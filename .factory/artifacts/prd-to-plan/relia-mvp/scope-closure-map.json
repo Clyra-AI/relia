@@ -79,7 +79,8 @@
         "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-007",
         "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-004",
         "DEMO-ACCEPTANCE-002",
-        "DEMO-ACCEPTANCE-004"
+        "DEMO-ACCEPTANCE-004",
+        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-011"
       ],
       "name": "Outcome Fixture Corpus And Backtest Baseline",
       "public_release_boundary": false,
@@ -4614,6 +4615,43 @@
       "status": "partial",
       "task_refs": [
         "T16"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "Attribution precision is at least 95% on a labeled sample; uncertain cases are excluded, not guessed."
+      ],
+      "acceptance_item_ids": [
+        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-011"
+      ],
+      "acceptance_item_statuses": [
+        {
+          "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-011",
+          "evidence_refs": [],
+          "repair_task_refs": [],
+          "status": "partial"
+        }
+      ],
+      "delivery_slice_refs": [
+        "outcome-fixture-corpus"
+      ],
+      "evidence_refs": [],
+      "group_id": "ingest-attribute-backtest-acceptance-tests",
+      "implemented_task_refs": [],
+      "notes": [
+        "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence.",
+        "Attribution precision must be measured on the labeled sample before ingest/backtest closure can be claimed."
+      ],
+      "remaining_task_refs": [
+        "T4"
+      ],
+      "requires_human_approval": false,
+      "scope_item": "Attribution precision is at least 95% on a labeled sample; uncertain cases are excluded, not guessed.",
+      "scope_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-011",
+      "source_ref": "docs/product/prd.md#ingest-attribute-backtest-acceptance-tests",
+      "status": "partial",
+      "task_refs": [
+        "T4"
       ]
     }
   ],
