@@ -1,0 +1,87 @@
+{
+  "factory": {
+    "repo_path": "${FACTORY_REPO}",
+    "profile_path": ".factory/profile.yaml"
+  },
+  "repos": {
+    "relia": {
+      "repo_path": "..",
+      "default_branch": "main",
+      "artifact_root": ".factory/artifacts",
+      "acceptance_ledger": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+      "task_packets": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
+      "scope_closure_map": ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+      "validation_contract": ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
+      "validation_commands": [
+        "python3 scripts/validate_repo_pack.py"
+      ],
+      "state_dir": "../.factoryd",
+      "workspace_root": "../.factoryd/workspaces",
+      "branch_prefix": "codex",
+      "worker_type": "codex_cli",
+      "worker_command": "",
+      "runtime_control": {
+        "owner": "factoryd-operator",
+        "autonomy_level": "restricted",
+        "mission_paused": false,
+        "mission_canceled": false,
+        "disabled_adapters": [],
+        "max_write_scope_paths": [],
+        "release_freeze": {
+          "enabled": false,
+          "reason": "",
+          "exception_ref": ""
+        },
+        "launch_request": {
+          "requested_action": "continue_mission",
+          "requested_adapter": "codex-cli",
+          "expected_decision": "allow",
+          "reason_code": "within_runtime_control_limits"
+        },
+        "conflict_behavior": "fail_closed"
+      },
+      "queue": {
+        "backend": "file",
+        "index_path": "../.factoryd/queue/index.json",
+        "sync_command": "",
+        "sync_required": false
+      },
+      "budget": {
+        "max_worker_tokens": 0,
+        "max_worker_cost_usd": 0,
+        "max_run_seconds": 0
+      },
+      "command_timeout_seconds": 300,
+      "worker_timeout_seconds": 1800,
+      "lease_ttl_seconds": 3600,
+      "mode": "until_blocked",
+      "auto_ship": false,
+      "shipping": {
+        "enabled": false,
+        "provider": "",
+        "skip_commit": false,
+        "commit_message": "factoryd: complete {task_id}",
+        "merge_method": "squash",
+        "scope_closure_mode": "semantic",
+        "push_required": false,
+        "pr_required": false,
+        "ci_required": false,
+        "codex_review_required": false,
+        "merge_required": false,
+        "post_merge_required": false,
+        "scope_closure_required": false,
+        "push_command": "",
+        "open_pr_command": "",
+        "ci_command": "",
+        "codex_review_command": "",
+        "merge_command": "",
+        "post_merge_command": "",
+        "scope_closure_command": ""
+      },
+      "approval_posture": "human approval required for live credentials, high-risk tasks, and merge",
+      "credential_posture": "no ambient secrets during deterministic bootstrap",
+      "network_posture": "offline by default until approved",
+      "capability_grants": []
+    }
+  }
+}

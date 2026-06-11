@@ -1,0 +1,2568 @@
+{
+  "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+  "acceptance_mapping_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
+  "artifact_type": "task_packets",
+  "delivery_slices": [
+    {
+      "acceptance_group_refs": [
+        "acceptance-tests"
+      ],
+      "acceptance_item_ids": [
+        "ACCEPTANCE-TESTS-001"
+      ],
+      "name": "Repo Lifecycle And CLI Foundation",
+      "public_release_boundary": false,
+      "required_for_completion": true,
+      "slice_id": "repo-lifecycle-foundation",
+      "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T1",
+      "task_refs": [
+        "T1"
+      ]
+    },
+    {
+      "acceptance_group_refs": [
+        "fr22-stable-cli-output",
+        "nfr12-artifact-stability",
+        "mvp-in-scope"
+      ],
+      "acceptance_item_ids": [
+        "FR22-STABLE-CLI-OUTPUT-001",
+        "NFR12-ARTIFACT-STABILITY-001",
+        "MVP-IN-SCOPE-001",
+        "MVP-IN-SCOPE-021"
+      ],
+      "name": "Contracts, Configuration, And Validation",
+      "public_release_boundary": false,
+      "required_for_completion": true,
+      "slice_id": "contracts-config-and-validation",
+      "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T2",
+      "task_refs": [
+        "T2"
+      ]
+    },
+    {
+      "acceptance_group_refs": [
+        "nfr5-security",
+        "nfr6-local-privacy",
+        "mvp-in-scope"
+      ],
+      "acceptance_item_ids": [
+        "NFR5-SECURITY-001",
+        "NFR6-LOCAL-PRIVACY-001",
+        "MVP-IN-SCOPE-004",
+        "MVP-IN-SCOPE-005"
+      ],
+      "name": "Data Intake, Attribution, And Persistence",
+      "public_release_boundary": false,
+      "required_for_completion": true,
+      "slice_id": "data-intake-and-persistence",
+      "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T3",
+      "task_refs": [
+        "T3"
+      ]
+    },
+    {
+      "acceptance_group_refs": [
+        "fr4-attribution-with-confidence",
+        "fr7-deterministic-failure-signatures",
+        "nfr3-deterministic-backtest",
+        "mvp-in-scope",
+        "ingest-attribute-backtest-acceptance-tests"
+      ],
+      "acceptance_item_ids": [
+        "FR4-ATTRIBUTION-WITH-CONFIDENCE-001",
+        "FR7-DETERMINISTIC-FAILURE-SIGNATURES-001",
+        "NFR3-DETERMINISTIC-BACKTEST-001",
+        "MVP-IN-SCOPE-003",
+        "MVP-IN-SCOPE-006",
+        "MVP-IN-SCOPE-007",
+        "MVP-IN-SCOPE-008",
+        "MVP-IN-SCOPE-010",
+        "MVP-IN-SCOPE-018",
+        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-002",
+        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-003",
+        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-004",
+        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-005",
+        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-006",
+        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-009"
+      ],
+      "name": "Analysis, Processing, And Decisioning",
+      "public_release_boundary": false,
+      "required_for_completion": true,
+      "slice_id": "analysis-processing-and-decisioning",
+      "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T4",
+      "task_refs": [
+        "T4"
+      ]
+    },
+    {
+      "acceptance_group_refs": [
+        "fr1-outcomes-as-the-only-memory-source",
+        "fr8-conservative-recurrence-pairing",
+        "fr11-calibrated-confidence",
+        "fr19-coverage-ood-signal",
+        "nfr9-debuggable-errors",
+        "nfr14-advisory-restraint",
+        "nfr15-no-dashboard-dependency",
+        "mvp-in-scope",
+        "ingest-attribute-backtest-acceptance-tests"
+      ],
+      "acceptance_item_ids": [
+        "FR1-OUTCOMES-AS-THE-ONLY-MEMORY-SOURCE-001",
+        "FR8-CONSERVATIVE-RECURRENCE-PAIRING-001",
+        "FR11-CALIBRATED-CONFIDENCE-001",
+        "FR19-COVERAGE-OOD-SIGNAL-001",
+        "NFR9-DEBUGGABLE-ERRORS-001",
+        "NFR14-ADVISORY-RESTRAINT-001",
+        "NFR15-NO-DASHBOARD-DEPENDENCY-001",
+        "MVP-IN-SCOPE-009",
+        "MVP-IN-SCOPE-015",
+        "MVP-IN-SCOPE-020",
+        "MVP-IN-SCOPE-024",
+        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-007"
+      ],
+      "name": "Reporting, Evidence, And Observability",
+      "public_release_boundary": false,
+      "required_for_completion": true,
+      "slice_id": "reporting-and-evidence",
+      "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T5",
+      "task_refs": [
+        "T5"
+      ]
+    },
+    {
+      "acceptance_group_refs": [
+        "fr2-repo-native-local-first-operation",
+        "fr20-advisory-only-default",
+        "fr23-provider-adapters-and-no-llm-mode",
+        "fr24-cost-visibility",
+        "fr25-portable-artifacts",
+        "nfr10-cost-visibility",
+        "nfr11-stochastic-honesty",
+        "mvp-in-scope",
+        "distill-review-memory-page-acceptance-tests",
+        "serve-and-advise-acceptance-tests"
+      ],
+      "acceptance_item_ids": [
+        "FR2-REPO-NATIVE-LOCAL-FIRST-OPERATION-001",
+        "FR20-ADVISORY-ONLY-DEFAULT-001",
+        "FR23-PROVIDER-ADAPTERS-AND-NO-LLM-MODE-001",
+        "FR24-COST-VISIBILITY-001",
+        "FR25-PORTABLE-ARTIFACTS-001",
+        "NFR10-COST-VISIBILITY-001",
+        "NFR11-STOCHASTIC-HONESTY-001",
+        "MVP-IN-SCOPE-011",
+        "MVP-IN-SCOPE-019",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-009",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-010",
+        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-005"
+      ],
+      "name": "External Provider And Network Integration",
+      "public_release_boundary": false,
+      "required_for_completion": true,
+      "slice_id": "external-provider-and-network-integration",
+      "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T6",
+      "task_refs": [
+        "T6"
+      ]
+    },
+    {
+      "acceptance_group_refs": [
+        "fr3-github-outcome-intake",
+        "fr9-backtest-before-behavior-change",
+        "fr10-provenance-mandatory-rules",
+        "fr12-decay-and-churn-invalidation",
+        "fr13-human-review-gate",
+        "fr14-bidirectional-memory",
+        "fr15-memory-page-with-receipts",
+        "fr21-forward-err-tracking",
+        "nfr2-fast-first-memory",
+        "nfr4-calibration-honesty",
+        "nfr7-rule-readability",
+        "nfr8-structured-data-first",
+        "nfr13-inference-humility",
+        "mvp-in-scope",
+        "ingest-attribute-backtest-acceptance-tests",
+        "distill-review-memory-page-acceptance-tests"
+      ],
+      "acceptance_item_ids": [
+        "FR3-GITHUB-OUTCOME-INTAKE-001",
+        "FR9-BACKTEST-BEFORE-BEHAVIOR-CHANGE-001",
+        "FR10-PROVENANCE-MANDATORY-RULES-001",
+        "FR12-DECAY-AND-CHURN-INVALIDATION-001",
+        "FR13-HUMAN-REVIEW-GATE-001",
+        "FR14-BIDIRECTIONAL-MEMORY-001",
+        "FR15-MEMORY-PAGE-WITH-RECEIPTS-001",
+        "FR21-FORWARD-ERR-TRACKING-001",
+        "NFR2-FAST-FIRST-MEMORY-001",
+        "NFR4-CALIBRATION-HONESTY-001",
+        "NFR7-RULE-READABILITY-001",
+        "NFR8-STRUCTURED-DATA-FIRST-001",
+        "NFR13-INFERENCE-HUMILITY-001",
+        "MVP-IN-SCOPE-002",
+        "MVP-IN-SCOPE-012",
+        "MVP-IN-SCOPE-013",
+        "MVP-IN-SCOPE-014",
+        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-001",
+        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-008",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-001",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-002",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-003",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-004",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-005",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-006",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-007",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-008"
+      ],
+      "name": "Review, Governance, And Approval Workflow",
+      "public_release_boundary": false,
+      "required_for_completion": true,
+      "slice_id": "review-governance-and-approval",
+      "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T7",
+      "task_refs": [
+        "T7"
+      ]
+    },
+    {
+      "acceptance_group_refs": [
+        "fr5-canonical-experience-schema",
+        "fr16-mcp-serving",
+        "fr17-compiled-context-block",
+        "mvp-in-scope",
+        "serve-and-advise-acceptance-tests"
+      ],
+      "acceptance_item_ids": [
+        "FR5-CANONICAL-EXPERIENCE-SCHEMA-001",
+        "FR16-MCP-SERVING-001",
+        "FR17-COMPILED-CONTEXT-BLOCK-001",
+        "MVP-IN-SCOPE-016",
+        "MVP-IN-SCOPE-017",
+        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-001",
+        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-002",
+        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-003",
+        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-004",
+        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-006",
+        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-007",
+        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-008",
+        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-010"
+      ],
+      "name": "Serving, Interfaces, And Agent Access",
+      "public_release_boundary": false,
+      "required_for_completion": true,
+      "slice_id": "serving-interface-and-agent-access",
+      "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T8",
+      "task_refs": [
+        "T8"
+      ]
+    },
+    {
+      "acceptance_group_refs": [
+        "fr6-capture-time-redaction",
+        "fr18-advisory-assessment",
+        "nfr1-fast-first-value",
+        "mvp-in-scope",
+        "ingest-attribute-backtest-acceptance-tests",
+        "serve-and-advise-acceptance-tests",
+        "success-metrics",
+        "demo-acceptance"
+      ],
+      "acceptance_item_ids": [
+        "FR6-CAPTURE-TIME-REDACTION-001",
+        "FR18-ADVISORY-ASSESSMENT-001",
+        "NFR1-FAST-FIRST-VALUE-001",
+        "MVP-IN-SCOPE-022",
+        "MVP-IN-SCOPE-023",
+        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-010",
+        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-009",
+        "SUCCESS-METRICS-001",
+        "SUCCESS-METRICS-002",
+        "SUCCESS-METRICS-003",
+        "SUCCESS-METRICS-004",
+        "SUCCESS-METRICS-005",
+        "SUCCESS-METRICS-006",
+        "SUCCESS-METRICS-007",
+        "SUCCESS-METRICS-008",
+        "SUCCESS-METRICS-009",
+        "SUCCESS-METRICS-010",
+        "SUCCESS-METRICS-011",
+        "SUCCESS-METRICS-012",
+        "SUCCESS-METRICS-013",
+        "SUCCESS-METRICS-014",
+        "SUCCESS-METRICS-015",
+        "SUCCESS-METRICS-016",
+        "DEMO-ACCEPTANCE-001",
+        "DEMO-ACCEPTANCE-002",
+        "DEMO-ACCEPTANCE-003",
+        "DEMO-ACCEPTANCE-004",
+        "DEMO-ACCEPTANCE-005"
+      ],
+      "name": "Release, Demo, And Product Signals",
+      "public_release_boundary": true,
+      "required_for_completion": true,
+      "slice_id": "release-demo-and-product-signals",
+      "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T9",
+      "task_refs": [
+        "T9"
+      ]
+    }
+  ],
+  "generated_at": "2026-06-11T11:16:58Z",
+  "schema_version": "0.1",
+  "source_prd_ref": "docs/product/prd.md",
+  "tasks": [
+    {
+      "acceptance_checks": [
+        "The MVP is not complete until all acceptance groups pass."
+      ],
+      "acceptance_group_id": "acceptance-tests",
+      "acceptance_group_ids": [
+        "acceptance-tests"
+      ],
+      "acceptance_group_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json#/groups",
+      "acceptance_item_ids": [
+        "ACCEPTANCE-TESTS-001"
+      ],
+      "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+      "alignment_gate_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions",
+      "allowed_paths": [
+        "AGENTS.md",
+        "WORKFLOW.md",
+        "README.md",
+        "Makefile",
+        ".tool-versions",
+        "go.mod",
+        "go.sum",
+        "relia.yaml",
+        "CLAUDE.md",
+        "cmd/",
+        "internal/",
+        "tests/",
+        "schemas/",
+        "docs/",
+        "examples/",
+        "memory/",
+        ".github/",
+        ".factory/artifacts/task-runs/T1/",
+        ".factory/artifacts/pr-lifecycle/T1/"
+      ],
+      "blocked_by": [],
+      "commands": [
+        "make prepush-full"
+      ],
+      "delivery_slice_refs": [
+        "repo-lifecycle-foundation"
+      ],
+      "evidence_required": [
+        "work_proof_marker",
+        "validation_report",
+        "scope_closure_report",
+        "pr_lifecycle_report",
+        "factoryd_run_once_report"
+      ],
+      "factory_compatibility": {
+        "factory_contract_version": "1.0",
+        "generated_by": "repo-bootstrap-from-prd",
+        "profile_ref": ".factory/profile.yaml",
+        "skill_inventory_ref": "Factory skills/README.md"
+      },
+      "factoryd_runtime": {
+        "approval_posture": "human approval required for high risk, live credentials, and merge",
+        "branch_prefix": "codex",
+        "capability_grants": [],
+        "credential_posture": "no ambient secrets",
+        "network_posture": "offline by default",
+        "runtime_control": {
+          "owner": "factoryd-operator",
+          "autonomy_level": "restricted",
+          "release_freeze": {
+            "enabled": false
+          },
+          "launch_request": {
+            "requested_action": "continue_mission",
+            "requested_adapter": "codex_cli",
+            "expected_decision": "allow",
+            "reason_code": "within_runtime_control_limits"
+          },
+          "conflict_behavior": "fail_closed"
+        },
+        "state_dir": ".factoryd/",
+        "worker_command": "",
+        "worker_type": "codex_cli",
+        "workspace_root": ".factoryd/workspaces/"
+      },
+      "forbidden_paths": [
+        ".git/",
+        ".factory/tmp/",
+        ".factoryd/",
+        ".factory/artifacts/prd-to-plan/relia-mvp/",
+        ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+      ],
+      "input_artifacts": [
+        "docs/product/prd.md",
+        "AGENTS.md",
+        "WORKFLOW.md",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        ".factory/profile.yaml",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json"
+      ],
+      "lifecycle_gates": {
+        "ci_required": true,
+        "codex_review_required": true,
+        "commit_push_required": true,
+        "local_validation_required": true,
+        "post_merge_monitor_required": true,
+        "pr_lifecycle_report_required": true,
+        "skip_policy": "approved_exception_required"
+      },
+      "max_iterations": 2,
+      "mission_contract_ref": "docs/product/prd.md",
+      "objective": "Establish repo lifecycle, CLI skeleton, command result envelope, exit-code behavior, CI, validation, and local operating-pack baseline.",
+      "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
+      "required_worker_chain": [
+        "task-executor",
+        "validation-gate",
+        "commit-push",
+        "post-merge-monitor"
+      ],
+      "requires_credentials": false,
+      "requires_human_approval": false,
+      "requires_network": false,
+      "risk_class": "low",
+      "runtime_pins": {
+        "artifact_namespace": ".factory/artifacts/",
+        "dependency_policy": "standard library first; pin and justify dependencies",
+        "distribution_target": "standalone_binary",
+        "language": "go",
+        "live_work_policy": "no ambient secrets or live network by default",
+        "module_or_package_path": "github.com/Clyra-AI/relia",
+        "provider_policy": "none by default",
+        "toolchain_version": "1.26.4"
+      },
+      "scope_exclusions": [
+        "No scope outside docs/product/prd.md.",
+        "No completion claim without acceptance evidence."
+      ],
+      "shared_constraints_ref": "AGENTS.md",
+      "slice_rationale": {
+        "rationale": "Task advances a product-shaped capability slice while preserving acceptance-item closure refs.",
+        "slice_type": "vertical"
+      },
+      "slice_type": "vertical",
+      "stop_conditions": [
+        "missing runner-ready task contract",
+        "changed path outside allowed_paths",
+        "forbidden path changed",
+        "required validation command failed",
+        "plan drift detected",
+        "scope closure did not advance"
+      ],
+      "task_id": "T1",
+      "upstream_debt_refs": [],
+      "validation_commands": [
+        "make prepush-full"
+      ],
+      "validation_contract_inheritance": {
+        "acceptance_criteria": [
+          "The MVP is not complete until all acceptance groups pass."
+        ],
+        "acceptance_item_ids": [
+          "ACCEPTANCE-TESTS-001"
+        ],
+        "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+        "evidence_required": [
+          "work_proof_marker",
+          "validation_report",
+          "scope_closure_report",
+          "pr_lifecycle_report",
+          "factoryd_run_once_report"
+        ],
+        "required_checks": [
+          "make prepush-full"
+        ],
+        "required_review": {
+          "required": false,
+          "review_type": "code",
+          "reviewer_class": "peer_agent"
+        },
+        "source_validation_contract_ref": ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
+        "stop_conditions": [
+          "missing runner-ready task contract",
+          "changed path outside allowed_paths",
+          "forbidden path changed",
+          "required validation command failed",
+          "plan drift detected",
+          "scope closure did not advance"
+        ]
+      },
+      "work_item_id": "relia-mvp-t1",
+      "worker_type": "codex_cli"
+    },
+    {
+      "acceptance_checks": [
+        "Relia must support stable exit codes and `--json`.",
+        "Schemas and artifacts must be versioned.",
+        "local OSS CLI",
+        "stable exit codes and `--json"
+      ],
+      "acceptance_group_id": "fr22-stable-cli-output",
+      "acceptance_group_ids": [
+        "fr22-stable-cli-output",
+        "nfr12-artifact-stability",
+        "mvp-in-scope"
+      ],
+      "acceptance_group_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json#/groups",
+      "acceptance_item_ids": [
+        "FR22-STABLE-CLI-OUTPUT-001",
+        "NFR12-ARTIFACT-STABILITY-001",
+        "MVP-IN-SCOPE-001",
+        "MVP-IN-SCOPE-021"
+      ],
+      "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+      "alignment_gate_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions",
+      "allowed_paths": [
+        "AGENTS.md",
+        "WORKFLOW.md",
+        "README.md",
+        "Makefile",
+        ".tool-versions",
+        "go.mod",
+        "go.sum",
+        "relia.yaml",
+        "CLAUDE.md",
+        "cmd/",
+        "internal/",
+        "tests/",
+        "schemas/",
+        "docs/",
+        "examples/",
+        "memory/",
+        ".github/",
+        ".factory/artifacts/task-runs/T2/",
+        ".factory/artifacts/pr-lifecycle/T2/"
+      ],
+      "blocked_by": [
+        "T1"
+      ],
+      "commands": [
+        "make prepush-full"
+      ],
+      "delivery_slice_refs": [
+        "contracts-config-and-validation"
+      ],
+      "evidence_required": [
+        "work_proof_marker",
+        "validation_report",
+        "scope_closure_report",
+        "pr_lifecycle_report",
+        "factoryd_run_once_report"
+      ],
+      "factory_compatibility": {
+        "factory_contract_version": "1.0",
+        "generated_by": "repo-bootstrap-from-prd",
+        "profile_ref": ".factory/profile.yaml",
+        "skill_inventory_ref": "Factory skills/README.md"
+      },
+      "factoryd_runtime": {
+        "approval_posture": "human approval required for high risk, live credentials, and merge",
+        "branch_prefix": "codex",
+        "capability_grants": [],
+        "credential_posture": "no ambient secrets",
+        "network_posture": "offline by default",
+        "runtime_control": {
+          "owner": "factoryd-operator",
+          "autonomy_level": "restricted",
+          "release_freeze": {
+            "enabled": false
+          },
+          "launch_request": {
+            "requested_action": "continue_mission",
+            "requested_adapter": "codex_cli",
+            "expected_decision": "allow",
+            "reason_code": "within_runtime_control_limits"
+          },
+          "conflict_behavior": "fail_closed"
+        },
+        "state_dir": ".factoryd/",
+        "worker_command": "",
+        "worker_type": "codex_cli",
+        "workspace_root": ".factoryd/workspaces/"
+      },
+      "forbidden_paths": [
+        ".git/",
+        ".factory/tmp/",
+        ".factoryd/",
+        ".factory/artifacts/prd-to-plan/relia-mvp/",
+        ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+      ],
+      "input_artifacts": [
+        "docs/product/prd.md",
+        "AGENTS.md",
+        "WORKFLOW.md",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        ".factory/profile.yaml",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json"
+      ],
+      "lifecycle_gates": {
+        "ci_required": true,
+        "codex_review_required": true,
+        "commit_push_required": true,
+        "local_validation_required": true,
+        "post_merge_monitor_required": true,
+        "pr_lifecycle_report_required": true,
+        "skip_policy": "approved_exception_required"
+      },
+      "max_iterations": 2,
+      "mission_contract_ref": "docs/product/prd.md",
+      "objective": "Implement PRD-defined configuration, schemas, artifact contracts, privacy defaults, validation, and structured output guarantees.",
+      "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
+      "required_worker_chain": [
+        "task-executor",
+        "validation-gate",
+        "commit-push",
+        "post-merge-monitor"
+      ],
+      "requires_credentials": false,
+      "requires_human_approval": false,
+      "requires_network": false,
+      "risk_class": "low",
+      "runtime_pins": {
+        "artifact_namespace": ".factory/artifacts/",
+        "dependency_policy": "standard library first; pin and justify dependencies",
+        "distribution_target": "standalone_binary",
+        "language": "go",
+        "live_work_policy": "no ambient secrets or live network by default",
+        "module_or_package_path": "github.com/Clyra-AI/relia",
+        "provider_policy": "none by default",
+        "toolchain_version": "1.26.4"
+      },
+      "scope_exclusions": [
+        "No scope outside docs/product/prd.md.",
+        "No completion claim without acceptance evidence."
+      ],
+      "shared_constraints_ref": "AGENTS.md",
+      "slice_rationale": {
+        "rationale": "Task advances a product-shaped capability slice while preserving acceptance-item closure refs.",
+        "slice_type": "vertical"
+      },
+      "slice_type": "vertical",
+      "stop_conditions": [
+        "missing runner-ready task contract",
+        "changed path outside allowed_paths",
+        "forbidden path changed",
+        "required validation command failed",
+        "plan drift detected",
+        "scope closure did not advance"
+      ],
+      "task_id": "T2",
+      "upstream_debt_refs": [],
+      "validation_commands": [
+        "make prepush-full"
+      ],
+      "validation_contract_inheritance": {
+        "acceptance_criteria": [
+          "Relia must support stable exit codes and `--json`.",
+          "Schemas and artifacts must be versioned.",
+          "local OSS CLI",
+          "stable exit codes and `--json"
+        ],
+        "acceptance_item_ids": [
+          "FR22-STABLE-CLI-OUTPUT-001",
+          "NFR12-ARTIFACT-STABILITY-001",
+          "MVP-IN-SCOPE-001",
+          "MVP-IN-SCOPE-021"
+        ],
+        "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+        "evidence_required": [
+          "work_proof_marker",
+          "validation_report",
+          "scope_closure_report",
+          "pr_lifecycle_report",
+          "factoryd_run_once_report"
+        ],
+        "required_checks": [
+          "make prepush-full"
+        ],
+        "required_review": {
+          "required": false,
+          "review_type": "code",
+          "reviewer_class": "peer_agent"
+        },
+        "source_validation_contract_ref": ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
+        "stop_conditions": [
+          "missing runner-ready task contract",
+          "changed path outside allowed_paths",
+          "forbidden path changed",
+          "required validation command failed",
+          "plan drift detected",
+          "scope closure did not advance"
+        ]
+      },
+      "work_item_id": "relia-mvp-t2",
+      "worker_type": "codex_cli"
+    },
+    {
+      "acceptance_checks": [
+        "Redaction must happen before artifact persistence. If a value cannot be confidently redacted, Relia must fail closed (exit 6): mark the artifact unsafe to persist rather than write a possibly-unredacted secret. Silent persistence of an unrecognized secret is a trust bug, not an edge case.",
+        "Relia must not send code, diffs, logs, or experience records anywhere by default. When a distill provider is configured, only redacted experience records leave the machine, and `relia check` must say so explicitly.",
+        "capture-time redaction with entropy scanning",
+        "canonical experience records (local-only reproducible cache by default; committed opt-in, redacted, capped)"
+      ],
+      "acceptance_group_id": "nfr5-security",
+      "acceptance_group_ids": [
+        "nfr5-security",
+        "nfr6-local-privacy",
+        "mvp-in-scope"
+      ],
+      "acceptance_group_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json#/groups",
+      "acceptance_item_ids": [
+        "NFR5-SECURITY-001",
+        "NFR6-LOCAL-PRIVACY-001",
+        "MVP-IN-SCOPE-004",
+        "MVP-IN-SCOPE-005"
+      ],
+      "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+      "alignment_gate_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions",
+      "allowed_paths": [
+        "AGENTS.md",
+        "WORKFLOW.md",
+        "README.md",
+        "Makefile",
+        ".tool-versions",
+        "go.mod",
+        "go.sum",
+        "relia.yaml",
+        "CLAUDE.md",
+        "cmd/",
+        "internal/",
+        "tests/",
+        "schemas/",
+        "docs/",
+        "examples/",
+        "memory/",
+        ".github/",
+        ".factory/artifacts/task-runs/T3/",
+        ".factory/artifacts/pr-lifecycle/T3/"
+      ],
+      "blocked_by": [
+        "T2"
+      ],
+      "commands": [
+        "make prepush-full"
+      ],
+      "delivery_slice_refs": [
+        "data-intake-and-persistence"
+      ],
+      "evidence_required": [
+        "work_proof_marker",
+        "validation_report",
+        "scope_closure_report",
+        "pr_lifecycle_report",
+        "factoryd_run_once_report"
+      ],
+      "factory_compatibility": {
+        "factory_contract_version": "1.0",
+        "generated_by": "repo-bootstrap-from-prd",
+        "profile_ref": ".factory/profile.yaml",
+        "skill_inventory_ref": "Factory skills/README.md"
+      },
+      "factoryd_runtime": {
+        "approval_posture": "human approval required for high risk, live credentials, and merge",
+        "branch_prefix": "codex",
+        "capability_grants": [],
+        "credential_posture": "no ambient secrets",
+        "network_posture": "offline by default",
+        "runtime_control": {
+          "owner": "factoryd-operator",
+          "autonomy_level": "restricted",
+          "release_freeze": {
+            "enabled": false
+          },
+          "launch_request": {
+            "requested_action": "continue_mission",
+            "requested_adapter": "codex_cli",
+            "expected_decision": "allow",
+            "reason_code": "within_runtime_control_limits"
+          },
+          "conflict_behavior": "fail_closed"
+        },
+        "state_dir": ".factoryd/",
+        "worker_command": "",
+        "worker_type": "codex_cli",
+        "workspace_root": ".factoryd/workspaces/"
+      },
+      "forbidden_paths": [
+        ".git/",
+        ".factory/tmp/",
+        ".factoryd/",
+        ".factory/artifacts/prd-to-plan/relia-mvp/",
+        ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+      ],
+      "input_artifacts": [
+        "docs/product/prd.md",
+        "AGENTS.md",
+        "WORKFLOW.md",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        ".factory/profile.yaml",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json"
+      ],
+      "lifecycle_gates": {
+        "ci_required": true,
+        "codex_review_required": true,
+        "commit_push_required": true,
+        "local_validation_required": true,
+        "post_merge_monitor_required": true,
+        "pr_lifecycle_report_required": true,
+        "skip_policy": "approved_exception_required"
+      },
+      "max_iterations": 2,
+      "mission_contract_ref": "docs/product/prd.md",
+      "objective": "Implement PRD-defined input ingestion, attribution, normalization, redaction, persistence, and provenance capture.",
+      "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
+      "required_worker_chain": [
+        "task-executor",
+        "validation-gate",
+        "commit-push",
+        "post-merge-monitor"
+      ],
+      "requires_credentials": false,
+      "requires_human_approval": false,
+      "requires_network": false,
+      "risk_class": "low",
+      "runtime_pins": {
+        "artifact_namespace": ".factory/artifacts/",
+        "dependency_policy": "standard library first; pin and justify dependencies",
+        "distribution_target": "standalone_binary",
+        "language": "go",
+        "live_work_policy": "no ambient secrets or live network by default",
+        "module_or_package_path": "github.com/Clyra-AI/relia",
+        "provider_policy": "none by default",
+        "toolchain_version": "1.26.4"
+      },
+      "scope_exclusions": [
+        "No scope outside docs/product/prd.md.",
+        "No completion claim without acceptance evidence."
+      ],
+      "shared_constraints_ref": "AGENTS.md",
+      "slice_rationale": {
+        "rationale": "Task advances a product-shaped capability slice while preserving acceptance-item closure refs.",
+        "slice_type": "vertical"
+      },
+      "slice_type": "vertical",
+      "stop_conditions": [
+        "missing runner-ready task contract",
+        "changed path outside allowed_paths",
+        "forbidden path changed",
+        "required validation command failed",
+        "plan drift detected",
+        "scope closure did not advance"
+      ],
+      "task_id": "T3",
+      "upstream_debt_refs": [],
+      "validation_commands": [
+        "make prepush-full"
+      ],
+      "validation_contract_inheritance": {
+        "acceptance_criteria": [
+          "Redaction must happen before artifact persistence. If a value cannot be confidently redacted, Relia must fail closed (exit 6): mark the artifact unsafe to persist rather than write a possibly-unredacted secret. Silent persistence of an unrecognized secret is a trust bug, not an edge case.",
+          "Relia must not send code, diffs, logs, or experience records anywhere by default. When a distill provider is configured, only redacted experience records leave the machine, and `relia check` must say so explicitly.",
+          "capture-time redaction with entropy scanning",
+          "canonical experience records (local-only reproducible cache by default; committed opt-in, redacted, capped)"
+        ],
+        "acceptance_item_ids": [
+          "NFR5-SECURITY-001",
+          "NFR6-LOCAL-PRIVACY-001",
+          "MVP-IN-SCOPE-004",
+          "MVP-IN-SCOPE-005"
+        ],
+        "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+        "evidence_required": [
+          "work_proof_marker",
+          "validation_report",
+          "scope_closure_report",
+          "pr_lifecycle_report",
+          "factoryd_run_once_report"
+        ],
+        "required_checks": [
+          "make prepush-full"
+        ],
+        "required_review": {
+          "required": false,
+          "review_type": "code",
+          "reviewer_class": "peer_agent"
+        },
+        "source_validation_contract_ref": ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
+        "stop_conditions": [
+          "missing runner-ready task contract",
+          "changed path outside allowed_paths",
+          "forbidden path changed",
+          "required validation command failed",
+          "plan drift detected",
+          "scope closure did not advance"
+        ]
+      },
+      "work_item_id": "relia-mvp-t3",
+      "worker_type": "codex_cli"
+    },
+    {
+      "acceptance_checks": [
+        "Relia must attribute agent authorship via bot login, co-author trailer, and PR label, with method and confidence recorded. Uncertain attribution must fail closed (excluded from ERR) by default.",
+        "Signature extraction must prefer structured check-run data and label log-parsed signatures with extraction confidence.",
+        "Repeated backtests over the same window and artifacts must produce the same result.",
+        "agent attribution with confidence",
+        "deterministic failure signatures with confidence labels",
+        "basic flake discounting",
+        "conservative recurrence pairing and ERR",
+        "tiered clustering (deterministic signature keys, bundled local embeddings, provider embeddings opt-in)",
+        "CLI `assess` on diff or plan",
+        "relia check` flags zero-match attribution config with a concrete reference.",
+        "relia ingest` writes schema-valid, redacted experience records for PRs, check runs, reverts, and marked corrections.",
+        "Attribution records method and confidence; an ambiguous trailer yields `attribution_uncertain` and exclusion from ERR.",
+        "relia backtest --window 180d` is deterministic on repeated runs.",
+        "Confirmed recurrences are paired with the earlier experience they repeat, with resolvable links.",
+        "Seeded secrets never appear in any artifact."
+      ],
+      "acceptance_group_id": "fr4-attribution-with-confidence",
+      "acceptance_group_ids": [
+        "fr4-attribution-with-confidence",
+        "fr7-deterministic-failure-signatures",
+        "nfr3-deterministic-backtest",
+        "mvp-in-scope",
+        "ingest-attribute-backtest-acceptance-tests"
+      ],
+      "acceptance_group_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json#/groups",
+      "acceptance_item_ids": [
+        "FR4-ATTRIBUTION-WITH-CONFIDENCE-001",
+        "FR7-DETERMINISTIC-FAILURE-SIGNATURES-001",
+        "NFR3-DETERMINISTIC-BACKTEST-001",
+        "MVP-IN-SCOPE-003",
+        "MVP-IN-SCOPE-006",
+        "MVP-IN-SCOPE-007",
+        "MVP-IN-SCOPE-008",
+        "MVP-IN-SCOPE-010",
+        "MVP-IN-SCOPE-018",
+        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-002",
+        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-003",
+        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-004",
+        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-005",
+        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-006",
+        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-009"
+      ],
+      "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+      "alignment_gate_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions",
+      "allowed_paths": [
+        "AGENTS.md",
+        "WORKFLOW.md",
+        "README.md",
+        "Makefile",
+        ".tool-versions",
+        "go.mod",
+        "go.sum",
+        "relia.yaml",
+        "CLAUDE.md",
+        "cmd/",
+        "internal/",
+        "tests/",
+        "schemas/",
+        "docs/",
+        "examples/",
+        "memory/",
+        ".github/",
+        ".factory/artifacts/task-runs/T4/",
+        ".factory/artifacts/pr-lifecycle/T4/"
+      ],
+      "blocked_by": [
+        "T3"
+      ],
+      "commands": [
+        "make prepush-full"
+      ],
+      "delivery_slice_refs": [
+        "analysis-processing-and-decisioning"
+      ],
+      "evidence_required": [
+        "work_proof_marker",
+        "validation_report",
+        "scope_closure_report",
+        "pr_lifecycle_report",
+        "factoryd_run_once_report"
+      ],
+      "factory_compatibility": {
+        "factory_contract_version": "1.0",
+        "generated_by": "repo-bootstrap-from-prd",
+        "profile_ref": ".factory/profile.yaml",
+        "skill_inventory_ref": "Factory skills/README.md"
+      },
+      "factoryd_runtime": {
+        "approval_posture": "human approval required for high risk, live credentials, and merge",
+        "branch_prefix": "codex",
+        "capability_grants": [],
+        "credential_posture": "no ambient secrets",
+        "network_posture": "offline by default",
+        "runtime_control": {
+          "owner": "factoryd-operator",
+          "autonomy_level": "restricted",
+          "release_freeze": {
+            "enabled": false
+          },
+          "launch_request": {
+            "requested_action": "continue_mission",
+            "requested_adapter": "codex_cli",
+            "expected_decision": "allow",
+            "reason_code": "within_runtime_control_limits"
+          },
+          "conflict_behavior": "fail_closed"
+        },
+        "state_dir": ".factoryd/",
+        "worker_command": "",
+        "worker_type": "codex_cli",
+        "workspace_root": ".factoryd/workspaces/"
+      },
+      "forbidden_paths": [
+        ".git/",
+        ".factory/tmp/",
+        ".factoryd/",
+        ".factory/artifacts/prd-to-plan/relia-mvp/",
+        ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+      ],
+      "input_artifacts": [
+        "docs/product/prd.md",
+        "AGENTS.md",
+        "WORKFLOW.md",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        ".factory/profile.yaml",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json"
+      ],
+      "lifecycle_gates": {
+        "ci_required": true,
+        "codex_review_required": true,
+        "commit_push_required": true,
+        "local_validation_required": true,
+        "post_merge_monitor_required": true,
+        "pr_lifecycle_report_required": true,
+        "skip_policy": "approved_exception_required"
+      },
+      "max_iterations": 2,
+      "mission_contract_ref": "docs/product/prd.md",
+      "objective": "Implement PRD-defined analysis, transformation, classification, matching, scoring, confidence, and deterministic decision logic.",
+      "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
+      "required_worker_chain": [
+        "task-executor",
+        "validation-gate",
+        "commit-push",
+        "post-merge-monitor"
+      ],
+      "requires_credentials": false,
+      "requires_human_approval": false,
+      "requires_network": false,
+      "risk_class": "low",
+      "runtime_pins": {
+        "artifact_namespace": ".factory/artifacts/",
+        "dependency_policy": "standard library first; pin and justify dependencies",
+        "distribution_target": "standalone_binary",
+        "language": "go",
+        "live_work_policy": "no ambient secrets or live network by default",
+        "module_or_package_path": "github.com/Clyra-AI/relia",
+        "provider_policy": "none by default",
+        "toolchain_version": "1.26.4"
+      },
+      "scope_exclusions": [
+        "No scope outside docs/product/prd.md.",
+        "No completion claim without acceptance evidence."
+      ],
+      "shared_constraints_ref": "AGENTS.md",
+      "slice_rationale": {
+        "rationale": "Task advances a product-shaped capability slice while preserving acceptance-item closure refs.",
+        "slice_type": "vertical"
+      },
+      "slice_type": "vertical",
+      "stop_conditions": [
+        "missing runner-ready task contract",
+        "changed path outside allowed_paths",
+        "forbidden path changed",
+        "required validation command failed",
+        "plan drift detected",
+        "scope closure did not advance"
+      ],
+      "task_id": "T4",
+      "upstream_debt_refs": [],
+      "validation_commands": [
+        "make prepush-full"
+      ],
+      "validation_contract_inheritance": {
+        "acceptance_criteria": [
+          "Relia must attribute agent authorship via bot login, co-author trailer, and PR label, with method and confidence recorded. Uncertain attribution must fail closed (excluded from ERR) by default.",
+          "Signature extraction must prefer structured check-run data and label log-parsed signatures with extraction confidence.",
+          "Repeated backtests over the same window and artifacts must produce the same result.",
+          "agent attribution with confidence",
+          "deterministic failure signatures with confidence labels",
+          "basic flake discounting",
+          "conservative recurrence pairing and ERR",
+          "tiered clustering (deterministic signature keys, bundled local embeddings, provider embeddings opt-in)",
+          "CLI `assess` on diff or plan",
+          "relia check` flags zero-match attribution config with a concrete reference.",
+          "relia ingest` writes schema-valid, redacted experience records for PRs, check runs, reverts, and marked corrections.",
+          "Attribution records method and confidence; an ambiguous trailer yields `attribution_uncertain` and exclusion from ERR.",
+          "relia backtest --window 180d` is deterministic on repeated runs.",
+          "Confirmed recurrences are paired with the earlier experience they repeat, with resolvable links.",
+          "Seeded secrets never appear in any artifact."
+        ],
+        "acceptance_item_ids": [
+          "FR4-ATTRIBUTION-WITH-CONFIDENCE-001",
+          "FR7-DETERMINISTIC-FAILURE-SIGNATURES-001",
+          "NFR3-DETERMINISTIC-BACKTEST-001",
+          "MVP-IN-SCOPE-003",
+          "MVP-IN-SCOPE-006",
+          "MVP-IN-SCOPE-007",
+          "MVP-IN-SCOPE-008",
+          "MVP-IN-SCOPE-010",
+          "MVP-IN-SCOPE-018",
+          "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-002",
+          "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-003",
+          "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-004",
+          "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-005",
+          "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-006",
+          "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-009"
+        ],
+        "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+        "evidence_required": [
+          "work_proof_marker",
+          "validation_report",
+          "scope_closure_report",
+          "pr_lifecycle_report",
+          "factoryd_run_once_report"
+        ],
+        "required_checks": [
+          "make prepush-full"
+        ],
+        "required_review": {
+          "required": false,
+          "review_type": "code",
+          "reviewer_class": "peer_agent"
+        },
+        "source_validation_contract_ref": ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
+        "stop_conditions": [
+          "missing runner-ready task contract",
+          "changed path outside allowed_paths",
+          "forbidden path changed",
+          "required validation command failed",
+          "plan drift detected",
+          "scope closure did not advance"
+        ]
+      },
+      "work_item_id": "relia-mvp-t4",
+      "worker_type": "codex_cli"
+    },
+    {
+      "acceptance_checks": [
+        "Memory writes must originate from verified outcome events. Agent self-reports and reflections must not enter memory in the MVP.",
+        "Relia must pair recurrences conservatively, separate `confirmed` from `possible`, and exclude `possible` from headline ERR.",
+        "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence — never from the drafting model.",
+        "Relia must report experience density for touched paths and label `no_coverage` distinctly from `covered_clean`.",
+        "Errors must include file, path, PR, command, object, or line references where possible.",
+        "The PR advisor must default to at most one comment per PR and edit that comment in place on subsequent pushes rather than posting new ones. Reassessment is debounced (default 10 minutes) and skipped entirely when the diff fingerprint is unchanged, so force-push storms produce one living comment, not a thread. The advisor stays silent below `min_confidence` and on `covered_clean`.",
+        "The MVP must explain value through local CLI output, local reports, MEMORY.md, and the PR comment.",
+        "read-only backtest with HTML report and JSON",
+        "MEMORY.md memory page with receipts",
+        "forward ERR tracking against a baseline; gate available but off by default",
+        "proof-honest README badge generated from the JSON command result",
+        "Possible recurrences appear separately and are excluded from headline ERR."
+      ],
+      "acceptance_group_id": "fr1-outcomes-as-the-only-memory-source",
+      "acceptance_group_ids": [
+        "fr1-outcomes-as-the-only-memory-source",
+        "fr8-conservative-recurrence-pairing",
+        "fr11-calibrated-confidence",
+        "fr19-coverage-ood-signal",
+        "nfr9-debuggable-errors",
+        "nfr14-advisory-restraint",
+        "nfr15-no-dashboard-dependency",
+        "mvp-in-scope",
+        "ingest-attribute-backtest-acceptance-tests"
+      ],
+      "acceptance_group_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json#/groups",
+      "acceptance_item_ids": [
+        "FR1-OUTCOMES-AS-THE-ONLY-MEMORY-SOURCE-001",
+        "FR8-CONSERVATIVE-RECURRENCE-PAIRING-001",
+        "FR11-CALIBRATED-CONFIDENCE-001",
+        "FR19-COVERAGE-OOD-SIGNAL-001",
+        "NFR9-DEBUGGABLE-ERRORS-001",
+        "NFR14-ADVISORY-RESTRAINT-001",
+        "NFR15-NO-DASHBOARD-DEPENDENCY-001",
+        "MVP-IN-SCOPE-009",
+        "MVP-IN-SCOPE-015",
+        "MVP-IN-SCOPE-020",
+        "MVP-IN-SCOPE-024",
+        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-007"
+      ],
+      "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+      "alignment_gate_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions",
+      "allowed_paths": [
+        "AGENTS.md",
+        "WORKFLOW.md",
+        "README.md",
+        "Makefile",
+        ".tool-versions",
+        "go.mod",
+        "go.sum",
+        "relia.yaml",
+        "CLAUDE.md",
+        "cmd/",
+        "internal/",
+        "tests/",
+        "schemas/",
+        "docs/",
+        "examples/",
+        "memory/",
+        ".github/",
+        ".factory/artifacts/task-runs/T5/",
+        ".factory/artifacts/pr-lifecycle/T5/"
+      ],
+      "blocked_by": [
+        "T4"
+      ],
+      "commands": [
+        "make prepush-full"
+      ],
+      "delivery_slice_refs": [
+        "reporting-and-evidence"
+      ],
+      "evidence_required": [
+        "work_proof_marker",
+        "validation_report",
+        "scope_closure_report",
+        "pr_lifecycle_report",
+        "factoryd_run_once_report"
+      ],
+      "factory_compatibility": {
+        "factory_contract_version": "1.0",
+        "generated_by": "repo-bootstrap-from-prd",
+        "profile_ref": ".factory/profile.yaml",
+        "skill_inventory_ref": "Factory skills/README.md"
+      },
+      "factoryd_runtime": {
+        "approval_posture": "human approval required for high risk, live credentials, and merge",
+        "branch_prefix": "codex",
+        "capability_grants": [],
+        "credential_posture": "no ambient secrets",
+        "network_posture": "offline by default",
+        "runtime_control": {
+          "owner": "factoryd-operator",
+          "autonomy_level": "restricted",
+          "release_freeze": {
+            "enabled": false
+          },
+          "launch_request": {
+            "requested_action": "continue_mission",
+            "requested_adapter": "codex_cli",
+            "expected_decision": "allow",
+            "reason_code": "within_runtime_control_limits"
+          },
+          "conflict_behavior": "fail_closed"
+        },
+        "state_dir": ".factoryd/",
+        "worker_command": "",
+        "worker_type": "codex_cli",
+        "workspace_root": ".factoryd/workspaces/"
+      },
+      "forbidden_paths": [
+        ".git/",
+        ".factory/tmp/",
+        ".factoryd/",
+        ".factory/artifacts/prd-to-plan/relia-mvp/",
+        ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+      ],
+      "input_artifacts": [
+        "docs/product/prd.md",
+        "AGENTS.md",
+        "WORKFLOW.md",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        ".factory/profile.yaml",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json"
+      ],
+      "lifecycle_gates": {
+        "ci_required": true,
+        "codex_review_required": true,
+        "commit_push_required": true,
+        "local_validation_required": true,
+        "post_merge_monitor_required": true,
+        "pr_lifecycle_report_required": true,
+        "skip_policy": "approved_exception_required"
+      },
+      "max_iterations": 2,
+      "mission_contract_ref": "docs/product/prd.md",
+      "objective": "Implement PRD-defined report generation, evidence records, diagnostics, metrics, summaries, badges, and operator-visible feedback.",
+      "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
+      "required_worker_chain": [
+        "task-executor",
+        "validation-gate",
+        "commit-push",
+        "post-merge-monitor"
+      ],
+      "requires_credentials": false,
+      "requires_human_approval": false,
+      "requires_network": false,
+      "risk_class": "low",
+      "runtime_pins": {
+        "artifact_namespace": ".factory/artifacts/",
+        "dependency_policy": "standard library first; pin and justify dependencies",
+        "distribution_target": "standalone_binary",
+        "language": "go",
+        "live_work_policy": "no ambient secrets or live network by default",
+        "module_or_package_path": "github.com/Clyra-AI/relia",
+        "provider_policy": "none by default",
+        "toolchain_version": "1.26.4"
+      },
+      "scope_exclusions": [
+        "No scope outside docs/product/prd.md.",
+        "No completion claim without acceptance evidence."
+      ],
+      "shared_constraints_ref": "AGENTS.md",
+      "slice_rationale": {
+        "rationale": "Task advances a product-shaped capability slice while preserving acceptance-item closure refs.",
+        "slice_type": "vertical"
+      },
+      "slice_type": "vertical",
+      "stop_conditions": [
+        "missing runner-ready task contract",
+        "changed path outside allowed_paths",
+        "forbidden path changed",
+        "required validation command failed",
+        "plan drift detected",
+        "scope closure did not advance"
+      ],
+      "task_id": "T5",
+      "upstream_debt_refs": [],
+      "validation_commands": [
+        "make prepush-full"
+      ],
+      "validation_contract_inheritance": {
+        "acceptance_criteria": [
+          "Memory writes must originate from verified outcome events. Agent self-reports and reflections must not enter memory in the MVP.",
+          "Relia must pair recurrences conservatively, separate `confirmed` from `possible`, and exclude `possible` from headline ERR.",
+          "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence — never from the drafting model.",
+          "Relia must report experience density for touched paths and label `no_coverage` distinctly from `covered_clean`.",
+          "Errors must include file, path, PR, command, object, or line references where possible.",
+          "The PR advisor must default to at most one comment per PR and edit that comment in place on subsequent pushes rather than posting new ones. Reassessment is debounced (default 10 minutes) and skipped entirely when the diff fingerprint is unchanged, so force-push storms produce one living comment, not a thread. The advisor stays silent below `min_confidence` and on `covered_clean`.",
+          "The MVP must explain value through local CLI output, local reports, MEMORY.md, and the PR comment.",
+          "read-only backtest with HTML report and JSON",
+          "MEMORY.md memory page with receipts",
+          "forward ERR tracking against a baseline; gate available but off by default",
+          "proof-honest README badge generated from the JSON command result",
+          "Possible recurrences appear separately and are excluded from headline ERR."
+        ],
+        "acceptance_item_ids": [
+          "FR1-OUTCOMES-AS-THE-ONLY-MEMORY-SOURCE-001",
+          "FR8-CONSERVATIVE-RECURRENCE-PAIRING-001",
+          "FR11-CALIBRATED-CONFIDENCE-001",
+          "FR19-COVERAGE-OOD-SIGNAL-001",
+          "NFR9-DEBUGGABLE-ERRORS-001",
+          "NFR14-ADVISORY-RESTRAINT-001",
+          "NFR15-NO-DASHBOARD-DEPENDENCY-001",
+          "MVP-IN-SCOPE-009",
+          "MVP-IN-SCOPE-015",
+          "MVP-IN-SCOPE-020",
+          "MVP-IN-SCOPE-024",
+          "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-007"
+        ],
+        "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+        "evidence_required": [
+          "work_proof_marker",
+          "validation_report",
+          "scope_closure_report",
+          "pr_lifecycle_report",
+          "factoryd_run_once_report"
+        ],
+        "required_checks": [
+          "make prepush-full"
+        ],
+        "required_review": {
+          "required": false,
+          "review_type": "code",
+          "reviewer_class": "peer_agent"
+        },
+        "source_validation_contract_ref": ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
+        "stop_conditions": [
+          "missing runner-ready task contract",
+          "changed path outside allowed_paths",
+          "forbidden path changed",
+          "required validation command failed",
+          "plan drift detected",
+          "scope closure did not advance"
+        ]
+      },
+      "work_item_id": "relia-mvp-t5",
+      "worker_type": "codex_cli"
+    },
+    {
+      "acceptance_checks": [
+        "The MVP must work without a hosted Relia account. Memory lives in the repository.",
+        "The GitHub Action must never block merges by default. The recurrence gate requires explicit configuration and exits `5` when tripped.",
+        "Distillation must support OpenAI-compatible and Anthropic adapters behind a pluggable interface, BYO key, cost caps, and a deterministic no-LLM mode.",
+        "Distill runs using a provider must report token and estimated cost information.",
+        "Experience records, rules, memory pages, reports, and baselines must remain useful outside any hosted service.",
+        "Provider-backed distillation must show token and estimated cost information and respect `max_cost_usd_per_run`.",
+        "LLM-drafted statements are labeled by origin and reviewable; clustering and calibration are deterministic given the same inputs.",
+        "LLM rule drafting (OpenAI-compatible and Anthropic adapters) and no-LLM mode",
+        "GitHub Action with one advisory, evidence-citing PR comment",
+        "No-LLM mode produces deterministic cluster-summary drafts.",
+        "Provider-backed distill reports cost and respects the configured cap.",
+        "The GitHub Action posts at most one advisory comment per PR, citing real PRs."
+      ],
+      "acceptance_group_id": "fr2-repo-native-local-first-operation",
+      "acceptance_group_ids": [
+        "fr2-repo-native-local-first-operation",
+        "fr20-advisory-only-default",
+        "fr23-provider-adapters-and-no-llm-mode",
+        "fr24-cost-visibility",
+        "fr25-portable-artifacts",
+        "nfr10-cost-visibility",
+        "nfr11-stochastic-honesty",
+        "mvp-in-scope",
+        "distill-review-memory-page-acceptance-tests",
+        "serve-and-advise-acceptance-tests"
+      ],
+      "acceptance_group_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json#/groups",
+      "acceptance_item_ids": [
+        "FR2-REPO-NATIVE-LOCAL-FIRST-OPERATION-001",
+        "FR20-ADVISORY-ONLY-DEFAULT-001",
+        "FR23-PROVIDER-ADAPTERS-AND-NO-LLM-MODE-001",
+        "FR24-COST-VISIBILITY-001",
+        "FR25-PORTABLE-ARTIFACTS-001",
+        "NFR10-COST-VISIBILITY-001",
+        "NFR11-STOCHASTIC-HONESTY-001",
+        "MVP-IN-SCOPE-011",
+        "MVP-IN-SCOPE-019",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-009",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-010",
+        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-005"
+      ],
+      "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+      "alignment_gate_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions",
+      "allowed_paths": [
+        "AGENTS.md",
+        "WORKFLOW.md",
+        "README.md",
+        "Makefile",
+        ".tool-versions",
+        "go.mod",
+        "go.sum",
+        "relia.yaml",
+        "CLAUDE.md",
+        "cmd/",
+        "internal/",
+        "tests/",
+        "schemas/",
+        "docs/",
+        "examples/",
+        "memory/",
+        ".github/",
+        ".factory/artifacts/task-runs/T6/",
+        ".factory/artifacts/pr-lifecycle/T6/"
+      ],
+      "blocked_by": [
+        "T5"
+      ],
+      "commands": [
+        "make prepush-full"
+      ],
+      "delivery_slice_refs": [
+        "external-provider-and-network-integration"
+      ],
+      "evidence_required": [
+        "work_proof_marker",
+        "validation_report",
+        "scope_closure_report",
+        "pr_lifecycle_report",
+        "factoryd_run_once_report"
+      ],
+      "factory_compatibility": {
+        "factory_contract_version": "1.0",
+        "generated_by": "repo-bootstrap-from-prd",
+        "profile_ref": ".factory/profile.yaml",
+        "skill_inventory_ref": "Factory skills/README.md"
+      },
+      "factoryd_runtime": {
+        "approval_posture": "human approval required for high risk, live credentials, and merge",
+        "branch_prefix": "codex",
+        "capability_grants": [],
+        "credential_posture": "no ambient secrets",
+        "network_posture": "offline by default",
+        "runtime_control": {
+          "owner": "factoryd-operator",
+          "autonomy_level": "restricted",
+          "release_freeze": {
+            "enabled": false
+          },
+          "launch_request": {
+            "requested_action": "continue_mission",
+            "requested_adapter": "codex_cli",
+            "expected_decision": "allow",
+            "reason_code": "within_runtime_control_limits"
+          },
+          "conflict_behavior": "fail_closed"
+        },
+        "state_dir": ".factoryd/",
+        "worker_command": "",
+        "worker_type": "codex_cli",
+        "workspace_root": ".factoryd/workspaces/"
+      },
+      "forbidden_paths": [
+        ".git/",
+        ".factory/tmp/",
+        ".factoryd/",
+        ".factory/artifacts/prd-to-plan/relia-mvp/",
+        ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+      ],
+      "input_artifacts": [
+        "docs/product/prd.md",
+        "AGENTS.md",
+        "WORKFLOW.md",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        ".factory/profile.yaml",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json"
+      ],
+      "lifecycle_gates": {
+        "ci_required": true,
+        "codex_review_required": true,
+        "commit_push_required": true,
+        "local_validation_required": true,
+        "post_merge_monitor_required": true,
+        "pr_lifecycle_report_required": true,
+        "skip_policy": "approved_exception_required"
+      },
+      "max_iterations": 2,
+      "mission_contract_ref": "docs/product/prd.md",
+      "objective": "Implement PRD-defined provider, network, API, webhook, and hosted-service integrations behind explicit deterministic and approval boundaries.",
+      "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
+      "required_worker_chain": [
+        "task-executor",
+        "validation-gate",
+        "commit-push",
+        "post-merge-monitor"
+      ],
+      "requires_credentials": true,
+      "requires_human_approval": true,
+      "requires_network": true,
+      "risk_class": "high",
+      "runtime_pins": {
+        "artifact_namespace": ".factory/artifacts/",
+        "dependency_policy": "standard library first; pin and justify dependencies",
+        "distribution_target": "standalone_binary",
+        "language": "go",
+        "live_work_policy": "no ambient secrets or live network by default",
+        "module_or_package_path": "github.com/Clyra-AI/relia",
+        "provider_policy": "none by default",
+        "toolchain_version": "1.26.4"
+      },
+      "scope_exclusions": [
+        "No scope outside docs/product/prd.md.",
+        "No completion claim without acceptance evidence.",
+        "No live credentials, API keys, tokens, or secrets without explicit approval.",
+        "No live network/provider calls without explicit approval and allowlist."
+      ],
+      "shared_constraints_ref": "AGENTS.md",
+      "slice_rationale": {
+        "rationale": "Task advances a product-shaped capability slice while preserving acceptance-item closure refs.",
+        "slice_type": "vertical"
+      },
+      "slice_type": "vertical",
+      "stop_conditions": [
+        "missing runner-ready task contract",
+        "changed path outside allowed_paths",
+        "forbidden path changed",
+        "required validation command failed",
+        "plan drift detected",
+        "scope closure did not advance",
+        "live credential or network work attempted without approval"
+      ],
+      "task_id": "T6",
+      "upstream_debt_refs": [],
+      "validation_commands": [
+        "make prepush-full"
+      ],
+      "validation_contract_inheritance": {
+        "acceptance_criteria": [
+          "The MVP must work without a hosted Relia account. Memory lives in the repository.",
+          "The GitHub Action must never block merges by default. The recurrence gate requires explicit configuration and exits `5` when tripped.",
+          "Distillation must support OpenAI-compatible and Anthropic adapters behind a pluggable interface, BYO key, cost caps, and a deterministic no-LLM mode.",
+          "Distill runs using a provider must report token and estimated cost information.",
+          "Experience records, rules, memory pages, reports, and baselines must remain useful outside any hosted service.",
+          "Provider-backed distillation must show token and estimated cost information and respect `max_cost_usd_per_run`.",
+          "LLM-drafted statements are labeled by origin and reviewable; clustering and calibration are deterministic given the same inputs.",
+          "LLM rule drafting (OpenAI-compatible and Anthropic adapters) and no-LLM mode",
+          "GitHub Action with one advisory, evidence-citing PR comment",
+          "No-LLM mode produces deterministic cluster-summary drafts.",
+          "Provider-backed distill reports cost and respects the configured cap.",
+          "The GitHub Action posts at most one advisory comment per PR, citing real PRs."
+        ],
+        "acceptance_item_ids": [
+          "FR2-REPO-NATIVE-LOCAL-FIRST-OPERATION-001",
+          "FR20-ADVISORY-ONLY-DEFAULT-001",
+          "FR23-PROVIDER-ADAPTERS-AND-NO-LLM-MODE-001",
+          "FR24-COST-VISIBILITY-001",
+          "FR25-PORTABLE-ARTIFACTS-001",
+          "NFR10-COST-VISIBILITY-001",
+          "NFR11-STOCHASTIC-HONESTY-001",
+          "MVP-IN-SCOPE-011",
+          "MVP-IN-SCOPE-019",
+          "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-009",
+          "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-010",
+          "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-005"
+        ],
+        "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+        "evidence_required": [
+          "work_proof_marker",
+          "validation_report",
+          "scope_closure_report",
+          "pr_lifecycle_report",
+          "factoryd_run_once_report"
+        ],
+        "required_checks": [
+          "make prepush-full"
+        ],
+        "required_review": {
+          "required": false,
+          "review_type": "code",
+          "reviewer_class": "peer_agent"
+        },
+        "source_validation_contract_ref": ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
+        "stop_conditions": [
+          "missing runner-ready task contract",
+          "changed path outside allowed_paths",
+          "forbidden path changed",
+          "required validation command failed",
+          "plan drift detected",
+          "scope closure did not advance",
+          "live credential or network work attempted without approval"
+        ]
+      },
+      "work_item_id": "relia-mvp-t6",
+      "worker_type": "codex_cli"
+    },
+    {
+      "acceptance_checks": [
+        "Relia must ingest PR metadata, check runs, reverts, and marked review corrections.",
+        "relia backtest` must deliver the ERR headline and paired evidence read-only, with no rules, review, or workflow change required.",
+        "Every rule must cite at least one experience and one PR. Uncited rules fail validation and never render.",
+        "Rules must decay by half-life and go `stale` when their scoped paths are deleted.",
+        "Drafted rules must be reviewed before becoming `active`, with `accepted`, `suggested`, and `needs_user_input` labels. Disabling review is an explicit, surfaced configuration choice.",
+        "Relia must support `avoid` rules from failures and `playbook` rules from held fixes, and playbook rules must cite held evidence.",
+        "relia memory` must render MEMORY.md showing statements, confidence, lifecycle status, and clickable provenance.",
+        "Relia must track ERR against a saved baseline and label stale baselines.",
+        "A technical user should ingest, distill, and approve their first rule in under 30 minutes.",
+        "Reports must clearly distinguish confirmed recurrences, possible recurrences, flake-discounted evidence, and uncertain attribution.",
+        "Rule YAML and MEMORY.md must be understandable by engineers without a custom UI.",
+        "Outcome extraction should use the GitHub API's structured data (check runs, review threads, merge/revert metadata) before log scraping; log-parsed values carry confidence labels.",
+        "Drafted rules, signatures parsed from logs, attribution inferences, and held-fix detection must be confidence-labeled.",
+        "GitHub PR/check-run/revert/review-correction intake",
+        "bidirectional rules (`avoid`, `playbook`) with mandatory provenance",
+        "calibrated confidence, decay, churn invalidation, lifecycle states",
+        "human review flow with labels",
+        "relia init` writes valid config with discovered checks and candidate attribution markers.",
+        "The planted flaky test is discounted and drafts no rule.",
+        "relia distill` drafts an `avoid` rule from the planted recurrence cluster with correct citations.",
+        "relia distill` drafts a `playbook` rule citing the held fix.",
+        "A rule without provenance fails `relia check` with exit 4.",
+        "Drafted rules are `suggested` or `needs_user_input`, never auto-`accepted`.",
+        "relia review` approve/edit/reject transitions write correct lifecycle states.",
+        "The planted contradiction moves its rule to `contradicted` and out of serving.",
+        "The planted path deletion moves its rule to `stale` and out of serving.",
+        "MEMORY.md renders receipts as resolvable links and separates weak from strong memory."
+      ],
+      "acceptance_group_id": "fr3-github-outcome-intake",
+      "acceptance_group_ids": [
+        "fr3-github-outcome-intake",
+        "fr9-backtest-before-behavior-change",
+        "fr10-provenance-mandatory-rules",
+        "fr12-decay-and-churn-invalidation",
+        "fr13-human-review-gate",
+        "fr14-bidirectional-memory",
+        "fr15-memory-page-with-receipts",
+        "fr21-forward-err-tracking",
+        "nfr2-fast-first-memory",
+        "nfr4-calibration-honesty",
+        "nfr7-rule-readability",
+        "nfr8-structured-data-first",
+        "nfr13-inference-humility",
+        "mvp-in-scope",
+        "ingest-attribute-backtest-acceptance-tests",
+        "distill-review-memory-page-acceptance-tests"
+      ],
+      "acceptance_group_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json#/groups",
+      "acceptance_item_ids": [
+        "FR3-GITHUB-OUTCOME-INTAKE-001",
+        "FR9-BACKTEST-BEFORE-BEHAVIOR-CHANGE-001",
+        "FR10-PROVENANCE-MANDATORY-RULES-001",
+        "FR12-DECAY-AND-CHURN-INVALIDATION-001",
+        "FR13-HUMAN-REVIEW-GATE-001",
+        "FR14-BIDIRECTIONAL-MEMORY-001",
+        "FR15-MEMORY-PAGE-WITH-RECEIPTS-001",
+        "FR21-FORWARD-ERR-TRACKING-001",
+        "NFR2-FAST-FIRST-MEMORY-001",
+        "NFR4-CALIBRATION-HONESTY-001",
+        "NFR7-RULE-READABILITY-001",
+        "NFR8-STRUCTURED-DATA-FIRST-001",
+        "NFR13-INFERENCE-HUMILITY-001",
+        "MVP-IN-SCOPE-002",
+        "MVP-IN-SCOPE-012",
+        "MVP-IN-SCOPE-013",
+        "MVP-IN-SCOPE-014",
+        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-001",
+        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-008",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-001",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-002",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-003",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-004",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-005",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-006",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-007",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-008"
+      ],
+      "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+      "alignment_gate_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions",
+      "allowed_paths": [
+        "AGENTS.md",
+        "WORKFLOW.md",
+        "README.md",
+        "Makefile",
+        ".tool-versions",
+        "go.mod",
+        "go.sum",
+        "relia.yaml",
+        "CLAUDE.md",
+        "cmd/",
+        "internal/",
+        "tests/",
+        "schemas/",
+        "docs/",
+        "examples/",
+        "memory/",
+        ".github/",
+        ".factory/artifacts/task-runs/T7/",
+        ".factory/artifacts/pr-lifecycle/T7/"
+      ],
+      "blocked_by": [
+        "T6"
+      ],
+      "commands": [
+        "make prepush-full"
+      ],
+      "delivery_slice_refs": [
+        "review-governance-and-approval"
+      ],
+      "evidence_required": [
+        "work_proof_marker",
+        "validation_report",
+        "scope_closure_report",
+        "pr_lifecycle_report",
+        "factoryd_run_once_report"
+      ],
+      "factory_compatibility": {
+        "factory_contract_version": "1.0",
+        "generated_by": "repo-bootstrap-from-prd",
+        "profile_ref": ".factory/profile.yaml",
+        "skill_inventory_ref": "Factory skills/README.md"
+      },
+      "factoryd_runtime": {
+        "approval_posture": "human approval required for high risk, live credentials, and merge",
+        "branch_prefix": "codex",
+        "capability_grants": [],
+        "credential_posture": "no ambient secrets",
+        "network_posture": "offline by default",
+        "runtime_control": {
+          "owner": "factoryd-operator",
+          "autonomy_level": "restricted",
+          "release_freeze": {
+            "enabled": false
+          },
+          "launch_request": {
+            "requested_action": "continue_mission",
+            "requested_adapter": "codex_cli",
+            "expected_decision": "allow",
+            "reason_code": "within_runtime_control_limits"
+          },
+          "conflict_behavior": "fail_closed"
+        },
+        "state_dir": ".factoryd/",
+        "worker_command": "",
+        "worker_type": "codex_cli",
+        "workspace_root": ".factoryd/workspaces/"
+      },
+      "forbidden_paths": [
+        ".git/",
+        ".factory/tmp/",
+        ".factoryd/",
+        ".factory/artifacts/prd-to-plan/relia-mvp/",
+        ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+      ],
+      "input_artifacts": [
+        "docs/product/prd.md",
+        "AGENTS.md",
+        "WORKFLOW.md",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        ".factory/profile.yaml",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json"
+      ],
+      "lifecycle_gates": {
+        "ci_required": true,
+        "codex_review_required": true,
+        "commit_push_required": true,
+        "local_validation_required": true,
+        "post_merge_monitor_required": true,
+        "pr_lifecycle_report_required": true,
+        "skip_policy": "approved_exception_required"
+      },
+      "max_iterations": 2,
+      "mission_contract_ref": "docs/product/prd.md",
+      "objective": "Implement PRD-defined review states, approval gates, policy lifecycle, governance evidence, and human-decision workflows.",
+      "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
+      "required_worker_chain": [
+        "task-executor",
+        "validation-gate",
+        "commit-push",
+        "post-merge-monitor"
+      ],
+      "requires_credentials": false,
+      "requires_human_approval": true,
+      "requires_network": true,
+      "risk_class": "medium",
+      "runtime_pins": {
+        "artifact_namespace": ".factory/artifacts/",
+        "dependency_policy": "standard library first; pin and justify dependencies",
+        "distribution_target": "standalone_binary",
+        "language": "go",
+        "live_work_policy": "no ambient secrets or live network by default",
+        "module_or_package_path": "github.com/Clyra-AI/relia",
+        "provider_policy": "none by default",
+        "toolchain_version": "1.26.4"
+      },
+      "scope_exclusions": [
+        "No scope outside docs/product/prd.md.",
+        "No completion claim without acceptance evidence.",
+        "No live network/provider calls without explicit approval and allowlist.",
+        "Do not self-close manual, product-signal, or judgment-only acceptance without recorded evidence."
+      ],
+      "shared_constraints_ref": "AGENTS.md",
+      "slice_rationale": {
+        "rationale": "Task advances a product-shaped capability slice while preserving acceptance-item closure refs.",
+        "slice_type": "vertical"
+      },
+      "slice_type": "vertical",
+      "stop_conditions": [
+        "missing runner-ready task contract",
+        "changed path outside allowed_paths",
+        "forbidden path changed",
+        "required validation command failed",
+        "plan drift detected",
+        "scope closure did not advance",
+        "live credential or network work attempted without approval",
+        "manual, product-signal, or judgment-only acceptance closed without approval evidence"
+      ],
+      "task_id": "T7",
+      "upstream_debt_refs": [],
+      "validation_commands": [
+        "make prepush-full"
+      ],
+      "validation_contract_inheritance": {
+        "acceptance_criteria": [
+          "Relia must ingest PR metadata, check runs, reverts, and marked review corrections.",
+          "relia backtest` must deliver the ERR headline and paired evidence read-only, with no rules, review, or workflow change required.",
+          "Every rule must cite at least one experience and one PR. Uncited rules fail validation and never render.",
+          "Rules must decay by half-life and go `stale` when their scoped paths are deleted.",
+          "Drafted rules must be reviewed before becoming `active`, with `accepted`, `suggested`, and `needs_user_input` labels. Disabling review is an explicit, surfaced configuration choice.",
+          "Relia must support `avoid` rules from failures and `playbook` rules from held fixes, and playbook rules must cite held evidence.",
+          "relia memory` must render MEMORY.md showing statements, confidence, lifecycle status, and clickable provenance.",
+          "Relia must track ERR against a saved baseline and label stale baselines.",
+          "A technical user should ingest, distill, and approve their first rule in under 30 minutes.",
+          "Reports must clearly distinguish confirmed recurrences, possible recurrences, flake-discounted evidence, and uncertain attribution.",
+          "Rule YAML and MEMORY.md must be understandable by engineers without a custom UI.",
+          "Outcome extraction should use the GitHub API's structured data (check runs, review threads, merge/revert metadata) before log scraping; log-parsed values carry confidence labels.",
+          "Drafted rules, signatures parsed from logs, attribution inferences, and held-fix detection must be confidence-labeled.",
+          "GitHub PR/check-run/revert/review-correction intake",
+          "bidirectional rules (`avoid`, `playbook`) with mandatory provenance",
+          "calibrated confidence, decay, churn invalidation, lifecycle states",
+          "human review flow with labels",
+          "relia init` writes valid config with discovered checks and candidate attribution markers.",
+          "The planted flaky test is discounted and drafts no rule.",
+          "relia distill` drafts an `avoid` rule from the planted recurrence cluster with correct citations.",
+          "relia distill` drafts a `playbook` rule citing the held fix.",
+          "A rule without provenance fails `relia check` with exit 4.",
+          "Drafted rules are `suggested` or `needs_user_input`, never auto-`accepted`.",
+          "relia review` approve/edit/reject transitions write correct lifecycle states.",
+          "The planted contradiction moves its rule to `contradicted` and out of serving.",
+          "The planted path deletion moves its rule to `stale` and out of serving.",
+          "MEMORY.md renders receipts as resolvable links and separates weak from strong memory."
+        ],
+        "acceptance_item_ids": [
+          "FR3-GITHUB-OUTCOME-INTAKE-001",
+          "FR9-BACKTEST-BEFORE-BEHAVIOR-CHANGE-001",
+          "FR10-PROVENANCE-MANDATORY-RULES-001",
+          "FR12-DECAY-AND-CHURN-INVALIDATION-001",
+          "FR13-HUMAN-REVIEW-GATE-001",
+          "FR14-BIDIRECTIONAL-MEMORY-001",
+          "FR15-MEMORY-PAGE-WITH-RECEIPTS-001",
+          "FR21-FORWARD-ERR-TRACKING-001",
+          "NFR2-FAST-FIRST-MEMORY-001",
+          "NFR4-CALIBRATION-HONESTY-001",
+          "NFR7-RULE-READABILITY-001",
+          "NFR8-STRUCTURED-DATA-FIRST-001",
+          "NFR13-INFERENCE-HUMILITY-001",
+          "MVP-IN-SCOPE-002",
+          "MVP-IN-SCOPE-012",
+          "MVP-IN-SCOPE-013",
+          "MVP-IN-SCOPE-014",
+          "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-001",
+          "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-008",
+          "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-001",
+          "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-002",
+          "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-003",
+          "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-004",
+          "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-005",
+          "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-006",
+          "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-007",
+          "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-008"
+        ],
+        "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+        "evidence_required": [
+          "work_proof_marker",
+          "validation_report",
+          "scope_closure_report",
+          "pr_lifecycle_report",
+          "factoryd_run_once_report"
+        ],
+        "required_checks": [
+          "make prepush-full"
+        ],
+        "required_review": {
+          "required": false,
+          "review_type": "code",
+          "reviewer_class": "peer_agent"
+        },
+        "source_validation_contract_ref": ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
+        "stop_conditions": [
+          "missing runner-ready task contract",
+          "changed path outside allowed_paths",
+          "forbidden path changed",
+          "required validation command failed",
+          "plan drift detected",
+          "scope closure did not advance",
+          "live credential or network work attempted without approval",
+          "manual, product-signal, or judgment-only acceptance closed without approval evidence"
+        ]
+      },
+      "work_item_id": "relia-mvp-t7",
+      "worker_type": "codex_cli"
+    },
+    {
+      "acceptance_checks": [
+        "Backtest, distill, serve, assess, and reports must consume canonical experience records.",
+        "relia serve` must expose `recall`, `assess`, and `coverage` over MCP, serving only `active` rules.",
+        "relia compile` must maintain a managed, marker-delimited block in AGENTS.md and CLAUDE.md, regenerable and never touching content outside the markers.",
+        "MCP server (`recall`, `assess`, `coverage`)",
+        "compiled managed block in AGENTS.md/CLAUDE.md",
+        "relia serve` exposes `recall`, `assess`, and `coverage` over MCP and serves only `active` rules.",
+        "A real agent session retrieves a rule via `recall` and the rule's citations resolve.",
+        "relia compile` maintains the managed block idempotently and never edits outside markers.",
+        "relia assess` returns `match_high` with citations on a planted-pattern diff and `no_coverage` on unknown paths.",
+        "The Action stays silent below `min_confidence` and on `covered_clean`.",
+        "The Action never blocks by default; with the gate explicitly enabled, a tripped threshold exits 5.",
+        "ERR trend compares against the saved baseline and labels staleness.",
+        "The README badge reflects current ERR and reads as stale after 30 days without ingest or 20 merged PRs since the last ingest, whichever comes first."
+      ],
+      "acceptance_group_id": "fr5-canonical-experience-schema",
+      "acceptance_group_ids": [
+        "fr5-canonical-experience-schema",
+        "fr16-mcp-serving",
+        "fr17-compiled-context-block",
+        "mvp-in-scope",
+        "serve-and-advise-acceptance-tests"
+      ],
+      "acceptance_group_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json#/groups",
+      "acceptance_item_ids": [
+        "FR5-CANONICAL-EXPERIENCE-SCHEMA-001",
+        "FR16-MCP-SERVING-001",
+        "FR17-COMPILED-CONTEXT-BLOCK-001",
+        "MVP-IN-SCOPE-016",
+        "MVP-IN-SCOPE-017",
+        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-001",
+        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-002",
+        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-003",
+        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-004",
+        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-006",
+        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-007",
+        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-008",
+        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-010"
+      ],
+      "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+      "alignment_gate_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions",
+      "allowed_paths": [
+        "AGENTS.md",
+        "WORKFLOW.md",
+        "README.md",
+        "Makefile",
+        ".tool-versions",
+        "go.mod",
+        "go.sum",
+        "relia.yaml",
+        "CLAUDE.md",
+        "cmd/",
+        "internal/",
+        "tests/",
+        "schemas/",
+        "docs/",
+        "examples/",
+        "memory/",
+        ".github/",
+        ".factory/artifacts/task-runs/T8/",
+        ".factory/artifacts/pr-lifecycle/T8/"
+      ],
+      "blocked_by": [
+        "T7"
+      ],
+      "commands": [
+        "make prepush-full"
+      ],
+      "delivery_slice_refs": [
+        "serving-interface-and-agent-access"
+      ],
+      "evidence_required": [
+        "work_proof_marker",
+        "validation_report",
+        "scope_closure_report",
+        "pr_lifecycle_report",
+        "factoryd_run_once_report"
+      ],
+      "factory_compatibility": {
+        "factory_contract_version": "1.0",
+        "generated_by": "repo-bootstrap-from-prd",
+        "profile_ref": ".factory/profile.yaml",
+        "skill_inventory_ref": "Factory skills/README.md"
+      },
+      "factoryd_runtime": {
+        "approval_posture": "human approval required for high risk, live credentials, and merge",
+        "branch_prefix": "codex",
+        "capability_grants": [],
+        "credential_posture": "no ambient secrets",
+        "network_posture": "offline by default",
+        "runtime_control": {
+          "owner": "factoryd-operator",
+          "autonomy_level": "restricted",
+          "release_freeze": {
+            "enabled": false
+          },
+          "launch_request": {
+            "requested_action": "continue_mission",
+            "requested_adapter": "codex_cli",
+            "expected_decision": "allow",
+            "reason_code": "within_runtime_control_limits"
+          },
+          "conflict_behavior": "fail_closed"
+        },
+        "state_dir": ".factoryd/",
+        "worker_command": "",
+        "worker_type": "codex_cli",
+        "workspace_root": ".factoryd/workspaces/"
+      },
+      "forbidden_paths": [
+        ".git/",
+        ".factory/tmp/",
+        ".factoryd/",
+        ".factory/artifacts/prd-to-plan/relia-mvp/",
+        ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+      ],
+      "input_artifacts": [
+        "docs/product/prd.md",
+        "AGENTS.md",
+        "WORKFLOW.md",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        ".factory/profile.yaml",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json"
+      ],
+      "lifecycle_gates": {
+        "ci_required": true,
+        "codex_review_required": true,
+        "commit_push_required": true,
+        "local_validation_required": true,
+        "post_merge_monitor_required": true,
+        "pr_lifecycle_report_required": true,
+        "skip_policy": "approved_exception_required"
+      },
+      "max_iterations": 2,
+      "mission_contract_ref": "docs/product/prd.md",
+      "objective": "Implement PRD-defined CLI/API/server interfaces, agent-facing access, context compilation, recall, and integration surfaces.",
+      "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
+      "required_worker_chain": [
+        "task-executor",
+        "validation-gate",
+        "commit-push",
+        "post-merge-monitor"
+      ],
+      "requires_credentials": false,
+      "requires_human_approval": false,
+      "requires_network": false,
+      "risk_class": "low",
+      "runtime_pins": {
+        "artifact_namespace": ".factory/artifacts/",
+        "dependency_policy": "standard library first; pin and justify dependencies",
+        "distribution_target": "standalone_binary",
+        "language": "go",
+        "live_work_policy": "no ambient secrets or live network by default",
+        "module_or_package_path": "github.com/Clyra-AI/relia",
+        "provider_policy": "none by default",
+        "toolchain_version": "1.26.4"
+      },
+      "scope_exclusions": [
+        "No scope outside docs/product/prd.md.",
+        "No completion claim without acceptance evidence."
+      ],
+      "shared_constraints_ref": "AGENTS.md",
+      "slice_rationale": {
+        "rationale": "Task advances a product-shaped capability slice while preserving acceptance-item closure refs.",
+        "slice_type": "vertical"
+      },
+      "slice_type": "vertical",
+      "stop_conditions": [
+        "missing runner-ready task contract",
+        "changed path outside allowed_paths",
+        "forbidden path changed",
+        "required validation command failed",
+        "plan drift detected",
+        "scope closure did not advance"
+      ],
+      "task_id": "T8",
+      "upstream_debt_refs": [],
+      "validation_commands": [
+        "make prepush-full"
+      ],
+      "validation_contract_inheritance": {
+        "acceptance_criteria": [
+          "Backtest, distill, serve, assess, and reports must consume canonical experience records.",
+          "relia serve` must expose `recall`, `assess`, and `coverage` over MCP, serving only `active` rules.",
+          "relia compile` must maintain a managed, marker-delimited block in AGENTS.md and CLAUDE.md, regenerable and never touching content outside the markers.",
+          "MCP server (`recall`, `assess`, `coverage`)",
+          "compiled managed block in AGENTS.md/CLAUDE.md",
+          "relia serve` exposes `recall`, `assess`, and `coverage` over MCP and serves only `active` rules.",
+          "A real agent session retrieves a rule via `recall` and the rule's citations resolve.",
+          "relia compile` maintains the managed block idempotently and never edits outside markers.",
+          "relia assess` returns `match_high` with citations on a planted-pattern diff and `no_coverage` on unknown paths.",
+          "The Action stays silent below `min_confidence` and on `covered_clean`.",
+          "The Action never blocks by default; with the gate explicitly enabled, a tripped threshold exits 5.",
+          "ERR trend compares against the saved baseline and labels staleness.",
+          "The README badge reflects current ERR and reads as stale after 30 days without ingest or 20 merged PRs since the last ingest, whichever comes first."
+        ],
+        "acceptance_item_ids": [
+          "FR5-CANONICAL-EXPERIENCE-SCHEMA-001",
+          "FR16-MCP-SERVING-001",
+          "FR17-COMPILED-CONTEXT-BLOCK-001",
+          "MVP-IN-SCOPE-016",
+          "MVP-IN-SCOPE-017",
+          "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-001",
+          "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-002",
+          "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-003",
+          "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-004",
+          "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-006",
+          "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-007",
+          "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-008",
+          "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-010"
+        ],
+        "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+        "evidence_required": [
+          "work_proof_marker",
+          "validation_report",
+          "scope_closure_report",
+          "pr_lifecycle_report",
+          "factoryd_run_once_report"
+        ],
+        "required_checks": [
+          "make prepush-full"
+        ],
+        "required_review": {
+          "required": false,
+          "review_type": "code",
+          "reviewer_class": "peer_agent"
+        },
+        "source_validation_contract_ref": ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
+        "stop_conditions": [
+          "missing runner-ready task contract",
+          "changed path outside allowed_paths",
+          "forbidden path changed",
+          "required validation command failed",
+          "plan drift detected",
+          "scope closure did not advance"
+        ]
+      },
+      "work_item_id": "relia-mvp-t8",
+      "worker_type": "codex_cli"
+    },
+    {
+      "acceptance_checks": [
+        "Secrets must be redacted before experience records, reports, memory pages, compiled blocks, or shares are persisted.",
+        "relia assess`, the MCP `assess` tool, and the PR comment must share one engine and one `RiskAssessment` schema.",
+        "A technical user should run `relia demo` and open the bundled backtest report in under 5 minutes, and run a real `backtest` in under 10 minutes from install.",
+        "seeded demo repo and bundled static reports",
+        "relia demo` zero-config demo and `relia share` redacted export",
+        "relia demo` opens the bundled backtest and memory-page reports with no install, token, model key, or hosted account.",
+        "relia share` re-runs redaction at export, produces a single self-contained artifact, and fails closed when unsafe.",
+        "bundled demo report opened in under 5 minutes",
+        "first real backtest completed in under 10 minutes from install",
+        "first rule distilled, reviewed, and active in under 30 minutes",
+        "backtest finds a nonzero recurrence story on the user's own repo",
+        "user runs `ingest` more than once (incremental usage)",
+        "user installs the GitHub Action",
+        "agent sessions query the MCP server in real work",
+        "user edits or adds rules by hand (ownership signal)",
+        "user adds a second repository",
+        "user cites the memory page or backtest report in a team discussion or PR",
+        "at least 70% of confirmed recurrence pairs judged correct on human spot-check",
+        "at least 60% of `suggested` drafts accepted without edit",
+        "100% of served rules carry resolvable citations",
+        "advisory comment precision at least 70% on spot-check (\"was this warning relevant?\")",
+        "no unredacted secrets in standard Relia artifacts",
+        "headline ERR never includes possible recurrences or uncertain attribution",
+        "relia demo` works offline with no configuration.",
+        "Every number shown live is reproducible from the seeded repo.",
+        "The memory-off/memory-on contrast uses the same task, model, and prompt.",
+        "Every citation shown in the demo resolves to a real PR in the seeded repo.",
+        "The fallback static reports cover all five beats."
+      ],
+      "acceptance_group_id": "fr6-capture-time-redaction",
+      "acceptance_group_ids": [
+        "fr6-capture-time-redaction",
+        "fr18-advisory-assessment",
+        "nfr1-fast-first-value",
+        "mvp-in-scope",
+        "ingest-attribute-backtest-acceptance-tests",
+        "serve-and-advise-acceptance-tests",
+        "success-metrics",
+        "demo-acceptance"
+      ],
+      "acceptance_group_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json#/groups",
+      "acceptance_item_ids": [
+        "FR6-CAPTURE-TIME-REDACTION-001",
+        "FR18-ADVISORY-ASSESSMENT-001",
+        "NFR1-FAST-FIRST-VALUE-001",
+        "MVP-IN-SCOPE-022",
+        "MVP-IN-SCOPE-023",
+        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-010",
+        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-009",
+        "SUCCESS-METRICS-001",
+        "SUCCESS-METRICS-002",
+        "SUCCESS-METRICS-003",
+        "SUCCESS-METRICS-004",
+        "SUCCESS-METRICS-005",
+        "SUCCESS-METRICS-006",
+        "SUCCESS-METRICS-007",
+        "SUCCESS-METRICS-008",
+        "SUCCESS-METRICS-009",
+        "SUCCESS-METRICS-010",
+        "SUCCESS-METRICS-011",
+        "SUCCESS-METRICS-012",
+        "SUCCESS-METRICS-013",
+        "SUCCESS-METRICS-014",
+        "SUCCESS-METRICS-015",
+        "SUCCESS-METRICS-016",
+        "DEMO-ACCEPTANCE-001",
+        "DEMO-ACCEPTANCE-002",
+        "DEMO-ACCEPTANCE-003",
+        "DEMO-ACCEPTANCE-004",
+        "DEMO-ACCEPTANCE-005"
+      ],
+      "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+      "alignment_gate_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions",
+      "allowed_paths": [
+        "AGENTS.md",
+        "WORKFLOW.md",
+        "README.md",
+        "Makefile",
+        ".tool-versions",
+        "go.mod",
+        "go.sum",
+        "relia.yaml",
+        "CLAUDE.md",
+        "cmd/",
+        "internal/",
+        "tests/",
+        "schemas/",
+        "docs/",
+        "examples/",
+        "memory/",
+        ".github/",
+        ".factory/artifacts/task-runs/T9/",
+        ".factory/artifacts/pr-lifecycle/T9/"
+      ],
+      "blocked_by": [
+        "T8"
+      ],
+      "commands": [
+        "make prepush-full"
+      ],
+      "delivery_slice_refs": [
+        "release-demo-and-product-signals"
+      ],
+      "evidence_required": [
+        "work_proof_marker",
+        "validation_report",
+        "scope_closure_report",
+        "pr_lifecycle_report",
+        "factoryd_run_once_report"
+      ],
+      "factory_compatibility": {
+        "factory_contract_version": "1.0",
+        "generated_by": "repo-bootstrap-from-prd",
+        "profile_ref": ".factory/profile.yaml",
+        "skill_inventory_ref": "Factory skills/README.md"
+      },
+      "factoryd_runtime": {
+        "approval_posture": "human approval required for high risk, live credentials, and merge",
+        "branch_prefix": "codex",
+        "capability_grants": [],
+        "credential_posture": "no ambient secrets",
+        "network_posture": "offline by default",
+        "runtime_control": {
+          "owner": "factoryd-operator",
+          "autonomy_level": "restricted",
+          "release_freeze": {
+            "enabled": false
+          },
+          "launch_request": {
+            "requested_action": "continue_mission",
+            "requested_adapter": "codex_cli",
+            "expected_decision": "allow",
+            "reason_code": "within_runtime_control_limits"
+          },
+          "conflict_behavior": "fail_closed"
+        },
+        "state_dir": ".factoryd/",
+        "worker_command": "",
+        "worker_type": "codex_cli",
+        "workspace_root": ".factoryd/workspaces/"
+      },
+      "forbidden_paths": [
+        ".git/",
+        ".factory/tmp/",
+        ".factoryd/",
+        ".factory/artifacts/prd-to-plan/relia-mvp/",
+        ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+      ],
+      "input_artifacts": [
+        "docs/product/prd.md",
+        "AGENTS.md",
+        "WORKFLOW.md",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        ".factory/profile.yaml",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json"
+      ],
+      "lifecycle_gates": {
+        "ci_required": true,
+        "codex_review_required": true,
+        "commit_push_required": true,
+        "local_validation_required": true,
+        "post_merge_monitor_required": true,
+        "pr_lifecycle_report_required": true,
+        "skip_policy": "approved_exception_required"
+      },
+      "max_iterations": 2,
+      "mission_contract_ref": "docs/product/prd.md",
+      "objective": "Implement PRD-defined demo flows, distribution readiness, release gates, product-pull signals, and full-scope closure checks.",
+      "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
+      "required_worker_chain": [
+        "task-executor",
+        "validation-gate",
+        "commit-push",
+        "post-merge-monitor"
+      ],
+      "requires_credentials": false,
+      "requires_human_approval": true,
+      "requires_network": true,
+      "risk_class": "medium",
+      "runtime_pins": {
+        "artifact_namespace": ".factory/artifacts/",
+        "dependency_policy": "standard library first; pin and justify dependencies",
+        "distribution_target": "standalone_binary",
+        "language": "go",
+        "live_work_policy": "no ambient secrets or live network by default",
+        "module_or_package_path": "github.com/Clyra-AI/relia",
+        "provider_policy": "none by default",
+        "toolchain_version": "1.26.4"
+      },
+      "scope_exclusions": [
+        "No scope outside docs/product/prd.md.",
+        "No completion claim without acceptance evidence.",
+        "No live network/provider calls without explicit approval and allowlist."
+      ],
+      "shared_constraints_ref": "AGENTS.md",
+      "slice_rationale": {
+        "rationale": "Task advances a product-shaped capability slice while preserving acceptance-item closure refs.",
+        "slice_type": "vertical"
+      },
+      "slice_type": "vertical",
+      "stop_conditions": [
+        "missing runner-ready task contract",
+        "changed path outside allowed_paths",
+        "forbidden path changed",
+        "required validation command failed",
+        "plan drift detected",
+        "scope closure did not advance",
+        "live credential or network work attempted without approval"
+      ],
+      "task_id": "T9",
+      "upstream_debt_refs": [],
+      "validation_commands": [
+        "make prepush-full"
+      ],
+      "validation_contract_inheritance": {
+        "acceptance_criteria": [
+          "Secrets must be redacted before experience records, reports, memory pages, compiled blocks, or shares are persisted.",
+          "relia assess`, the MCP `assess` tool, and the PR comment must share one engine and one `RiskAssessment` schema.",
+          "A technical user should run `relia demo` and open the bundled backtest report in under 5 minutes, and run a real `backtest` in under 10 minutes from install.",
+          "seeded demo repo and bundled static reports",
+          "relia demo` zero-config demo and `relia share` redacted export",
+          "relia demo` opens the bundled backtest and memory-page reports with no install, token, model key, or hosted account.",
+          "relia share` re-runs redaction at export, produces a single self-contained artifact, and fails closed when unsafe.",
+          "bundled demo report opened in under 5 minutes",
+          "first real backtest completed in under 10 minutes from install",
+          "first rule distilled, reviewed, and active in under 30 minutes",
+          "backtest finds a nonzero recurrence story on the user's own repo",
+          "user runs `ingest` more than once (incremental usage)",
+          "user installs the GitHub Action",
+          "agent sessions query the MCP server in real work",
+          "user edits or adds rules by hand (ownership signal)",
+          "user adds a second repository",
+          "user cites the memory page or backtest report in a team discussion or PR",
+          "at least 70% of confirmed recurrence pairs judged correct on human spot-check",
+          "at least 60% of `suggested` drafts accepted without edit",
+          "100% of served rules carry resolvable citations",
+          "advisory comment precision at least 70% on spot-check (\"was this warning relevant?\")",
+          "no unredacted secrets in standard Relia artifacts",
+          "headline ERR never includes possible recurrences or uncertain attribution",
+          "relia demo` works offline with no configuration.",
+          "Every number shown live is reproducible from the seeded repo.",
+          "The memory-off/memory-on contrast uses the same task, model, and prompt.",
+          "Every citation shown in the demo resolves to a real PR in the seeded repo.",
+          "The fallback static reports cover all five beats."
+        ],
+        "acceptance_item_ids": [
+          "FR6-CAPTURE-TIME-REDACTION-001",
+          "FR18-ADVISORY-ASSESSMENT-001",
+          "NFR1-FAST-FIRST-VALUE-001",
+          "MVP-IN-SCOPE-022",
+          "MVP-IN-SCOPE-023",
+          "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-010",
+          "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-009",
+          "SUCCESS-METRICS-001",
+          "SUCCESS-METRICS-002",
+          "SUCCESS-METRICS-003",
+          "SUCCESS-METRICS-004",
+          "SUCCESS-METRICS-005",
+          "SUCCESS-METRICS-006",
+          "SUCCESS-METRICS-007",
+          "SUCCESS-METRICS-008",
+          "SUCCESS-METRICS-009",
+          "SUCCESS-METRICS-010",
+          "SUCCESS-METRICS-011",
+          "SUCCESS-METRICS-012",
+          "SUCCESS-METRICS-013",
+          "SUCCESS-METRICS-014",
+          "SUCCESS-METRICS-015",
+          "SUCCESS-METRICS-016",
+          "DEMO-ACCEPTANCE-001",
+          "DEMO-ACCEPTANCE-002",
+          "DEMO-ACCEPTANCE-003",
+          "DEMO-ACCEPTANCE-004",
+          "DEMO-ACCEPTANCE-005"
+        ],
+        "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+        "evidence_required": [
+          "work_proof_marker",
+          "validation_report",
+          "scope_closure_report",
+          "pr_lifecycle_report",
+          "factoryd_run_once_report"
+        ],
+        "required_checks": [
+          "make prepush-full"
+        ],
+        "required_review": {
+          "required": false,
+          "review_type": "code",
+          "reviewer_class": "peer_agent"
+        },
+        "source_validation_contract_ref": ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
+        "stop_conditions": [
+          "missing runner-ready task contract",
+          "changed path outside allowed_paths",
+          "forbidden path changed",
+          "required validation command failed",
+          "plan drift detected",
+          "scope closure did not advance",
+          "live credential or network work attempted without approval"
+        ]
+      },
+      "work_item_id": "relia-mvp-t9",
+      "worker_type": "codex_cli"
+    }
+  ]
+}

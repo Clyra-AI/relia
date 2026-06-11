@@ -1,0 +1,2718 @@
+{
+  "artifact_type": "acceptance_ledger",
+  "coverage_policy": {
+    "closure_unit": "acceptance_item",
+    "enumerated_items_required": true,
+    "group_only_refs_allowed": false
+  },
+  "generated_at": "2026-06-11T11:16:58Z",
+  "generated_by": "factoryd",
+  "items": [
+    {
+      "acceptance_item_id": "FR1-OUTCOMES-AS-THE-ONLY-MEMORY-SOURCE-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "reporting-and-evidence"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "fr1-outcomes-as-the-only-memory-source",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#fr1-outcomes-as-the-only-memory-source",
+      "source_text": "Memory writes must originate from verified outcome events. Agent self-reports and reflections must not enter memory in the MVP.",
+      "status": "planned",
+      "task_refs": [
+        "T5"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/4/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "FR2-REPO-NATIVE-LOCAL-FIRST-OPERATION-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "external-provider-and-network-integration"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "fr2-repo-native-local-first-operation",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#fr2-repo-native-local-first-operation",
+      "source_text": "The MVP must work without a hosted Relia account. Memory lives in the repository.",
+      "status": "planned",
+      "task_refs": [
+        "T6"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/5/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "FR3-GITHUB-OUTCOME-INTAKE-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "review-governance-and-approval"
+      ],
+      "evidence_mode": "external",
+      "group_id": "fr3-github-outcome-intake",
+      "kind": "acceptance_test",
+      "notes": [
+        "Requires approved network allowlist before live closure."
+      ],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#fr3-github-outcome-intake",
+      "source_text": "Relia must ingest PR metadata, check runs, reverts, and marked review corrections.",
+      "status": "planned",
+      "task_refs": [
+        "T7"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/6/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "FR4-ATTRIBUTION-WITH-CONFIDENCE-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "analysis-processing-and-decisioning"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "fr4-attribution-with-confidence",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#fr4-attribution-with-confidence",
+      "source_text": "Relia must attribute agent authorship via bot login, co-author trailer, and PR label, with method and confidence recorded. Uncertain attribution must fail closed (excluded from ERR) by default.",
+      "status": "planned",
+      "task_refs": [
+        "T4"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/3/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "FR5-CANONICAL-EXPERIENCE-SCHEMA-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "serving-interface-and-agent-access"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "fr5-canonical-experience-schema",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#fr5-canonical-experience-schema",
+      "source_text": "Backtest, distill, serve, assess, and reports must consume canonical experience records.",
+      "status": "planned",
+      "task_refs": [
+        "T8"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/7/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "FR6-CAPTURE-TIME-REDACTION-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "release-demo-and-product-signals"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "fr6-capture-time-redaction",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#fr6-capture-time-redaction",
+      "source_text": "Secrets must be redacted before experience records, reports, memory pages, compiled blocks, or shares are persisted.",
+      "status": "planned",
+      "task_refs": [
+        "T9"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/8/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "FR7-DETERMINISTIC-FAILURE-SIGNATURES-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "analysis-processing-and-decisioning"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "fr7-deterministic-failure-signatures",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#fr7-deterministic-failure-signatures",
+      "source_text": "Signature extraction must prefer structured check-run data and label log-parsed signatures with extraction confidence.",
+      "status": "planned",
+      "task_refs": [
+        "T4"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/3/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "FR8-CONSERVATIVE-RECURRENCE-PAIRING-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "reporting-and-evidence"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "fr8-conservative-recurrence-pairing",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#fr8-conservative-recurrence-pairing",
+      "source_text": "Relia must pair recurrences conservatively, separate `confirmed` from `possible`, and exclude `possible` from headline ERR.",
+      "status": "planned",
+      "task_refs": [
+        "T5"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/4/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "FR9-BACKTEST-BEFORE-BEHAVIOR-CHANGE-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "review-governance-and-approval"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "fr9-backtest-before-behavior-change",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#fr9-backtest-before-behavior-change",
+      "source_text": "relia backtest` must deliver the ERR headline and paired evidence read-only, with no rules, review, or workflow change required.",
+      "status": "planned",
+      "task_refs": [
+        "T7"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/6/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "FR10-PROVENANCE-MANDATORY-RULES-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "review-governance-and-approval"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "fr10-provenance-mandatory-rules",
+      "kind": "quality_gate",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#fr10-provenance-mandatory-rules",
+      "source_text": "Every rule must cite at least one experience and one PR. Uncited rules fail validation and never render.",
+      "status": "planned",
+      "task_refs": [
+        "T7"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/6/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "FR11-CALIBRATED-CONFIDENCE-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "reporting-and-evidence"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "fr11-calibrated-confidence",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#fr11-calibrated-confidence",
+      "source_text": "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence — never from the drafting model.",
+      "status": "planned",
+      "task_refs": [
+        "T5"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/4/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "FR12-DECAY-AND-CHURN-INVALIDATION-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "review-governance-and-approval"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "fr12-decay-and-churn-invalidation",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#fr12-decay-and-churn-invalidation",
+      "source_text": "Rules must decay by half-life and go `stale` when their scoped paths are deleted.",
+      "status": "planned",
+      "task_refs": [
+        "T7"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/6/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "FR13-HUMAN-REVIEW-GATE-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "review-governance-and-approval"
+      ],
+      "evidence_mode": "manual_review",
+      "group_id": "fr13-human-review-gate",
+      "kind": "acceptance_test",
+      "notes": [
+        "Requires manual review or human approval evidence."
+      ],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#fr13-human-review-gate",
+      "source_text": "Drafted rules must be reviewed before becoming `active`, with `accepted`, `suggested`, and `needs_user_input` labels. Disabling review is an explicit, surfaced configuration choice.",
+      "status": "planned",
+      "task_refs": [
+        "T7"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/6/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "FR14-BIDIRECTIONAL-MEMORY-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "review-governance-and-approval"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "fr14-bidirectional-memory",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#fr14-bidirectional-memory",
+      "source_text": "Relia must support `avoid` rules from failures and `playbook` rules from held fixes, and playbook rules must cite held evidence.",
+      "status": "planned",
+      "task_refs": [
+        "T7"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/6/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "FR15-MEMORY-PAGE-WITH-RECEIPTS-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "review-governance-and-approval"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "fr15-memory-page-with-receipts",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#fr15-memory-page-with-receipts",
+      "source_text": "relia memory` must render MEMORY.md showing statements, confidence, lifecycle status, and clickable provenance.",
+      "status": "planned",
+      "task_refs": [
+        "T7"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/6/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "FR16-MCP-SERVING-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "serving-interface-and-agent-access"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "fr16-mcp-serving",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#fr16-mcp-serving",
+      "source_text": "relia serve` must expose `recall`, `assess`, and `coverage` over MCP, serving only `active` rules.",
+      "status": "planned",
+      "task_refs": [
+        "T8"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/7/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "FR17-COMPILED-CONTEXT-BLOCK-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "serving-interface-and-agent-access"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "fr17-compiled-context-block",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#fr17-compiled-context-block",
+      "source_text": "relia compile` must maintain a managed, marker-delimited block in AGENTS.md and CLAUDE.md, regenerable and never touching content outside the markers.",
+      "status": "planned",
+      "task_refs": [
+        "T8"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/7/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "FR18-ADVISORY-ASSESSMENT-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "release-demo-and-product-signals"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "fr18-advisory-assessment",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#fr18-advisory-assessment",
+      "source_text": "relia assess`, the MCP `assess` tool, and the PR comment must share one engine and one `RiskAssessment` schema.",
+      "status": "planned",
+      "task_refs": [
+        "T9"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/8/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "FR19-COVERAGE-OOD-SIGNAL-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "reporting-and-evidence"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "fr19-coverage-ood-signal",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#fr19-coverage-ood-signal",
+      "source_text": "Relia must report experience density for touched paths and label `no_coverage` distinctly from `covered_clean`.",
+      "status": "planned",
+      "task_refs": [
+        "T5"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/4/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "FR20-ADVISORY-ONLY-DEFAULT-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "external-provider-and-network-integration"
+      ],
+      "evidence_mode": "external",
+      "group_id": "fr20-advisory-only-default",
+      "kind": "acceptance_test",
+      "notes": [
+        "Requires approved network allowlist before live closure."
+      ],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#fr20-advisory-only-default",
+      "source_text": "The GitHub Action must never block merges by default. The recurrence gate requires explicit configuration and exits `5` when tripped.",
+      "status": "planned",
+      "task_refs": [
+        "T6"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/5/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "FR21-FORWARD-ERR-TRACKING-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "review-governance-and-approval"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "fr21-forward-err-tracking",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#fr21-forward-err-tracking",
+      "source_text": "Relia must track ERR against a saved baseline and label stale baselines.",
+      "status": "planned",
+      "task_refs": [
+        "T7"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/6/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "FR22-STABLE-CLI-OUTPUT-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "contracts-config-and-validation"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "fr22-stable-cli-output",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#fr22-stable-cli-output",
+      "source_text": "Relia must support stable exit codes and `--json`.",
+      "status": "planned",
+      "task_refs": [
+        "T2"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/1/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "FR23-PROVIDER-ADAPTERS-AND-NO-LLM-MODE-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "external-provider-and-network-integration"
+      ],
+      "evidence_mode": "external",
+      "group_id": "fr23-provider-adapters-and-no-llm-mode",
+      "kind": "acceptance_test",
+      "notes": [
+        "Requires approved scoped credentials before live closure.",
+        "Requires approved network allowlist before live closure."
+      ],
+      "risk_class": "high",
+      "source_ref": "docs/product/prd.md#fr23-provider-adapters-and-no-llm-mode",
+      "source_text": "Distillation must support OpenAI-compatible and Anthropic adapters behind a pluggable interface, BYO key, cost caps, and a deterministic no-LLM mode.",
+      "status": "planned",
+      "task_refs": [
+        "T6"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/5/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "FR24-COST-VISIBILITY-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "external-provider-and-network-integration"
+      ],
+      "evidence_mode": "external",
+      "group_id": "fr24-cost-visibility",
+      "kind": "acceptance_test",
+      "notes": [
+        "Requires approved scoped credentials before live closure.",
+        "Requires approved network allowlist before live closure."
+      ],
+      "risk_class": "high",
+      "source_ref": "docs/product/prd.md#fr24-cost-visibility",
+      "source_text": "Distill runs using a provider must report token and estimated cost information.",
+      "status": "planned",
+      "task_refs": [
+        "T6"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/5/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "FR25-PORTABLE-ARTIFACTS-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "external-provider-and-network-integration"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "fr25-portable-artifacts",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#fr25-portable-artifacts",
+      "source_text": "Experience records, rules, memory pages, reports, and baselines must remain useful outside any hosted service.",
+      "status": "planned",
+      "task_refs": [
+        "T6"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/5/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "NFR1-FAST-FIRST-VALUE-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "release-demo-and-product-signals"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "nfr1-fast-first-value",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#nfr1-fast-first-value",
+      "source_text": "A technical user should run `relia demo` and open the bundled backtest report in under 5 minutes, and run a real `backtest` in under 10 minutes from install.",
+      "status": "planned",
+      "task_refs": [
+        "T9"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/8/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "NFR2-FAST-FIRST-MEMORY-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "review-governance-and-approval"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "nfr2-fast-first-memory",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#nfr2-fast-first-memory",
+      "source_text": "A technical user should ingest, distill, and approve their first rule in under 30 minutes.",
+      "status": "planned",
+      "task_refs": [
+        "T7"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/6/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "NFR3-DETERMINISTIC-BACKTEST-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "analysis-processing-and-decisioning"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "nfr3-deterministic-backtest",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#nfr3-deterministic-backtest",
+      "source_text": "Repeated backtests over the same window and artifacts must produce the same result.",
+      "status": "planned",
+      "task_refs": [
+        "T4"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/3/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "NFR4-CALIBRATION-HONESTY-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "review-governance-and-approval"
+      ],
+      "evidence_mode": "manual_review",
+      "group_id": "nfr4-calibration-honesty",
+      "kind": "acceptance_test",
+      "notes": [
+        "Requires manual review or human approval evidence."
+      ],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#nfr4-calibration-honesty",
+      "source_text": "Reports must clearly distinguish confirmed recurrences, possible recurrences, flake-discounted evidence, and uncertain attribution.",
+      "status": "planned",
+      "task_refs": [
+        "T7"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/6/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "NFR5-SECURITY-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "data-intake-and-persistence"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "nfr5-security",
+      "kind": "nonfunctional_requirement",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#nfr5-security",
+      "source_text": "Redaction must happen before artifact persistence. If a value cannot be confidently redacted, Relia must fail closed (exit 6): mark the artifact unsafe to persist rather than write a possibly-unredacted secret. Silent persistence of an unrecognized secret is a trust bug, not an edge case.",
+      "status": "planned",
+      "task_refs": [
+        "T3"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/2/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "NFR6-LOCAL-PRIVACY-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "data-intake-and-persistence"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "nfr6-local-privacy",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#nfr6-local-privacy",
+      "source_text": "Relia must not send code, diffs, logs, or experience records anywhere by default. When a distill provider is configured, only redacted experience records leave the machine, and `relia check` must say so explicitly.",
+      "status": "planned",
+      "task_refs": [
+        "T3"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/2/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "NFR7-RULE-READABILITY-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "review-governance-and-approval"
+      ],
+      "evidence_mode": "manual_review",
+      "group_id": "nfr7-rule-readability",
+      "kind": "acceptance_test",
+      "notes": [
+        "Requires manual review or human approval evidence."
+      ],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#nfr7-rule-readability",
+      "source_text": "Rule YAML and MEMORY.md must be understandable by engineers without a custom UI.",
+      "status": "planned",
+      "task_refs": [
+        "T7"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/6/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "NFR8-STRUCTURED-DATA-FIRST-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "review-governance-and-approval"
+      ],
+      "evidence_mode": "external",
+      "group_id": "nfr8-structured-data-first",
+      "kind": "acceptance_test",
+      "notes": [
+        "Requires approved network allowlist before live closure."
+      ],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#nfr8-structured-data-first",
+      "source_text": "Outcome extraction should use the GitHub API's structured data (check runs, review threads, merge/revert metadata) before log scraping; log-parsed values carry confidence labels.",
+      "status": "planned",
+      "task_refs": [
+        "T7"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/6/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "NFR9-DEBUGGABLE-ERRORS-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "reporting-and-evidence"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "nfr9-debuggable-errors",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#nfr9-debuggable-errors",
+      "source_text": "Errors must include file, path, PR, command, object, or line references where possible.",
+      "status": "planned",
+      "task_refs": [
+        "T5"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/4/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "NFR10-COST-VISIBILITY-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "external-provider-and-network-integration"
+      ],
+      "evidence_mode": "external",
+      "group_id": "nfr10-cost-visibility",
+      "kind": "acceptance_test",
+      "notes": [
+        "Requires approved scoped credentials before live closure.",
+        "Requires approved network allowlist before live closure."
+      ],
+      "risk_class": "high",
+      "source_ref": "docs/product/prd.md#nfr10-cost-visibility",
+      "source_text": "Provider-backed distillation must show token and estimated cost information and respect `max_cost_usd_per_run`.",
+      "status": "planned",
+      "task_refs": [
+        "T6"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/5/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "NFR11-STOCHASTIC-HONESTY-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "external-provider-and-network-integration"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "nfr11-stochastic-honesty",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#nfr11-stochastic-honesty",
+      "source_text": "LLM-drafted statements are labeled by origin and reviewable; clustering and calibration are deterministic given the same inputs.",
+      "status": "planned",
+      "task_refs": [
+        "T6"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/5/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "NFR12-ARTIFACT-STABILITY-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "contracts-config-and-validation"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "nfr12-artifact-stability",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#nfr12-artifact-stability",
+      "source_text": "Schemas and artifacts must be versioned.",
+      "status": "planned",
+      "task_refs": [
+        "T2"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/1/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "NFR13-INFERENCE-HUMILITY-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "review-governance-and-approval"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "nfr13-inference-humility",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#nfr13-inference-humility",
+      "source_text": "Drafted rules, signatures parsed from logs, attribution inferences, and held-fix detection must be confidence-labeled.",
+      "status": "planned",
+      "task_refs": [
+        "T7"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/6/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "NFR14-ADVISORY-RESTRAINT-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "reporting-and-evidence"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "nfr14-advisory-restraint",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#nfr14-advisory-restraint",
+      "source_text": "The PR advisor must default to at most one comment per PR and edit that comment in place on subsequent pushes rather than posting new ones. Reassessment is debounced (default 10 minutes) and skipped entirely when the diff fingerprint is unchanged, so force-push storms produce one living comment, not a thread. The advisor stays silent below `min_confidence` and on `covered_clean`.",
+      "status": "planned",
+      "task_refs": [
+        "T5"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/4/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "NFR15-NO-DASHBOARD-DEPENDENCY-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "reporting-and-evidence"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "nfr15-no-dashboard-dependency",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#nfr15-no-dashboard-dependency",
+      "source_text": "The MVP must explain value through local CLI output, local reports, MEMORY.md, and the PR comment.",
+      "status": "planned",
+      "task_refs": [
+        "T5"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/4/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "contracts-config-and-validation"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "mvp-in-scope",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#mvp-in-scope",
+      "source_text": "local OSS CLI",
+      "status": "planned",
+      "task_refs": [
+        "T2"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/1/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-002",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "review-governance-and-approval"
+      ],
+      "evidence_mode": "external",
+      "group_id": "mvp-in-scope",
+      "kind": "acceptance_test",
+      "notes": [
+        "Requires approved network allowlist before live closure."
+      ],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#mvp-in-scope",
+      "source_text": "GitHub PR/check-run/revert/review-correction intake",
+      "status": "planned",
+      "task_refs": [
+        "T7"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/6/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-003",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "analysis-processing-and-decisioning"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "mvp-in-scope",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#mvp-in-scope",
+      "source_text": "agent attribution with confidence",
+      "status": "planned",
+      "task_refs": [
+        "T4"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/3/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-004",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "data-intake-and-persistence"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "mvp-in-scope",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#mvp-in-scope",
+      "source_text": "capture-time redaction with entropy scanning",
+      "status": "planned",
+      "task_refs": [
+        "T3"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/2/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-005",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "data-intake-and-persistence"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "mvp-in-scope",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#mvp-in-scope",
+      "source_text": "canonical experience records (local-only reproducible cache by default; committed opt-in, redacted, capped)",
+      "status": "planned",
+      "task_refs": [
+        "T3"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/2/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-006",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "analysis-processing-and-decisioning"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "mvp-in-scope",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#mvp-in-scope",
+      "source_text": "deterministic failure signatures with confidence labels",
+      "status": "planned",
+      "task_refs": [
+        "T4"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/3/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-007",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "analysis-processing-and-decisioning"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "mvp-in-scope",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#mvp-in-scope",
+      "source_text": "basic flake discounting",
+      "status": "planned",
+      "task_refs": [
+        "T4"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/3/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-008",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "analysis-processing-and-decisioning"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "mvp-in-scope",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#mvp-in-scope",
+      "source_text": "conservative recurrence pairing and ERR",
+      "status": "planned",
+      "task_refs": [
+        "T4"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/3/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-009",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "reporting-and-evidence"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "mvp-in-scope",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#mvp-in-scope",
+      "source_text": "read-only backtest with HTML report and JSON",
+      "status": "planned",
+      "task_refs": [
+        "T5"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/4/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-010",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "analysis-processing-and-decisioning"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "mvp-in-scope",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#mvp-in-scope",
+      "source_text": "tiered clustering (deterministic signature keys, bundled local embeddings, provider embeddings opt-in)",
+      "status": "planned",
+      "task_refs": [
+        "T4"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/3/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-011",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "external-provider-and-network-integration"
+      ],
+      "evidence_mode": "external",
+      "group_id": "mvp-in-scope",
+      "kind": "acceptance_test",
+      "notes": [
+        "Requires approved network allowlist before live closure."
+      ],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#mvp-in-scope",
+      "source_text": "LLM rule drafting (OpenAI-compatible and Anthropic adapters) and no-LLM mode",
+      "status": "planned",
+      "task_refs": [
+        "T6"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/5/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-012",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "review-governance-and-approval"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "mvp-in-scope",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#mvp-in-scope",
+      "source_text": "bidirectional rules (`avoid`, `playbook`) with mandatory provenance",
+      "status": "planned",
+      "task_refs": [
+        "T7"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/6/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-013",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "review-governance-and-approval"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "mvp-in-scope",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#mvp-in-scope",
+      "source_text": "calibrated confidence, decay, churn invalidation, lifecycle states",
+      "status": "planned",
+      "task_refs": [
+        "T7"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/6/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-014",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "review-governance-and-approval"
+      ],
+      "evidence_mode": "manual_review",
+      "group_id": "mvp-in-scope",
+      "kind": "acceptance_test",
+      "notes": [
+        "Requires manual review or human approval evidence."
+      ],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#mvp-in-scope",
+      "source_text": "human review flow with labels",
+      "status": "planned",
+      "task_refs": [
+        "T7"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/6/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-015",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "reporting-and-evidence"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "mvp-in-scope",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#mvp-in-scope",
+      "source_text": "MEMORY.md memory page with receipts",
+      "status": "planned",
+      "task_refs": [
+        "T5"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/4/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-016",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "serving-interface-and-agent-access"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "mvp-in-scope",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#mvp-in-scope",
+      "source_text": "MCP server (`recall`, `assess`, `coverage`)",
+      "status": "planned",
+      "task_refs": [
+        "T8"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/7/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-017",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "serving-interface-and-agent-access"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "mvp-in-scope",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#mvp-in-scope",
+      "source_text": "compiled managed block in AGENTS.md/CLAUDE.md",
+      "status": "planned",
+      "task_refs": [
+        "T8"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/7/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-018",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "analysis-processing-and-decisioning"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "mvp-in-scope",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#mvp-in-scope",
+      "source_text": "CLI `assess` on diff or plan",
+      "status": "planned",
+      "task_refs": [
+        "T4"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/3/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-019",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "external-provider-and-network-integration"
+      ],
+      "evidence_mode": "external",
+      "group_id": "mvp-in-scope",
+      "kind": "acceptance_test",
+      "notes": [
+        "Requires approved network allowlist before live closure."
+      ],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#mvp-in-scope",
+      "source_text": "GitHub Action with one advisory, evidence-citing PR comment",
+      "status": "planned",
+      "task_refs": [
+        "T6"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/5/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-020",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "reporting-and-evidence"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "mvp-in-scope",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#mvp-in-scope",
+      "source_text": "forward ERR tracking against a baseline; gate available but off by default",
+      "status": "planned",
+      "task_refs": [
+        "T5"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/4/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-021",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "contracts-config-and-validation"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "mvp-in-scope",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#mvp-in-scope",
+      "source_text": "stable exit codes and `--json",
+      "status": "planned",
+      "task_refs": [
+        "T2"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/1/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-022",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "release-demo-and-product-signals"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "mvp-in-scope",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#mvp-in-scope",
+      "source_text": "seeded demo repo and bundled static reports",
+      "status": "planned",
+      "task_refs": [
+        "T9"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/8/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-023",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "release-demo-and-product-signals"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "mvp-in-scope",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#mvp-in-scope",
+      "source_text": "relia demo` zero-config demo and `relia share` redacted export",
+      "status": "planned",
+      "task_refs": [
+        "T9"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/8/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-024",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "reporting-and-evidence"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "mvp-in-scope",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#mvp-in-scope",
+      "source_text": "proof-honest README badge generated from the JSON command result",
+      "status": "planned",
+      "task_refs": [
+        "T5"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/4/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "ACCEPTANCE-TESTS-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "repo-lifecycle-foundation"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "acceptance-tests",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#acceptance-tests",
+      "source_text": "The MVP is not complete until all acceptance groups pass.",
+      "status": "planned",
+      "task_refs": [
+        "T1"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/0/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "review-governance-and-approval"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "ingest-attribute-backtest-acceptance-tests",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#ingest-attribute-backtest-acceptance-tests",
+      "source_text": "relia init` writes valid config with discovered checks and candidate attribution markers.",
+      "status": "planned",
+      "task_refs": [
+        "T7"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/6/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-002",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "analysis-processing-and-decisioning"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "ingest-attribute-backtest-acceptance-tests",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#ingest-attribute-backtest-acceptance-tests",
+      "source_text": "relia check` flags zero-match attribution config with a concrete reference.",
+      "status": "planned",
+      "task_refs": [
+        "T4"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/3/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-003",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "analysis-processing-and-decisioning"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "ingest-attribute-backtest-acceptance-tests",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#ingest-attribute-backtest-acceptance-tests",
+      "source_text": "relia ingest` writes schema-valid, redacted experience records for PRs, check runs, reverts, and marked corrections.",
+      "status": "planned",
+      "task_refs": [
+        "T4"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/3/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-004",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "analysis-processing-and-decisioning"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "ingest-attribute-backtest-acceptance-tests",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#ingest-attribute-backtest-acceptance-tests",
+      "source_text": "Attribution records method and confidence; an ambiguous trailer yields `attribution_uncertain` and exclusion from ERR.",
+      "status": "planned",
+      "task_refs": [
+        "T4"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/3/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-005",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "analysis-processing-and-decisioning"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "ingest-attribute-backtest-acceptance-tests",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#ingest-attribute-backtest-acceptance-tests",
+      "source_text": "relia backtest --window 180d` is deterministic on repeated runs.",
+      "status": "planned",
+      "task_refs": [
+        "T4"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/3/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-006",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "analysis-processing-and-decisioning"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "ingest-attribute-backtest-acceptance-tests",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#ingest-attribute-backtest-acceptance-tests",
+      "source_text": "Confirmed recurrences are paired with the earlier experience they repeat, with resolvable links.",
+      "status": "planned",
+      "task_refs": [
+        "T4"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/3/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-007",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "reporting-and-evidence"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "ingest-attribute-backtest-acceptance-tests",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#ingest-attribute-backtest-acceptance-tests",
+      "source_text": "Possible recurrences appear separately and are excluded from headline ERR.",
+      "status": "planned",
+      "task_refs": [
+        "T5"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/4/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-008",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "review-governance-and-approval"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "ingest-attribute-backtest-acceptance-tests",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#ingest-attribute-backtest-acceptance-tests",
+      "source_text": "The planted flaky test is discounted and drafts no rule.",
+      "status": "planned",
+      "task_refs": [
+        "T7"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/6/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-009",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "analysis-processing-and-decisioning"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "ingest-attribute-backtest-acceptance-tests",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#ingest-attribute-backtest-acceptance-tests",
+      "source_text": "Seeded secrets never appear in any artifact.",
+      "status": "planned",
+      "task_refs": [
+        "T4"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/3/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-010",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "release-demo-and-product-signals"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "ingest-attribute-backtest-acceptance-tests",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#ingest-attribute-backtest-acceptance-tests",
+      "source_text": "relia demo` opens the bundled backtest and memory-page reports with no install, token, model key, or hosted account.",
+      "status": "planned",
+      "task_refs": [
+        "T9"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/8/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "review-governance-and-approval"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "distill-review-memory-page-acceptance-tests",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#distill-review-memory-page-acceptance-tests",
+      "source_text": "relia distill` drafts an `avoid` rule from the planted recurrence cluster with correct citations.",
+      "status": "planned",
+      "task_refs": [
+        "T7"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/6/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-002",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "review-governance-and-approval"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "distill-review-memory-page-acceptance-tests",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#distill-review-memory-page-acceptance-tests",
+      "source_text": "relia distill` drafts a `playbook` rule citing the held fix.",
+      "status": "planned",
+      "task_refs": [
+        "T7"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/6/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-003",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "review-governance-and-approval"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "distill-review-memory-page-acceptance-tests",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#distill-review-memory-page-acceptance-tests",
+      "source_text": "A rule without provenance fails `relia check` with exit 4.",
+      "status": "planned",
+      "task_refs": [
+        "T7"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/6/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-004",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "review-governance-and-approval"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "distill-review-memory-page-acceptance-tests",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#distill-review-memory-page-acceptance-tests",
+      "source_text": "Drafted rules are `suggested` or `needs_user_input`, never auto-`accepted`.",
+      "status": "planned",
+      "task_refs": [
+        "T7"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/6/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-005",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "review-governance-and-approval"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "distill-review-memory-page-acceptance-tests",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#distill-review-memory-page-acceptance-tests",
+      "source_text": "relia review` approve/edit/reject transitions write correct lifecycle states.",
+      "status": "planned",
+      "task_refs": [
+        "T7"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/6/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-006",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "review-governance-and-approval"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "distill-review-memory-page-acceptance-tests",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#distill-review-memory-page-acceptance-tests",
+      "source_text": "The planted contradiction moves its rule to `contradicted` and out of serving.",
+      "status": "planned",
+      "task_refs": [
+        "T7"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/6/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-007",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "review-governance-and-approval"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "distill-review-memory-page-acceptance-tests",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#distill-review-memory-page-acceptance-tests",
+      "source_text": "The planted path deletion moves its rule to `stale` and out of serving.",
+      "status": "planned",
+      "task_refs": [
+        "T7"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/6/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-008",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "review-governance-and-approval"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "distill-review-memory-page-acceptance-tests",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#distill-review-memory-page-acceptance-tests",
+      "source_text": "MEMORY.md renders receipts as resolvable links and separates weak from strong memory.",
+      "status": "planned",
+      "task_refs": [
+        "T7"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/6/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-009",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "external-provider-and-network-integration"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "distill-review-memory-page-acceptance-tests",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#distill-review-memory-page-acceptance-tests",
+      "source_text": "No-LLM mode produces deterministic cluster-summary drafts.",
+      "status": "planned",
+      "task_refs": [
+        "T6"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/5/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-010",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "external-provider-and-network-integration"
+      ],
+      "evidence_mode": "external",
+      "group_id": "distill-review-memory-page-acceptance-tests",
+      "kind": "acceptance_test",
+      "notes": [
+        "Requires approved network allowlist before live closure."
+      ],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#distill-review-memory-page-acceptance-tests",
+      "source_text": "Provider-backed distill reports cost and respects the configured cap.",
+      "status": "planned",
+      "task_refs": [
+        "T6"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/5/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "serving-interface-and-agent-access"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "serve-and-advise-acceptance-tests",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#serve-and-advise-acceptance-tests",
+      "source_text": "relia serve` exposes `recall`, `assess`, and `coverage` over MCP and serves only `active` rules.",
+      "status": "planned",
+      "task_refs": [
+        "T8"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/7/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-002",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "serving-interface-and-agent-access"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "serve-and-advise-acceptance-tests",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#serve-and-advise-acceptance-tests",
+      "source_text": "A real agent session retrieves a rule via `recall` and the rule's citations resolve.",
+      "status": "planned",
+      "task_refs": [
+        "T8"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/7/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-003",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "serving-interface-and-agent-access"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "serve-and-advise-acceptance-tests",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#serve-and-advise-acceptance-tests",
+      "source_text": "relia compile` maintains the managed block idempotently and never edits outside markers.",
+      "status": "planned",
+      "task_refs": [
+        "T8"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/7/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-004",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "serving-interface-and-agent-access"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "serve-and-advise-acceptance-tests",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#serve-and-advise-acceptance-tests",
+      "source_text": "relia assess` returns `match_high` with citations on a planted-pattern diff and `no_coverage` on unknown paths.",
+      "status": "planned",
+      "task_refs": [
+        "T8"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/7/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-005",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "external-provider-and-network-integration"
+      ],
+      "evidence_mode": "external",
+      "group_id": "serve-and-advise-acceptance-tests",
+      "kind": "acceptance_test",
+      "notes": [
+        "Requires approved network allowlist before live closure."
+      ],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#serve-and-advise-acceptance-tests",
+      "source_text": "The GitHub Action posts at most one advisory comment per PR, citing real PRs.",
+      "status": "planned",
+      "task_refs": [
+        "T6"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/5/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-006",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "serving-interface-and-agent-access"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "serve-and-advise-acceptance-tests",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#serve-and-advise-acceptance-tests",
+      "source_text": "The Action stays silent below `min_confidence` and on `covered_clean`.",
+      "status": "planned",
+      "task_refs": [
+        "T8"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/7/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-007",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "serving-interface-and-agent-access"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "serve-and-advise-acceptance-tests",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#serve-and-advise-acceptance-tests",
+      "source_text": "The Action never blocks by default; with the gate explicitly enabled, a tripped threshold exits 5.",
+      "status": "planned",
+      "task_refs": [
+        "T8"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/7/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-008",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "serving-interface-and-agent-access"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "serve-and-advise-acceptance-tests",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#serve-and-advise-acceptance-tests",
+      "source_text": "ERR trend compares against the saved baseline and labels staleness.",
+      "status": "planned",
+      "task_refs": [
+        "T8"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/7/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-009",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "release-demo-and-product-signals"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "serve-and-advise-acceptance-tests",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#serve-and-advise-acceptance-tests",
+      "source_text": "relia share` re-runs redaction at export, produces a single self-contained artifact, and fails closed when unsafe.",
+      "status": "planned",
+      "task_refs": [
+        "T9"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/8/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-010",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "serving-interface-and-agent-access"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "serve-and-advise-acceptance-tests",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#serve-and-advise-acceptance-tests",
+      "source_text": "The README badge reflects current ERR and reads as stale after 30 days without ingest or 20 merged PRs since the last ingest, whichever comes first.",
+      "status": "planned",
+      "task_refs": [
+        "T8"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/7/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "SUCCESS-METRICS-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "release-demo-and-product-signals"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "success-metrics",
+      "kind": "quality_gate",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#success-metrics",
+      "source_text": "bundled demo report opened in under 5 minutes",
+      "status": "planned",
+      "task_refs": [
+        "T9"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/8/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "SUCCESS-METRICS-002",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "release-demo-and-product-signals"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "success-metrics",
+      "kind": "quality_gate",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#success-metrics",
+      "source_text": "first real backtest completed in under 10 minutes from install",
+      "status": "planned",
+      "task_refs": [
+        "T9"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/8/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "SUCCESS-METRICS-003",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "release-demo-and-product-signals"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "success-metrics",
+      "kind": "quality_gate",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#success-metrics",
+      "source_text": "first rule distilled, reviewed, and active in under 30 minutes",
+      "status": "planned",
+      "task_refs": [
+        "T9"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/8/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "SUCCESS-METRICS-004",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "release-demo-and-product-signals"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "success-metrics",
+      "kind": "quality_gate",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#success-metrics",
+      "source_text": "backtest finds a nonzero recurrence story on the user's own repo",
+      "status": "planned",
+      "task_refs": [
+        "T9"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/8/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "SUCCESS-METRICS-005",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "release-demo-and-product-signals"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "success-metrics",
+      "kind": "quality_gate",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#success-metrics",
+      "source_text": "user runs `ingest` more than once (incremental usage)",
+      "status": "planned",
+      "task_refs": [
+        "T9"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/8/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "SUCCESS-METRICS-006",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "release-demo-and-product-signals"
+      ],
+      "evidence_mode": "external",
+      "group_id": "success-metrics",
+      "kind": "quality_gate",
+      "notes": [
+        "Requires approved network allowlist before live closure."
+      ],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#success-metrics",
+      "source_text": "user installs the GitHub Action",
+      "status": "planned",
+      "task_refs": [
+        "T9"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/8/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "SUCCESS-METRICS-007",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "release-demo-and-product-signals"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "success-metrics",
+      "kind": "quality_gate",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#success-metrics",
+      "source_text": "agent sessions query the MCP server in real work",
+      "status": "planned",
+      "task_refs": [
+        "T9"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/8/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "SUCCESS-METRICS-008",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "release-demo-and-product-signals"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "success-metrics",
+      "kind": "quality_gate",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#success-metrics",
+      "source_text": "user edits or adds rules by hand (ownership signal)",
+      "status": "planned",
+      "task_refs": [
+        "T9"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/8/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "SUCCESS-METRICS-009",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "release-demo-and-product-signals"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "success-metrics",
+      "kind": "quality_gate",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#success-metrics",
+      "source_text": "user adds a second repository",
+      "status": "planned",
+      "task_refs": [
+        "T9"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/8/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "SUCCESS-METRICS-010",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "release-demo-and-product-signals"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "success-metrics",
+      "kind": "quality_gate",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#success-metrics",
+      "source_text": "user cites the memory page or backtest report in a team discussion or PR",
+      "status": "planned",
+      "task_refs": [
+        "T9"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/8/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "SUCCESS-METRICS-011",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "release-demo-and-product-signals"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "success-metrics",
+      "kind": "quality_gate",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#success-metrics",
+      "source_text": "at least 70% of confirmed recurrence pairs judged correct on human spot-check",
+      "status": "planned",
+      "task_refs": [
+        "T9"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/8/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "SUCCESS-METRICS-012",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "release-demo-and-product-signals"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "success-metrics",
+      "kind": "quality_gate",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#success-metrics",
+      "source_text": "at least 60% of `suggested` drafts accepted without edit",
+      "status": "planned",
+      "task_refs": [
+        "T9"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/8/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "SUCCESS-METRICS-013",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "release-demo-and-product-signals"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "success-metrics",
+      "kind": "quality_gate",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#success-metrics",
+      "source_text": "100% of served rules carry resolvable citations",
+      "status": "planned",
+      "task_refs": [
+        "T9"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/8/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "SUCCESS-METRICS-014",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "release-demo-and-product-signals"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "success-metrics",
+      "kind": "quality_gate",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#success-metrics",
+      "source_text": "advisory comment precision at least 70% on spot-check (\"was this warning relevant?\")",
+      "status": "planned",
+      "task_refs": [
+        "T9"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/8/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "SUCCESS-METRICS-015",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "release-demo-and-product-signals"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "success-metrics",
+      "kind": "quality_gate",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#success-metrics",
+      "source_text": "no unredacted secrets in standard Relia artifacts",
+      "status": "planned",
+      "task_refs": [
+        "T9"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/8/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "SUCCESS-METRICS-016",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "release-demo-and-product-signals"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "success-metrics",
+      "kind": "quality_gate",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#success-metrics",
+      "source_text": "headline ERR never includes possible recurrences or uncertain attribution",
+      "status": "planned",
+      "task_refs": [
+        "T9"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/8/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "DEMO-ACCEPTANCE-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "release-demo-and-product-signals"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "demo-acceptance",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#demo-acceptance",
+      "source_text": "relia demo` works offline with no configuration.",
+      "status": "planned",
+      "task_refs": [
+        "T9"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/8/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "DEMO-ACCEPTANCE-002",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "release-demo-and-product-signals"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "demo-acceptance",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#demo-acceptance",
+      "source_text": "Every number shown live is reproducible from the seeded repo.",
+      "status": "planned",
+      "task_refs": [
+        "T9"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/8/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "DEMO-ACCEPTANCE-003",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "release-demo-and-product-signals"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "demo-acceptance",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#demo-acceptance",
+      "source_text": "The memory-off/memory-on contrast uses the same task, model, and prompt.",
+      "status": "planned",
+      "task_refs": [
+        "T9"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/8/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "DEMO-ACCEPTANCE-004",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "release-demo-and-product-signals"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "demo-acceptance",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#demo-acceptance",
+      "source_text": "Every citation shown in the demo resolves to a real PR in the seeded repo.",
+      "status": "planned",
+      "task_refs": [
+        "T9"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/8/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "DEMO-ACCEPTANCE-005",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "release-demo-and-product-signals"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "demo-acceptance",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "low",
+      "source_ref": "docs/product/prd.md#demo-acceptance",
+      "source_text": "The fallback static reports cover all five beats.",
+      "status": "planned",
+      "task_refs": [
+        "T9"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/8/validation_commands"
+      ]
+    }
+  ],
+  "schema_version": "1.0",
+  "source_prd_ref": "docs/product/prd.md",
+  "source_ref": "docs/product/prd.md"
+}
