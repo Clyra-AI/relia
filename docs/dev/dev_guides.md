@@ -36,7 +36,9 @@ Future task packets must cite applicable tiers or record an approved non-applica
 
 - GitHub Actions workflow: .github/workflows/validate.yml.
 - Required local command: make prepush-full.
-- Security scanner: CodeQL for Go.
+- Security scanner: opt-in CodeQL for Go via .github/workflows/codeql.yml.
+  Enable GitHub Code Security/code scanning and set repository variable
+  CODEQL_ENABLED=true before expecting CodeQL to run on PRs.
 - PR lifecycle report path: .factory/artifacts/pr-lifecycle/<work_item_id>/pr-lifecycle-report.json.
 
 ## Bootstrap Rules
