@@ -1049,7 +1049,7 @@
       "workspace_root": ".factoryd/workspaces/"
     }
   },
-  "generated_at": "2026-06-11T15:28:58Z",
+  "generated_at": "2026-06-11T15:48:57Z",
   "required_checks": [
     "make prepush-full"
   ],

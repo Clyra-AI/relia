@@ -612,7 +612,7 @@
     "workspace_root": ".factoryd/workspaces/"
   },
   "feedback_plan": "Use make prepush-full, validation reports, PR lifecycle reports, and scope closure.",
-  "generated_at": "2026-06-11T15:28:58Z",
+  "generated_at": "2026-06-11T15:48:57Z",
   "handoff_conditions": [
     "human approval required",
     "live credentials required",
