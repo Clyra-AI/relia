@@ -29,6 +29,13 @@ def fail(message):
     print(message, file=sys.stderr)
     raise SystemExit(1)
 
+def profile_visibility_from_text(profile_text):
+    for line in profile_text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("repo_visibility:"):
+            return stripped.split(":", 1)[1].strip().strip("'\"")
+    fail("profile must declare repo_visibility")
+
 def duplicate_values(values):
     seen = set()
     duplicates = []
@@ -78,8 +85,9 @@ def main():
     if profile_path != ".factory/profile.yaml":
         fail("factory.profile_path must point at generated .factory/profile.yaml")
     profile_text = (root / ".factory/profile.yaml").read_text()
-    if "repo_visibility:" not in profile_text:
-        fail("profile must declare repo_visibility")
+    profile_visibility = profile_visibility_from_text(profile_text)
+    if profile_visibility != "public":
+        fail("profile repo_visibility must be public")
     required_checks = json.loads((root / ".github/required-checks.json").read_text()).get("required_checks") or []
     if "validate" not in required_checks:
         fail("required-checks.json must require validate")
@@ -99,7 +107,7 @@ def main():
     for needle in ["permissions:", "concurrency:", "timeout-minutes:", "actions/checkout@v6.0.2", "actions/setup-go@v6.3.0", "github/codeql-action/init@v4", "github/codeql-action/analyze@v4"]:
         if needle not in codeql_text:
             fail(f"CodeQL workflow missing {needle}")
-    if "repo_visibility: public" in profile_text:
+    if profile_visibility == "public":
         if "CodeQL analyze" not in required_checks:
             fail("public generated repos must require CodeQL analyze")
         if "vars.CODEQL_ENABLED" in codeql_text:
@@ -267,7 +275,7 @@ def main():
         if not isinstance(runtime, dict) or "capability_grants" not in runtime or not isinstance(runtime["capability_grants"], list):
             fail(f"{task_id}.factoryd_runtime.capability_grants must be a list")
         scanner = task.get("security_scanner_gates") or {}
-        if "repo_visibility: public" in profile_text:
+        if profile_visibility == "public":
             if scanner.get("required") is not True or scanner.get("status_check") != "CodeQL analyze":
                 fail(f"{task_id}.security_scanner_gates must require CodeQL analyze for public repos")
     print("ok: repo pack")
