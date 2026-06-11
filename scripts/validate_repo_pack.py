@@ -23,11 +23,22 @@ def fail(message):
     print(message, file=sys.stderr)
     raise SystemExit(1)
 
+def duplicate_values(values):
+    seen = set()
+    duplicates = []
+    for value in values:
+        if value in seen and value not in duplicates:
+            duplicates.append(value)
+        seen.add(value)
+    return duplicates
+
 def self_test():
     if ROOT.name == "scripts":
         fail("repo root resolution selected scripts/ instead of repository root")
     if not (ROOT / "scripts" / "validate_repo_pack.py").exists():
         fail("repo root resolution must be relative to this validator file")
+    if duplicate_values(["T1", "T2", "T1", "T2", "T3"]) != ["T1", "T2"]:
+        fail("duplicate_values must preserve duplicate ids in first duplicate order")
     print("repo-pack validator self-test passed")
 
 def main():
@@ -108,9 +119,13 @@ def main():
     tasks = packets.get("tasks") or []
     if not tasks:
         fail("task-packets.json must contain at least one task")
-    task_ids = {task.get("task_id") for task in tasks}
-    if None in task_ids:
+    task_id_values = [task.get("task_id") for task in tasks]
+    if None in task_id_values:
         fail("task-packets.json contains a task without task_id")
+    duplicate_task_ids = duplicate_values(task_id_values)
+    if duplicate_task_ids:
+        fail("task-packets task_id values must be unique: " + ", ".join(str(task_id) for task_id in duplicate_task_ids))
+    task_ids = set(task_id_values)
     for item in ledger_items:
         for ref in item.get("validation_refs") or []:
             if "/tasks/T" in ref:
