@@ -27,6 +27,7 @@ Before PR or merge, run:
 - Runtime: Go 1.26.4.
 - Module path: github.com/Clyra-AI/relia.
 - Distribution target: standalone_binary.
+- Repository visibility: public.
 - Factory mission: relia-mvp.
 - Artifact namespace: Factory artifacts in .factory/artifacts/; daemon state in .factoryd/.
 - Live credentials and network access are blocked until explicitly approved.
@@ -42,4 +43,10 @@ Before PR or merge, run:
 
 ## 5. Runner Readiness
 
-Task packets must declare allowed_paths, forbidden_paths, validation_commands, worker_type, factoryd_runtime, evidence_required, and stop_conditions before daemon dispatch.
+Task packets must declare allowed_paths, forbidden_paths, validation_commands, baseline_commands, red_first_commands, final_validation_commands, acceptance_result_requirements, worker_type, factoryd_runtime, evidence_required, lifecycle_gates, and stop_conditions before daemon dispatch.
+
+## 6. CI And Scanner Posture
+
+Relia is public. Pull requests must preserve the required-check manifest,
+`validate`, and `CodeQL analyze` unless an approved scanner exception is
+recorded with compensating validation evidence.

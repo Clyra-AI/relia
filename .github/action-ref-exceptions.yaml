@@ -1,0 +1,50 @@
+exceptions:
+  - workflow: .github/workflows/validate.yml
+    action: actions/checkout@v6.0.2
+    owner: delivery-infra
+    reason: audited checkout action kept on upstream release tag until SHA pin refresh automation lands
+    scope: validate workflow checkout only
+    expires: 2026-09-30
+    review_command: python3 scripts/validate_repo_pack.py
+  - workflow: .github/workflows/validate.yml
+    action: actions/setup-go@v6.3.0
+    owner: delivery-infra
+    reason: audited Go setup action kept on upstream release tag until SHA pin refresh automation lands
+    scope: validate workflow Go setup only
+    expires: 2026-09-30
+    review_command: python3 scripts/validate_repo_pack.py
+  - workflow: .github/workflows/codeql.yml
+    action: actions/checkout@v6.0.2
+    owner: delivery-infra
+    reason: audited checkout action kept on upstream release tag until SHA pin refresh automation lands
+    scope: CodeQL workflow checkout only
+    expires: 2026-09-30
+    review_command: python3 scripts/validate_repo_pack.py
+  - workflow: .github/workflows/codeql.yml
+    action: actions/setup-go@v6.3.0
+    owner: delivery-infra
+    reason: audited Go setup action kept on upstream release tag until SHA pin refresh automation lands
+    scope: CodeQL workflow Go setup only
+    expires: 2026-09-30
+    review_command: python3 scripts/validate_repo_pack.py
+  - workflow: .github/workflows/codeql.yml
+    action: github/codeql-action/init@v4
+    owner: delivery-infra
+    reason: CodeQL Action v4 is reviewed through GitHub code scanning compatibility
+    scope: CodeQL initialization only
+    expires: 2026-09-30
+    review_command: python3 scripts/validate_repo_pack.py
+  - workflow: .github/workflows/codeql.yml
+    action: github/codeql-action/autobuild@v4
+    owner: delivery-infra
+    reason: CodeQL Action v4 is reviewed through GitHub code scanning compatibility
+    scope: CodeQL autobuild only
+    expires: 2026-09-30
+    review_command: python3 scripts/validate_repo_pack.py
+  - workflow: .github/workflows/codeql.yml
+    action: github/codeql-action/analyze@v4
+    owner: delivery-infra
+    reason: CodeQL Action v4 is reviewed through GitHub code scanning compatibility
+    scope: CodeQL analysis only
+    expires: 2026-09-30
+    review_command: python3 scripts/validate_repo_pack.py

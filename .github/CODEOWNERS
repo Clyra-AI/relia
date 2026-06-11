@@ -1,0 +1,16 @@
+# Default owner for all paths.
+* @davidahmann
+
+# Delivery policy, workflows, and generated Factory artifacts require owner review.
+/.github/** @davidahmann
+/.factory/** @davidahmann
+/AGENTS.md @davidahmann
+/WORKFLOW.md @davidahmann
+/docs/dev/** @davidahmann
+/docs/architecture/** @davidahmann
+
+# Product contracts and executable schema surfaces require owner review.
+/docs/product/prd.md @davidahmann
+/schemas/** @davidahmann
+/cmd/** @davidahmann
+/internal/** @davidahmann

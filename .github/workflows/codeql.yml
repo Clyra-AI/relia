@@ -1,24 +1,40 @@
-name: CodeQL
+name: codeql
 
 on:
   pull_request:
   push:
-    branches: [main]
-  workflow_dispatch:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  security-events: write
+  packages: read
+  actions: read
+
+concurrency:
+  group: codeql-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   analyze:
     name: CodeQL analyze
-    if: ${{ vars.CODEQL_ENABLED == 'true' }}
     runs-on: ubuntu-latest
-    permissions:
-      security-events: write
-      packages: read
-      actions: read
-      contents: read
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: github/codeql-action/init@v3
+      - name: Check out repository
+        uses: actions/checkout@v6.0.2
+      - name: Set up Go
+        uses: actions/setup-go@v6.3.0
+        with:
+          go-version-file: go.mod
+          check-latest: false
+          cache: true
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
         with:
           languages: go
-      - uses: github/codeql-action/analyze@v3
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v4
+      - name: Analyze
+        uses: github/codeql-action/analyze@v4

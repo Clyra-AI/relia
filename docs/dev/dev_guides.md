@@ -10,6 +10,7 @@
 
 - make lint-fast: repo operating pack and layout checks.
 - make test-fast: Go unit tests.
+- make test-coverage: Go coverage gate over first-party CLI packages.
 - make test-contracts: Factory planning artifact and repo-pack checks.
 - make prepush-full: full local gate before PR or merge.
 
@@ -32,13 +33,27 @@
 
 Future task packets must cite applicable tiers or record an approved non-applicable reason.
 
+## Coverage Gates
+
+Relia inherits the org-wide Factory coverage policy derived from Wrkr's launch
+standard.
+
+| Scope | Minimum | Enforcement |
+|---|---:|---|
+| Go first-party packages overall (`cmd/`) | `>= 75%` | `make test-coverage`, included in `make prepush-full` and CI |
+
+Coverage output is written to `.factory/tmp/coverage.out`. A task that changes
+runtime behavior, schemas, CLI output, or package boundaries must cite
+`coverage_policy_refs` or record an approved coverage exception with
+compensating validation evidence.
+
 ## CI And PR Lifecycle
 
 - GitHub Actions workflow: .github/workflows/validate.yml.
 - Required local command: make prepush-full.
-- Security scanner: opt-in CodeQL for Go via .github/workflows/codeql.yml.
-  Enable GitHub Code Security/code scanning and set repository variable
-  CODEQL_ENABLED=true before expecting CodeQL to run on PRs.
+- Security scanner: required CodeQL for Go via .github/workflows/codeql.yml.
+- Required-check manifest: .github/required-checks.json, expected checks validate and CodeQL analyze.
+- Workflow hardening: validate and CodeQL workflows declare least-privilege permissions, concurrency cancellation, job timeouts, and toolchain setup from pinned repo files.
 - PR lifecycle report path: .factory/artifacts/pr-lifecycle/<work_item_id>/pr-lifecycle-report.json.
 
 ## Bootstrap Rules
