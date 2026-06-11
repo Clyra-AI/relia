@@ -55,33 +55,6 @@ def main():
     for rel in REQUIRED:
         if not (root / rel).exists():
             fail(f"missing required repo-pack file: {rel}")
-    profile_text = (root / ".factory/profile.yaml").read_text()
-    if "repo_visibility: public" not in profile_text:
-        fail("profile must declare repo_visibility: public")
-    if "required_check: CodeQL analyze" not in profile_text:
-        fail("profile must require CodeQL analyze for public repo scanner posture")
-    required_checks = json.loads((root / ".github/required-checks.json").read_text()).get("required_checks") or []
-    for check in ["validate", "CodeQL analyze"]:
-        if check not in required_checks:
-            fail(f"required-check manifest must include {check}")
-    validate_text = (root / ".github/workflows/validate.yml").read_text()
-    codeql_text = (root / ".github/workflows/codeql.yml").read_text()
-    makefile_text = (root / "Makefile").read_text()
-    dev_guide_text = (root / "docs/dev/dev_guides.md").read_text()
-    for needle in ["test-coverage:", "check_go_coverage.py", "prepush-full: lint-fast test-fast test-coverage test-contracts"]:
-        if needle not in makefile_text:
-            fail(f"Makefile missing coverage gate token {needle!r}")
-    for needle in ["Coverage Gates", "make test-coverage", ">= 75%"]:
-        if needle not in dev_guide_text:
-            fail(f"docs/dev/dev_guides.md missing coverage gate token {needle!r}")
-    for needle in ["permissions:", "concurrency:", "timeout-minutes:", "actions/checkout@v6.0.2", "actions/setup-go@v6.3.0", "go-version-file: go.mod", "make prepush-full"]:
-        if needle not in validate_text:
-            fail(f"validate workflow missing {needle}")
-    for needle in ["permissions:", "concurrency:", "timeout-minutes:", "actions/checkout@v6.0.2", "actions/setup-go@v6.3.0", "github/codeql-action/init@v4", "github/codeql-action/analyze@v4"]:
-        if needle not in codeql_text:
-            fail(f"CodeQL workflow missing {needle}")
-    if "vars.CODEQL_ENABLED" in codeql_text:
-        fail("public repo CodeQL workflow must not be gated behind CODEQL_ENABLED")
     cfg = json.loads((root / ".factory/factoryd.example.json").read_text())
     autoship_cfg = json.loads((root / ".factory/factoryd.autoship.example.json").read_text())
     repos = cfg.get("repos") or {}
@@ -104,6 +77,36 @@ def main():
     profile_path = (cfg.get("factory") or {}).get("profile_path")
     if profile_path != ".factory/profile.yaml":
         fail("factory.profile_path must point at generated .factory/profile.yaml")
+    profile_text = (root / ".factory/profile.yaml").read_text()
+    if "repo_visibility:" not in profile_text:
+        fail("profile must declare repo_visibility")
+    required_checks = json.loads((root / ".github/required-checks.json").read_text()).get("required_checks") or []
+    if "validate" not in required_checks:
+        fail("required-checks.json must require validate")
+    makefile_text = (root / "Makefile").read_text()
+    dev_guide_text = (root / "docs/dev/dev_guides.md").read_text()
+    for needle in ["test-coverage:", "check_go_coverage.py", "prepush-full: lint-fast test-fast test-coverage test-contracts"]:
+        if needle not in makefile_text:
+            fail(f"Makefile missing coverage gate token {needle!r}")
+    for needle in ["Coverage Gates", "make test-coverage", ">= 75%"]:
+        if needle not in dev_guide_text:
+            fail(f"docs/dev/dev_guides.md missing coverage gate token {needle!r}")
+    validate_text = (root / ".github/workflows/validate.yml").read_text()
+    codeql_text = (root / ".github/workflows/codeql.yml").read_text()
+    for needle in ["permissions:", "concurrency:", "timeout-minutes:", "actions/checkout@v6.0.2", "actions/setup-go@v6.3.0", "go-version-file: go.mod", "make prepush-full"]:
+        if needle not in validate_text:
+            fail(f"validate workflow missing {needle}")
+    for needle in ["permissions:", "concurrency:", "timeout-minutes:", "actions/checkout@v6.0.2", "actions/setup-go@v6.3.0", "github/codeql-action/init@v4", "github/codeql-action/analyze@v4"]:
+        if needle not in codeql_text:
+            fail(f"CodeQL workflow missing {needle}")
+    if "repo_visibility: public" in profile_text:
+        if "CodeQL analyze" not in required_checks:
+            fail("public generated repos must require CodeQL analyze")
+        if "vars.CODEQL_ENABLED" in codeql_text:
+            fail("public generated repos must not gate CodeQL behind CODEQL_ENABLED")
+    else:
+        if "vars.CODEQL_ENABLED == 'true'" not in codeql_text:
+            fail("private generated repos must keep CodeQL opt-in behind CODEQL_ENABLED")
     for key in ["acceptance_ledger", "task_packets", "scope_closure_map", "validation_contract", "validation_commands", "worker_type"]:
         if not repo.get(key):
             fail(f"factoryd config missing {key}")
@@ -125,6 +128,8 @@ def main():
     ledger_items = ledger.get("items") or []
     if not ledger_items:
         fail("acceptance ledger must contain at least one item")
+    if ledger.get("acceptance_item_count") != len(ledger_items):
+        fail("acceptance ledger acceptance_item_count must match items length")
     ledger_ids = {item.get("acceptance_item_id") for item in ledger_items}
     if len(ledger_ids) != len(ledger_items):
         fail("acceptance ledger item ids must be unique")
@@ -210,44 +215,22 @@ def main():
             fail("task-packets delivery_slices must match execution-plan delivery_slices")
     for index, task in enumerate(tasks):
         task_id = task.get("task_id") or f"task[{index}]"
-        for key in [
-            "task_id",
-            "objective",
-            "allowed_paths",
-            "forbidden_paths",
-            "validation_commands",
-            "baseline_commands",
-            "red_first_commands",
-            "final_validation_commands",
-            "acceptance_result_requirements",
-            "evidence_required",
-            "stop_conditions",
-            "worker_type",
-            "factoryd_runtime",
-            "required_worker_chain",
-            "lifecycle_gates",
-            "test_matrix_refs",
-            "ci_lane_refs",
-            "ci_control_refs",
-            "coverage_policy_refs",
-            "security_scanner_gates",
-            "engineering_policy_refs",
-            "architecture_guidance_refs",
-            "changelog_intent",
-            "versioning_impact",
-            "migration_impact",
-            "docs_sync_refs",
-            "acceptance_group_id",
-            "acceptance_ledger_ref",
-            "acceptance_item_ids",
-            "alignment_gate_ref",
-            "plan_drift_policy_ref",
-        ]:
+        for key in ["task_id", "objective", "allowed_paths", "forbidden_paths", "validation_commands", "baseline_commands", "red_first_commands", "final_validation_commands", "acceptance_result_requirements", "evidence_required", "stop_conditions", "worker_type", "factoryd_runtime", "required_worker_chain", "lifecycle_gates", "test_matrix_refs", "ci_lane_refs", "ci_control_refs", "coverage_policy_refs", "security_scanner_gates", "engineering_policy_refs", "architecture_guidance_refs", "changelog_intent", "versioning_impact", "migration_impact", "docs_sync_refs", "acceptance_group_id", "acceptance_ledger_ref", "acceptance_item_ids", "alignment_gate_ref", "plan_drift_policy_ref"]:
             if key not in task or task[key] in (None, "", []):
                 fail(f"{task_id} missing runner-ready field: {key}")
+        lifecycle = task.get("lifecycle_gates") or {}
+        if "ship_pr_required" in lifecycle:
+            fail(f"{task_id}.lifecycle_gates uses deprecated ship_pr_required")
+        if lifecycle.get("commit_push_required") is not True:
+            fail(f"{task_id}.lifecycle_gates.commit_push_required must be true")
         task_item_ids = set(task.get("acceptance_item_ids") or [])
+        if len(task_item_ids) > 15:
+            fail(f"{task_id}.acceptance_item_ids has {len(task_item_ids)} items; split runner-ready tasks at 15 or fewer acceptance items")
         if not task_item_ids.issubset(ledger_ids):
             fail(f"{task_id} references unknown acceptance item ids")
+        result_ids = {item.get("acceptance_item_id") for item in task.get("acceptance_result_requirements") or []}
+        if result_ids != task_item_ids:
+            fail(f"{task_id}.acceptance_result_requirements must cover task acceptance_item_ids")
         if declared_slices:
             task_slices = set(task.get("delivery_slice_refs") or [])
             if not task_slices:
@@ -283,17 +266,10 @@ def main():
         runtime = task.get("factoryd_runtime")
         if not isinstance(runtime, dict) or "capability_grants" not in runtime or not isinstance(runtime["capability_grants"], list):
             fail(f"{task_id}.factoryd_runtime.capability_grants must be a list")
-        lifecycle = task.get("lifecycle_gates") or {}
-        if "ship_pr_required" in lifecycle:
-            fail(f"{task_id}.lifecycle_gates uses deprecated ship_pr_required")
-        if lifecycle.get("commit_push_required") is not True:
-            fail(f"{task_id}.lifecycle_gates.commit_push_required must be true")
-        result_ids = {item.get("acceptance_item_id") for item in task.get("acceptance_result_requirements") or []}
-        if result_ids != task_item_ids:
-            fail(f"{task_id}.acceptance_result_requirements must exactly cover acceptance_item_ids")
         scanner = task.get("security_scanner_gates") or {}
-        if scanner.get("required") is not True or scanner.get("status_check") != "CodeQL analyze":
-            fail(f"{task_id}.security_scanner_gates must require CodeQL analyze")
+        if "repo_visibility: public" in profile_text:
+            if scanner.get("required") is not True or scanner.get("status_check") != "CodeQL analyze":
+                fail(f"{task_id}.security_scanner_gates must require CodeQL analyze for public repos")
     print("ok: repo pack")
 
 if __name__ == "__main__":

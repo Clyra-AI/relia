@@ -81,7 +81,7 @@
     ]
   },
   "failed_approaches": [],
-  "generated_at": "2026-06-11T11:16:58Z",
+  "generated_at": "2026-06-11T15:28:58Z",
   "open_questions": [
     "**Experience shards default to local-only and gitignored.** They are a reproducible, redacted cache of GitHub history; GitHub is already the durable shared store, so committing the cache adds repo noise and merge conflicts without adding truth. Rules, MEMORY.md, and the compiled block — the reviewed, human-owned memory — are always committed. `commit_experiences: true` remains for air-gapped or archival needs. Ingest must be idempotent so any clone rebuilds the cache.",
     "**Decay half-life defaults to 90 days.** 60 is too aggressive for repos with monthly agent activity; 180 keeps zombie rules alive. 90 also composes cleanly with the system's other windows: a rule unseen for two half-lives (~180 days) decays to `stale` just as its evidence ages out of the default `lookback_days: 180`.",

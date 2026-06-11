@@ -42,13 +42,13 @@
     },
     {
       "acceptance_group_refs": [
+        "fr10-provenance-mandatory-rules",
         "nfr5-security",
-        "nfr6-local-privacy",
         "mvp-in-scope"
       ],
       "acceptance_item_ids": [
+        "FR10-PROVENANCE-MANDATORY-RULES-001",
         "NFR5-SECURITY-001",
-        "NFR6-LOCAL-PRIVACY-001",
         "MVP-IN-SCOPE-004",
         "MVP-IN-SCOPE-005"
       ],
@@ -63,33 +63,27 @@
     },
     {
       "acceptance_group_refs": [
-        "fr4-attribution-with-confidence",
-        "fr7-deterministic-failure-signatures",
-        "nfr3-deterministic-backtest",
         "mvp-in-scope",
-        "ingest-attribute-backtest-acceptance-tests"
+        "ingest-attribute-backtest-acceptance-tests",
+        "distill-review-memory-page-acceptance-tests",
+        "serve-and-advise-acceptance-tests",
+        "demo-acceptance"
       ],
       "acceptance_item_ids": [
-        "FR4-ATTRIBUTION-WITH-CONFIDENCE-001",
-        "FR7-DETERMINISTIC-FAILURE-SIGNATURES-001",
-        "NFR3-DETERMINISTIC-BACKTEST-001",
-        "MVP-IN-SCOPE-003",
-        "MVP-IN-SCOPE-006",
-        "MVP-IN-SCOPE-007",
-        "MVP-IN-SCOPE-008",
-        "MVP-IN-SCOPE-010",
-        "MVP-IN-SCOPE-018",
-        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-002",
-        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-003",
-        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-004",
-        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-005",
-        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-006",
-        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-009"
+        "MVP-IN-SCOPE-022",
+        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-008",
+        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-009",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-001",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-006",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-007",
+        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-004",
+        "DEMO-ACCEPTANCE-002",
+        "DEMO-ACCEPTANCE-004"
       ],
-      "name": "Analysis, Processing, And Decisioning",
+      "name": "Outcome Fixture Corpus And Backtest Baseline",
       "public_release_boundary": false,
       "required_for_completion": true,
-      "slice_id": "analysis-processing-and-decisioning",
+      "slice_id": "outcome-fixture-corpus",
       "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T4",
       "task_refs": [
         "T4"
@@ -97,37 +91,137 @@
     },
     {
       "acceptance_group_refs": [
-        "fr1-outcomes-as-the-only-memory-source",
         "fr8-conservative-recurrence-pairing",
-        "fr11-calibrated-confidence",
-        "fr19-coverage-ood-signal",
+        "fr21-forward-err-tracking",
+        "nfr3-deterministic-backtest",
         "nfr9-debuggable-errors",
-        "nfr14-advisory-restraint",
-        "nfr15-no-dashboard-dependency",
         "mvp-in-scope",
         "ingest-attribute-backtest-acceptance-tests"
       ],
       "acceptance_item_ids": [
-        "FR1-OUTCOMES-AS-THE-ONLY-MEMORY-SOURCE-001",
         "FR8-CONSERVATIVE-RECURRENCE-PAIRING-001",
-        "FR11-CALIBRATED-CONFIDENCE-001",
-        "FR19-COVERAGE-OOD-SIGNAL-001",
+        "FR21-FORWARD-ERR-TRACKING-001",
+        "NFR3-DETERMINISTIC-BACKTEST-001",
         "NFR9-DEBUGGABLE-ERRORS-001",
-        "NFR14-ADVISORY-RESTRAINT-001",
-        "NFR15-NO-DASHBOARD-DEPENDENCY-001",
+        "MVP-IN-SCOPE-007",
+        "MVP-IN-SCOPE-008",
         "MVP-IN-SCOPE-009",
-        "MVP-IN-SCOPE-015",
         "MVP-IN-SCOPE-020",
-        "MVP-IN-SCOPE-024",
+        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-002",
+        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-003",
+        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-005",
+        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-006",
         "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-007"
+      ],
+      "name": "Signature Extraction, Recurrence, And Backtest",
+      "public_release_boundary": false,
+      "required_for_completion": true,
+      "slice_id": "signature-and-recurrence-analysis",
+      "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T5",
+      "task_refs": [
+        "T5"
+      ]
+    },
+    {
+      "acceptance_group_refs": [
+        "fr4-attribution-with-confidence",
+        "fr7-deterministic-failure-signatures",
+        "fr11-calibrated-confidence",
+        "fr12-decay-and-churn-invalidation",
+        "fr13-human-review-gate",
+        "fr14-bidirectional-memory",
+        "fr15-memory-page-with-receipts",
+        "nfr2-fast-first-memory",
+        "nfr4-calibration-honesty",
+        "nfr6-local-privacy",
+        "nfr8-structured-data-first",
+        "nfr11-stochastic-honesty",
+        "nfr13-inference-humility",
+        "mvp-in-scope",
+        "ingest-attribute-backtest-acceptance-tests",
+        "distill-review-memory-page-acceptance-tests"
+      ],
+      "acceptance_item_ids": [
+        "FR4-ATTRIBUTION-WITH-CONFIDENCE-001",
+        "FR7-DETERMINISTIC-FAILURE-SIGNATURES-001",
+        "FR11-CALIBRATED-CONFIDENCE-001",
+        "FR12-DECAY-AND-CHURN-INVALIDATION-001",
+        "FR13-HUMAN-REVIEW-GATE-001",
+        "FR14-BIDIRECTIONAL-MEMORY-001",
+        "FR15-MEMORY-PAGE-WITH-RECEIPTS-001",
+        "NFR2-FAST-FIRST-MEMORY-001",
+        "NFR4-CALIBRATION-HONESTY-001",
+        "NFR6-LOCAL-PRIVACY-001",
+        "NFR8-STRUCTURED-DATA-FIRST-001",
+        "NFR11-STOCHASTIC-HONESTY-001",
+        "NFR13-INFERENCE-HUMILITY-001",
+        "MVP-IN-SCOPE-003",
+        "MVP-IN-SCOPE-006"
+      ],
+      "name": "Distillation, Calibration, And Confidence Part 1",
+      "public_release_boundary": false,
+      "required_for_completion": true,
+      "slice_id": "distillation-calibration-and-confidence-part-1",
+      "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T6",
+      "task_refs": [
+        "T6"
+      ]
+    },
+    {
+      "acceptance_group_refs": [
+        "fr4-attribution-with-confidence",
+        "fr7-deterministic-failure-signatures",
+        "fr11-calibrated-confidence",
+        "fr12-decay-and-churn-invalidation",
+        "fr13-human-review-gate",
+        "fr14-bidirectional-memory",
+        "fr15-memory-page-with-receipts",
+        "nfr2-fast-first-memory",
+        "nfr4-calibration-honesty",
+        "nfr6-local-privacy",
+        "nfr8-structured-data-first",
+        "nfr11-stochastic-honesty",
+        "nfr13-inference-humility",
+        "mvp-in-scope",
+        "ingest-attribute-backtest-acceptance-tests",
+        "distill-review-memory-page-acceptance-tests"
+      ],
+      "acceptance_item_ids": [
+        "MVP-IN-SCOPE-010",
+        "MVP-IN-SCOPE-011",
+        "MVP-IN-SCOPE-012",
+        "MVP-IN-SCOPE-013",
+        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-004",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-002",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-003",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-004",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-005",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-008",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-009"
+      ],
+      "name": "Distillation, Calibration, And Confidence Part 2",
+      "public_release_boundary": false,
+      "required_for_completion": true,
+      "slice_id": "distillation-calibration-and-confidence-part-2",
+      "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T7",
+      "task_refs": [
+        "T7"
+      ]
+    },
+    {
+      "acceptance_group_refs": [
+        "fr1-outcomes-as-the-only-memory-source"
+      ],
+      "acceptance_item_ids": [
+        "FR1-OUTCOMES-AS-THE-ONLY-MEMORY-SOURCE-001"
       ],
       "name": "Reporting, Evidence, And Observability",
       "public_release_boundary": false,
       "required_for_completion": true,
       "slice_id": "reporting-and-evidence",
-      "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T5",
+      "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T8",
       "task_refs": [
-        "T5"
+        "T8"
       ]
     },
     {
@@ -138,7 +232,6 @@
         "fr24-cost-visibility",
         "fr25-portable-artifacts",
         "nfr10-cost-visibility",
-        "nfr11-stochastic-honesty",
         "mvp-in-scope",
         "distill-review-memory-page-acceptance-tests",
         "serve-and-advise-acceptance-tests"
@@ -150,10 +243,7 @@
         "FR24-COST-VISIBILITY-001",
         "FR25-PORTABLE-ARTIFACTS-001",
         "NFR10-COST-VISIBILITY-001",
-        "NFR11-STOCHASTIC-HONESTY-001",
-        "MVP-IN-SCOPE-011",
         "MVP-IN-SCOPE-019",
-        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-009",
         "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-010",
         "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-005"
       ],
@@ -161,98 +251,118 @@
       "public_release_boundary": false,
       "required_for_completion": true,
       "slice_id": "external-provider-and-network-integration",
-      "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T6",
+      "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T9",
       "task_refs": [
-        "T6"
+        "T9"
       ]
     },
     {
       "acceptance_group_refs": [
         "fr3-github-outcome-intake",
         "fr9-backtest-before-behavior-change",
-        "fr10-provenance-mandatory-rules",
-        "fr12-decay-and-churn-invalidation",
-        "fr13-human-review-gate",
-        "fr14-bidirectional-memory",
-        "fr15-memory-page-with-receipts",
-        "fr21-forward-err-tracking",
-        "nfr2-fast-first-memory",
-        "nfr4-calibration-honesty",
         "nfr7-rule-readability",
-        "nfr8-structured-data-first",
-        "nfr13-inference-humility",
-        "mvp-in-scope",
-        "ingest-attribute-backtest-acceptance-tests",
-        "distill-review-memory-page-acceptance-tests"
+        "mvp-in-scope"
       ],
       "acceptance_item_ids": [
         "FR3-GITHUB-OUTCOME-INTAKE-001",
         "FR9-BACKTEST-BEFORE-BEHAVIOR-CHANGE-001",
-        "FR10-PROVENANCE-MANDATORY-RULES-001",
-        "FR12-DECAY-AND-CHURN-INVALIDATION-001",
-        "FR13-HUMAN-REVIEW-GATE-001",
-        "FR14-BIDIRECTIONAL-MEMORY-001",
-        "FR15-MEMORY-PAGE-WITH-RECEIPTS-001",
-        "FR21-FORWARD-ERR-TRACKING-001",
-        "NFR2-FAST-FIRST-MEMORY-001",
-        "NFR4-CALIBRATION-HONESTY-001",
         "NFR7-RULE-READABILITY-001",
-        "NFR8-STRUCTURED-DATA-FIRST-001",
-        "NFR13-INFERENCE-HUMILITY-001",
         "MVP-IN-SCOPE-002",
-        "MVP-IN-SCOPE-012",
-        "MVP-IN-SCOPE-013",
-        "MVP-IN-SCOPE-014",
-        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-001",
-        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-008",
-        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-001",
-        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-002",
-        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-003",
-        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-004",
-        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-005",
-        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-006",
-        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-007",
-        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-008"
+        "MVP-IN-SCOPE-014"
       ],
       "name": "Review, Governance, And Approval Workflow",
       "public_release_boundary": false,
       "required_for_completion": true,
       "slice_id": "review-governance-and-approval",
-      "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T7",
+      "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T10",
       "task_refs": [
-        "T7"
+        "T10"
+      ]
+    },
+    {
+      "acceptance_group_refs": [
+        "mvp-in-scope"
+      ],
+      "acceptance_item_ids": [
+        "MVP-IN-SCOPE-015"
+      ],
+      "name": "Memory Rendering And Lifecycle",
+      "public_release_boundary": false,
+      "required_for_completion": true,
+      "slice_id": "memory-rendering-and-lifecycle",
+      "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T11",
+      "task_refs": [
+        "T11"
+      ]
+    },
+    {
+      "acceptance_group_refs": [
+        "serve-and-advise-acceptance-tests"
+      ],
+      "acceptance_item_ids": [
+        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-002",
+        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-007",
+        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-008"
+      ],
+      "name": "MCP Serving, Recall, And Coverage",
+      "public_release_boundary": false,
+      "required_for_completion": true,
+      "slice_id": "mcp-serving-and-recall",
+      "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T12",
+      "task_refs": [
+        "T12"
+      ]
+    },
+    {
+      "acceptance_group_refs": [
+        "fr17-compiled-context-block",
+        "mvp-in-scope",
+        "ingest-attribute-backtest-acceptance-tests",
+        "serve-and-advise-acceptance-tests"
+      ],
+      "acceptance_item_ids": [
+        "FR17-COMPILED-CONTEXT-BLOCK-001",
+        "MVP-IN-SCOPE-017",
+        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-001",
+        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-003"
+      ],
+      "name": "Compile And Context Management",
+      "public_release_boundary": false,
+      "required_for_completion": true,
+      "slice_id": "compile-and-context-management",
+      "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T13",
+      "task_refs": [
+        "T13"
       ]
     },
     {
       "acceptance_group_refs": [
         "fr5-canonical-experience-schema",
         "fr16-mcp-serving",
-        "fr17-compiled-context-block",
+        "fr19-coverage-ood-signal",
+        "nfr14-advisory-restraint",
+        "nfr15-no-dashboard-dependency",
         "mvp-in-scope",
         "serve-and-advise-acceptance-tests"
       ],
       "acceptance_item_ids": [
         "FR5-CANONICAL-EXPERIENCE-SCHEMA-001",
         "FR16-MCP-SERVING-001",
-        "FR17-COMPILED-CONTEXT-BLOCK-001",
+        "FR19-COVERAGE-OOD-SIGNAL-001",
+        "NFR14-ADVISORY-RESTRAINT-001",
+        "NFR15-NO-DASHBOARD-DEPENDENCY-001",
         "MVP-IN-SCOPE-016",
-        "MVP-IN-SCOPE-017",
+        "MVP-IN-SCOPE-018",
         "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-001",
-        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-002",
-        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-003",
-        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-004",
-        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-006",
-        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-007",
-        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-008",
-        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-010"
+        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-006"
       ],
-      "name": "Serving, Interfaces, And Agent Access",
+      "name": "Assessment And PR Advisory",
       "public_release_boundary": false,
       "required_for_completion": true,
-      "slice_id": "serving-interface-and-agent-access",
-      "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T8",
+      "slice_id": "assessment-and-pr-advisory",
+      "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T14",
       "task_refs": [
-        "T8"
+        "T14"
       ]
     },
     {
@@ -270,17 +380,40 @@
         "FR6-CAPTURE-TIME-REDACTION-001",
         "FR18-ADVISORY-ASSESSMENT-001",
         "NFR1-FAST-FIRST-VALUE-001",
-        "MVP-IN-SCOPE-022",
         "MVP-IN-SCOPE-023",
+        "MVP-IN-SCOPE-024",
         "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-010",
         "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-009",
+        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-010",
         "SUCCESS-METRICS-001",
         "SUCCESS-METRICS-002",
         "SUCCESS-METRICS-003",
         "SUCCESS-METRICS-004",
         "SUCCESS-METRICS-005",
         "SUCCESS-METRICS-006",
-        "SUCCESS-METRICS-007",
+        "SUCCESS-METRICS-007"
+      ],
+      "name": "Release, Demo, And Product Signals Part 1",
+      "public_release_boundary": false,
+      "required_for_completion": true,
+      "slice_id": "release-demo-and-product-signals-part-1",
+      "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T15",
+      "task_refs": [
+        "T15"
+      ]
+    },
+    {
+      "acceptance_group_refs": [
+        "fr6-capture-time-redaction",
+        "fr18-advisory-assessment",
+        "nfr1-fast-first-value",
+        "mvp-in-scope",
+        "ingest-attribute-backtest-acceptance-tests",
+        "serve-and-advise-acceptance-tests",
+        "success-metrics",
+        "demo-acceptance"
+      ],
+      "acceptance_item_ids": [
         "SUCCESS-METRICS-008",
         "SUCCESS-METRICS-009",
         "SUCCESS-METRICS-010",
@@ -291,22 +424,20 @@
         "SUCCESS-METRICS-015",
         "SUCCESS-METRICS-016",
         "DEMO-ACCEPTANCE-001",
-        "DEMO-ACCEPTANCE-002",
         "DEMO-ACCEPTANCE-003",
-        "DEMO-ACCEPTANCE-004",
         "DEMO-ACCEPTANCE-005"
       ],
-      "name": "Release, Demo, And Product Signals",
-      "public_release_boundary": true,
+      "name": "Release, Demo, And Product Signals Part 2",
+      "public_release_boundary": false,
       "required_for_completion": true,
-      "slice_id": "release-demo-and-product-signals",
-      "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T9",
+      "slice_id": "release-demo-and-product-signals-part-2",
+      "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T16",
       "task_refs": [
-        "T9"
+        "T16"
       ]
     }
   ],
-  "generated_at": "2026-06-11T11:16:58Z",
+  "generated_at": "2026-06-11T15:28:58Z",
   "groups": [
     {
       "acceptance_item_ids": [
@@ -325,7 +456,7 @@
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T5"
+            "T8"
           ]
         }
       ],
@@ -337,7 +468,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T5"
+        "T8"
       ],
       "title": "FR1: Outcomes As The Only Memory Source"
     },
@@ -358,7 +489,7 @@
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T6"
+            "T9"
           ]
         }
       ],
@@ -370,7 +501,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T6"
+        "T9"
       ],
       "title": "FR2: Repo-Native Local-First Operation"
     },
@@ -391,7 +522,7 @@
           ],
           "evidence_mode": "external",
           "task_refs": [
-            "T7"
+            "T10"
           ]
         }
       ],
@@ -403,7 +534,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T7"
+        "T10"
       ],
       "title": "FR3: GitHub Outcome Intake"
     },
@@ -420,11 +551,11 @@
         {
           "acceptance_item_id": "FR4-ATTRIBUTION-WITH-CONFIDENCE-001",
           "delivery_slice_refs": [
-            "analysis-processing-and-decisioning"
+            "distillation-calibration-and-confidence-part-1"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T4"
+            "T6"
           ]
         }
       ],
@@ -436,7 +567,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T4"
+        "T6"
       ],
       "title": "FR4: Attribution With Confidence"
     },
@@ -453,11 +584,11 @@
         {
           "acceptance_item_id": "FR5-CANONICAL-EXPERIENCE-SCHEMA-001",
           "delivery_slice_refs": [
-            "serving-interface-and-agent-access"
+            "assessment-and-pr-advisory"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T8"
+            "T14"
           ]
         }
       ],
@@ -469,7 +600,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T8"
+        "T14"
       ],
       "title": "FR5: Canonical Experience Schema"
     },
@@ -486,11 +617,11 @@
         {
           "acceptance_item_id": "FR6-CAPTURE-TIME-REDACTION-001",
           "delivery_slice_refs": [
-            "release-demo-and-product-signals"
+            "release-demo-and-product-signals-part-1"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T9"
+            "T15"
           ]
         }
       ],
@@ -502,7 +633,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T9"
+        "T15"
       ],
       "title": "FR6: Capture-Time Redaction"
     },
@@ -519,11 +650,11 @@
         {
           "acceptance_item_id": "FR7-DETERMINISTIC-FAILURE-SIGNATURES-001",
           "delivery_slice_refs": [
-            "analysis-processing-and-decisioning"
+            "distillation-calibration-and-confidence-part-1"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T4"
+            "T6"
           ]
         }
       ],
@@ -535,7 +666,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T4"
+        "T6"
       ],
       "title": "FR7: Deterministic Failure Signatures"
     },
@@ -552,7 +683,7 @@
         {
           "acceptance_item_id": "FR8-CONSERVATIVE-RECURRENCE-PAIRING-001",
           "delivery_slice_refs": [
-            "reporting-and-evidence"
+            "signature-and-recurrence-analysis"
           ],
           "evidence_mode": "automated",
           "task_refs": [
@@ -589,7 +720,7 @@
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T7"
+            "T10"
           ]
         }
       ],
@@ -601,7 +732,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T7"
+        "T10"
       ],
       "title": "FR9: Backtest Before Behavior Change"
     },
@@ -618,11 +749,11 @@
         {
           "acceptance_item_id": "FR10-PROVENANCE-MANDATORY-RULES-001",
           "delivery_slice_refs": [
-            "review-governance-and-approval"
+            "data-intake-and-persistence"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T7"
+            "T3"
           ]
         }
       ],
@@ -634,7 +765,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T7"
+        "T3"
       ],
       "title": "FR10: Provenance-Mandatory Rules"
     },
@@ -651,11 +782,11 @@
         {
           "acceptance_item_id": "FR11-CALIBRATED-CONFIDENCE-001",
           "delivery_slice_refs": [
-            "reporting-and-evidence"
+            "distillation-calibration-and-confidence-part-1"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T5"
+            "T6"
           ]
         }
       ],
@@ -667,7 +798,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T5"
+        "T6"
       ],
       "title": "FR11: Calibrated Confidence"
     },
@@ -684,11 +815,11 @@
         {
           "acceptance_item_id": "FR12-DECAY-AND-CHURN-INVALIDATION-001",
           "delivery_slice_refs": [
-            "review-governance-and-approval"
+            "distillation-calibration-and-confidence-part-1"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T7"
+            "T6"
           ]
         }
       ],
@@ -700,7 +831,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T7"
+        "T6"
       ],
       "title": "FR12: Decay And Churn Invalidation"
     },
@@ -717,11 +848,11 @@
         {
           "acceptance_item_id": "FR13-HUMAN-REVIEW-GATE-001",
           "delivery_slice_refs": [
-            "review-governance-and-approval"
+            "distillation-calibration-and-confidence-part-1"
           ],
           "evidence_mode": "manual_review",
           "task_refs": [
-            "T7"
+            "T6"
           ]
         }
       ],
@@ -733,7 +864,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T7"
+        "T6"
       ],
       "title": "FR13: Human Review Gate"
     },
@@ -750,11 +881,11 @@
         {
           "acceptance_item_id": "FR14-BIDIRECTIONAL-MEMORY-001",
           "delivery_slice_refs": [
-            "review-governance-and-approval"
+            "distillation-calibration-and-confidence-part-1"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T7"
+            "T6"
           ]
         }
       ],
@@ -766,7 +897,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T7"
+        "T6"
       ],
       "title": "FR14: Bidirectional Memory"
     },
@@ -783,11 +914,11 @@
         {
           "acceptance_item_id": "FR15-MEMORY-PAGE-WITH-RECEIPTS-001",
           "delivery_slice_refs": [
-            "review-governance-and-approval"
+            "distillation-calibration-and-confidence-part-1"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T7"
+            "T6"
           ]
         }
       ],
@@ -799,7 +930,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T7"
+        "T6"
       ],
       "title": "FR15: Memory Page With Receipts"
     },
@@ -816,11 +947,11 @@
         {
           "acceptance_item_id": "FR16-MCP-SERVING-001",
           "delivery_slice_refs": [
-            "serving-interface-and-agent-access"
+            "assessment-and-pr-advisory"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T8"
+            "T14"
           ]
         }
       ],
@@ -832,7 +963,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T8"
+        "T14"
       ],
       "title": "FR16: MCP Serving"
     },
@@ -849,11 +980,11 @@
         {
           "acceptance_item_id": "FR17-COMPILED-CONTEXT-BLOCK-001",
           "delivery_slice_refs": [
-            "serving-interface-and-agent-access"
+            "compile-and-context-management"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T8"
+            "T13"
           ]
         }
       ],
@@ -865,7 +996,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T8"
+        "T13"
       ],
       "title": "FR17: Compiled Context Block"
     },
@@ -882,11 +1013,11 @@
         {
           "acceptance_item_id": "FR18-ADVISORY-ASSESSMENT-001",
           "delivery_slice_refs": [
-            "release-demo-and-product-signals"
+            "release-demo-and-product-signals-part-1"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T9"
+            "T15"
           ]
         }
       ],
@@ -898,7 +1029,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T9"
+        "T15"
       ],
       "title": "FR18: Advisory Assessment"
     },
@@ -915,11 +1046,11 @@
         {
           "acceptance_item_id": "FR19-COVERAGE-OOD-SIGNAL-001",
           "delivery_slice_refs": [
-            "reporting-and-evidence"
+            "assessment-and-pr-advisory"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T5"
+            "T14"
           ]
         }
       ],
@@ -931,7 +1062,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T5"
+        "T14"
       ],
       "title": "FR19: Coverage / OOD Signal"
     },
@@ -952,7 +1083,7 @@
           ],
           "evidence_mode": "external",
           "task_refs": [
-            "T6"
+            "T9"
           ]
         }
       ],
@@ -964,7 +1095,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T6"
+        "T9"
       ],
       "title": "FR20: Advisory-Only Default"
     },
@@ -981,11 +1112,11 @@
         {
           "acceptance_item_id": "FR21-FORWARD-ERR-TRACKING-001",
           "delivery_slice_refs": [
-            "review-governance-and-approval"
+            "signature-and-recurrence-analysis"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T7"
+            "T5"
           ]
         }
       ],
@@ -997,7 +1128,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T7"
+        "T5"
       ],
       "title": "FR21: Forward ERR Tracking"
     },
@@ -1051,7 +1182,7 @@
           ],
           "evidence_mode": "external",
           "task_refs": [
-            "T6"
+            "T9"
           ]
         }
       ],
@@ -1063,7 +1194,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T6"
+        "T9"
       ],
       "title": "FR23: Provider Adapters And No-LLM Mode"
     },
@@ -1084,7 +1215,7 @@
           ],
           "evidence_mode": "external",
           "task_refs": [
-            "T6"
+            "T9"
           ]
         }
       ],
@@ -1096,7 +1227,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T6"
+        "T9"
       ],
       "title": "FR24: Cost Visibility"
     },
@@ -1117,7 +1248,7 @@
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T6"
+            "T9"
           ]
         }
       ],
@@ -1129,7 +1260,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T6"
+        "T9"
       ],
       "title": "FR25: Portable Artifacts"
     },
@@ -1146,11 +1277,11 @@
         {
           "acceptance_item_id": "NFR1-FAST-FIRST-VALUE-001",
           "delivery_slice_refs": [
-            "release-demo-and-product-signals"
+            "release-demo-and-product-signals-part-1"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T9"
+            "T15"
           ]
         }
       ],
@@ -1162,7 +1293,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T9"
+        "T15"
       ],
       "title": "NFR1: Fast First Value"
     },
@@ -1179,11 +1310,11 @@
         {
           "acceptance_item_id": "NFR2-FAST-FIRST-MEMORY-001",
           "delivery_slice_refs": [
-            "review-governance-and-approval"
+            "distillation-calibration-and-confidence-part-1"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T7"
+            "T6"
           ]
         }
       ],
@@ -1195,7 +1326,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T7"
+        "T6"
       ],
       "title": "NFR2: Fast First Memory"
     },
@@ -1212,11 +1343,11 @@
         {
           "acceptance_item_id": "NFR3-DETERMINISTIC-BACKTEST-001",
           "delivery_slice_refs": [
-            "analysis-processing-and-decisioning"
+            "signature-and-recurrence-analysis"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T4"
+            "T5"
           ]
         }
       ],
@@ -1228,7 +1359,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T4"
+        "T5"
       ],
       "title": "NFR3: Deterministic Backtest"
     },
@@ -1245,11 +1376,11 @@
         {
           "acceptance_item_id": "NFR4-CALIBRATION-HONESTY-001",
           "delivery_slice_refs": [
-            "review-governance-and-approval"
+            "distillation-calibration-and-confidence-part-1"
           ],
           "evidence_mode": "manual_review",
           "task_refs": [
-            "T7"
+            "T6"
           ]
         }
       ],
@@ -1262,7 +1393,7 @@
         "human approval for judgment-based acceptance"
       ],
       "task_refs": [
-        "T7"
+        "T6"
       ],
       "title": "NFR4: Calibration Honesty"
     },
@@ -1312,11 +1443,11 @@
         {
           "acceptance_item_id": "NFR6-LOCAL-PRIVACY-001",
           "delivery_slice_refs": [
-            "data-intake-and-persistence"
+            "distillation-calibration-and-confidence-part-1"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T3"
+            "T6"
           ]
         }
       ],
@@ -1328,7 +1459,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T3"
+        "T6"
       ],
       "title": "NFR6: Local Privacy"
     },
@@ -1349,7 +1480,7 @@
           ],
           "evidence_mode": "manual_review",
           "task_refs": [
-            "T7"
+            "T10"
           ]
         }
       ],
@@ -1362,7 +1493,7 @@
         "human approval for judgment-based acceptance"
       ],
       "task_refs": [
-        "T7"
+        "T10"
       ],
       "title": "NFR7: Rule Readability"
     },
@@ -1379,11 +1510,11 @@
         {
           "acceptance_item_id": "NFR8-STRUCTURED-DATA-FIRST-001",
           "delivery_slice_refs": [
-            "review-governance-and-approval"
+            "distillation-calibration-and-confidence-part-1"
           ],
           "evidence_mode": "external",
           "task_refs": [
-            "T7"
+            "T6"
           ]
         }
       ],
@@ -1395,7 +1526,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T7"
+        "T6"
       ],
       "title": "NFR8: Structured-Data-First"
     },
@@ -1412,7 +1543,7 @@
         {
           "acceptance_item_id": "NFR9-DEBUGGABLE-ERRORS-001",
           "delivery_slice_refs": [
-            "reporting-and-evidence"
+            "signature-and-recurrence-analysis"
           ],
           "evidence_mode": "automated",
           "task_refs": [
@@ -1449,7 +1580,7 @@
           ],
           "evidence_mode": "external",
           "task_refs": [
-            "T6"
+            "T9"
           ]
         }
       ],
@@ -1461,7 +1592,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T6"
+        "T9"
       ],
       "title": "NFR10: Cost Visibility"
     },
@@ -1478,7 +1609,7 @@
         {
           "acceptance_item_id": "NFR11-STOCHASTIC-HONESTY-001",
           "delivery_slice_refs": [
-            "external-provider-and-network-integration"
+            "distillation-calibration-and-confidence-part-1"
           ],
           "evidence_mode": "automated",
           "task_refs": [
@@ -1544,11 +1675,11 @@
         {
           "acceptance_item_id": "NFR13-INFERENCE-HUMILITY-001",
           "delivery_slice_refs": [
-            "review-governance-and-approval"
+            "distillation-calibration-and-confidence-part-1"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T7"
+            "T6"
           ]
         }
       ],
@@ -1560,7 +1691,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T7"
+        "T6"
       ],
       "title": "NFR13: Inference Humility"
     },
@@ -1577,11 +1708,11 @@
         {
           "acceptance_item_id": "NFR14-ADVISORY-RESTRAINT-001",
           "delivery_slice_refs": [
-            "reporting-and-evidence"
+            "assessment-and-pr-advisory"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T5"
+            "T14"
           ]
         }
       ],
@@ -1593,7 +1724,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T5"
+        "T14"
       ],
       "title": "NFR14: Advisory Restraint"
     },
@@ -1610,11 +1741,11 @@
         {
           "acceptance_item_id": "NFR15-NO-DASHBOARD-DEPENDENCY-001",
           "delivery_slice_refs": [
-            "reporting-and-evidence"
+            "assessment-and-pr-advisory"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T5"
+            "T14"
           ]
         }
       ],
@@ -1626,7 +1757,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T5"
+        "T14"
       ],
       "title": "NFR15: No Dashboard Dependency"
     },
@@ -1703,17 +1834,17 @@
           ],
           "evidence_mode": "external",
           "task_refs": [
-            "T7"
+            "T10"
           ]
         },
         {
           "acceptance_item_id": "MVP-IN-SCOPE-003",
           "delivery_slice_refs": [
-            "analysis-processing-and-decisioning"
+            "distillation-calibration-and-confidence-part-1"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T4"
+            "T6"
           ]
         },
         {
@@ -1739,37 +1870,37 @@
         {
           "acceptance_item_id": "MVP-IN-SCOPE-006",
           "delivery_slice_refs": [
-            "analysis-processing-and-decisioning"
+            "distillation-calibration-and-confidence-part-1"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T4"
+            "T6"
           ]
         },
         {
           "acceptance_item_id": "MVP-IN-SCOPE-007",
           "delivery_slice_refs": [
-            "analysis-processing-and-decisioning"
+            "signature-and-recurrence-analysis"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T4"
+            "T5"
           ]
         },
         {
           "acceptance_item_id": "MVP-IN-SCOPE-008",
           "delivery_slice_refs": [
-            "analysis-processing-and-decisioning"
+            "signature-and-recurrence-analysis"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T4"
+            "T5"
           ]
         },
         {
           "acceptance_item_id": "MVP-IN-SCOPE-009",
           "delivery_slice_refs": [
-            "reporting-and-evidence"
+            "signature-and-recurrence-analysis"
           ],
           "evidence_mode": "automated",
           "task_refs": [
@@ -1779,27 +1910,27 @@
         {
           "acceptance_item_id": "MVP-IN-SCOPE-010",
           "delivery_slice_refs": [
-            "analysis-processing-and-decisioning"
+            "distillation-calibration-and-confidence-part-2"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T4"
+            "T7"
           ]
         },
         {
           "acceptance_item_id": "MVP-IN-SCOPE-011",
           "delivery_slice_refs": [
-            "external-provider-and-network-integration"
+            "distillation-calibration-and-confidence-part-2"
           ],
           "evidence_mode": "external",
           "task_refs": [
-            "T6"
+            "T7"
           ]
         },
         {
           "acceptance_item_id": "MVP-IN-SCOPE-012",
           "delivery_slice_refs": [
-            "review-governance-and-approval"
+            "distillation-calibration-and-confidence-part-2"
           ],
           "evidence_mode": "automated",
           "task_refs": [
@@ -1809,7 +1940,7 @@
         {
           "acceptance_item_id": "MVP-IN-SCOPE-013",
           "delivery_slice_refs": [
-            "review-governance-and-approval"
+            "distillation-calibration-and-confidence-part-2"
           ],
           "evidence_mode": "automated",
           "task_refs": [
@@ -1823,47 +1954,47 @@
           ],
           "evidence_mode": "manual_review",
           "task_refs": [
-            "T7"
+            "T10"
           ]
         },
         {
           "acceptance_item_id": "MVP-IN-SCOPE-015",
           "delivery_slice_refs": [
-            "reporting-and-evidence"
+            "memory-rendering-and-lifecycle"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T5"
+            "T11"
           ]
         },
         {
           "acceptance_item_id": "MVP-IN-SCOPE-016",
           "delivery_slice_refs": [
-            "serving-interface-and-agent-access"
+            "assessment-and-pr-advisory"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T8"
+            "T14"
           ]
         },
         {
           "acceptance_item_id": "MVP-IN-SCOPE-017",
           "delivery_slice_refs": [
-            "serving-interface-and-agent-access"
+            "compile-and-context-management"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T8"
+            "T13"
           ]
         },
         {
           "acceptance_item_id": "MVP-IN-SCOPE-018",
           "delivery_slice_refs": [
-            "analysis-processing-and-decisioning"
+            "assessment-and-pr-advisory"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T4"
+            "T14"
           ]
         },
         {
@@ -1873,13 +2004,13 @@
           ],
           "evidence_mode": "external",
           "task_refs": [
-            "T6"
+            "T9"
           ]
         },
         {
           "acceptance_item_id": "MVP-IN-SCOPE-020",
           "delivery_slice_refs": [
-            "reporting-and-evidence"
+            "signature-and-recurrence-analysis"
           ],
           "evidence_mode": "automated",
           "task_refs": [
@@ -1899,31 +2030,31 @@
         {
           "acceptance_item_id": "MVP-IN-SCOPE-022",
           "delivery_slice_refs": [
-            "release-demo-and-product-signals"
+            "outcome-fixture-corpus"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T9"
+            "T4"
           ]
         },
         {
           "acceptance_item_id": "MVP-IN-SCOPE-023",
           "delivery_slice_refs": [
-            "release-demo-and-product-signals"
+            "release-demo-and-product-signals-part-1"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T9"
+            "T15"
           ]
         },
         {
           "acceptance_item_id": "MVP-IN-SCOPE-024",
           "delivery_slice_refs": [
-            "reporting-and-evidence"
+            "release-demo-and-product-signals-part-1"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T5"
+            "T15"
           ]
         }
       ],
@@ -1941,8 +2072,12 @@
         "T5",
         "T6",
         "T7",
-        "T8",
-        "T9"
+        "T9",
+        "T10",
+        "T11",
+        "T13",
+        "T14",
+        "T15"
       ],
       "title": "MVP In Scope"
     },
@@ -2010,7 +2145,37 @@
         {
           "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-001",
           "delivery_slice_refs": [
-            "review-governance-and-approval"
+            "compile-and-context-management"
+          ],
+          "evidence_mode": "automated",
+          "task_refs": [
+            "T13"
+          ]
+        },
+        {
+          "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-002",
+          "delivery_slice_refs": [
+            "signature-and-recurrence-analysis"
+          ],
+          "evidence_mode": "automated",
+          "task_refs": [
+            "T5"
+          ]
+        },
+        {
+          "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-003",
+          "delivery_slice_refs": [
+            "signature-and-recurrence-analysis"
+          ],
+          "evidence_mode": "automated",
+          "task_refs": [
+            "T5"
+          ]
+        },
+        {
+          "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-004",
+          "delivery_slice_refs": [
+            "distillation-calibration-and-confidence-part-2"
           ],
           "evidence_mode": "automated",
           "task_refs": [
@@ -2018,59 +2183,29 @@
           ]
         },
         {
-          "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-002",
-          "delivery_slice_refs": [
-            "analysis-processing-and-decisioning"
-          ],
-          "evidence_mode": "automated",
-          "task_refs": [
-            "T4"
-          ]
-        },
-        {
-          "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-003",
-          "delivery_slice_refs": [
-            "analysis-processing-and-decisioning"
-          ],
-          "evidence_mode": "automated",
-          "task_refs": [
-            "T4"
-          ]
-        },
-        {
-          "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-004",
-          "delivery_slice_refs": [
-            "analysis-processing-and-decisioning"
-          ],
-          "evidence_mode": "automated",
-          "task_refs": [
-            "T4"
-          ]
-        },
-        {
           "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-005",
           "delivery_slice_refs": [
-            "analysis-processing-and-decisioning"
+            "signature-and-recurrence-analysis"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T4"
+            "T5"
           ]
         },
         {
           "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-006",
           "delivery_slice_refs": [
-            "analysis-processing-and-decisioning"
+            "signature-and-recurrence-analysis"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T4"
+            "T5"
           ]
         },
         {
           "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-007",
           "delivery_slice_refs": [
-            "reporting-and-evidence"
+            "signature-and-recurrence-analysis"
           ],
           "evidence_mode": "automated",
           "task_refs": [
@@ -2080,17 +2215,17 @@
         {
           "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-008",
           "delivery_slice_refs": [
-            "review-governance-and-approval"
+            "outcome-fixture-corpus"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T7"
+            "T4"
           ]
         },
         {
           "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-009",
           "delivery_slice_refs": [
-            "analysis-processing-and-decisioning"
+            "outcome-fixture-corpus"
           ],
           "evidence_mode": "automated",
           "task_refs": [
@@ -2100,11 +2235,11 @@
         {
           "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-010",
           "delivery_slice_refs": [
-            "release-demo-and-product-signals"
+            "release-demo-and-product-signals-part-1"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T9"
+            "T15"
           ]
         }
       ],
@@ -2119,7 +2254,8 @@
         "T4",
         "T5",
         "T7",
-        "T9"
+        "T13",
+        "T15"
       ],
       "title": "Ingest, Attribute, Backtest Acceptance Tests"
     },
@@ -2154,17 +2290,17 @@
         {
           "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-001",
           "delivery_slice_refs": [
-            "review-governance-and-approval"
+            "outcome-fixture-corpus"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T7"
+            "T4"
           ]
         },
         {
           "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-002",
           "delivery_slice_refs": [
-            "review-governance-and-approval"
+            "distillation-calibration-and-confidence-part-2"
           ],
           "evidence_mode": "automated",
           "task_refs": [
@@ -2174,7 +2310,7 @@
         {
           "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-003",
           "delivery_slice_refs": [
-            "review-governance-and-approval"
+            "distillation-calibration-and-confidence-part-2"
           ],
           "evidence_mode": "automated",
           "task_refs": [
@@ -2184,7 +2320,7 @@
         {
           "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-004",
           "delivery_slice_refs": [
-            "review-governance-and-approval"
+            "distillation-calibration-and-confidence-part-2"
           ],
           "evidence_mode": "automated",
           "task_refs": [
@@ -2194,7 +2330,7 @@
         {
           "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-005",
           "delivery_slice_refs": [
-            "review-governance-and-approval"
+            "distillation-calibration-and-confidence-part-2"
           ],
           "evidence_mode": "automated",
           "task_refs": [
@@ -2204,27 +2340,27 @@
         {
           "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-006",
           "delivery_slice_refs": [
-            "review-governance-and-approval"
+            "outcome-fixture-corpus"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T7"
+            "T4"
           ]
         },
         {
           "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-007",
           "delivery_slice_refs": [
-            "review-governance-and-approval"
+            "outcome-fixture-corpus"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T7"
+            "T4"
           ]
         },
         {
           "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-008",
           "delivery_slice_refs": [
-            "review-governance-and-approval"
+            "distillation-calibration-and-confidence-part-2"
           ],
           "evidence_mode": "automated",
           "task_refs": [
@@ -2234,11 +2370,11 @@
         {
           "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-009",
           "delivery_slice_refs": [
-            "external-provider-and-network-integration"
+            "distillation-calibration-and-confidence-part-2"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T6"
+            "T7"
           ]
         },
         {
@@ -2248,7 +2384,7 @@
           ],
           "evidence_mode": "external",
           "task_refs": [
-            "T6"
+            "T9"
           ]
         }
       ],
@@ -2260,8 +2396,9 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T6",
-        "T7"
+        "T4",
+        "T7",
+        "T9"
       ],
       "title": "Distill, Review, Memory Page Acceptance Tests"
     },
@@ -2296,41 +2433,41 @@
         {
           "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-001",
           "delivery_slice_refs": [
-            "serving-interface-and-agent-access"
+            "assessment-and-pr-advisory"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T8"
+            "T14"
           ]
         },
         {
           "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-002",
           "delivery_slice_refs": [
-            "serving-interface-and-agent-access"
+            "mcp-serving-and-recall"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T8"
+            "T12"
           ]
         },
         {
           "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-003",
           "delivery_slice_refs": [
-            "serving-interface-and-agent-access"
+            "compile-and-context-management"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T8"
+            "T13"
           ]
         },
         {
           "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-004",
           "delivery_slice_refs": [
-            "serving-interface-and-agent-access"
+            "outcome-fixture-corpus"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T8"
+            "T4"
           ]
         },
         {
@@ -2340,57 +2477,57 @@
           ],
           "evidence_mode": "external",
           "task_refs": [
-            "T6"
+            "T9"
           ]
         },
         {
           "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-006",
           "delivery_slice_refs": [
-            "serving-interface-and-agent-access"
+            "assessment-and-pr-advisory"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T8"
+            "T14"
           ]
         },
         {
           "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-007",
           "delivery_slice_refs": [
-            "serving-interface-and-agent-access"
+            "mcp-serving-and-recall"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T8"
+            "T12"
           ]
         },
         {
           "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-008",
           "delivery_slice_refs": [
-            "serving-interface-and-agent-access"
+            "mcp-serving-and-recall"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T8"
+            "T12"
           ]
         },
         {
           "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-009",
           "delivery_slice_refs": [
-            "release-demo-and-product-signals"
+            "release-demo-and-product-signals-part-1"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T9"
+            "T15"
           ]
         },
         {
           "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-010",
           "delivery_slice_refs": [
-            "serving-interface-and-agent-access"
+            "release-demo-and-product-signals-part-1"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T8"
+            "T15"
           ]
         }
       ],
@@ -2402,9 +2539,12 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T6",
-        "T8",
-        "T9"
+        "T4",
+        "T9",
+        "T12",
+        "T13",
+        "T14",
+        "T15"
       ],
       "title": "Serve And Advise Acceptance Tests"
     },
@@ -2451,161 +2591,161 @@
         {
           "acceptance_item_id": "SUCCESS-METRICS-001",
           "delivery_slice_refs": [
-            "release-demo-and-product-signals"
+            "release-demo-and-product-signals-part-1"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T9"
+            "T15"
           ]
         },
         {
           "acceptance_item_id": "SUCCESS-METRICS-002",
           "delivery_slice_refs": [
-            "release-demo-and-product-signals"
+            "release-demo-and-product-signals-part-1"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T9"
+            "T15"
           ]
         },
         {
           "acceptance_item_id": "SUCCESS-METRICS-003",
           "delivery_slice_refs": [
-            "release-demo-and-product-signals"
+            "release-demo-and-product-signals-part-1"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T9"
+            "T15"
           ]
         },
         {
           "acceptance_item_id": "SUCCESS-METRICS-004",
           "delivery_slice_refs": [
-            "release-demo-and-product-signals"
+            "release-demo-and-product-signals-part-1"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T9"
+            "T15"
           ]
         },
         {
           "acceptance_item_id": "SUCCESS-METRICS-005",
           "delivery_slice_refs": [
-            "release-demo-and-product-signals"
+            "release-demo-and-product-signals-part-1"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T9"
+            "T15"
           ]
         },
         {
           "acceptance_item_id": "SUCCESS-METRICS-006",
           "delivery_slice_refs": [
-            "release-demo-and-product-signals"
+            "release-demo-and-product-signals-part-1"
           ],
           "evidence_mode": "external",
           "task_refs": [
-            "T9"
+            "T15"
           ]
         },
         {
           "acceptance_item_id": "SUCCESS-METRICS-007",
           "delivery_slice_refs": [
-            "release-demo-and-product-signals"
+            "release-demo-and-product-signals-part-1"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T9"
+            "T15"
           ]
         },
         {
           "acceptance_item_id": "SUCCESS-METRICS-008",
           "delivery_slice_refs": [
-            "release-demo-and-product-signals"
+            "release-demo-and-product-signals-part-2"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T9"
+            "T16"
           ]
         },
         {
           "acceptance_item_id": "SUCCESS-METRICS-009",
           "delivery_slice_refs": [
-            "release-demo-and-product-signals"
+            "release-demo-and-product-signals-part-2"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T9"
+            "T16"
           ]
         },
         {
           "acceptance_item_id": "SUCCESS-METRICS-010",
           "delivery_slice_refs": [
-            "release-demo-and-product-signals"
+            "release-demo-and-product-signals-part-2"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T9"
+            "T16"
           ]
         },
         {
           "acceptance_item_id": "SUCCESS-METRICS-011",
           "delivery_slice_refs": [
-            "release-demo-and-product-signals"
+            "release-demo-and-product-signals-part-2"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T9"
+            "T16"
           ]
         },
         {
           "acceptance_item_id": "SUCCESS-METRICS-012",
           "delivery_slice_refs": [
-            "release-demo-and-product-signals"
+            "release-demo-and-product-signals-part-2"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T9"
+            "T16"
           ]
         },
         {
           "acceptance_item_id": "SUCCESS-METRICS-013",
           "delivery_slice_refs": [
-            "release-demo-and-product-signals"
+            "release-demo-and-product-signals-part-2"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T9"
+            "T16"
           ]
         },
         {
           "acceptance_item_id": "SUCCESS-METRICS-014",
           "delivery_slice_refs": [
-            "release-demo-and-product-signals"
+            "release-demo-and-product-signals-part-2"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T9"
+            "T16"
           ]
         },
         {
           "acceptance_item_id": "SUCCESS-METRICS-015",
           "delivery_slice_refs": [
-            "release-demo-and-product-signals"
+            "release-demo-and-product-signals-part-2"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T9"
+            "T16"
           ]
         },
         {
           "acceptance_item_id": "SUCCESS-METRICS-016",
           "delivery_slice_refs": [
-            "release-demo-and-product-signals"
+            "release-demo-and-product-signals-part-2"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T9"
+            "T16"
           ]
         }
       ],
@@ -2617,7 +2757,8 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T9"
+        "T15",
+        "T16"
       ],
       "title": "Success Metrics"
     },
@@ -2642,51 +2783,51 @@
         {
           "acceptance_item_id": "DEMO-ACCEPTANCE-001",
           "delivery_slice_refs": [
-            "release-demo-and-product-signals"
+            "release-demo-and-product-signals-part-2"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T9"
+            "T16"
           ]
         },
         {
           "acceptance_item_id": "DEMO-ACCEPTANCE-002",
           "delivery_slice_refs": [
-            "release-demo-and-product-signals"
+            "outcome-fixture-corpus"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T9"
+            "T4"
           ]
         },
         {
           "acceptance_item_id": "DEMO-ACCEPTANCE-003",
           "delivery_slice_refs": [
-            "release-demo-and-product-signals"
+            "release-demo-and-product-signals-part-2"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T9"
+            "T16"
           ]
         },
         {
           "acceptance_item_id": "DEMO-ACCEPTANCE-004",
           "delivery_slice_refs": [
-            "release-demo-and-product-signals"
+            "outcome-fixture-corpus"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T9"
+            "T4"
           ]
         },
         {
           "acceptance_item_id": "DEMO-ACCEPTANCE-005",
           "delivery_slice_refs": [
-            "release-demo-and-product-signals"
+            "release-demo-and-product-signals-part-2"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T9"
+            "T16"
           ]
         }
       ],
@@ -2698,7 +2839,8 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T9"
+        "T4",
+        "T16"
       ],
       "title": "Demo Acceptance"
     }
