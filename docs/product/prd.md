@@ -3,7 +3,7 @@
 | Field | Value |
 |-------|-------|
 | Version | 1.1 |
-| Status | Draft for review (open questions resolved) |
+| Status | Ready for MVP execution |
 | Owner | Product and Engineering |
 | Last Updated | 2026-06-11 |
 | Primary Audience | Engineers building Relia OSS, plus technical founders reviewing scope |
@@ -1423,6 +1423,7 @@ The MVP is not complete until all acceptance groups pass.
 8. The planted flaky test is discounted and drafts no rule.
 9. Seeded secrets never appear in any artifact.
 10. `relia demo` opens the bundled backtest and memory-page reports with no install, token, model key, or hosted account.
+11. Attribution precision is at least 95% on a labeled sample; uncertain cases are excluded, not guessed.
 
 ### Distill, Review, Memory Page Acceptance Tests
 

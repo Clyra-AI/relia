@@ -78,7 +78,8 @@
         "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-007",
         "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-004",
         "DEMO-ACCEPTANCE-002",
-        "DEMO-ACCEPTANCE-004"
+        "DEMO-ACCEPTANCE-004",
+        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-011"
       ],
       "name": "Outcome Fixture Corpus And Backtest Baseline",
       "public_release_boundary": false,
@@ -2125,7 +2126,8 @@
         "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-007",
         "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-008",
         "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-009",
-        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-010"
+        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-010",
+        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-011"
       ],
       "closure_status": "partial",
       "criteria": [
@@ -2138,7 +2140,8 @@
         "Possible recurrences appear separately and are excluded from headline ERR.",
         "The planted flaky test is discounted and drafts no rule.",
         "Seeded secrets never appear in any artifact.",
-        "relia demo` opens the bundled backtest and memory-page reports with no install, token, model key, or hosted account."
+        "relia demo` opens the bundled backtest and memory-page reports with no install, token, model key, or hosted account.",
+        "Attribution precision is at least 95% on a labeled sample; uncertain cases are excluded, not guessed."
       ],
       "group_id": "ingest-attribute-backtest-acceptance-tests",
       "item_mappings": [
@@ -2240,6 +2243,16 @@
           "evidence_mode": "automated",
           "task_refs": [
             "T15"
+          ]
+        },
+        {
+          "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-011",
+          "delivery_slice_refs": [
+            "outcome-fixture-corpus"
+          ],
+          "evidence_mode": "automated",
+          "task_refs": [
+            "T4"
           ]
         }
       ],

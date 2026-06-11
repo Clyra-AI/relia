@@ -78,7 +78,8 @@
         "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-007",
         "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-004",
         "DEMO-ACCEPTANCE-002",
-        "DEMO-ACCEPTANCE-004"
+        "DEMO-ACCEPTANCE-004",
+        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-011"
       ],
       "name": "Outcome Fixture Corpus And Backtest Baseline",
       "public_release_boundary": false,
@@ -638,18 +639,18 @@
         "credential_posture": "no ambient secrets",
         "network_posture": "offline by default",
         "runtime_control": {
-          "owner": "factoryd-operator",
           "autonomy_level": "restricted",
+          "conflict_behavior": "fail_closed",
+          "launch_request": {
+            "expected_decision": "allow",
+            "reason_code": "within_runtime_control_limits",
+            "requested_action": "continue_mission",
+            "requested_adapter": "codex_cli"
+          },
+          "owner": "factoryd-operator",
           "release_freeze": {
             "enabled": false
-          },
-          "launch_request": {
-            "requested_action": "continue_mission",
-            "requested_adapter": "codex_cli",
-            "expected_decision": "allow",
-            "reason_code": "within_runtime_control_limits"
-          },
-          "conflict_behavior": "fail_closed"
+          }
         },
         "state_dir": ".factoryd/",
         "worker_command": "",
@@ -1068,18 +1069,18 @@
         "credential_posture": "no ambient secrets",
         "network_posture": "offline by default",
         "runtime_control": {
-          "owner": "factoryd-operator",
           "autonomy_level": "restricted",
+          "conflict_behavior": "fail_closed",
+          "launch_request": {
+            "expected_decision": "allow",
+            "reason_code": "within_runtime_control_limits",
+            "requested_action": "continue_mission",
+            "requested_adapter": "codex_cli"
+          },
+          "owner": "factoryd-operator",
           "release_freeze": {
             "enabled": false
-          },
-          "launch_request": {
-            "requested_action": "continue_mission",
-            "requested_adapter": "codex_cli",
-            "expected_decision": "allow",
-            "reason_code": "within_runtime_control_limits"
-          },
-          "conflict_behavior": "fail_closed"
+          }
         },
         "state_dir": ".factoryd/",
         "worker_command": "",
@@ -1504,18 +1505,18 @@
         "credential_posture": "no ambient secrets",
         "network_posture": "offline by default",
         "runtime_control": {
-          "owner": "factoryd-operator",
           "autonomy_level": "restricted",
+          "conflict_behavior": "fail_closed",
+          "launch_request": {
+            "expected_decision": "allow",
+            "reason_code": "within_runtime_control_limits",
+            "requested_action": "continue_mission",
+            "requested_adapter": "codex_cli"
+          },
+          "owner": "factoryd-operator",
           "release_freeze": {
             "enabled": false
-          },
-          "launch_request": {
-            "requested_action": "continue_mission",
-            "requested_adapter": "codex_cli",
-            "expected_decision": "allow",
-            "reason_code": "within_runtime_control_limits"
-          },
-          "conflict_behavior": "fail_closed"
+          }
         },
         "state_dir": ".factoryd/",
         "worker_command": "",
@@ -1698,7 +1699,8 @@
         "The planted path deletion moves its rule to `stale` and out of serving.",
         "relia assess` returns `match_high` with citations on a planted-pattern diff and `no_coverage` on unknown paths.",
         "Every number shown live is reproducible from the seeded repo.",
-        "Every citation shown in the demo resolves to a real PR in the seeded repo."
+        "Every citation shown in the demo resolves to a real PR in the seeded repo.",
+        "Attribution precision is at least 95% on a labeled sample; uncertain cases are excluded, not guessed."
       ],
       "acceptance_group_id": "mvp-in-scope",
       "acceptance_group_ids": [
@@ -1718,7 +1720,8 @@
         "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-007",
         "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-004",
         "DEMO-ACCEPTANCE-002",
-        "DEMO-ACCEPTANCE-004"
+        "DEMO-ACCEPTANCE-004",
+        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-011"
       ],
       "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
       "acceptance_result_requirements": [
@@ -1844,6 +1847,21 @@
         },
         {
           "acceptance_item_id": "DEMO-ACCEPTANCE-004",
+          "allowed_statuses": [
+            "implemented",
+            "partial",
+            "missing",
+            "blocked",
+            "deferred_with_approval"
+          ],
+          "evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "scope_closure_report"
+          ]
+        },
+        {
+          "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-011",
           "allowed_statuses": [
             "implemented",
             "partial",
@@ -2027,18 +2045,18 @@
         "credential_posture": "no ambient secrets",
         "network_posture": "offline by default",
         "runtime_control": {
-          "owner": "factoryd-operator",
           "autonomy_level": "restricted",
+          "conflict_behavior": "fail_closed",
+          "launch_request": {
+            "expected_decision": "allow",
+            "reason_code": "within_runtime_control_limits",
+            "requested_action": "continue_mission",
+            "requested_adapter": "codex_cli"
+          },
+          "owner": "factoryd-operator",
           "release_freeze": {
             "enabled": false
-          },
-          "launch_request": {
-            "requested_action": "continue_mission",
-            "requested_adapter": "codex_cli",
-            "expected_decision": "allow",
-            "reason_code": "within_runtime_control_limits"
-          },
-          "conflict_behavior": "fail_closed"
+          }
         },
         "state_dir": ".factoryd/",
         "worker_command": "",
@@ -2629,18 +2647,18 @@
         "credential_posture": "no ambient secrets",
         "network_posture": "offline by default",
         "runtime_control": {
-          "owner": "factoryd-operator",
           "autonomy_level": "restricted",
+          "conflict_behavior": "fail_closed",
+          "launch_request": {
+            "expected_decision": "allow",
+            "reason_code": "within_runtime_control_limits",
+            "requested_action": "continue_mission",
+            "requested_adapter": "codex_cli"
+          },
+          "owner": "factoryd-operator",
           "release_freeze": {
             "enabled": false
-          },
-          "launch_request": {
-            "requested_action": "continue_mission",
-            "requested_adapter": "codex_cli",
-            "expected_decision": "allow",
-            "reason_code": "within_runtime_control_limits"
-          },
-          "conflict_behavior": "fail_closed"
+          }
         },
         "state_dir": ".factoryd/",
         "worker_command": "",
@@ -3283,18 +3301,18 @@
         "credential_posture": "no ambient secrets",
         "network_posture": "offline by default",
         "runtime_control": {
-          "owner": "factoryd-operator",
           "autonomy_level": "restricted",
+          "conflict_behavior": "fail_closed",
+          "launch_request": {
+            "expected_decision": "allow",
+            "reason_code": "within_runtime_control_limits",
+            "requested_action": "continue_mission",
+            "requested_adapter": "codex_cli"
+          },
+          "owner": "factoryd-operator",
           "release_freeze": {
             "enabled": false
-          },
-          "launch_request": {
-            "requested_action": "continue_mission",
-            "requested_adapter": "codex_cli",
-            "expected_decision": "allow",
-            "reason_code": "within_runtime_control_limits"
-          },
-          "conflict_behavior": "fail_closed"
+          }
         },
         "state_dir": ".factoryd/",
         "worker_command": "",
@@ -3879,18 +3897,18 @@
         "credential_posture": "no ambient secrets",
         "network_posture": "offline by default",
         "runtime_control": {
-          "owner": "factoryd-operator",
           "autonomy_level": "restricted",
+          "conflict_behavior": "fail_closed",
+          "launch_request": {
+            "expected_decision": "allow",
+            "reason_code": "within_runtime_control_limits",
+            "requested_action": "continue_mission",
+            "requested_adapter": "codex_cli"
+          },
+          "owner": "factoryd-operator",
           "release_freeze": {
             "enabled": false
-          },
-          "launch_request": {
-            "requested_action": "continue_mission",
-            "requested_adapter": "codex_cli",
-            "expected_decision": "allow",
-            "reason_code": "within_runtime_control_limits"
-          },
-          "conflict_behavior": "fail_closed"
+          }
         },
         "state_dir": ".factoryd/",
         "worker_command": "",
@@ -4282,18 +4300,18 @@
         "credential_posture": "no ambient secrets",
         "network_posture": "offline by default",
         "runtime_control": {
-          "owner": "factoryd-operator",
           "autonomy_level": "restricted",
+          "conflict_behavior": "fail_closed",
+          "launch_request": {
+            "expected_decision": "allow",
+            "reason_code": "within_runtime_control_limits",
+            "requested_action": "continue_mission",
+            "requested_adapter": "codex_cli"
+          },
+          "owner": "factoryd-operator",
           "release_freeze": {
             "enabled": false
-          },
-          "launch_request": {
-            "requested_action": "continue_mission",
-            "requested_adapter": "codex_cli",
-            "expected_decision": "allow",
-            "reason_code": "within_runtime_control_limits"
-          },
-          "conflict_behavior": "fail_closed"
+          }
         },
         "state_dir": ".factoryd/",
         "worker_command": "",
@@ -4803,18 +4821,18 @@
         "credential_posture": "no ambient secrets",
         "network_posture": "offline by default",
         "runtime_control": {
-          "owner": "factoryd-operator",
           "autonomy_level": "restricted",
+          "conflict_behavior": "fail_closed",
+          "launch_request": {
+            "expected_decision": "allow",
+            "reason_code": "within_runtime_control_limits",
+            "requested_action": "continue_mission",
+            "requested_adapter": "codex_cli"
+          },
+          "owner": "factoryd-operator",
           "release_freeze": {
             "enabled": false
-          },
-          "launch_request": {
-            "requested_action": "continue_mission",
-            "requested_adapter": "codex_cli",
-            "expected_decision": "allow",
-            "reason_code": "within_runtime_control_limits"
-          },
-          "conflict_behavior": "fail_closed"
+          }
         },
         "state_dir": ".factoryd/",
         "worker_command": "",
@@ -5271,18 +5289,18 @@
         "credential_posture": "no ambient secrets",
         "network_posture": "offline by default",
         "runtime_control": {
-          "owner": "factoryd-operator",
           "autonomy_level": "restricted",
+          "conflict_behavior": "fail_closed",
+          "launch_request": {
+            "expected_decision": "allow",
+            "reason_code": "within_runtime_control_limits",
+            "requested_action": "continue_mission",
+            "requested_adapter": "codex_cli"
+          },
+          "owner": "factoryd-operator",
           "release_freeze": {
             "enabled": false
-          },
-          "launch_request": {
-            "requested_action": "continue_mission",
-            "requested_adapter": "codex_cli",
-            "expected_decision": "allow",
-            "reason_code": "within_runtime_control_limits"
-          },
-          "conflict_behavior": "fail_closed"
+          }
         },
         "state_dir": ".factoryd/",
         "worker_command": "",
@@ -5662,18 +5680,18 @@
         "credential_posture": "no ambient secrets",
         "network_posture": "offline by default",
         "runtime_control": {
-          "owner": "factoryd-operator",
           "autonomy_level": "restricted",
+          "conflict_behavior": "fail_closed",
+          "launch_request": {
+            "expected_decision": "allow",
+            "reason_code": "within_runtime_control_limits",
+            "requested_action": "continue_mission",
+            "requested_adapter": "codex_cli"
+          },
+          "owner": "factoryd-operator",
           "release_freeze": {
             "enabled": false
-          },
-          "launch_request": {
-            "requested_action": "continue_mission",
-            "requested_adapter": "codex_cli",
-            "expected_decision": "allow",
-            "reason_code": "within_runtime_control_limits"
-          },
-          "conflict_behavior": "fail_closed"
+          }
         },
         "state_dir": ".factoryd/",
         "worker_command": "",
@@ -6073,18 +6091,18 @@
         "credential_posture": "no ambient secrets",
         "network_posture": "offline by default",
         "runtime_control": {
-          "owner": "factoryd-operator",
           "autonomy_level": "restricted",
+          "conflict_behavior": "fail_closed",
+          "launch_request": {
+            "expected_decision": "allow",
+            "reason_code": "within_runtime_control_limits",
+            "requested_action": "continue_mission",
+            "requested_adapter": "codex_cli"
+          },
+          "owner": "factoryd-operator",
           "release_freeze": {
             "enabled": false
-          },
-          "launch_request": {
-            "requested_action": "continue_mission",
-            "requested_adapter": "codex_cli",
-            "expected_decision": "allow",
-            "reason_code": "within_runtime_control_limits"
-          },
-          "conflict_behavior": "fail_closed"
+          }
         },
         "state_dir": ".factoryd/",
         "worker_command": "",
@@ -6508,18 +6526,18 @@
         "credential_posture": "no ambient secrets",
         "network_posture": "offline by default",
         "runtime_control": {
-          "owner": "factoryd-operator",
           "autonomy_level": "restricted",
+          "conflict_behavior": "fail_closed",
+          "launch_request": {
+            "expected_decision": "allow",
+            "reason_code": "within_runtime_control_limits",
+            "requested_action": "continue_mission",
+            "requested_adapter": "codex_cli"
+          },
+          "owner": "factoryd-operator",
           "release_freeze": {
             "enabled": false
-          },
-          "launch_request": {
-            "requested_action": "continue_mission",
-            "requested_adapter": "codex_cli",
-            "expected_decision": "allow",
-            "reason_code": "within_runtime_control_limits"
-          },
-          "conflict_behavior": "fail_closed"
+          }
         },
         "state_dir": ".factoryd/",
         "worker_command": "",
@@ -7033,18 +7051,18 @@
         "credential_posture": "no ambient secrets",
         "network_posture": "offline by default",
         "runtime_control": {
-          "owner": "factoryd-operator",
           "autonomy_level": "restricted",
+          "conflict_behavior": "fail_closed",
+          "launch_request": {
+            "expected_decision": "allow",
+            "reason_code": "within_runtime_control_limits",
+            "requested_action": "continue_mission",
+            "requested_adapter": "codex_cli"
+          },
+          "owner": "factoryd-operator",
           "release_freeze": {
             "enabled": false
-          },
-          "launch_request": {
-            "requested_action": "continue_mission",
-            "requested_adapter": "codex_cli",
-            "expected_decision": "allow",
-            "reason_code": "within_runtime_control_limits"
-          },
-          "conflict_behavior": "fail_closed"
+          }
         },
         "state_dir": ".factoryd/",
         "worker_command": "",
@@ -7671,18 +7689,18 @@
         "credential_posture": "no ambient secrets",
         "network_posture": "offline by default",
         "runtime_control": {
-          "owner": "factoryd-operator",
           "autonomy_level": "restricted",
+          "conflict_behavior": "fail_closed",
+          "launch_request": {
+            "expected_decision": "allow",
+            "reason_code": "within_runtime_control_limits",
+            "requested_action": "continue_mission",
+            "requested_adapter": "codex_cli"
+          },
+          "owner": "factoryd-operator",
           "release_freeze": {
             "enabled": false
-          },
-          "launch_request": {
-            "requested_action": "continue_mission",
-            "requested_adapter": "codex_cli",
-            "expected_decision": "allow",
-            "reason_code": "within_runtime_control_limits"
-          },
-          "conflict_behavior": "fail_closed"
+          }
         },
         "state_dir": ".factoryd/",
         "worker_command": "",
@@ -8273,18 +8291,18 @@
         "credential_posture": "no ambient secrets",
         "network_posture": "offline by default",
         "runtime_control": {
-          "owner": "factoryd-operator",
           "autonomy_level": "restricted",
+          "conflict_behavior": "fail_closed",
+          "launch_request": {
+            "expected_decision": "allow",
+            "reason_code": "within_runtime_control_limits",
+            "requested_action": "continue_mission",
+            "requested_adapter": "codex_cli"
+          },
+          "owner": "factoryd-operator",
           "release_freeze": {
             "enabled": false
-          },
-          "launch_request": {
-            "requested_action": "continue_mission",
-            "requested_adapter": "codex_cli",
-            "expected_decision": "allow",
-            "reason_code": "within_runtime_control_limits"
-          },
-          "conflict_behavior": "fail_closed"
+          }
         },
         "state_dir": ".factoryd/",
         "worker_command": "",

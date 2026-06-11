@@ -1,5 +1,5 @@
 {
-  "acceptance_item_count": 116,
+  "acceptance_item_count": 117,
   "artifact_type": "acceptance_ledger",
   "coverage_policy": {
     "closure_unit": "acceptance_item",
@@ -255,7 +255,7 @@
       "notes": [],
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#fr11-calibrated-confidence",
-      "source_text": "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence — never from the drafting model.",
+      "source_text": "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence \u2014 never from the drafting model.",
       "status": "planned",
       "task_refs": [
         "T6"
@@ -2710,6 +2710,31 @@
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/15/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-011",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "outcome-fixture-corpus"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "ingest-attribute-backtest-acceptance-tests",
+      "kind": "acceptance_test",
+      "notes": [
+        "Phase 1 quality gate: attribution precision is measured against labeled fixture history before recurrence metrics are trusted."
+      ],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#ingest-attribute-backtest-acceptance-tests",
+      "source_text": "Attribution precision is at least 95% on a labeled sample; uncertain cases are excluded, not guessed.",
+      "status": "planned",
+      "task_refs": [
+        "T4"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/3/validation_commands"
       ]
     }
   ],
