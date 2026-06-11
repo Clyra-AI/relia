@@ -1,0 +1,82 @@
+project: relia
+product_name: Relia
+profile_version: "0.1"
+profile_type: repo_local_generated
+generated_by: factoryd bootstrap
+mission: relia-mvp
+source_prd: docs/product/prd.md
+runtime_pins:
+  language: go
+  toolchain_version: 1.26.4
+  module_or_package_path: github.com/Clyra-AI/relia
+  dependency_policy: standard_library_first; pin and justify additions
+  distribution_target: standalone_binary
+factoryd_runtime:
+  state_dir: .factoryd
+  workspace_root: .factoryd/workspaces
+  branch_prefix: codex
+  worker_type: codex_cli
+  approval_posture: human approval required for live credentials, high-risk tasks, and merge
+  credential_posture: no ambient secrets during deterministic bootstrap
+  network_posture: offline by default until approved
+  capability_grants: []
+validation_lanes:
+  fast:
+    - make lint-fast
+    - make test-fast
+  contracts:
+    - make test-contracts
+  full:
+    - make prepush-full
+acceptance_groups:
+  - fr1-outcomes-as-the-only-memory-source
+  - fr2-repo-native-local-first-operation
+  - fr3-github-outcome-intake
+  - fr4-attribution-with-confidence
+  - fr5-canonical-experience-schema
+  - fr6-capture-time-redaction
+  - fr7-deterministic-failure-signatures
+  - fr8-conservative-recurrence-pairing
+  - fr9-backtest-before-behavior-change
+  - fr10-provenance-mandatory-rules
+  - fr11-calibrated-confidence
+  - fr12-decay-and-churn-invalidation
+  - fr13-human-review-gate
+  - fr14-bidirectional-memory
+  - fr15-memory-page-with-receipts
+  - fr16-mcp-serving
+  - fr17-compiled-context-block
+  - fr18-advisory-assessment
+  - fr19-coverage-ood-signal
+  - fr20-advisory-only-default
+  - fr21-forward-err-tracking
+  - fr22-stable-cli-output
+  - fr23-provider-adapters-and-no-llm-mode
+  - fr24-cost-visibility
+  - fr25-portable-artifacts
+  - nfr1-fast-first-value
+  - nfr2-fast-first-memory
+  - nfr3-deterministic-backtest
+  - nfr4-calibration-honesty
+  - nfr5-security
+  - nfr6-local-privacy
+  - nfr7-rule-readability
+  - nfr8-structured-data-first
+  - nfr9-debuggable-errors
+  - nfr10-cost-visibility
+  - nfr11-stochastic-honesty
+  - nfr12-artifact-stability
+  - nfr13-inference-humility
+  - nfr14-advisory-restraint
+  - nfr15-no-dashboard-dependency
+  - mvp-in-scope
+  - acceptance-tests
+  - ingest-attribute-backtest-acceptance-tests
+  - distill-review-memory-page-acceptance-tests
+  - serve-and-advise-acceptance-tests
+  - success-metrics
+  - demo-acceptance
+artifact_roots:
+  planning: .factory/artifacts/prd-to-plan/relia-mvp
+  task_runs: .factory/artifacts/task-runs
+  pr_lifecycle: .factory/artifacts/pr-lifecycle
