@@ -10,7 +10,7 @@
     "Relia must pair recurrences conservatively, separate `confirmed` from `possible`, and exclude `possible` from headline ERR.",
     "relia backtest` must deliver the ERR headline and paired evidence read-only, with no rules, review, or workflow change required.",
     "Every rule must cite at least one experience and one PR. Uncited rules fail validation and never render.",
-    "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence — never from the drafting model.",
+    "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence \u2014 never from the drafting model.",
     "Rules must decay by half-life and go `stale` when their scoped paths are deleted.",
     "Drafted rules must be reviewed before becoming `active`, with `accepted`, `suggested`, and `needs_user_input` labels. Disabling review is an explicit, surfaced configuration choice.",
     "Relia must support `avoid` rules from failures and `playbook` rules from held fixes, and playbook rules must cite held evidence.",
@@ -997,7 +997,7 @@
         "DEMO-ACCEPTANCE-005"
       ],
       "name": "Release, Demo, And Product Signals Part 2",
-      "public_release_boundary": false,
+      "public_release_boundary": true,
       "required_for_completion": true,
       "slice_id": "release-demo-and-product-signals-part-2",
       "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T16",

@@ -50,3 +50,14 @@ Task packets must declare allowed_paths, forbidden_paths, validation_commands, b
 Relia is public. Pull requests must preserve the required-check manifest,
 `validate`, and `CodeQL analyze` unless an approved scanner exception is
 recorded with compensating validation evidence.
+
+## 7. Post-PRD Finding Intake
+
+Material `app-audit` or `code-review` findings must be saved as repo-local
+markdown before implementation. Use `factoryd ingest --kind audit` for audit
+findings and `factoryd ingest --kind review` for review findings so generated
+task packets preserve the originating Factory skill refs.
+
+The MVP has one public release boundary: the final release/demo/product-signals
+delivery slice. Do not clear that boundary when splitting release work into
+runner-sized tasks.

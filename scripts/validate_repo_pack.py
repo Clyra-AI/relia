@@ -45,6 +45,29 @@ def duplicate_values(values):
         seen.add(value)
     return duplicates
 
+def validate_public_release_boundary(documents):
+    for label, document in documents:
+        slices = document.get("delivery_slices") or []
+        release_slices = [
+            item for item in slices
+            if isinstance(item, dict)
+            and str(item.get("slice_id", "")).startswith("release-demo-and-product-signals")
+        ]
+        if not release_slices:
+            continue
+        boundaries = [
+            item for item in release_slices
+            if item.get("public_release_boundary") is True
+        ]
+        if len(boundaries) != 1:
+            fail(f"{label} must declare exactly one public release boundary among release/demo/product-signal slices")
+        boundary = boundaries[0]
+        expected_boundary = release_slices[-1].get("slice_id")
+        if boundary.get("slice_id") != expected_boundary:
+            fail(f"{label} public release boundary must be the final release/demo/product-signal slice {expected_boundary}")
+        if not boundary.get("required_for_completion"):
+            fail(f"{label}.{expected_boundary}.required_for_completion must be true")
+
 def self_test():
     if ROOT.name == "scripts":
         fail("repo root resolution selected scripts/ instead of repository root")
@@ -130,6 +153,7 @@ def main():
     if not execution_plan_path.exists():
         fail("execution-plan.json is required next to task-packets.json")
     execution_plan = json.loads(execution_plan_path.read_text())
+    validation_contract = json.loads((root / repo["validation_contract"]).read_text())
     ledger = json.loads((root / repo["acceptance_ledger"]).read_text())
     if ledger.get("artifact_type") != "acceptance_ledger":
         fail("acceptance ledger must use artifact_type acceptance_ledger")
@@ -221,6 +245,13 @@ def main():
         packet_slices = {item.get("slice_id") for item in packets.get("delivery_slices") or []}
         if packet_slices != declared_slices:
             fail("task-packets delivery_slices must match execution-plan delivery_slices")
+    validate_public_release_boundary([
+        ("execution-plan", execution_plan),
+        ("task-packets", packets),
+        ("validation-contract", validation_contract),
+        ("acceptance-mapping", mapping),
+        ("scope-closure-map", closure),
+    ])
     for index, task in enumerate(tasks):
         task_id = task.get("task_id") or f"task[{index}]"
         for key in ["task_id", "objective", "allowed_paths", "forbidden_paths", "validation_commands", "baseline_commands", "red_first_commands", "final_validation_commands", "acceptance_result_requirements", "evidence_required", "stop_conditions", "worker_type", "factoryd_runtime", "required_worker_chain", "lifecycle_gates", "test_matrix_refs", "ci_lane_refs", "ci_control_refs", "coverage_policy_refs", "security_scanner_gates", "engineering_policy_refs", "architecture_guidance_refs", "changelog_intent", "versioning_impact", "migration_impact", "docs_sync_refs", "acceptance_group_id", "acceptance_ledger_ref", "acceptance_item_ids", "alignment_gate_ref", "plan_drift_policy_ref"]:

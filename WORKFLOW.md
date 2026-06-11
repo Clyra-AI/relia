@@ -27,9 +27,26 @@ This repo accepts work from:
 - Full lane: make prepush-full
 - Required PR checks: validate, CodeQL analyze
 
+## Post-PRD Findings
+
+When `app-audit` or `code-review` produces material follow-up work, save the
+finding list in the repo and run:
+
+```sh
+FACTORY_REPO=/path/to/factory factoryd ingest --config .factory/factoryd.example.json --repo relia --kind audit --input product/audits/<mission>.md --mission <mission> --json
+FACTORY_REPO=/path/to/factory factoryd ingest --config .factory/factoryd.example.json --repo relia --kind review --input product/reviews/<mission>.md --mission <mission> --json
+```
+
+The generated `.factory/artifacts/post-prd/<mission>/` artifacts are the
+governed source for execution. Do not edit `docs/product/prd.md` unless a human
+explicitly promotes a finding into product scope.
+
 ## Stop Conditions
 
 Stop and request a human decision if runtime pins, distribution target, credential posture, network posture, or PRD scope boundaries need to change.
 
 Scanner-gated changes cannot close without CodeQL status evidence or an
 approved scanner exception.
+Release or completion claims cannot close unless the final
+release/demo/product-signals delivery slice is marked as the public release
+boundary and all required MVP acceptance items have evidence.
