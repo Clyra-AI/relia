@@ -437,7 +437,7 @@
       ]
     }
   ],
-  "generated_at": "2026-06-11T15:28:58Z",
+  "generated_at": "2026-06-11T15:48:57Z",
   "schema_version": "0.1",
   "source_prd_ref": "docs/product/prd.md",
   "tasks": [
@@ -4836,57 +4836,6 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
       ],
-      "gated_by_acceptance_items": [
-        {
-          "acceptance_item_id": "SUCCESS-METRICS-002",
-          "required_status": "implemented",
-          "reason": "Later provider, serving, compile, or advisory work depends on PRD product-signal evidence or an approved deferral.",
-          "source_ref": "docs/product/prd.md#success-metrics",
-          "evidence_mode": "automated"
-        },
-        {
-          "acceptance_item_id": "SUCCESS-METRICS-004",
-          "required_status": "implemented",
-          "reason": "Later provider, serving, compile, or advisory work depends on PRD product-signal evidence or an approved deferral.",
-          "source_ref": "docs/product/prd.md#success-metrics",
-          "evidence_mode": "automated"
-        },
-        {
-          "acceptance_item_id": "SUCCESS-METRICS-005",
-          "required_status": "implemented",
-          "reason": "Later provider, serving, compile, or advisory work depends on PRD product-signal evidence or an approved deferral.",
-          "source_ref": "docs/product/prd.md#success-metrics",
-          "evidence_mode": "automated"
-        },
-        {
-          "acceptance_item_id": "SUCCESS-METRICS-006",
-          "required_status": "implemented",
-          "reason": "Later provider, serving, compile, or advisory work depends on PRD product-signal evidence or an approved deferral.",
-          "source_ref": "docs/product/prd.md#success-metrics",
-          "evidence_mode": "external"
-        },
-        {
-          "acceptance_item_id": "SUCCESS-METRICS-008",
-          "required_status": "implemented",
-          "reason": "Later provider, serving, compile, or advisory work depends on PRD product-signal evidence or an approved deferral.",
-          "source_ref": "docs/product/prd.md#success-metrics",
-          "evidence_mode": "automated"
-        },
-        {
-          "acceptance_item_id": "SUCCESS-METRICS-009",
-          "required_status": "implemented",
-          "reason": "Later provider, serving, compile, or advisory work depends on PRD product-signal evidence or an approved deferral.",
-          "source_ref": "docs/product/prd.md#success-metrics",
-          "evidence_mode": "automated"
-        },
-        {
-          "acceptance_item_id": "SUCCESS-METRICS-010",
-          "required_status": "implemented",
-          "reason": "Later provider, serving, compile, or advisory work depends on PRD product-signal evidence or an approved deferral.",
-          "source_ref": "docs/product/prd.md#success-metrics",
-          "evidence_mode": "automated"
-        }
-      ],
       "input_artifacts": [
         "docs/product/prd.md",
         "AGENTS.md",
@@ -6157,57 +6106,6 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
       ],
-      "gated_by_acceptance_items": [
-        {
-          "acceptance_item_id": "SUCCESS-METRICS-002",
-          "required_status": "implemented",
-          "reason": "Later provider, serving, compile, or advisory work depends on PRD product-signal evidence or an approved deferral.",
-          "source_ref": "docs/product/prd.md#success-metrics",
-          "evidence_mode": "automated"
-        },
-        {
-          "acceptance_item_id": "SUCCESS-METRICS-004",
-          "required_status": "implemented",
-          "reason": "Later provider, serving, compile, or advisory work depends on PRD product-signal evidence or an approved deferral.",
-          "source_ref": "docs/product/prd.md#success-metrics",
-          "evidence_mode": "automated"
-        },
-        {
-          "acceptance_item_id": "SUCCESS-METRICS-005",
-          "required_status": "implemented",
-          "reason": "Later provider, serving, compile, or advisory work depends on PRD product-signal evidence or an approved deferral.",
-          "source_ref": "docs/product/prd.md#success-metrics",
-          "evidence_mode": "automated"
-        },
-        {
-          "acceptance_item_id": "SUCCESS-METRICS-006",
-          "required_status": "implemented",
-          "reason": "Later provider, serving, compile, or advisory work depends on PRD product-signal evidence or an approved deferral.",
-          "source_ref": "docs/product/prd.md#success-metrics",
-          "evidence_mode": "external"
-        },
-        {
-          "acceptance_item_id": "SUCCESS-METRICS-008",
-          "required_status": "implemented",
-          "reason": "Later provider, serving, compile, or advisory work depends on PRD product-signal evidence or an approved deferral.",
-          "source_ref": "docs/product/prd.md#success-metrics",
-          "evidence_mode": "automated"
-        },
-        {
-          "acceptance_item_id": "SUCCESS-METRICS-009",
-          "required_status": "implemented",
-          "reason": "Later provider, serving, compile, or advisory work depends on PRD product-signal evidence or an approved deferral.",
-          "source_ref": "docs/product/prd.md#success-metrics",
-          "evidence_mode": "automated"
-        },
-        {
-          "acceptance_item_id": "SUCCESS-METRICS-010",
-          "required_status": "implemented",
-          "reason": "Later provider, serving, compile, or advisory work depends on PRD product-signal evidence or an approved deferral.",
-          "source_ref": "docs/product/prd.md#success-metrics",
-          "evidence_mode": "automated"
-        }
-      ],
       "input_artifacts": [
         "docs/product/prd.md",
         "AGENTS.md",
@@ -6642,57 +6540,6 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
-      ],
-      "gated_by_acceptance_items": [
-        {
-          "acceptance_item_id": "SUCCESS-METRICS-002",
-          "required_status": "implemented",
-          "reason": "Later provider, serving, compile, or advisory work depends on PRD product-signal evidence or an approved deferral.",
-          "source_ref": "docs/product/prd.md#success-metrics",
-          "evidence_mode": "automated"
-        },
-        {
-          "acceptance_item_id": "SUCCESS-METRICS-004",
-          "required_status": "implemented",
-          "reason": "Later provider, serving, compile, or advisory work depends on PRD product-signal evidence or an approved deferral.",
-          "source_ref": "docs/product/prd.md#success-metrics",
-          "evidence_mode": "automated"
-        },
-        {
-          "acceptance_item_id": "SUCCESS-METRICS-005",
-          "required_status": "implemented",
-          "reason": "Later provider, serving, compile, or advisory work depends on PRD product-signal evidence or an approved deferral.",
-          "source_ref": "docs/product/prd.md#success-metrics",
-          "evidence_mode": "automated"
-        },
-        {
-          "acceptance_item_id": "SUCCESS-METRICS-006",
-          "required_status": "implemented",
-          "reason": "Later provider, serving, compile, or advisory work depends on PRD product-signal evidence or an approved deferral.",
-          "source_ref": "docs/product/prd.md#success-metrics",
-          "evidence_mode": "external"
-        },
-        {
-          "acceptance_item_id": "SUCCESS-METRICS-008",
-          "required_status": "implemented",
-          "reason": "Later provider, serving, compile, or advisory work depends on PRD product-signal evidence or an approved deferral.",
-          "source_ref": "docs/product/prd.md#success-metrics",
-          "evidence_mode": "automated"
-        },
-        {
-          "acceptance_item_id": "SUCCESS-METRICS-009",
-          "required_status": "implemented",
-          "reason": "Later provider, serving, compile, or advisory work depends on PRD product-signal evidence or an approved deferral.",
-          "source_ref": "docs/product/prd.md#success-metrics",
-          "evidence_mode": "automated"
-        },
-        {
-          "acceptance_item_id": "SUCCESS-METRICS-010",
-          "required_status": "implemented",
-          "reason": "Later provider, serving, compile, or advisory work depends on PRD product-signal evidence or an approved deferral.",
-          "source_ref": "docs/product/prd.md#success-metrics",
-          "evidence_mode": "automated"
-        }
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -7218,57 +7065,6 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
-      ],
-      "gated_by_acceptance_items": [
-        {
-          "acceptance_item_id": "SUCCESS-METRICS-002",
-          "required_status": "implemented",
-          "reason": "Later provider, serving, compile, or advisory work depends on PRD product-signal evidence or an approved deferral.",
-          "source_ref": "docs/product/prd.md#success-metrics",
-          "evidence_mode": "automated"
-        },
-        {
-          "acceptance_item_id": "SUCCESS-METRICS-004",
-          "required_status": "implemented",
-          "reason": "Later provider, serving, compile, or advisory work depends on PRD product-signal evidence or an approved deferral.",
-          "source_ref": "docs/product/prd.md#success-metrics",
-          "evidence_mode": "automated"
-        },
-        {
-          "acceptance_item_id": "SUCCESS-METRICS-005",
-          "required_status": "implemented",
-          "reason": "Later provider, serving, compile, or advisory work depends on PRD product-signal evidence or an approved deferral.",
-          "source_ref": "docs/product/prd.md#success-metrics",
-          "evidence_mode": "automated"
-        },
-        {
-          "acceptance_item_id": "SUCCESS-METRICS-006",
-          "required_status": "implemented",
-          "reason": "Later provider, serving, compile, or advisory work depends on PRD product-signal evidence or an approved deferral.",
-          "source_ref": "docs/product/prd.md#success-metrics",
-          "evidence_mode": "external"
-        },
-        {
-          "acceptance_item_id": "SUCCESS-METRICS-008",
-          "required_status": "implemented",
-          "reason": "Later provider, serving, compile, or advisory work depends on PRD product-signal evidence or an approved deferral.",
-          "source_ref": "docs/product/prd.md#success-metrics",
-          "evidence_mode": "automated"
-        },
-        {
-          "acceptance_item_id": "SUCCESS-METRICS-009",
-          "required_status": "implemented",
-          "reason": "Later provider, serving, compile, or advisory work depends on PRD product-signal evidence or an approved deferral.",
-          "source_ref": "docs/product/prd.md#success-metrics",
-          "evidence_mode": "automated"
-        },
-        {
-          "acceptance_item_id": "SUCCESS-METRICS-010",
-          "required_status": "implemented",
-          "reason": "Later provider, serving, compile, or advisory work depends on PRD product-signal evidence or an approved deferral.",
-          "source_ref": "docs/product/prd.md#success-metrics",
-          "evidence_mode": "automated"
-        }
       ],
       "input_artifacts": [
         "docs/product/prd.md",
