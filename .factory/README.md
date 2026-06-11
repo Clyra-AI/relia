@@ -11,3 +11,12 @@ The initial PRD-to-plan artifacts are under:
 ~~~text
 .factory/artifacts/prd-to-plan/relia-mvp/
 ~~~
+
+Post-PRD audit and review findings are ingested into separate mission folders:
+
+~~~sh
+FACTORY_REPO=/path/to/factory factoryd ingest --config .factory/factoryd.example.json --repo relia --kind audit --input product/audits/<mission>.md --mission <mission> --json
+FACTORY_REPO=/path/to/factory factoryd ingest --config .factory/factoryd.example.json --repo relia --kind review --input product/reviews/<mission>.md --mission <mission> --json
+~~~
+
+Generated post-PRD artifacts live under `.factory/artifacts/post-prd/<mission>/`.
