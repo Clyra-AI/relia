@@ -25,7 +25,11 @@ This repo accepts work from:
 - Fast lane: make lint-fast, make test-fast
 - Contract lane: make test-contracts
 - Full lane: make prepush-full
+- Required PR checks: validate, CodeQL analyze
 
 ## Stop Conditions
 
 Stop and request a human decision if runtime pins, distribution target, credential posture, network posture, or PRD scope boundaries need to change.
+
+Scanner-gated changes cannot close without CodeQL status evidence or an
+approved scanner exception.

@@ -5,6 +5,7 @@ profile_type: repo_local_generated
 generated_by: factoryd bootstrap
 mission: relia-mvp
 source_prd: docs/product/prd.md
+repo_visibility: public
 runtime_pins:
   language: go
   toolchain_version: 1.26.4
@@ -28,6 +29,19 @@ validation_lanes:
     - make test-contracts
   full:
     - make prepush-full
+security_scanning:
+  required: true
+  scanner: CodeQL
+  workflow: .github/workflows/codeql.yml
+  required_check: CodeQL analyze
+  exception_policy: blocked unless the plan records an approved scanner exception and compensating validation
+ci_controls:
+  required_checks_ref: .github/required-checks.json
+  codeowners_ref: .github/CODEOWNERS
+  action_ref_exceptions_ref: .github/action-ref-exceptions.yaml
+  branch_protection_required_checks:
+    - validate
+    - CodeQL analyze
 acceptance_groups:
   - fr1-outcomes-as-the-only-memory-source
   - fr2-repo-native-local-first-operation

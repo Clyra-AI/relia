@@ -1,0 +1,6 @@
+{
+  "required_checks": [
+    "validate",
+    "CodeQL analyze"
+  ]
+}

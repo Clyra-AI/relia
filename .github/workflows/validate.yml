@@ -3,18 +3,28 @@ name: validate
 on:
   pull_request:
   push:
-    branches: [main]
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - name: Check out repository
+        uses: actions/checkout@v6.0.2
+      - name: Set up Go
+        uses: actions/setup-go@v6.3.0
         with:
-          go-version: "1.26.4"
+          go-version-file: go.mod
+          check-latest: false
           cache: true
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.x"
-      - run: make prepush-full
+      - name: Run full validation
+        run: make prepush-full
