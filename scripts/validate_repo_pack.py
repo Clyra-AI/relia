@@ -45,28 +45,95 @@ def duplicate_values(values):
         seen.add(value)
     return duplicates
 
+def public_release_boundary_error(label, document):
+    slices = document.get("delivery_slices") or []
+    release_slices = [
+        item for item in slices
+        if isinstance(item, dict)
+        and str(item.get("slice_id", "")).startswith("release-demo-and-product-signals")
+    ]
+    all_boundaries = [
+        item for item in slices
+        if isinstance(item, dict) and item.get("public_release_boundary") is True
+    ]
+    if not release_slices:
+        if all_boundaries:
+            boundary_ids = ", ".join(str(item.get("slice_id", "<missing>")) for item in all_boundaries)
+            return f"{label} must not declare public release boundaries outside a release/demo/product-signal slice; found {boundary_ids}"
+        return None
+    if len(all_boundaries) != 1:
+        boundary_ids = ", ".join(str(item.get("slice_id", "<missing>")) for item in all_boundaries)
+        if not boundary_ids:
+            boundary_ids = "<none>"
+        return f"{label} must declare exactly one public release boundary across all delivery_slices; found {len(all_boundaries)}: {boundary_ids}"
+    boundary = all_boundaries[0]
+    boundary_id = str(boundary.get("slice_id", ""))
+    if not boundary_id.startswith("release-demo-and-product-signals"):
+        return f"{label} public release boundary must be on the final release/demo/product-signal slice, got {boundary_id or '<missing>'}"
+    expected_boundary = release_slices[-1].get("slice_id")
+    if boundary.get("slice_id") != expected_boundary:
+        return f"{label} public release boundary must be the final release/demo/product-signal slice {expected_boundary}"
+    if not boundary.get("required_for_completion"):
+        return f"{label}.{expected_boundary}.required_for_completion must be true"
+    return None
+
+
 def validate_public_release_boundary(documents):
     for label, document in documents:
-        slices = document.get("delivery_slices") or []
-        release_slices = [
-            item for item in slices
-            if isinstance(item, dict)
-            and str(item.get("slice_id", "")).startswith("release-demo-and-product-signals")
+        error = public_release_boundary_error(label, document)
+        if error:
+            fail(error)
+
+
+def self_test_public_release_boundary():
+    valid = {
+        "delivery_slices": [
+            {"slice_id": "foundation", "public_release_boundary": False},
+            {"slice_id": "release-demo-and-product-signals-part-1", "public_release_boundary": False},
+            {
+                "slice_id": "release-demo-and-product-signals-part-2",
+                "public_release_boundary": True,
+                "required_for_completion": True,
+            },
         ]
-        if not release_slices:
-            continue
-        boundaries = [
-            item for item in release_slices
-            if item.get("public_release_boundary") is True
+    }
+    error = public_release_boundary_error("self-test-valid", valid)
+    if error:
+        fail(f"valid public release boundary fixture failed: {error}")
+
+    duplicate_boundary = {
+        "delivery_slices": [
+            {"slice_id": "foundation", "public_release_boundary": True},
+            {"slice_id": "release-demo-and-product-signals-part-1", "public_release_boundary": False},
+            {
+                "slice_id": "release-demo-and-product-signals-part-2",
+                "public_release_boundary": True,
+                "required_for_completion": True,
+            },
         ]
-        if len(boundaries) != 1:
-            fail(f"{label} must declare exactly one public release boundary among release/demo/product-signal slices")
-        boundary = boundaries[0]
-        expected_boundary = release_slices[-1].get("slice_id")
-        if boundary.get("slice_id") != expected_boundary:
-            fail(f"{label} public release boundary must be the final release/demo/product-signal slice {expected_boundary}")
-        if not boundary.get("required_for_completion"):
-            fail(f"{label}.{expected_boundary}.required_for_completion must be true")
+    }
+    error = public_release_boundary_error("self-test-duplicate", duplicate_boundary)
+    if not error or "exactly one public release boundary across all delivery_slices" not in error:
+        fail("duplicate public release boundary fixture did not fail closed")
+
+    misplaced_boundary = {
+        "delivery_slices": [
+            {"slice_id": "foundation", "public_release_boundary": False},
+            {
+                "slice_id": "release-demo-and-product-signals-part-1",
+                "public_release_boundary": True,
+                "required_for_completion": True,
+            },
+            {
+                "slice_id": "release-demo-and-product-signals-part-2",
+                "public_release_boundary": False,
+                "required_for_completion": True,
+            },
+        ]
+    }
+    error = public_release_boundary_error("self-test-misplaced", misplaced_boundary)
+    if not error or "final release/demo/product-signal slice" not in error:
+        fail("misplaced public release boundary fixture did not fail closed")
 
 def self_test():
     if ROOT.name == "scripts":
@@ -75,6 +142,7 @@ def self_test():
         fail("repo root resolution must be relative to this validator file")
     if duplicate_values(["T1", "T2", "T1", "T2", "T3"]) != ["T1", "T2"]:
         fail("duplicate_values must preserve duplicate ids in first duplicate order")
+    self_test_public_release_boundary()
     print("repo-pack validator self-test passed")
 
 def main():
