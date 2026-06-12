@@ -497,7 +497,8 @@
         "ingest-attribute-backtest-acceptance-tests",
         "serve-and-advise-acceptance-tests",
         "success-metrics",
-        "demo-acceptance"
+        "demo-acceptance",
+        "distill-review-memory-page-acceptance-tests"
       ],
       "acceptance_item_ids": [
         "SUCCESS-METRICS-008",
