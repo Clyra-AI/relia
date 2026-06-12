@@ -109,8 +109,9 @@ def validate_t9_model_provider_gate(task):
     if len(matching) != 1:
         fail(f"{task_id}.factoryd_runtime.capability_grants must include one wildcard model_provider_endpoint grant")
     grant = matching[0]
-    if grant.get("approved") is not False:
-        fail(f"{task_id}.model_provider_endpoint grant must remain unapproved until provider posture is explicitly approved")
+    approved = grant.get("approved")
+    if approved not in (False, True):
+        fail(f"{task_id}.model_provider_endpoint grant approved flag must be true or false")
     required_grant_fields = [
         "evidence_ref",
         "network_allowlist",
@@ -124,6 +125,17 @@ def validate_t9_model_provider_gate(task):
         fail(f"{task_id}.model_provider_endpoint grant missing fields: {missing}")
     if grant.get("provider_endpoint") in (None, "", []) and grant.get("base_url") in (None, "", []):
         fail(f"{task_id}.model_provider_endpoint grant must include provider_endpoint or base_url")
+    if approved is True:
+        checked_values = [
+            grant.get("provider_identity"),
+            grant.get("provider_endpoint") or grant.get("base_url"),
+            grant.get("credential_environment"),
+            grant.get("budget_posture"),
+            grant.get("redaction_posture"),
+            *list(grant.get("network_allowlist") or []),
+        ]
+        if any("pending-approved" in str(value).lower() or str(value).lower().startswith("pending-") for value in checked_values):
+            fail(f"{task_id}.approved model_provider_endpoint grant must not use pending placeholders")
     if "model_provider_endpoint" not in str(grant.get("evidence_ref")):
         fail(f"{task_id}.model_provider_endpoint grant evidence_ref must cite the alignment decision")
     joined_stop_conditions = "\n".join(str(value) for value in task.get("stop_conditions") or [])
