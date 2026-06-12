@@ -511,7 +511,8 @@
         "SUCCESS-METRICS-016",
         "DEMO-ACCEPTANCE-001",
         "DEMO-ACCEPTANCE-003",
-        "DEMO-ACCEPTANCE-005"
+        "DEMO-ACCEPTANCE-005",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-013"
       ],
       "name": "Release, Demo, And Product Signals Part 2",
       "public_release_boundary": true,

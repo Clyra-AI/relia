@@ -2047,21 +2047,26 @@
         "mvp"
       ],
       "delivery_slice_refs": [
-        "distillation-calibration-and-confidence-part-2"
+        "distillation-calibration-and-confidence-part-2",
+        "release-demo-and-product-signals-part-2"
       ],
       "evidence_mode": "automated",
       "group_id": "distill-review-memory-page-acceptance-tests",
       "kind": "acceptance_test",
-      "notes": [],
+      "notes": [
+        "Release packaging tasks inherit this check so model payloads cannot be bundled after distill work closes."
+      ],
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#distill-review-memory-page-acceptance-tests",
       "source_text": "Release binaries, containers, and tracked source do not bundle model weights or inference-runtime payloads.",
       "status": "planned",
       "task_refs": [
-        "T7"
+        "T7",
+        "T16"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/6/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/6/validation_commands",
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/15/validation_commands"
       ]
     },
     {

@@ -431,7 +431,8 @@
         "SUCCESS-METRICS-016",
         "DEMO-ACCEPTANCE-001",
         "DEMO-ACCEPTANCE-003",
-        "DEMO-ACCEPTANCE-005"
+        "DEMO-ACCEPTANCE-005",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-013"
       ],
       "name": "Release, Demo, And Product Signals Part 2",
       "public_release_boundary": true,
@@ -3593,16 +3594,19 @@
         }
       ],
       "delivery_slice_refs": [
-        "distillation-calibration-and-confidence-part-2"
+        "distillation-calibration-and-confidence-part-2",
+        "release-demo-and-product-signals-part-2"
       ],
       "evidence_refs": [],
       "group_id": "distill-review-memory-page-acceptance-tests",
       "implemented_task_refs": [],
       "notes": [
-        "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
+        "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence.",
+        "Release packaging tasks inherit this check so closure cannot happen before release artifacts are validated."
       ],
       "remaining_task_refs": [
-        "T7"
+        "T7",
+        "T16"
       ],
       "requires_human_approval": false,
       "scope_item": "Release binaries, containers, and tracked source do not bundle model weights or inference-runtime payloads.",
@@ -3610,7 +3614,8 @@
       "source_ref": "docs/product/prd.md#distill-review-memory-page-acceptance-tests",
       "status": "partial",
       "task_refs": [
-        "T7"
+        "T7",
+        "T16"
       ]
     },
     {

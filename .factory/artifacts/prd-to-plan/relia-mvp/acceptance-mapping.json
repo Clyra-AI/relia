@@ -430,7 +430,8 @@
         "SUCCESS-METRICS-016",
         "DEMO-ACCEPTANCE-001",
         "DEMO-ACCEPTANCE-003",
-        "DEMO-ACCEPTANCE-005"
+        "DEMO-ACCEPTANCE-005",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-013"
       ],
       "name": "Release, Demo, And Product Signals Part 2",
       "public_release_boundary": true,
@@ -2435,11 +2436,13 @@
         {
           "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-013",
           "delivery_slice_refs": [
-            "distillation-calibration-and-confidence-part-2"
+            "distillation-calibration-and-confidence-part-2",
+            "release-demo-and-product-signals-part-2"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T7"
+            "T7",
+            "T16"
           ]
         },
         {
@@ -2463,7 +2466,9 @@
       "task_refs": [
         "T4",
         "T7",
-        "T9"
+        "T9",
+        "T15",
+        "T16"
       ],
       "title": "Distill, Review, Memory Page Acceptance Tests"
     },
