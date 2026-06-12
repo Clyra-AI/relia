@@ -127,8 +127,9 @@ def validate_t9_model_provider_gate(task):
     missing = [field for field in required_grant_fields if field not in grant or grant[field] in (None, "", [])]
     if missing:
         fail(f"{task_id}.model_provider_endpoint grant missing fields: {missing}")
-    if not isinstance(grant.get("network_allowlist"), list):
-        fail(f"{task_id}.model_provider_endpoint grant network_allowlist must be a list")
+    allowlist = grant.get("network_allowlist")
+    if not isinstance(allowlist, list) or not all(str(item).strip() for item in allowlist):
+        fail(f"{task_id}.model_provider_endpoint grant network_allowlist must be a non-empty string list")
     if grant.get("provider_endpoint") in (None, "", []) and grant.get("base_url") in (None, "", []):
         fail(f"{task_id}.model_provider_endpoint grant must include provider_endpoint or base_url")
     if approved is True:
