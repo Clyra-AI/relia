@@ -154,6 +154,9 @@ def validate_model_provider_gate(task):
     task_id = task.get("task_id") or "T9"
     if task.get("requires_model_provider_endpoint") is not True:
         fail(f"{task_id}.requires_model_provider_endpoint must be true for provider-backed distill work")
+    for key in ["requires_network", "requires_credentials"]:
+        if task.get(key) is not True:
+            fail(f"{task_id}.{key} must be true for provider-backed distill work")
     requirements = task.get("model_provider_requirements")
     if not isinstance(requirements, dict) or requirements.get("required_grant") != "model_provider_endpoint":
         fail(f"{task_id}.model_provider_requirements must require model_provider_endpoint")
@@ -283,6 +286,8 @@ def model_provider_gate_task(task_id="T7", grant_task_id="*"):
     return {
         "task_id": task_id,
         "requires_model_provider_endpoint": True,
+        "requires_network": True,
+        "requires_credentials": True,
         "requires_human_approval": False,
         "model_provider_requirements": {
             "required_grant": "model_provider_endpoint",

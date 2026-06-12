@@ -3992,8 +3992,8 @@
             "redaction_posture": "pending-approved-model-provider-redaction"
           }
         ],
-        "credential_posture": "no ambient secrets",
-        "network_posture": "offline by default",
+        "credential_posture": "no ambient secrets; approved model_provider_endpoint credential environment required before provider work",
+        "network_posture": "offline by default; allowlisted only after approved model_provider_endpoint grant",
         "runtime_control": {
           "autonomy_level": "restricted",
           "conflict_behavior": "fail_closed",
@@ -4061,9 +4061,9 @@
         "commit-push",
         "post-merge-monitor"
       ],
-      "requires_credentials": false,
+      "requires_credentials": true,
       "requires_human_approval": false,
-      "requires_network": false,
+      "requires_network": true,
       "risk_class": "low",
       "runtime_pins": {
         "artifact_namespace": ".factory/artifacts/",
