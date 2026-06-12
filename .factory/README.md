@@ -20,3 +20,9 @@ FACTORY_REPO=/path/to/factory factoryd ingest --config .factory/factoryd.example
 ~~~
 
 Generated post-PRD artifacts live under `.factory/artifacts/post-prd/<mission>/`.
+
+Live approval, credential, network, model-provider, and model-artifact grants
+belong in the active `.factory/factoryd*.json` daemon config. PRD-derived task
+packets may carry planning-time seed grants that describe the required
+capability, but operator approvals should not be recorded by mutating generated
+task packets.
