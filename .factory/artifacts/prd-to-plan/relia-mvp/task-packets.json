@@ -3974,27 +3974,7 @@
       "factoryd_runtime": {
         "approval_posture": "human approval required for high risk, live credentials, and merge",
         "branch_prefix": "codex",
-        "capability_grants": [
-          {
-            "task_id": "*",
-            "capability": "model_artifact_pull",
-            "approved": false,
-            "evidence_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions/model_artifact_pull",
-            "network_allowlist": [
-              "pending-approved-model-source-host"
-            ],
-            "pull_command": "relia models pull <approved-model-id>",
-            "model_source_url": "pending-approved-model-source-url",
-            "model_id": "pending-approved-model-id",
-            "model_version": "pending-approved-model-version",
-            "model_license": "pending-approved-model-license",
-            "content_digest": "pending-approved-model-digest",
-            "cache_path": ".relia/models/<approved-model-id>",
-            "update_policy": "manual repull with recorded digest update",
-            "rollback_policy": "retain previous approved digest until replacement validates",
-            "absence_behavior": "fail closed with exit 8 for embeddings: local; use embeddings: signature for zero-install fallback"
-          }
-        ],
+        "capability_grants": [],
         "credential_posture": "no ambient secrets",
         "network_posture": "offline by default",
         "runtime_control": {
@@ -4065,9 +4045,9 @@
         "post-merge-monitor"
       ],
       "requires_credentials": false,
-      "requires_human_approval": true,
-      "requires_network": true,
-      "risk_class": "medium",
+      "requires_human_approval": false,
+      "requires_network": false,
+      "risk_class": "low",
       "runtime_pins": {
         "artifact_namespace": ".factory/artifacts/",
         "dependency_policy": "standard library first; pin and justify dependencies",
@@ -4075,7 +4055,7 @@
         "language": "go",
         "live_work_policy": "no ambient secrets or live network by default",
         "module_or_package_path": "github.com/Clyra-AI/relia",
-        "provider_policy": "none by default; provider embeddings are opt-in live provider calls with endpoint/base_url, credential, cost, redaction, and network posture; local embeddings require explicit relia models pull artifact evidence",
+        "provider_policy": "none by default; T7 uses deterministic signature/no-LLM paths and implements fail-closed local embedding behavior without downloading model artifacts during task execution",
         "toolchain_version": "1.26.4"
       },
       "scope_exclusions": [
@@ -4218,24 +4198,7 @@
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t7",
-      "worker_type": "codex_cli",
-      "requires_model_artifact_pull": true,
-      "model_artifact_requirements": {
-        "required_grant": "model_artifact_pull",
-        "required_fields": [
-          "pull_command",
-          "model_source_url",
-          "model_id",
-          "model_version",
-          "model_license",
-          "content_digest",
-          "cache_path",
-          "update_policy",
-          "rollback_policy",
-          "absence_behavior",
-          "network_allowlist"
-        ]
-      }
+      "worker_type": "codex_cli"
     },
     {
       "acceptance_checks": [
