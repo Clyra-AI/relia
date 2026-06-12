@@ -3,6 +3,7 @@ from pathlib import Path
 import json
 import re
 import sys
+from tempfile import TemporaryDirectory
 
 ROOT = Path(__file__).resolve().parents[1]
 FACTORYD_CONFIG = ROOT / ".factory" / "factoryd.example.json"
@@ -46,17 +47,16 @@ def load_json_file(path):
 
 def factoryd_config_capability_grants():
     grants = []
-    for path in [FACTORYD_CONFIG, FACTORYD_ACTIVE_CONFIG, FACTORYD_AUTOSHIP_CONFIG]:
-        if not path.exists():
-            continue
-        config = load_json_file(path)
-        repos = config.get("repos")
-        if isinstance(repos, dict):
-            repo = repos.get(FACTORYD_REPO_KEY)
-            if isinstance(repo, dict) and isinstance(repo.get("capability_grants"), list):
-                grants.extend(grant for grant in repo["capability_grants"] if isinstance(grant, dict))
-        elif isinstance(config.get("capability_grants"), list):
-            grants.extend(grant for grant in config["capability_grants"] if isinstance(grant, dict))
+    if not FACTORYD_ACTIVE_CONFIG.exists():
+        return grants
+    config = load_json_file(FACTORYD_ACTIVE_CONFIG)
+    repos = config.get("repos")
+    if isinstance(repos, dict):
+        repo = repos.get(FACTORYD_REPO_KEY)
+        if isinstance(repo, dict) and isinstance(repo.get("capability_grants"), list):
+            grants.extend(grant for grant in repo["capability_grants"] if isinstance(grant, dict))
+    elif isinstance(config.get("capability_grants"), list):
+        grants.extend(grant for grant in config["capability_grants"] if isinstance(grant, dict))
     return grants
 
 def profile_visibility_from_text(profile_text):
@@ -157,7 +157,7 @@ def validate_model_provider_gate(task):
         and grant.get("capability") == "model_provider_endpoint"
     ]
     if any(grant.get("approved") is True for grant in seed_matching):
-        fail(f"{task_id}.seed model_provider_endpoint grants must stay approved false; active approvals belong in .factory/factoryd*.json")
+        fail(f"{task_id}.seed model_provider_endpoint grants must stay approved false; active approvals belong in .factory/factoryd.json")
     active_matching = [
         grant for grant in active_grants
         if isinstance(grant, dict)
@@ -166,7 +166,7 @@ def validate_model_provider_gate(task):
     ]
     matching = [*seed_matching, *active_matching]
     if not matching:
-        fail(f"{task_id} must include one seed wildcard or task-scoped model_provider_endpoint grant in factoryd_runtime.capability_grants, or one task-scoped active .factory/factoryd*.json config grant")
+        fail(f"{task_id} must include one seed wildcard or task-scoped model_provider_endpoint grant in factoryd_runtime.capability_grants, or one task-scoped active .factory/factoryd.json config grant")
     grant = next((candidate for candidate in matching if candidate.get("approved") is True), matching[0])
     approved = grant.get("approved")
     if approved not in (False, True):
@@ -311,8 +311,48 @@ def self_test():
 
     original_fail = fail
     original_config_grants = factoryd_config_capability_grants
+    original_example_config = FACTORYD_CONFIG
+    original_active_config = FACTORYD_ACTIVE_CONFIG
+    original_autoship_config = FACTORYD_AUTOSHIP_CONFIG
     globals()["fail"] = lambda message: (_ for _ in ()).throw(AssertionError(message))
     try:
+        active_config_grant = {
+            "task_id": "T7",
+            "capability": "model_provider_endpoint",
+            "approved": True,
+            "evidence_ref": ".factory/artifacts/approvals/model_provider_endpoint.md",
+            "network_allowlist": ["api.example.com"],
+            "provider_identity": "example-provider",
+            "provider_model": "example-model",
+            "provider_endpoint": "https://api.example.com/v1",
+            "credential_environment": "RELIA_PROVIDER_API_KEY",
+            "budget_posture": "capped",
+            "redaction_posture": "redacted",
+        }
+        with TemporaryDirectory() as temp_dir:
+            temp_root = Path(temp_dir)
+            example_config = temp_root / "factoryd.example.json"
+            active_config = temp_root / "factoryd.json"
+            autoship_config = temp_root / "factoryd.autoship.example.json"
+            config_payload = {"repos": {FACTORYD_REPO_KEY: {"capability_grants": [active_config_grant]}}}
+            empty_active_payload = {"repos": {FACTORYD_REPO_KEY: {"capability_grants": []}}}
+            example_config.write_text(json.dumps(config_payload), encoding="utf-8")
+            autoship_config.write_text(json.dumps(config_payload), encoding="utf-8")
+            active_config.write_text(json.dumps(empty_active_payload), encoding="utf-8")
+            try:
+                globals()["FACTORYD_CONFIG"] = example_config
+                globals()["FACTORYD_ACTIVE_CONFIG"] = active_config
+                globals()["FACTORYD_AUTOSHIP_CONFIG"] = autoship_config
+                if factoryd_config_capability_grants():
+                    fail("example and autoship config grants should be ignored")
+                active_config.write_text(json.dumps(config_payload), encoding="utf-8")
+                if factoryd_config_capability_grants() != [active_config_grant]:
+                    fail("active factoryd.json grants should be visible")
+            finally:
+                globals()["FACTORYD_CONFIG"] = original_example_config
+                globals()["FACTORYD_ACTIVE_CONFIG"] = original_active_config
+                globals()["FACTORYD_AUTOSHIP_CONFIG"] = original_autoship_config
+
         active_wildcard_task = model_provider_gate_task()
         active_wildcard_task["factoryd_runtime"]["capability_grants"] = []
         active_wildcard_grant = {
