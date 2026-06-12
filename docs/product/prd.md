@@ -338,11 +338,20 @@ relia check
 relia backtest --window 180d
 relia ingest
 relia distill
-relia models pull
 relia review
 relia compile
 relia serve
 ```
+
+Optional local embedding refinement uses a separate pre-distill acquisition step:
+
+```bash
+relia models pull
+relia distill --embeddings local
+```
+
+The optional path is not part of the default first-session flow. The default
+`embeddings: signature` path must remain zero-install and no-network.
 
 ### Exit Codes
 

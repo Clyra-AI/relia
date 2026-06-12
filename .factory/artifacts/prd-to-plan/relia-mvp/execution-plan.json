@@ -54,7 +54,7 @@
       "success-metrics",
       "demo-acceptance"
     ],
-    "required_item_count": 117,
+    "required_item_count": 121,
     "scope_closure_map_ref": ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
     "status": "mapped"
   },
@@ -279,7 +279,11 @@
         "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-004",
         "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-005",
         "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-008",
-        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-009"
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-009",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-011",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-012",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-013",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-014"
       ],
       "name": "Distillation, Calibration, And Confidence Part 2",
       "public_release_boundary": false,

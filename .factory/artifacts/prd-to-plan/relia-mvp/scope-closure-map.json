@@ -199,7 +199,11 @@
         "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-004",
         "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-005",
         "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-008",
-        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-009"
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-009",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-011",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-012",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-013",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-014"
       ],
       "name": "Distillation, Calibration, And Confidence Part 2",
       "public_release_boundary": false,
@@ -3499,6 +3503,150 @@
       "status": "partial",
       "task_refs": [
         "T9"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "relia models pull records model ID, version, source URL, license, digest, cache path, update policy, and rollback policy before local embedding refinement is used."
+      ],
+      "acceptance_item_ids": [
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-011"
+      ],
+      "acceptance_item_statuses": [
+        {
+          "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-011",
+          "evidence_refs": [],
+          "repair_task_refs": [],
+          "status": "partial"
+        }
+      ],
+      "delivery_slice_refs": [
+        "distillation-calibration-and-confidence-part-2"
+      ],
+      "evidence_refs": [],
+      "group_id": "distill-review-memory-page-acceptance-tests",
+      "implemented_task_refs": [],
+      "notes": [
+        "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
+      ],
+      "remaining_task_refs": [
+        "T7"
+      ],
+      "requires_human_approval": false,
+      "scope_item": "relia models pull records model ID, version, source URL, license, digest, cache path, update policy, and rollback policy before local embedding refinement is used.",
+      "scope_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-011",
+      "source_ref": "docs/product/prd.md#distill-review-memory-page-acceptance-tests",
+      "status": "partial",
+      "task_refs": [
+        "T7"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "embeddings: local fails closed with exit 8 when the local model artifact is missing, stale, or digest-mismatched, while embeddings: signature remains the zero-install deterministic fallback with signature-only provenance."
+      ],
+      "acceptance_item_ids": [
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-012"
+      ],
+      "acceptance_item_statuses": [
+        {
+          "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-012",
+          "evidence_refs": [],
+          "repair_task_refs": [],
+          "status": "partial"
+        }
+      ],
+      "delivery_slice_refs": [
+        "distillation-calibration-and-confidence-part-2"
+      ],
+      "evidence_refs": [],
+      "group_id": "distill-review-memory-page-acceptance-tests",
+      "implemented_task_refs": [],
+      "notes": [
+        "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
+      ],
+      "remaining_task_refs": [
+        "T7"
+      ],
+      "requires_human_approval": false,
+      "scope_item": "embeddings: local fails closed with exit 8 when the local model artifact is missing, stale, or digest-mismatched, while embeddings: signature remains the zero-install deterministic fallback with signature-only provenance.",
+      "scope_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-012",
+      "source_ref": "docs/product/prd.md#distill-review-memory-page-acceptance-tests",
+      "status": "partial",
+      "task_refs": [
+        "T7"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "Release binaries, containers, and tracked source do not bundle model weights or inference-runtime payloads."
+      ],
+      "acceptance_item_ids": [
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-013"
+      ],
+      "acceptance_item_statuses": [
+        {
+          "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-013",
+          "evidence_refs": [],
+          "repair_task_refs": [],
+          "status": "partial"
+        }
+      ],
+      "delivery_slice_refs": [
+        "distillation-calibration-and-confidence-part-2"
+      ],
+      "evidence_refs": [],
+      "group_id": "distill-review-memory-page-acceptance-tests",
+      "implemented_task_refs": [],
+      "notes": [
+        "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
+      ],
+      "remaining_task_refs": [
+        "T7"
+      ],
+      "requires_human_approval": false,
+      "scope_item": "Release binaries, containers, and tracked source do not bundle model weights or inference-runtime payloads.",
+      "scope_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-013",
+      "source_ref": "docs/product/prd.md#distill-review-memory-page-acceptance-tests",
+      "status": "partial",
+      "task_refs": [
+        "T7"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "The local embedding inference boundary is covered by an ADR before implementation chooses a pure Go library, ONNX/runtime binding, or external local process."
+      ],
+      "acceptance_item_ids": [
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-014"
+      ],
+      "acceptance_item_statuses": [
+        {
+          "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-014",
+          "evidence_refs": [],
+          "repair_task_refs": [],
+          "status": "partial"
+        }
+      ],
+      "delivery_slice_refs": [
+        "distillation-calibration-and-confidence-part-2"
+      ],
+      "evidence_refs": [],
+      "group_id": "distill-review-memory-page-acceptance-tests",
+      "implemented_task_refs": [],
+      "notes": [
+        "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
+      ],
+      "remaining_task_refs": [
+        "T7"
+      ],
+      "requires_human_approval": false,
+      "scope_item": "The local embedding inference boundary is covered by an ADR before implementation chooses a pure Go library, ONNX/runtime binding, or external local process.",
+      "scope_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-014",
+      "source_ref": "docs/product/prd.md#distill-review-memory-page-acceptance-tests",
+      "status": "partial",
+      "task_refs": [
+        "T7"
       ]
     },
     {
