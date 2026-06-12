@@ -150,6 +150,53 @@ def validate_model_provider_gate(task):
         for key in ["requires_human_approval", "requires_network", "requires_credentials"]:
             if task.get(key) is not True:
                 fail(f"{task_id}.{key} must remain true because T9 mixes model-provider, network, credential, API, webhook, and hosted-service work")
+    required_grant_fields = [
+        "evidence_ref",
+        "network_allowlist",
+        "provider_identity",
+        "provider_model",
+        "credential_environment",
+        "budget_posture",
+        "redaction_posture",
+    ]
+    required_string_fields = [
+        "evidence_ref",
+        "provider_identity",
+        "provider_model",
+        "credential_environment",
+        "budget_posture",
+        "redaction_posture",
+    ]
+
+    def validate_provider_grant_fields(candidate, label):
+        missing = [
+            field for field in required_grant_fields
+            if field not in candidate or missing_grant_value(candidate[field])
+        ]
+        if missing:
+            fail(f"{label} missing fields: {missing}")
+        non_string_fields = [
+            field for field in required_string_fields
+            if field in candidate and not isinstance(candidate.get(field), str)
+        ]
+        if non_string_fields:
+            fail(f"{label} fields must be non-empty strings: {non_string_fields}")
+        allowlist = candidate.get("network_allowlist")
+        if not isinstance(allowlist, list) or not all(isinstance(item, str) and item.strip() for item in allowlist):
+            fail(f"{label} network_allowlist must be a non-empty string list")
+        provider_endpoint_value = candidate.get("provider_endpoint", "")
+        base_url_value = candidate.get("base_url", "")
+        if provider_endpoint_value not in (None, "") and not isinstance(provider_endpoint_value, str):
+            fail(f"{label} provider_endpoint must be a string")
+        if base_url_value not in (None, "") and not isinstance(base_url_value, str):
+            fail(f"{label} base_url must be a string")
+        provider_endpoint = provider_endpoint_value.strip() if isinstance(provider_endpoint_value, str) else ""
+        base_url = base_url_value.strip() if isinstance(base_url_value, str) else ""
+        provider_endpoint_or_base_url = provider_endpoint or base_url
+        if not provider_endpoint_or_base_url:
+            fail(f"{label} must include provider_endpoint or base_url")
+        return provider_endpoint_or_base_url
+
     seed_grants = ((task.get("factoryd_runtime") or {}).get("capability_grants")) or []
     active_grants = factoryd_config_capability_grants()
     active_wildcard_grants = [
@@ -168,6 +215,8 @@ def validate_model_provider_gate(task):
     ]
     if any(grant.get("approved") is True for grant in seed_matching):
         fail(f"{task_id}.seed model_provider_endpoint grants must stay approved false; active approvals belong in .factory/factoryd.json")
+    for seed_grant in seed_matching:
+        validate_provider_grant_fields(seed_grant, f"{task_id}.seed model_provider_endpoint grant")
     active_matching = [
         grant for grant in active_grants
         if isinstance(grant, dict)
@@ -181,46 +230,7 @@ def validate_model_provider_gate(task):
     approved = grant.get("approved")
     if approved not in (False, True):
         fail(f"{task_id}.model_provider_endpoint grant approved flag must be true or false")
-    required_grant_fields = [
-        "evidence_ref",
-        "network_allowlist",
-        "provider_identity",
-        "provider_model",
-        "credential_environment",
-        "budget_posture",
-        "redaction_posture",
-    ]
-    missing = [field for field in required_grant_fields if field not in grant or missing_grant_value(grant[field])]
-    if missing:
-        fail(f"{task_id}.model_provider_endpoint grant missing fields: {missing}")
-    required_string_fields = [
-        "evidence_ref",
-        "provider_identity",
-        "provider_model",
-        "credential_environment",
-        "budget_posture",
-        "redaction_posture",
-    ]
-    non_string_fields = [
-        field for field in required_string_fields
-        if field in grant and not isinstance(grant.get(field), str)
-    ]
-    if non_string_fields:
-        fail(f"{task_id}.model_provider_endpoint grant fields must be non-empty strings: {non_string_fields}")
-    allowlist = grant.get("network_allowlist")
-    if not isinstance(allowlist, list) or not all(isinstance(item, str) and item.strip() for item in allowlist):
-        fail(f"{task_id}.model_provider_endpoint grant network_allowlist must be a non-empty string list")
-    provider_endpoint_value = grant.get("provider_endpoint", "")
-    base_url_value = grant.get("base_url", "")
-    if provider_endpoint_value not in (None, "") and not isinstance(provider_endpoint_value, str):
-        fail(f"{task_id}.model_provider_endpoint grant provider_endpoint must be a string")
-    if base_url_value not in (None, "") and not isinstance(base_url_value, str):
-        fail(f"{task_id}.model_provider_endpoint grant base_url must be a string")
-    provider_endpoint = provider_endpoint_value.strip() if isinstance(provider_endpoint_value, str) else ""
-    base_url = base_url_value.strip() if isinstance(base_url_value, str) else ""
-    provider_endpoint_or_base_url = provider_endpoint or base_url
-    if not provider_endpoint_or_base_url:
-        fail(f"{task_id}.model_provider_endpoint grant must include provider_endpoint or base_url")
+    provider_endpoint_or_base_url = validate_provider_grant_fields(grant, f"{task_id}.model_provider_endpoint grant")
     if approved is True:
         checked_values = [
             grant.get("provider_identity"),
@@ -498,6 +508,26 @@ def self_test():
                 raise
         else:
             fail("missing model-provider requirement field fixture did not fail closed")
+
+        missing_seed_metadata_task = model_provider_gate_task("T7", "T7")
+        missing_seed_metadata_task["factoryd_runtime"]["capability_grants"] = [
+            {
+                "task_id": "T7",
+                "capability": "model_provider_endpoint",
+                "approved": False,
+            }
+        ]
+        globals()["factoryd_config_capability_grants"] = lambda: [active_config_grant]
+        try:
+            try:
+                validate_model_provider_gate(missing_seed_metadata_task)
+            except AssertionError as exc:
+                if "seed model_provider_endpoint grant missing fields" not in str(exc):
+                    raise
+            else:
+                fail("missing seed provider metadata fixture did not fail closed")
+        finally:
+            globals()["factoryd_config_capability_grants"] = original_config_grants
     finally:
         globals()["factoryd_config_capability_grants"] = original_config_grants
         globals()["fail"] = original_fail
