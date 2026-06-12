@@ -40,8 +40,19 @@
     "unresolved": [
       "PRD requires networked or provider work; confirm network allowlist and deterministic replay boundary before live tasks are unblocked",
       "PRD requires credentials or secrets; confirm scoped credential posture before live implementation tasks are unblocked",
-      "PRD contains judgment-only acceptance criteria; define objective evidence or route those checks to a human approval gate"
-    ]
+      "PRD contains judgment-only acceptance criteria; define objective evidence or route those checks to a human approval gate",
+      "PRD requires explicit local embedding artifact pulls; approve model source URL, ID/version, license, digest, cache path, update policy, rollback policy, absence behavior, and network allowlist before T7 local embedding refinement is unblocked"
+    ],
+    "model_artifact_pull": {
+      "status": "pending_approval",
+      "decision": "model_artifact_pull",
+      "value": "local embedding artifact pulls are gated until an operator approves model source URL, model ID/version, license, digest, cache path, update policy, rollback policy, absence behavior, and network allowlist",
+      "required_before_dispatch": [
+        "T7"
+      ],
+      "required_grant": "model_artifact_pull",
+      "fallback": "embeddings: signature remains the zero-install deterministic fallback until this gate is approved"
+    }
   },
   "alignment_findings": {
     "facts": [
