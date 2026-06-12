@@ -532,7 +532,8 @@
       "task_refs": [
         "T4",
         "T7",
-        "T9"
+        "T9",
+        "T16"
       ],
       "title": "Distill, Review, Memory Page Acceptance Tests"
     },
