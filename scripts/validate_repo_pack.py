@@ -140,18 +140,28 @@ def validate_model_provider_gate(task):
         for key in ["requires_human_approval", "requires_network", "requires_credentials"]:
             if task.get(key) is not True:
                 fail(f"{task_id}.{key} must remain true because T9 mixes model-provider, network, credential, API, webhook, and hosted-service work")
-    grants = [
-        *(((task.get("factoryd_runtime") or {}).get("capability_grants")) or []),
-        *factoryd_config_capability_grants(),
-    ]
-    matching = [
-        grant for grant in grants
+    seed_grants = ((task.get("factoryd_runtime") or {}).get("capability_grants")) or []
+    active_grants = factoryd_config_capability_grants()
+    active_wildcard_grants = [
+        grant for grant in active_grants
         if isinstance(grant, dict)
-        and str(grant.get("task_id", "")).strip() in {"*", task_id}
+        and str(grant.get("task_id", "")).strip() == "*"
+        and grant.get("capability") == "model_provider_endpoint"
+    ]
+    if active_wildcard_grants:
+        fail(f"{task_id}.active model_provider_endpoint grants must be task-scoped, not wildcard")
+    matching = [
+        grant for grant_group in (seed_grants, active_grants)
+        for grant in grant_group
+        if isinstance(grant, dict)
+        and (
+            str(grant.get("task_id", "")).strip() == task_id
+            or (grant_group is seed_grants and str(grant.get("task_id", "")).strip() == "*")
+        )
         and grant.get("capability") == "model_provider_endpoint"
     ]
     if not matching:
-        fail(f"{task_id} must include one wildcard or task-scoped model_provider_endpoint grant in factoryd_runtime.capability_grants or active .factory/factoryd*.json config")
+        fail(f"{task_id} must include one seed wildcard or task-scoped model_provider_endpoint grant in factoryd_runtime.capability_grants, or one task-scoped active .factory/factoryd*.json config grant")
     grant = next((candidate for candidate in matching if candidate.get("approved") is True), matching[0])
     approved = grant.get("approved")
     if approved not in (False, True):
@@ -171,13 +181,16 @@ def validate_model_provider_gate(task):
     allowlist = grant.get("network_allowlist")
     if not isinstance(allowlist, list) or not all(str(item).strip() for item in allowlist):
         fail(f"{task_id}.model_provider_endpoint grant network_allowlist must be a non-empty string list")
-    if not str(grant.get("provider_endpoint", "")).strip() and not str(grant.get("base_url", "")).strip():
+    provider_endpoint = str(grant.get("provider_endpoint", "")).strip()
+    base_url = str(grant.get("base_url", "")).strip()
+    provider_endpoint_or_base_url = provider_endpoint or base_url
+    if not provider_endpoint_or_base_url:
         fail(f"{task_id}.model_provider_endpoint grant must include provider_endpoint or base_url")
     if approved is True:
         checked_values = [
             grant.get("provider_identity"),
             grant.get("provider_model"),
-            grant.get("provider_endpoint") or grant.get("base_url"),
+            provider_endpoint_or_base_url,
             grant.get("credential_environment"),
             grant.get("budget_posture"),
             grant.get("redaction_posture"),
@@ -190,6 +203,45 @@ def validate_model_provider_gate(task):
     joined_stop_conditions = "\n".join(str(value) for value in task.get("stop_conditions") or [])
     if "model_provider_endpoint grant" not in joined_stop_conditions:
         fail(f"{task_id}.stop_conditions must fail closed without model_provider_endpoint grant")
+
+
+def model_provider_gate_task(task_id="T7", grant_task_id="*"):
+    return {
+        "task_id": task_id,
+        "requires_model_provider_endpoint": True,
+        "requires_human_approval": False,
+        "model_provider_requirements": {
+            "required_grant": "model_provider_endpoint",
+            "provider_surfaces": ["openai_compatible_http", "anthropic_messages_http"],
+            "required_fields": [
+                "provider_identity",
+                "provider_model",
+                "provider_endpoint_or_base_url",
+                "credential_environment",
+                "budget_posture",
+                "redaction_posture",
+                "network_allowlist",
+            ],
+        },
+        "factoryd_runtime": {
+            "capability_grants": [
+                {
+                    "task_id": grant_task_id,
+                    "capability": "model_provider_endpoint",
+                    "approved": False,
+                    "evidence_ref": ".factory/artifacts/approvals/model_provider_endpoint.md",
+                    "network_allowlist": ["pending-approved-provider-host"],
+                    "provider_identity": "pending-approved-provider",
+                    "provider_model": "pending-approved-model",
+                    "provider_endpoint": "pending-approved-provider-endpoint",
+                    "credential_environment": "pending-approved-credential-environment",
+                    "budget_posture": "pending-approved-budget",
+                    "redaction_posture": "pending-approved-redaction",
+                }
+            ]
+        },
+        "stop_conditions": ["missing model_provider_endpoint grant"],
+    }
 
 
 def self_test_public_release_boundary():
@@ -250,6 +302,62 @@ def self_test():
     if duplicate_values(["T1", "T2", "T1", "T2", "T3"]) != ["T1", "T2"]:
         fail("duplicate_values must preserve duplicate ids in first duplicate order")
     self_test_public_release_boundary()
+    validate_model_provider_gate(model_provider_gate_task())
+
+    original_fail = fail
+    original_config_grants = factoryd_config_capability_grants
+    globals()["fail"] = lambda message: (_ for _ in ()).throw(AssertionError(message))
+    try:
+        active_wildcard_task = model_provider_gate_task()
+        active_wildcard_task["factoryd_runtime"]["capability_grants"] = []
+        active_wildcard_grant = {
+            "task_id": "*",
+            "capability": "model_provider_endpoint",
+            "approved": True,
+            "evidence_ref": ".factory/artifacts/approvals/model_provider_endpoint.md",
+            "network_allowlist": ["api.example.com"],
+            "provider_identity": "example-provider",
+            "provider_model": "example-model",
+            "provider_endpoint": "https://api.example.com/v1",
+            "credential_environment": "RELIA_PROVIDER_API_KEY",
+            "budget_posture": "capped",
+            "redaction_posture": "redacted",
+        }
+        globals()["factoryd_config_capability_grants"] = lambda: [active_wildcard_grant]
+        try:
+            validate_model_provider_gate(active_wildcard_task)
+        except AssertionError as exc:
+            if "active model_provider_endpoint grants must be task-scoped" not in str(exc):
+                raise
+        else:
+            fail("active wildcard model-provider grant fixture did not fail closed")
+        globals()["factoryd_config_capability_grants"] = original_config_grants
+
+        pending_base_url_task = model_provider_gate_task("T7", "T7")
+        pending_base_url_grant = pending_base_url_task["factoryd_runtime"]["capability_grants"][0]
+        pending_base_url_grant.update(
+            {
+                "approved": True,
+                "network_allowlist": ["api.example.com"],
+                "provider_identity": "example-provider",
+                "provider_model": "example-model",
+                "provider_endpoint": "   ",
+                "base_url": "pending-approved-base-url",
+                "credential_environment": "RELIA_PROVIDER_API_KEY",
+                "budget_posture": "capped",
+                "redaction_posture": "redacted",
+            }
+        )
+        try:
+            validate_model_provider_gate(pending_base_url_task)
+        except AssertionError as exc:
+            if "pending placeholders" not in str(exc):
+                raise
+        else:
+            fail("whitespace endpoint with pending base_url fixture did not fail closed")
+    finally:
+        globals()["factoryd_config_capability_grants"] = original_config_grants
+        globals()["fail"] = original_fail
     print("repo-pack validator self-test passed")
 
 def main():
