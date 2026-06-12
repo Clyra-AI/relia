@@ -4125,7 +4125,24 @@
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t7",
-      "worker_type": "codex_cli"
+      "worker_type": "codex_cli",
+      "requires_model_artifact_pull": true,
+      "model_artifact_requirements": {
+        "required_grant": "model_artifact_pull",
+        "required_fields": [
+          "pull_command",
+          "model_source_url",
+          "model_id",
+          "model_version",
+          "model_license",
+          "content_digest",
+          "cache_path",
+          "update_policy",
+          "rollback_policy",
+          "absence_behavior",
+          "network_allowlist"
+        ]
+      }
     },
     {
       "acceptance_checks": [

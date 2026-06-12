@@ -319,10 +319,15 @@ Auxiliary commands:
 
 | Command | MVP Requirement |
 |---|---|
+| `relia models pull` | Required auxiliary command for explicit local embedding artifact downloads |
 | `relia demo` | Required |
 | `relia share` | Required |
 
-`relia demo` and `relia share` are distribution and sharing helpers. They do not change the primary command surface, and they must obey the same redaction, provenance-honesty, and exit-code contracts.
+`relia models pull` is an explicit model-artifact acquisition command, not a
+normal first-session requirement. `relia demo` and `relia share` are
+distribution and sharing helpers. Auxiliary commands do not change the primary
+command surface, and they must obey the same redaction, provenance-honesty,
+model-artifact, and exit-code contracts.
 
 ### First-Session Commands
 
@@ -333,6 +338,7 @@ relia check
 relia backtest --window 180d
 relia ingest
 relia distill
+relia models pull
 relia review
 relia compile
 relia serve
@@ -805,7 +811,7 @@ The backtest is the first-session aha and must work read-only: no rules, no revi
 
 Distill must:
 
-- cluster failure signatures and held-fix patterns in three tiers: (1) deterministic signature-key clustering (same class + check + key, or matching message fingerprints) always runs and requires no network or model; (2) an explicitly pulled local embedding artifact refines clusters across paraphrased failure messages, offline after `relia models pull` verifies the model ID, version, source, license, digest, and cache path; (3) provider embeddings are an explicit opt-in for quality, never the default
+- cluster failure signatures and held-fix patterns in three tiers: (1) deterministic signature-key clustering (same class + check + key, or matching message fingerprints) always runs and requires no network or model; (2) an explicitly pulled local embedding artifact refines clusters across paraphrased failure messages, offline after `relia models pull` verifies the model ID, version, source, license, digest, cache path, update policy, and rollback policy; (3) provider embeddings are an explicit opt-in for quality, never the default
 - keep release binaries, containers, and tracked source free of model weights and inference-runtime payloads unless a future distribution decision records license, size, security, cross-platform, update, and rollback evidence
 - fail closed with exit `8` when `embeddings: local` is configured but the pulled artifact is missing, stale, or digest-mismatched; `embeddings: signature` remains the deterministic zero-install fallback and labels cluster provenance as signature-only
 - draft `avoid` rules from failure clusters with `min_evidence_count` or more members
@@ -1603,7 +1609,7 @@ Formerly open questions; resolved in v1.1 and reflected throughout this document
 
 1. **Experience shards default to local-only and gitignored.** They are a reproducible, redacted cache of GitHub history; GitHub is already the durable shared store, so committing the cache adds repo noise and merge conflicts without adding truth. Rules, MEMORY.md, and the compiled block — the reviewed, human-owned memory — are always committed. `commit_experiences: true` remains for air-gapped or archival needs. Ingest must be idempotent so any clone rebuilds the cache.
 2. **Decay half-life defaults to 90 days.** 60 is too aggressive for repos with monthly agent activity; 180 keeps zombie rules alive. 90 also composes cleanly with the system's other windows: a rule unseen for two half-lives (~180 days) decays to `stale` just as its evidence ages out of the default `lookback_days: 180`.
-3. **Clustering is tiered: deterministic signature keys always, explicitly pulled local embeddings, provider embeddings opt-in.** Failure signatures are already highly structured (class + check + key + message fingerprint), so deterministic clustering needs no network and no model — it is the zero-install fallback and the trust anchor. `relia models pull` fetches an approved local embedding artifact into a local cache only when the operator asks for local embedding refinement, recording model ID, version, source, license, digest, and cache path. `embeddings: local` fails closed with exit `8` if the artifact is missing, stale, or digest-mismatched; `embeddings: signature` remains the default deterministic path and labels provenance as signature-only. Provider embeddings are a quality opt-in, never the default.
+3. **Clustering is tiered: deterministic signature keys always, explicitly pulled local embeddings, provider embeddings opt-in.** Failure signatures are already highly structured (class + check + key + message fingerprint), so deterministic clustering needs no network and no model — it is the zero-install fallback and the trust anchor. `relia models pull` fetches an approved local embedding artifact into a local cache only when the operator asks for local embedding refinement, recording model ID, version, source, license, digest, cache path, update policy, and rollback policy. `embeddings: local` fails closed with exit `8` if the artifact is missing, stale, or digest-mismatched; `embeddings: signature` remains the default deterministic path and labels provenance as signature-only. Provider embeddings are a quality opt-in, never the default.
 4. **Minimum evidence count is 2 confirmed experiences, with confidence capped at 0.6 until 3.** Requiring 3 starves low-volume repos during cold start — the biggest churn risk. Two confirmed (flake-discounted, conservatively paired) failures of the same signature is a real pattern, and the human review gate plus the confidence cap bound the damage of a premature rule.
 5. **Monorepos scope by path prefix, not per-package configs.** Rules already carry `scope.paths` and the coverage map is already per-prefix, so path-prefix scoping falls out of the existing model. One `relia.yaml` with an optional `repo.scopes` mapping (check name → path prefix) handles check attribution in monorepos. Per-package configs multiply setup cost and fragment memory; post-MVP.
 6. **`fix_held` requires 14 settle days AND at least 3 subsequent merges touching overlapping paths.** Elapsed time alone is not evidence on a slow repo — "nothing reappeared" means nothing if nothing was touched. The compound criterion (both required, both configurable) keeps playbook rules honest; on slow repos a fix simply stays `candidate` longer, which is the truthful state.
