@@ -8,6 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 FACTORYD_CONFIG = ROOT / ".factory" / "factoryd.example.json"
 FACTORYD_ACTIVE_CONFIG = ROOT / ".factory" / "factoryd.json"
 FACTORYD_AUTOSHIP_CONFIG = ROOT / ".factory" / "factoryd.autoship.example.json"
+FACTORYD_REPO_KEY = "relia"
 
 REQUIRED = [
     "AGENTS.md",
@@ -51,10 +52,10 @@ def factoryd_config_capability_grants():
         config = load_json_file(path)
         repos = config.get("repos")
         if isinstance(repos, dict):
-            for repo in repos.values():
-                if isinstance(repo, dict) and isinstance(repo.get("capability_grants"), list):
-                    grants.extend(grant for grant in repo["capability_grants"] if isinstance(grant, dict))
-        if isinstance(config.get("capability_grants"), list):
+            repo = repos.get(FACTORYD_REPO_KEY)
+            if isinstance(repo, dict) and isinstance(repo.get("capability_grants"), list):
+                grants.extend(grant for grant in repo["capability_grants"] if isinstance(grant, dict))
+        elif isinstance(config.get("capability_grants"), list):
             grants.extend(grant for grant in config["capability_grants"] if isinstance(grant, dict))
     return grants
 
