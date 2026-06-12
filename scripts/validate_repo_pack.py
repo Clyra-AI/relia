@@ -115,7 +115,6 @@ def validate_t9_model_provider_gate(task):
         "evidence_ref",
         "network_allowlist",
         "provider_identity",
-        "provider_endpoint",
         "credential_environment",
         "budget_posture",
         "redaction_posture",
@@ -123,6 +122,8 @@ def validate_t9_model_provider_gate(task):
     missing = [field for field in required_grant_fields if field not in grant or grant[field] in (None, "", [])]
     if missing:
         fail(f"{task_id}.model_provider_endpoint grant missing fields: {missing}")
+    if grant.get("provider_endpoint") in (None, "", []) and grant.get("base_url") in (None, "", []):
+        fail(f"{task_id}.model_provider_endpoint grant must include provider_endpoint or base_url")
     if "model_provider_endpoint" not in str(grant.get("evidence_ref")):
         fail(f"{task_id}.model_provider_endpoint grant evidence_ref must cite the alignment decision")
     joined_stop_conditions = "\n".join(str(value) for value in task.get("stop_conditions") or [])
