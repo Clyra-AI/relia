@@ -54,7 +54,7 @@
       "success-metrics",
       "demo-acceptance"
     ],
-    "required_item_count": 117,
+    "required_item_count": 121,
     "scope_closure_map_ref": ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
     "status": "mapped"
   },
@@ -279,7 +279,11 @@
         "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-004",
         "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-005",
         "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-008",
-        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-009"
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-009",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-011",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-012",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-013",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-014"
       ],
       "name": "Distillation, Calibration, And Confidence Part 2",
       "public_release_boundary": false,
@@ -493,7 +497,8 @@
         "ingest-attribute-backtest-acceptance-tests",
         "serve-and-advise-acceptance-tests",
         "success-metrics",
-        "demo-acceptance"
+        "demo-acceptance",
+        "distill-review-memory-page-acceptance-tests"
       ],
       "acceptance_item_ids": [
         "SUCCESS-METRICS-008",
@@ -507,7 +512,8 @@
         "SUCCESS-METRICS-016",
         "DEMO-ACCEPTANCE-001",
         "DEMO-ACCEPTANCE-003",
-        "DEMO-ACCEPTANCE-005"
+        "DEMO-ACCEPTANCE-005",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-013"
       ],
       "name": "Release, Demo, And Product Signals Part 2",
       "public_release_boundary": true,
@@ -734,7 +740,7 @@
       "basic flake discounting",
       "conservative recurrence pairing and ERR",
       "read-only backtest with HTML report and JSON",
-      "tiered clustering (deterministic signature keys, bundled local embeddings, provider embeddings opt-in)",
+      "tiered clustering (deterministic signature keys, explicitly pulled local embeddings, provider embeddings opt-in)",
       "LLM rule drafting (OpenAI-compatible and Anthropic adapters) and no-LLM mode",
       "bidirectional rules (`avoid`, `playbook`) with mandatory provenance",
       "calibrated confidence, decay, churn invalidation, lifecycle states",
@@ -801,9 +807,13 @@
       "The memory-off/memory-on contrast uses the same task, model, and prompt.",
       "Every citation shown in the demo resolves to a real PR in the seeded repo.",
       "The fallback static reports cover all five beats.",
-      "Attribution precision is at least 95% on a labeled sample; uncertain cases are excluded, not guessed."
+      "Attribution precision is at least 95% on a labeled sample; uncertain cases are excluded, not guessed.",
+      "relia models pull records model ID, version, source URL, license, digest, cache path, update policy, and rollback policy before local embedding refinement is used.",
+      "embeddings: local fails closed with exit 8 when the local model artifact is missing, stale, or digest-mismatched, while embeddings: signature remains the zero-install deterministic fallback with signature-only provenance.",
+      "Release binaries, containers, and tracked source do not bundle model weights or inference-runtime payloads.",
+      "The local embedding inference boundary is covered by an ADR before implementation chooses a pure Go library, ONNX/runtime binding, or external local process."
     ],
-    "acceptance_item_count": 117,
+    "acceptance_item_count": 121,
     "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
     "capability_gateway": {
       "enforcement_mode": "fail_closed",
@@ -820,7 +830,8 @@
       "work_proof_marker",
       "validation_report",
       "scope_closure_report",
-      "pr_lifecycle_report"
+      "pr_lifecycle_report",
+      "factoryd_run_once_report"
     ],
     "holdout_triggers": [
       "runtime pin change",
@@ -842,9 +853,9 @@
       "reviewer_class": "peer_agent"
     },
     "stop_conditions": [
-      "changed path outside allowed_paths",
-      "required validation command failed",
-      "scope closure did not advance",
+      "validation failed",
+      "path policy violation",
+      "closure did not advance",
       "alignment drift detected"
     ]
   },

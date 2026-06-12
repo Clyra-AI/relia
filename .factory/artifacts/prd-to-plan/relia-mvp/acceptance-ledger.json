@@ -1,5 +1,5 @@
 {
-  "acceptance_item_count": 117,
+  "acceptance_item_count": 121,
   "artifact_type": "acceptance_ledger",
   "coverage_policy": {
     "closure_unit": "acceptance_item",
@@ -1173,7 +1173,7 @@
       "notes": [],
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
-      "source_text": "tiered clustering (deterministic signature keys, bundled local embeddings, provider embeddings opt-in)",
+      "source_text": "tiered clustering (deterministic signature keys, explicitly pulled local embeddings, provider embeddings opt-in)",
       "status": "planned",
       "task_refs": [
         "T7"
@@ -1993,6 +1993,103 @@
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/8/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-011",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "distillation-calibration-and-confidence-part-2"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "distill-review-memory-page-acceptance-tests",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#distill-review-memory-page-acceptance-tests",
+      "source_text": "relia models pull records model ID, version, source URL, license, digest, cache path, update policy, and rollback policy before local embedding refinement is used.",
+      "status": "planned",
+      "task_refs": [
+        "T7"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/6/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-012",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "distillation-calibration-and-confidence-part-2"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "distill-review-memory-page-acceptance-tests",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#distill-review-memory-page-acceptance-tests",
+      "source_text": "embeddings: local fails closed with exit 8 when the local model artifact is missing, stale, or digest-mismatched, while embeddings: signature remains the zero-install deterministic fallback with signature-only provenance.",
+      "status": "planned",
+      "task_refs": [
+        "T7"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/6/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-013",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "distillation-calibration-and-confidence-part-2",
+        "release-demo-and-product-signals-part-2"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "distill-review-memory-page-acceptance-tests",
+      "kind": "acceptance_test",
+      "notes": [
+        "Release packaging tasks inherit this check so model payloads cannot be bundled after distill work closes."
+      ],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#distill-review-memory-page-acceptance-tests",
+      "source_text": "Release binaries, containers, and tracked source do not bundle model weights or inference-runtime payloads.",
+      "status": "planned",
+      "task_refs": [
+        "T7",
+        "T16"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/6/validation_commands",
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/15/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-014",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "distillation-calibration-and-confidence-part-2"
+      ],
+      "evidence_mode": "automated",
+      "group_id": "distill-review-memory-page-acceptance-tests",
+      "kind": "acceptance_test",
+      "notes": [],
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#distill-review-memory-page-acceptance-tests",
+      "source_text": "The local embedding inference boundary is covered by an ADR before implementation chooses a pure Go library, ONNX/runtime binding, or external local process.",
+      "status": "planned",
+      "task_refs": [
+        "T7"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/6/validation_commands"
       ]
     },
     {

@@ -198,7 +198,11 @@
         "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-004",
         "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-005",
         "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-008",
-        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-009"
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-009",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-011",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-012",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-013",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-014"
       ],
       "name": "Distillation, Calibration, And Confidence Part 2",
       "public_release_boundary": false,
@@ -412,7 +416,8 @@
         "ingest-attribute-backtest-acceptance-tests",
         "serve-and-advise-acceptance-tests",
         "success-metrics",
-        "demo-acceptance"
+        "demo-acceptance",
+        "distill-review-memory-page-acceptance-tests"
       ],
       "acceptance_item_ids": [
         "SUCCESS-METRICS-008",
@@ -426,7 +431,8 @@
         "SUCCESS-METRICS-016",
         "DEMO-ACCEPTANCE-001",
         "DEMO-ACCEPTANCE-003",
-        "DEMO-ACCEPTANCE-005"
+        "DEMO-ACCEPTANCE-005",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-013"
       ],
       "name": "Release, Demo, And Product Signals Part 2",
       "public_release_boundary": true,
@@ -3515,7 +3521,7 @@
     },
     {
       "acceptance_checks": [
-        "tiered clustering (deterministic signature keys, bundled local embeddings, provider embeddings opt-in)",
+        "tiered clustering (deterministic signature keys, explicitly pulled local embeddings, provider embeddings opt-in)",
         "LLM rule drafting (OpenAI-compatible and Anthropic adapters) and no-LLM mode",
         "bidirectional rules (`avoid`, `playbook`) with mandatory provenance",
         "calibrated confidence, decay, churn invalidation, lifecycle states",
@@ -3525,7 +3531,11 @@
         "Drafted rules are `suggested` or `needs_user_input`, never auto-`accepted`.",
         "relia review` approve/edit/reject transitions write correct lifecycle states.",
         "MEMORY.md renders receipts as resolvable links and separates weak from strong memory.",
-        "No-LLM mode produces deterministic cluster-summary drafts."
+        "No-LLM mode produces deterministic cluster-summary drafts.",
+        "relia models pull records model ID, version, source URL, license, digest, cache path, update policy, and rollback policy before local embedding refinement is used.",
+        "embeddings: local fails closed with exit 8 when the local model artifact is missing, stale, or digest-mismatched, while embeddings: signature remains the zero-install deterministic fallback with signature-only provenance.",
+        "Release binaries, containers, and tracked source do not bundle model weights or inference-runtime payloads.",
+        "The local embedding inference boundary is covered by an ADR before implementation chooses a pure Go library, ONNX/runtime binding, or external local process."
       ],
       "acceptance_group_id": "fr4-attribution-with-confidence",
       "acceptance_group_ids": [
@@ -3558,7 +3568,11 @@
         "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-004",
         "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-005",
         "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-008",
-        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-009"
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-009",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-011",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-012",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-013",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-014"
       ],
       "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
       "acceptance_result_requirements": [
@@ -3726,6 +3740,66 @@
             "work_proof_marker",
             "scope_closure_report"
           ]
+        },
+        {
+          "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-011",
+          "allowed_statuses": [
+            "implemented",
+            "partial",
+            "missing",
+            "blocked",
+            "deferred_with_approval"
+          ],
+          "evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "scope_closure_report"
+          ]
+        },
+        {
+          "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-012",
+          "allowed_statuses": [
+            "implemented",
+            "partial",
+            "missing",
+            "blocked",
+            "deferred_with_approval"
+          ],
+          "evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "scope_closure_report"
+          ]
+        },
+        {
+          "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-013",
+          "allowed_statuses": [
+            "implemented",
+            "partial",
+            "missing",
+            "blocked",
+            "deferred_with_approval"
+          ],
+          "evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "scope_closure_report"
+          ]
+        },
+        {
+          "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-014",
+          "allowed_statuses": [
+            "implemented",
+            "partial",
+            "missing",
+            "blocked",
+            "deferred_with_approval"
+          ],
+          "evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "scope_closure_report"
+          ]
         }
       ],
       "alignment_gate_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions",
@@ -3766,6 +3840,14 @@
         {
           "rule": "Deterministic bootstrap has no network/secrets; live work requires approval and evidence.",
           "source_ref": "docs/architecture/architecture_guides.md#trust-mode-posture"
+        },
+        {
+          "rule": "Local embedding model artifacts are explicit pulls, not bundled release or repo payloads.",
+          "source_ref": "docs/architecture/architecture_guides.md#model-artifact-boundary"
+        },
+        {
+          "rule": "Local embedding inference-runtime choices require an ADR before implementation.",
+          "source_ref": "docs/architecture/architecture_guides.md#adr-and-decision-triggers"
         }
       ],
       "baseline_commands": [
@@ -3964,9 +4046,9 @@
         "post-merge-monitor"
       ],
       "requires_credentials": false,
-      "requires_human_approval": true,
-      "requires_network": true,
-      "risk_class": "medium",
+      "requires_human_approval": false,
+      "requires_network": false,
+      "risk_class": "low",
       "runtime_pins": {
         "artifact_namespace": ".factory/artifacts/",
         "dependency_policy": "standard library first; pin and justify dependencies",
@@ -3974,14 +4056,16 @@
         "language": "go",
         "live_work_policy": "no ambient secrets or live network by default",
         "module_or_package_path": "github.com/Clyra-AI/relia",
-        "provider_policy": "none by default",
+        "provider_policy": "none by default; T7 uses deterministic signature/no-LLM paths and implements fail-closed local embedding behavior without downloading model artifacts during task execution",
         "toolchain_version": "1.26.4"
       },
       "scope_exclusions": [
         "No scope outside docs/product/prd.md.",
         "No completion claim without acceptance evidence.",
         "No live network/provider calls without explicit approval and allowlist.",
-        "Do not self-close manual, product-signal, or judgment-only acceptance without recorded evidence."
+        "Do not self-close manual, product-signal, or judgment-only acceptance without recorded evidence.",
+        "Do not bundle model weights or inference-runtime payloads into source, binaries, containers, or release artifacts.",
+        "Do not call provider embedding endpoints unless provider credentials, cost cap, redaction posture, and network allowlist are explicitly approved."
       ],
       "security_scanner_gates": {
         "exception_policy": "approved_exception_required_when_required_or_surface_touched",
@@ -4012,7 +4096,11 @@
         "plan drift detected",
         "scope closure did not advance",
         "live credential or network work attempted without approval",
-        "manual, product-signal, or judgment-only acceptance closed without approval evidence"
+        "manual, product-signal, or judgment-only acceptance closed without approval evidence",
+        "local model artifact source, license, digest, cache path, update policy, or rollback policy is missing",
+        "model artifact download attempted without explicit relia models pull scope or approved network posture",
+        "model weights or inference-runtime payloads are added to source, binary, container, or release artifacts without an approved distribution decision",
+        "embeddings: local silently falls back instead of failing closed on missing or digest-mismatched artifact"
       ],
       "task_id": "T7",
       "test_matrix_refs": [
@@ -4044,7 +4132,7 @@
       ],
       "validation_contract_inheritance": {
         "acceptance_criteria": [
-          "tiered clustering (deterministic signature keys, bundled local embeddings, provider embeddings opt-in)",
+          "tiered clustering (deterministic signature keys, explicitly pulled local embeddings, provider embeddings opt-in)",
           "LLM rule drafting (OpenAI-compatible and Anthropic adapters) and no-LLM mode",
           "bidirectional rules (`avoid`, `playbook`) with mandatory provenance",
           "calibrated confidence, decay, churn invalidation, lifecycle states",
@@ -4054,7 +4142,11 @@
           "Drafted rules are `suggested` or `needs_user_input`, never auto-`accepted`.",
           "relia review` approve/edit/reject transitions write correct lifecycle states.",
           "MEMORY.md renders receipts as resolvable links and separates weak from strong memory.",
-          "No-LLM mode produces deterministic cluster-summary drafts."
+          "No-LLM mode produces deterministic cluster-summary drafts.",
+          "relia models pull records model ID, version, source URL, license, digest, cache path, update policy, and rollback policy before local embedding refinement is used.",
+          "embeddings: local fails closed with exit 8 when the local model artifact is missing, stale, or digest-mismatched, while embeddings: signature remains the zero-install deterministic fallback with signature-only provenance.",
+          "Release binaries, containers, and tracked source do not bundle model weights or inference-runtime payloads.",
+          "The local embedding inference boundary is covered by an ADR before implementation chooses a pure Go library, ONNX/runtime binding, or external local process."
         ],
         "acceptance_item_ids": [
           "MVP-IN-SCOPE-010",
@@ -4067,7 +4159,11 @@
           "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-004",
           "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-005",
           "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-008",
-          "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-009"
+          "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-009",
+          "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-011",
+          "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-012",
+          "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-013",
+          "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-014"
         ],
         "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
         "evidence_required": [
@@ -4094,7 +4190,11 @@
           "plan drift detected",
           "scope closure did not advance",
           "live credential or network work attempted without approval",
-          "manual, product-signal, or judgment-only acceptance closed without approval evidence"
+          "manual, product-signal, or judgment-only acceptance closed without approval evidence",
+          "local model artifact source, license, digest, cache path, update policy, or rollback policy is missing",
+          "model artifact download attempted without explicit relia models pull scope or approved network posture",
+          "model weights or inference-runtime payloads are added to source, binary, container, or release artifacts without an approved distribution decision",
+          "embeddings: local silently falls back instead of failing closed on missing or digest-mismatched artifact"
         ]
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
@@ -7650,6 +7750,10 @@
         {
           "path": "docs/architecture/architecture_guides.md",
           "reason": "Keep boundaries, state, feedback, and trust posture aligned."
+        },
+        {
+          "path": "docs/architecture/architecture_guides.md",
+          "reason": "Release packaging must preserve the model-artifact non-bundling boundary."
         }
       ],
       "engineering_policy_refs": [
@@ -7772,7 +7876,8 @@
       "scope_exclusions": [
         "No scope outside docs/product/prd.md.",
         "No completion claim without acceptance evidence.",
-        "No live network/provider calls without explicit approval and allowlist."
+        "No live network/provider calls without explicit approval and allowlist.",
+        "Do not bundle model weights or inference-runtime payloads into source, binaries, containers, or release artifacts."
       ],
       "security_scanner_gates": {
         "exception_policy": "approved_exception_required_when_required_or_surface_touched",
@@ -7802,7 +7907,8 @@
         "required validation command failed",
         "plan drift detected",
         "scope closure did not advance",
-        "live credential or network work attempted without approval"
+        "live credential or network work attempted without approval",
+        "model weights or inference-runtime payloads are added to source, binary, container, or release artifacts without an approved distribution decision"
       ],
       "task_id": "T15",
       "test_matrix_refs": [
@@ -7911,7 +8017,8 @@
         "headline ERR never includes possible recurrences or uncertain attribution",
         "relia demo` works offline with no configuration.",
         "The memory-off/memory-on contrast uses the same task, model, and prompt.",
-        "The fallback static reports cover all five beats."
+        "The fallback static reports cover all five beats.",
+        "Release binaries, containers, and tracked source do not bundle model weights or inference-runtime payloads."
       ],
       "acceptance_group_id": "fr6-capture-time-redaction",
       "acceptance_group_ids": [
@@ -7937,7 +8044,8 @@
         "SUCCESS-METRICS-016",
         "DEMO-ACCEPTANCE-001",
         "DEMO-ACCEPTANCE-003",
-        "DEMO-ACCEPTANCE-005"
+        "DEMO-ACCEPTANCE-005",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-013"
       ],
       "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
       "acceptance_result_requirements": [
@@ -8120,6 +8228,21 @@
             "work_proof_marker",
             "scope_closure_report"
           ]
+        },
+        {
+          "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-013",
+          "allowed_statuses": [
+            "implemented",
+            "partial",
+            "missing",
+            "blocked",
+            "deferred_with_approval"
+          ],
+          "evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "scope_closure_report"
+          ]
         }
       ],
       "alignment_gate_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions",
@@ -8252,6 +8375,10 @@
         {
           "path": "docs/architecture/architecture_guides.md",
           "reason": "Keep boundaries, state, feedback, and trust posture aligned."
+        },
+        {
+          "path": "docs/architecture/architecture_guides.md",
+          "reason": "Release packaging must preserve the model-artifact non-bundling boundary."
         }
       ],
       "engineering_policy_refs": [
@@ -8374,7 +8501,8 @@
       "scope_exclusions": [
         "No scope outside docs/product/prd.md.",
         "No completion claim without acceptance evidence.",
-        "No live network/provider calls without explicit approval and allowlist."
+        "No live network/provider calls without explicit approval and allowlist.",
+        "Do not bundle model weights or inference-runtime payloads into source, binaries, containers, or release artifacts."
       ],
       "security_scanner_gates": {
         "exception_policy": "approved_exception_required_when_required_or_surface_touched",
@@ -8404,7 +8532,8 @@
         "required validation command failed",
         "plan drift detected",
         "scope closure did not advance",
-        "live credential or network work attempted without approval"
+        "live credential or network work attempted without approval",
+        "model weights or inference-runtime payloads are added to source, binary, container, or release artifacts without an approved distribution decision"
       ],
       "task_id": "T16",
       "test_matrix_refs": [
@@ -8447,7 +8576,8 @@
           "headline ERR never includes possible recurrences or uncertain attribution",
           "relia demo` works offline with no configuration.",
           "The memory-off/memory-on contrast uses the same task, model, and prompt.",
-          "The fallback static reports cover all five beats."
+          "The fallback static reports cover all five beats.",
+          "Release binaries, containers, and tracked source do not bundle model weights or inference-runtime payloads."
         ],
         "acceptance_item_ids": [
           "SUCCESS-METRICS-008",
@@ -8461,7 +8591,8 @@
           "SUCCESS-METRICS-016",
           "DEMO-ACCEPTANCE-001",
           "DEMO-ACCEPTANCE-003",
-          "DEMO-ACCEPTANCE-005"
+          "DEMO-ACCEPTANCE-005",
+          "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-013"
         ],
         "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
         "evidence_required": [

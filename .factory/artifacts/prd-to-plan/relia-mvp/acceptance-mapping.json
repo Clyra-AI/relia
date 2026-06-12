@@ -198,7 +198,11 @@
         "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-004",
         "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-005",
         "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-008",
-        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-009"
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-009",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-011",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-012",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-013",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-014"
       ],
       "name": "Distillation, Calibration, And Confidence Part 2",
       "public_release_boundary": false,
@@ -412,7 +416,8 @@
         "ingest-attribute-backtest-acceptance-tests",
         "serve-and-advise-acceptance-tests",
         "success-metrics",
-        "demo-acceptance"
+        "demo-acceptance",
+        "distill-review-memory-page-acceptance-tests"
       ],
       "acceptance_item_ids": [
         "SUCCESS-METRICS-008",
@@ -426,7 +431,8 @@
         "SUCCESS-METRICS-016",
         "DEMO-ACCEPTANCE-001",
         "DEMO-ACCEPTANCE-003",
-        "DEMO-ACCEPTANCE-005"
+        "DEMO-ACCEPTANCE-005",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-013"
       ],
       "name": "Release, Demo, And Product Signals Part 2",
       "public_release_boundary": true,
@@ -1800,7 +1806,7 @@
         "basic flake discounting",
         "conservative recurrence pairing and ERR",
         "read-only backtest with HTML report and JSON",
-        "tiered clustering (deterministic signature keys, bundled local embeddings, provider embeddings opt-in)",
+        "tiered clustering (deterministic signature keys, explicitly pulled local embeddings, provider embeddings opt-in)",
         "LLM rule drafting (OpenAI-compatible and Anthropic adapters) and no-LLM mode",
         "bidirectional rules (`avoid`, `playbook`) with mandatory provenance",
         "calibrated confidence, decay, churn invalidation, lifecycle states",
@@ -2283,7 +2289,11 @@
         "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-007",
         "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-008",
         "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-009",
-        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-010"
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-010",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-011",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-012",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-013",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-014"
       ],
       "closure_status": "partial",
       "criteria": [
@@ -2296,7 +2306,11 @@
         "The planted path deletion moves its rule to `stale` and out of serving.",
         "MEMORY.md renders receipts as resolvable links and separates weak from strong memory.",
         "No-LLM mode produces deterministic cluster-summary drafts.",
-        "Provider-backed distill reports cost and respects the configured cap."
+        "Provider-backed distill reports cost and respects the configured cap.",
+        "relia models pull records model ID, version, source URL, license, digest, cache path, update policy, and rollback policy before local embedding refinement is used.",
+        "embeddings: local fails closed with exit 8 when the local model artifact is missing, stale, or digest-mismatched, while embeddings: signature remains the zero-install deterministic fallback with signature-only provenance.",
+        "Release binaries, containers, and tracked source do not bundle model weights or inference-runtime payloads.",
+        "The local embedding inference boundary is covered by an ADR before implementation chooses a pure Go library, ONNX/runtime binding, or external local process."
       ],
       "group_id": "distill-review-memory-page-acceptance-tests",
       "item_mappings": [
@@ -2399,6 +2413,48 @@
           "task_refs": [
             "T9"
           ]
+        },
+        {
+          "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-011",
+          "delivery_slice_refs": [
+            "distillation-calibration-and-confidence-part-2"
+          ],
+          "evidence_mode": "automated",
+          "task_refs": [
+            "T7"
+          ]
+        },
+        {
+          "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-012",
+          "delivery_slice_refs": [
+            "distillation-calibration-and-confidence-part-2"
+          ],
+          "evidence_mode": "automated",
+          "task_refs": [
+            "T7"
+          ]
+        },
+        {
+          "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-013",
+          "delivery_slice_refs": [
+            "distillation-calibration-and-confidence-part-2",
+            "release-demo-and-product-signals-part-2"
+          ],
+          "evidence_mode": "automated",
+          "task_refs": [
+            "T7",
+            "T16"
+          ]
+        },
+        {
+          "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-014",
+          "delivery_slice_refs": [
+            "distillation-calibration-and-confidence-part-2"
+          ],
+          "evidence_mode": "automated",
+          "task_refs": [
+            "T7"
+          ]
         }
       ],
       "judgment_only": false,
@@ -2411,7 +2467,8 @@
       "task_refs": [
         "T4",
         "T7",
-        "T9"
+        "T9",
+        "T16"
       ],
       "title": "Distill, Review, Memory Page Acceptance Tests"
     },
