@@ -10,7 +10,11 @@ FACTORYD_CONFIG = ROOT / ".factory" / "factoryd.example.json"
 FACTORYD_ACTIVE_CONFIG = ROOT / ".factory" / "factoryd.json"
 FACTORYD_AUTOSHIP_CONFIG = ROOT / ".factory" / "factoryd.autoship.example.json"
 FACTORYD_REPO_KEY = "relia"
-PROVIDER_ACCEPTANCE_IDS = {"MVP-IN-SCOPE-010", "MVP-IN-SCOPE-011"}
+PROVIDER_ACCEPTANCE_IDS = {
+    "FR23-PROVIDER-ADAPTERS-AND-NO-LLM-MODE-001",
+    "MVP-IN-SCOPE-010",
+    "MVP-IN-SCOPE-011",
+}
 
 REQUIRED = [
     "AGENTS.md",
@@ -370,6 +374,8 @@ def self_test():
         fail("repo root resolution must be relative to this validator file")
     if duplicate_values(["T1", "T2", "T1", "T2", "T3"]) != ["T1", "T2"]:
         fail("duplicate_values must preserve duplicate ids in first duplicate order")
+    if "FR23-PROVIDER-ADAPTERS-AND-NO-LLM-MODE-001" not in PROVIDER_ACCEPTANCE_IDS:
+        fail("provider gate fallback must include FR23 provider adapter acceptance item")
     self_test_public_release_boundary()
     validate_model_provider_gate(model_provider_gate_task())
 
