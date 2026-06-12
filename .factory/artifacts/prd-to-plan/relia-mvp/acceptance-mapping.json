@@ -1800,7 +1800,7 @@
         "basic flake discounting",
         "conservative recurrence pairing and ERR",
         "read-only backtest with HTML report and JSON",
-        "tiered clustering (deterministic signature keys, bundled local embeddings, provider embeddings opt-in)",
+        "tiered clustering (deterministic signature keys, explicitly pulled local embeddings, provider embeddings opt-in)",
         "LLM rule drafting (OpenAI-compatible and Anthropic adapters) and no-LLM mode",
         "bidirectional rules (`avoid`, `playbook`) with mandatory provenance",
         "calibrated confidence, decay, churn invalidation, lifecycle states",

@@ -3515,7 +3515,7 @@
     },
     {
       "acceptance_checks": [
-        "tiered clustering (deterministic signature keys, bundled local embeddings, provider embeddings opt-in)",
+        "tiered clustering (deterministic signature keys, explicitly pulled local embeddings, provider embeddings opt-in)",
         "LLM rule drafting (OpenAI-compatible and Anthropic adapters) and no-LLM mode",
         "bidirectional rules (`avoid`, `playbook`) with mandatory provenance",
         "calibrated confidence, decay, churn invalidation, lifecycle states",
@@ -3525,7 +3525,11 @@
         "Drafted rules are `suggested` or `needs_user_input`, never auto-`accepted`.",
         "relia review` approve/edit/reject transitions write correct lifecycle states.",
         "MEMORY.md renders receipts as resolvable links and separates weak from strong memory.",
-        "No-LLM mode produces deterministic cluster-summary drafts."
+        "No-LLM mode produces deterministic cluster-summary drafts.",
+        "relia models pull records model ID, version, source URL, license, digest, cache path, update policy, and rollback policy before local embedding refinement is used.",
+        "embeddings: local fails closed with exit 8 when the local model artifact is missing, stale, or digest-mismatched, while embeddings: signature remains the zero-install deterministic fallback with signature-only provenance.",
+        "Release binaries, containers, and tracked source do not bundle model weights or inference-runtime payloads.",
+        "The local embedding inference boundary is covered by an ADR before implementation chooses a pure Go library, ONNX/runtime binding, or external local process."
       ],
       "acceptance_group_id": "fr4-attribution-with-confidence",
       "acceptance_group_ids": [
@@ -3766,6 +3770,14 @@
         {
           "rule": "Deterministic bootstrap has no network/secrets; live work requires approval and evidence.",
           "source_ref": "docs/architecture/architecture_guides.md#trust-mode-posture"
+        },
+        {
+          "rule": "Local embedding model artifacts are explicit pulls, not bundled release or repo payloads.",
+          "source_ref": "docs/architecture/architecture_guides.md#model-artifact-boundary"
+        },
+        {
+          "rule": "Local embedding inference-runtime choices require an ADR before implementation.",
+          "source_ref": "docs/architecture/architecture_guides.md#adr-and-decision-triggers"
         }
       ],
       "baseline_commands": [
@@ -3974,14 +3986,16 @@
         "language": "go",
         "live_work_policy": "no ambient secrets or live network by default",
         "module_or_package_path": "github.com/Clyra-AI/relia",
-        "provider_policy": "none by default",
+        "provider_policy": "none by default; provider embeddings are opt-in live provider calls with endpoint/base_url, credential, cost, redaction, and network posture; local embeddings require explicit relia models pull artifact evidence",
         "toolchain_version": "1.26.4"
       },
       "scope_exclusions": [
         "No scope outside docs/product/prd.md.",
         "No completion claim without acceptance evidence.",
         "No live network/provider calls without explicit approval and allowlist.",
-        "Do not self-close manual, product-signal, or judgment-only acceptance without recorded evidence."
+        "Do not self-close manual, product-signal, or judgment-only acceptance without recorded evidence.",
+        "Do not bundle model weights or inference-runtime payloads into source, binaries, containers, or release artifacts.",
+        "Do not call provider embedding endpoints unless provider credentials, cost cap, redaction posture, and network allowlist are explicitly approved."
       ],
       "security_scanner_gates": {
         "exception_policy": "approved_exception_required_when_required_or_surface_touched",
@@ -4012,7 +4026,11 @@
         "plan drift detected",
         "scope closure did not advance",
         "live credential or network work attempted without approval",
-        "manual, product-signal, or judgment-only acceptance closed without approval evidence"
+        "manual, product-signal, or judgment-only acceptance closed without approval evidence",
+        "local model artifact source, license, digest, cache path, update policy, or rollback policy is missing",
+        "model artifact download attempted without explicit relia models pull scope or approved network posture",
+        "model weights or inference-runtime payloads are added to source, binary, container, or release artifacts without an approved distribution decision",
+        "embeddings: local silently falls back instead of failing closed on missing or digest-mismatched artifact"
       ],
       "task_id": "T7",
       "test_matrix_refs": [
@@ -4044,7 +4062,7 @@
       ],
       "validation_contract_inheritance": {
         "acceptance_criteria": [
-          "tiered clustering (deterministic signature keys, bundled local embeddings, provider embeddings opt-in)",
+          "tiered clustering (deterministic signature keys, explicitly pulled local embeddings, provider embeddings opt-in)",
           "LLM rule drafting (OpenAI-compatible and Anthropic adapters) and no-LLM mode",
           "bidirectional rules (`avoid`, `playbook`) with mandatory provenance",
           "calibrated confidence, decay, churn invalidation, lifecycle states",
@@ -4054,7 +4072,11 @@
           "Drafted rules are `suggested` or `needs_user_input`, never auto-`accepted`.",
           "relia review` approve/edit/reject transitions write correct lifecycle states.",
           "MEMORY.md renders receipts as resolvable links and separates weak from strong memory.",
-          "No-LLM mode produces deterministic cluster-summary drafts."
+          "No-LLM mode produces deterministic cluster-summary drafts.",
+          "relia models pull records model ID, version, source URL, license, digest, cache path, update policy, and rollback policy before local embedding refinement is used.",
+          "embeddings: local fails closed with exit 8 when the local model artifact is missing, stale, or digest-mismatched, while embeddings: signature remains the zero-install deterministic fallback with signature-only provenance.",
+          "Release binaries, containers, and tracked source do not bundle model weights or inference-runtime payloads.",
+          "The local embedding inference boundary is covered by an ADR before implementation chooses a pure Go library, ONNX/runtime binding, or external local process."
         ],
         "acceptance_item_ids": [
           "MVP-IN-SCOPE-010",
@@ -4094,7 +4116,11 @@
           "plan drift detected",
           "scope closure did not advance",
           "live credential or network work attempted without approval",
-          "manual, product-signal, or judgment-only acceptance closed without approval evidence"
+          "manual, product-signal, or judgment-only acceptance closed without approval evidence",
+          "local model artifact source, license, digest, cache path, update policy, or rollback policy is missing",
+          "model artifact download attempted without explicit relia models pull scope or approved network posture",
+          "model weights or inference-runtime payloads are added to source, binary, container, or release artifacts without an approved distribution decision",
+          "embeddings: local silently falls back instead of failing closed on missing or digest-mismatched artifact"
         ]
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",

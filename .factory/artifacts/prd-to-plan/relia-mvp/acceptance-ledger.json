@@ -1173,7 +1173,7 @@
       "notes": [],
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
-      "source_text": "tiered clustering (deterministic signature keys, bundled local embeddings, provider embeddings opt-in)",
+      "source_text": "tiered clustering (deterministic signature keys, explicitly pulled local embeddings, provider embeddings opt-in)",
       "status": "planned",
       "task_refs": [
         "T7"

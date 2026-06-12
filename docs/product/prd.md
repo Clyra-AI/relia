@@ -201,9 +201,10 @@ experience records -> signature clusters -> drafted rules with confidence and pr
 Required capabilities:
 
 - `relia distill`
+- `relia models pull`
 - `relia review`
 - `relia memory`
-- tiered clustering of failure signatures and success patterns (deterministic signature keys, bundled local embeddings, provider embeddings opt-in)
+- tiered clustering of failure signatures and success patterns (deterministic signature keys, explicitly pulled local embeddings, provider embeddings opt-in)
 - LLM rule drafting via OpenAI-compatible and Anthropic provider adapters behind a pluggable interface
 - no-LLM mode producing deterministic cluster summaries as draft statements
 - bidirectional rule kinds: `avoid` (from failures) and `playbook` (from fixes and clean patterns that held)
@@ -444,7 +445,7 @@ distill:
   model: claude-fable-5
   max_cost_usd_per_run: 2.00
   min_evidence_count: 2      # confidence is capped until 3 confirmed experiences
-  embeddings: local          # signature | local | provider; signature clustering always runs
+  embeddings: signature      # signature | local | provider; local requires relia models pull
   review_required: true
 
 memory:
@@ -804,7 +805,9 @@ The backtest is the first-session aha and must work read-only: no rules, no revi
 
 Distill must:
 
-- cluster failure signatures and held-fix patterns in three tiers: (1) deterministic signature-key clustering (same class + check + key, or matching message fingerprints) always runs and requires no network or model; (2) a bundled local embedding model refines clusters across paraphrased failure messages, offline; (3) provider embeddings are an explicit opt-in for quality, never the default
+- cluster failure signatures and held-fix patterns in three tiers: (1) deterministic signature-key clustering (same class + check + key, or matching message fingerprints) always runs and requires no network or model; (2) an explicitly pulled local embedding artifact refines clusters across paraphrased failure messages, offline after `relia models pull` verifies the model ID, version, source, license, digest, and cache path; (3) provider embeddings are an explicit opt-in for quality, never the default
+- keep release binaries, containers, and tracked source free of model weights and inference-runtime payloads unless a future distribution decision records license, size, security, cross-platform, update, and rollback evidence
+- fail closed with exit `8` when `embeddings: local` is configured but the pulled artifact is missing, stale, or digest-mismatched; `embeddings: signature` remains the deterministic zero-install fallback and labels cluster provenance as signature-only
 - draft `avoid` rules from failure clusters with `min_evidence_count` or more members
 - draft `playbook` rules from held fixes, citing at least one held experience
 - compute confidence from evidence count, recency, and contradictions
@@ -1107,7 +1110,7 @@ The MVP must explain value through local CLI output, local reports, MEMORY.md, a
 - basic flake discounting
 - conservative recurrence pairing and ERR
 - read-only backtest with HTML report and JSON
-- tiered clustering (deterministic signature keys, bundled local embeddings, provider embeddings opt-in)
+- tiered clustering (deterministic signature keys, explicitly pulled local embeddings, provider embeddings opt-in)
 - LLM rule drafting (OpenAI-compatible and Anthropic adapters) and no-LLM mode
 - bidirectional rules (`avoid`, `playbook`) with mandatory provenance
 - calibrated confidence, decay, churn invalidation, lifecycle states
@@ -1600,7 +1603,7 @@ Formerly open questions; resolved in v1.1 and reflected throughout this document
 
 1. **Experience shards default to local-only and gitignored.** They are a reproducible, redacted cache of GitHub history; GitHub is already the durable shared store, so committing the cache adds repo noise and merge conflicts without adding truth. Rules, MEMORY.md, and the compiled block — the reviewed, human-owned memory — are always committed. `commit_experiences: true` remains for air-gapped or archival needs. Ingest must be idempotent so any clone rebuilds the cache.
 2. **Decay half-life defaults to 90 days.** 60 is too aggressive for repos with monthly agent activity; 180 keeps zombie rules alive. 90 also composes cleanly with the system's other windows: a rule unseen for two half-lives (~180 days) decays to `stale` just as its evidence ages out of the default `lookback_days: 180`.
-3. **Clustering is tiered: deterministic signature keys always, bundled local embeddings by default, provider embeddings opt-in.** Failure signatures are already highly structured (class + check + key + message fingerprint), so deterministic clustering needs no network and no model — it is the no-network fallback and the trust anchor. A bundled local embedding model refines clusters across paraphrased messages offline, honoring NFR6 (nothing leaves the machine by default). Provider embeddings are a quality opt-in, never the default.
+3. **Clustering is tiered: deterministic signature keys always, explicitly pulled local embeddings, provider embeddings opt-in.** Failure signatures are already highly structured (class + check + key + message fingerprint), so deterministic clustering needs no network and no model — it is the zero-install fallback and the trust anchor. `relia models pull` fetches an approved local embedding artifact into a local cache only when the operator asks for local embedding refinement, recording model ID, version, source, license, digest, and cache path. `embeddings: local` fails closed with exit `8` if the artifact is missing, stale, or digest-mismatched; `embeddings: signature` remains the default deterministic path and labels provenance as signature-only. Provider embeddings are a quality opt-in, never the default.
 4. **Minimum evidence count is 2 confirmed experiences, with confidence capped at 0.6 until 3.** Requiring 3 starves low-volume repos during cold start — the biggest churn risk. Two confirmed (flake-discounted, conservatively paired) failures of the same signature is a real pattern, and the human review gate plus the confidence cap bound the damage of a premature rule.
 5. **Monorepos scope by path prefix, not per-package configs.** Rules already carry `scope.paths` and the coverage map is already per-prefix, so path-prefix scoping falls out of the existing model. One `relia.yaml` with an optional `repo.scopes` mapping (check name → path prefix) handles check attribution in monorepos. Per-package configs multiply setup cost and fragment memory; post-MVP.
 6. **`fix_held` requires 14 settle days AND at least 3 subsequent merges touching overlapping paths.** Elapsed time alone is not evidence on a slow repo — "nothing reappeared" means nothing if nothing was touched. The compound criterion (both required, both configurable) keeps playbook rules honest; on slow repos a fix simply stays `candidate` longer, which is the truthful state.

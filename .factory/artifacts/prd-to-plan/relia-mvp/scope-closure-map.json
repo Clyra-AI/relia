@@ -2207,7 +2207,7 @@
     },
     {
       "acceptance_criteria": [
-        "tiered clustering (deterministic signature keys, bundled local embeddings, provider embeddings opt-in)"
+        "tiered clustering (deterministic signature keys, explicitly pulled local embeddings, provider embeddings opt-in)"
       ],
       "acceptance_item_ids": [
         "MVP-IN-SCOPE-010"
@@ -2233,7 +2233,7 @@
         "T7"
       ],
       "requires_human_approval": false,
-      "scope_item": "tiered clustering (deterministic signature keys, bundled local embeddings, provider embeddings opt-in)",
+      "scope_item": "tiered clustering (deterministic signature keys, explicitly pulled local embeddings, provider embeddings opt-in)",
       "scope_item_id": "MVP-IN-SCOPE-010",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
       "status": "partial",

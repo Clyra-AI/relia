@@ -31,6 +31,11 @@ Before PR or merge, run:
 - Factory mission: relia-mvp.
 - Artifact namespace: Factory artifacts in .factory/artifacts/; daemon state in .factoryd/.
 - Live credentials and network access are blocked until explicitly approved.
+- Model artifacts are not bundled in source, binaries, containers, or releases.
+  Local embeddings require an explicit `relia models pull` path with model ID,
+  version, source, license, digest, cache path, update policy, rollback policy,
+  and missing-artifact behavior. Provider endpoints remain separate opt-in live
+  capabilities.
 
 ## 4. Required Boundaries
 

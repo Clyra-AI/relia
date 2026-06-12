@@ -27,7 +27,24 @@
 
 Require a decision note when a task changes runtime pins, distribution target, credential/network posture, public output contracts, schema compatibility, or major reliability/performance tradeoffs.
 
+Model artifact and inference-runtime decisions require an ADR before
+implementation when they affect local embeddings, packaging, release artifacts,
+cross-platform support, memory/CPU cost, or dependency footprint. The ADR must
+choose the inference boundary, such as pure Go library, ONNX/runtime binding, or
+external local process, and record license, size, security, update, rollback,
+and cache-location implications.
+
 ## Trust-Mode Posture
 
 - Deterministic bootstrap has no network, no ambient secrets, and no live credentials.
 - Approved live work must use explicit config and record credential/network posture in evidence.
+
+## Model Artifact Boundary
+
+- Deterministic signature clustering is the zero-install trust anchor.
+- Local embedding refinement is an explicitly pulled model-artifact path, not a
+  bundled binary or repo payload.
+- Provider embeddings and LLM rule drafting are opt-in live provider paths, not
+  substitutes for deterministic provenance.
+- Missing local artifacts must fail closed for explicit local mode or be
+  represented as signature-only provenance when signature mode is selected.
