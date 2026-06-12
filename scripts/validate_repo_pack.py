@@ -258,12 +258,13 @@ def validate_model_provider_gate(task):
     approved = grant.get("approved")
     if approved not in (False, True):
         fail(f"{task_id}.model_provider_endpoint grant approved flag must be true or false")
-    provider_endpoint_or_base_url = validate_provider_grant_fields(grant, f"{task_id}.model_provider_endpoint grant")
+    validate_provider_grant_fields(grant, f"{task_id}.model_provider_endpoint grant")
     if approved is True:
         checked_values = [
             grant.get("provider_identity"),
             grant.get("provider_model"),
-            provider_endpoint_or_base_url,
+            grant.get("provider_endpoint"),
+            grant.get("base_url"),
             grant.get("credential_environment"),
             grant.get("budget_posture"),
             grant.get("redaction_posture"),
@@ -508,6 +509,22 @@ def self_test():
                     raise
             else:
                 fail("whitespace endpoint with pending base_url fixture did not fail closed")
+        finally:
+            globals()["factoryd_config_capability_grants"] = original_config_grants
+
+        pending_extra_base_url_task = model_provider_gate_task("T7", "T7")
+        pending_extra_base_url_task["factoryd_runtime"]["capability_grants"] = []
+        pending_extra_base_url_grant = dict(active_config_grant)
+        pending_extra_base_url_grant["base_url"] = "pending-approved-base-url"
+        globals()["factoryd_config_capability_grants"] = lambda: [pending_extra_base_url_grant]
+        try:
+            try:
+                validate_model_provider_gate(pending_extra_base_url_task)
+            except AssertionError as exc:
+                if "pending placeholders" not in str(exc):
+                    raise
+            else:
+                fail("real endpoint with pending base_url fixture did not fail closed")
         finally:
             globals()["factoryd_config_capability_grants"] = original_config_grants
 
