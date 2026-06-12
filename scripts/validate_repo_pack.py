@@ -74,6 +74,13 @@ def duplicate_values(values):
         seen.add(value)
     return duplicates
 
+def missing_grant_value(value):
+    if value is None or value == []:
+        return True
+    if isinstance(value, str):
+        return not value.strip()
+    return False
+
 def public_release_boundary_error(label, document):
     slices = document.get("delivery_slices") or []
     release_slices = [
@@ -114,7 +121,7 @@ def validate_public_release_boundary(documents):
             fail(error)
 
 
-def validate_t9_model_provider_gate(task):
+def validate_model_provider_gate(task):
     task_id = task.get("task_id") or "T9"
     if task.get("requires_model_provider_endpoint") is not True:
         fail(f"{task_id}.requires_model_provider_endpoint must be true for provider-backed distill work")
@@ -128,9 +135,10 @@ def validate_t9_model_provider_gate(task):
     required_fields = {str(value) for value in requirements.get("required_fields") or []}
     if "provider_model" not in required_fields:
         fail(f"{task_id}.model_provider_requirements.required_fields must include provider_model")
-    for key in ["requires_human_approval", "requires_network", "requires_credentials"]:
-        if task.get(key) is not True:
-            fail(f"{task_id}.{key} must remain true because T9 mixes model-provider, network, credential, API, webhook, and hosted-service work")
+    if task_id == "T9":
+        for key in ["requires_human_approval", "requires_network", "requires_credentials"]:
+            if task.get(key) is not True:
+                fail(f"{task_id}.{key} must remain true because T9 mixes model-provider, network, credential, API, webhook, and hosted-service work")
     grants = [
         *(((task.get("factoryd_runtime") or {}).get("capability_grants")) or []),
         *factoryd_config_capability_grants(),
@@ -156,13 +164,13 @@ def validate_t9_model_provider_gate(task):
         "budget_posture",
         "redaction_posture",
     ]
-    missing = [field for field in required_grant_fields if field not in grant or grant[field] in (None, "", [])]
+    missing = [field for field in required_grant_fields if field not in grant or missing_grant_value(grant[field])]
     if missing:
         fail(f"{task_id}.model_provider_endpoint grant missing fields: {missing}")
     allowlist = grant.get("network_allowlist")
     if not isinstance(allowlist, list) or not all(str(item).strip() for item in allowlist):
         fail(f"{task_id}.model_provider_endpoint grant network_allowlist must be a non-empty string list")
-    if grant.get("provider_endpoint") in (None, "", []) and grant.get("base_url") in (None, "", []):
+    if not str(grant.get("provider_endpoint", "")).strip() and not str(grant.get("base_url", "")).strip():
         fail(f"{task_id}.model_provider_endpoint grant must include provider_endpoint or base_url")
     if approved is True:
         checked_values = [
@@ -471,8 +479,9 @@ def main():
         runtime = task.get("factoryd_runtime")
         if not isinstance(runtime, dict) or "capability_grants" not in runtime or not isinstance(runtime["capability_grants"], list):
             fail(f"{task_id}.factoryd_runtime.capability_grants must be a list")
-        if task_id == "T9":
-            validate_t9_model_provider_gate(task)
+        provider_acceptance_ids = {"MVP-IN-SCOPE-010", "MVP-IN-SCOPE-011"}
+        if task.get("requires_model_provider_endpoint") is True or provider_acceptance_ids & task_item_ids:
+            validate_model_provider_gate(task)
         scanner = task.get("security_scanner_gates") or {}
         if profile_visibility == "public":
             if scanner.get("required") is not True or scanner.get("status_check") != "CodeQL analyze":
