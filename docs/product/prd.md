@@ -1455,6 +1455,10 @@ The MVP is not complete until all acceptance groups pass.
 8. MEMORY.md renders receipts as resolvable links and separates weak from strong memory.
 9. No-LLM mode produces deterministic cluster-summary drafts.
 10. Provider-backed distill reports cost and respects the configured cap.
+11. `relia models pull` records model ID, version, source URL, license, digest, cache path, update policy, and rollback policy before local embedding refinement is used.
+12. `embeddings: local` fails closed with exit 8 when the local model artifact is missing, stale, or digest-mismatched, while `embeddings: signature` remains the zero-install deterministic fallback with signature-only provenance.
+13. Release binaries, containers, and tracked source do not bundle model weights or inference-runtime payloads.
+14. The local embedding inference boundary is covered by an ADR before implementation chooses a pure Go library, ONNX/runtime binding, or external local process.
 
 ### Serve And Advise Acceptance Tests
 
