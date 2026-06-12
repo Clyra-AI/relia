@@ -805,9 +805,13 @@
       "The memory-off/memory-on contrast uses the same task, model, and prompt.",
       "Every citation shown in the demo resolves to a real PR in the seeded repo.",
       "The fallback static reports cover all five beats.",
-      "Attribution precision is at least 95% on a labeled sample; uncertain cases are excluded, not guessed."
+      "Attribution precision is at least 95% on a labeled sample; uncertain cases are excluded, not guessed.",
+      "relia models pull records model ID, version, source URL, license, digest, cache path, update policy, and rollback policy before local embedding refinement is used.",
+      "embeddings: local fails closed with exit 8 when the local model artifact is missing, stale, or digest-mismatched, while embeddings: signature remains the zero-install deterministic fallback with signature-only provenance.",
+      "Release binaries, containers, and tracked source do not bundle model weights or inference-runtime payloads.",
+      "The local embedding inference boundary is covered by an ADR before implementation chooses a pure Go library, ONNX/runtime binding, or external local process."
     ],
-    "acceptance_item_count": 117,
+    "acceptance_item_count": 121,
     "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
     "capability_gateway": {
       "enforcement_mode": "fail_closed",
@@ -824,7 +828,8 @@
       "work_proof_marker",
       "validation_report",
       "scope_closure_report",
-      "pr_lifecycle_report"
+      "pr_lifecycle_report",
+      "factoryd_run_once_report"
     ],
     "holdout_triggers": [
       "runtime pin change",
@@ -846,9 +851,9 @@
       "reviewer_class": "peer_agent"
     },
     "stop_conditions": [
-      "changed path outside allowed_paths",
-      "required validation command failed",
-      "scope closure did not advance",
+      "validation failed",
+      "path policy violation",
+      "closure did not advance",
       "alignment drift detected"
     ]
   },
