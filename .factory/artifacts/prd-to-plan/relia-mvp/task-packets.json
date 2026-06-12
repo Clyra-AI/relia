@@ -3975,9 +3975,25 @@
       "factoryd_runtime": {
         "approval_posture": "human approval required for high risk, live credentials, and merge",
         "branch_prefix": "codex",
-        "capability_grants": [],
-        "credential_posture": "no ambient secrets",
-        "network_posture": "offline by default",
+        "capability_grants": [
+          {
+            "task_id": "T7",
+            "capability": "model_provider_endpoint",
+            "approved": false,
+            "evidence_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions/model_provider_endpoint",
+            "network_allowlist": [
+              "pending-approved-model-provider-host"
+            ],
+            "provider_identity": "pending-approved-provider",
+            "provider_model": "pending-approved-model",
+            "provider_endpoint": "pending-approved-provider-endpoint",
+            "credential_environment": "pending-approved-model-provider-env-var",
+            "budget_posture": "pending-approved-model-provider-budget",
+            "redaction_posture": "pending-approved-model-provider-redaction"
+          }
+        ],
+        "credential_posture": "no ambient secrets; approved model_provider_endpoint credential environment required before provider work",
+        "network_posture": "offline by default; allowlisted only after approved model_provider_endpoint grant",
         "runtime_control": {
           "autonomy_level": "restricted",
           "conflict_behavior": "fail_closed",
@@ -4045,9 +4061,9 @@
         "commit-push",
         "post-merge-monitor"
       ],
-      "requires_credentials": false,
+      "requires_credentials": true,
       "requires_human_approval": false,
-      "requires_network": false,
+      "requires_network": true,
       "risk_class": "low",
       "runtime_pins": {
         "artifact_namespace": ".factory/artifacts/",
@@ -4065,7 +4081,8 @@
         "No live network/provider calls without explicit approval and allowlist.",
         "Do not self-close manual, product-signal, or judgment-only acceptance without recorded evidence.",
         "Do not bundle model weights or inference-runtime payloads into source, binaries, containers, or release artifacts.",
-        "Do not call provider embedding endpoints unless provider credentials, cost cap, redaction posture, and network allowlist are explicitly approved."
+        "Do not call provider embedding endpoints unless provider credentials, cost cap, redaction posture, and network allowlist are explicitly approved.",
+        "No model provider endpoint calls without a complete model_provider_endpoint grant with provider identity, provider model, endpoint or base_url, credential environment, budget posture, redaction posture, and allowlist."
       ],
       "security_scanner_gates": {
         "exception_policy": "approved_exception_required_when_required_or_surface_touched",
@@ -4100,7 +4117,8 @@
         "local model artifact source, license, digest, cache path, update policy, or rollback policy is missing",
         "model artifact download attempted without explicit relia models pull scope or approved network posture",
         "model weights or inference-runtime payloads are added to source, binary, container, or release artifacts without an approved distribution decision",
-        "embeddings: local silently falls back instead of failing closed on missing or digest-mismatched artifact"
+        "embeddings: local silently falls back instead of failing closed on missing or digest-mismatched artifact",
+        "model provider endpoint work attempted without model_provider_endpoint grant"
       ],
       "task_id": "T7",
       "test_matrix_refs": [
@@ -4199,7 +4217,25 @@
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t7",
-      "worker_type": "codex_cli"
+      "worker_type": "codex_cli",
+      "requires_model_provider_endpoint": true,
+      "model_provider_requirements": {
+        "required_grant": "model_provider_endpoint",
+        "provider_surfaces": [
+          "openai_compatible_http",
+          "anthropic_messages_http"
+        ],
+        "required_fields": [
+          "provider_identity",
+          "provider_model",
+          "provider_endpoint_or_base_url",
+          "credential_environment",
+          "budget_posture",
+          "redaction_posture",
+          "network_allowlist"
+        ],
+        "approval_policy": "Provider embedding and LLM rule-drafting integrations for OpenAI-compatible and Anthropic adapters require a complete model_provider_endpoint grant with provider identity, provider model, endpoint or base_url, credential environment, budget posture, redaction posture, and allowlist. Generic network or credential approval alone does not satisfy this model-specific gate."
+      }
     },
     {
       "acceptance_checks": [
@@ -4917,7 +4953,23 @@
       "factoryd_runtime": {
         "approval_posture": "human approval required for high risk, live credentials, and merge",
         "branch_prefix": "codex",
-        "capability_grants": [],
+        "capability_grants": [
+          {
+            "task_id": "*",
+            "capability": "model_provider_endpoint",
+            "approved": false,
+            "evidence_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions/model_provider_endpoint",
+            "network_allowlist": [
+              "pending-approved-model-provider-host"
+            ],
+            "provider_identity": "pending-approved-provider",
+            "provider_model": "pending-approved-model",
+            "provider_endpoint": "pending-approved-provider-endpoint",
+            "credential_environment": "pending-approved-model-provider-env-var",
+            "budget_posture": "pending-approved-model-provider-budget",
+            "redaction_posture": "pending-approved-model-provider-redaction"
+          }
+        ],
         "credential_posture": "no ambient secrets",
         "network_posture": "offline by default",
         "runtime_control": {
@@ -4996,16 +5048,17 @@
         "dependency_policy": "standard library first; pin and justify dependencies",
         "distribution_target": "standalone_binary",
         "language": "go",
-        "live_work_policy": "no ambient secrets or live network by default",
+        "live_work_policy": "no ambient secrets or live network by default; GitHub/webhook/hosted-service work needs generic credential/network approval, and provider-backed distill needs model_provider_endpoint approval",
         "module_or_package_path": "github.com/Clyra-AI/relia",
-        "provider_policy": "none by default",
+        "provider_policy": "deterministic no-LLM by default; provider embeddings and OpenAI-compatible or Anthropic LLM rule-drafting adapters require a complete model_provider_endpoint grant with provider identity, provider model, endpoint or base_url, credential environment, budget posture, redaction posture, and allowlist",
         "toolchain_version": "1.26.4"
       },
       "scope_exclusions": [
         "No scope outside docs/product/prd.md.",
         "No completion claim without acceptance evidence.",
         "No live credentials, API keys, tokens, or secrets without explicit approval.",
-        "No live network/provider calls without explicit approval and allowlist."
+        "No live network/provider calls without explicit approval and allowlist.",
+        "No model provider endpoint calls without a complete model_provider_endpoint grant with provider identity, provider model, endpoint or base_url, credential environment, budget posture, redaction posture, and allowlist."
       ],
       "security_scanner_gates": {
         "exception_policy": "approved_exception_required_when_required_or_surface_touched",
@@ -5035,7 +5088,8 @@
         "required validation command failed",
         "plan drift detected",
         "scope closure did not advance",
-        "live credential or network work attempted without approval"
+        "live credential or network work attempted without approval",
+        "model provider endpoint work attempted without model_provider_endpoint grant"
       ],
       "task_id": "T9",
       "test_matrix_refs": [
@@ -5117,7 +5171,25 @@
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t9",
-      "worker_type": "codex_cli"
+      "worker_type": "codex_cli",
+      "requires_model_provider_endpoint": true,
+      "model_provider_requirements": {
+        "required_grant": "model_provider_endpoint",
+        "provider_surfaces": [
+          "openai_compatible_http",
+          "anthropic_messages_http"
+        ],
+        "required_fields": [
+          "provider_identity",
+          "provider_model",
+          "provider_endpoint_or_base_url",
+          "credential_environment",
+          "budget_posture",
+          "redaction_posture",
+          "network_allowlist"
+        ],
+        "approval_policy": "Provider embedding and LLM rule-drafting integrations for OpenAI-compatible and Anthropic adapters require a complete model_provider_endpoint grant with provider identity, provider model, endpoint or base_url, credential environment, budget posture, redaction posture, and allowlist in addition to any generic network or credential approvals for GitHub, webhooks, or hosted service work."
+      }
     },
     {
       "acceptance_checks": [

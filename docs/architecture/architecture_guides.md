@@ -43,8 +43,12 @@ and cache-location implications.
 
 - Deterministic signature clustering is the zero-install trust anchor.
 - Local embedding refinement is an explicitly pulled model-artifact path, not a
-  bundled binary or repo payload.
+  bundled binary or repo payload. It requires an approved `model_artifact_pull`
+  grant before any artifact download or refresh.
 - Provider embeddings and LLM rule drafting are opt-in live provider paths, not
-  substitutes for deterministic provenance.
+  substitutes for deterministic provenance. They require an approved
+  `model_provider_endpoint` grant naming provider, model, endpoint or
+  `base_url`, credential environment, budget posture, redaction posture, and
+  allowlist before live provider calls.
 - Missing local artifacts must fail closed for explicit local mode or be
   represented as signature-only provenance when signature mode is selected.

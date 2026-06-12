@@ -68,14 +68,16 @@ compensating validation evidence.
   network, provider credential, model key, or downloaded model artifact.
 - `embeddings: local` requires an explicit `relia models pull` command before
   use. The pulled artifact must record model ID, version, source URL, license,
-  SHA-256 or equivalent digest, cache path, update policy, and rollback policy.
+  SHA-256 content digest, cache path, update policy, and rollback policy.
 - If `embeddings: local` is configured and the artifact is absent, stale, or
   digest-mismatched, Relia must fail closed with exit `8` and clear remediation.
   It must not silently degrade to provider embeddings or unlabeled signature-only
   behavior.
 - `embeddings: provider` is a separate live provider capability. Provider
   endpoint work must declare provider, model, endpoint or `base_url`, credential
-  environment, cost cap, redaction posture, and network allowlist.
+  environment, cost cap, redaction posture, and network allowlist through a
+  complete `model_provider_endpoint` grant. Generic network or credential
+  approval does not satisfy this gate.
 - Release binaries, containers, and tracked source must not include model weights
   or inference-runtime payloads unless a future distribution decision records
   license, size, security, cross-platform, update, and rollback evidence.

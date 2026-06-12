@@ -1,4 +1,5 @@
 .factory/tmp/
+.factory/factoryd.json
 .factoryd/
 __pycache__/
 *.pyc
