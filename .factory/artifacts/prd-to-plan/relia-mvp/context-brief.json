@@ -41,7 +41,8 @@
       "PRD requires networked or provider work; confirm network allowlist and deterministic replay boundary before live tasks are unblocked",
       "PRD requires credentials or secrets; confirm scoped credential posture before live implementation tasks are unblocked",
       "PRD contains judgment-only acceptance criteria; define objective evidence or route those checks to a human approval gate",
-      "PRD requires explicit local embedding artifact pulls only when the optional embeddings: local path is exercised; approve model source URL, ID/version, license, digest, cache path, update policy, rollback policy, absence behavior, and network allowlist before any live model-artifact pull or local-embedding validation run"
+      "PRD requires explicit local embedding artifact pulls only when the optional embeddings: local path is exercised; approve model source URL, ID/version, license, digest, cache path, update policy, rollback policy, absence behavior, and network allowlist before any live model-artifact pull or local-embedding validation run",
+      "PRD requires provider embeddings or LLM rule-drafting adapters; approve model provider identity, endpoint/base_url, credential environment, budget posture, redaction posture, and network allowlist before provider-backed distill runs are unblocked"
     ],
     "model_artifact_pull": {
       "status": "pending_approval",
@@ -54,6 +55,17 @@
       ],
       "required_grant": "model_artifact_pull",
       "fallback": "embeddings: signature remains the zero-install deterministic fallback until this gate is approved"
+    },
+    "model_provider_endpoint": {
+      "status": "pending_approval",
+      "decision": "model_provider_endpoint",
+      "value": "Provider embeddings and LLM rule drafting through OpenAI-compatible and Anthropic adapters are gated until an operator approves provider endpoint metadata and credential/network posture through a model_provider_endpoint grant.",
+      "required_before_dispatch": [
+        "T9"
+      ],
+      "required_grant": "model_provider_endpoint",
+      "generic_grants_sufficient": false,
+      "fallback": "deterministic no-LLM and embeddings: signature remain available until this gate is approved"
     }
   },
   "alignment_findings": {
@@ -135,7 +147,8 @@
   "scope_risks": [
     "PRD mentions networked integrations; deterministic work must separate local replay from approved live calls.",
     "PRD mentions live credentials; live work must remain blocked until scoped credential policy is approved.",
-    "PRD mentions credential-adjacent or secret-handling scope; generated tasks must preserve redaction and evidence requirements."
+    "PRD mentions credential-adjacent or secret-handling scope; generated tasks must preserve redaction and evidence requirements.",
+    "Provider-backed embeddings or LLM rule drafting require a model_provider_endpoint grant; generic network or credential approval alone is insufficient."
   ],
   "shared_constraints_ref": "AGENTS.md",
   "system_model_summary": "State lives in repo-local files and Factory artifacts; feedback lives in validation commands, PR lifecycle reports, and scope closure.",

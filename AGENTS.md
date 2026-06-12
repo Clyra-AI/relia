@@ -34,8 +34,10 @@ Before PR or merge, run:
 - Model artifacts are not bundled in source, binaries, containers, or releases.
   Local embeddings require an explicit `relia models pull` path with model ID,
   version, source, license, digest, cache path, update policy, rollback policy,
-  and missing-artifact behavior. Provider endpoints remain separate opt-in live
-  capabilities.
+  and missing-artifact behavior through the `model_artifact_pull` gate.
+  Provider embeddings and LLM rule drafting are separate opt-in live
+  capabilities that require the `model_provider_endpoint` gate; generic network
+  or credential approval is not enough.
 
 ## 4. Required Boundaries
 

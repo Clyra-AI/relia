@@ -85,6 +85,51 @@ def validate_public_release_boundary(documents):
             fail(error)
 
 
+def validate_t9_model_provider_gate(task):
+    task_id = task.get("task_id") or "T9"
+    if task.get("requires_model_provider_endpoint") is not True:
+        fail(f"{task_id}.requires_model_provider_endpoint must be true for provider-backed distill work")
+    requirements = task.get("model_provider_requirements")
+    if not isinstance(requirements, dict) or requirements.get("required_grant") != "model_provider_endpoint":
+        fail(f"{task_id}.model_provider_requirements must require model_provider_endpoint")
+    provider_surfaces = {str(value) for value in requirements.get("provider_surfaces") or []}
+    missing_surfaces = {"openai_compatible_http", "anthropic_messages_http"} - provider_surfaces
+    if missing_surfaces:
+        fail(f"{task_id}.model_provider_requirements.provider_surfaces missing {sorted(missing_surfaces)}")
+    for key in ["requires_human_approval", "requires_network", "requires_credentials"]:
+        if task.get(key) is not True:
+            fail(f"{task_id}.{key} must remain true because T9 mixes model-provider, network, credential, API, webhook, and hosted-service work")
+    grants = (((task.get("factoryd_runtime") or {}).get("capability_grants")) or [])
+    matching = [
+        grant for grant in grants
+        if isinstance(grant, dict)
+        and grant.get("task_id") == "*"
+        and grant.get("capability") == "model_provider_endpoint"
+    ]
+    if len(matching) != 1:
+        fail(f"{task_id}.factoryd_runtime.capability_grants must include one wildcard model_provider_endpoint grant")
+    grant = matching[0]
+    if grant.get("approved") is not False:
+        fail(f"{task_id}.model_provider_endpoint grant must remain unapproved until provider posture is explicitly approved")
+    required_grant_fields = [
+        "evidence_ref",
+        "network_allowlist",
+        "provider_identity",
+        "provider_endpoint",
+        "credential_environment",
+        "budget_posture",
+        "redaction_posture",
+    ]
+    missing = [field for field in required_grant_fields if field not in grant or grant[field] in (None, "", [])]
+    if missing:
+        fail(f"{task_id}.model_provider_endpoint grant missing fields: {missing}")
+    if "model_provider_endpoint" not in str(grant.get("evidence_ref")):
+        fail(f"{task_id}.model_provider_endpoint grant evidence_ref must cite the alignment decision")
+    joined_stop_conditions = "\n".join(str(value) for value in task.get("stop_conditions") or [])
+    if "model_provider_endpoint grant" not in joined_stop_conditions:
+        fail(f"{task_id}.stop_conditions must fail closed without model_provider_endpoint grant")
+
+
 def self_test_public_release_boundary():
     valid = {
         "delivery_slices": [
@@ -373,6 +418,8 @@ def main():
         runtime = task.get("factoryd_runtime")
         if not isinstance(runtime, dict) or "capability_grants" not in runtime or not isinstance(runtime["capability_grants"], list):
             fail(f"{task_id}.factoryd_runtime.capability_grants must be a list")
+        if task_id == "T9":
+            validate_t9_model_provider_gate(task)
         scanner = task.get("security_scanner_gates") or {}
         if profile_visibility == "public":
             if scanner.get("required") is not True or scanner.get("status_check") != "CodeQL analyze":
