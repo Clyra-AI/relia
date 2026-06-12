@@ -13,9 +13,10 @@ Generated Factory-ready repository.
 	~~~
 
 Provider-backed distill work requires a complete `model_provider_endpoint`
-grant. Local embedding artifact pulls require a separate `model_artifact_pull`
-grant. Generic network or credential approval does not satisfy either
-model-specific gate.
+grant naming provider, model, endpoint or `base_url`, credential environment,
+budget posture, redaction posture, and allowlist. Local embedding artifact pulls
+require a separate `model_artifact_pull` grant. Generic network or credential
+approval does not satisfy either model-specific gate.
 
 ## Post-PRD audit or review findings
 

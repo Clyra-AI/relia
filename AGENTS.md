@@ -36,8 +36,10 @@ Before PR or merge, run:
   version, source, license, digest, cache path, update policy, rollback policy,
   and missing-artifact behavior through the `model_artifact_pull` gate.
   Provider embeddings and LLM rule drafting are separate opt-in live
-  capabilities that require the `model_provider_endpoint` gate; generic network
-  or credential approval is not enough.
+  capabilities that require the `model_provider_endpoint` gate with provider,
+  model, endpoint or `base_url`, credential environment, budget posture,
+  redaction posture, and allowlist; generic network or credential approval is
+  not enough.
 
 ## 4. Required Boundaries
 

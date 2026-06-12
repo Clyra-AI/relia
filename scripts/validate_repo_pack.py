@@ -96,6 +96,9 @@ def validate_t9_model_provider_gate(task):
     missing_surfaces = {"openai_compatible_http", "anthropic_messages_http"} - provider_surfaces
     if missing_surfaces:
         fail(f"{task_id}.model_provider_requirements.provider_surfaces missing {sorted(missing_surfaces)}")
+    required_fields = {str(value) for value in requirements.get("required_fields") or []}
+    if "provider_model" not in required_fields:
+        fail(f"{task_id}.model_provider_requirements.required_fields must include provider_model")
     for key in ["requires_human_approval", "requires_network", "requires_credentials"]:
         if task.get(key) is not True:
             fail(f"{task_id}.{key} must remain true because T9 mixes model-provider, network, credential, API, webhook, and hosted-service work")
@@ -103,11 +106,11 @@ def validate_t9_model_provider_gate(task):
     matching = [
         grant for grant in grants
         if isinstance(grant, dict)
-        and grant.get("task_id") == "*"
+        and str(grant.get("task_id", "")).strip() in {"*", task_id}
         and grant.get("capability") == "model_provider_endpoint"
     ]
     if len(matching) != 1:
-        fail(f"{task_id}.factoryd_runtime.capability_grants must include one wildcard model_provider_endpoint grant")
+        fail(f"{task_id}.factoryd_runtime.capability_grants must include one wildcard or task-scoped model_provider_endpoint grant")
     grant = matching[0]
     approved = grant.get("approved")
     if approved not in (False, True):
@@ -116,6 +119,7 @@ def validate_t9_model_provider_gate(task):
         "evidence_ref",
         "network_allowlist",
         "provider_identity",
+        "provider_model",
         "credential_environment",
         "budget_posture",
         "redaction_posture",
@@ -128,6 +132,7 @@ def validate_t9_model_provider_gate(task):
     if approved is True:
         checked_values = [
             grant.get("provider_identity"),
+            grant.get("provider_model"),
             grant.get("provider_endpoint") or grant.get("base_url"),
             grant.get("credential_environment"),
             grant.get("budget_posture"),
