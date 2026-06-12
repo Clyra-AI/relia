@@ -134,8 +134,18 @@ def validate_model_provider_gate(task):
     if missing_surfaces:
         fail(f"{task_id}.model_provider_requirements.provider_surfaces missing {sorted(missing_surfaces)}")
     required_fields = {str(value) for value in requirements.get("required_fields") or []}
-    if "provider_model" not in required_fields:
-        fail(f"{task_id}.model_provider_requirements.required_fields must include provider_model")
+    expected_required_fields = {
+        "provider_identity",
+        "provider_model",
+        "provider_endpoint_or_base_url",
+        "credential_environment",
+        "budget_posture",
+        "redaction_posture",
+        "network_allowlist",
+    }
+    missing_required_fields = sorted(expected_required_fields - required_fields)
+    if missing_required_fields:
+        fail(f"{task_id}.model_provider_requirements.required_fields missing {missing_required_fields}")
     if task_id == "T9":
         for key in ["requires_human_approval", "requires_network", "requires_credentials"]:
             if task.get(key) is not True:
@@ -478,6 +488,16 @@ def self_test():
                 fail("non-string provider metadata fixture did not fail closed")
         finally:
             globals()["factoryd_config_capability_grants"] = original_config_grants
+
+        missing_requirement_field_task = model_provider_gate_task("T7", "T7")
+        missing_requirement_field_task["model_provider_requirements"]["required_fields"].remove("network_allowlist")
+        try:
+            validate_model_provider_gate(missing_requirement_field_task)
+        except AssertionError as exc:
+            if "required_fields missing" not in str(exc):
+                raise
+        else:
+            fail("missing model-provider requirement field fixture did not fail closed")
     finally:
         globals()["factoryd_config_capability_grants"] = original_config_grants
         globals()["fail"] = original_fail
