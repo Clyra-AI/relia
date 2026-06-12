@@ -10,6 +10,7 @@ FACTORYD_CONFIG = ROOT / ".factory" / "factoryd.example.json"
 FACTORYD_ACTIVE_CONFIG = ROOT / ".factory" / "factoryd.json"
 FACTORYD_AUTOSHIP_CONFIG = ROOT / ".factory" / "factoryd.autoship.example.json"
 FACTORYD_REPO_KEY = "relia"
+PROVIDER_ACCEPTANCE_IDS = {"MVP-IN-SCOPE-010", "MVP-IN-SCOPE-011"}
 
 REQUIRED = [
     "AGENTS.md",
@@ -120,6 +121,29 @@ def validate_public_release_boundary(documents):
         error = public_release_boundary_error(label, document)
         if error:
             fail(error)
+
+
+def validate_context_brief(context, provider_task_ids):
+    decisions = context.get("alignment_decisions")
+    if not isinstance(decisions, dict):
+        fail("context-brief.json missing alignment_decisions")
+    model_provider = decisions.get("model_provider_endpoint")
+    if not provider_task_ids:
+        return
+    if not isinstance(model_provider, dict):
+        fail("context-brief.json.alignment_decisions.model_provider_endpoint is required for provider-gated tasks")
+    if model_provider.get("required_grant") != "model_provider_endpoint":
+        fail("context-brief.json.alignment_decisions.model_provider_endpoint.required_grant must be model_provider_endpoint")
+    if model_provider.get("generic_grants_sufficient") is not False:
+        fail("context-brief.json.alignment_decisions.model_provider_endpoint.generic_grants_sufficient must be false")
+    dispatch_refs = {
+        str(task_id).strip()
+        for task_id in model_provider.get("required_before_dispatch") or []
+        if str(task_id).strip()
+    }
+    missing = sorted(provider_task_ids - dispatch_refs)
+    if missing:
+        fail("context-brief.json.alignment_decisions.model_provider_endpoint.required_before_dispatch missing provider-gated tasks: " + ", ".join(missing))
 
 
 def validate_model_provider_gate(task):
@@ -393,6 +417,37 @@ def self_test():
                 globals()["FACTORYD_ACTIVE_CONFIG"] = original_active_config
                 globals()["FACTORYD_AUTOSHIP_CONFIG"] = original_autoship_config
 
+        validate_context_brief(
+            {
+                "alignment_decisions": {
+                    "model_provider_endpoint": {
+                        "required_grant": "model_provider_endpoint",
+                        "generic_grants_sufficient": False,
+                        "required_before_dispatch": ["T7", "T9"],
+                    }
+                }
+            },
+            {"T7", "T9"},
+        )
+        try:
+            validate_context_brief(
+                {
+                    "alignment_decisions": {
+                        "model_provider_endpoint": {
+                            "required_grant": "model_provider_endpoint",
+                            "generic_grants_sufficient": False,
+                            "required_before_dispatch": ["T9"],
+                        }
+                    }
+                },
+                {"T7", "T9"},
+            )
+        except AssertionError as exc:
+            if "required_before_dispatch missing provider-gated tasks" not in str(exc):
+                raise
+        else:
+            fail("missing provider dispatch context fixture did not fail closed")
+
         active_wildcard_task = model_provider_gate_task()
         active_wildcard_task["factoryd_runtime"]["capability_grants"] = []
         active_wildcard_grant = {
@@ -608,7 +663,11 @@ def main():
     execution_plan_path = plan_dir / "execution-plan.json"
     if not execution_plan_path.exists():
         fail("execution-plan.json is required next to task-packets.json")
+    context_brief_path = plan_dir / "context-brief.json"
+    if not context_brief_path.exists():
+        fail("context-brief.json is required next to task-packets.json")
     execution_plan = json.loads(execution_plan_path.read_text())
+    context_brief = json.loads(context_brief_path.read_text())
     validation_contract = json.loads((root / repo["validation_contract"]).read_text())
     ledger = json.loads((root / repo["acceptance_ledger"]).read_text())
     if ledger.get("artifact_type") != "acceptance_ledger":
@@ -701,6 +760,16 @@ def main():
         packet_slices = {item.get("slice_id") for item in packets.get("delivery_slices") or []}
         if packet_slices != declared_slices:
             fail("task-packets delivery_slices must match execution-plan delivery_slices")
+    provider_task_ids = {
+        task.get("task_id")
+        for task in tasks
+        if task.get("task_id")
+        and (
+            task.get("requires_model_provider_endpoint") is True
+            or PROVIDER_ACCEPTANCE_IDS & set(task.get("acceptance_item_ids") or [])
+        )
+    }
+    validate_context_brief(context_brief, provider_task_ids)
     validate_public_release_boundary([
         ("execution-plan", execution_plan),
         ("task-packets", packets),
@@ -761,8 +830,7 @@ def main():
         runtime = task.get("factoryd_runtime")
         if not isinstance(runtime, dict) or "capability_grants" not in runtime or not isinstance(runtime["capability_grants"], list):
             fail(f"{task_id}.factoryd_runtime.capability_grants must be a list")
-        provider_acceptance_ids = {"MVP-IN-SCOPE-010", "MVP-IN-SCOPE-011"}
-        if task.get("requires_model_provider_endpoint") is True or provider_acceptance_ids & task_item_ids:
+        if task.get("requires_model_provider_endpoint") is True or PROVIDER_ACCEPTANCE_IDS & task_item_ids:
             validate_model_provider_gate(task)
         scanner = task.get("security_scanner_gates") or {}
         if profile_visibility == "public":

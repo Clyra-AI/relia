@@ -61,6 +61,7 @@
       "decision": "model_provider_endpoint",
       "value": "Provider embeddings and LLM rule drafting through OpenAI-compatible and Anthropic adapters are gated until an operator approves provider endpoint and model metadata and credential/network posture through a model_provider_endpoint grant.",
       "required_before_dispatch": [
+        "T7",
         "T9"
       ],
       "required_grant": "model_provider_endpoint",
