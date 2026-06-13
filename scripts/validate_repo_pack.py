@@ -686,6 +686,8 @@ def main():
         if not (root / rel).exists():
             fail(f"factoryd config references missing file: {rel}")
     packets = json.loads((root / repo["task_packets"]).read_text())
+    if packets.get("artifact_type") != "task_packets":
+        fail("task-packets.json artifact_type must be task_packets")
     plan_dir = (root / repo["task_packets"]).parent
     plan_dir_ref = str(Path(repo["task_packets"]).parent).replace("\\", "/")
     execution_plan_path = plan_dir / "execution-plan.json"
