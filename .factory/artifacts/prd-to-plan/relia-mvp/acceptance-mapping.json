@@ -2913,6 +2913,42 @@
         "T16"
       ],
       "title": "Demo Acceptance"
+    },
+    {
+      "group_id": "agent_native_cli_conventions",
+      "title": "Agent-Native CLI Conventions",
+      "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
+      "required": true,
+      "task_refs": [
+        "T1"
+      ],
+      "acceptance_refs": [
+        "CLI-AGENT-001"
+      ],
+      "acceptance_item_ids": [
+        "CLI-AGENT-001"
+      ],
+      "criteria": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
+      ],
+      "closure_status": "partial",
+      "item_mappings": [
+        {
+          "acceptance_item_id": "CLI-AGENT-001",
+          "task_refs": [
+            "T1"
+          ],
+          "evidence_mode": "automated",
+          "delivery_slice_refs": [
+            "repo-lifecycle-foundation"
+          ]
+        }
+      ],
+      "delivery_slice_refs": [
+        "repo-lifecycle-foundation"
+      ]
     }
   ],
   "schema_version": "0.1",

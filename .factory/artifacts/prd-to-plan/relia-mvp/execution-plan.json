@@ -52,9 +52,10 @@
       "distill-review-memory-page-acceptance-tests",
       "serve-and-advise-acceptance-tests",
       "success-metrics",
-      "demo-acceptance"
+      "demo-acceptance",
+      "agent_native_cli_conventions"
     ],
-    "required_item_count": 121,
+    "required_item_count": 122,
     "scope_closure_map_ref": ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
     "status": "mapped"
   },
@@ -89,7 +90,8 @@
         "acceptance-tests"
       ],
       "acceptance_item_ids": [
-        "ACCEPTANCE-TESTS-001"
+        "ACCEPTANCE-TESTS-001",
+        "CLI-AGENT-001"
       ],
       "name": "Repo Lifecycle And CLI Foundation",
       "public_release_boundary": false,
@@ -861,5 +863,37 @@
   },
   "validation_requirements": [
     "make prepush-full"
+  ],
+  "proof_of_behavior_requirements": {
+    "levels": [
+      "syntax",
+      "source_evidence",
+      "workflow_behavior",
+      "user_visible_behavior"
+    ],
+    "rule": "Tasks must close at or above their required_proof_level; workflow or user-visible closure requires proof-of-behavior scorecard evidence or approved exception.",
+    "artifact_type": "proof-of-behavior-scorecard"
+  },
+  "engineering_policy_refs": [
+    {
+      "policy": "structured_parser_policy",
+      "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+      "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions."
+    },
+    {
+      "policy": "agent_native_cli",
+      "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
+      "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use."
+    },
+    {
+      "policy": "artifact_budget_and_refs",
+      "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+      "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata."
+    },
+    {
+      "policy": "customer_safe_redaction",
+      "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+      "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data."
+    }
   ]
 }

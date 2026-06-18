@@ -1,5 +1,5 @@
 {
-  "acceptance_item_count": 121,
+  "acceptance_item_count": 122,
   "artifact_type": "acceptance_ledger",
   "coverage_policy": {
     "closure_unit": "acceptance_item",
@@ -2832,6 +2832,31 @@
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/3/validation_commands"
+      ]
+    },
+    {
+      "acceptance_item_id": "CLI-AGENT-001",
+      "group_id": "agent_native_cli_conventions",
+      "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
+      "source_text": "Agent-facing CLI commands support stable JSON mode, non-interactive machine-readable output, quiet/compact posture, typed exits, and machine-readable errors or an approved deferral.",
+      "kind": "quality_gate",
+      "evidence_mode": "automated",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "task_refs": [
+        "T1"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/0/validation_commands"
+      ],
+      "status": "planned",
+      "risk_class": "low",
+      "notes": [
+        "Factory-derived CLI quality gate added from the agent-native CLI standard."
+      ],
+      "delivery_slice_refs": [
+        "repo-lifecycle-foundation"
       ]
     }
   ],

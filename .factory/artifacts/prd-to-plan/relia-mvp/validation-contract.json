@@ -120,7 +120,10 @@
     "relia models pull records model ID, version, source URL, license, digest, cache path, update policy, and rollback policy before local embedding refinement is used.",
     "embeddings: local fails closed with exit 8 when the local model artifact is missing, stale, or digest-mismatched, while embeddings: signature remains the zero-install deterministic fallback with signature-only provenance.",
     "Release binaries, containers, and tracked source do not bundle model weights or inference-runtime payloads.",
-    "The local embedding inference boundary is covered by an ADR before implementation chooses a pure Go library, ONNX/runtime binding, or external local process."
+    "The local embedding inference boundary is covered by an ADR before implementation chooses a pure Go library, ONNX/runtime binding, or external local process.",
+    "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+    "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+    "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
   ],
   "acceptance_groups": [
     {
@@ -572,7 +575,7 @@
       "title": "Demo Acceptance"
     }
   ],
-  "acceptance_item_count": 121,
+  "acceptance_item_count": 122,
   "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
   "acceptance_mapping_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
   "artifact_type": "validation_contract",
@@ -1034,7 +1037,11 @@
       "factoryd_runtime",
       "validation_commands",
       "evidence_required",
-      "stop_conditions"
+      "stop_conditions",
+      "required_proof_level",
+      "engineering_policy_refs",
+      "artifact_budget_refs",
+      "redaction_posture"
     ],
     "runtime": {
       "approval_posture": "human approval required for high risk, live credentials, and merge",
@@ -1078,5 +1085,15 @@
     "path policy violation",
     "closure did not advance",
     "alignment drift detected"
-  ]
+  ],
+  "proof_of_behavior_requirements": {
+    "levels": [
+      "syntax",
+      "source_evidence",
+      "workflow_behavior",
+      "user_visible_behavior"
+    ],
+    "rule": "Tasks must close at or above their required_proof_level; workflow or user-visible closure requires proof-of-behavior scorecard evidence or approved exception.",
+    "artifact_type": "proof-of-behavior-scorecard"
+  }
 }
