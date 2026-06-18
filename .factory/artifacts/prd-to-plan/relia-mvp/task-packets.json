@@ -672,7 +672,8 @@
         "validation_report",
         "scope_closure_report",
         "pr_lifecycle_report",
-        "factoryd_run_once_report"
+        "factoryd_run_once_report",
+        "proof-of-behavior-scorecard"
       ],
       "factory_compatibility": {
         "factory_contract_version": "1.0",
@@ -845,7 +846,8 @@
           "validation_report",
           "scope_closure_report",
           "pr_lifecycle_report",
-          "factoryd_run_once_report"
+          "factoryd_run_once_report",
+          "proof-of-behavior-scorecard"
         ],
         "required_checks": [
           "make prepush-full"
@@ -868,8 +870,8 @@
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t1",
       "worker_type": "codex_cli",
-      "required_proof_level": "syntax",
-      "proof_scorecard_required": false,
+      "required_proof_level": "user_visible_behavior",
+      "proof_scorecard_required": true,
       "proof_scorecard_artifact": "proof-of-behavior-scorecard",
       "structured_parser_policy_refs": [
         "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
@@ -3085,7 +3087,7 @@
       "acceptance_checks": [
         "Relia must attribute agent authorship via bot login, co-author trailer, and PR label, with method and confidence recorded. Uncertain attribution must fail closed (excluded from ERR) by default.",
         "Signature extraction must prefer structured check-run data and label log-parsed signatures with extraction confidence.",
-        "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence — never from the drafting model.",
+        "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence \u2014 never from the drafting model.",
         "Rules must decay by half-life and go `stale` when their scoped paths are deleted.",
         "Drafted rules must be reviewed before becoming `active`, with `accepted`, `suggested`, and `needs_user_input` labels. Disabling review is an explicit, surfaced configuration choice.",
         "Relia must support `avoid` rules from failures and `playbook` rules from held fixes, and playbook rules must cite held evidence.",
@@ -3702,7 +3704,7 @@
         "acceptance_criteria": [
           "Relia must attribute agent authorship via bot login, co-author trailer, and PR label, with method and confidence recorded. Uncertain attribution must fail closed (excluded from ERR) by default.",
           "Signature extraction must prefer structured check-run data and label log-parsed signatures with extraction confidence.",
-          "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence — never from the drafting model.",
+          "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence \u2014 never from the drafting model.",
           "Rules must decay by half-life and go `stale` when their scoped paths are deleted.",
           "Drafted rules must be reviewed before becoming `active`, with `accepted`, `suggested`, and `needs_user_input` labels. Disabling review is an explicit, surfaced configuration choice.",
           "Relia must support `avoid` rules from failures and `playbook` rules from held fixes, and playbook rules must cite held evidence.",

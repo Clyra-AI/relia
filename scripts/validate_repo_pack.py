@@ -15,6 +15,48 @@ PROVIDER_ACCEPTANCE_IDS = {
     "MVP-IN-SCOPE-010",
     "MVP-IN-SCOPE-011",
 }
+RUNNER_READY_TASK_FIELDS = [
+    "task_id",
+    "objective",
+    "allowed_paths",
+    "forbidden_paths",
+    "validation_commands",
+    "baseline_commands",
+    "red_first_commands",
+    "final_validation_commands",
+    "acceptance_result_requirements",
+    "evidence_required",
+    "stop_conditions",
+    "worker_type",
+    "factoryd_runtime",
+    "required_worker_chain",
+    "lifecycle_gates",
+    "test_matrix_refs",
+    "ci_lane_refs",
+    "ci_control_refs",
+    "coverage_policy_refs",
+    "security_scanner_gates",
+    "engineering_policy_refs",
+    "architecture_guidance_refs",
+    "changelog_intent",
+    "versioning_impact",
+    "migration_impact",
+    "docs_sync_refs",
+    "acceptance_group_id",
+    "acceptance_ledger_ref",
+    "acceptance_item_ids",
+    "alignment_gate_ref",
+    "plan_drift_policy_ref",
+    "required_proof_level",
+    "artifact_budget_refs",
+    "redaction_posture",
+]
+REQUIRED_PROOF_LEVELS = {
+    "syntax",
+    "source_evidence",
+    "workflow_behavior",
+    "user_visible_behavior",
+}
 
 REQUIRED = [
     "AGENTS.md",
@@ -323,6 +365,23 @@ def model_provider_gate_task(task_id="T7", grant_task_id="*"):
     }
 
 
+def validate_runner_ready_task_fields(task, task_id):
+    for key in RUNNER_READY_TASK_FIELDS:
+        if key not in task or task[key] in (None, "", []):
+            fail(f"{task_id} missing runner-ready field: {key}")
+    if task.get("required_proof_level") not in REQUIRED_PROOF_LEVELS:
+        fail(f"{task_id}.required_proof_level must be one of {sorted(REQUIRED_PROOF_LEVELS)}")
+    if not isinstance(task.get("artifact_budget_refs"), list):
+        fail(f"{task_id}.artifact_budget_refs must be a non-empty list")
+    redaction = task.get("redaction_posture")
+    if not isinstance(redaction, dict):
+        fail(f"{task_id}.redaction_posture must be an object")
+    if redaction.get("classification") not in {"internal", "customer_safe", "public"}:
+        fail(f"{task_id}.redaction_posture.classification is invalid")
+    if not isinstance(redaction.get("customer_safe"), bool):
+        fail(f"{task_id}.redaction_posture.customer_safe must be boolean")
+
+
 def self_test_public_release_boundary():
     valid = {
         "delivery_slices": [
@@ -384,6 +443,35 @@ def self_test():
         fail("provider gate fallback must include FR23 provider adapter acceptance item")
     self_test_public_release_boundary()
     validate_model_provider_gate(model_provider_gate_task())
+    sample_task = {key: "value" for key in RUNNER_READY_TASK_FIELDS}
+    for key in [
+        "allowed_paths",
+        "forbidden_paths",
+        "validation_commands",
+        "baseline_commands",
+        "red_first_commands",
+        "final_validation_commands",
+        "acceptance_result_requirements",
+        "evidence_required",
+        "stop_conditions",
+        "required_worker_chain",
+        "test_matrix_refs",
+        "ci_lane_refs",
+        "ci_control_refs",
+        "coverage_policy_refs",
+        "security_scanner_gates",
+        "engineering_policy_refs",
+        "architecture_guidance_refs",
+        "docs_sync_refs",
+        "acceptance_item_ids",
+        "artifact_budget_refs",
+    ]:
+        sample_task[key] = ["value"]
+    sample_task["factoryd_runtime"] = {"worker_type": "codex_cli"}
+    sample_task["lifecycle_gates"] = {"commit_push_required": True}
+    sample_task["required_proof_level"] = "workflow_behavior"
+    sample_task["redaction_posture"] = {"classification": "internal", "customer_safe": False}
+    validate_runner_ready_task_fields(sample_task, "self-test")
 
     original_fail = fail
     original_config_grants = factoryd_config_capability_grants
@@ -392,6 +480,16 @@ def self_test():
     original_autoship_config = FACTORYD_AUTOSHIP_CONFIG
     globals()["fail"] = lambda message: (_ for _ in ()).throw(AssertionError(message))
     try:
+        missing_runner_ready_task = dict(sample_task)
+        del missing_runner_ready_task["required_proof_level"]
+        try:
+            validate_runner_ready_task_fields(missing_runner_ready_task, "self-test")
+        except AssertionError as exc:
+            if "missing runner-ready field" not in str(exc):
+                raise
+        else:
+            fail("missing runner-ready proof field fixture did not fail closed")
+
         active_config_grant = {
             "task_id": "T7",
             "capability": "model_provider_endpoint",
@@ -809,9 +907,7 @@ def main():
     ])
     for index, task in enumerate(tasks):
         task_id = task.get("task_id") or f"task[{index}]"
-        for key in ["task_id", "objective", "allowed_paths", "forbidden_paths", "validation_commands", "baseline_commands", "red_first_commands", "final_validation_commands", "acceptance_result_requirements", "evidence_required", "stop_conditions", "worker_type", "factoryd_runtime", "required_worker_chain", "lifecycle_gates", "test_matrix_refs", "ci_lane_refs", "ci_control_refs", "coverage_policy_refs", "security_scanner_gates", "engineering_policy_refs", "architecture_guidance_refs", "changelog_intent", "versioning_impact", "migration_impact", "docs_sync_refs", "acceptance_group_id", "acceptance_ledger_ref", "acceptance_item_ids", "alignment_gate_ref", "plan_drift_policy_ref"]:
-            if key not in task or task[key] in (None, "", []):
-                fail(f"{task_id} missing runner-ready field: {key}")
+        validate_runner_ready_task_fields(task, task_id)
         lifecycle = task.get("lifecycle_gates") or {}
         if "ship_pr_required" in lifecycle:
             fail(f"{task_id}.lifecycle_gates uses deprecated ship_pr_required")
