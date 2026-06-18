@@ -10341,7 +10341,7 @@
         "make test-fast"
       ],
       "blocked_by": [
-        "T10"
+        "T16"
       ],
       "changelog_intent": {
         "draft_entry": "Add a bounded customer-failure intake and fixture-promotion loop with redaction, owner approval, and no committed customer data.",
@@ -10562,7 +10562,7 @@
         "post-merge-monitor"
       ],
       "requires_credentials": false,
-      "requires_human_approval": false,
+      "requires_human_approval": true,
       "requires_network": false,
       "risk_class": "medium",
       "runtime_pins": {
@@ -11043,7 +11043,7 @@
         "post-merge-monitor"
       ],
       "requires_credentials": false,
-      "requires_human_approval": false,
+      "requires_human_approval": true,
       "requires_network": false,
       "risk_class": "medium",
       "runtime_pins": {
