@@ -6,10 +6,12 @@
   "delivery_slices": [
     {
       "acceptance_group_refs": [
-        "acceptance-tests"
+        "acceptance-tests",
+        "agent_native_cli_conventions"
       ],
       "acceptance_item_ids": [
-        "ACCEPTANCE-TESTS-001"
+        "ACCEPTANCE-TESTS-001",
+        "CLI-AGENT-001"
       ],
       "name": "Repo Lifecycle And CLI Foundation",
       "public_release_boundary": false,
@@ -809,7 +811,7 @@
     },
     {
       "acceptance_criteria": [
-        "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence \u2014 never from the drafting model."
+        "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence — never from the drafting model."
       ],
       "acceptance_item_ids": [
         "FR11-CALIBRATED-CONFIDENCE-001"
@@ -835,7 +837,7 @@
         "T6"
       ],
       "requires_human_approval": false,
-      "scope_item": "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence \u2014 never from the drafting model.",
+      "scope_item": "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence — never from the drafting model.",
       "scope_item_id": "FR11-CALIBRATED-CONFIDENCE-001",
       "source_ref": "docs/product/prd.md#fr11-calibrated-confidence",
       "status": "partial",

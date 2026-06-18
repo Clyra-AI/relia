@@ -57,7 +57,8 @@
     ],
     "required_item_count": 122,
     "scope_closure_map_ref": ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
-    "status": "mapped"
+    "status": "mapped",
+    "acceptance_item_count": 122
   },
   "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
   "acceptance_mapping_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
@@ -87,7 +88,8 @@
   "delivery_slices": [
     {
       "acceptance_group_refs": [
-        "acceptance-tests"
+        "acceptance-tests",
+        "agent_native_cli_conventions"
       ],
       "acceptance_item_ids": [
         "ACCEPTANCE-TESTS-001",
@@ -703,7 +705,7 @@
       "Relia must pair recurrences conservatively, separate `confirmed` from `possible`, and exclude `possible` from headline ERR.",
       "relia backtest` must deliver the ERR headline and paired evidence read-only, with no rules, review, or workflow change required.",
       "Every rule must cite at least one experience and one PR. Uncited rules fail validation and never render.",
-      "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence \u2014 never from the drafting model.",
+      "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence — never from the drafting model.",
       "Rules must decay by half-life and go `stale` when their scoped paths are deleted.",
       "Drafted rules must be reviewed before becoming `active`, with `accepted`, `suggested`, and `needs_user_input` labels. Disabling review is an explicit, surfaced configuration choice.",
       "Relia must support `avoid` rules from failures and `playbook` rules from held fixes, and playbook rules must cite held evidence.",
@@ -813,21 +815,947 @@
       "relia models pull records model ID, version, source URL, license, digest, cache path, update policy, and rollback policy before local embedding refinement is used.",
       "embeddings: local fails closed with exit 8 when the local model artifact is missing, stale, or digest-mismatched, while embeddings: signature remains the zero-install deterministic fallback with signature-only provenance.",
       "Release binaries, containers, and tracked source do not bundle model weights or inference-runtime payloads.",
-      "The local embedding inference boundary is covered by an ADR before implementation chooses a pure Go library, ONNX/runtime binding, or external local process."
+      "The local embedding inference boundary is covered by an ADR before implementation chooses a pure Go library, ONNX/runtime binding, or external local process.",
+      "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+      "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+      "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors.",
+      "CLI-AGENT-001: Agent-facing CLI output supports stable JSON mode or records an approved deferral."
     ],
-    "acceptance_item_count": 121,
+    "acceptance_groups": [
+      {
+        "group_id": "fr1-outcomes-as-the-only-memory-source",
+        "risk_class": "low",
+        "source_ref": "docs/product/prd.md#fr1-outcomes-as-the-only-memory-source",
+        "task_refs": [
+          "T8"
+        ],
+        "title": "FR1: Outcomes As The Only Memory Source"
+      },
+      {
+        "group_id": "fr2-repo-native-local-first-operation",
+        "risk_class": "low",
+        "source_ref": "docs/product/prd.md#fr2-repo-native-local-first-operation",
+        "task_refs": [
+          "T9"
+        ],
+        "title": "FR2: Repo-Native Local-First Operation"
+      },
+      {
+        "group_id": "fr3-github-outcome-intake",
+        "risk_class": "medium",
+        "source_ref": "docs/product/prd.md#fr3-github-outcome-intake",
+        "task_refs": [
+          "T10"
+        ],
+        "title": "FR3: GitHub Outcome Intake"
+      },
+      {
+        "group_id": "fr4-attribution-with-confidence",
+        "risk_class": "low",
+        "source_ref": "docs/product/prd.md#fr4-attribution-with-confidence",
+        "task_refs": [
+          "T6"
+        ],
+        "title": "FR4: Attribution With Confidence"
+      },
+      {
+        "group_id": "fr5-canonical-experience-schema",
+        "risk_class": "low",
+        "source_ref": "docs/product/prd.md#fr5-canonical-experience-schema",
+        "task_refs": [
+          "T14"
+        ],
+        "title": "FR5: Canonical Experience Schema"
+      },
+      {
+        "group_id": "fr6-capture-time-redaction",
+        "risk_class": "low",
+        "source_ref": "docs/product/prd.md#fr6-capture-time-redaction",
+        "task_refs": [
+          "T15"
+        ],
+        "title": "FR6: Capture-Time Redaction"
+      },
+      {
+        "group_id": "fr7-deterministic-failure-signatures",
+        "risk_class": "low",
+        "source_ref": "docs/product/prd.md#fr7-deterministic-failure-signatures",
+        "task_refs": [
+          "T6"
+        ],
+        "title": "FR7: Deterministic Failure Signatures"
+      },
+      {
+        "group_id": "fr8-conservative-recurrence-pairing",
+        "risk_class": "low",
+        "source_ref": "docs/product/prd.md#fr8-conservative-recurrence-pairing",
+        "task_refs": [
+          "T5"
+        ],
+        "title": "FR8: Conservative Recurrence Pairing"
+      },
+      {
+        "group_id": "fr9-backtest-before-behavior-change",
+        "risk_class": "low",
+        "source_ref": "docs/product/prd.md#fr9-backtest-before-behavior-change",
+        "task_refs": [
+          "T10"
+        ],
+        "title": "FR9: Backtest Before Behavior Change"
+      },
+      {
+        "group_id": "fr10-provenance-mandatory-rules",
+        "risk_class": "low",
+        "source_ref": "docs/product/prd.md#fr10-provenance-mandatory-rules",
+        "task_refs": [
+          "T3"
+        ],
+        "title": "FR10: Provenance-Mandatory Rules"
+      },
+      {
+        "group_id": "fr11-calibrated-confidence",
+        "risk_class": "low",
+        "source_ref": "docs/product/prd.md#fr11-calibrated-confidence",
+        "task_refs": [
+          "T6"
+        ],
+        "title": "FR11: Calibrated Confidence"
+      },
+      {
+        "group_id": "fr12-decay-and-churn-invalidation",
+        "risk_class": "low",
+        "source_ref": "docs/product/prd.md#fr12-decay-and-churn-invalidation",
+        "task_refs": [
+          "T6"
+        ],
+        "title": "FR12: Decay And Churn Invalidation"
+      },
+      {
+        "group_id": "fr13-human-review-gate",
+        "risk_class": "low",
+        "source_ref": "docs/product/prd.md#fr13-human-review-gate",
+        "task_refs": [
+          "T6"
+        ],
+        "title": "FR13: Human Review Gate"
+      },
+      {
+        "group_id": "fr14-bidirectional-memory",
+        "risk_class": "low",
+        "source_ref": "docs/product/prd.md#fr14-bidirectional-memory",
+        "task_refs": [
+          "T6"
+        ],
+        "title": "FR14: Bidirectional Memory"
+      },
+      {
+        "group_id": "fr15-memory-page-with-receipts",
+        "risk_class": "low",
+        "source_ref": "docs/product/prd.md#fr15-memory-page-with-receipts",
+        "task_refs": [
+          "T6"
+        ],
+        "title": "FR15: Memory Page With Receipts"
+      },
+      {
+        "group_id": "fr16-mcp-serving",
+        "risk_class": "low",
+        "source_ref": "docs/product/prd.md#fr16-mcp-serving",
+        "task_refs": [
+          "T14"
+        ],
+        "title": "FR16: MCP Serving"
+      },
+      {
+        "group_id": "fr17-compiled-context-block",
+        "risk_class": "low",
+        "source_ref": "docs/product/prd.md#fr17-compiled-context-block",
+        "task_refs": [
+          "T13"
+        ],
+        "title": "FR17: Compiled Context Block"
+      },
+      {
+        "group_id": "fr18-advisory-assessment",
+        "risk_class": "low",
+        "source_ref": "docs/product/prd.md#fr18-advisory-assessment",
+        "task_refs": [
+          "T15"
+        ],
+        "title": "FR18: Advisory Assessment"
+      },
+      {
+        "group_id": "fr19-coverage-ood-signal",
+        "risk_class": "low",
+        "source_ref": "docs/product/prd.md#fr19-coverage-ood-signal",
+        "task_refs": [
+          "T14"
+        ],
+        "title": "FR19: Coverage / OOD Signal"
+      },
+      {
+        "group_id": "fr20-advisory-only-default",
+        "risk_class": "medium",
+        "source_ref": "docs/product/prd.md#fr20-advisory-only-default",
+        "task_refs": [
+          "T9"
+        ],
+        "title": "FR20: Advisory-Only Default"
+      },
+      {
+        "group_id": "fr21-forward-err-tracking",
+        "risk_class": "low",
+        "source_ref": "docs/product/prd.md#fr21-forward-err-tracking",
+        "task_refs": [
+          "T5"
+        ],
+        "title": "FR21: Forward ERR Tracking"
+      },
+      {
+        "group_id": "fr22-stable-cli-output",
+        "risk_class": "low",
+        "source_ref": "docs/product/prd.md#fr22-stable-cli-output",
+        "task_refs": [
+          "T2"
+        ],
+        "title": "FR22: Stable CLI Output"
+      },
+      {
+        "group_id": "fr23-provider-adapters-and-no-llm-mode",
+        "risk_class": "high",
+        "source_ref": "docs/product/prd.md#fr23-provider-adapters-and-no-llm-mode",
+        "task_refs": [
+          "T9"
+        ],
+        "title": "FR23: Provider Adapters And No-LLM Mode"
+      },
+      {
+        "group_id": "fr24-cost-visibility",
+        "risk_class": "high",
+        "source_ref": "docs/product/prd.md#fr24-cost-visibility",
+        "task_refs": [
+          "T9"
+        ],
+        "title": "FR24: Cost Visibility"
+      },
+      {
+        "group_id": "fr25-portable-artifacts",
+        "risk_class": "low",
+        "source_ref": "docs/product/prd.md#fr25-portable-artifacts",
+        "task_refs": [
+          "T9"
+        ],
+        "title": "FR25: Portable Artifacts"
+      },
+      {
+        "group_id": "nfr1-fast-first-value",
+        "risk_class": "low",
+        "source_ref": "docs/product/prd.md#nfr1-fast-first-value",
+        "task_refs": [
+          "T15"
+        ],
+        "title": "NFR1: Fast First Value"
+      },
+      {
+        "group_id": "nfr2-fast-first-memory",
+        "risk_class": "low",
+        "source_ref": "docs/product/prd.md#nfr2-fast-first-memory",
+        "task_refs": [
+          "T6"
+        ],
+        "title": "NFR2: Fast First Memory"
+      },
+      {
+        "group_id": "nfr3-deterministic-backtest",
+        "risk_class": "low",
+        "source_ref": "docs/product/prd.md#nfr3-deterministic-backtest",
+        "task_refs": [
+          "T5"
+        ],
+        "title": "NFR3: Deterministic Backtest"
+      },
+      {
+        "group_id": "nfr4-calibration-honesty",
+        "risk_class": "medium",
+        "source_ref": "docs/product/prd.md#nfr4-calibration-honesty",
+        "task_refs": [
+          "T6"
+        ],
+        "title": "NFR4: Calibration Honesty"
+      },
+      {
+        "group_id": "nfr5-security",
+        "risk_class": "low",
+        "source_ref": "docs/product/prd.md#nfr5-security",
+        "task_refs": [
+          "T3"
+        ],
+        "title": "NFR5: Security"
+      },
+      {
+        "group_id": "nfr6-local-privacy",
+        "risk_class": "low",
+        "source_ref": "docs/product/prd.md#nfr6-local-privacy",
+        "task_refs": [
+          "T6"
+        ],
+        "title": "NFR6: Local Privacy"
+      },
+      {
+        "group_id": "nfr7-rule-readability",
+        "risk_class": "medium",
+        "source_ref": "docs/product/prd.md#nfr7-rule-readability",
+        "task_refs": [
+          "T10"
+        ],
+        "title": "NFR7: Rule Readability"
+      },
+      {
+        "group_id": "nfr8-structured-data-first",
+        "risk_class": "medium",
+        "source_ref": "docs/product/prd.md#nfr8-structured-data-first",
+        "task_refs": [
+          "T6"
+        ],
+        "title": "NFR8: Structured-Data-First"
+      },
+      {
+        "group_id": "nfr9-debuggable-errors",
+        "risk_class": "low",
+        "source_ref": "docs/product/prd.md#nfr9-debuggable-errors",
+        "task_refs": [
+          "T5"
+        ],
+        "title": "NFR9: Debuggable Errors"
+      },
+      {
+        "group_id": "nfr10-cost-visibility",
+        "risk_class": "high",
+        "source_ref": "docs/product/prd.md#nfr10-cost-visibility",
+        "task_refs": [
+          "T9"
+        ],
+        "title": "NFR10: Cost Visibility"
+      },
+      {
+        "group_id": "nfr11-stochastic-honesty",
+        "risk_class": "low",
+        "source_ref": "docs/product/prd.md#nfr11-stochastic-honesty",
+        "task_refs": [
+          "T6"
+        ],
+        "title": "NFR11: Stochastic Honesty"
+      },
+      {
+        "group_id": "nfr12-artifact-stability",
+        "risk_class": "low",
+        "source_ref": "docs/product/prd.md#nfr12-artifact-stability",
+        "task_refs": [
+          "T2"
+        ],
+        "title": "NFR12: Artifact Stability"
+      },
+      {
+        "group_id": "nfr13-inference-humility",
+        "risk_class": "low",
+        "source_ref": "docs/product/prd.md#nfr13-inference-humility",
+        "task_refs": [
+          "T6"
+        ],
+        "title": "NFR13: Inference Humility"
+      },
+      {
+        "group_id": "nfr14-advisory-restraint",
+        "risk_class": "low",
+        "source_ref": "docs/product/prd.md#nfr14-advisory-restraint",
+        "task_refs": [
+          "T14"
+        ],
+        "title": "NFR14: Advisory Restraint"
+      },
+      {
+        "group_id": "nfr15-no-dashboard-dependency",
+        "risk_class": "low",
+        "source_ref": "docs/product/prd.md#nfr15-no-dashboard-dependency",
+        "task_refs": [
+          "T14"
+        ],
+        "title": "NFR15: No Dashboard Dependency"
+      },
+      {
+        "group_id": "mvp-in-scope",
+        "risk_class": "medium",
+        "source_ref": "docs/product/prd.md#mvp-in-scope",
+        "task_refs": [
+          "T2",
+          "T3",
+          "T4",
+          "T5",
+          "T6",
+          "T7",
+          "T9",
+          "T10",
+          "T11",
+          "T13",
+          "T14",
+          "T15"
+        ],
+        "title": "MVP In Scope"
+      },
+      {
+        "group_id": "acceptance-tests",
+        "risk_class": "low",
+        "source_ref": "docs/product/prd.md#acceptance-tests",
+        "task_refs": [
+          "T1"
+        ],
+        "title": "Acceptance Tests"
+      },
+      {
+        "group_id": "ingest-attribute-backtest-acceptance-tests",
+        "risk_class": "low",
+        "source_ref": "docs/product/prd.md#ingest-attribute-backtest-acceptance-tests",
+        "task_refs": [
+          "T4",
+          "T5",
+          "T7",
+          "T13",
+          "T15"
+        ],
+        "title": "Ingest, Attribute, Backtest Acceptance Tests"
+      },
+      {
+        "group_id": "distill-review-memory-page-acceptance-tests",
+        "risk_class": "medium",
+        "source_ref": "docs/product/prd.md#distill-review-memory-page-acceptance-tests",
+        "task_refs": [
+          "T4",
+          "T7",
+          "T9",
+          "T16"
+        ],
+        "title": "Distill, Review, Memory Page Acceptance Tests"
+      },
+      {
+        "group_id": "serve-and-advise-acceptance-tests",
+        "risk_class": "medium",
+        "source_ref": "docs/product/prd.md#serve-and-advise-acceptance-tests",
+        "task_refs": [
+          "T4",
+          "T9",
+          "T12",
+          "T13",
+          "T14",
+          "T15"
+        ],
+        "title": "Serve And Advise Acceptance Tests"
+      },
+      {
+        "group_id": "success-metrics",
+        "risk_class": "medium",
+        "source_ref": "docs/product/prd.md#success-metrics",
+        "task_refs": [
+          "T15",
+          "T16"
+        ],
+        "title": "Success Metrics"
+      },
+      {
+        "group_id": "demo-acceptance",
+        "risk_class": "low",
+        "source_ref": "docs/product/prd.md#demo-acceptance",
+        "task_refs": [
+          "T4",
+          "T16"
+        ],
+        "title": "Demo Acceptance"
+      },
+      {
+        "group_id": "agent_native_cli_conventions",
+        "title": "Agent-Native CLI Conventions",
+        "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
+        "required": true,
+        "task_refs": [
+          "T1"
+        ],
+        "acceptance_refs": [
+          "CLI-AGENT-001"
+        ],
+        "acceptance_item_ids": [
+          "CLI-AGENT-001"
+        ],
+        "criteria": [
+          "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+          "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+          "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
+        ],
+        "closure_status": "partial",
+        "item_mappings": [
+          {
+            "acceptance_item_id": "CLI-AGENT-001",
+            "task_refs": [
+              "T1"
+            ],
+            "evidence_mode": "automated",
+            "delivery_slice_refs": [
+              "repo-lifecycle-foundation"
+            ]
+          }
+        ],
+        "delivery_slice_refs": [
+          "repo-lifecycle-foundation"
+        ]
+      }
+    ],
+    "acceptance_item_count": 122,
     "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
-    "capability_gateway": {
-      "enforcement_mode": "fail_closed",
-      "observed_requests": [],
-      "policy_surface_refs": [
-        "AGENTS.md",
-        "WORKFLOW.md",
-        ".factory/profile.yaml"
-      ],
-      "required_declaration_ref": "AGENTS.md"
-    },
+    "acceptance_mapping_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
+    "artifact_type": "validation_contract",
     "contract_id": "relia-mvp-validation-contract",
+    "delivery_slices": [
+      {
+        "acceptance_group_refs": [
+          "acceptance-tests",
+          "agent_native_cli_conventions"
+        ],
+        "acceptance_item_ids": [
+          "ACCEPTANCE-TESTS-001",
+          "CLI-AGENT-001"
+        ],
+        "name": "Repo Lifecycle And CLI Foundation",
+        "public_release_boundary": false,
+        "required_for_completion": true,
+        "slice_id": "repo-lifecycle-foundation",
+        "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T1",
+        "task_refs": [
+          "T1"
+        ]
+      },
+      {
+        "acceptance_group_refs": [
+          "fr22-stable-cli-output",
+          "nfr12-artifact-stability",
+          "mvp-in-scope"
+        ],
+        "acceptance_item_ids": [
+          "FR22-STABLE-CLI-OUTPUT-001",
+          "NFR12-ARTIFACT-STABILITY-001",
+          "MVP-IN-SCOPE-001",
+          "MVP-IN-SCOPE-021"
+        ],
+        "name": "Contracts, Configuration, And Validation",
+        "public_release_boundary": false,
+        "required_for_completion": true,
+        "slice_id": "contracts-config-and-validation",
+        "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T2",
+        "task_refs": [
+          "T2"
+        ]
+      },
+      {
+        "acceptance_group_refs": [
+          "fr10-provenance-mandatory-rules",
+          "nfr5-security",
+          "mvp-in-scope"
+        ],
+        "acceptance_item_ids": [
+          "FR10-PROVENANCE-MANDATORY-RULES-001",
+          "NFR5-SECURITY-001",
+          "MVP-IN-SCOPE-004",
+          "MVP-IN-SCOPE-005"
+        ],
+        "name": "Data Intake, Attribution, And Persistence",
+        "public_release_boundary": false,
+        "required_for_completion": true,
+        "slice_id": "data-intake-and-persistence",
+        "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T3",
+        "task_refs": [
+          "T3"
+        ]
+      },
+      {
+        "acceptance_group_refs": [
+          "mvp-in-scope",
+          "ingest-attribute-backtest-acceptance-tests",
+          "distill-review-memory-page-acceptance-tests",
+          "serve-and-advise-acceptance-tests",
+          "demo-acceptance"
+        ],
+        "acceptance_item_ids": [
+          "MVP-IN-SCOPE-022",
+          "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-008",
+          "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-009",
+          "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-001",
+          "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-006",
+          "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-007",
+          "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-004",
+          "DEMO-ACCEPTANCE-002",
+          "DEMO-ACCEPTANCE-004",
+          "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-011"
+        ],
+        "name": "Outcome Fixture Corpus And Backtest Baseline",
+        "public_release_boundary": false,
+        "required_for_completion": true,
+        "slice_id": "outcome-fixture-corpus",
+        "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T4",
+        "task_refs": [
+          "T4"
+        ]
+      },
+      {
+        "acceptance_group_refs": [
+          "fr8-conservative-recurrence-pairing",
+          "fr21-forward-err-tracking",
+          "nfr3-deterministic-backtest",
+          "nfr9-debuggable-errors",
+          "mvp-in-scope",
+          "ingest-attribute-backtest-acceptance-tests"
+        ],
+        "acceptance_item_ids": [
+          "FR8-CONSERVATIVE-RECURRENCE-PAIRING-001",
+          "FR21-FORWARD-ERR-TRACKING-001",
+          "NFR3-DETERMINISTIC-BACKTEST-001",
+          "NFR9-DEBUGGABLE-ERRORS-001",
+          "MVP-IN-SCOPE-007",
+          "MVP-IN-SCOPE-008",
+          "MVP-IN-SCOPE-009",
+          "MVP-IN-SCOPE-020",
+          "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-002",
+          "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-003",
+          "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-005",
+          "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-006",
+          "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-007"
+        ],
+        "name": "Signature Extraction, Recurrence, And Backtest",
+        "public_release_boundary": false,
+        "required_for_completion": true,
+        "slice_id": "signature-and-recurrence-analysis",
+        "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T5",
+        "task_refs": [
+          "T5"
+        ]
+      },
+      {
+        "acceptance_group_refs": [
+          "fr4-attribution-with-confidence",
+          "fr7-deterministic-failure-signatures",
+          "fr11-calibrated-confidence",
+          "fr12-decay-and-churn-invalidation",
+          "fr13-human-review-gate",
+          "fr14-bidirectional-memory",
+          "fr15-memory-page-with-receipts",
+          "nfr2-fast-first-memory",
+          "nfr4-calibration-honesty",
+          "nfr6-local-privacy",
+          "nfr8-structured-data-first",
+          "nfr11-stochastic-honesty",
+          "nfr13-inference-humility",
+          "mvp-in-scope",
+          "ingest-attribute-backtest-acceptance-tests",
+          "distill-review-memory-page-acceptance-tests"
+        ],
+        "acceptance_item_ids": [
+          "FR4-ATTRIBUTION-WITH-CONFIDENCE-001",
+          "FR7-DETERMINISTIC-FAILURE-SIGNATURES-001",
+          "FR11-CALIBRATED-CONFIDENCE-001",
+          "FR12-DECAY-AND-CHURN-INVALIDATION-001",
+          "FR13-HUMAN-REVIEW-GATE-001",
+          "FR14-BIDIRECTIONAL-MEMORY-001",
+          "FR15-MEMORY-PAGE-WITH-RECEIPTS-001",
+          "NFR2-FAST-FIRST-MEMORY-001",
+          "NFR4-CALIBRATION-HONESTY-001",
+          "NFR6-LOCAL-PRIVACY-001",
+          "NFR8-STRUCTURED-DATA-FIRST-001",
+          "NFR11-STOCHASTIC-HONESTY-001",
+          "NFR13-INFERENCE-HUMILITY-001",
+          "MVP-IN-SCOPE-003",
+          "MVP-IN-SCOPE-006"
+        ],
+        "name": "Distillation, Calibration, And Confidence Part 1",
+        "public_release_boundary": false,
+        "required_for_completion": true,
+        "slice_id": "distillation-calibration-and-confidence-part-1",
+        "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T6",
+        "task_refs": [
+          "T6"
+        ]
+      },
+      {
+        "acceptance_group_refs": [
+          "fr4-attribution-with-confidence",
+          "fr7-deterministic-failure-signatures",
+          "fr11-calibrated-confidence",
+          "fr12-decay-and-churn-invalidation",
+          "fr13-human-review-gate",
+          "fr14-bidirectional-memory",
+          "fr15-memory-page-with-receipts",
+          "nfr2-fast-first-memory",
+          "nfr4-calibration-honesty",
+          "nfr6-local-privacy",
+          "nfr8-structured-data-first",
+          "nfr11-stochastic-honesty",
+          "nfr13-inference-humility",
+          "mvp-in-scope",
+          "ingest-attribute-backtest-acceptance-tests",
+          "distill-review-memory-page-acceptance-tests"
+        ],
+        "acceptance_item_ids": [
+          "MVP-IN-SCOPE-010",
+          "MVP-IN-SCOPE-011",
+          "MVP-IN-SCOPE-012",
+          "MVP-IN-SCOPE-013",
+          "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-004",
+          "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-002",
+          "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-003",
+          "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-004",
+          "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-005",
+          "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-008",
+          "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-009",
+          "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-011",
+          "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-012",
+          "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-013",
+          "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-014"
+        ],
+        "name": "Distillation, Calibration, And Confidence Part 2",
+        "public_release_boundary": false,
+        "required_for_completion": true,
+        "slice_id": "distillation-calibration-and-confidence-part-2",
+        "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T7",
+        "task_refs": [
+          "T7"
+        ]
+      },
+      {
+        "acceptance_group_refs": [
+          "fr1-outcomes-as-the-only-memory-source"
+        ],
+        "acceptance_item_ids": [
+          "FR1-OUTCOMES-AS-THE-ONLY-MEMORY-SOURCE-001"
+        ],
+        "name": "Reporting, Evidence, And Observability",
+        "public_release_boundary": false,
+        "required_for_completion": true,
+        "slice_id": "reporting-and-evidence",
+        "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T8",
+        "task_refs": [
+          "T8"
+        ]
+      },
+      {
+        "acceptance_group_refs": [
+          "fr2-repo-native-local-first-operation",
+          "fr20-advisory-only-default",
+          "fr23-provider-adapters-and-no-llm-mode",
+          "fr24-cost-visibility",
+          "fr25-portable-artifacts",
+          "nfr10-cost-visibility",
+          "mvp-in-scope",
+          "distill-review-memory-page-acceptance-tests",
+          "serve-and-advise-acceptance-tests"
+        ],
+        "acceptance_item_ids": [
+          "FR2-REPO-NATIVE-LOCAL-FIRST-OPERATION-001",
+          "FR20-ADVISORY-ONLY-DEFAULT-001",
+          "FR23-PROVIDER-ADAPTERS-AND-NO-LLM-MODE-001",
+          "FR24-COST-VISIBILITY-001",
+          "FR25-PORTABLE-ARTIFACTS-001",
+          "NFR10-COST-VISIBILITY-001",
+          "MVP-IN-SCOPE-019",
+          "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-010",
+          "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-005"
+        ],
+        "name": "External Provider And Network Integration",
+        "public_release_boundary": false,
+        "required_for_completion": true,
+        "slice_id": "external-provider-and-network-integration",
+        "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T9",
+        "task_refs": [
+          "T9"
+        ]
+      },
+      {
+        "acceptance_group_refs": [
+          "fr3-github-outcome-intake",
+          "fr9-backtest-before-behavior-change",
+          "nfr7-rule-readability",
+          "mvp-in-scope"
+        ],
+        "acceptance_item_ids": [
+          "FR3-GITHUB-OUTCOME-INTAKE-001",
+          "FR9-BACKTEST-BEFORE-BEHAVIOR-CHANGE-001",
+          "NFR7-RULE-READABILITY-001",
+          "MVP-IN-SCOPE-002",
+          "MVP-IN-SCOPE-014"
+        ],
+        "name": "Review, Governance, And Approval Workflow",
+        "public_release_boundary": false,
+        "required_for_completion": true,
+        "slice_id": "review-governance-and-approval",
+        "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T10",
+        "task_refs": [
+          "T10"
+        ]
+      },
+      {
+        "acceptance_group_refs": [
+          "mvp-in-scope"
+        ],
+        "acceptance_item_ids": [
+          "MVP-IN-SCOPE-015"
+        ],
+        "name": "Memory Rendering And Lifecycle",
+        "public_release_boundary": false,
+        "required_for_completion": true,
+        "slice_id": "memory-rendering-and-lifecycle",
+        "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T11",
+        "task_refs": [
+          "T11"
+        ]
+      },
+      {
+        "acceptance_group_refs": [
+          "serve-and-advise-acceptance-tests"
+        ],
+        "acceptance_item_ids": [
+          "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-002",
+          "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-007",
+          "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-008"
+        ],
+        "name": "MCP Serving, Recall, And Coverage",
+        "public_release_boundary": false,
+        "required_for_completion": true,
+        "slice_id": "mcp-serving-and-recall",
+        "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T12",
+        "task_refs": [
+          "T12"
+        ]
+      },
+      {
+        "acceptance_group_refs": [
+          "fr17-compiled-context-block",
+          "mvp-in-scope",
+          "ingest-attribute-backtest-acceptance-tests",
+          "serve-and-advise-acceptance-tests"
+        ],
+        "acceptance_item_ids": [
+          "FR17-COMPILED-CONTEXT-BLOCK-001",
+          "MVP-IN-SCOPE-017",
+          "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-001",
+          "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-003"
+        ],
+        "name": "Compile And Context Management",
+        "public_release_boundary": false,
+        "required_for_completion": true,
+        "slice_id": "compile-and-context-management",
+        "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T13",
+        "task_refs": [
+          "T13"
+        ]
+      },
+      {
+        "acceptance_group_refs": [
+          "fr5-canonical-experience-schema",
+          "fr16-mcp-serving",
+          "fr19-coverage-ood-signal",
+          "nfr14-advisory-restraint",
+          "nfr15-no-dashboard-dependency",
+          "mvp-in-scope",
+          "serve-and-advise-acceptance-tests"
+        ],
+        "acceptance_item_ids": [
+          "FR5-CANONICAL-EXPERIENCE-SCHEMA-001",
+          "FR16-MCP-SERVING-001",
+          "FR19-COVERAGE-OOD-SIGNAL-001",
+          "NFR14-ADVISORY-RESTRAINT-001",
+          "NFR15-NO-DASHBOARD-DEPENDENCY-001",
+          "MVP-IN-SCOPE-016",
+          "MVP-IN-SCOPE-018",
+          "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-001",
+          "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-006"
+        ],
+        "name": "Assessment And PR Advisory",
+        "public_release_boundary": false,
+        "required_for_completion": true,
+        "slice_id": "assessment-and-pr-advisory",
+        "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T14",
+        "task_refs": [
+          "T14"
+        ]
+      },
+      {
+        "acceptance_group_refs": [
+          "fr6-capture-time-redaction",
+          "fr18-advisory-assessment",
+          "nfr1-fast-first-value",
+          "mvp-in-scope",
+          "ingest-attribute-backtest-acceptance-tests",
+          "serve-and-advise-acceptance-tests",
+          "success-metrics",
+          "demo-acceptance"
+        ],
+        "acceptance_item_ids": [
+          "FR6-CAPTURE-TIME-REDACTION-001",
+          "FR18-ADVISORY-ASSESSMENT-001",
+          "NFR1-FAST-FIRST-VALUE-001",
+          "MVP-IN-SCOPE-023",
+          "MVP-IN-SCOPE-024",
+          "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-010",
+          "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-009",
+          "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-010",
+          "SUCCESS-METRICS-001",
+          "SUCCESS-METRICS-002",
+          "SUCCESS-METRICS-003",
+          "SUCCESS-METRICS-004",
+          "SUCCESS-METRICS-005",
+          "SUCCESS-METRICS-006",
+          "SUCCESS-METRICS-007"
+        ],
+        "name": "Release, Demo, And Product Signals Part 1",
+        "public_release_boundary": false,
+        "required_for_completion": true,
+        "slice_id": "release-demo-and-product-signals-part-1",
+        "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T15",
+        "task_refs": [
+          "T15"
+        ]
+      },
+      {
+        "acceptance_group_refs": [
+          "fr6-capture-time-redaction",
+          "fr18-advisory-assessment",
+          "nfr1-fast-first-value",
+          "mvp-in-scope",
+          "ingest-attribute-backtest-acceptance-tests",
+          "serve-and-advise-acceptance-tests",
+          "success-metrics",
+          "demo-acceptance",
+          "distill-review-memory-page-acceptance-tests"
+        ],
+        "acceptance_item_ids": [
+          "SUCCESS-METRICS-008",
+          "SUCCESS-METRICS-009",
+          "SUCCESS-METRICS-010",
+          "SUCCESS-METRICS-011",
+          "SUCCESS-METRICS-012",
+          "SUCCESS-METRICS-013",
+          "SUCCESS-METRICS-014",
+          "SUCCESS-METRICS-015",
+          "SUCCESS-METRICS-016",
+          "DEMO-ACCEPTANCE-001",
+          "DEMO-ACCEPTANCE-003",
+          "DEMO-ACCEPTANCE-005",
+          "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-013"
+        ],
+        "name": "Release, Demo, And Product Signals Part 2",
+        "public_release_boundary": true,
+        "required_for_completion": true,
+        "slice_id": "release-demo-and-product-signals-part-2",
+        "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T16",
+        "task_refs": [
+          "T16"
+        ]
+      }
+    ],
     "evidence_required": [
       "work_proof_marker",
       "validation_report",
@@ -835,17 +1763,47 @@
       "pr_lifecycle_report",
       "factoryd_run_once_report"
     ],
-    "holdout_triggers": [
-      "runtime pin change",
-      "credential or network requirement",
-      "judgment-only acceptance criterion"
-    ],
-    "independence_level": "validation_gate_or_review",
-    "promotion_decisions": [
-      "ready_for_pr",
-      "needs_repair",
-      "blocked"
-    ],
+    "factoryd_runtime_requirements": {
+      "runner_ready_fields": [
+        "allowed_paths",
+        "forbidden_paths",
+        "worker_type",
+        "factoryd_runtime",
+        "validation_commands",
+        "evidence_required",
+        "stop_conditions",
+        "required_proof_level",
+        "engineering_policy_refs",
+        "artifact_budget_refs",
+        "redaction_posture"
+      ],
+      "runtime": {
+        "approval_posture": "human approval required for high risk, live credentials, and merge",
+        "branch_prefix": "codex",
+        "capability_grants": [],
+        "credential_posture": "no ambient secrets",
+        "network_posture": "offline by default",
+        "runtime_control": {
+          "autonomy_level": "restricted",
+          "conflict_behavior": "fail_closed",
+          "launch_request": {
+            "expected_decision": "allow",
+            "reason_code": "within_runtime_control_limits",
+            "requested_action": "continue_mission",
+            "requested_adapter": "codex_cli"
+          },
+          "owner": "factoryd-operator",
+          "release_freeze": {
+            "enabled": false
+          }
+        },
+        "state_dir": ".factoryd/",
+        "worker_command": "",
+        "worker_type": "codex_cli",
+        "workspace_root": ".factoryd/workspaces/"
+      }
+    },
+    "generated_at": "2026-06-11T15:48:57Z",
     "required_checks": [
       "make prepush-full"
     ],
@@ -854,12 +1812,24 @@
       "review_type": "code",
       "reviewer_class": "peer_agent"
     },
+    "schema_version": "0.1",
+    "source_prd_ref": "docs/product/prd.md",
     "stop_conditions": [
       "validation failed",
       "path policy violation",
       "closure did not advance",
       "alignment drift detected"
-    ]
+    ],
+    "proof_of_behavior_requirements": {
+      "levels": [
+        "syntax",
+        "source_evidence",
+        "workflow_behavior",
+        "user_visible_behavior"
+      ],
+      "rule": "Tasks must close at or above their required_proof_level; workflow or user-visible closure requires proof-of-behavior scorecard evidence or approved exception.",
+      "artifact_type": "proof-of-behavior-scorecard"
+    }
   },
   "validation_requirements": [
     "make prepush-full"
