@@ -27,3 +27,11 @@ under `product/audits/` or `product/reviews/`, then ingest them:
 FACTORY_REPO=/path/to/factory factoryd ingest --config .factory/factoryd.example.json --repo relia --kind audit --input product/audits/<mission>.md --mission <mission> --json
 FACTORY_REPO=/path/to/factory factoryd ingest --config .factory/factoryd.example.json --repo relia --kind review --input product/reviews/<mission>.md --mission <mission> --json
 ~~~
+
+## Customer-derived failures
+
+Customer-derived failures are not committed directly. Use
+`docs/dev/customer-failure-intake-template.md` for redacted intake and
+`docs/architecture/lesson-record-template.md` for reviewed lesson candidates.
+Only synthetic, public-safe, owner-approved fixtures may become reusable tests
+or product lessons.

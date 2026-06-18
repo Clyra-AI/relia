@@ -52,3 +52,25 @@ and cache-location implications.
   allowlist before live provider calls.
 - Missing local artifacts must fail closed for explicit local mode or be
   represented as signature-only provenance when signature mode is selected.
+
+## Customer Failure And Lesson Boundary
+
+Customer-derived learning is an evidence pipeline, not a global memory dump.
+The architecture must preserve the distinction between private raw observations,
+synthetic fixtures, reviewed lessons, and shipped product behavior.
+
+- Raw customer material is not a Relia state source. It can only produce a
+  redacted intake record, private delivery debt, or an approved synthetic
+  fixture proposal.
+- Synthetic fixtures are the preferred bridge from customer observation to
+  testable behavior. They must keep expected outcome, provenance, and negative
+  case information close to the test or example that consumes them.
+- Lesson records must be narrow. A lesson needs applicability limits,
+  non-applicability notes, expiry or revisit trigger, owner, and evidence refs.
+- Broad rules without evidence, owner, applicability, and expiry are not valid
+  architecture artifacts.
+- Customer-failure intake and lesson records are post-MVP learning surfaces
+  unless a human explicitly promotes them into PRD scope.
+
+Use [lesson-record-template.md](lesson-record-template.md) for proposed memory
+or lesson records before they are consumed by implementation tasks.

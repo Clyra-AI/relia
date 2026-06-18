@@ -41,6 +41,16 @@ The generated `.factory/artifacts/post-prd/<mission>/` artifacts are the
 governed source for execution. Do not edit `docs/product/prd.md` unless a human
 explicitly promotes a finding into product scope.
 
+## Post-MVP Learning Intake
+
+Customer-derived failures are intake candidates, not immediate product
+requirements. Record them with
+[docs/dev/customer-failure-intake-template.md](docs/dev/customer-failure-intake-template.md),
+redact them before they enter committed artifacts, and promote only synthetic or
+public-safe fixtures. Lessons intended for reuse must follow
+[docs/architecture/lesson-record-template.md](docs/architecture/lesson-record-template.md)
+and include owner, evidence, applicability, non-applicability, and expiry.
+
 ## Stop Conditions
 
 Stop and request a human decision if runtime pins, distribution target, credential posture, network posture, or PRD scope boundaries need to change.
