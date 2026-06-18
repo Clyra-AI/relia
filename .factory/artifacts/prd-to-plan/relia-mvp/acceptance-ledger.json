@@ -21,19 +21,18 @@
       "group_id": "fr1-outcomes-as-the-only-memory-source",
       "kind": "acceptance_test",
       "notes": [
-        "Sprint 4 adds a bounded learning-loop task reference; it cannot close without redacted, owner-approved evidence."
+        "Sprint 4 adds a bounded learning-loop task reference; it cannot close without redacted, owner-approved evidence.",
+        "Sprint 4 optional post-MVP learning tasks are tracked in acceptance mapping, not MVP-required ledger refs."
       ],
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#fr1-outcomes-as-the-only-memory-source",
       "source_text": "Memory writes must originate from verified outcome events. Agent self-reports and reflections must not enter memory in the MVP.",
       "status": "planned",
       "task_refs": [
-        "T8",
-        "T17"
+        "T8"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/9/validation_commands",
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/18/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/9/validation_commands"
       ]
     },
     {
@@ -234,19 +233,18 @@
       "group_id": "fr10-provenance-mandatory-rules",
       "kind": "quality_gate",
       "notes": [
-        "Sprint 4 adds a bounded learning-loop task reference; it cannot close without redacted, owner-approved evidence."
+        "Sprint 4 adds a bounded learning-loop task reference; it cannot close without redacted, owner-approved evidence.",
+        "Sprint 4 optional post-MVP learning tasks are tracked in acceptance mapping, not MVP-required ledger refs."
       ],
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#fr10-provenance-mandatory-rules",
       "source_text": "Every rule must cite at least one experience and one PR. Uncited rules fail validation and never render.",
       "status": "planned",
       "task_refs": [
-        "T3",
-        "T17"
+        "T3"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/2/validation_commands",
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/18/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/2/validation_commands"
       ]
     },
     {
@@ -284,19 +282,18 @@
       "group_id": "fr12-decay-and-churn-invalidation",
       "kind": "acceptance_test",
       "notes": [
-        "Sprint 4 adds a bounded learning-loop task reference; it cannot close without redacted, owner-approved evidence."
+        "Sprint 4 adds a bounded learning-loop task reference; it cannot close without redacted, owner-approved evidence.",
+        "Sprint 4 optional post-MVP learning tasks are tracked in acceptance mapping, not MVP-required ledger refs."
       ],
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#fr12-decay-and-churn-invalidation",
       "source_text": "Rules must decay by half-life and go `stale` when their scoped paths are deleted.",
       "status": "planned",
       "task_refs": [
-        "T6",
-        "T18"
+        "T6"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/7/validation_commands",
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/19/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/7/validation_commands"
       ]
     },
     {
@@ -336,19 +333,18 @@
       "group_id": "fr14-bidirectional-memory",
       "kind": "acceptance_test",
       "notes": [
-        "Sprint 4 adds a bounded learning-loop task reference; it cannot close without redacted, owner-approved evidence."
+        "Sprint 4 adds a bounded learning-loop task reference; it cannot close without redacted, owner-approved evidence.",
+        "Sprint 4 optional post-MVP learning tasks are tracked in acceptance mapping, not MVP-required ledger refs."
       ],
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#fr14-bidirectional-memory",
       "source_text": "Relia must support `avoid` rules from failures and `playbook` rules from held fixes, and playbook rules must cite held evidence.",
       "status": "planned",
       "task_refs": [
-        "T6",
-        "T18"
+        "T6"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/7/validation_commands",
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/19/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/7/validation_commands"
       ]
     },
     {
@@ -363,19 +359,18 @@
       "group_id": "fr15-memory-page-with-receipts",
       "kind": "acceptance_test",
       "notes": [
-        "Sprint 4 adds a bounded learning-loop task reference; it cannot close without redacted, owner-approved evidence."
+        "Sprint 4 adds a bounded learning-loop task reference; it cannot close without redacted, owner-approved evidence.",
+        "Sprint 4 optional post-MVP learning tasks are tracked in acceptance mapping, not MVP-required ledger refs."
       ],
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#fr15-memory-page-with-receipts",
       "source_text": "relia memory` must render MEMORY.md showing statements, confidence, lifecycle status, and clickable provenance.",
       "status": "planned",
       "task_refs": [
-        "T6",
-        "T18"
+        "T6"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/7/validation_commands",
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/19/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/7/validation_commands"
       ]
     },
     {
@@ -698,19 +693,18 @@
       "kind": "acceptance_test",
       "notes": [
         "Requires manual review or human approval evidence.",
-        "Sprint 4 adds a bounded learning-loop task reference; it cannot close without redacted, owner-approved evidence."
+        "Sprint 4 adds a bounded learning-loop task reference; it cannot close without redacted, owner-approved evidence.",
+        "Sprint 4 optional post-MVP learning tasks are tracked in acceptance mapping, not MVP-required ledger refs."
       ],
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#nfr4-calibration-honesty",
       "source_text": "Reports must clearly distinguish confirmed recurrences, possible recurrences, flake-discounted evidence, and uncertain attribution.",
       "status": "planned",
       "task_refs": [
-        "T6",
-        "T18"
+        "T6"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/7/validation_commands",
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/19/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/7/validation_commands"
       ]
     },
     {
@@ -748,19 +742,18 @@
       "group_id": "nfr6-local-privacy",
       "kind": "acceptance_test",
       "notes": [
-        "Sprint 4 adds a bounded learning-loop task reference; it cannot close without redacted, owner-approved evidence."
+        "Sprint 4 adds a bounded learning-loop task reference; it cannot close without redacted, owner-approved evidence.",
+        "Sprint 4 optional post-MVP learning tasks are tracked in acceptance mapping, not MVP-required ledger refs."
       ],
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#nfr6-local-privacy",
       "source_text": "Relia must not send code, diffs, logs, or experience records anywhere by default. When a distill provider is configured, only redacted experience records leave the machine, and `relia check` must say so explicitly.",
       "status": "planned",
       "task_refs": [
-        "T6",
-        "T17"
+        "T6"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/7/validation_commands",
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/18/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/7/validation_commands"
       ]
     },
     {

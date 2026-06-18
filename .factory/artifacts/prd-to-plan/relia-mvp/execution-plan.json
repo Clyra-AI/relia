@@ -918,7 +918,8 @@
         "risk_class": "low",
         "source_ref": "docs/product/prd.md#fr1-outcomes-as-the-only-memory-source",
         "task_refs": [
-          "T8"
+          "T8",
+          "T17"
         ],
         "title": "FR1: Outcomes As The Only Memory Source"
       },
@@ -999,7 +1000,8 @@
         "risk_class": "low",
         "source_ref": "docs/product/prd.md#fr10-provenance-mandatory-rules",
         "task_refs": [
-          "T3"
+          "T3",
+          "T17"
         ],
         "title": "FR10: Provenance-Mandatory Rules"
       },
@@ -1017,7 +1019,8 @@
         "risk_class": "low",
         "source_ref": "docs/product/prd.md#fr12-decay-and-churn-invalidation",
         "task_refs": [
-          "T6"
+          "T6",
+          "T18"
         ],
         "title": "FR12: Decay And Churn Invalidation"
       },
@@ -1035,7 +1038,8 @@
         "risk_class": "low",
         "source_ref": "docs/product/prd.md#fr14-bidirectional-memory",
         "task_refs": [
-          "T6"
+          "T6",
+          "T18"
         ],
         "title": "FR14: Bidirectional Memory"
       },
@@ -1044,7 +1048,8 @@
         "risk_class": "low",
         "source_ref": "docs/product/prd.md#fr15-memory-page-with-receipts",
         "task_refs": [
-          "T6"
+          "T6",
+          "T18"
         ],
         "title": "FR15: Memory Page With Receipts"
       },
@@ -1170,7 +1175,8 @@
         "risk_class": "medium",
         "source_ref": "docs/product/prd.md#nfr4-calibration-honesty",
         "task_refs": [
-          "T6"
+          "T6",
+          "T18"
         ],
         "title": "NFR4: Calibration Honesty"
       },
@@ -1188,7 +1194,8 @@
         "risk_class": "low",
         "source_ref": "docs/product/prd.md#nfr6-local-privacy",
         "task_refs": [
-          "T6"
+          "T6",
+          "T17"
         ],
         "title": "NFR6: Local Privacy"
       },
@@ -1279,16 +1286,16 @@
         "source_ref": "docs/product/prd.md#mvp-in-scope",
         "task_refs": [
           "T2",
-          "T3",
-          "T4",
-          "T5",
-          "T6",
-          "T7",
-          "T9",
           "T10",
+          "T6",
+          "T3",
+          "T5",
+          "T7",
           "T11",
-          "T13",
           "T14",
+          "T13",
+          "T9",
+          "T4.1",
           "T15"
         ],
         "title": "MVP In Scope"
@@ -1307,10 +1314,10 @@
         "risk_class": "low",
         "source_ref": "docs/product/prd.md#ingest-attribute-backtest-acceptance-tests",
         "task_refs": [
-          "T4",
+          "T13",
           "T5",
           "T7",
-          "T13",
+          "T4.1",
           "T15"
         ],
         "title": "Ingest, Attribute, Backtest Acceptance Tests"
@@ -1320,7 +1327,7 @@
         "risk_class": "medium",
         "source_ref": "docs/product/prd.md#distill-review-memory-page-acceptance-tests",
         "task_refs": [
-          "T4",
+          "T4.2",
           "T7",
           "T9",
           "T16"
@@ -1332,11 +1339,11 @@
         "risk_class": "medium",
         "source_ref": "docs/product/prd.md#serve-and-advise-acceptance-tests",
         "task_refs": [
-          "T4",
-          "T9",
+          "T14",
           "T12",
           "T13",
-          "T14",
+          "T4.3",
+          "T9",
           "T15"
         ],
         "title": "Serve And Advise Acceptance Tests"
@@ -1356,46 +1363,30 @@
         "risk_class": "low",
         "source_ref": "docs/product/prd.md#demo-acceptance",
         "task_refs": [
-          "T4",
-          "T16"
+          "T16",
+          "T4.1"
         ],
         "title": "Demo Acceptance"
       },
       {
-        "acceptance_item_ids": [
-          "CLI-AGENT-001"
-        ],
-        "acceptance_refs": [
-          "CLI-AGENT-001"
-        ],
-        "closure_status": "partial",
-        "criteria": [
-          "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
-          "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
-          "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
-        ],
-        "delivery_slice_refs": [
-          "repo-lifecycle-foundation"
-        ],
         "group_id": "agent_native_cli_conventions",
-        "item_mappings": [
-          {
-            "acceptance_item_id": "CLI-AGENT-001",
-            "delivery_slice_refs": [
-              "repo-lifecycle-foundation"
-            ],
-            "evidence_mode": "automated",
-            "task_refs": [
-              "T1"
-            ]
-          }
-        ],
-        "required": true,
+        "risk_class": "medium",
         "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
         "task_refs": [
           "T1"
         ],
         "title": "Agent-Native CLI Conventions"
+      },
+      {
+        "group_id": "post_mvp_learning",
+        "risk_class": "medium",
+        "source_ref": "docs/dev/customer-failure-intake-template.md",
+        "task_refs": [
+          "T17",
+          "T18"
+        ],
+        "title": "Post-MVP Learning And Lesson Calibration",
+        "required": false
       }
     ],
     "acceptance_item_count": 122,
