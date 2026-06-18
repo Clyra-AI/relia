@@ -10224,7 +10224,7 @@
         "No raw customer code, logs, diffs, paths, owners, credentials, or payment/contact identifiers are committed.",
         "The loop is a lightweight lesson source, not broad support-ticket ingestion or hosted analytics."
       ],
-      "acceptance_group_id": "fr1-outcomes-as-the-only-memory-source",
+      "acceptance_group_id": "post_mvp_learning",
       "acceptance_group_ids": [
         "post_mvp_learning"
       ],
@@ -10686,7 +10686,7 @@
         "Memory-grain templates state where artifacts live and when lessons expire or need recalibration.",
         "No memory retrieval infrastructure is built in this planning slice."
       ],
-      "acceptance_group_id": "fr12-decay-and-churn-invalidation",
+      "acceptance_group_id": "post_mvp_learning",
       "acceptance_group_ids": [
         "post_mvp_learning"
       ],
