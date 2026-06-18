@@ -500,8 +500,7 @@
         {
           "acceptance_item_id": "FR1-OUTCOMES-AS-THE-ONLY-MEMORY-SOURCE-001",
           "delivery_slice_refs": [
-            "reporting-and-evidence",
-            "customer-failure-absorption-loop"
+            "reporting-and-evidence"
           ],
           "evidence_mode": "automated",
           "task_refs": [
@@ -798,8 +797,7 @@
         {
           "acceptance_item_id": "FR10-PROVENANCE-MANDATORY-RULES-001",
           "delivery_slice_refs": [
-            "data-intake-and-persistence",
-            "customer-failure-absorption-loop"
+            "data-intake-and-persistence"
           ],
           "evidence_mode": "automated",
           "task_refs": [
@@ -865,8 +863,7 @@
         {
           "acceptance_item_id": "FR12-DECAY-AND-CHURN-INVALIDATION-001",
           "delivery_slice_refs": [
-            "distillation-calibration-and-confidence-part-1",
-            "lesson-grain-calibration"
+            "distillation-calibration-and-confidence-part-1"
           ],
           "evidence_mode": "automated",
           "task_refs": [
@@ -932,8 +929,7 @@
         {
           "acceptance_item_id": "FR14-BIDIRECTIONAL-MEMORY-001",
           "delivery_slice_refs": [
-            "distillation-calibration-and-confidence-part-1",
-            "lesson-grain-calibration"
+            "distillation-calibration-and-confidence-part-1"
           ],
           "evidence_mode": "automated",
           "task_refs": [
@@ -966,8 +962,7 @@
         {
           "acceptance_item_id": "FR15-MEMORY-PAGE-WITH-RECEIPTS-001",
           "delivery_slice_refs": [
-            "distillation-calibration-and-confidence-part-1",
-            "lesson-grain-calibration"
+            "distillation-calibration-and-confidence-part-1"
           ],
           "evidence_mode": "automated",
           "task_refs": [
@@ -1429,8 +1424,7 @@
         {
           "acceptance_item_id": "NFR4-CALIBRATION-HONESTY-001",
           "delivery_slice_refs": [
-            "distillation-calibration-and-confidence-part-1",
-            "lesson-grain-calibration"
+            "distillation-calibration-and-confidence-part-1"
           ],
           "evidence_mode": "manual_review",
           "task_refs": [
@@ -1497,8 +1491,7 @@
         {
           "acceptance_item_id": "NFR6-LOCAL-PRIVACY-001",
           "delivery_slice_refs": [
-            "distillation-calibration-and-confidence-part-1",
-            "customer-failure-absorption-loop"
+            "distillation-calibration-and-confidence-part-1"
           ],
           "evidence_mode": "automated",
           "task_refs": [
