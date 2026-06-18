@@ -450,7 +450,10 @@
   "tasks": [
     {
       "acceptance_checks": [
-        "The MVP is not complete until all acceptance groups pass."
+        "The MVP is not complete until all acceptance groups pass.",
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
       ],
       "acceptance_group_id": "acceptance-tests",
       "acceptance_group_ids": [
@@ -458,12 +461,28 @@
       ],
       "acceptance_group_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json#/groups",
       "acceptance_item_ids": [
-        "ACCEPTANCE-TESTS-001"
+        "ACCEPTANCE-TESTS-001",
+        "CLI-AGENT-001"
       ],
       "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
       "acceptance_result_requirements": [
         {
           "acceptance_item_id": "ACCEPTANCE-TESTS-001",
+          "allowed_statuses": [
+            "implemented",
+            "partial",
+            "missing",
+            "blocked",
+            "deferred_with_approval"
+          ],
+          "evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "scope_closure_report"
+          ]
+        },
+        {
+          "acceptance_item_id": "CLI-AGENT-001",
           "allowed_statuses": [
             "implemented",
             "partial",
@@ -623,6 +642,26 @@
           "policy": "provenance_evidence",
           "rule": "Validation, work-proof, PR lifecycle, scanner, and scope-closure evidence use repo-relative refs.",
           "source_ref": "docs/dev/dev_guides.md"
+        },
+        {
+          "policy": "structured_parser_policy",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions."
+        },
+        {
+          "policy": "agent_native_cli",
+          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
+          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use."
+        },
+        {
+          "policy": "artifact_budget_and_refs",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata."
+        },
+        {
+          "policy": "customer_safe_redaction",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data."
         }
       ],
       "evidence_required": [
@@ -788,10 +827,14 @@
       ],
       "validation_contract_inheritance": {
         "acceptance_criteria": [
-          "The MVP is not complete until all acceptance groups pass."
+          "The MVP is not complete until all acceptance groups pass.",
+          "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+          "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+          "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
         ],
         "acceptance_item_ids": [
-          "ACCEPTANCE-TESTS-001"
+          "ACCEPTANCE-TESTS-001",
+          "CLI-AGENT-001"
         ],
         "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
         "evidence_required": [
@@ -821,7 +864,27 @@
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t1",
-      "worker_type": "codex_cli"
+      "worker_type": "codex_cli",
+      "required_proof_level": "syntax",
+      "proof_scorecard_required": false,
+      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
+      "structured_parser_policy_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "artifact_budget_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "redaction_posture": {
+        "classification": "internal",
+        "customer_safe": false,
+        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported.",
+        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing"
+      },
+      "agent_native_cli_checks": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
+      ]
     },
     {
       "acceptance_checks": [
@@ -1053,6 +1116,26 @@
           "policy": "provenance_evidence",
           "rule": "Validation, work-proof, PR lifecycle, scanner, and scope-closure evidence use repo-relative refs.",
           "source_ref": "docs/dev/dev_guides.md"
+        },
+        {
+          "policy": "structured_parser_policy",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions."
+        },
+        {
+          "policy": "agent_native_cli",
+          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
+          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use."
+        },
+        {
+          "policy": "artifact_budget_and_refs",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata."
+        },
+        {
+          "policy": "customer_safe_redaction",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data."
         }
       ],
       "evidence_required": [
@@ -1257,7 +1340,27 @@
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t2",
-      "worker_type": "codex_cli"
+      "worker_type": "codex_cli",
+      "required_proof_level": "source_evidence",
+      "proof_scorecard_required": false,
+      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
+      "structured_parser_policy_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "artifact_budget_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "redaction_posture": {
+        "classification": "internal",
+        "customer_safe": false,
+        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported.",
+        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing"
+      },
+      "agent_native_cli_checks": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
+      ]
     },
     {
       "acceptance_checks": [
@@ -1489,6 +1592,26 @@
           "policy": "provenance_evidence",
           "rule": "Validation, work-proof, PR lifecycle, scanner, and scope-closure evidence use repo-relative refs.",
           "source_ref": "docs/dev/dev_guides.md"
+        },
+        {
+          "policy": "structured_parser_policy",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions."
+        },
+        {
+          "policy": "agent_native_cli",
+          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
+          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use."
+        },
+        {
+          "policy": "artifact_budget_and_refs",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata."
+        },
+        {
+          "policy": "customer_safe_redaction",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data."
         }
       ],
       "evidence_required": [
@@ -1693,7 +1816,27 @@
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t3",
-      "worker_type": "codex_cli"
+      "worker_type": "codex_cli",
+      "required_proof_level": "workflow_behavior",
+      "proof_scorecard_required": true,
+      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
+      "structured_parser_policy_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "artifact_budget_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "redaction_posture": {
+        "classification": "internal",
+        "customer_safe": false,
+        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported.",
+        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing"
+      },
+      "agent_native_cli_checks": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
+      ]
     },
     {
       "acceptance_checks": [
@@ -2029,6 +2172,26 @@
           "policy": "provenance_evidence",
           "rule": "Validation, work-proof, PR lifecycle, scanner, and scope-closure evidence use repo-relative refs.",
           "source_ref": "docs/dev/dev_guides.md"
+        },
+        {
+          "policy": "structured_parser_policy",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions."
+        },
+        {
+          "policy": "agent_native_cli",
+          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
+          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use."
+        },
+        {
+          "policy": "artifact_budget_and_refs",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata."
+        },
+        {
+          "policy": "customer_safe_redaction",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data."
         }
       ],
       "evidence_required": [
@@ -2243,7 +2406,27 @@
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t4",
-      "worker_type": "codex_cli"
+      "worker_type": "codex_cli",
+      "required_proof_level": "user_visible_behavior",
+      "proof_scorecard_required": true,
+      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
+      "structured_parser_policy_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "artifact_budget_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "redaction_posture": {
+        "classification": "customer_safe",
+        "customer_safe": true,
+        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported.",
+        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing"
+      },
+      "agent_native_cli_checks": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
+      ]
     },
     {
       "acceptance_checks": [
@@ -2631,6 +2814,26 @@
           "policy": "provenance_evidence",
           "rule": "Validation, work-proof, PR lifecycle, scanner, and scope-closure evidence use repo-relative refs.",
           "source_ref": "docs/dev/dev_guides.md"
+        },
+        {
+          "policy": "structured_parser_policy",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions."
+        },
+        {
+          "policy": "agent_native_cli",
+          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
+          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use."
+        },
+        {
+          "policy": "artifact_budget_and_refs",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata."
+        },
+        {
+          "policy": "customer_safe_redaction",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data."
         }
       ],
       "evidence_required": [
@@ -2853,7 +3056,27 @@
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t5",
-      "worker_type": "codex_cli"
+      "worker_type": "codex_cli",
+      "required_proof_level": "user_visible_behavior",
+      "proof_scorecard_required": true,
+      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
+      "structured_parser_policy_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "artifact_budget_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "redaction_posture": {
+        "classification": "internal",
+        "customer_safe": false,
+        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported.",
+        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing"
+      },
+      "agent_native_cli_checks": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
+      ]
     },
     {
       "acceptance_checks": [
@@ -3285,6 +3508,26 @@
           "policy": "provenance_evidence",
           "rule": "Validation, work-proof, PR lifecycle, scanner, and scope-closure evidence use repo-relative refs.",
           "source_ref": "docs/dev/dev_guides.md"
+        },
+        {
+          "policy": "structured_parser_policy",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions."
+        },
+        {
+          "policy": "agent_native_cli",
+          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
+          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use."
+        },
+        {
+          "policy": "artifact_budget_and_refs",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata."
+        },
+        {
+          "policy": "customer_safe_redaction",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data."
         }
       ],
       "evidence_required": [
@@ -3517,7 +3760,27 @@
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t6",
-      "worker_type": "codex_cli"
+      "worker_type": "codex_cli",
+      "required_proof_level": "user_visible_behavior",
+      "proof_scorecard_required": true,
+      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
+      "structured_parser_policy_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "artifact_budget_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "redaction_posture": {
+        "classification": "internal",
+        "customer_safe": false,
+        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported.",
+        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing"
+      },
+      "agent_native_cli_checks": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
+      ]
     },
     {
       "acceptance_checks": [
@@ -3957,6 +4220,26 @@
           "policy": "provenance_evidence",
           "rule": "Validation, work-proof, PR lifecycle, scanner, and scope-closure evidence use repo-relative refs.",
           "source_ref": "docs/dev/dev_guides.md"
+        },
+        {
+          "policy": "structured_parser_policy",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions."
+        },
+        {
+          "policy": "agent_native_cli",
+          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
+          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use."
+        },
+        {
+          "policy": "artifact_budget_and_refs",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata."
+        },
+        {
+          "policy": "customer_safe_redaction",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data."
         }
       ],
       "evidence_required": [
@@ -4235,7 +4518,27 @@
           "network_allowlist"
         ],
         "approval_policy": "Provider embedding and LLM rule-drafting integrations for OpenAI-compatible and Anthropic adapters require a complete model_provider_endpoint grant with provider identity, provider model, endpoint or base_url, credential environment, budget posture, redaction posture, and allowlist. Generic network or credential approval alone does not satisfy this model-specific gate."
-      }
+      },
+      "required_proof_level": "user_visible_behavior",
+      "proof_scorecard_required": true,
+      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
+      "structured_parser_policy_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "artifact_budget_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "redaction_posture": {
+        "classification": "internal",
+        "customer_safe": false,
+        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported.",
+        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing"
+      },
+      "agent_native_cli_checks": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
+      ]
     },
     {
       "acceptance_checks": [
@@ -4414,6 +4717,26 @@
           "policy": "provenance_evidence",
           "rule": "Validation, work-proof, PR lifecycle, scanner, and scope-closure evidence use repo-relative refs.",
           "source_ref": "docs/dev/dev_guides.md"
+        },
+        {
+          "policy": "structured_parser_policy",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions."
+        },
+        {
+          "policy": "agent_native_cli",
+          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
+          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use."
+        },
+        {
+          "policy": "artifact_budget_and_refs",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata."
+        },
+        {
+          "policy": "customer_safe_redaction",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data."
         }
       ],
       "evidence_required": [
@@ -4612,7 +4935,27 @@
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t8",
-      "worker_type": "codex_cli"
+      "worker_type": "codex_cli",
+      "required_proof_level": "user_visible_behavior",
+      "proof_scorecard_required": true,
+      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
+      "structured_parser_policy_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "artifact_budget_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "redaction_posture": {
+        "classification": "customer_safe",
+        "customer_safe": true,
+        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported.",
+        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing"
+      },
+      "agent_native_cli_checks": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
+      ]
     },
     {
       "acceptance_checks": [
@@ -4935,6 +5278,26 @@
           "policy": "provenance_evidence",
           "rule": "Validation, work-proof, PR lifecycle, scanner, and scope-closure evidence use repo-relative refs.",
           "source_ref": "docs/dev/dev_guides.md"
+        },
+        {
+          "policy": "structured_parser_policy",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions."
+        },
+        {
+          "policy": "agent_native_cli",
+          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
+          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use."
+        },
+        {
+          "policy": "artifact_budget_and_refs",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata."
+        },
+        {
+          "policy": "customer_safe_redaction",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data."
         }
       ],
       "evidence_required": [
@@ -5189,7 +5552,27 @@
           "network_allowlist"
         ],
         "approval_policy": "Provider embedding and LLM rule-drafting integrations for OpenAI-compatible and Anthropic adapters require a complete model_provider_endpoint grant with provider identity, provider model, endpoint or base_url, credential environment, budget posture, redaction posture, and allowlist in addition to any generic network or credential approvals for GitHub, webhooks, or hosted service work."
-      }
+      },
+      "required_proof_level": "user_visible_behavior",
+      "proof_scorecard_required": true,
+      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
+      "structured_parser_policy_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "artifact_budget_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "redaction_posture": {
+        "classification": "internal",
+        "customer_safe": false,
+        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported.",
+        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing"
+      },
+      "agent_native_cli_checks": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
+      ]
     },
     {
       "acceptance_checks": [
@@ -5439,6 +5822,26 @@
           "policy": "provenance_evidence",
           "rule": "Validation, work-proof, PR lifecycle, scanner, and scope-closure evidence use repo-relative refs.",
           "source_ref": "docs/dev/dev_guides.md"
+        },
+        {
+          "policy": "structured_parser_policy",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions."
+        },
+        {
+          "policy": "agent_native_cli",
+          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
+          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use."
+        },
+        {
+          "policy": "artifact_budget_and_refs",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata."
+        },
+        {
+          "policy": "customer_safe_redaction",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data."
         }
       ],
       "evidence_required": [
@@ -5651,7 +6054,27 @@
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t10",
-      "worker_type": "codex_cli"
+      "worker_type": "codex_cli",
+      "required_proof_level": "user_visible_behavior",
+      "proof_scorecard_required": true,
+      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
+      "structured_parser_policy_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "artifact_budget_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "redaction_posture": {
+        "classification": "internal",
+        "customer_safe": false,
+        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported.",
+        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing"
+      },
+      "agent_native_cli_checks": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
+      ]
     },
     {
       "acceptance_checks": [
@@ -5830,6 +6253,26 @@
           "policy": "provenance_evidence",
           "rule": "Validation, work-proof, PR lifecycle, scanner, and scope-closure evidence use repo-relative refs.",
           "source_ref": "docs/dev/dev_guides.md"
+        },
+        {
+          "policy": "structured_parser_policy",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions."
+        },
+        {
+          "policy": "agent_native_cli",
+          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
+          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use."
+        },
+        {
+          "policy": "artifact_budget_and_refs",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata."
+        },
+        {
+          "policy": "customer_safe_redaction",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data."
         }
       ],
       "evidence_required": [
@@ -6028,7 +6471,27 @@
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t11",
-      "worker_type": "codex_cli"
+      "worker_type": "codex_cli",
+      "required_proof_level": "user_visible_behavior",
+      "proof_scorecard_required": true,
+      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
+      "structured_parser_policy_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "artifact_budget_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "redaction_posture": {
+        "classification": "internal",
+        "customer_safe": false,
+        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported.",
+        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing"
+      },
+      "agent_native_cli_checks": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
+      ]
     },
     {
       "acceptance_checks": [
@@ -6241,6 +6704,26 @@
           "policy": "provenance_evidence",
           "rule": "Validation, work-proof, PR lifecycle, scanner, and scope-closure evidence use repo-relative refs.",
           "source_ref": "docs/dev/dev_guides.md"
+        },
+        {
+          "policy": "structured_parser_policy",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions."
+        },
+        {
+          "policy": "agent_native_cli",
+          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
+          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use."
+        },
+        {
+          "policy": "artifact_budget_and_refs",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata."
+        },
+        {
+          "policy": "customer_safe_redaction",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data."
         }
       ],
       "evidence_required": [
@@ -6443,7 +6926,27 @@
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t12",
-      "worker_type": "codex_cli"
+      "worker_type": "codex_cli",
+      "required_proof_level": "user_visible_behavior",
+      "proof_scorecard_required": true,
+      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
+      "structured_parser_policy_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "artifact_budget_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "redaction_posture": {
+        "classification": "internal",
+        "customer_safe": false,
+        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported.",
+        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing"
+      },
+      "agent_native_cli_checks": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
+      ]
     },
     {
       "acceptance_checks": [
@@ -6676,6 +7179,26 @@
           "policy": "provenance_evidence",
           "rule": "Validation, work-proof, PR lifecycle, scanner, and scope-closure evidence use repo-relative refs.",
           "source_ref": "docs/dev/dev_guides.md"
+        },
+        {
+          "policy": "structured_parser_policy",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions."
+        },
+        {
+          "policy": "agent_native_cli",
+          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
+          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use."
+        },
+        {
+          "policy": "artifact_budget_and_refs",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata."
+        },
+        {
+          "policy": "customer_safe_redaction",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data."
         }
       ],
       "evidence_required": [
@@ -6880,7 +7403,27 @@
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t13",
-      "worker_type": "codex_cli"
+      "worker_type": "codex_cli",
+      "required_proof_level": "user_visible_behavior",
+      "proof_scorecard_required": true,
+      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
+      "structured_parser_policy_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "artifact_budget_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "redaction_posture": {
+        "classification": "internal",
+        "customer_safe": false,
+        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported.",
+        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing"
+      },
+      "agent_native_cli_checks": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
+      ]
     },
     {
       "acceptance_checks": [
@@ -7201,6 +7744,26 @@
           "policy": "provenance_evidence",
           "rule": "Validation, work-proof, PR lifecycle, scanner, and scope-closure evidence use repo-relative refs.",
           "source_ref": "docs/dev/dev_guides.md"
+        },
+        {
+          "policy": "structured_parser_policy",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions."
+        },
+        {
+          "policy": "agent_native_cli",
+          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
+          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use."
+        },
+        {
+          "policy": "artifact_budget_and_refs",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata."
+        },
+        {
+          "policy": "customer_safe_redaction",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data."
         }
       ],
       "evidence_required": [
@@ -7415,7 +7978,27 @@
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t14",
-      "worker_type": "codex_cli"
+      "worker_type": "codex_cli",
+      "required_proof_level": "user_visible_behavior",
+      "proof_scorecard_required": true,
+      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
+      "structured_parser_policy_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "artifact_budget_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "redaction_posture": {
+        "classification": "internal",
+        "customer_safe": false,
+        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported.",
+        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing"
+      },
+      "agent_native_cli_checks": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
+      ]
     },
     {
       "acceptance_checks": [
@@ -7843,6 +8426,26 @@
           "policy": "provenance_evidence",
           "rule": "Validation, work-proof, PR lifecycle, scanner, and scope-closure evidence use repo-relative refs.",
           "source_ref": "docs/dev/dev_guides.md"
+        },
+        {
+          "policy": "structured_parser_policy",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions."
+        },
+        {
+          "policy": "agent_native_cli",
+          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
+          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use."
+        },
+        {
+          "policy": "artifact_budget_and_refs",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata."
+        },
+        {
+          "policy": "customer_safe_redaction",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data."
         }
       ],
       "evidence_required": [
@@ -8074,7 +8677,27 @@
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t15",
-      "worker_type": "codex_cli"
+      "worker_type": "codex_cli",
+      "required_proof_level": "user_visible_behavior",
+      "proof_scorecard_required": true,
+      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
+      "structured_parser_policy_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "artifact_budget_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "redaction_posture": {
+        "classification": "customer_safe",
+        "customer_safe": true,
+        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported.",
+        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing"
+      },
+      "agent_native_cli_checks": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
+      ]
     },
     {
       "acceptance_checks": [
@@ -8468,6 +9091,26 @@
           "policy": "provenance_evidence",
           "rule": "Validation, work-proof, PR lifecycle, scanner, and scope-closure evidence use repo-relative refs.",
           "source_ref": "docs/dev/dev_guides.md"
+        },
+        {
+          "policy": "structured_parser_policy",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions."
+        },
+        {
+          "policy": "agent_native_cli",
+          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
+          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use."
+        },
+        {
+          "policy": "artifact_budget_and_refs",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata."
+        },
+        {
+          "policy": "customer_safe_redaction",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
+          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data."
         }
       ],
       "evidence_required": [
@@ -8695,7 +9338,37 @@
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t16",
-      "worker_type": "codex_cli"
+      "worker_type": "codex_cli",
+      "required_proof_level": "user_visible_behavior",
+      "proof_scorecard_required": true,
+      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
+      "structured_parser_policy_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "artifact_budget_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "redaction_posture": {
+        "classification": "customer_safe",
+        "customer_safe": true,
+        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported.",
+        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing"
+      },
+      "agent_native_cli_checks": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
+      ]
     }
-  ]
+  ],
+  "proof_of_behavior_requirements": {
+    "levels": [
+      "syntax",
+      "source_evidence",
+      "workflow_behavior",
+      "user_visible_behavior"
+    ],
+    "rule": "Tasks must close at or above their required_proof_level; workflow or user-visible closure requires proof-of-behavior scorecard evidence or approved exception.",
+    "artifact_type": "proof-of-behavior-scorecard"
+  }
 }

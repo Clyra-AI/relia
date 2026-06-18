@@ -4807,9 +4807,48 @@
       "task_refs": [
         "T4"
       ]
+    },
+    {
+      "scope_item": "Agent-facing CLI commands support stable JSON mode, non-interactive machine-readable output, quiet/compact posture, typed exits, and machine-readable errors or an approved deferral.",
+      "scope_item_id": "CLI-AGENT-001",
+      "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
+      "status": "partial",
+      "task_refs": [
+        "T1"
+      ],
+      "implemented_task_refs": [],
+      "remaining_task_refs": [
+        "T1"
+      ],
+      "evidence_refs": [],
+      "acceptance_item_ids": [
+        "CLI-AGENT-001"
+      ],
+      "acceptance_item_statuses": [
+        {
+          "acceptance_item_id": "CLI-AGENT-001",
+          "status": "partial",
+          "evidence_refs": [],
+          "repair_task_refs": []
+        }
+      ],
+      "acceptance_criteria": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
+      ],
+      "requires_human_approval": false,
+      "notes": [
+        "Factory-derived CLI quality gate; close with command tests and validation evidence."
+      ],
+      "delivery_slice_refs": [
+        "repo-lifecycle-foundation"
+      ],
+      "group_id": "agent_native_cli_conventions"
     }
   ],
   "last_updated_at": "2026-06-11T15:48:57Z",
   "schema_version": "0.1",
-  "source_prd_ref": "docs/product/prd.md"
+  "source_prd_ref": "docs/product/prd.md",
+  "acceptance_item_count": 122
 }

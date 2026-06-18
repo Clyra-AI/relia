@@ -62,6 +62,33 @@ compensating validation evidence.
 - Evidence artifacts must use repo-relative paths.
 - New dependencies must be pinned and justified.
 
+## Agent-Native CLI Policy
+
+- Agent-facing commands must support stable JSON output mode before they become
+  automation surfaces.
+- Commands should emit machine-readable output when stdout is not a TTY unless
+  explicitly human-only with an approved exception.
+- `--quiet` and `--compact` must preserve status, evidence refs, typed errors,
+  and the command-result envelope.
+- Task packets that touch CLI behavior must carry acceptance checks for JSON
+  mode, piped or non-interactive behavior, quiet/compact posture, typed exits,
+  and machine-readable errors.
+
+## Structured Data, Proof, Budgets, And Redaction
+
+- PR, check-run, experience, memory, MCP, assessment, report, and config data
+  must be handled through parsers, schemas, or stable APIs.
+- Structured check-run data is preferred over log parsing; any log-parsed
+  fallback must be labeled and validated.
+- Task closure must name the required proof level: syntax, source evidence,
+  workflow behavior, or user-visible behavior. Workflow or user-visible closure
+  requires proof-of-behavior scorecard evidence or an approved exception.
+- Large logs, reports, traces, and generated evidence must be cited by artifact
+  ref with full-output hashes and truncation metadata instead of duplicated
+  payloads.
+- Customer-safe or public artifacts must recursively redact nested owner,
+  credential, endpoint, secret, and machine-local path fields.
+
 ## Model Provider And Artifact Policy
 
 - Default clustering must run with `embeddings: signature` and require no
