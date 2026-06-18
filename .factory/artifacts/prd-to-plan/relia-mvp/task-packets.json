@@ -575,7 +575,7 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T1/",
-        ".factory/artifacts/pr-lifecycle/T1/"
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t1/"
       ],
       "architecture_guidance_refs": [
         {
@@ -1047,7 +1047,7 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T2/",
-        ".factory/artifacts/pr-lifecycle/T2/"
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t2/"
       ],
       "architecture_guidance_refs": [
         {
@@ -1523,7 +1523,7 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T3/",
-        ".factory/artifacts/pr-lifecycle/T3/"
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t3/"
       ],
       "architecture_guidance_refs": [
         {
@@ -2032,7 +2032,7 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T4.1/",
-        ".factory/artifacts/pr-lifecycle/T4.1/"
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t4-1/"
       ],
       "architecture_guidance_refs": [
         {
@@ -2496,7 +2496,7 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T4.2/",
-        ".factory/artifacts/pr-lifecycle/T4.2/"
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t4-2/"
       ],
       "architecture_guidance_refs": [
         {
@@ -2921,7 +2921,7 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T4.3/",
-        ".factory/artifacts/pr-lifecycle/T4.3/"
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t4-3/"
       ],
       "architecture_guidance_refs": [
         {
@@ -3549,7 +3549,7 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T5/",
-        ".factory/artifacts/pr-lifecycle/T5/"
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t5/"
       ],
       "architecture_guidance_refs": [
         {
@@ -4243,7 +4243,7 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T6/",
-        ".factory/artifacts/pr-lifecycle/T6/"
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t6/"
       ],
       "architecture_guidance_refs": [
         {
@@ -4947,7 +4947,7 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T7/",
-        ".factory/artifacts/pr-lifecycle/T7/"
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t7/"
       ],
       "architecture_guidance_refs": [
         {
@@ -5452,7 +5452,7 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T8/",
-        ".factory/artifacts/pr-lifecycle/T8/"
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t8/"
       ],
       "architecture_guidance_refs": [
         {
@@ -6013,7 +6013,7 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T9/",
-        ".factory/artifacts/pr-lifecycle/T9/"
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t9/"
       ],
       "architecture_guidance_refs": [
         {
@@ -6557,7 +6557,7 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T10/",
-        ".factory/artifacts/pr-lifecycle/T10/"
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t10/"
       ],
       "architecture_guidance_refs": [
         {
@@ -6988,7 +6988,7 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T11/",
-        ".factory/artifacts/pr-lifecycle/T11/"
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t11/"
       ],
       "architecture_guidance_refs": [
         {
@@ -7439,7 +7439,7 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T12/",
-        ".factory/artifacts/pr-lifecycle/T12/"
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t12/"
       ],
       "architecture_guidance_refs": [
         {
@@ -7914,7 +7914,7 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T13/",
-        ".factory/artifacts/pr-lifecycle/T13/"
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t13/"
       ],
       "architecture_guidance_refs": [
         {
@@ -8479,7 +8479,7 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T14/",
-        ".factory/artifacts/pr-lifecycle/T14/"
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t14/"
       ],
       "architecture_guidance_refs": [
         {
@@ -9157,7 +9157,7 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T15/",
-        ".factory/artifacts/pr-lifecycle/T15/"
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t15/"
       ],
       "architecture_guidance_refs": [
         {
@@ -9822,7 +9822,7 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T16/",
-        ".factory/artifacts/pr-lifecycle/T16/"
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t16/"
       ],
       "architecture_guidance_refs": [
         {
@@ -10226,9 +10226,7 @@
       ],
       "acceptance_group_id": "fr1-outcomes-as-the-only-memory-source",
       "acceptance_group_ids": [
-        "fr1-outcomes-as-the-only-memory-source",
-        "fr10-provenance-mandatory-rules",
-        "nfr6-local-privacy"
+        "post_mvp_learning"
       ],
       "acceptance_group_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json#/groups",
       "acceptance_item_ids": [
@@ -10309,7 +10307,7 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T17/",
-        ".factory/artifacts/pr-lifecycle/T17/",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t17/",
         "docs/product/",
         "docs/dev/",
         ".factory/artifacts/customer-failure-intake/",
@@ -10690,10 +10688,7 @@
       ],
       "acceptance_group_id": "fr12-decay-and-churn-invalidation",
       "acceptance_group_ids": [
-        "fr12-decay-and-churn-invalidation",
-        "fr14-bidirectional-memory",
-        "fr15-memory-page-with-receipts",
-        "nfr4-calibration-honesty"
+        "post_mvp_learning"
       ],
       "acceptance_group_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json#/groups",
       "acceptance_item_ids": [
@@ -10790,7 +10785,7 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T18/",
-        ".factory/artifacts/pr-lifecycle/T18/",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t18/",
         "docs/architecture/",
         "docs/dev/",
         ".factory/artifacts/lesson-records/",
