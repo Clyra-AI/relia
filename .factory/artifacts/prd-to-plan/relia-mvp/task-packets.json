@@ -1,4 +1,5 @@
 {
+  "acceptance_item_count": 122,
   "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
   "acceptance_mapping_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
   "artifact_type": "task_packets",
@@ -87,9 +88,11 @@
       "public_release_boundary": false,
       "required_for_completion": true,
       "slice_id": "outcome-fixture-corpus",
-      "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T4",
+      "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T4.1-T4.3",
       "task_refs": [
-        "T4"
+        "T4.1",
+        "T4.2",
+        "T4.3"
       ]
     },
     {
@@ -444,9 +447,56 @@
       "task_refs": [
         "T16"
       ]
+    },
+    {
+      "acceptance_group_refs": [
+        "post_mvp_learning"
+      ],
+      "acceptance_item_ids": [
+        "FR1-OUTCOMES-AS-THE-ONLY-MEMORY-SOURCE-001",
+        "FR10-PROVENANCE-MANDATORY-RULES-001",
+        "NFR6-LOCAL-PRIVACY-001"
+      ],
+      "name": "Customer Failure Absorption Loop",
+      "public_release_boundary": false,
+      "required_for_completion": false,
+      "slice_id": "customer-failure-absorption-loop",
+      "source_ref": "docs/dev/customer-failure-intake-template.md",
+      "task_refs": [
+        "T17"
+      ]
+    },
+    {
+      "acceptance_group_refs": [
+        "post_mvp_learning"
+      ],
+      "acceptance_item_ids": [
+        "FR12-DECAY-AND-CHURN-INVALIDATION-001",
+        "FR14-BIDIRECTIONAL-MEMORY-001",
+        "FR15-MEMORY-PAGE-WITH-RECEIPTS-001",
+        "NFR4-CALIBRATION-HONESTY-001"
+      ],
+      "name": "Lesson Grain Calibration",
+      "public_release_boundary": false,
+      "required_for_completion": false,
+      "slice_id": "lesson-grain-calibration",
+      "source_ref": "docs/architecture/lesson-record-template.md",
+      "task_refs": [
+        "T18"
+      ]
     }
   ],
   "generated_at": "2026-06-11T15:48:57Z",
+  "proof_of_behavior_requirements": {
+    "artifact_type": "proof-of-behavior-scorecard",
+    "levels": [
+      "syntax",
+      "source_evidence",
+      "workflow_behavior",
+      "user_visible_behavior"
+    ],
+    "rule": "Tasks must close at or above their required_proof_level; workflow or user-visible closure requires proof-of-behavior scorecard evidence or approved exception."
+  },
   "schema_version": "0.1",
   "source_prd_ref": "docs/product/prd.md",
   "tasks": [
@@ -500,6 +550,11 @@
           ]
         }
       ],
+      "agent_native_cli_checks": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
+      ],
       "alignment_gate_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions",
       "allowed_paths": [
         "AGENTS.md",
@@ -539,6 +594,9 @@
           "rule": "Deterministic bootstrap has no network/secrets; live work requires approval and evidence.",
           "source_ref": "docs/architecture/architecture_guides.md#trust-mode-posture"
         }
+      ],
+      "artifact_budget_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
       ],
       "baseline_commands": [
         "make lint-fast",
@@ -648,23 +706,23 @@
         },
         {
           "policy": "structured_parser_policy",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions."
+          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         },
         {
           "policy": "agent_native_cli",
-          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
-          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use."
+          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use.",
+          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy"
         },
         {
           "policy": "artifact_budget_and_refs",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata."
+          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         },
         {
           "policy": "customer_safe_redaction",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data."
+          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         }
       ],
       "evidence_required": [
@@ -745,9 +803,18 @@
       "mission_contract_ref": "docs/product/prd.md",
       "objective": "Establish repo lifecycle, CLI skeleton, command result envelope, exit-code behavior, CI, validation, and local operating-pack baseline.",
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
+      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
+      "proof_scorecard_required": true,
       "red_first_commands": [
         "make test-fast"
       ],
+      "redaction_posture": {
+        "classification": "internal",
+        "customer_safe": false,
+        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing",
+        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported."
+      },
+      "required_proof_level": "user_visible_behavior",
       "required_worker_chain": [
         "task-executor",
         "validation-gate",
@@ -800,6 +867,9 @@
         "required validation command failed",
         "plan drift detected",
         "scope closure did not advance"
+      ],
+      "structured_parser_policy_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
       ],
       "task_id": "T1",
       "test_matrix_refs": [
@@ -869,27 +939,7 @@
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t1",
-      "worker_type": "codex_cli",
-      "required_proof_level": "user_visible_behavior",
-      "proof_scorecard_required": true,
-      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
-      "structured_parser_policy_refs": [
-        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
-      ],
-      "artifact_budget_refs": [
-        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
-      ],
-      "redaction_posture": {
-        "classification": "internal",
-        "customer_safe": false,
-        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported.",
-        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing"
-      },
-      "agent_native_cli_checks": [
-        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
-        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
-        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
-      ]
+      "worker_type": "codex_cli"
     },
     {
       "acceptance_checks": [
@@ -974,6 +1024,11 @@
           ]
         }
       ],
+      "agent_native_cli_checks": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
+      ],
       "alignment_gate_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions",
       "allowed_paths": [
         "AGENTS.md",
@@ -1013,6 +1068,9 @@
           "rule": "Deterministic bootstrap has no network/secrets; live work requires approval and evidence.",
           "source_ref": "docs/architecture/architecture_guides.md#trust-mode-posture"
         }
+      ],
+      "artifact_budget_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
       ],
       "baseline_commands": [
         "make lint-fast",
@@ -1124,23 +1182,23 @@
         },
         {
           "policy": "structured_parser_policy",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions."
+          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         },
         {
           "policy": "agent_native_cli",
-          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
-          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use."
+          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use.",
+          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy"
         },
         {
           "policy": "artifact_budget_and_refs",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata."
+          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         },
         {
           "policy": "customer_safe_redaction",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data."
+          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         }
       ],
       "evidence_required": [
@@ -1220,9 +1278,18 @@
       "mission_contract_ref": "docs/product/prd.md",
       "objective": "Implement PRD-defined configuration, schemas, artifact contracts, privacy defaults, validation, and structured output guarantees.",
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
+      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
+      "proof_scorecard_required": false,
       "red_first_commands": [
         "make test-fast"
       ],
+      "redaction_posture": {
+        "classification": "internal",
+        "customer_safe": false,
+        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing",
+        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported."
+      },
+      "required_proof_level": "source_evidence",
       "required_worker_chain": [
         "task-executor",
         "validation-gate",
@@ -1275,6 +1342,9 @@
         "required validation command failed",
         "plan drift detected",
         "scope closure did not advance"
+      ],
+      "structured_parser_policy_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
       ],
       "task_id": "T2",
       "test_matrix_refs": [
@@ -1345,27 +1415,7 @@
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t2",
-      "worker_type": "codex_cli",
-      "required_proof_level": "source_evidence",
-      "proof_scorecard_required": false,
-      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
-      "structured_parser_policy_refs": [
-        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
-      ],
-      "artifact_budget_refs": [
-        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
-      ],
-      "redaction_posture": {
-        "classification": "internal",
-        "customer_safe": false,
-        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported.",
-        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing"
-      },
-      "agent_native_cli_checks": [
-        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
-        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
-        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
-      ]
+      "worker_type": "codex_cli"
     },
     {
       "acceptance_checks": [
@@ -1450,6 +1500,11 @@
           ]
         }
       ],
+      "agent_native_cli_checks": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
+      ],
       "alignment_gate_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions",
       "allowed_paths": [
         "AGENTS.md",
@@ -1489,6 +1544,9 @@
           "rule": "Deterministic bootstrap has no network/secrets; live work requires approval and evidence.",
           "source_ref": "docs/architecture/architecture_guides.md#trust-mode-posture"
         }
+      ],
+      "artifact_budget_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
       ],
       "baseline_commands": [
         "make lint-fast",
@@ -1600,23 +1658,23 @@
         },
         {
           "policy": "structured_parser_policy",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions."
+          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         },
         {
           "policy": "agent_native_cli",
-          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
-          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use."
+          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use.",
+          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy"
         },
         {
           "policy": "artifact_budget_and_refs",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata."
+          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         },
         {
           "policy": "customer_safe_redaction",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data."
+          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         }
       ],
       "evidence_required": [
@@ -1696,9 +1754,18 @@
       "mission_contract_ref": "docs/product/prd.md",
       "objective": "Implement PRD-defined input ingestion, attribution, normalization, redaction, persistence, and provenance capture.",
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
+      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
+      "proof_scorecard_required": true,
       "red_first_commands": [
         "make test-fast"
       ],
+      "redaction_posture": {
+        "classification": "internal",
+        "customer_safe": false,
+        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing",
+        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported."
+      },
+      "required_proof_level": "workflow_behavior",
       "required_worker_chain": [
         "task-executor",
         "validation-gate",
@@ -1751,6 +1818,9 @@
         "required validation command failed",
         "plan drift detected",
         "scope closure did not advance"
+      ],
+      "structured_parser_policy_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
       ],
       "task_id": "T3",
       "test_matrix_refs": [
@@ -1821,61 +1891,30 @@
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t3",
-      "worker_type": "codex_cli",
-      "required_proof_level": "workflow_behavior",
-      "proof_scorecard_required": true,
-      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
-      "structured_parser_policy_refs": [
-        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
-      ],
-      "artifact_budget_refs": [
-        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
-      ],
-      "redaction_posture": {
-        "classification": "internal",
-        "customer_safe": false,
-        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported.",
-        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing"
-      },
-      "agent_native_cli_checks": [
-        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
-        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
-        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
-      ]
+      "worker_type": "codex_cli"
     },
     {
       "acceptance_checks": [
-        "seeded demo repo and bundled static reports",
+        "Seeded demo repo and bundled static reports exist without real customer data.",
         "The planted flaky test is discounted and drafts no rule.",
         "Seeded secrets never appear in any artifact.",
-        "relia distill` drafts an `avoid` rule from the planted recurrence cluster with correct citations.",
-        "The planted contradiction moves its rule to `contradicted` and out of serving.",
-        "The planted path deletion moves its rule to `stale` and out of serving.",
-        "relia assess` returns `match_high` with citations on a planted-pattern diff and `no_coverage` on unknown paths.",
-        "Every number shown live is reproducible from the seeded repo.",
-        "Every citation shown in the demo resolves to a real PR in the seeded repo.",
-        "Attribution precision is at least 95% on a labeled sample; uncertain cases are excluded, not guessed."
+        "Attribution precision is at least 95% on a labeled sample; uncertain cases are excluded, not guessed.",
+        "Every number and citation shown by fixture reports is reproducible from the seeded repo."
       ],
-      "acceptance_group_id": "mvp-in-scope",
+      "acceptance_group_id": "demo-acceptance",
       "acceptance_group_ids": [
-        "mvp-in-scope",
+        "demo-acceptance",
         "ingest-attribute-backtest-acceptance-tests",
-        "distill-review-memory-page-acceptance-tests",
-        "serve-and-advise-acceptance-tests",
-        "demo-acceptance"
+        "mvp-in-scope"
       ],
       "acceptance_group_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json#/groups",
       "acceptance_item_ids": [
         "MVP-IN-SCOPE-022",
         "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-008",
         "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-009",
-        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-001",
-        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-006",
-        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-007",
-        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-004",
+        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-011",
         "DEMO-ACCEPTANCE-002",
-        "DEMO-ACCEPTANCE-004",
-        "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-011"
+        "DEMO-ACCEPTANCE-004"
       ],
       "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
       "acceptance_result_requirements": [
@@ -1925,52 +1964,7 @@
           ]
         },
         {
-          "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-001",
-          "allowed_statuses": [
-            "implemented",
-            "partial",
-            "missing",
-            "blocked",
-            "deferred_with_approval"
-          ],
-          "evidence_required": [
-            "validation_report",
-            "work_proof_marker",
-            "scope_closure_report"
-          ]
-        },
-        {
-          "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-006",
-          "allowed_statuses": [
-            "implemented",
-            "partial",
-            "missing",
-            "blocked",
-            "deferred_with_approval"
-          ],
-          "evidence_required": [
-            "validation_report",
-            "work_proof_marker",
-            "scope_closure_report"
-          ]
-        },
-        {
-          "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-007",
-          "allowed_statuses": [
-            "implemented",
-            "partial",
-            "missing",
-            "blocked",
-            "deferred_with_approval"
-          ],
-          "evidence_required": [
-            "validation_report",
-            "work_proof_marker",
-            "scope_closure_report"
-          ]
-        },
-        {
-          "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-004",
+          "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-011",
           "allowed_statuses": [
             "implemented",
             "partial",
@@ -2013,22 +2007,12 @@
             "work_proof_marker",
             "scope_closure_report"
           ]
-        },
-        {
-          "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-011",
-          "allowed_statuses": [
-            "implemented",
-            "partial",
-            "missing",
-            "blocked",
-            "deferred_with_approval"
-          ],
-          "evidence_required": [
-            "validation_report",
-            "work_proof_marker",
-            "scope_closure_report"
-          ]
         }
+      ],
+      "agent_native_cli_checks": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
       ],
       "alignment_gate_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions",
       "allowed_paths": [
@@ -2049,8 +2033,8 @@
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T4/",
-        ".factory/artifacts/pr-lifecycle/T4/"
+        ".factory/artifacts/task-runs/T4.1/",
+        ".factory/artifacts/pr-lifecycle/T4.1/"
       ],
       "architecture_guidance_refs": [
         {
@@ -2070,6 +2054,9 @@
           "source_ref": "docs/architecture/architecture_guides.md#trust-mode-posture"
         }
       ],
+      "artifact_budget_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
       "baseline_commands": [
         "make lint-fast",
         "make test-fast"
@@ -2078,7 +2065,7 @@
         "T3"
       ],
       "changelog_intent": {
-        "draft_entry": "Create deterministic fixtures, seeded histories, planted outcomes, and reproducible baseline data needed to prove PRD-defined analysis and demo claims.",
+        "draft_entry": "Build the seeded outcome fixture corpus, flake-discount fixtures, redaction fixtures, attribution precision sample, and reproducible demo-number/citation baselines.",
         "impact": "required",
         "section": "Unreleased",
         "semver_marker": "pre_1_0_minor_candidate"
@@ -2180,23 +2167,23 @@
         },
         {
           "policy": "structured_parser_policy",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions."
+          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         },
         {
           "policy": "agent_native_cli",
-          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
-          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use."
+          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use.",
+          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy"
         },
         {
           "policy": "artifact_budget_and_refs",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata."
+          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         },
         {
           "policy": "customer_safe_redaction",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data."
+          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         }
       ],
       "evidence_required": [
@@ -2204,7 +2191,8 @@
         "validation_report",
         "scope_closure_report",
         "pr_lifecycle_report",
-        "factoryd_run_once_report"
+        "factoryd_run_once_report",
+        "proof-of-behavior-scorecard"
       ],
       "factory_compatibility": {
         "factory_contract_version": "1.0",
@@ -2274,11 +2262,20 @@
       "max_iterations": 2,
       "migration_impact": "None expected unless this task changes public output, schemas, artifacts, or install/distribution behavior.",
       "mission_contract_ref": "docs/product/prd.md",
-      "objective": "Create deterministic fixtures, seeded histories, planted outcomes, and reproducible baseline data needed to prove PRD-defined analysis and demo claims.",
+      "objective": "Build the seeded outcome fixture corpus, flake-discount fixtures, redaction fixtures, attribution precision sample, and reproducible demo-number/citation baselines.",
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
+      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
+      "proof_scorecard_required": true,
       "red_first_commands": [
-        "make test-fast"
+        "make test-contracts"
       ],
+      "redaction_posture": {
+        "classification": "customer_safe",
+        "customer_safe": true,
+        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing",
+        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported."
+      },
+      "required_proof_level": "workflow_behavior",
       "required_worker_chain": [
         "task-executor",
         "validation-gate",
@@ -2288,7 +2285,7 @@
       "requires_credentials": false,
       "requires_human_approval": false,
       "requires_network": false,
-      "risk_class": "low",
+      "risk_class": "medium",
       "runtime_pins": {
         "artifact_namespace": ".factory/artifacts/",
         "dependency_policy": "standard library first; pin and justify dependencies",
@@ -2300,8 +2297,8 @@
         "toolchain_version": "1.26.4"
       },
       "scope_exclusions": [
-        "No scope outside docs/product/prd.md.",
-        "No completion claim without acceptance evidence."
+        "Do not broaden this task outside its listed acceptance item IDs.",
+        "Do not store real customer data in committed fixtures or artifacts."
       ],
       "security_scanner_gates": {
         "exception_policy": "approved_exception_required_when_required_or_surface_touched",
@@ -2332,7 +2329,10 @@
         "plan drift detected",
         "scope closure did not advance"
       ],
-      "task_id": "T4",
+      "structured_parser_policy_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "task_id": "T4.1",
       "test_matrix_refs": [
         {
           "command_refs": [
@@ -2358,6 +2358,7 @@
       ],
       "upstream_debt_refs": [],
       "validation_commands": [
+        "make test-coverage",
         "make prepush-full"
       ],
       "validation_contract_inheritance": {
@@ -2411,27 +2412,914 @@
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t4",
-      "worker_type": "codex_cli",
-      "required_proof_level": "user_visible_behavior",
-      "proof_scorecard_required": true,
-      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
-      "structured_parser_policy_refs": [
-        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      "worker_type": "codex_cli"
+    },
+    {
+      "acceptance_checks": [
+        "`relia distill` drafts an `avoid` rule from the planted recurrence cluster with correct citations.",
+        "The planted contradiction moves its rule to `contradicted` and out of serving.",
+        "The planted path deletion moves its rule to `stale` and out of serving.",
+        "Lifecycle fixture output uses repo-relative, redacted, schema-valid evidence."
       ],
-      "artifact_budget_refs": [
-        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      "acceptance_group_id": "distill-review-memory-page-acceptance-tests",
+      "acceptance_group_ids": [
+        "distill-review-memory-page-acceptance-tests"
       ],
-      "redaction_posture": {
-        "classification": "customer_safe",
-        "customer_safe": true,
-        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported.",
-        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing"
-      },
+      "acceptance_group_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json#/groups",
+      "acceptance_item_ids": [
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-001",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-006",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-007"
+      ],
+      "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+      "acceptance_result_requirements": [
+        {
+          "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-001",
+          "allowed_statuses": [
+            "implemented",
+            "partial",
+            "missing",
+            "blocked",
+            "deferred_with_approval"
+          ],
+          "evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "scope_closure_report"
+          ]
+        },
+        {
+          "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-006",
+          "allowed_statuses": [
+            "implemented",
+            "partial",
+            "missing",
+            "blocked",
+            "deferred_with_approval"
+          ],
+          "evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "scope_closure_report"
+          ]
+        },
+        {
+          "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-007",
+          "allowed_statuses": [
+            "implemented",
+            "partial",
+            "missing",
+            "blocked",
+            "deferred_with_approval"
+          ],
+          "evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "scope_closure_report"
+          ]
+        }
+      ],
       "agent_native_cli_checks": [
         "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
         "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
         "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
-      ]
+      ],
+      "alignment_gate_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions",
+      "allowed_paths": [
+        "AGENTS.md",
+        "WORKFLOW.md",
+        "README.md",
+        "Makefile",
+        ".tool-versions",
+        "go.mod",
+        "go.sum",
+        "relia.yaml",
+        "CLAUDE.md",
+        "cmd/",
+        "internal/",
+        "tests/",
+        "schemas/",
+        "docs/",
+        "examples/",
+        "memory/",
+        ".github/",
+        ".factory/artifacts/task-runs/T4.2/",
+        ".factory/artifacts/pr-lifecycle/T4.2/"
+      ],
+      "architecture_guidance_refs": [
+        {
+          "rule": "Record state owner, feedback source, blast radius, source-of-truth impact, and rollback/deletion checks for material changes.",
+          "source_ref": "docs/architecture/architecture_guides.md#systems-thinking-map"
+        },
+        {
+          "rule": "Use test-first evidence or a structured skipped reason.",
+          "source_ref": "docs/architecture/architecture_guides.md#tdd-and-red-first-expectations"
+        },
+        {
+          "rule": "Boundary, public contract, credential/network, or major reliability/perf changes require a decision note.",
+          "source_ref": "docs/architecture/architecture_guides.md#adr-and-decision-triggers"
+        },
+        {
+          "rule": "Deterministic bootstrap has no network/secrets; live work requires approval and evidence.",
+          "source_ref": "docs/architecture/architecture_guides.md#trust-mode-posture"
+        }
+      ],
+      "artifact_budget_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "baseline_commands": [
+        "make lint-fast",
+        "make test-fast"
+      ],
+      "blocked_by": [
+        "T4.1"
+      ],
+      "changelog_intent": {
+        "draft_entry": "Build distill/review lifecycle fixture cases for planted recurrence, contradiction, and stale-path outcomes with correct citations.",
+        "impact": "required",
+        "section": "Unreleased",
+        "semver_marker": "pre_1_0_minor_candidate"
+      },
+      "ci_control_refs": {
+        "action_ref_exceptions_ref": ".github/action-ref-exceptions.yaml",
+        "controls": [
+          "least_privilege_permissions",
+          "concurrency",
+          "timeouts",
+          "toolchain_pin_from_go_mod"
+        ],
+        "owner_review_ref": ".github/CODEOWNERS",
+        "required": true,
+        "required_checks_ref": ".github/required-checks.json",
+        "workflow_refs": [
+          ".github/workflows/validate.yml",
+          ".github/workflows/codeql.yml"
+        ]
+      },
+      "ci_lane_refs": [
+        {
+          "command_refs": [
+            "make lint-fast",
+            "make test-fast"
+          ],
+          "lane": "fast",
+          "source_ref": "docs/dev/dev_guides.md#validation-matrix"
+        },
+        {
+          "command_refs": [
+            "make test-contracts",
+            "make prepush-full"
+          ],
+          "lane": "core",
+          "source_ref": "docs/dev/dev_guides.md#validation-matrix"
+        },
+        {
+          "lane": "risk",
+          "source_ref": "docs/dev/dev_guides.md#ci-and-pr-lifecycle",
+          "status_check_refs": [
+            "CodeQL analyze"
+          ]
+        }
+      ],
+      "commands": [
+        "make prepush-full"
+      ],
+      "coverage_policy_refs": {
+        "command_refs": [
+          "make test-coverage",
+          "make prepush-full"
+        ],
+        "exception_policy": "coverage misses block promotion unless the task records an approved scoped exception with owner, reason, expiry or follow-up task, and compensating validation evidence",
+        "minimums": [
+          {
+            "command_refs": [
+              "make test-coverage"
+            ],
+            "scope": "go_first_party_packages_overall",
+            "threshold": 75
+          }
+        ],
+        "required": true,
+        "source_ref": "docs/dev/dev_guides.md#coverage-gates"
+      },
+      "delivery_slice_refs": [
+        "outcome-fixture-corpus"
+      ],
+      "docs_sync_refs": [
+        {
+          "path": "README.md",
+          "reason": "Keep user-facing behavior, commands, and artifact paths accurate."
+        },
+        {
+          "path": "docs/dev/dev_guides.md",
+          "reason": "Keep validation, CI, scanner, and test matrix guidance aligned."
+        },
+        {
+          "path": "docs/architecture/architecture_guides.md",
+          "reason": "Keep boundaries, state, feedback, and trust posture aligned."
+        }
+      ],
+      "engineering_policy_refs": [
+        {
+          "policy": "docs_parity",
+          "rule": "Behavior, flags, outputs, install paths, and workflow semantics update docs and Factory planning artifacts together.",
+          "source_ref": "docs/dev/dev_guides.md"
+        },
+        {
+          "policy": "output_contracts",
+          "rule": "CLI output, exit codes, schemas, and artifacts are executable contracts.",
+          "source_ref": "docs/dev/dev_guides.md"
+        },
+        {
+          "policy": "provenance_evidence",
+          "rule": "Validation, work-proof, PR lifecycle, scanner, and scope-closure evidence use repo-relative refs.",
+          "source_ref": "docs/dev/dev_guides.md"
+        },
+        {
+          "policy": "structured_parser_policy",
+          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+        },
+        {
+          "policy": "agent_native_cli",
+          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use.",
+          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy"
+        },
+        {
+          "policy": "artifact_budget_and_refs",
+          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+        },
+        {
+          "policy": "customer_safe_redaction",
+          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+        }
+      ],
+      "evidence_required": [
+        "work_proof_marker",
+        "validation_report",
+        "scope_closure_report",
+        "pr_lifecycle_report",
+        "factoryd_run_once_report",
+        "proof-of-behavior-scorecard"
+      ],
+      "factory_compatibility": {
+        "factory_contract_version": "1.0",
+        "generated_by": "repo-bootstrap-from-prd",
+        "profile_ref": ".factory/profile.yaml",
+        "skill_inventory_ref": "Factory skills/README.md"
+      },
+      "factoryd_runtime": {
+        "approval_posture": "human approval required for high risk, live credentials, and merge",
+        "branch_prefix": "codex",
+        "capability_grants": [],
+        "credential_posture": "no ambient secrets",
+        "network_posture": "offline by default",
+        "runtime_control": {
+          "autonomy_level": "restricted",
+          "conflict_behavior": "fail_closed",
+          "launch_request": {
+            "expected_decision": "allow",
+            "reason_code": "within_runtime_control_limits",
+            "requested_action": "continue_mission",
+            "requested_adapter": "codex_cli"
+          },
+          "owner": "factoryd-operator",
+          "release_freeze": {
+            "enabled": false
+          }
+        },
+        "state_dir": ".factoryd/",
+        "worker_command": "",
+        "worker_type": "codex_cli",
+        "workspace_root": ".factoryd/workspaces/"
+      },
+      "final_validation_commands": [
+        "make prepush-full"
+      ],
+      "forbidden_paths": [
+        ".git/",
+        ".factory/tmp/",
+        ".factoryd/",
+        ".factory/artifacts/prd-to-plan/relia-mvp/",
+        ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+      ],
+      "input_artifacts": [
+        "docs/product/prd.md",
+        "AGENTS.md",
+        "WORKFLOW.md",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        ".factory/profile.yaml",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json"
+      ],
+      "lifecycle_gates": {
+        "ci_required": true,
+        "codex_review_required": true,
+        "commit_push_required": true,
+        "local_validation_required": true,
+        "post_merge_monitor_required": true,
+        "pr_lifecycle_report_required": true,
+        "skip_policy": "approved_exception_required"
+      },
+      "max_iterations": 2,
+      "migration_impact": "None expected unless this task changes public output, schemas, artifacts, or install/distribution behavior.",
+      "mission_contract_ref": "docs/product/prd.md",
+      "objective": "Build distill/review lifecycle fixture cases for planted recurrence, contradiction, and stale-path outcomes with correct citations.",
+      "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
+      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
+      "proof_scorecard_required": true,
+      "red_first_commands": [
+        "make test-contracts"
+      ],
+      "redaction_posture": {
+        "classification": "customer_safe",
+        "customer_safe": true,
+        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing",
+        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported."
+      },
+      "required_proof_level": "workflow_behavior",
+      "required_worker_chain": [
+        "task-executor",
+        "validation-gate",
+        "commit-push",
+        "post-merge-monitor"
+      ],
+      "requires_credentials": false,
+      "requires_human_approval": false,
+      "requires_network": false,
+      "risk_class": "medium",
+      "runtime_pins": {
+        "artifact_namespace": ".factory/artifacts/",
+        "dependency_policy": "standard library first; pin and justify dependencies",
+        "distribution_target": "standalone_binary",
+        "language": "go",
+        "live_work_policy": "no ambient secrets or live network by default",
+        "module_or_package_path": "github.com/Clyra-AI/relia",
+        "provider_policy": "none by default",
+        "toolchain_version": "1.26.4"
+      },
+      "scope_exclusions": [
+        "Do not broaden this task outside its listed acceptance item IDs.",
+        "Do not store real customer data in committed fixtures or artifacts."
+      ],
+      "security_scanner_gates": {
+        "exception_policy": "approved_exception_required_when_required_or_surface_touched",
+        "required": true,
+        "required_for_surfaces": [
+          "dependency additions",
+          "generated-code intake",
+          "CI or workflow changes",
+          "external calls",
+          "security-sensitive code",
+          "release-sensitive changes"
+        ],
+        "scanner": "CodeQL",
+        "status_check": "CodeQL analyze",
+        "workflow_ref": ".github/workflows/codeql.yml"
+      },
+      "shared_constraints_ref": "AGENTS.md",
+      "slice_rationale": {
+        "rationale": "Task advances a product-shaped capability slice while preserving acceptance-item closure refs.",
+        "slice_type": "vertical"
+      },
+      "slice_type": "vertical",
+      "stop_conditions": [
+        "missing runner-ready task contract",
+        "changed path outside allowed_paths",
+        "forbidden path changed",
+        "required validation command failed",
+        "plan drift detected",
+        "scope closure did not advance"
+      ],
+      "structured_parser_policy_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "task_id": "T4.2",
+      "test_matrix_refs": [
+        {
+          "command_refs": [
+            "make test-fast"
+          ],
+          "source_ref": "docs/dev/dev_guides.md#12-level-test-matrix",
+          "tier": "Tier 1 Unit"
+        },
+        {
+          "command_refs": [
+            "scope closure map"
+          ],
+          "source_ref": "docs/dev/dev_guides.md#12-level-test-matrix",
+          "tier": "Tier 4 Acceptance"
+        },
+        {
+          "command_refs": [
+            "make test-contracts"
+          ],
+          "source_ref": "docs/dev/dev_guides.md#12-level-test-matrix",
+          "tier": "Tier 9 Contract"
+        }
+      ],
+      "upstream_debt_refs": [],
+      "validation_commands": [
+        "make test-coverage",
+        "make prepush-full"
+      ],
+      "validation_contract_inheritance": {
+        "acceptance_criteria": [
+          "seeded demo repo and bundled static reports",
+          "The planted flaky test is discounted and drafts no rule.",
+          "Seeded secrets never appear in any artifact.",
+          "relia distill` drafts an `avoid` rule from the planted recurrence cluster with correct citations.",
+          "The planted contradiction moves its rule to `contradicted` and out of serving.",
+          "The planted path deletion moves its rule to `stale` and out of serving.",
+          "relia assess` returns `match_high` with citations on a planted-pattern diff and `no_coverage` on unknown paths.",
+          "Every number shown live is reproducible from the seeded repo.",
+          "Every citation shown in the demo resolves to a real PR in the seeded repo."
+        ],
+        "acceptance_item_ids": [
+          "MVP-IN-SCOPE-022",
+          "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-008",
+          "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-009",
+          "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-001",
+          "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-006",
+          "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-007",
+          "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-004",
+          "DEMO-ACCEPTANCE-002",
+          "DEMO-ACCEPTANCE-004"
+        ],
+        "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+        "evidence_required": [
+          "work_proof_marker",
+          "validation_report",
+          "scope_closure_report",
+          "pr_lifecycle_report",
+          "factoryd_run_once_report"
+        ],
+        "required_checks": [
+          "make prepush-full"
+        ],
+        "required_review": {
+          "required": false,
+          "review_type": "code",
+          "reviewer_class": "peer_agent"
+        },
+        "source_validation_contract_ref": ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
+        "stop_conditions": [
+          "missing runner-ready task contract",
+          "changed path outside allowed_paths",
+          "forbidden path changed",
+          "required validation command failed",
+          "plan drift detected",
+          "scope closure did not advance"
+        ]
+      },
+      "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
+      "work_item_id": "relia-mvp-t4",
+      "worker_type": "codex_cli"
+    },
+    {
+      "acceptance_checks": [
+        "`relia assess` returns `match_high` with citations on a planted-pattern diff.",
+        "`relia assess` returns `no_coverage` on unknown paths.",
+        "Assessment fixture evidence remains deterministic and repo-relative."
+      ],
+      "acceptance_group_id": "serve-and-advise-acceptance-tests",
+      "acceptance_group_ids": [
+        "serve-and-advise-acceptance-tests"
+      ],
+      "acceptance_group_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json#/groups",
+      "acceptance_item_ids": [
+        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-004"
+      ],
+      "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+      "acceptance_result_requirements": [
+        {
+          "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-004",
+          "allowed_statuses": [
+            "implemented",
+            "partial",
+            "missing",
+            "blocked",
+            "deferred_with_approval"
+          ],
+          "evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "scope_closure_report"
+          ]
+        }
+      ],
+      "agent_native_cli_checks": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
+      ],
+      "alignment_gate_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions",
+      "allowed_paths": [
+        "AGENTS.md",
+        "WORKFLOW.md",
+        "README.md",
+        "Makefile",
+        ".tool-versions",
+        "go.mod",
+        "go.sum",
+        "relia.yaml",
+        "CLAUDE.md",
+        "cmd/",
+        "internal/",
+        "tests/",
+        "schemas/",
+        "docs/",
+        "examples/",
+        "memory/",
+        ".github/",
+        ".factory/artifacts/task-runs/T4.3/",
+        ".factory/artifacts/pr-lifecycle/T4.3/"
+      ],
+      "architecture_guidance_refs": [
+        {
+          "rule": "Record state owner, feedback source, blast radius, source-of-truth impact, and rollback/deletion checks for material changes.",
+          "source_ref": "docs/architecture/architecture_guides.md#systems-thinking-map"
+        },
+        {
+          "rule": "Use test-first evidence or a structured skipped reason.",
+          "source_ref": "docs/architecture/architecture_guides.md#tdd-and-red-first-expectations"
+        },
+        {
+          "rule": "Boundary, public contract, credential/network, or major reliability/perf changes require a decision note.",
+          "source_ref": "docs/architecture/architecture_guides.md#adr-and-decision-triggers"
+        },
+        {
+          "rule": "Deterministic bootstrap has no network/secrets; live work requires approval and evidence.",
+          "source_ref": "docs/architecture/architecture_guides.md#trust-mode-posture"
+        }
+      ],
+      "artifact_budget_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "baseline_commands": [
+        "make lint-fast",
+        "make test-fast"
+      ],
+      "blocked_by": [
+        "T4.2"
+      ],
+      "changelog_intent": {
+        "draft_entry": "Build assessment fixture coverage for planted-pattern and unknown-path diffs without bundling unrelated corpus work.",
+        "impact": "required",
+        "section": "Unreleased",
+        "semver_marker": "pre_1_0_minor_candidate"
+      },
+      "ci_control_refs": {
+        "action_ref_exceptions_ref": ".github/action-ref-exceptions.yaml",
+        "controls": [
+          "least_privilege_permissions",
+          "concurrency",
+          "timeouts",
+          "toolchain_pin_from_go_mod"
+        ],
+        "owner_review_ref": ".github/CODEOWNERS",
+        "required": true,
+        "required_checks_ref": ".github/required-checks.json",
+        "workflow_refs": [
+          ".github/workflows/validate.yml",
+          ".github/workflows/codeql.yml"
+        ]
+      },
+      "ci_lane_refs": [
+        {
+          "command_refs": [
+            "make lint-fast",
+            "make test-fast"
+          ],
+          "lane": "fast",
+          "source_ref": "docs/dev/dev_guides.md#validation-matrix"
+        },
+        {
+          "command_refs": [
+            "make test-contracts",
+            "make prepush-full"
+          ],
+          "lane": "core",
+          "source_ref": "docs/dev/dev_guides.md#validation-matrix"
+        },
+        {
+          "lane": "risk",
+          "source_ref": "docs/dev/dev_guides.md#ci-and-pr-lifecycle",
+          "status_check_refs": [
+            "CodeQL analyze"
+          ]
+        }
+      ],
+      "commands": [
+        "make prepush-full"
+      ],
+      "coverage_policy_refs": {
+        "command_refs": [
+          "make test-coverage",
+          "make prepush-full"
+        ],
+        "exception_policy": "coverage misses block promotion unless the task records an approved scoped exception with owner, reason, expiry or follow-up task, and compensating validation evidence",
+        "minimums": [
+          {
+            "command_refs": [
+              "make test-coverage"
+            ],
+            "scope": "go_first_party_packages_overall",
+            "threshold": 75
+          }
+        ],
+        "required": true,
+        "source_ref": "docs/dev/dev_guides.md#coverage-gates"
+      },
+      "delivery_slice_refs": [
+        "outcome-fixture-corpus"
+      ],
+      "docs_sync_refs": [
+        {
+          "path": "README.md",
+          "reason": "Keep user-facing behavior, commands, and artifact paths accurate."
+        },
+        {
+          "path": "docs/dev/dev_guides.md",
+          "reason": "Keep validation, CI, scanner, and test matrix guidance aligned."
+        },
+        {
+          "path": "docs/architecture/architecture_guides.md",
+          "reason": "Keep boundaries, state, feedback, and trust posture aligned."
+        }
+      ],
+      "engineering_policy_refs": [
+        {
+          "policy": "docs_parity",
+          "rule": "Behavior, flags, outputs, install paths, and workflow semantics update docs and Factory planning artifacts together.",
+          "source_ref": "docs/dev/dev_guides.md"
+        },
+        {
+          "policy": "output_contracts",
+          "rule": "CLI output, exit codes, schemas, and artifacts are executable contracts.",
+          "source_ref": "docs/dev/dev_guides.md"
+        },
+        {
+          "policy": "provenance_evidence",
+          "rule": "Validation, work-proof, PR lifecycle, scanner, and scope-closure evidence use repo-relative refs.",
+          "source_ref": "docs/dev/dev_guides.md"
+        },
+        {
+          "policy": "structured_parser_policy",
+          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+        },
+        {
+          "policy": "agent_native_cli",
+          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use.",
+          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy"
+        },
+        {
+          "policy": "artifact_budget_and_refs",
+          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+        },
+        {
+          "policy": "customer_safe_redaction",
+          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+        }
+      ],
+      "evidence_required": [
+        "work_proof_marker",
+        "validation_report",
+        "scope_closure_report",
+        "pr_lifecycle_report",
+        "factoryd_run_once_report",
+        "proof-of-behavior-scorecard"
+      ],
+      "factory_compatibility": {
+        "factory_contract_version": "1.0",
+        "generated_by": "repo-bootstrap-from-prd",
+        "profile_ref": ".factory/profile.yaml",
+        "skill_inventory_ref": "Factory skills/README.md"
+      },
+      "factoryd_runtime": {
+        "approval_posture": "human approval required for high risk, live credentials, and merge",
+        "branch_prefix": "codex",
+        "capability_grants": [],
+        "credential_posture": "no ambient secrets",
+        "network_posture": "offline by default",
+        "runtime_control": {
+          "autonomy_level": "restricted",
+          "conflict_behavior": "fail_closed",
+          "launch_request": {
+            "expected_decision": "allow",
+            "reason_code": "within_runtime_control_limits",
+            "requested_action": "continue_mission",
+            "requested_adapter": "codex_cli"
+          },
+          "owner": "factoryd-operator",
+          "release_freeze": {
+            "enabled": false
+          }
+        },
+        "state_dir": ".factoryd/",
+        "worker_command": "",
+        "worker_type": "codex_cli",
+        "workspace_root": ".factoryd/workspaces/"
+      },
+      "final_validation_commands": [
+        "make prepush-full"
+      ],
+      "forbidden_paths": [
+        ".git/",
+        ".factory/tmp/",
+        ".factoryd/",
+        ".factory/artifacts/prd-to-plan/relia-mvp/",
+        ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+      ],
+      "input_artifacts": [
+        "docs/product/prd.md",
+        "AGENTS.md",
+        "WORKFLOW.md",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        ".factory/profile.yaml",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json"
+      ],
+      "lifecycle_gates": {
+        "ci_required": true,
+        "codex_review_required": true,
+        "commit_push_required": true,
+        "local_validation_required": true,
+        "post_merge_monitor_required": true,
+        "pr_lifecycle_report_required": true,
+        "skip_policy": "approved_exception_required"
+      },
+      "max_iterations": 2,
+      "migration_impact": "None expected unless this task changes public output, schemas, artifacts, or install/distribution behavior.",
+      "mission_contract_ref": "docs/product/prd.md",
+      "objective": "Build assessment fixture coverage for planted-pattern and unknown-path diffs without bundling unrelated corpus work.",
+      "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
+      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
+      "proof_scorecard_required": true,
+      "red_first_commands": [
+        "make test-contracts"
+      ],
+      "redaction_posture": {
+        "classification": "customer_safe",
+        "customer_safe": true,
+        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing",
+        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported."
+      },
+      "required_proof_level": "workflow_behavior",
+      "required_worker_chain": [
+        "task-executor",
+        "validation-gate",
+        "commit-push",
+        "post-merge-monitor"
+      ],
+      "requires_credentials": false,
+      "requires_human_approval": false,
+      "requires_network": false,
+      "risk_class": "medium",
+      "runtime_pins": {
+        "artifact_namespace": ".factory/artifacts/",
+        "dependency_policy": "standard library first; pin and justify dependencies",
+        "distribution_target": "standalone_binary",
+        "language": "go",
+        "live_work_policy": "no ambient secrets or live network by default",
+        "module_or_package_path": "github.com/Clyra-AI/relia",
+        "provider_policy": "none by default",
+        "toolchain_version": "1.26.4"
+      },
+      "scope_exclusions": [
+        "Do not broaden this task outside its listed acceptance item IDs.",
+        "Do not store real customer data in committed fixtures or artifacts."
+      ],
+      "security_scanner_gates": {
+        "exception_policy": "approved_exception_required_when_required_or_surface_touched",
+        "required": true,
+        "required_for_surfaces": [
+          "dependency additions",
+          "generated-code intake",
+          "CI or workflow changes",
+          "external calls",
+          "security-sensitive code",
+          "release-sensitive changes"
+        ],
+        "scanner": "CodeQL",
+        "status_check": "CodeQL analyze",
+        "workflow_ref": ".github/workflows/codeql.yml"
+      },
+      "shared_constraints_ref": "AGENTS.md",
+      "slice_rationale": {
+        "rationale": "Task advances a product-shaped capability slice while preserving acceptance-item closure refs.",
+        "slice_type": "vertical"
+      },
+      "slice_type": "vertical",
+      "stop_conditions": [
+        "missing runner-ready task contract",
+        "changed path outside allowed_paths",
+        "forbidden path changed",
+        "required validation command failed",
+        "plan drift detected",
+        "scope closure did not advance"
+      ],
+      "structured_parser_policy_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "task_id": "T4.3",
+      "test_matrix_refs": [
+        {
+          "command_refs": [
+            "make test-fast"
+          ],
+          "source_ref": "docs/dev/dev_guides.md#12-level-test-matrix",
+          "tier": "Tier 1 Unit"
+        },
+        {
+          "command_refs": [
+            "scope closure map"
+          ],
+          "source_ref": "docs/dev/dev_guides.md#12-level-test-matrix",
+          "tier": "Tier 4 Acceptance"
+        },
+        {
+          "command_refs": [
+            "make test-contracts"
+          ],
+          "source_ref": "docs/dev/dev_guides.md#12-level-test-matrix",
+          "tier": "Tier 9 Contract"
+        }
+      ],
+      "upstream_debt_refs": [],
+      "validation_commands": [
+        "make test-coverage",
+        "make prepush-full"
+      ],
+      "validation_contract_inheritance": {
+        "acceptance_criteria": [
+          "seeded demo repo and bundled static reports",
+          "The planted flaky test is discounted and drafts no rule.",
+          "Seeded secrets never appear in any artifact.",
+          "relia distill` drafts an `avoid` rule from the planted recurrence cluster with correct citations.",
+          "The planted contradiction moves its rule to `contradicted` and out of serving.",
+          "The planted path deletion moves its rule to `stale` and out of serving.",
+          "relia assess` returns `match_high` with citations on a planted-pattern diff and `no_coverage` on unknown paths.",
+          "Every number shown live is reproducible from the seeded repo.",
+          "Every citation shown in the demo resolves to a real PR in the seeded repo."
+        ],
+        "acceptance_item_ids": [
+          "MVP-IN-SCOPE-022",
+          "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-008",
+          "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-009",
+          "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-001",
+          "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-006",
+          "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-007",
+          "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-004",
+          "DEMO-ACCEPTANCE-002",
+          "DEMO-ACCEPTANCE-004"
+        ],
+        "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+        "evidence_required": [
+          "work_proof_marker",
+          "validation_report",
+          "scope_closure_report",
+          "pr_lifecycle_report",
+          "factoryd_run_once_report"
+        ],
+        "required_checks": [
+          "make prepush-full"
+        ],
+        "required_review": {
+          "required": false,
+          "review_type": "code",
+          "reviewer_class": "peer_agent"
+        },
+        "source_validation_contract_ref": ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
+        "stop_conditions": [
+          "missing runner-ready task contract",
+          "changed path outside allowed_paths",
+          "forbidden path changed",
+          "required validation command failed",
+          "plan drift detected",
+          "scope closure did not advance"
+        ]
+      },
+      "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
+      "work_item_id": "relia-mvp-t4",
+      "worker_type": "codex_cli"
     },
     {
       "acceptance_checks": [
@@ -2672,6 +3560,11 @@
           ]
         }
       ],
+      "agent_native_cli_checks": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
+      ],
       "alignment_gate_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions",
       "allowed_paths": [
         "AGENTS.md",
@@ -2712,12 +3605,15 @@
           "source_ref": "docs/architecture/architecture_guides.md#trust-mode-posture"
         }
       ],
+      "artifact_budget_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
       "baseline_commands": [
         "make lint-fast",
         "make test-fast"
       ],
       "blocked_by": [
-        "T4"
+        "T4.3"
       ],
       "changelog_intent": {
         "draft_entry": "Implement PRD-defined signature extraction, recurrence pairing, backtest computation, flake handling, and conservative outcome classification.",
@@ -2822,23 +3718,23 @@
         },
         {
           "policy": "structured_parser_policy",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions."
+          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         },
         {
           "policy": "agent_native_cli",
-          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
-          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use."
+          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use.",
+          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy"
         },
         {
           "policy": "artifact_budget_and_refs",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata."
+          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         },
         {
           "policy": "customer_safe_redaction",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data."
+          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         }
       ],
       "evidence_required": [
@@ -2918,9 +3814,18 @@
       "mission_contract_ref": "docs/product/prd.md",
       "objective": "Implement PRD-defined signature extraction, recurrence pairing, backtest computation, flake handling, and conservative outcome classification.",
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
+      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
+      "proof_scorecard_required": true,
       "red_first_commands": [
         "make test-fast"
       ],
+      "redaction_posture": {
+        "classification": "internal",
+        "customer_safe": false,
+        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing",
+        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported."
+      },
+      "required_proof_level": "user_visible_behavior",
       "required_worker_chain": [
         "task-executor",
         "validation-gate",
@@ -2973,6 +3878,9 @@
         "required validation command failed",
         "plan drift detected",
         "scope closure did not advance"
+      ],
+      "structured_parser_policy_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
       ],
       "task_id": "T5",
       "test_matrix_refs": [
@@ -3061,27 +3969,7 @@
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t5",
-      "worker_type": "codex_cli",
-      "required_proof_level": "user_visible_behavior",
-      "proof_scorecard_required": true,
-      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
-      "structured_parser_policy_refs": [
-        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
-      ],
-      "artifact_budget_refs": [
-        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
-      ],
-      "redaction_posture": {
-        "classification": "internal",
-        "customer_safe": false,
-        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported.",
-        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing"
-      },
-      "agent_native_cli_checks": [
-        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
-        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
-        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
-      ]
+      "worker_type": "codex_cli"
     },
     {
       "acceptance_checks": [
@@ -3366,6 +4254,11 @@
           ]
         }
       ],
+      "agent_native_cli_checks": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
+      ],
       "alignment_gate_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions",
       "allowed_paths": [
         "AGENTS.md",
@@ -3405,6 +4298,9 @@
           "rule": "Deterministic bootstrap has no network/secrets; live work requires approval and evidence.",
           "source_ref": "docs/architecture/architecture_guides.md#trust-mode-posture"
         }
+      ],
+      "artifact_budget_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
       ],
       "baseline_commands": [
         "make lint-fast",
@@ -3516,23 +4412,23 @@
         },
         {
           "policy": "structured_parser_policy",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions."
+          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         },
         {
           "policy": "agent_native_cli",
-          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
-          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use."
+          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use.",
+          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy"
         },
         {
           "policy": "artifact_budget_and_refs",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata."
+          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         },
         {
           "policy": "customer_safe_redaction",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data."
+          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         }
       ],
       "evidence_required": [
@@ -3612,9 +4508,18 @@
       "mission_contract_ref": "docs/product/prd.md",
       "objective": "Implement PRD-defined clustering, rule drafting, confidence scoring, decay, contradiction handling, and deterministic fallback behavior. Part 1 of 2; scope is split to keep the runner-ready packet bounded.",
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
+      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
+      "proof_scorecard_required": true,
       "red_first_commands": [
         "make test-fast"
       ],
+      "redaction_posture": {
+        "classification": "internal",
+        "customer_safe": false,
+        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing",
+        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported."
+      },
+      "required_proof_level": "user_visible_behavior",
       "required_worker_chain": [
         "task-executor",
         "validation-gate",
@@ -3671,6 +4576,9 @@
         "scope closure did not advance",
         "live credential or network work attempted without approval",
         "manual, product-signal, or judgment-only acceptance closed without approval evidence"
+      ],
+      "structured_parser_policy_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
       ],
       "task_id": "T6",
       "test_matrix_refs": [
@@ -3765,27 +4673,7 @@
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t6",
-      "worker_type": "codex_cli",
-      "required_proof_level": "user_visible_behavior",
-      "proof_scorecard_required": true,
-      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
-      "structured_parser_policy_refs": [
-        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
-      ],
-      "artifact_budget_refs": [
-        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
-      ],
-      "redaction_posture": {
-        "classification": "internal",
-        "customer_safe": false,
-        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported.",
-        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing"
-      },
-      "agent_native_cli_checks": [
-        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
-        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
-        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
-      ]
+      "worker_type": "codex_cli"
     },
     {
       "acceptance_checks": [
@@ -4070,6 +4958,11 @@
           ]
         }
       ],
+      "agent_native_cli_checks": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
+      ],
       "alignment_gate_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions",
       "allowed_paths": [
         "AGENTS.md",
@@ -4117,6 +5010,9 @@
           "rule": "Local embedding inference-runtime choices require an ADR before implementation.",
           "source_ref": "docs/architecture/architecture_guides.md#adr-and-decision-triggers"
         }
+      ],
+      "artifact_budget_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
       ],
       "baseline_commands": [
         "make lint-fast",
@@ -4228,23 +5124,23 @@
         },
         {
           "policy": "structured_parser_policy",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions."
+          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         },
         {
           "policy": "agent_native_cli",
-          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
-          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use."
+          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use.",
+          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy"
         },
         {
           "policy": "artifact_budget_and_refs",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata."
+          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         },
         {
           "policy": "customer_safe_redaction",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data."
+          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         }
       ],
       "evidence_required": [
@@ -4265,19 +5161,19 @@
         "branch_prefix": "codex",
         "capability_grants": [
           {
-            "task_id": "T7",
-            "capability": "model_provider_endpoint",
             "approved": false,
+            "budget_posture": "pending-approved-model-provider-budget",
+            "capability": "model_provider_endpoint",
+            "credential_environment": "pending-approved-model-provider-env-var",
             "evidence_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions/model_provider_endpoint",
             "network_allowlist": [
               "pending-approved-model-provider-host"
             ],
+            "provider_endpoint": "pending-approved-provider-endpoint",
             "provider_identity": "pending-approved-provider",
             "provider_model": "pending-approved-model",
-            "provider_endpoint": "pending-approved-provider-endpoint",
-            "credential_environment": "pending-approved-model-provider-env-var",
-            "budget_posture": "pending-approved-model-provider-budget",
-            "redaction_posture": "pending-approved-model-provider-redaction"
+            "redaction_posture": "pending-approved-model-provider-redaction",
+            "task_id": "T7"
           }
         ],
         "credential_posture": "no ambient secrets; approved model_provider_endpoint credential environment required before provider work",
@@ -4338,11 +5234,37 @@
       "max_iterations": 2,
       "migration_impact": "None expected unless this task changes public output, schemas, artifacts, or install/distribution behavior.",
       "mission_contract_ref": "docs/product/prd.md",
+      "model_provider_requirements": {
+        "approval_policy": "Provider embedding and LLM rule-drafting integrations for OpenAI-compatible and Anthropic adapters require a complete model_provider_endpoint grant with provider identity, provider model, endpoint or base_url, credential environment, budget posture, redaction posture, and allowlist. Generic network or credential approval alone does not satisfy this model-specific gate.",
+        "provider_surfaces": [
+          "openai_compatible_http",
+          "anthropic_messages_http"
+        ],
+        "required_fields": [
+          "provider_identity",
+          "provider_model",
+          "provider_endpoint_or_base_url",
+          "credential_environment",
+          "budget_posture",
+          "redaction_posture",
+          "network_allowlist"
+        ],
+        "required_grant": "model_provider_endpoint"
+      },
       "objective": "Implement PRD-defined clustering, rule drafting, confidence scoring, decay, contradiction handling, and deterministic fallback behavior. Part 2 of 2; scope is split to keep the runner-ready packet bounded.",
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
+      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
+      "proof_scorecard_required": true,
       "red_first_commands": [
         "make test-fast"
       ],
+      "redaction_posture": {
+        "classification": "internal",
+        "customer_safe": false,
+        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing",
+        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported."
+      },
+      "required_proof_level": "user_visible_behavior",
       "required_worker_chain": [
         "task-executor",
         "validation-gate",
@@ -4351,6 +5273,7 @@
       ],
       "requires_credentials": true,
       "requires_human_approval": false,
+      "requires_model_provider_endpoint": true,
       "requires_network": true,
       "risk_class": "low",
       "runtime_pins": {
@@ -4407,6 +5330,9 @@
         "model weights or inference-runtime payloads are added to source, binary, container, or release artifacts without an approved distribution decision",
         "embeddings: local silently falls back instead of failing closed on missing or digest-mismatched artifact",
         "model provider endpoint work attempted without model_provider_endpoint grant"
+      ],
+      "structured_parser_policy_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
       ],
       "task_id": "T7",
       "test_matrix_refs": [
@@ -4505,45 +5431,7 @@
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t7",
-      "worker_type": "codex_cli",
-      "requires_model_provider_endpoint": true,
-      "model_provider_requirements": {
-        "required_grant": "model_provider_endpoint",
-        "provider_surfaces": [
-          "openai_compatible_http",
-          "anthropic_messages_http"
-        ],
-        "required_fields": [
-          "provider_identity",
-          "provider_model",
-          "provider_endpoint_or_base_url",
-          "credential_environment",
-          "budget_posture",
-          "redaction_posture",
-          "network_allowlist"
-        ],
-        "approval_policy": "Provider embedding and LLM rule-drafting integrations for OpenAI-compatible and Anthropic adapters require a complete model_provider_endpoint grant with provider identity, provider model, endpoint or base_url, credential environment, budget posture, redaction posture, and allowlist. Generic network or credential approval alone does not satisfy this model-specific gate."
-      },
-      "required_proof_level": "user_visible_behavior",
-      "proof_scorecard_required": true,
-      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
-      "structured_parser_policy_refs": [
-        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
-      ],
-      "artifact_budget_refs": [
-        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
-      ],
-      "redaction_posture": {
-        "classification": "internal",
-        "customer_safe": false,
-        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported.",
-        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing"
-      },
-      "agent_native_cli_checks": [
-        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
-        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
-        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
-      ]
+      "worker_type": "codex_cli"
     },
     {
       "acceptance_checks": [
@@ -4574,6 +5462,11 @@
             "scope_closure_report"
           ]
         }
+      ],
+      "agent_native_cli_checks": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
       ],
       "alignment_gate_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions",
       "allowed_paths": [
@@ -4614,6 +5507,9 @@
           "rule": "Deterministic bootstrap has no network/secrets; live work requires approval and evidence.",
           "source_ref": "docs/architecture/architecture_guides.md#trust-mode-posture"
         }
+      ],
+      "artifact_budget_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
       ],
       "baseline_commands": [
         "make lint-fast",
@@ -4725,23 +5621,23 @@
         },
         {
           "policy": "structured_parser_policy",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions."
+          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         },
         {
           "policy": "agent_native_cli",
-          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
-          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use."
+          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use.",
+          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy"
         },
         {
           "policy": "artifact_budget_and_refs",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata."
+          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         },
         {
           "policy": "customer_safe_redaction",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data."
+          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         }
       ],
       "evidence_required": [
@@ -4821,9 +5717,18 @@
       "mission_contract_ref": "docs/product/prd.md",
       "objective": "Implement PRD-defined report generation, evidence records, diagnostics, metrics, summaries, badges, and operator-visible feedback.",
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
+      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
+      "proof_scorecard_required": true,
       "red_first_commands": [
         "make test-fast"
       ],
+      "redaction_posture": {
+        "classification": "customer_safe",
+        "customer_safe": true,
+        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing",
+        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported."
+      },
+      "required_proof_level": "user_visible_behavior",
       "required_worker_chain": [
         "task-executor",
         "validation-gate",
@@ -4876,6 +5781,9 @@
         "required validation command failed",
         "plan drift detected",
         "scope closure did not advance"
+      ],
+      "structured_parser_policy_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
       ],
       "task_id": "T8",
       "test_matrix_refs": [
@@ -4940,27 +5848,7 @@
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t8",
-      "worker_type": "codex_cli",
-      "required_proof_level": "user_visible_behavior",
-      "proof_scorecard_required": true,
-      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
-      "structured_parser_policy_refs": [
-        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
-      ],
-      "artifact_budget_refs": [
-        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
-      ],
-      "redaction_posture": {
-        "classification": "customer_safe",
-        "customer_safe": true,
-        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported.",
-        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing"
-      },
-      "agent_native_cli_checks": [
-        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
-        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
-        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
-      ]
+      "worker_type": "codex_cli"
     },
     {
       "acceptance_checks": [
@@ -5136,6 +6024,11 @@
           ]
         }
       ],
+      "agent_native_cli_checks": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
+      ],
       "alignment_gate_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions",
       "allowed_paths": [
         "AGENTS.md",
@@ -5175,6 +6068,9 @@
           "rule": "Deterministic bootstrap has no network/secrets; live work requires approval and evidence.",
           "source_ref": "docs/architecture/architecture_guides.md#trust-mode-posture"
         }
+      ],
+      "artifact_budget_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
       ],
       "baseline_commands": [
         "make lint-fast",
@@ -5286,23 +6182,23 @@
         },
         {
           "policy": "structured_parser_policy",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions."
+          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         },
         {
           "policy": "agent_native_cli",
-          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
-          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use."
+          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use.",
+          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy"
         },
         {
           "policy": "artifact_budget_and_refs",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata."
+          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         },
         {
           "policy": "customer_safe_redaction",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data."
+          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         }
       ],
       "evidence_required": [
@@ -5323,19 +6219,19 @@
         "branch_prefix": "codex",
         "capability_grants": [
           {
-            "task_id": "*",
-            "capability": "model_provider_endpoint",
             "approved": false,
+            "budget_posture": "pending-approved-model-provider-budget",
+            "capability": "model_provider_endpoint",
+            "credential_environment": "pending-approved-model-provider-env-var",
             "evidence_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions/model_provider_endpoint",
             "network_allowlist": [
               "pending-approved-model-provider-host"
             ],
+            "provider_endpoint": "pending-approved-provider-endpoint",
             "provider_identity": "pending-approved-provider",
             "provider_model": "pending-approved-model",
-            "provider_endpoint": "pending-approved-provider-endpoint",
-            "credential_environment": "pending-approved-model-provider-env-var",
-            "budget_posture": "pending-approved-model-provider-budget",
-            "redaction_posture": "pending-approved-model-provider-redaction"
+            "redaction_posture": "pending-approved-model-provider-redaction",
+            "task_id": "*"
           }
         ],
         "credential_posture": "no ambient secrets",
@@ -5396,11 +6292,37 @@
       "max_iterations": 2,
       "migration_impact": "None expected unless this task changes public output, schemas, artifacts, or install/distribution behavior.",
       "mission_contract_ref": "docs/product/prd.md",
+      "model_provider_requirements": {
+        "approval_policy": "Provider embedding and LLM rule-drafting integrations for OpenAI-compatible and Anthropic adapters require a complete model_provider_endpoint grant with provider identity, provider model, endpoint or base_url, credential environment, budget posture, redaction posture, and allowlist in addition to any generic network or credential approvals for GitHub, webhooks, or hosted service work.",
+        "provider_surfaces": [
+          "openai_compatible_http",
+          "anthropic_messages_http"
+        ],
+        "required_fields": [
+          "provider_identity",
+          "provider_model",
+          "provider_endpoint_or_base_url",
+          "credential_environment",
+          "budget_posture",
+          "redaction_posture",
+          "network_allowlist"
+        ],
+        "required_grant": "model_provider_endpoint"
+      },
       "objective": "Implement PRD-defined provider, network, API, webhook, and hosted-service integrations behind explicit deterministic and approval boundaries.",
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
+      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
+      "proof_scorecard_required": true,
       "red_first_commands": [
         "make test-fast"
       ],
+      "redaction_posture": {
+        "classification": "internal",
+        "customer_safe": false,
+        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing",
+        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported."
+      },
+      "required_proof_level": "user_visible_behavior",
       "required_worker_chain": [
         "task-executor",
         "validation-gate",
@@ -5409,6 +6331,7 @@
       ],
       "requires_credentials": true,
       "requires_human_approval": true,
+      "requires_model_provider_endpoint": true,
       "requires_network": true,
       "risk_class": "high",
       "runtime_pins": {
@@ -5458,6 +6381,9 @@
         "scope closure did not advance",
         "live credential or network work attempted without approval",
         "model provider endpoint work attempted without model_provider_endpoint grant"
+      ],
+      "structured_parser_policy_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
       ],
       "task_id": "T9",
       "test_matrix_refs": [
@@ -5539,45 +6465,7 @@
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t9",
-      "worker_type": "codex_cli",
-      "requires_model_provider_endpoint": true,
-      "model_provider_requirements": {
-        "required_grant": "model_provider_endpoint",
-        "provider_surfaces": [
-          "openai_compatible_http",
-          "anthropic_messages_http"
-        ],
-        "required_fields": [
-          "provider_identity",
-          "provider_model",
-          "provider_endpoint_or_base_url",
-          "credential_environment",
-          "budget_posture",
-          "redaction_posture",
-          "network_allowlist"
-        ],
-        "approval_policy": "Provider embedding and LLM rule-drafting integrations for OpenAI-compatible and Anthropic adapters require a complete model_provider_endpoint grant with provider identity, provider model, endpoint or base_url, credential environment, budget posture, redaction posture, and allowlist in addition to any generic network or credential approvals for GitHub, webhooks, or hosted service work."
-      },
-      "required_proof_level": "user_visible_behavior",
-      "proof_scorecard_required": true,
-      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
-      "structured_parser_policy_refs": [
-        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
-      ],
-      "artifact_budget_refs": [
-        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
-      ],
-      "redaction_posture": {
-        "classification": "internal",
-        "customer_safe": false,
-        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported.",
-        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing"
-      },
-      "agent_native_cli_checks": [
-        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
-        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
-        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
-      ]
+      "worker_type": "codex_cli"
     },
     {
       "acceptance_checks": [
@@ -5680,6 +6568,11 @@
           ]
         }
       ],
+      "agent_native_cli_checks": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
+      ],
       "alignment_gate_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions",
       "allowed_paths": [
         "AGENTS.md",
@@ -5719,6 +6612,9 @@
           "rule": "Deterministic bootstrap has no network/secrets; live work requires approval and evidence.",
           "source_ref": "docs/architecture/architecture_guides.md#trust-mode-posture"
         }
+      ],
+      "artifact_budget_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
       ],
       "baseline_commands": [
         "make lint-fast",
@@ -5830,23 +6726,23 @@
         },
         {
           "policy": "structured_parser_policy",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions."
+          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         },
         {
           "policy": "agent_native_cli",
-          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
-          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use."
+          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use.",
+          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy"
         },
         {
           "policy": "artifact_budget_and_refs",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata."
+          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         },
         {
           "policy": "customer_safe_redaction",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data."
+          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         }
       ],
       "evidence_required": [
@@ -5926,9 +6822,18 @@
       "mission_contract_ref": "docs/product/prd.md",
       "objective": "Implement PRD-defined review states, approval gates, policy lifecycle, governance evidence, and human-decision workflows.",
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
+      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
+      "proof_scorecard_required": true,
       "red_first_commands": [
         "make test-fast"
       ],
+      "redaction_posture": {
+        "classification": "internal",
+        "customer_safe": false,
+        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing",
+        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported."
+      },
+      "required_proof_level": "user_visible_behavior",
       "required_worker_chain": [
         "task-executor",
         "validation-gate",
@@ -5985,6 +6890,9 @@
         "scope closure did not advance",
         "live credential or network work attempted without approval",
         "manual, product-signal, or judgment-only acceptance closed without approval evidence"
+      ],
+      "structured_parser_policy_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
       ],
       "task_id": "T10",
       "test_matrix_refs": [
@@ -6059,27 +6967,7 @@
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t10",
-      "worker_type": "codex_cli",
-      "required_proof_level": "user_visible_behavior",
-      "proof_scorecard_required": true,
-      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
-      "structured_parser_policy_refs": [
-        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
-      ],
-      "artifact_budget_refs": [
-        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
-      ],
-      "redaction_posture": {
-        "classification": "internal",
-        "customer_safe": false,
-        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported.",
-        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing"
-      },
-      "agent_native_cli_checks": [
-        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
-        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
-        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
-      ]
+      "worker_type": "codex_cli"
     },
     {
       "acceptance_checks": [
@@ -6110,6 +6998,11 @@
             "scope_closure_report"
           ]
         }
+      ],
+      "agent_native_cli_checks": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
       ],
       "alignment_gate_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions",
       "allowed_paths": [
@@ -6150,6 +7043,9 @@
           "rule": "Deterministic bootstrap has no network/secrets; live work requires approval and evidence.",
           "source_ref": "docs/architecture/architecture_guides.md#trust-mode-posture"
         }
+      ],
+      "artifact_budget_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
       ],
       "baseline_commands": [
         "make lint-fast",
@@ -6261,23 +7157,23 @@
         },
         {
           "policy": "structured_parser_policy",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions."
+          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         },
         {
           "policy": "agent_native_cli",
-          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
-          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use."
+          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use.",
+          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy"
         },
         {
           "policy": "artifact_budget_and_refs",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata."
+          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         },
         {
           "policy": "customer_safe_redaction",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data."
+          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         }
       ],
       "evidence_required": [
@@ -6357,9 +7253,18 @@
       "mission_contract_ref": "docs/product/prd.md",
       "objective": "Implement PRD-defined durable memory artifacts, lifecycle rendering, provenance display, stale/contradicted handling, and managed memory-page output.",
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
+      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
+      "proof_scorecard_required": true,
       "red_first_commands": [
         "make test-fast"
       ],
+      "redaction_posture": {
+        "classification": "internal",
+        "customer_safe": false,
+        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing",
+        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported."
+      },
+      "required_proof_level": "user_visible_behavior",
       "required_worker_chain": [
         "task-executor",
         "validation-gate",
@@ -6412,6 +7317,9 @@
         "required validation command failed",
         "plan drift detected",
         "scope closure did not advance"
+      ],
+      "structured_parser_policy_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
       ],
       "task_id": "T11",
       "test_matrix_refs": [
@@ -6476,27 +7384,7 @@
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t11",
-      "worker_type": "codex_cli",
-      "required_proof_level": "user_visible_behavior",
-      "proof_scorecard_required": true,
-      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
-      "structured_parser_policy_refs": [
-        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
-      ],
-      "artifact_budget_refs": [
-        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
-      ],
-      "redaction_posture": {
-        "classification": "internal",
-        "customer_safe": false,
-        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported.",
-        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing"
-      },
-      "agent_native_cli_checks": [
-        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
-        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
-        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
-      ]
+      "worker_type": "codex_cli"
     },
     {
       "acceptance_checks": [
@@ -6562,6 +7450,11 @@
           ]
         }
       ],
+      "agent_native_cli_checks": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
+      ],
       "alignment_gate_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions",
       "allowed_paths": [
         "AGENTS.md",
@@ -6601,6 +7494,9 @@
           "rule": "Deterministic bootstrap has no network/secrets; live work requires approval and evidence.",
           "source_ref": "docs/architecture/architecture_guides.md#trust-mode-posture"
         }
+      ],
+      "artifact_budget_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
       ],
       "baseline_commands": [
         "make lint-fast",
@@ -6712,23 +7608,23 @@
         },
         {
           "policy": "structured_parser_policy",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions."
+          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         },
         {
           "policy": "agent_native_cli",
-          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
-          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use."
+          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use.",
+          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy"
         },
         {
           "policy": "artifact_budget_and_refs",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata."
+          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         },
         {
           "policy": "customer_safe_redaction",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data."
+          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         }
       ],
       "evidence_required": [
@@ -6808,9 +7704,18 @@
       "mission_contract_ref": "docs/product/prd.md",
       "objective": "Implement PRD-defined MCP tools, recall behavior, coverage/OOD responses, active-memory serving rules, and agent-facing access boundaries.",
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
+      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
+      "proof_scorecard_required": true,
       "red_first_commands": [
         "make test-fast"
       ],
+      "redaction_posture": {
+        "classification": "internal",
+        "customer_safe": false,
+        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing",
+        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported."
+      },
+      "required_proof_level": "user_visible_behavior",
       "required_worker_chain": [
         "task-executor",
         "validation-gate",
@@ -6863,6 +7768,9 @@
         "required validation command failed",
         "plan drift detected",
         "scope closure did not advance"
+      ],
+      "structured_parser_policy_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
       ],
       "task_id": "T12",
       "test_matrix_refs": [
@@ -6931,27 +7839,7 @@
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t12",
-      "worker_type": "codex_cli",
-      "required_proof_level": "user_visible_behavior",
-      "proof_scorecard_required": true,
-      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
-      "structured_parser_policy_refs": [
-        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
-      ],
-      "artifact_budget_refs": [
-        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
-      ],
-      "redaction_posture": {
-        "classification": "internal",
-        "customer_safe": false,
-        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported.",
-        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing"
-      },
-      "agent_native_cli_checks": [
-        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
-        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
-        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
-      ]
+      "worker_type": "codex_cli"
     },
     {
       "acceptance_checks": [
@@ -7037,6 +7925,11 @@
           ]
         }
       ],
+      "agent_native_cli_checks": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
+      ],
       "alignment_gate_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions",
       "allowed_paths": [
         "AGENTS.md",
@@ -7076,6 +7969,9 @@
           "rule": "Deterministic bootstrap has no network/secrets; live work requires approval and evidence.",
           "source_ref": "docs/architecture/architecture_guides.md#trust-mode-posture"
         }
+      ],
+      "artifact_budget_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
       ],
       "baseline_commands": [
         "make lint-fast",
@@ -7187,23 +8083,23 @@
         },
         {
           "policy": "structured_parser_policy",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions."
+          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         },
         {
           "policy": "agent_native_cli",
-          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
-          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use."
+          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use.",
+          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy"
         },
         {
           "policy": "artifact_budget_and_refs",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata."
+          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         },
         {
           "policy": "customer_safe_redaction",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data."
+          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         }
       ],
       "evidence_required": [
@@ -7283,9 +8179,18 @@
       "mission_contract_ref": "docs/product/prd.md",
       "objective": "Implement PRD-defined managed context blocks, AGENTS/CLAUDE marker discipline, idempotent compile behavior, and non-MCP agent access.",
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
+      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
+      "proof_scorecard_required": true,
       "red_first_commands": [
         "make test-fast"
       ],
+      "redaction_posture": {
+        "classification": "internal",
+        "customer_safe": false,
+        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing",
+        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported."
+      },
+      "required_proof_level": "user_visible_behavior",
       "required_worker_chain": [
         "task-executor",
         "validation-gate",
@@ -7338,6 +8243,9 @@
         "required validation command failed",
         "plan drift detected",
         "scope closure did not advance"
+      ],
+      "structured_parser_policy_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
       ],
       "task_id": "T13",
       "test_matrix_refs": [
@@ -7408,27 +8316,7 @@
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t13",
-      "worker_type": "codex_cli",
-      "required_proof_level": "user_visible_behavior",
-      "proof_scorecard_required": true,
-      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
-      "structured_parser_policy_refs": [
-        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
-      ],
-      "artifact_budget_refs": [
-        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
-      ],
-      "redaction_posture": {
-        "classification": "internal",
-        "customer_safe": false,
-        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported.",
-        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing"
-      },
-      "agent_native_cli_checks": [
-        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
-        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
-        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
-      ]
+      "worker_type": "codex_cli"
     },
     {
       "acceptance_checks": [
@@ -7602,6 +8490,11 @@
           ]
         }
       ],
+      "agent_native_cli_checks": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
+      ],
       "alignment_gate_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions",
       "allowed_paths": [
         "AGENTS.md",
@@ -7641,6 +8534,9 @@
           "rule": "Deterministic bootstrap has no network/secrets; live work requires approval and evidence.",
           "source_ref": "docs/architecture/architecture_guides.md#trust-mode-posture"
         }
+      ],
+      "artifact_budget_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
       ],
       "baseline_commands": [
         "make lint-fast",
@@ -7752,23 +8648,23 @@
         },
         {
           "policy": "structured_parser_policy",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions."
+          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         },
         {
           "policy": "agent_native_cli",
-          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
-          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use."
+          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use.",
+          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy"
         },
         {
           "policy": "artifact_budget_and_refs",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata."
+          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         },
         {
           "policy": "customer_safe_redaction",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data."
+          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         }
       ],
       "evidence_required": [
@@ -7848,9 +8744,18 @@
       "mission_contract_ref": "docs/product/prd.md",
       "objective": "Implement PRD-defined diff/plan assessment, risk match levels, advisory comment behavior, debounce rules, and forward signal tracking.",
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
+      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
+      "proof_scorecard_required": true,
       "red_first_commands": [
         "make test-fast"
       ],
+      "redaction_posture": {
+        "classification": "internal",
+        "customer_safe": false,
+        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing",
+        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported."
+      },
+      "required_proof_level": "user_visible_behavior",
       "required_worker_chain": [
         "task-executor",
         "validation-gate",
@@ -7903,6 +8808,9 @@
         "required validation command failed",
         "plan drift detected",
         "scope closure did not advance"
+      ],
+      "structured_parser_policy_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
       ],
       "task_id": "T14",
       "test_matrix_refs": [
@@ -7983,27 +8891,7 @@
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t14",
-      "worker_type": "codex_cli",
-      "required_proof_level": "user_visible_behavior",
-      "proof_scorecard_required": true,
-      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
-      "structured_parser_policy_refs": [
-        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
-      ],
-      "artifact_budget_refs": [
-        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
-      ],
-      "redaction_posture": {
-        "classification": "internal",
-        "customer_safe": false,
-        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported.",
-        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing"
-      },
-      "agent_native_cli_checks": [
-        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
-        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
-        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
-      ]
+      "worker_type": "codex_cli"
     },
     {
       "acceptance_checks": [
@@ -8280,6 +9168,11 @@
           ]
         }
       ],
+      "agent_native_cli_checks": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
+      ],
       "alignment_gate_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions",
       "allowed_paths": [
         "AGENTS.md",
@@ -8319,6 +9212,9 @@
           "rule": "Deterministic bootstrap has no network/secrets; live work requires approval and evidence.",
           "source_ref": "docs/architecture/architecture_guides.md#trust-mode-posture"
         }
+      ],
+      "artifact_budget_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
       ],
       "baseline_commands": [
         "make lint-fast",
@@ -8434,23 +9330,23 @@
         },
         {
           "policy": "structured_parser_policy",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions."
+          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         },
         {
           "policy": "agent_native_cli",
-          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
-          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use."
+          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use.",
+          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy"
         },
         {
           "policy": "artifact_budget_and_refs",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata."
+          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         },
         {
           "policy": "customer_safe_redaction",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data."
+          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         }
       ],
       "evidence_required": [
@@ -8530,9 +9426,18 @@
       "mission_contract_ref": "docs/product/prd.md",
       "objective": "Implement PRD-defined demo flows, distribution readiness, release gates, product-pull signals, and full-scope closure checks. Part 1 of 2; scope is split to keep the runner-ready packet bounded.",
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
+      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
+      "proof_scorecard_required": true,
       "red_first_commands": [
         "make test-fast"
       ],
+      "redaction_posture": {
+        "classification": "customer_safe",
+        "customer_safe": true,
+        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing",
+        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported."
+      },
+      "required_proof_level": "user_visible_behavior",
       "required_worker_chain": [
         "task-executor",
         "validation-gate",
@@ -8589,6 +9494,9 @@
         "scope closure did not advance",
         "live credential or network work attempted without approval",
         "model weights or inference-runtime payloads are added to source, binary, container, or release artifacts without an approved distribution decision"
+      ],
+      "structured_parser_policy_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
       ],
       "task_id": "T15",
       "test_matrix_refs": [
@@ -8682,27 +9590,7 @@
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t15",
-      "worker_type": "codex_cli",
-      "required_proof_level": "user_visible_behavior",
-      "proof_scorecard_required": true,
-      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
-      "structured_parser_policy_refs": [
-        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
-      ],
-      "artifact_budget_refs": [
-        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
-      ],
-      "redaction_posture": {
-        "classification": "customer_safe",
-        "customer_safe": true,
-        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported.",
-        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing"
-      },
-      "agent_native_cli_checks": [
-        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
-        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
-        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
-      ]
+      "worker_type": "codex_cli"
     },
     {
       "acceptance_checks": [
@@ -8945,6 +9833,11 @@
           ]
         }
       ],
+      "agent_native_cli_checks": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
+      ],
       "alignment_gate_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions",
       "allowed_paths": [
         "AGENTS.md",
@@ -8984,6 +9877,9 @@
           "rule": "Deterministic bootstrap has no network/secrets; live work requires approval and evidence.",
           "source_ref": "docs/architecture/architecture_guides.md#trust-mode-posture"
         }
+      ],
+      "artifact_budget_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
       ],
       "baseline_commands": [
         "make lint-fast",
@@ -9099,23 +9995,23 @@
         },
         {
           "policy": "structured_parser_policy",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions."
+          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         },
         {
           "policy": "agent_native_cli",
-          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
-          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use."
+          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use.",
+          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy"
         },
         {
           "policy": "artifact_budget_and_refs",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata."
+          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         },
         {
           "policy": "customer_safe_redaction",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction",
-          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data."
+          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
         }
       ],
       "evidence_required": [
@@ -9195,9 +10091,18 @@
       "mission_contract_ref": "docs/product/prd.md",
       "objective": "Implement PRD-defined demo flows, distribution readiness, release gates, product-pull signals, and full-scope closure checks. Part 2 of 2; scope is split to keep the runner-ready packet bounded.",
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
+      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
+      "proof_scorecard_required": true,
       "red_first_commands": [
         "make test-fast"
       ],
+      "redaction_posture": {
+        "classification": "customer_safe",
+        "customer_safe": true,
+        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing",
+        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported."
+      },
+      "required_proof_level": "user_visible_behavior",
       "required_worker_chain": [
         "task-executor",
         "validation-gate",
@@ -9254,6 +10159,9 @@
         "scope closure did not advance",
         "live credential or network work attempted without approval",
         "model weights or inference-runtime payloads are added to source, binary, container, or release artifacts without an approved distribution decision"
+      ],
+      "structured_parser_policy_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
       ],
       "task_id": "T16",
       "test_matrix_refs": [
@@ -9343,38 +10251,944 @@
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t16",
-      "worker_type": "codex_cli",
-      "required_proof_level": "user_visible_behavior",
-      "proof_scorecard_required": true,
-      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
-      "structured_parser_policy_refs": [
-        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      "worker_type": "codex_cli"
+    },
+    {
+      "acceptance_checks": [
+        "Customer failure intake is opt-in and starts from redacted, repo-local evidence only.",
+        "Fixture promotion requires owner approval, source evidence, redaction proof, and a generated follow-up task or approved deferral.",
+        "No raw customer code, logs, diffs, paths, owners, credentials, or payment/contact identifiers are committed.",
+        "The loop is a lightweight lesson source, not broad support-ticket ingestion or hosted analytics."
       ],
-      "artifact_budget_refs": [
-        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      "acceptance_group_id": "fr1-outcomes-as-the-only-memory-source",
+      "acceptance_group_ids": [
+        "fr1-outcomes-as-the-only-memory-source",
+        "fr10-provenance-mandatory-rules",
+        "nfr6-local-privacy"
       ],
-      "redaction_posture": {
-        "classification": "customer_safe",
-        "customer_safe": true,
-        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported.",
-        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing"
-      },
+      "acceptance_group_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json#/groups",
+      "acceptance_item_ids": [
+        "FR1-OUTCOMES-AS-THE-ONLY-MEMORY-SOURCE-001",
+        "FR10-PROVENANCE-MANDATORY-RULES-001",
+        "NFR6-LOCAL-PRIVACY-001"
+      ],
+      "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+      "acceptance_result_requirements": [
+        {
+          "acceptance_item_id": "FR1-OUTCOMES-AS-THE-ONLY-MEMORY-SOURCE-001",
+          "allowed_statuses": [
+            "implemented",
+            "partial",
+            "missing",
+            "blocked",
+            "deferred_with_approval"
+          ],
+          "evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "scope_closure_report"
+          ]
+        },
+        {
+          "acceptance_item_id": "FR10-PROVENANCE-MANDATORY-RULES-001",
+          "allowed_statuses": [
+            "implemented",
+            "partial",
+            "missing",
+            "blocked",
+            "deferred_with_approval"
+          ],
+          "evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "scope_closure_report"
+          ]
+        },
+        {
+          "acceptance_item_id": "NFR6-LOCAL-PRIVACY-001",
+          "allowed_statuses": [
+            "implemented",
+            "partial",
+            "missing",
+            "blocked",
+            "deferred_with_approval"
+          ],
+          "evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "scope_closure_report"
+          ]
+        }
+      ],
       "agent_native_cli_checks": [
         "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
         "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
         "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
-      ]
+      ],
+      "alignment_gate_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions",
+      "allowed_paths": [
+        "AGENTS.md",
+        "WORKFLOW.md",
+        "README.md",
+        "Makefile",
+        ".tool-versions",
+        "go.mod",
+        "go.sum",
+        "relia.yaml",
+        "CLAUDE.md",
+        "cmd/",
+        "internal/",
+        "tests/",
+        "schemas/",
+        "docs/",
+        "examples/",
+        "memory/",
+        ".github/",
+        ".factory/artifacts/task-runs/T17/",
+        ".factory/artifacts/pr-lifecycle/T17/",
+        "docs/product/",
+        "docs/dev/",
+        ".factory/artifacts/customer-failure-intake/",
+        "examples/fixtures/customer-failures/"
+      ],
+      "architecture_guidance_refs": [
+        {
+          "rule": "Record state owner, feedback source, blast radius, source-of-truth impact, and rollback/deletion checks for material changes.",
+          "source_ref": "docs/architecture/architecture_guides.md#systems-thinking-map"
+        },
+        {
+          "rule": "Use test-first evidence or a structured skipped reason.",
+          "source_ref": "docs/architecture/architecture_guides.md#tdd-and-red-first-expectations"
+        },
+        {
+          "rule": "Boundary, public contract, credential/network, or major reliability/perf changes require a decision note.",
+          "source_ref": "docs/architecture/architecture_guides.md#adr-and-decision-triggers"
+        },
+        {
+          "rule": "Deterministic bootstrap has no network/secrets; live work requires approval and evidence.",
+          "source_ref": "docs/architecture/architecture_guides.md#trust-mode-posture"
+        }
+      ],
+      "artifact_budget_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "baseline_commands": [
+        "make lint-fast",
+        "make test-fast"
+      ],
+      "blocked_by": [
+        "T10"
+      ],
+      "changelog_intent": {
+        "draft_entry": "Add a bounded customer-failure intake and fixture-promotion loop with redaction, owner approval, and no committed customer data.",
+        "impact": "required",
+        "section": "Unreleased",
+        "semver_marker": "pre_1_0_minor_candidate"
+      },
+      "ci_control_refs": {
+        "action_ref_exceptions_ref": ".github/action-ref-exceptions.yaml",
+        "controls": [
+          "least_privilege_permissions",
+          "concurrency",
+          "timeouts",
+          "toolchain_pin_from_go_mod"
+        ],
+        "owner_review_ref": ".github/CODEOWNERS",
+        "required": true,
+        "required_checks_ref": ".github/required-checks.json",
+        "workflow_refs": [
+          ".github/workflows/validate.yml",
+          ".github/workflows/codeql.yml"
+        ]
+      },
+      "ci_lane_refs": [
+        {
+          "command_refs": [
+            "make lint-fast",
+            "make test-fast"
+          ],
+          "lane": "fast",
+          "source_ref": "docs/dev/dev_guides.md#validation-matrix"
+        },
+        {
+          "command_refs": [
+            "make test-contracts",
+            "make prepush-full"
+          ],
+          "lane": "core",
+          "source_ref": "docs/dev/dev_guides.md#validation-matrix"
+        },
+        {
+          "lane": "risk",
+          "source_ref": "docs/dev/dev_guides.md#ci-and-pr-lifecycle",
+          "status_check_refs": [
+            "CodeQL analyze"
+          ]
+        }
+      ],
+      "commands": [
+        "make prepush-full"
+      ],
+      "coverage_policy_refs": {
+        "command_refs": [
+          "make test-coverage",
+          "make prepush-full"
+        ],
+        "exception_policy": "coverage misses block promotion unless the task records an approved scoped exception with owner, reason, expiry or follow-up task, and compensating validation evidence",
+        "minimums": [
+          {
+            "command_refs": [
+              "make test-coverage"
+            ],
+            "scope": "go_first_party_packages_overall",
+            "threshold": 75
+          }
+        ],
+        "required": true,
+        "source_ref": "docs/dev/dev_guides.md#coverage-gates"
+      },
+      "delivery_slice_refs": [
+        "customer-failure-absorption-loop"
+      ],
+      "docs_sync_refs": [
+        {
+          "path": "README.md",
+          "reason": "Keep user-facing behavior, commands, and artifact paths accurate."
+        },
+        {
+          "path": "docs/dev/dev_guides.md",
+          "reason": "Keep validation, CI, scanner, and test matrix guidance aligned."
+        },
+        {
+          "path": "docs/architecture/architecture_guides.md",
+          "reason": "Keep boundaries, state, feedback, and trust posture aligned."
+        }
+      ],
+      "engineering_policy_refs": [
+        {
+          "policy": "docs_parity",
+          "rule": "Behavior, flags, outputs, install paths, and workflow semantics update docs and Factory planning artifacts together.",
+          "source_ref": "docs/dev/dev_guides.md"
+        },
+        {
+          "policy": "output_contracts",
+          "rule": "CLI output, exit codes, schemas, and artifacts are executable contracts.",
+          "source_ref": "docs/dev/dev_guides.md"
+        },
+        {
+          "policy": "provenance_evidence",
+          "rule": "Validation, work-proof, PR lifecycle, scanner, and scope-closure evidence use repo-relative refs.",
+          "source_ref": "docs/dev/dev_guides.md"
+        },
+        {
+          "policy": "structured_parser_policy",
+          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+        },
+        {
+          "policy": "agent_native_cli",
+          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use.",
+          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy"
+        },
+        {
+          "policy": "artifact_budget_and_refs",
+          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+        },
+        {
+          "policy": "customer_safe_redaction",
+          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+        }
+      ],
+      "evidence_required": [
+        "work_proof_marker",
+        "validation_report",
+        "scope_closure_report",
+        "pr_lifecycle_report",
+        "factoryd_run_once_report",
+        "proof-of-behavior-scorecard"
+      ],
+      "factory_compatibility": {
+        "factory_contract_version": "1.0",
+        "generated_by": "repo-bootstrap-from-prd",
+        "profile_ref": ".factory/profile.yaml",
+        "skill_inventory_ref": "Factory skills/README.md"
+      },
+      "factoryd_runtime": {
+        "approval_posture": "human approval required for high risk, live credentials, and merge",
+        "branch_prefix": "codex",
+        "capability_grants": [],
+        "credential_posture": "no ambient secrets",
+        "network_posture": "offline by default",
+        "runtime_control": {
+          "autonomy_level": "restricted",
+          "conflict_behavior": "fail_closed",
+          "launch_request": {
+            "expected_decision": "allow",
+            "reason_code": "within_runtime_control_limits",
+            "requested_action": "continue_mission",
+            "requested_adapter": "codex_cli"
+          },
+          "owner": "factoryd-operator",
+          "release_freeze": {
+            "enabled": false
+          }
+        },
+        "state_dir": ".factoryd/",
+        "worker_command": "",
+        "worker_type": "codex_cli",
+        "workspace_root": ".factoryd/workspaces/"
+      },
+      "final_validation_commands": [
+        "make prepush-full"
+      ],
+      "forbidden_paths": [
+        ".git/",
+        ".factory/tmp/",
+        ".factoryd/",
+        ".factory/artifacts/prd-to-plan/relia-mvp/",
+        ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+      ],
+      "input_artifacts": [
+        "docs/product/prd.md",
+        "AGENTS.md",
+        "WORKFLOW.md",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        ".factory/profile.yaml",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json"
+      ],
+      "lifecycle_gates": {
+        "ci_required": true,
+        "codex_review_required": true,
+        "commit_push_required": true,
+        "local_validation_required": true,
+        "post_merge_monitor_required": true,
+        "pr_lifecycle_report_required": true,
+        "skip_policy": "approved_exception_required"
+      },
+      "max_iterations": 2,
+      "migration_impact": "None expected unless this task changes public output, schemas, artifacts, or install/distribution behavior.",
+      "mission_contract_ref": "docs/product/prd.md",
+      "objective": "Add a bounded customer-failure intake and fixture-promotion loop with redaction, owner approval, and no committed customer data.",
+      "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
+      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
+      "proof_scorecard_required": true,
+      "red_first_commands": [
+        "make test-contracts"
+      ],
+      "redaction_posture": {
+        "classification": "customer_safe",
+        "customer_safe": true,
+        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing",
+        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported."
+      },
+      "required_proof_level": "workflow_behavior",
+      "required_worker_chain": [
+        "task-executor",
+        "validation-gate",
+        "commit-push",
+        "post-merge-monitor"
+      ],
+      "requires_credentials": false,
+      "requires_human_approval": false,
+      "requires_network": false,
+      "risk_class": "medium",
+      "runtime_pins": {
+        "artifact_namespace": ".factory/artifacts/",
+        "dependency_policy": "standard library first; pin and justify dependencies",
+        "distribution_target": "standalone_binary",
+        "language": "go",
+        "live_work_policy": "no ambient secrets or live network by default",
+        "module_or_package_path": "github.com/Clyra-AI/relia",
+        "provider_policy": "none by default",
+        "toolchain_version": "1.26.4"
+      },
+      "scope_exclusions": [
+        "Do not build hosted analytics, broad support-ticket ingestion, or a customer failure database in MVP.",
+        "Do not commit real customer data; only redacted fixtures or templates may be tracked."
+      ],
+      "security_scanner_gates": {
+        "exception_policy": "approved_exception_required_when_required_or_surface_touched",
+        "required": true,
+        "required_for_surfaces": [
+          "dependency additions",
+          "generated-code intake",
+          "CI or workflow changes",
+          "external calls",
+          "security-sensitive code",
+          "release-sensitive changes"
+        ],
+        "scanner": "CodeQL",
+        "status_check": "CodeQL analyze",
+        "workflow_ref": ".github/workflows/codeql.yml"
+      },
+      "shared_constraints_ref": "AGENTS.md",
+      "slice_rationale": {
+        "rationale": "Task advances a product-shaped capability slice while preserving acceptance-item closure refs.",
+        "slice_type": "vertical"
+      },
+      "slice_type": "vertical",
+      "stop_conditions": [
+        "missing runner-ready task contract",
+        "changed path outside allowed_paths",
+        "forbidden path changed",
+        "required validation command failed",
+        "plan drift detected",
+        "scope closure did not advance"
+      ],
+      "structured_parser_policy_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "task_id": "T17",
+      "test_matrix_refs": [
+        {
+          "command_refs": [
+            "make test-fast"
+          ],
+          "source_ref": "docs/dev/dev_guides.md#12-level-test-matrix",
+          "tier": "Tier 1 Unit"
+        },
+        {
+          "command_refs": [
+            "scope closure map"
+          ],
+          "source_ref": "docs/dev/dev_guides.md#12-level-test-matrix",
+          "tier": "Tier 4 Acceptance"
+        },
+        {
+          "command_refs": [
+            "make test-contracts"
+          ],
+          "source_ref": "docs/dev/dev_guides.md#12-level-test-matrix",
+          "tier": "Tier 9 Contract"
+        }
+      ],
+      "upstream_debt_refs": [],
+      "validation_commands": [
+        "make test-coverage",
+        "make prepush-full"
+      ],
+      "validation_contract_inheritance": {
+        "acceptance_criteria": [
+          "Memory writes must originate from verified outcome events. Agent self-reports and reflections must not enter memory in the MVP."
+        ],
+        "acceptance_item_ids": [
+          "FR1-OUTCOMES-AS-THE-ONLY-MEMORY-SOURCE-001"
+        ],
+        "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+        "evidence_required": [
+          "work_proof_marker",
+          "validation_report",
+          "scope_closure_report",
+          "pr_lifecycle_report",
+          "factoryd_run_once_report"
+        ],
+        "required_checks": [
+          "make prepush-full"
+        ],
+        "required_review": {
+          "required": false,
+          "review_type": "code",
+          "reviewer_class": "peer_agent"
+        },
+        "source_validation_contract_ref": ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
+        "stop_conditions": [
+          "missing runner-ready task contract",
+          "changed path outside allowed_paths",
+          "forbidden path changed",
+          "required validation command failed",
+          "plan drift detected",
+          "scope closure did not advance"
+        ]
+      },
+      "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
+      "work_item_id": "relia-mvp-t8",
+      "worker_type": "codex_cli"
+    },
+    {
+      "acceptance_checks": [
+        "Lesson records include scope, applicability, expiry, source evidence, owner, confidence, and redaction posture.",
+        "Lessons are not global rules until promoted through human review with fixture-backed evidence.",
+        "Memory-grain templates state where artifacts live and when lessons expire or need recalibration.",
+        "No memory retrieval infrastructure is built in this planning slice."
+      ],
+      "acceptance_group_id": "fr12-decay-and-churn-invalidation",
+      "acceptance_group_ids": [
+        "fr12-decay-and-churn-invalidation",
+        "fr14-bidirectional-memory",
+        "fr15-memory-page-with-receipts",
+        "nfr4-calibration-honesty"
+      ],
+      "acceptance_group_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json#/groups",
+      "acceptance_item_ids": [
+        "FR12-DECAY-AND-CHURN-INVALIDATION-001",
+        "FR14-BIDIRECTIONAL-MEMORY-001",
+        "FR15-MEMORY-PAGE-WITH-RECEIPTS-001",
+        "NFR4-CALIBRATION-HONESTY-001"
+      ],
+      "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+      "acceptance_result_requirements": [
+        {
+          "acceptance_item_id": "FR12-DECAY-AND-CHURN-INVALIDATION-001",
+          "allowed_statuses": [
+            "implemented",
+            "partial",
+            "missing",
+            "blocked",
+            "deferred_with_approval"
+          ],
+          "evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "scope_closure_report"
+          ]
+        },
+        {
+          "acceptance_item_id": "FR14-BIDIRECTIONAL-MEMORY-001",
+          "allowed_statuses": [
+            "implemented",
+            "partial",
+            "missing",
+            "blocked",
+            "deferred_with_approval"
+          ],
+          "evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "scope_closure_report"
+          ]
+        },
+        {
+          "acceptance_item_id": "FR15-MEMORY-PAGE-WITH-RECEIPTS-001",
+          "allowed_statuses": [
+            "implemented",
+            "partial",
+            "missing",
+            "blocked",
+            "deferred_with_approval"
+          ],
+          "evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "scope_closure_report"
+          ]
+        },
+        {
+          "acceptance_item_id": "NFR4-CALIBRATION-HONESTY-001",
+          "allowed_statuses": [
+            "implemented",
+            "partial",
+            "missing",
+            "blocked",
+            "deferred_with_approval"
+          ],
+          "evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "scope_closure_report"
+          ]
+        }
+      ],
+      "agent_native_cli_checks": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
+      ],
+      "alignment_gate_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions",
+      "allowed_paths": [
+        "AGENTS.md",
+        "WORKFLOW.md",
+        "README.md",
+        "Makefile",
+        ".tool-versions",
+        "go.mod",
+        "go.sum",
+        "relia.yaml",
+        "CLAUDE.md",
+        "cmd/",
+        "internal/",
+        "tests/",
+        "schemas/",
+        "docs/",
+        "examples/",
+        "memory/",
+        ".github/",
+        ".factory/artifacts/task-runs/T18/",
+        ".factory/artifacts/pr-lifecycle/T18/",
+        "docs/architecture/",
+        "docs/dev/",
+        ".factory/artifacts/lesson-records/",
+        "memory/lessons/"
+      ],
+      "architecture_guidance_refs": [
+        {
+          "rule": "Record state owner, feedback source, blast radius, source-of-truth impact, and rollback/deletion checks for material changes.",
+          "source_ref": "docs/architecture/architecture_guides.md#systems-thinking-map"
+        },
+        {
+          "rule": "Use test-first evidence or a structured skipped reason.",
+          "source_ref": "docs/architecture/architecture_guides.md#tdd-and-red-first-expectations"
+        },
+        {
+          "rule": "Boundary, public contract, credential/network, or major reliability/perf changes require a decision note.",
+          "source_ref": "docs/architecture/architecture_guides.md#adr-and-decision-triggers"
+        },
+        {
+          "rule": "Deterministic bootstrap has no network/secrets; live work requires approval and evidence.",
+          "source_ref": "docs/architecture/architecture_guides.md#trust-mode-posture"
+        }
+      ],
+      "artifact_budget_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "baseline_commands": [
+        "make lint-fast",
+        "make test-fast"
+      ],
+      "blocked_by": [
+        "T17"
+      ],
+      "changelog_intent": {
+        "draft_entry": "Define Relia lesson/memory grain so failure-derived lessons include applicability, expiry, source evidence, owner, and promotion review before reuse.",
+        "impact": "required",
+        "section": "Unreleased",
+        "semver_marker": "pre_1_0_minor_candidate"
+      },
+      "ci_control_refs": {
+        "action_ref_exceptions_ref": ".github/action-ref-exceptions.yaml",
+        "controls": [
+          "least_privilege_permissions",
+          "concurrency",
+          "timeouts",
+          "toolchain_pin_from_go_mod"
+        ],
+        "owner_review_ref": ".github/CODEOWNERS",
+        "required": true,
+        "required_checks_ref": ".github/required-checks.json",
+        "workflow_refs": [
+          ".github/workflows/validate.yml",
+          ".github/workflows/codeql.yml"
+        ]
+      },
+      "ci_lane_refs": [
+        {
+          "command_refs": [
+            "make lint-fast",
+            "make test-fast"
+          ],
+          "lane": "fast",
+          "source_ref": "docs/dev/dev_guides.md#validation-matrix"
+        },
+        {
+          "command_refs": [
+            "make test-contracts",
+            "make prepush-full"
+          ],
+          "lane": "core",
+          "source_ref": "docs/dev/dev_guides.md#validation-matrix"
+        },
+        {
+          "lane": "risk",
+          "source_ref": "docs/dev/dev_guides.md#ci-and-pr-lifecycle",
+          "status_check_refs": [
+            "CodeQL analyze"
+          ]
+        }
+      ],
+      "commands": [
+        "make prepush-full"
+      ],
+      "coverage_policy_refs": {
+        "command_refs": [
+          "make test-coverage",
+          "make prepush-full"
+        ],
+        "exception_policy": "coverage misses block promotion unless the task records an approved scoped exception with owner, reason, expiry or follow-up task, and compensating validation evidence",
+        "minimums": [
+          {
+            "command_refs": [
+              "make test-coverage"
+            ],
+            "scope": "go_first_party_packages_overall",
+            "threshold": 75
+          }
+        ],
+        "required": true,
+        "source_ref": "docs/dev/dev_guides.md#coverage-gates"
+      },
+      "delivery_slice_refs": [
+        "lesson-grain-calibration"
+      ],
+      "docs_sync_refs": [
+        {
+          "path": "README.md",
+          "reason": "Keep user-facing behavior, commands, and artifact paths accurate."
+        },
+        {
+          "path": "docs/dev/dev_guides.md",
+          "reason": "Keep validation, CI, scanner, and test matrix guidance aligned."
+        },
+        {
+          "path": "docs/architecture/architecture_guides.md",
+          "reason": "Keep boundaries, state, feedback, and trust posture aligned."
+        }
+      ],
+      "engineering_policy_refs": [
+        {
+          "policy": "docs_parity",
+          "rule": "Behavior, flags, outputs, install paths, and workflow semantics update docs and Factory planning artifacts together.",
+          "source_ref": "docs/dev/dev_guides.md"
+        },
+        {
+          "policy": "output_contracts",
+          "rule": "CLI output, exit codes, schemas, and artifacts are executable contracts.",
+          "source_ref": "docs/dev/dev_guides.md"
+        },
+        {
+          "policy": "provenance_evidence",
+          "rule": "Validation, work-proof, PR lifecycle, scanner, and scope-closure evidence use repo-relative refs.",
+          "source_ref": "docs/dev/dev_guides.md"
+        },
+        {
+          "policy": "structured_parser_policy",
+          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+        },
+        {
+          "policy": "agent_native_cli",
+          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use.",
+          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy"
+        },
+        {
+          "policy": "artifact_budget_and_refs",
+          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+        },
+        {
+          "policy": "customer_safe_redaction",
+          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+        }
+      ],
+      "evidence_required": [
+        "work_proof_marker",
+        "validation_report",
+        "scope_closure_report",
+        "pr_lifecycle_report",
+        "factoryd_run_once_report",
+        "proof-of-behavior-scorecard"
+      ],
+      "factory_compatibility": {
+        "factory_contract_version": "1.0",
+        "generated_by": "repo-bootstrap-from-prd",
+        "profile_ref": ".factory/profile.yaml",
+        "skill_inventory_ref": "Factory skills/README.md"
+      },
+      "factoryd_runtime": {
+        "approval_posture": "human approval required for high risk, live credentials, and merge",
+        "branch_prefix": "codex",
+        "capability_grants": [],
+        "credential_posture": "no ambient secrets",
+        "network_posture": "offline by default",
+        "runtime_control": {
+          "autonomy_level": "restricted",
+          "conflict_behavior": "fail_closed",
+          "launch_request": {
+            "expected_decision": "allow",
+            "reason_code": "within_runtime_control_limits",
+            "requested_action": "continue_mission",
+            "requested_adapter": "codex_cli"
+          },
+          "owner": "factoryd-operator",
+          "release_freeze": {
+            "enabled": false
+          }
+        },
+        "state_dir": ".factoryd/",
+        "worker_command": "",
+        "worker_type": "codex_cli",
+        "workspace_root": ".factoryd/workspaces/"
+      },
+      "final_validation_commands": [
+        "make prepush-full"
+      ],
+      "forbidden_paths": [
+        ".git/",
+        ".factory/tmp/",
+        ".factoryd/",
+        ".factory/artifacts/prd-to-plan/relia-mvp/",
+        ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+      ],
+      "input_artifacts": [
+        "docs/product/prd.md",
+        "AGENTS.md",
+        "WORKFLOW.md",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        ".factory/profile.yaml",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json"
+      ],
+      "lifecycle_gates": {
+        "ci_required": true,
+        "codex_review_required": true,
+        "commit_push_required": true,
+        "local_validation_required": true,
+        "post_merge_monitor_required": true,
+        "pr_lifecycle_report_required": true,
+        "skip_policy": "approved_exception_required"
+      },
+      "max_iterations": 2,
+      "migration_impact": "None expected unless this task changes public output, schemas, artifacts, or install/distribution behavior.",
+      "mission_contract_ref": "docs/product/prd.md",
+      "objective": "Define Relia lesson/memory grain so failure-derived lessons include applicability, expiry, source evidence, owner, and promotion review before reuse.",
+      "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
+      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
+      "proof_scorecard_required": true,
+      "red_first_commands": [
+        "make test-contracts"
+      ],
+      "redaction_posture": {
+        "classification": "internal",
+        "customer_safe": false,
+        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing",
+        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported."
+      },
+      "required_proof_level": "workflow_behavior",
+      "required_worker_chain": [
+        "task-executor",
+        "validation-gate",
+        "commit-push",
+        "post-merge-monitor"
+      ],
+      "requires_credentials": false,
+      "requires_human_approval": false,
+      "requires_network": false,
+      "risk_class": "medium",
+      "runtime_pins": {
+        "artifact_namespace": ".factory/artifacts/",
+        "dependency_policy": "standard library first; pin and justify dependencies",
+        "distribution_target": "standalone_binary",
+        "language": "go",
+        "live_work_policy": "no ambient secrets or live network by default",
+        "module_or_package_path": "github.com/Clyra-AI/relia",
+        "provider_policy": "none by default",
+        "toolchain_version": "1.26.4"
+      },
+      "scope_exclusions": [
+        "Do not build retrieval infrastructure or global memory promotion automation in this task.",
+        "Do not promote broad rules without evidence, owner, applicability, and expiry."
+      ],
+      "security_scanner_gates": {
+        "exception_policy": "approved_exception_required_when_required_or_surface_touched",
+        "required": true,
+        "required_for_surfaces": [
+          "dependency additions",
+          "generated-code intake",
+          "CI or workflow changes",
+          "external calls",
+          "security-sensitive code",
+          "release-sensitive changes"
+        ],
+        "scanner": "CodeQL",
+        "status_check": "CodeQL analyze",
+        "workflow_ref": ".github/workflows/codeql.yml"
+      },
+      "shared_constraints_ref": "AGENTS.md",
+      "slice_rationale": {
+        "rationale": "Task advances a product-shaped capability slice while preserving acceptance-item closure refs.",
+        "slice_type": "vertical"
+      },
+      "slice_type": "vertical",
+      "stop_conditions": [
+        "missing runner-ready task contract",
+        "changed path outside allowed_paths",
+        "forbidden path changed",
+        "required validation command failed",
+        "plan drift detected",
+        "scope closure did not advance"
+      ],
+      "structured_parser_policy_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "task_id": "T18",
+      "test_matrix_refs": [
+        {
+          "command_refs": [
+            "make test-fast"
+          ],
+          "source_ref": "docs/dev/dev_guides.md#12-level-test-matrix",
+          "tier": "Tier 1 Unit"
+        },
+        {
+          "command_refs": [
+            "scope closure map"
+          ],
+          "source_ref": "docs/dev/dev_guides.md#12-level-test-matrix",
+          "tier": "Tier 4 Acceptance"
+        },
+        {
+          "command_refs": [
+            "make test-contracts"
+          ],
+          "source_ref": "docs/dev/dev_guides.md#12-level-test-matrix",
+          "tier": "Tier 9 Contract"
+        }
+      ],
+      "upstream_debt_refs": [],
+      "validation_commands": [
+        "make test-coverage",
+        "make prepush-full"
+      ],
+      "validation_contract_inheritance": {
+        "acceptance_criteria": [
+          "MEMORY.md memory page with receipts"
+        ],
+        "acceptance_item_ids": [
+          "MVP-IN-SCOPE-015"
+        ],
+        "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+        "evidence_required": [
+          "work_proof_marker",
+          "validation_report",
+          "scope_closure_report",
+          "pr_lifecycle_report",
+          "factoryd_run_once_report"
+        ],
+        "required_checks": [
+          "make prepush-full"
+        ],
+        "required_review": {
+          "required": false,
+          "review_type": "code",
+          "reviewer_class": "peer_agent"
+        },
+        "source_validation_contract_ref": ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
+        "stop_conditions": [
+          "missing runner-ready task contract",
+          "changed path outside allowed_paths",
+          "forbidden path changed",
+          "required validation command failed",
+          "plan drift detected",
+          "scope closure did not advance"
+        ]
+      },
+      "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
+      "work_item_id": "relia-mvp-t11",
+      "worker_type": "codex_cli"
     }
-  ],
-  "proof_of_behavior_requirements": {
-    "levels": [
-      "syntax",
-      "source_evidence",
-      "workflow_behavior",
-      "user_visible_behavior"
-    ],
-    "rule": "Tasks must close at or above their required_proof_level; workflow or user-visible closure requires proof-of-behavior scorecard evidence or approved exception.",
-    "artifact_type": "proof-of-behavior-scorecard"
-  },
-  "acceptance_item_count": 122
+  ]
 }

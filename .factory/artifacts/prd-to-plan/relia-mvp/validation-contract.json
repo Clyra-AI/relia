@@ -10,7 +10,7 @@
     "Relia must pair recurrences conservatively, separate `confirmed` from `possible`, and exclude `possible` from headline ERR.",
     "relia backtest` must deliver the ERR headline and paired evidence read-only, with no rules, review, or workflow change required.",
     "Every rule must cite at least one experience and one PR. Uncited rules fail validation and never render.",
-    "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence — never from the drafting model.",
+    "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence \u2014 never from the drafting model.",
     "Rules must decay by half-life and go `stale` when their scoped paths are deleted.",
     "Drafted rules must be reviewed before becoming `active`, with `accepted`, `suggested`, and `needs_user_input` labels. Disabling review is an explicit, surfaced configuration choice.",
     "Relia must support `avoid` rules from failures and `playbook` rules from held fixes, and playbook rules must cite held evidence.",
@@ -576,40 +576,40 @@
       "title": "Demo Acceptance"
     },
     {
-      "group_id": "agent_native_cli_conventions",
-      "title": "Agent-Native CLI Conventions",
-      "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
-      "required": true,
-      "task_refs": [
-        "T1"
+      "acceptance_item_ids": [
+        "CLI-AGENT-001"
       ],
       "acceptance_refs": [
         "CLI-AGENT-001"
       ],
-      "acceptance_item_ids": [
-        "CLI-AGENT-001"
-      ],
+      "closure_status": "partial",
       "criteria": [
         "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
         "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
         "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
       ],
-      "closure_status": "partial",
+      "delivery_slice_refs": [
+        "repo-lifecycle-foundation"
+      ],
+      "group_id": "agent_native_cli_conventions",
       "item_mappings": [
         {
           "acceptance_item_id": "CLI-AGENT-001",
-          "task_refs": [
-            "T1"
-          ],
-          "evidence_mode": "automated",
           "delivery_slice_refs": [
             "repo-lifecycle-foundation"
+          ],
+          "evidence_mode": "automated",
+          "task_refs": [
+            "T1"
           ]
         }
       ],
-      "delivery_slice_refs": [
-        "repo-lifecycle-foundation"
-      ]
+      "required": true,
+      "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
+      "task_refs": [
+        "T1"
+      ],
+      "title": "Agent-Native CLI Conventions"
     }
   ],
   "acceptance_item_count": 122,
@@ -702,9 +702,11 @@
       "public_release_boundary": false,
       "required_for_completion": true,
       "slice_id": "outcome-fixture-corpus",
-      "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T4",
+      "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T4.1-T4.3",
       "task_refs": [
-        "T4"
+        "T4.1",
+        "T4.2",
+        "T4.3"
       ]
     },
     {
@@ -1059,6 +1061,43 @@
       "task_refs": [
         "T16"
       ]
+    },
+    {
+      "acceptance_group_refs": [
+        "post_mvp_learning"
+      ],
+      "acceptance_item_ids": [
+        "FR1-OUTCOMES-AS-THE-ONLY-MEMORY-SOURCE-001",
+        "FR10-PROVENANCE-MANDATORY-RULES-001",
+        "NFR6-LOCAL-PRIVACY-001"
+      ],
+      "name": "Customer Failure Absorption Loop",
+      "public_release_boundary": false,
+      "required_for_completion": false,
+      "slice_id": "customer-failure-absorption-loop",
+      "source_ref": "docs/dev/customer-failure-intake-template.md",
+      "task_refs": [
+        "T17"
+      ]
+    },
+    {
+      "acceptance_group_refs": [
+        "post_mvp_learning"
+      ],
+      "acceptance_item_ids": [
+        "FR12-DECAY-AND-CHURN-INVALIDATION-001",
+        "FR14-BIDIRECTIONAL-MEMORY-001",
+        "FR15-MEMORY-PAGE-WITH-RECEIPTS-001",
+        "NFR4-CALIBRATION-HONESTY-001"
+      ],
+      "name": "Lesson Grain Calibration",
+      "public_release_boundary": false,
+      "required_for_completion": false,
+      "slice_id": "lesson-grain-calibration",
+      "source_ref": "docs/architecture/lesson-record-template.md",
+      "task_refs": [
+        "T18"
+      ]
     }
   ],
   "evidence_required": [
@@ -1109,6 +1148,16 @@
     }
   },
   "generated_at": "2026-06-11T15:48:57Z",
+  "proof_of_behavior_requirements": {
+    "artifact_type": "proof-of-behavior-scorecard",
+    "levels": [
+      "syntax",
+      "source_evidence",
+      "workflow_behavior",
+      "user_visible_behavior"
+    ],
+    "rule": "Tasks must close at or above their required_proof_level; workflow or user-visible closure requires proof-of-behavior scorecard evidence or approved exception."
+  },
   "required_checks": [
     "make prepush-full"
   ],
@@ -1124,15 +1173,5 @@
     "path policy violation",
     "closure did not advance",
     "alignment drift detected"
-  ],
-  "proof_of_behavior_requirements": {
-    "levels": [
-      "syntax",
-      "source_evidence",
-      "workflow_behavior",
-      "user_visible_behavior"
-    ],
-    "rule": "Tasks must close at or above their required_proof_level; workflow or user-visible closure requires proof-of-behavior scorecard evidence or approved exception.",
-    "artifact_type": "proof-of-behavior-scorecard"
-  }
+  ]
 }

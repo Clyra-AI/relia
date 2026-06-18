@@ -62,6 +62,45 @@ compensating validation evidence.
 - Evidence artifacts must use repo-relative paths.
 - New dependencies must be pinned and justified.
 
+## Outcome Fixture Corpus
+
+T4 is intentionally split into small runner-sized corpus tasks:
+
+- T4.1 builds seeded outcome fixtures, flake-discount fixtures, redaction
+  fixtures, attribution precision samples, and reproducible demo-number
+  baselines.
+- T4.2 builds distill/review lifecycle fixtures for recurrence,
+  contradiction, and stale-path behavior.
+- T4.3 builds assessment fixtures for planted-pattern and unknown-path diffs.
+
+Do not collapse these back into one broad corpus task. Each task must add the
+smallest fixture set needed for its acceptance items and must keep fixture
+provenance, expected outcomes, and negative cases close to the tests that use
+them.
+
+## Customer Failure Intake
+
+Customer-derived failures may improve Relia only through a bounded,
+redacted, reviewable intake loop. Raw customer code, private logs, tickets,
+screenshots, owner handles, endpoints, credentials, and machine-local paths
+must not be committed.
+
+Use [customer-failure-intake-template.md](customer-failure-intake-template.md)
+when a support case, customer repo, or downstream audit suggests a reusable
+lesson. The intake record must include:
+
+- the observed failure mode, stated without customer identifiers
+- the affected Relia behavior or acceptance item
+- redaction evidence and reviewer approval
+- a synthetic fixture proposal or reason no fixture is safe
+- applicability limits and expiry/revisit trigger
+- owner, evidence refs, and promotion decision
+
+Promotion into examples, tests, fixtures, or memory content requires owner
+approval and a synthetic or public-safe fixture. If safe reproduction is not
+possible, keep the item as private delivery debt or an approved deferral; do
+not generalize it into product behavior.
+
 ## Agent-Native CLI Policy
 
 - Agent-facing commands must support stable JSON output mode before they become

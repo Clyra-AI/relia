@@ -70,3 +70,12 @@ task packets preserve the originating Factory skill refs.
 The MVP has one public release boundary: the final release/demo/product-signals
 delivery slice. Do not clear that boundary when splitting release work into
 runner-sized tasks.
+
+## 8. Customer-Derived Learning
+
+Do not commit raw customer code, logs, tickets, owner handles, endpoints,
+credentials, screenshots, or machine-local paths. Customer-derived failures can
+enter Relia only through a redacted intake record, an approved synthetic fixture,
+or private delivery debt. Use `docs/dev/customer-failure-intake-template.md` and
+`docs/architecture/lesson-record-template.md` before promoting a recurring
+failure into reusable lessons or task packets.
