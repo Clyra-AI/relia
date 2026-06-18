@@ -500,26 +500,23 @@
         {
           "acceptance_item_id": "FR1-OUTCOMES-AS-THE-ONLY-MEMORY-SOURCE-001",
           "evidence_refs": [],
-          "repair_task_refs": [
-            "T17"
-          ],
+          "repair_task_refs": [],
           "status": "partial"
         }
       ],
       "delivery_slice_refs": [
-        "reporting-and-evidence",
-        "customer-failure-absorption-loop"
+        "reporting-and-evidence"
       ],
       "evidence_refs": [],
       "group_id": "fr1-outcomes-as-the-only-memory-source",
       "implemented_task_refs": [],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence.",
-        "Sprint 4 remapped this item to smaller task slices or bounded learning-loop follow-up evidence."
+        "Sprint 4 remapped this item to smaller task slices or bounded learning-loop follow-up evidence.",
+        "Sprint 4 optional post-MVP learning tasks are excluded from MVP closure blockers."
       ],
       "remaining_task_refs": [
-        "T8",
-        "T17"
+        "T8"
       ],
       "requires_human_approval": false,
       "scope_item": "Memory writes must originate from verified outcome events. Agent self-reports and reflections must not enter memory in the MVP.",
@@ -527,8 +524,7 @@
       "source_ref": "docs/product/prd.md#fr1-outcomes-as-the-only-memory-source",
       "status": "partial",
       "task_refs": [
-        "T8",
-        "T17"
+        "T8"
       ]
     },
     {
@@ -830,26 +826,23 @@
         {
           "acceptance_item_id": "FR10-PROVENANCE-MANDATORY-RULES-001",
           "evidence_refs": [],
-          "repair_task_refs": [
-            "T17"
-          ],
+          "repair_task_refs": [],
           "status": "partial"
         }
       ],
       "delivery_slice_refs": [
-        "data-intake-and-persistence",
-        "customer-failure-absorption-loop"
+        "data-intake-and-persistence"
       ],
       "evidence_refs": [],
       "group_id": "fr10-provenance-mandatory-rules",
       "implemented_task_refs": [],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence.",
-        "Sprint 4 remapped this item to smaller task slices or bounded learning-loop follow-up evidence."
+        "Sprint 4 remapped this item to smaller task slices or bounded learning-loop follow-up evidence.",
+        "Sprint 4 optional post-MVP learning tasks are excluded from MVP closure blockers."
       ],
       "remaining_task_refs": [
-        "T3",
-        "T17"
+        "T3"
       ],
       "requires_human_approval": false,
       "scope_item": "Every rule must cite at least one experience and one PR. Uncited rules fail validation and never render.",
@@ -857,8 +850,7 @@
       "source_ref": "docs/product/prd.md#fr10-provenance-mandatory-rules",
       "status": "partial",
       "task_refs": [
-        "T3",
-        "T17"
+        "T3"
       ]
     },
     {
@@ -908,26 +900,23 @@
         {
           "acceptance_item_id": "FR12-DECAY-AND-CHURN-INVALIDATION-001",
           "evidence_refs": [],
-          "repair_task_refs": [
-            "T18"
-          ],
+          "repair_task_refs": [],
           "status": "partial"
         }
       ],
       "delivery_slice_refs": [
-        "distillation-calibration-and-confidence-part-1",
-        "lesson-grain-calibration"
+        "distillation-calibration-and-confidence-part-1"
       ],
       "evidence_refs": [],
       "group_id": "fr12-decay-and-churn-invalidation",
       "implemented_task_refs": [],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence.",
-        "Sprint 4 remapped this item to smaller task slices or bounded learning-loop follow-up evidence."
+        "Sprint 4 remapped this item to smaller task slices or bounded learning-loop follow-up evidence.",
+        "Sprint 4 optional post-MVP learning tasks are excluded from MVP closure blockers."
       ],
       "remaining_task_refs": [
-        "T6",
-        "T18"
+        "T6"
       ],
       "requires_human_approval": false,
       "scope_item": "Rules must decay by half-life and go `stale` when their scoped paths are deleted.",
@@ -935,8 +924,7 @@
       "source_ref": "docs/product/prd.md#fr12-decay-and-churn-invalidation",
       "status": "partial",
       "task_refs": [
-        "T6",
-        "T18"
+        "T6"
       ]
     },
     {
@@ -986,26 +974,23 @@
         {
           "acceptance_item_id": "FR14-BIDIRECTIONAL-MEMORY-001",
           "evidence_refs": [],
-          "repair_task_refs": [
-            "T18"
-          ],
+          "repair_task_refs": [],
           "status": "partial"
         }
       ],
       "delivery_slice_refs": [
-        "distillation-calibration-and-confidence-part-1",
-        "lesson-grain-calibration"
+        "distillation-calibration-and-confidence-part-1"
       ],
       "evidence_refs": [],
       "group_id": "fr14-bidirectional-memory",
       "implemented_task_refs": [],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence.",
-        "Sprint 4 remapped this item to smaller task slices or bounded learning-loop follow-up evidence."
+        "Sprint 4 remapped this item to smaller task slices or bounded learning-loop follow-up evidence.",
+        "Sprint 4 optional post-MVP learning tasks are excluded from MVP closure blockers."
       ],
       "remaining_task_refs": [
-        "T6",
-        "T18"
+        "T6"
       ],
       "requires_human_approval": false,
       "scope_item": "Relia must support `avoid` rules from failures and `playbook` rules from held fixes, and playbook rules must cite held evidence.",
@@ -1013,8 +998,7 @@
       "source_ref": "docs/product/prd.md#fr14-bidirectional-memory",
       "status": "partial",
       "task_refs": [
-        "T6",
-        "T18"
+        "T6"
       ]
     },
     {
@@ -1028,26 +1012,23 @@
         {
           "acceptance_item_id": "FR15-MEMORY-PAGE-WITH-RECEIPTS-001",
           "evidence_refs": [],
-          "repair_task_refs": [
-            "T18"
-          ],
+          "repair_task_refs": [],
           "status": "partial"
         }
       ],
       "delivery_slice_refs": [
-        "distillation-calibration-and-confidence-part-1",
-        "lesson-grain-calibration"
+        "distillation-calibration-and-confidence-part-1"
       ],
       "evidence_refs": [],
       "group_id": "fr15-memory-page-with-receipts",
       "implemented_task_refs": [],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence.",
-        "Sprint 4 remapped this item to smaller task slices or bounded learning-loop follow-up evidence."
+        "Sprint 4 remapped this item to smaller task slices or bounded learning-loop follow-up evidence.",
+        "Sprint 4 optional post-MVP learning tasks are excluded from MVP closure blockers."
       ],
       "remaining_task_refs": [
-        "T6",
-        "T18"
+        "T6"
       ],
       "requires_human_approval": false,
       "scope_item": "relia memory` must render MEMORY.md showing statements, confidence, lifecycle status, and clickable provenance.",
@@ -1055,8 +1036,7 @@
       "source_ref": "docs/product/prd.md#fr15-memory-page-with-receipts",
       "status": "partial",
       "task_refs": [
-        "T6",
-        "T18"
+        "T6"
       ]
     },
     {
@@ -1538,26 +1518,23 @@
         {
           "acceptance_item_id": "NFR4-CALIBRATION-HONESTY-001",
           "evidence_refs": [],
-          "repair_task_refs": [
-            "T18"
-          ],
+          "repair_task_refs": [],
           "status": "partial"
         }
       ],
       "delivery_slice_refs": [
-        "distillation-calibration-and-confidence-part-1",
-        "lesson-grain-calibration"
+        "distillation-calibration-and-confidence-part-1"
       ],
       "evidence_refs": [],
       "group_id": "nfr4-calibration-honesty",
       "implemented_task_refs": [],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence.",
-        "Sprint 4 remapped this item to smaller task slices or bounded learning-loop follow-up evidence."
+        "Sprint 4 remapped this item to smaller task slices or bounded learning-loop follow-up evidence.",
+        "Sprint 4 optional post-MVP learning tasks are excluded from MVP closure blockers."
       ],
       "remaining_task_refs": [
-        "T6",
-        "T18"
+        "T6"
       ],
       "requires_human_approval": true,
       "scope_item": "Reports must clearly distinguish confirmed recurrences, possible recurrences, flake-discounted evidence, and uncertain attribution.",
@@ -1565,8 +1542,7 @@
       "source_ref": "docs/product/prd.md#nfr4-calibration-honesty",
       "status": "partial",
       "task_refs": [
-        "T6",
-        "T18"
+        "T6"
       ]
     },
     {
@@ -1616,26 +1592,23 @@
         {
           "acceptance_item_id": "NFR6-LOCAL-PRIVACY-001",
           "evidence_refs": [],
-          "repair_task_refs": [
-            "T17"
-          ],
+          "repair_task_refs": [],
           "status": "partial"
         }
       ],
       "delivery_slice_refs": [
-        "distillation-calibration-and-confidence-part-1",
-        "customer-failure-absorption-loop"
+        "distillation-calibration-and-confidence-part-1"
       ],
       "evidence_refs": [],
       "group_id": "nfr6-local-privacy",
       "implemented_task_refs": [],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence.",
-        "Sprint 4 remapped this item to smaller task slices or bounded learning-loop follow-up evidence."
+        "Sprint 4 remapped this item to smaller task slices or bounded learning-loop follow-up evidence.",
+        "Sprint 4 optional post-MVP learning tasks are excluded from MVP closure blockers."
       ],
       "remaining_task_refs": [
-        "T6",
-        "T17"
+        "T6"
       ],
       "requires_human_approval": false,
       "scope_item": "Relia must not send code, diffs, logs, or experience records anywhere by default. When a distill provider is configured, only redacted experience records leave the machine, and `relia check` must say so explicitly.",
@@ -1643,8 +1616,7 @@
       "source_ref": "docs/product/prd.md#nfr6-local-privacy",
       "status": "partial",
       "task_refs": [
-        "T6",
-        "T17"
+        "T6"
       ]
     },
     {
