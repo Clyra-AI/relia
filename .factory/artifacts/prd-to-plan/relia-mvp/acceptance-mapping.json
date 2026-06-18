@@ -505,8 +505,7 @@
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T8",
-            "T17"
+            "T8"
           ]
         }
       ],
@@ -518,8 +517,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T8",
-        "T17"
+        "T8"
       ],
       "title": "FR1: Outcomes As The Only Memory Source"
     },
@@ -805,8 +803,7 @@
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T3",
-            "T17"
+            "T3"
           ]
         }
       ],
@@ -818,8 +815,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T3",
-        "T17"
+        "T3"
       ],
       "title": "FR10: Provenance-Mandatory Rules"
     },
@@ -874,8 +870,7 @@
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T6",
-            "T18"
+            "T6"
           ]
         }
       ],
@@ -887,8 +882,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T6",
-        "T18"
+        "T6"
       ],
       "title": "FR12: Decay And Churn Invalidation"
     },
@@ -943,8 +937,7 @@
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T6",
-            "T18"
+            "T6"
           ]
         }
       ],
@@ -956,8 +949,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T6",
-        "T18"
+        "T6"
       ],
       "title": "FR14: Bidirectional Memory"
     },
@@ -979,8 +971,7 @@
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T6",
-            "T18"
+            "T6"
           ]
         }
       ],
@@ -992,8 +983,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T6",
-        "T18"
+        "T6"
       ],
       "title": "FR15: Memory Page With Receipts"
     },
@@ -1444,8 +1434,7 @@
           ],
           "evidence_mode": "manual_review",
           "task_refs": [
-            "T6",
-            "T18"
+            "T6"
           ]
         }
       ],
@@ -1458,8 +1447,7 @@
         "human approval for judgment-based acceptance"
       ],
       "task_refs": [
-        "T6",
-        "T18"
+        "T6"
       ],
       "title": "NFR4: Calibration Honesty"
     },
@@ -1514,8 +1502,7 @@
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T6",
-            "T17"
+            "T6"
           ]
         }
       ],
@@ -1527,8 +1514,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T6",
-        "T17"
+        "T6"
       ],
       "title": "NFR6: Local Privacy"
     },
