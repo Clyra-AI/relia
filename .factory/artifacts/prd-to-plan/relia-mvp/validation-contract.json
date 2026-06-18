@@ -132,8 +132,7 @@
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#fr1-outcomes-as-the-only-memory-source",
       "task_refs": [
-        "T8",
-        "T17"
+        "T8"
       ],
       "title": "FR1: Outcomes As The Only Memory Source"
     },
@@ -214,8 +213,7 @@
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#fr10-provenance-mandatory-rules",
       "task_refs": [
-        "T3",
-        "T17"
+        "T3"
       ],
       "title": "FR10: Provenance-Mandatory Rules"
     },
@@ -233,8 +231,7 @@
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#fr12-decay-and-churn-invalidation",
       "task_refs": [
-        "T6",
-        "T18"
+        "T6"
       ],
       "title": "FR12: Decay And Churn Invalidation"
     },
@@ -252,8 +249,7 @@
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#fr14-bidirectional-memory",
       "task_refs": [
-        "T6",
-        "T18"
+        "T6"
       ],
       "title": "FR14: Bidirectional Memory"
     },
@@ -262,8 +258,7 @@
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#fr15-memory-page-with-receipts",
       "task_refs": [
-        "T6",
-        "T18"
+        "T6"
       ],
       "title": "FR15: Memory Page With Receipts"
     },
@@ -389,8 +384,7 @@
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#nfr4-calibration-honesty",
       "task_refs": [
-        "T6",
-        "T18"
+        "T6"
       ],
       "title": "NFR4: Calibration Honesty"
     },
@@ -408,8 +402,7 @@
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#nfr6-local-privacy",
       "task_refs": [
-        "T6",
-        "T17"
+        "T6"
       ],
       "title": "NFR6: Local Privacy"
     },
