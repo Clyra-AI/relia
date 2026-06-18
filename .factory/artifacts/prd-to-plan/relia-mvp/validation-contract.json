@@ -576,13 +576,41 @@
       "title": "Demo Acceptance"
     },
     {
+      "acceptance_item_ids": [
+        "CLI-AGENT-001"
+      ],
+      "acceptance_refs": [
+        "CLI-AGENT-001"
+      ],
+      "closure_status": "partial",
+      "criteria": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
+      ],
+      "delivery_slice_refs": [
+        "repo-lifecycle-foundation"
+      ],
       "group_id": "agent_native_cli_conventions",
-      "risk_class": "medium",
+      "item_mappings": [
+        {
+          "acceptance_item_id": "CLI-AGENT-001",
+          "delivery_slice_refs": [
+            "repo-lifecycle-foundation"
+          ],
+          "evidence_mode": "automated",
+          "task_refs": [
+            "T1"
+          ]
+        }
+      ],
+      "required": true,
       "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
       "task_refs": [
         "T1"
       ],
-      "title": "Agent-Native CLI Conventions"
+      "title": "Agent-Native CLI Conventions",
+      "risk_class": "medium"
     },
     {
       "group_id": "post_mvp_learning",
