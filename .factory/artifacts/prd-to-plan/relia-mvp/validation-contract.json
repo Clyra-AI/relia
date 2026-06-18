@@ -10,7 +10,7 @@
     "Relia must pair recurrences conservatively, separate `confirmed` from `possible`, and exclude `possible` from headline ERR.",
     "relia backtest` must deliver the ERR headline and paired evidence read-only, with no rules, review, or workflow change required.",
     "Every rule must cite at least one experience and one PR. Uncited rules fail validation and never render.",
-    "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence \u2014 never from the drafting model.",
+    "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence — never from the drafting model.",
     "Rules must decay by half-life and go `stale` when their scoped paths are deleted.",
     "Drafted rules must be reviewed before becoming `active`, with `accepted`, `suggested`, and `needs_user_input` labels. Disabling review is an explicit, surfaced configuration choice.",
     "Relia must support `avoid` rules from failures and `playbook` rules from held fixes, and playbook rules must cite held evidence.",
@@ -123,7 +123,8 @@
     "The local embedding inference boundary is covered by an ADR before implementation chooses a pure Go library, ONNX/runtime binding, or external local process.",
     "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
     "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
-    "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
+    "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors.",
+    "CLI-AGENT-001: Agent-facing CLI output supports stable JSON mode or records an approved deferral."
   ],
   "acceptance_groups": [
     {
@@ -573,6 +574,42 @@
         "T16"
       ],
       "title": "Demo Acceptance"
+    },
+    {
+      "group_id": "agent_native_cli_conventions",
+      "title": "Agent-Native CLI Conventions",
+      "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy",
+      "required": true,
+      "task_refs": [
+        "T1"
+      ],
+      "acceptance_refs": [
+        "CLI-AGENT-001"
+      ],
+      "acceptance_item_ids": [
+        "CLI-AGENT-001"
+      ],
+      "criteria": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
+      ],
+      "closure_status": "partial",
+      "item_mappings": [
+        {
+          "acceptance_item_id": "CLI-AGENT-001",
+          "task_refs": [
+            "T1"
+          ],
+          "evidence_mode": "automated",
+          "delivery_slice_refs": [
+            "repo-lifecycle-foundation"
+          ]
+        }
+      ],
+      "delivery_slice_refs": [
+        "repo-lifecycle-foundation"
+      ]
     }
   ],
   "acceptance_item_count": 122,
@@ -583,10 +620,12 @@
   "delivery_slices": [
     {
       "acceptance_group_refs": [
-        "acceptance-tests"
+        "acceptance-tests",
+        "agent_native_cli_conventions"
       ],
       "acceptance_item_ids": [
-        "ACCEPTANCE-TESTS-001"
+        "ACCEPTANCE-TESTS-001",
+        "CLI-AGENT-001"
       ],
       "name": "Repo Lifecycle And CLI Foundation",
       "public_release_boundary": false,
