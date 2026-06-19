@@ -87,15 +87,7 @@
       "approval_posture": "human approval required for live credentials and high-risk work; merge allowed only by explicit task-scoped merge_authority grant",
       "credential_posture": "no ambient secrets during deterministic bootstrap",
       "network_posture": "offline by default until approved",
-      "capability_grants": [
-        {
-          "task_id": "T1",
-          "capability": "merge_authority",
-          "approved": true,
-          "expires_at": "2026-06-30T00:00:00Z",
-          "evidence_ref": ".factory/artifacts/approvals/T1-merge-authority.json"
-        }
-      ]
+      "capability_grants": []
     }
   }
 }
