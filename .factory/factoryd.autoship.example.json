@@ -53,7 +53,7 @@
       },
       "command_timeout_seconds": 300,
       "worker_timeout_seconds": 1800,
-      "lease_ttl_seconds": 3600,
+      "lease_ttl_seconds": 14400,
       "mode": "until_blocked",
       "auto_ship": true,
       "shipping": {
@@ -76,12 +76,26 @@
         "codex_review_command": "",
         "merge_command": "",
         "post_merge_command": "",
-        "scope_closure_command": ""
+        "scope_closure_command": "",
+        "phase_timeout_seconds": {
+          "ci": 5400,
+          "codex_review": 5400,
+          "merge": 1800,
+          "post_merge": 1800
+        }
       },
-      "approval_posture": "human approval required for live credentials, high-risk tasks, and merge",
+      "approval_posture": "human approval required for live credentials and high-risk work; merge allowed only by explicit task-scoped merge_authority grant",
       "credential_posture": "no ambient secrets during deterministic bootstrap",
       "network_posture": "offline by default until approved",
-      "capability_grants": []
+      "capability_grants": [
+        {
+          "task_id": "T1",
+          "capability": "merge_authority",
+          "approved": true,
+          "expires_at": "2026-06-30T00:00:00Z",
+          "evidence_ref": ".factory/artifacts/approvals/T1-merge-authority.json"
+        }
+      ]
     }
   }
 }
