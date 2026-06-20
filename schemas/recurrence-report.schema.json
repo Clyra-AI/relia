@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Clyra-AI/relia/schemas/recurrence-report.schema.json",
+  "title": "Relia Recurrence Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "object_type",
+    "schema_version",
+    "report_id",
+    "repo_id",
+    "window",
+    "experiences_total",
+    "experiences_agent_attributed",
+    "recurrences_confirmed",
+    "recurrences_possible",
+    "error_recurrence_rate",
+    "redaction_status",
+    "metadata"
+  ],
+  "properties": {
+    "object_type": {
+      "const": "relia.recurrence_report"
+    },
+    "schema_version": {
+      "const": "1.0"
+    },
+    "report_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "repo_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "window": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start", "end"],
+      "properties": {
+        "start": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "experiences_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "experiences_agent_attributed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "recurrences_confirmed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "recurrences_possible": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "error_recurrence_rate": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "redaction_status": {
+      "enum": ["applied", "failed_closed"]
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

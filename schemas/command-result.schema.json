@@ -74,6 +74,10 @@
     "redaction_status": {
       "enum": ["not_applicable", "applied", "failed_closed"]
     },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    },
     "data": {
       "type": "object"
     }
@@ -126,13 +130,17 @@
     "artifact_ref": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["kind", "path"],
+      "required": ["kind", "path", "schema_version"],
       "properties": {
         "kind": {
           "type": "string",
           "minLength": 1
         },
         "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "schema_version": {
           "type": "string",
           "minLength": 1
         }

@@ -17,9 +17,38 @@ attribution:
 outcomes:
   checks:
     required: []
+  revert_detection: true
+  review_corrections:
+    marker: "relia:correction"
+  lookback_days: 180
+  fix_held:
+    settle_days: 14
+    min_overlapping_merges: 3
+
+redaction:
+  patterns:
+    - api_key
+    - token
+    - password
+    - secret
+  entropy_scan: true
 
 distill:
   embeddings: signature
+  min_evidence_count: 2
+  review_required: true
+
+memory:
+  decay_half_life_days: 90
+  invalidate_on_path_delete: true
+  max_active_rules: 200
+  commit_experiences: false
+
+artifacts:
+  schema_version: "1.0"
+  generated_root: .relia
+  memory_root: memory
+  default_share_scope: private
 
 serve:
   advisory_only: true

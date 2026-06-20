@@ -21,16 +21,22 @@ The T1 command surface establishes the lifecycle skeleton and agent-native
 output contract:
 
 - `relia init` creates `relia.yaml` if it is missing and is idempotent when the
-  file already exists.
-- `relia check` validates the repo-local operating pack baseline.
+  file already exists. The generated config defaults to signature-only
+  embeddings, entropy scanning, local-private generated artifacts under
+  `.relia/`, and `commit_experiences: false`.
+- `relia check` validates the repo-local operating pack baseline, required
+  schema contracts, config defaults, and fail-closed local model posture.
 - `--json` always emits the stable command result envelope.
 - piped or non-interactive stdout defaults to JSON.
 - `--quiet` and `--compact` emit compact JSON while preserving status,
   evidence refs, typed errors, and exit codes.
 
-The command result schema is `schemas/command-result.schema.json`. Stable
-exit-code examples for codes `0` through `9` are in
-`examples/command-results/exit-code-examples.json`.
+Schema contracts live under `schemas/` and use schema version `1.0`. The
+command result schema is `schemas/command-result.schema.json`. Stable exit-code
+examples for codes `0` through `9` are in
+`examples/command-results/exit-code-examples.json`. Artifact refs emitted by
+the CLI include their own `schema_version` so automation can treat artifacts as
+versioned contracts.
 
 Provider-backed distill work requires a complete `model_provider_endpoint`
 grant naming provider, model, endpoint or `base_url`, credential environment,

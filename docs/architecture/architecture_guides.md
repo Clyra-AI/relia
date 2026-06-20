@@ -22,6 +22,19 @@ validation. Rollback is deletion of the T1 schema/examples and restoration of
 the previous command wrapper, but that would also remove the agent-native CLI
 baseline required by `docs/dev/dev_guides.md#agent-native-cli-policy`.
 
+## Phase 0 Contract Boundary
+
+T2 owns the first PRD-defined configuration, schema, artifact, and privacy
+contract layer. The state owner remains `cmd/relia` for `init` and `check`, with
+schema source of truth under `schemas/` and user config in `relia.yaml`.
+Feedback sources are unit tests, `make prepush-full`, schema-file presence
+checks in `relia check`, and Factory task-run evidence. The blast radius is
+limited to local command output, config validation, artifact refs, memory-rule
+preflight checks, and source schema files. Rollback is restoring the T1
+command-result contract and removing the T2 schema/config checks, but that
+would reopen the PRD gaps for versioned artifacts, privacy defaults, and
+schema-backed automation.
+
 ## Systems Thinking Map
 
 - State lives in repo-local config, generated artifacts, source files, and Factory evidence.

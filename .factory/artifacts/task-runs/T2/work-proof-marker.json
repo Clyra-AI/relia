@@ -1,0 +1,35 @@
+{
+  "artifact_type": "work_proof_marker",
+  "schema_version": "1.0",
+  "task_id": "T2",
+  "status": "implemented",
+  "implementation_performed": true,
+  "changed_paths": [
+    "README.md",
+    "cmd/relia/main.go",
+    "cmd/relia/main_test.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/architecture/decision-0002-phase0-contracts.md",
+    "docs/dev/changelog.md",
+    "docs/dev/dev_guides.md",
+    "relia.yaml",
+    "schemas/command-result.schema.json",
+    "schemas/compiled-context.schema.json",
+    "schemas/coverage-map.schema.json",
+    "schemas/experience-record.schema.json",
+    "schemas/failure-signature.schema.json",
+    "schemas/memory-rule.schema.json",
+    "schemas/outcome-evidence.schema.json",
+    "schemas/recurrence-report.schema.json",
+    "schemas/redaction-config.schema.json",
+    "schemas/risk-assessment.schema.json"
+  ],
+  "implementation_summary": [
+    "Added required PRD Phase 0 schema contracts with schema_version and metadata fields.",
+    "Extended relia init/check defaults and validation for private artifact posture, redaction defaults, versioned artifact refs, distill provider validation, local model manifest fail-closed behavior, and basic memory-rule provenance checks.",
+    "Updated tests, README, developer and architecture guides, decision record, and changelog for the contract slice."
+  ],
+  "evidence_refs": [
+    ".factory/artifacts/task-runs/T2/validation-report.json"
+  ]
+}

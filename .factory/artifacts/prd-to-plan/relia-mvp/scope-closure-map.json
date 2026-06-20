@@ -1265,28 +1265,42 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "FR22-STABLE-CLI-OUTPUT-001",
-          "evidence_refs": [],
+          "evidence_refs": [
+            "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/validation-report.json",
+            "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/ship-packet.json",
+            "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "contracts-config-and-validation"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/validation-report.json",
+        "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/ship-packet.json",
+        "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "fr22-stable-cli-output",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T2"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T2"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "Relia must support stable exit codes and `--json`.",
       "scope_item_id": "FR22-STABLE-CLI-OUTPUT-001",
       "source_ref": "docs/product/prd.md#fr22-stable-cli-output",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T2"
       ]
@@ -1809,28 +1823,42 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "NFR12-ARTIFACT-STABILITY-001",
-          "evidence_refs": [],
+          "evidence_refs": [
+            "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/validation-report.json",
+            "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/ship-packet.json",
+            "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "contracts-config-and-validation"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/validation-report.json",
+        "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/ship-packet.json",
+        "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "nfr12-artifact-stability",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T2"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T2"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "Schemas and artifacts must be versioned.",
       "scope_item_id": "NFR12-ARTIFACT-STABILITY-001",
       "source_ref": "docs/product/prd.md#nfr12-artifact-stability",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T2"
       ]
@@ -1953,28 +1981,42 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "MVP-IN-SCOPE-001",
-          "evidence_refs": [],
+          "evidence_refs": [
+            "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/validation-report.json",
+            "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/ship-packet.json",
+            "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "contracts-config-and-validation"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/validation-report.json",
+        "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/ship-packet.json",
+        "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "mvp-in-scope",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T2"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T2"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "local OSS CLI",
       "scope_item_id": "MVP-IN-SCOPE-001",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T2"
       ]
@@ -2673,28 +2715,42 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "MVP-IN-SCOPE-021",
-          "evidence_refs": [],
+          "evidence_refs": [
+            "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/validation-report.json",
+            "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/ship-packet.json",
+            "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "contracts-config-and-validation"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/validation-report.json",
+        "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/ship-packet.json",
+        "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260620T191738.481643000Z-relia-T2/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "mvp-in-scope",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T2"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T2"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "stable exit codes and `--json",
       "scope_item_id": "MVP-IN-SCOPE-021",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T2"
       ]
@@ -4941,7 +4997,7 @@
       ]
     }
   ],
-  "last_updated_at": "2026-06-20T16:56:27Z",
+  "last_updated_at": "2026-06-20T19:17:38Z",
   "schema_version": "0.1",
   "source_prd_ref": "docs/product/prd.md"
 }

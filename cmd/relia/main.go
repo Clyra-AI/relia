@@ -48,6 +48,19 @@ var requiredCheckFiles = []string{
 	".factory/factoryd.autoship.example.json",
 }
 
+var requiredSchemaFiles = []string{
+	"schemas/experience-record.schema.json",
+	"schemas/outcome-evidence.schema.json",
+	"schemas/failure-signature.schema.json",
+	"schemas/memory-rule.schema.json",
+	"schemas/coverage-map.schema.json",
+	"schemas/risk-assessment.schema.json",
+	"schemas/recurrence-report.schema.json",
+	"schemas/compiled-context.schema.json",
+	"schemas/command-result.schema.json",
+	"schemas/redaction-config.schema.json",
+}
+
 var primaryCommands = []string{
 	"init",
 	"check",
@@ -92,8 +105,20 @@ type CommandError struct {
 }
 
 type ArtifactRef struct {
-	Kind string `json:"kind"`
-	Path string `json:"path"`
+	Kind          string `json:"kind"`
+	Path          string `json:"path"`
+	SchemaVersion string `json:"schema_version"`
+}
+
+type configSummary struct {
+	GeneratedArtifactsRoot string
+	MemoryArtifactsRoot    string
+	DefaultShareScope      string
+	SchemaVersion          string
+	DistillProvider        string
+	DistillEmbeddings      string
+	RedactionEntropyScan   bool
+	CommitExperiences      bool
 }
 
 type globalFlags struct {
@@ -215,7 +240,7 @@ func initResult(args []string, start time.Time) CommandResult {
 		root = wd
 	}
 	configPath := filepath.Join(root, defaultConfigFile)
-	artifact := ArtifactRef{Kind: "config", Path: defaultConfigFile}
+	artifact := ArtifactRef{Kind: "config", Path: defaultConfigFile, SchemaVersion: commandSchemaVersion}
 	if _, err := os.Stat(configPath); err == nil {
 		result := passResult("init", "init", "relia.yaml already exists", start, map[string]any{
 			"config_path": defaultConfigFile,
@@ -266,10 +291,35 @@ func checkResult(args []string, start time.Time) CommandResult {
 		return errorResult("check", "check", validationError("required local operating-pack files are missing", missing), start)
 	}
 
-	return passResult("check", "check", "local operating pack baseline is present", start, map[string]any{
-		"checked_paths": len(requiredCheckFiles),
-		"repo_root":     ".",
+	if commandErr := validateSchemaContracts(root); commandErr != nil {
+		return errorResult("check", "check", commandErr, start)
+	}
+	config, warnings, commandErr := loadAndValidateConfig(root)
+	if commandErr != nil {
+		return errorResult("check", "check", commandErr, start)
+	}
+	if commandErr := validateMemoryRules(root); commandErr != nil {
+		return errorResult("check", "check", commandErr, start)
+	}
+
+	result := passResult("check", "check", "local operating pack baseline is present", start, map[string]any{
+		"checked_paths":             len(requiredCheckFiles),
+		"schema_contract_count":     len(requiredSchemaFiles),
+		"repo_root":                 ".",
+		"generated_artifacts_root":  config.GeneratedArtifactsRoot,
+		"memory_artifacts_root":     config.MemoryArtifactsRoot,
+		"default_share_scope":       config.DefaultShareScope,
+		"commit_experiences":        config.CommitExperiences,
+		"redaction_entropy_scan":    config.RedactionEntropyScan,
+		"distill_embeddings":        config.DistillEmbeddings,
+		"live_provider_configured":  config.DistillProvider != "",
+		"artifact_schema_version":   config.SchemaVersion,
+		"relia_version":             "0.0.0-dev",
+		"privacy_default_posture":   "local_private_redacted",
+		"required_schema_contracts": requiredSchemaFiles,
 	})
+	result.Warnings = append(result.Warnings, warnings...)
+	return result
 }
 
 func helpResult(start time.Time) CommandResult {
@@ -356,6 +406,36 @@ func configError(message string) *CommandError {
 	}
 }
 
+func dependencyError(message string, ref string) *CommandError {
+	return &CommandError{
+		Type:        "dependency_error",
+		Message:     message,
+		ExitCode:    ExitDependency,
+		Remediation: "Run relia models pull with an approved model_artifact_pull gate or use embeddings: signature.",
+		Ref:         ref,
+	}
+}
+
+func schemaContractError(message string, ref string) *CommandError {
+	return &CommandError{
+		Type:        "schema_contract_validation_failed",
+		Message:     message,
+		ExitCode:    ExitValidation,
+		Remediation: "Repair the versioned schema or dependent Relia artifact before running Relia workflows.",
+		Ref:         ref,
+	}
+}
+
+func memoryArtifactError(message string, ref string) *CommandError {
+	return &CommandError{
+		Type:        "memory_artifact_validation_failed",
+		Message:     message,
+		ExitCode:    ExitValidation,
+		Remediation: "Repair the reviewed memory rule provenance, evidence, lifecycle status, or review label.",
+		Ref:         ref,
+	}
+}
+
 func validationError(message string, missing []string) *CommandError {
 	return &CommandError{
 		Type:        "operating_pack_validation_failed",
@@ -364,6 +444,269 @@ func validationError(message string, missing []string) *CommandError {
 		Remediation: "Restore the required repo lifecycle files before running Relia workflows.",
 		Ref:         "docs/dev/dev_guides.md#validation-matrix",
 	}
+}
+
+func validateSchemaContracts(root string) *CommandError {
+	for _, rel := range requiredSchemaFiles {
+		path := filepath.Join(root, rel)
+		content, err := os.ReadFile(path)
+		if err != nil {
+			if errors.Is(err, os.ErrNotExist) {
+				return validationError("required schema contract files are missing", []string{rel})
+			}
+			return internalError("could not inspect "+rel, err)
+		}
+		var schema map[string]any
+		if err := json.Unmarshal(content, &schema); err != nil {
+			return schemaContractError(rel+" is not valid JSON", rel)
+		}
+		properties, ok := schema["properties"].(map[string]any)
+		if !ok {
+			return schemaContractError(rel+" must declare JSON schema properties", rel)
+		}
+		if _, ok := properties["schema_version"]; !ok {
+			return schemaContractError(rel+" must declare schema_version", rel)
+		}
+		if _, ok := properties["metadata"]; !ok {
+			return schemaContractError(rel+" must declare forward-compatible metadata", rel)
+		}
+	}
+	return nil
+}
+
+func loadAndValidateConfig(root string) (configSummary, []Finding, *CommandError) {
+	summary := configSummary{
+		GeneratedArtifactsRoot: ".relia",
+		MemoryArtifactsRoot:    "memory",
+		DefaultShareScope:      "private",
+		SchemaVersion:          commandSchemaVersion,
+		DistillEmbeddings:      "signature",
+		RedactionEntropyScan:   true,
+		CommitExperiences:      false,
+	}
+	content, err := os.ReadFile(filepath.Join(root, defaultConfigFile))
+	if err != nil {
+		return summary, nil, internalError("could not read relia.yaml", err)
+	}
+
+	parseConfigYAML(content, &summary)
+	var warnings []Finding
+	if summary.DefaultShareScope != "private" {
+		return summary, warnings, memoryArtifactError("default_share_scope must remain private in the MVP", defaultConfigFile)
+	}
+	if summary.DistillProvider != "" && !isAllowedDistillProvider(summary.DistillProvider) {
+		return summary, warnings, configError("unknown distill provider " + summary.DistillProvider)
+	}
+	if !isAllowedEmbeddingMode(summary.DistillEmbeddings) {
+		return summary, warnings, configError("unknown distill embeddings mode " + summary.DistillEmbeddings)
+	}
+	if summary.DistillEmbeddings == "local" {
+		if commandErr := validateLocalModelArtifact(root); commandErr != nil {
+			return summary, warnings, commandErr
+		}
+	}
+	if summary.DistillEmbeddings == "provider" && summary.DistillProvider == "" {
+		return summary, warnings, configError("embeddings: provider requires distill.provider")
+	}
+	if summary.DistillProvider != "" {
+		warnings = append(warnings, Finding{
+			Type:    "live_provider_requires_explicit_grant",
+			Message: "provider-backed distill is configured and requires model_provider_endpoint approval before live use",
+			Ref:     "docs/dev/dev_guides.md#model-provider-and-artifact-policy",
+		})
+	}
+	if !summary.RedactionEntropyScan {
+		warnings = append(warnings, Finding{
+			Type:    "redaction_entropy_scan_disabled",
+			Message: "entropy scanning is disabled; generated artifacts remain internal until redaction posture is reviewed",
+			Ref:     defaultConfigFile,
+		})
+	}
+	return summary, warnings, nil
+}
+
+func parseConfigYAML(content []byte, summary *configSummary) {
+	section := ""
+	for _, rawLine := range strings.Split(string(content), "\n") {
+		line := stripYAMLComment(rawLine)
+		if strings.TrimSpace(line) == "" {
+			continue
+		}
+		indent := len(line) - len(strings.TrimLeft(line, " "))
+		trimmed := strings.TrimSpace(line)
+		if indent == 0 && strings.HasSuffix(trimmed, ":") {
+			section = strings.TrimSuffix(trimmed, ":")
+			continue
+		}
+		if indent != 2 || !strings.Contains(trimmed, ":") {
+			continue
+		}
+		key, value, ok := splitYAMLKeyValue(trimmed)
+		if !ok {
+			continue
+		}
+		switch section + "." + key {
+		case "artifacts.generated_root":
+			if value != "" {
+				summary.GeneratedArtifactsRoot = value
+			}
+		case "artifacts.memory_root":
+			if value != "" {
+				summary.MemoryArtifactsRoot = value
+			}
+		case "artifacts.default_share_scope":
+			if value != "" {
+				summary.DefaultShareScope = value
+			}
+		case "artifacts.schema_version":
+			if value != "" {
+				summary.SchemaVersion = value
+			}
+		case "distill.provider":
+			summary.DistillProvider = value
+		case "distill.embeddings":
+			if value != "" {
+				summary.DistillEmbeddings = value
+			}
+		case "redaction.entropy_scan":
+			if parsed, ok := parseYAMLBool(value); ok {
+				summary.RedactionEntropyScan = parsed
+			}
+		case "memory.commit_experiences":
+			if parsed, ok := parseYAMLBool(value); ok {
+				summary.CommitExperiences = parsed
+			}
+		}
+	}
+}
+
+func stripYAMLComment(line string) string {
+	if index := strings.Index(line, "#"); index >= 0 {
+		return line[:index]
+	}
+	return line
+}
+
+func splitYAMLKeyValue(line string) (string, string, bool) {
+	parts := strings.SplitN(line, ":", 2)
+	if len(parts) != 2 {
+		return "", "", false
+	}
+	key := strings.TrimSpace(parts[0])
+	value := strings.Trim(strings.TrimSpace(parts[1]), `"'`)
+	return key, value, key != ""
+}
+
+func parseYAMLBool(value string) (bool, bool) {
+	switch strings.ToLower(strings.TrimSpace(value)) {
+	case "true":
+		return true, true
+	case "false":
+		return false, true
+	default:
+		return false, false
+	}
+}
+
+func isAllowedDistillProvider(provider string) bool {
+	switch provider {
+	case "anthropic", "openai-compatible":
+		return true
+	default:
+		return false
+	}
+}
+
+func isAllowedEmbeddingMode(mode string) bool {
+	switch mode {
+	case "signature", "local", "provider":
+		return true
+	default:
+		return false
+	}
+}
+
+func validateLocalModelArtifact(root string) *CommandError {
+	manifestRel := filepath.Join(".relia", "models", "manifest.json")
+	content, err := os.ReadFile(filepath.Join(root, manifestRel))
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return dependencyError("local embedding artifact manifest is missing", manifestRel)
+		}
+		return internalError("could not inspect local model artifact manifest", err)
+	}
+	var manifest map[string]any
+	if err := json.Unmarshal(content, &manifest); err != nil {
+		return dependencyError("local embedding artifact manifest is not valid JSON", manifestRel)
+	}
+	required := []string{"model_id", "version", "source_url", "license", "sha256", "cache_path", "update_policy", "rollback_policy"}
+	var missing []string
+	for _, key := range required {
+		value, ok := manifest[key].(string)
+		if !ok || strings.TrimSpace(value) == "" {
+			missing = append(missing, key)
+		}
+	}
+	if len(missing) > 0 {
+		return dependencyError("local embedding artifact manifest missing fields: "+strings.Join(missing, ", "), manifestRel)
+	}
+	return nil
+}
+
+func validateMemoryRules(root string) *CommandError {
+	rulesDir := filepath.Join(root, "memory", "rules")
+	entries, err := os.ReadDir(rulesDir)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return nil
+		}
+		return internalError("could not inspect memory rules", err)
+	}
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+		name := entry.Name()
+		if !strings.HasSuffix(name, ".yaml") && !strings.HasSuffix(name, ".yml") {
+			continue
+		}
+		rel := filepath.Join("memory", "rules", name)
+		content, err := os.ReadFile(filepath.Join(root, rel))
+		if err != nil {
+			return internalError("could not read "+rel, err)
+		}
+		text := string(content)
+		if !hasYAMLKey(text, "provenance") || !hasYAMLKey(text, "evidence") {
+			return memoryArtifactError("memory rule must include provenance and evidence citations", rel)
+		}
+		if yamlScalarValue(text, "status") == "active" && yamlScalarValue(text, "review_label") == "" {
+			return memoryArtifactError("active memory rule must include a review_label", rel)
+		}
+	}
+	return nil
+}
+
+func hasYAMLKey(content string, key string) bool {
+	for _, line := range strings.Split(content, "\n") {
+		trimmed := strings.TrimSpace(stripYAMLComment(line))
+		if strings.HasPrefix(trimmed, key+":") {
+			return true
+		}
+	}
+	return false
+}
+
+func yamlScalarValue(content string, key string) string {
+	for _, line := range strings.Split(content, "\n") {
+		trimmed := strings.TrimSpace(stripYAMLComment(line))
+		if strings.HasPrefix(trimmed, key+":") {
+			_, value, ok := splitYAMLKeyValue(trimmed)
+			if ok {
+				return value
+			}
+		}
+	}
+	return ""
 }
 
 func internalError(message string, err error) *CommandError {
@@ -464,9 +807,38 @@ attribution:
 outcomes:
   checks:
     required: []
+  revert_detection: true
+  review_corrections:
+    marker: "relia:correction"
+  lookback_days: 180
+  fix_held:
+    settle_days: 14
+    min_overlapping_merges: 3
+
+redaction:
+  patterns:
+    - api_key
+    - token
+    - password
+    - secret
+  entropy_scan: true
 
 distill:
   embeddings: signature
+  min_evidence_count: 2
+  review_required: true
+
+memory:
+  decay_half_life_days: 90
+  invalidate_on_path_delete: true
+  max_active_rules: 200
+  commit_experiences: false
+
+artifacts:
+  schema_version: "1.0"
+  generated_root: .relia
+  memory_root: memory
+  default_share_scope: private
 
 serve:
   advisory_only: true

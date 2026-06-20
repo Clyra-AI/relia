@@ -126,6 +126,22 @@ T1 establishes the command result envelope as the baseline automation contract:
 - primary MVP commands not implemented in T1 return a typed
   `not_implemented` error envelope rather than an ambiguous parser failure
 
+T2 extends the baseline with executable Phase 0 contracts:
+
+- required schema files under `schemas/`:
+  `experience-record.schema.json`, `outcome-evidence.schema.json`,
+  `failure-signature.schema.json`, `memory-rule.schema.json`,
+  `coverage-map.schema.json`, `risk-assessment.schema.json`,
+  `recurrence-report.schema.json`, `compiled-context.schema.json`,
+  `command-result.schema.json`, and `redaction-config.schema.json`
+- `relia init` writes privacy-preserving defaults: signature embeddings,
+  entropy scanning, local-private generated artifacts under `.relia/`, and
+  `commit_experiences: false`
+- `relia check` validates schema contract presence, config posture, missing
+  local model manifests for `embeddings: local`, unknown distill providers, and
+  basic memory-rule provenance/review requirements
+- command result artifact refs carry `schema_version`
+
 The envelope preserves `object_type`, `schema_version`, `command`, `status`,
 `mode`, `exit_code`, `warnings`, `errors`, `artifacts`, `evidence_refs`,
 `duration_ms`, and `redaction_status`. Human-readable output is only the default

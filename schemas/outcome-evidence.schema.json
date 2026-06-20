@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Clyra-AI/relia/schemas/outcome-evidence.schema.json",
+  "title": "Relia Outcome Evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "object_type",
+    "schema_version",
+    "evidence_id",
+    "experience_id",
+    "kind",
+    "terminal_state",
+    "source",
+    "observed_at",
+    "redaction_status",
+    "metadata"
+  ],
+  "properties": {
+    "object_type": {
+      "const": "relia.outcome_evidence"
+    },
+    "schema_version": {
+      "const": "1.0"
+    },
+    "evidence_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "experience_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "kind": {
+      "enum": ["check_run", "review_correction", "revert", "merge", "fix_held"]
+    },
+    "terminal_state": {
+      "enum": ["passed", "failed", "reverted", "corrected", "held", "unknown"]
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "url"],
+      "properties": {
+        "provider": {
+          "const": "github"
+        },
+        "url": {
+          "type": "string",
+          "minLength": 1
+        },
+        "external_id": {
+          "type": "string"
+        }
+      }
+    },
+    "observed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "redaction_status": {
+      "enum": ["applied", "failed_closed"]
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

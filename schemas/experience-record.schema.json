@@ -1,0 +1,202 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Clyra-AI/relia/schemas/experience-record.schema.json",
+  "title": "Relia Experience Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "object_type",
+    "schema_version",
+    "experience_id",
+    "repo",
+    "recorded_at",
+    "attribution",
+    "context",
+    "action",
+    "outcome",
+    "provenance",
+    "flake_discount",
+    "org_eligible",
+    "share_scope",
+    "redaction_status",
+    "metadata"
+  ],
+  "properties": {
+    "object_type": {
+      "const": "relia.experience_record"
+    },
+    "schema_version": {
+      "const": "1.0"
+    },
+    "experience_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "repo": {
+      "$ref": "#/$defs/repo_ref"
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "attribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "confidence"],
+      "properties": {
+        "method": {
+          "enum": ["bot_login", "coauthor_trailer", "pr_label", "manual", "uncertain"]
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "actor": {
+          "type": "string"
+        }
+      }
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["paths", "diff_fingerprint"],
+      "properties": {
+        "paths": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "diff_fingerprint": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pr", "commits"],
+      "properties": {
+        "pr": {
+          "$ref": "#/$defs/provenance_ref"
+        },
+        "commits": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/provenance_ref"
+          }
+        }
+      }
+    },
+    "outcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "terminal_state", "signature"],
+      "properties": {
+        "kind": {
+          "enum": ["ci_pass", "ci_fail", "review_correction", "revert", "fix_held"]
+        },
+        "terminal_state": {
+          "enum": ["passed", "failed", "reverted", "corrected", "held"]
+        },
+        "signature": {
+          "$ref": "#/$defs/failure_signature"
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["refs"],
+      "properties": {
+        "refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/provenance_ref"
+          }
+        }
+      }
+    },
+    "flake_discount": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "org": {
+      "type": "string"
+    },
+    "org_eligible": {
+      "const": false
+    },
+    "share_scope": {
+      "const": "private"
+    },
+    "redaction_status": {
+      "enum": ["applied", "failed_closed"]
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "repo_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "remote"],
+      "properties": {
+        "provider": {
+          "const": "github"
+        },
+        "remote": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "provenance_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "url"],
+      "properties": {
+        "kind": {
+          "enum": ["pull_request", "check_run", "commit", "review_comment", "revert"]
+        },
+        "url": {
+          "type": "string",
+          "minLength": 1
+        },
+        "id": {
+          "type": "string"
+        }
+      }
+    },
+    "failure_signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["class", "key", "extraction_confidence"],
+      "properties": {
+        "class": {
+          "enum": ["test_failure", "lint_failure", "build_failure", "review_correction", "revert", "unknown"]
+        },
+        "check_name": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "message_fingerprint": {
+          "type": "string"
+        },
+        "extraction_confidence": {
+          "enum": ["structured", "log_parsed", "low"]
+        }
+      }
+    }
+  }
+}

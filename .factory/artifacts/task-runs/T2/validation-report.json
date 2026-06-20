@@ -1,0 +1,177 @@
+{
+  "artifact_type": "validation_report",
+  "schema_version": "1.0",
+  "task_id": "T2",
+  "status": "pass",
+  "commands_run": [
+    "make lint-fast",
+    "make test-fast",
+    "make test-fast",
+    "make test-coverage",
+    "make test-fast",
+    "make test-coverage",
+    "make test-contracts",
+    "make prepush-full",
+    "GOCACHE=/tmp/relia-go-build go run ./cmd/relia --json check"
+  ],
+  "baseline_evidence": [
+    {
+      "command": "make lint-fast",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "make test-fast",
+      "status": "pass",
+      "exit_code": 0
+    }
+  ],
+  "red_evidence": [
+    {
+      "command": "make test-fast",
+      "status": "expected_fail",
+      "exit_code": 2,
+      "evidence_summary": "Tests added before implementation failed to compile because ArtifactRef.SchemaVersion and requiredSchemaFiles were not implemented."
+    }
+  ],
+  "green_evidence": [
+    {
+      "command": "make test-fast",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "make test-coverage",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence_summary": "Go coverage total: 86.1% (minimum 75.0%)."
+    },
+    {
+      "command": "make test-contracts",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence_summary": "ok: repo pack"
+    },
+    {
+      "command": "GOCACHE=/tmp/relia-go-build go run ./cmd/relia --json check",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence_summary": "Emitted relia.command_result schema_version 1.0 with schema_contract_count 10, default_share_scope private, commit_experiences false, and privacy_default_posture local_private_redacted."
+    }
+  ],
+  "final_validation_evidence": [
+    {
+      "command": "make prepush-full",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence_summary": "lint-fast, test-fast, test-coverage, and test-contracts passed; coverage 86.1%."
+    }
+  ],
+  "acceptance_results": [
+    {
+      "acceptance_item_id": "FR22-STABLE-CLI-OUTPUT-001",
+      "status": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        "schemas/command-result.schema.json"
+      ]
+    },
+    {
+      "acceptance_item_id": "NFR12-ARTIFACT-STABILITY-001",
+      "status": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+        "schemas/experience-record.schema.json",
+        "schemas/memory-rule.schema.json",
+        "schemas/command-result.schema.json",
+        "relia.yaml"
+      ]
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-001",
+      "status": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+        "relia.yaml",
+        "README.md",
+        "docs/dev/dev_guides.md"
+      ]
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-021",
+      "status": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+        "schemas/experience-record.schema.json",
+        "schemas/redaction-config.schema.json",
+        "cmd/relia/main_test.go"
+      ]
+    }
+  ],
+  "path_policy_result": {
+    "status": "pass",
+    "allowed_paths_checked": true,
+    "forbidden_paths_changed": false,
+    "changed_paths": [
+      "README.md",
+      "cmd/relia/main.go",
+      "cmd/relia/main_test.go",
+      "docs/architecture/architecture_guides.md",
+      "docs/architecture/decision-0002-phase0-contracts.md",
+      "docs/dev/changelog.md",
+      "docs/dev/dev_guides.md",
+      "relia.yaml",
+      "schemas/command-result.schema.json",
+      "schemas/compiled-context.schema.json",
+      "schemas/coverage-map.schema.json",
+      "schemas/experience-record.schema.json",
+      "schemas/failure-signature.schema.json",
+      "schemas/memory-rule.schema.json",
+      "schemas/outcome-evidence.schema.json",
+      "schemas/recurrence-report.schema.json",
+      "schemas/redaction-config.schema.json",
+      "schemas/risk-assessment.schema.json",
+      ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+      ".factory/artifacts/task-runs/T2/validation-report.json"
+    ]
+  },
+  "plan_drift_result": {
+    "status": "pass",
+    "notes": "Scope remained within the T2 configuration, schema, artifact, privacy, validation, and structured output objective."
+  },
+  "changelog_result": {
+    "status": "implemented",
+    "evidence_refs": [
+      "docs/dev/changelog.md"
+    ]
+  },
+  "versioning_result": {
+    "status": "implemented",
+    "evidence_refs": [
+      "schemas/command-result.schema.json",
+      "schemas/experience-record.schema.json",
+      "relia.yaml"
+    ],
+    "notes": "Schema and artifact contracts use schema_version 1.0; no runtime pin or distribution target changed."
+  },
+  "migration_result": {
+    "status": "implemented",
+    "notes": "Pre-1.0 contract expansion only; no migration required for existing generated artifacts."
+  },
+  "docs_sync_result": {
+    "status": "implemented",
+    "evidence_refs": [
+      "README.md",
+      "docs/dev/dev_guides.md",
+      "docs/architecture/architecture_guides.md",
+      "docs/architecture/decision-0002-phase0-contracts.md"
+    ]
+  },
+  "blockers": [],
+  "residual_risks": [
+    "Deep JSON Schema instance validation is intentionally limited to source contract presence and shape in this slice; later feature slices can validate generated artifacts against these schemas when those artifacts exist.",
+    "Factoryd-produced scope_closure_report, pr_lifecycle_report, and factoryd_run_once_report are required by the packet but intentionally not authored by this worker."
+  ]
+}
