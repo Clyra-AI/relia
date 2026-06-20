@@ -46,6 +46,12 @@ var requiredCheckFiles = []string{
 	".github/workflows/codeql.yml",
 	".factory/factoryd.example.json",
 	".factory/factoryd.autoship.example.json",
+	"schemas/command-result.schema.json",
+	"schemas/relia-config.schema.json",
+	"schemas/experience-record.schema.json",
+	"schemas/memory-rule.schema.json",
+	"examples/command-results/exit-code-examples.json",
+	"memory/README.md",
 }
 
 var primaryCommands = []string{
@@ -94,6 +100,95 @@ type CommandError struct {
 type ArtifactRef struct {
 	Kind string `json:"kind"`
 	Path string `json:"path"`
+}
+
+type configContract struct {
+	Name          string
+	Path          string
+	Schema        string
+	SchemaVersion string
+}
+
+type configValidation struct {
+	SchemaVersion           string
+	ArtifactContractVersion string
+	PrivacyDefaults         map[string]any
+	ArtifactContracts       []configContract
+	SchemaVersions          map[string]string
+}
+
+type yamlDocument struct {
+	scalars map[string]string
+	lists   map[string][]string
+}
+
+type expectedScalar struct {
+	path string
+	want string
+}
+
+var reliaArtifactContracts = []configContract{
+	{
+		Name:          "command_results",
+		Schema:        "schemas/command-result.schema.json",
+		SchemaVersion: commandSchemaVersion,
+	},
+	{
+		Name:          "config",
+		Path:          defaultConfigFile,
+		Schema:        "schemas/relia-config.schema.json",
+		SchemaVersion: commandSchemaVersion,
+	},
+	{
+		Name:          "experiences",
+		Path:          "memory/experiences.jsonl",
+		Schema:        "schemas/experience-record.schema.json",
+		SchemaVersion: commandSchemaVersion,
+	},
+	{
+		Name:          "memory_rules",
+		Path:          "memory/rules.jsonl",
+		Schema:        "schemas/memory-rule.schema.json",
+		SchemaVersion: commandSchemaVersion,
+	},
+}
+
+var checkArtifactRefs = []ArtifactRef{
+	{Kind: "config", Path: defaultConfigFile},
+	{Kind: "schema", Path: "schemas/command-result.schema.json"},
+	{Kind: "schema", Path: "schemas/relia-config.schema.json"},
+	{Kind: "schema", Path: "schemas/experience-record.schema.json"},
+	{Kind: "schema", Path: "schemas/memory-rule.schema.json"},
+	{Kind: "artifact_contract", Path: "memory/"},
+	{Kind: "example", Path: "examples/command-results/exit-code-examples.json"},
+}
+
+var requiredPrivacyFields = []string{
+	"owner",
+	"credential",
+	"secret",
+	"endpoint",
+	"machine_local_path",
+}
+
+var requiredConfigScalars = []expectedScalar{
+	{path: "version", want: "1"},
+	{path: "schema_version", want: commandSchemaVersion},
+	{path: "artifact_contract_version", want: commandSchemaVersion},
+	{path: "repo.provider", want: "github"},
+	{path: "attribution.uncertain", want: "exclude"},
+	{path: "privacy.default_scope", want: "local_only"},
+	{path: "privacy.customer_safe_default", want: "false"},
+	{path: "privacy.org_eligible_default", want: "false"},
+	{path: "privacy.redaction.capture_time", want: "true"},
+	{path: "privacy.redaction.recursive", want: "true"},
+	{path: "network.default", want: "disabled"},
+	{path: "network.credentials", want: "none"},
+	{path: "distill.embeddings", want: "signature"},
+	{path: "distill.local_artifacts.required_pull", want: "true"},
+	{path: "distill.provider.enabled", want: "false"},
+	{path: "serve.advisory_only", want: "true"},
+	{path: "gate.enabled", want: "false"},
 }
 
 type globalFlags struct {
@@ -266,10 +361,274 @@ func checkResult(args []string, start time.Time) CommandResult {
 		return errorResult("check", "check", validationError("required local operating-pack files are missing", missing), start)
 	}
 
-	return passResult("check", "check", "local operating pack baseline is present", start, map[string]any{
-		"checked_paths": len(requiredCheckFiles),
-		"repo_root":     ".",
+	configValidation, err := validateReliaConfig(root)
+	if err != nil {
+		result := errorResult("check", "check", configurationValidationError(err.Error()), start)
+		result.RedactionStatus = "failed_closed"
+		return result
+	}
+
+	result := passResult("check", "check", "local operating pack baseline is present", start, map[string]any{
+		"artifact_contract_version": configValidation.ArtifactContractVersion,
+		"artifact_contracts":        artifactContractData(configValidation.ArtifactContracts),
+		"checked_paths":             len(requiredCheckFiles),
+		"config_schema_version":     configValidation.SchemaVersion,
+		"privacy_defaults":          configValidation.PrivacyDefaults,
+		"repo_root":                 ".",
+		"schema_versions":           configValidation.SchemaVersions,
 	})
+	result.Artifacts = append(result.Artifacts, checkArtifactRefs...)
+	return result
+}
+
+func validateReliaConfig(root string) (configValidation, error) {
+	content, err := os.ReadFile(filepath.Join(root, defaultConfigFile))
+	if err != nil {
+		return configValidation{}, fmt.Errorf("could not read %s: %w", defaultConfigFile, err)
+	}
+	document, err := parseReliaYAML(content)
+	if err != nil {
+		return configValidation{}, fmt.Errorf("%s is invalid: %w", defaultConfigFile, err)
+	}
+
+	for _, expected := range requiredConfigScalars {
+		if err := requireScalar(document, expected.path, expected.want); err != nil {
+			return configValidation{}, err
+		}
+	}
+	if err := requireListContains(document, "privacy.redaction.nested_fields", requiredPrivacyFields); err != nil {
+		return configValidation{}, err
+	}
+
+	schemaVersions := map[string]string{}
+	for _, contract := range reliaArtifactContracts {
+		prefix := "artifact_contracts." + contract.Name
+		if contract.Path != "" {
+			if err := requireScalar(document, prefix+".path", contract.Path); err != nil {
+				return configValidation{}, err
+			}
+			if err := validateRepoRelativePath(contract.Path); err != nil {
+				return configValidation{}, fmt.Errorf("%s.path is invalid: %w", prefix, err)
+			}
+			if err := validateArtifactParent(root, contract.Path); err != nil {
+				return configValidation{}, fmt.Errorf("%s.path is invalid: %w", prefix, err)
+			}
+		}
+		if err := requireScalar(document, prefix+".schema", contract.Schema); err != nil {
+			return configValidation{}, err
+		}
+		if err := validateRepoRelativePath(contract.Schema); err != nil {
+			return configValidation{}, fmt.Errorf("%s.schema is invalid: %w", prefix, err)
+		}
+		if err := requireScalar(document, prefix+".schema_version", contract.SchemaVersion); err != nil {
+			return configValidation{}, err
+		}
+		schemaVersion, err := validateSchemaFile(root, contract.Schema)
+		if err != nil {
+			return configValidation{}, fmt.Errorf("%s.schema is invalid: %w", prefix, err)
+		}
+		if schemaVersion != contract.SchemaVersion {
+			return configValidation{}, fmt.Errorf("%s.schema_version must match %s schema version %s", prefix, contract.Schema, schemaVersion)
+		}
+		schemaVersions[contract.Schema] = schemaVersion
+	}
+
+	if err := validateJSONFile(root, "examples/command-results/exit-code-examples.json"); err != nil {
+		return configValidation{}, err
+	}
+
+	return configValidation{
+		SchemaVersion:           commandSchemaVersion,
+		ArtifactContractVersion: commandSchemaVersion,
+		ArtifactContracts:       append([]configContract(nil), reliaArtifactContracts...),
+		SchemaVersions:          schemaVersions,
+		PrivacyDefaults: map[string]any{
+			"default_scope":          "local_only",
+			"customer_safe_default":  false,
+			"org_eligible_default":   false,
+			"redaction_capture_time": true,
+			"redaction_recursive":    true,
+		},
+	}, nil
+}
+
+func parseReliaYAML(content []byte) (yamlDocument, error) {
+	document := yamlDocument{
+		scalars: map[string]string{},
+		lists:   map[string][]string{},
+	}
+	stack := []string{}
+	lines := strings.Split(string(content), "\n")
+	for lineNumber, raw := range lines {
+		if strings.TrimSpace(raw) == "" || strings.HasPrefix(strings.TrimSpace(raw), "#") {
+			continue
+		}
+		if strings.Contains(raw, "\t") {
+			return yamlDocument{}, fmt.Errorf("line %d uses tabs; use two-space indentation", lineNumber+1)
+		}
+		indent := leadingSpaces(raw)
+		if indent%2 != 0 {
+			return yamlDocument{}, fmt.Errorf("line %d uses odd indentation", lineNumber+1)
+		}
+		level := indent / 2
+		if level > len(stack) {
+			return yamlDocument{}, fmt.Errorf("line %d skips an indentation level", lineNumber+1)
+		}
+		stack = stack[:level]
+		trimmed := strings.TrimSpace(raw)
+		if strings.HasPrefix(trimmed, "- ") {
+			if len(stack) == 0 {
+				return yamlDocument{}, fmt.Errorf("line %d has a list item without a parent key", lineNumber+1)
+			}
+			path := strings.Join(stack, ".")
+			document.lists[path] = append(document.lists[path], normalizeYAMLScalar(strings.TrimPrefix(trimmed, "- ")))
+			continue
+		}
+		key, value, ok := strings.Cut(trimmed, ":")
+		if !ok {
+			return yamlDocument{}, fmt.Errorf("line %d is not a key-value entry", lineNumber+1)
+		}
+		key = strings.TrimSpace(key)
+		if key == "" {
+			return yamlDocument{}, fmt.Errorf("line %d has an empty key", lineNumber+1)
+		}
+		pathParts := append(append([]string{}, stack...), key)
+		path := strings.Join(pathParts, ".")
+		value = strings.TrimSpace(value)
+		if value == "" {
+			stack = append(stack, key)
+			continue
+		}
+		document.scalars[path] = normalizeYAMLScalar(value)
+	}
+	return document, nil
+}
+
+func leadingSpaces(value string) int {
+	count := 0
+	for _, char := range value {
+		if char != ' ' {
+			break
+		}
+		count++
+	}
+	return count
+}
+
+func normalizeYAMLScalar(value string) string {
+	value = strings.TrimSpace(value)
+	if len(value) >= 2 {
+		first := value[0]
+		last := value[len(value)-1]
+		if (first == '"' && last == '"') || (first == '\'' && last == '\'') {
+			return value[1 : len(value)-1]
+		}
+	}
+	return value
+}
+
+func requireScalar(document yamlDocument, path string, want string) error {
+	got, ok := document.scalars[path]
+	if !ok {
+		return fmt.Errorf("%s must be %s", path, want)
+	}
+	if got != want {
+		return fmt.Errorf("%s must be %s", path, want)
+	}
+	return nil
+}
+
+func requireListContains(document yamlDocument, path string, want []string) error {
+	values := map[string]bool{}
+	for _, value := range document.lists[path] {
+		values[value] = true
+	}
+	for _, value := range want {
+		if !values[value] {
+			return fmt.Errorf("%s must include %s", path, value)
+		}
+	}
+	return nil
+}
+
+func validateRepoRelativePath(rel string) error {
+	if rel == "" {
+		return errors.New("path is empty")
+	}
+	if filepath.IsAbs(rel) {
+		return errors.New("absolute paths are not allowed")
+	}
+	clean := filepath.ToSlash(filepath.Clean(rel))
+	if clean == "." || clean == ".." || strings.HasPrefix(clean, "../") || strings.Contains(clean, "/../") {
+		return errors.New("path must stay inside the repository")
+	}
+	return nil
+}
+
+func validateArtifactParent(root string, rel string) error {
+	parent := filepath.Dir(filepath.Join(root, rel))
+	if _, err := os.Stat(parent); err != nil {
+		return fmt.Errorf("parent directory %s is missing", filepath.ToSlash(filepath.Dir(rel)))
+	}
+	return nil
+}
+
+func validateSchemaFile(root string, rel string) (string, error) {
+	content, err := os.ReadFile(filepath.Join(root, rel))
+	if err != nil {
+		return "", err
+	}
+	var schema map[string]any
+	if err := json.Unmarshal(content, &schema); err != nil {
+		return "", err
+	}
+	for _, key := range []string{"$schema", "$id", "title"} {
+		value, ok := schema[key].(string)
+		if !ok || strings.TrimSpace(value) == "" {
+			return "", fmt.Errorf("missing string %s", key)
+		}
+	}
+	if schema["type"] != "object" {
+		return "", errors.New("schema root type must be object")
+	}
+	properties, ok := schema["properties"].(map[string]any)
+	if !ok {
+		return "", errors.New("schema must define properties")
+	}
+	schemaVersion, ok := properties["schema_version"].(map[string]any)
+	if !ok {
+		return "", errors.New("schema must define schema_version")
+	}
+	version, ok := schemaVersion["const"].(string)
+	if !ok || strings.TrimSpace(version) == "" {
+		return "", errors.New("schema_version must define a const version")
+	}
+	return version, nil
+}
+
+func validateJSONFile(root string, rel string) error {
+	content, err := os.ReadFile(filepath.Join(root, rel))
+	if err != nil {
+		return fmt.Errorf("could not read %s: %w", rel, err)
+	}
+	var payload any
+	if err := json.Unmarshal(content, &payload); err != nil {
+		return fmt.Errorf("%s is not valid JSON: %w", rel, err)
+	}
+	return nil
+}
+
+func artifactContractData(contracts []configContract) []map[string]string {
+	data := make([]map[string]string, 0, len(contracts))
+	for _, contract := range contracts {
+		data = append(data, map[string]string{
+			"name":           contract.Name,
+			"path":           contract.Path,
+			"schema":         contract.Schema,
+			"schema_version": contract.SchemaVersion,
+		})
+	}
+	return data
 }
 
 func helpResult(start time.Time) CommandResult {
@@ -366,6 +725,16 @@ func validationError(message string, missing []string) *CommandError {
 	}
 }
 
+func configurationValidationError(message string) *CommandError {
+	return &CommandError{
+		Type:        "configuration_validation_failed",
+		Message:     message,
+		ExitCode:    ExitValidation,
+		Remediation: "Restore relia.yaml to the versioned offline-safe defaults from relia init.",
+		Ref:         defaultConfigFile,
+	}
+}
+
 func internalError(message string, err error) *CommandError {
 	if err != nil {
 		message += ": " + err.Error()
@@ -446,6 +815,8 @@ func findRepoRoot(start string) (string, bool) {
 
 func defaultConfigYAML() string {
 	return `version: 1
+schema_version: "1.0"
+artifact_contract_version: "1.0"
 
 repo:
   provider: github
@@ -465,8 +836,47 @@ outcomes:
   checks:
     required: []
 
+privacy:
+  default_scope: local_only
+  customer_safe_default: false
+  org_eligible_default: false
+  redaction:
+    capture_time: true
+    recursive: true
+    nested_fields:
+      - owner
+      - credential
+      - secret
+      - endpoint
+      - machine_local_path
+
+network:
+  default: disabled
+  credentials: none
+
+artifact_contracts:
+  command_results:
+    schema: schemas/command-result.schema.json
+    schema_version: "1.0"
+  config:
+    path: relia.yaml
+    schema: schemas/relia-config.schema.json
+    schema_version: "1.0"
+  experiences:
+    path: memory/experiences.jsonl
+    schema: schemas/experience-record.schema.json
+    schema_version: "1.0"
+  memory_rules:
+    path: memory/rules.jsonl
+    schema: schemas/memory-rule.schema.json
+    schema_version: "1.0"
+
 distill:
   embeddings: signature
+  local_artifacts:
+    required_pull: true
+  provider:
+    enabled: false
 
 serve:
   advisory_only: true

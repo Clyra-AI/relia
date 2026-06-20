@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"testing"
 )
 
@@ -258,6 +259,70 @@ func TestCheckReportsMissingOperatingPackFiles(t *testing.T) {
 	}
 }
 
+func TestCheckReportsVersionedConfigSchemasAndArtifactContracts(t *testing.T) {
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	wantArtifacts := map[string]bool{
+		"config:relia.yaml":                                        false,
+		"schema:schemas/command-result.schema.json":                false,
+		"schema:schemas/relia-config.schema.json":                  false,
+		"schema:schemas/experience-record.schema.json":             false,
+		"schema:schemas/memory-rule.schema.json":                   false,
+		"artifact_contract:memory/":                                false,
+		"example:examples/command-results/exit-code-examples.json": false,
+	}
+	for _, artifact := range result.Artifacts {
+		key := artifact.Kind + ":" + artifact.Path
+		if _, ok := wantArtifacts[key]; ok {
+			wantArtifacts[key] = true
+		}
+	}
+	for key, found := range wantArtifacts {
+		if !found {
+			t.Fatalf("missing artifact ref %s in %#v", key, result.Artifacts)
+		}
+	}
+	if result.Data["config_schema_version"] != "1.0" {
+		t.Fatalf("config_schema_version = %#v", result.Data["config_schema_version"])
+	}
+	privacyDefaults, ok := result.Data["privacy_defaults"].(map[string]any)
+	if !ok {
+		t.Fatalf("privacy_defaults = %#v", result.Data["privacy_defaults"])
+	}
+	if privacyDefaults["default_scope"] != "local_only" {
+		t.Fatalf("default_scope = %#v", privacyDefaults["default_scope"])
+	}
+	if privacyDefaults["org_eligible_default"] != false {
+		t.Fatalf("org_eligible_default = %#v", privacyDefaults["org_eligible_default"])
+	}
+}
+
+func TestCheckFailsClosedForUnsafeConfigDefaults(t *testing.T) {
+	tempDir := t.TempDir()
+	writeMinimalRepoForCheck(t, tempDir, strings.Replace(defaultConfigYAML(), "org_eligible_default: false", "org_eligible_default: true", 1))
+	t.Chdir(tempDir)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitValidation {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.RedactionStatus != "failed_closed" {
+		t.Fatalf("redaction_status = %q", result.RedactionStatus)
+	}
+	if result.Errors[0].Type != "configuration_validation_failed" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+	if !strings.Contains(result.Errors[0].Message, "privacy.org_eligible_default must be false") {
+		t.Fatalf("error message = %q", result.Errors[0].Message)
+	}
+}
+
 func TestHumanErrorWritesToStderr(t *testing.T) {
 	stdout, stderr, code := runForTest(t, []string{"unknown-command"}, true)
 
@@ -362,4 +427,56 @@ func findRepoRootForTest(t *testing.T) string {
 		t.Fatalf("could not find repo root from %s", wd)
 	}
 	return root
+}
+
+func writeMinimalRepoForCheck(t *testing.T, root string, config string) {
+	t.Helper()
+
+	files := map[string]string{
+		"AGENTS.md":              "# agents\n",
+		"WORKFLOW.md":            "# workflow\n",
+		"README.md":              "# readme\n",
+		"Makefile":               "test:\n",
+		".tool-versions":         "golang 1.26.4\n",
+		"go.mod":                 "module github.com/Clyra-AI/relia\n\ngo 1.26.4\n",
+		"relia.yaml":             config,
+		"docs/product/prd.md":    "# prd\n",
+		"docs/dev/dev_guides.md": "# dev\n",
+		"docs/architecture/architecture_guides.md":         "# architecture\n",
+		".github/required-checks.json":                     `{"required_checks":["validate","CodeQL analyze"]}`,
+		".github/workflows/validate.yml":                   "name: validate\n",
+		".github/workflows/codeql.yml":                     "name: codeql\n",
+		".factory/factoryd.example.json":                   "{}\n",
+		".factory/factoryd.autoship.example.json":          "{}\n",
+		"schemas/command-result.schema.json":               minimalSchemaForTest("relia.command_result"),
+		"schemas/relia-config.schema.json":                 minimalSchemaForTest("relia.config"),
+		"schemas/experience-record.schema.json":            minimalSchemaForTest("relia.experience_record"),
+		"schemas/memory-rule.schema.json":                  minimalSchemaForTest("relia.memory_rule"),
+		"examples/command-results/exit-code-examples.json": "{}\n",
+		"memory/README.md":                                 "# memory\n",
+	}
+	for rel, content := range files {
+		path := filepath.Join(root, rel)
+		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+}
+
+func minimalSchemaForTest(title string) string {
+	return `{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Clyra-AI/relia/schemas/test.schema.json",
+  "title": "` + title + `",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    }
+  }
+}
+`
 }

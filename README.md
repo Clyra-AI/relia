@@ -17,12 +17,13 @@ FACTORY_REPO=/path/to/factory factoryd run --config .factory/factoryd.autoship.e
 
 ## CLI Baseline
 
-The T1 command surface establishes the lifecycle skeleton and agent-native
-output contract:
+The T1/T2 command surface establishes the lifecycle skeleton, agent-native
+output contract, and local configuration contract:
 
 - `relia init` creates `relia.yaml` if it is missing and is idempotent when the
   file already exists.
-- `relia check` validates the repo-local operating pack baseline.
+- `relia check` validates the repo-local operating pack baseline, versioned
+  schema files, artifact contract refs, and offline privacy defaults.
 - `--json` always emits the stable command result envelope.
 - piped or non-interactive stdout defaults to JSON.
 - `--quiet` and `--compact` emit compact JSON while preserving status,
@@ -31,6 +32,13 @@ output contract:
 The command result schema is `schemas/command-result.schema.json`. Stable
 exit-code examples for codes `0` through `9` are in
 `examples/command-results/exit-code-examples.json`.
+
+The default config is `relia.yaml` with schema version `1.0`; its schema is
+`schemas/relia-config.schema.json`. The MVP artifact contracts reserve
+`memory/experiences.jsonl` for `schemas/experience-record.schema.json` and
+`memory/rules.jsonl` for `schemas/memory-rule.schema.json`. Generated memory is
+local-only by default, recursively redacted before sharing, and starts with
+`org_eligible: false`.
 
 Provider-backed distill work requires a complete `model_provider_endpoint`
 grant naming provider, model, endpoint or `base_url`, credential environment,

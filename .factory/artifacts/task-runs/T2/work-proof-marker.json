@@ -1,0 +1,34 @@
+{
+  "artifact_type": "work_proof_marker",
+  "schema_version": "1.0",
+  "task_id": "T2",
+  "status": "implemented",
+  "implementation_performed": true,
+  "changed_paths": [
+    "README.md",
+    "cmd/relia/main.go",
+    "cmd/relia/main_test.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/architecture/decision-0002-config-and-artifact-contracts.md",
+    "docs/dev/changelog.md",
+    "docs/dev/dev_guides.md",
+    "examples/command-results/exit-code-examples.json",
+    "memory/README.md",
+    "relia.yaml",
+    "schemas/experience-record.schema.json",
+    "schemas/memory-rule.schema.json",
+    "schemas/relia-config.schema.json",
+    ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+    ".factory/artifacts/task-runs/T2/validation-report.json"
+  ],
+  "evidence_refs": [
+    ".factory/artifacts/task-runs/T2/validation-report.json",
+    "cmd/relia/main_test.go",
+    "schemas/relia-config.schema.json",
+    "schemas/experience-record.schema.json",
+    "schemas/memory-rule.schema.json",
+    "relia.yaml",
+    "memory/README.md"
+  ],
+  "summary": "Implemented versioned Relia config validation, schema/artifact contracts, offline privacy defaults, fail-closed config validation, and structured relia check artifact output."
+}

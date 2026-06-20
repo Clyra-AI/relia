@@ -1,4 +1,6 @@
 version: 1
+schema_version: "1.0"
+artifact_contract_version: "1.0"
 
 repo:
   provider: github
@@ -18,8 +20,47 @@ outcomes:
   checks:
     required: []
 
+privacy:
+  default_scope: local_only
+  customer_safe_default: false
+  org_eligible_default: false
+  redaction:
+    capture_time: true
+    recursive: true
+    nested_fields:
+      - owner
+      - credential
+      - secret
+      - endpoint
+      - machine_local_path
+
+network:
+  default: disabled
+  credentials: none
+
+artifact_contracts:
+  command_results:
+    schema: schemas/command-result.schema.json
+    schema_version: "1.0"
+  config:
+    path: relia.yaml
+    schema: schemas/relia-config.schema.json
+    schema_version: "1.0"
+  experiences:
+    path: memory/experiences.jsonl
+    schema: schemas/experience-record.schema.json
+    schema_version: "1.0"
+  memory_rules:
+    path: memory/rules.jsonl
+    schema: schemas/memory-rule.schema.json
+    schema_version: "1.0"
+
 distill:
   embeddings: signature
+  local_artifacts:
+    required_pull: true
+  provider:
+    enabled: false
 
 serve:
   advisory_only: true

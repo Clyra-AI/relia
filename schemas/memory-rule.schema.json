@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Clyra-AI/relia/schemas/memory-rule.schema.json",
+  "title": "Relia Memory Rule",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "object_type",
+    "schema_version",
+    "rule_id",
+    "kind",
+    "lifecycle_status",
+    "statement",
+    "confidence",
+    "provenance",
+    "review",
+    "redaction_status",
+    "org_eligible"
+  ],
+  "properties": {
+    "object_type": {
+      "const": "relia.memory_rule"
+    },
+    "schema_version": {
+      "const": "1.0"
+    },
+    "rule_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "kind": {
+      "enum": ["avoid", "playbook"]
+    },
+    "lifecycle_status": {
+      "enum": ["candidate", "active", "stale", "contradicted", "retired"]
+    },
+    "statement": {
+      "type": "string",
+      "minLength": 1
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "provenance": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/provenance_ref"
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label"],
+      "properties": {
+        "label": {
+          "enum": ["accepted", "suggested", "needs_user_input"]
+        },
+        "reviewed_by": {
+          "type": "string"
+        }
+      }
+    },
+    "redaction_status": {
+      "enum": ["applied", "failed_closed"]
+    },
+    "org_eligible": {
+      "const": false
+    }
+  },
+  "$defs": {
+    "provenance_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["experience_id", "ref"],
+      "properties": {
+        "experience_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

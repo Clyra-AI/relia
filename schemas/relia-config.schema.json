@@ -1,0 +1,285 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Clyra-AI/relia/schemas/relia-config.schema.json",
+  "title": "Relia Configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "schema_version",
+    "artifact_contract_version",
+    "repo",
+    "attribution",
+    "outcomes",
+    "privacy",
+    "network",
+    "artifact_contracts",
+    "distill",
+    "serve",
+    "gate"
+  ],
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "schema_version": {
+      "const": "1.0"
+    },
+    "artifact_contract_version": {
+      "const": "1.0"
+    },
+    "repo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "remote", "scopes"],
+      "properties": {
+        "provider": {
+          "const": "github"
+        },
+        "remote": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scopes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "attribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["agent_authors", "coauthor_trailers", "pr_labels", "uncertain"],
+      "properties": {
+        "agent_authors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "coauthor_trailers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "pr_labels": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "uncertain": {
+          "const": "exclude"
+        }
+      }
+    },
+    "outcomes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["checks"],
+      "properties": {
+        "checks": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["required"],
+          "properties": {
+            "required": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "privacy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "default_scope",
+        "customer_safe_default",
+        "org_eligible_default",
+        "redaction"
+      ],
+      "properties": {
+        "default_scope": {
+          "const": "local_only"
+        },
+        "customer_safe_default": {
+          "const": false
+        },
+        "org_eligible_default": {
+          "const": false
+        },
+        "redaction": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["capture_time", "recursive", "nested_fields"],
+          "properties": {
+            "capture_time": {
+              "const": true
+            },
+            "recursive": {
+              "const": true
+            },
+            "nested_fields": {
+              "type": "array",
+              "allOf": [
+                {
+                  "contains": {
+                    "const": "owner"
+                  }
+                },
+                {
+                  "contains": {
+                    "const": "credential"
+                  }
+                },
+                {
+                  "contains": {
+                    "const": "secret"
+                  }
+                },
+                {
+                  "contains": {
+                    "const": "endpoint"
+                  }
+                },
+                {
+                  "contains": {
+                    "const": "machine_local_path"
+                  }
+                }
+              ],
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "network": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["default", "credentials"],
+      "properties": {
+        "default": {
+          "const": "disabled"
+        },
+        "credentials": {
+          "const": "none"
+        }
+      }
+    },
+    "artifact_contracts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["command_results", "config", "experiences", "memory_rules"],
+      "properties": {
+        "command_results": {
+          "$ref": "#/$defs/schema_contract"
+        },
+        "config": {
+          "$ref": "#/$defs/artifact_contract"
+        },
+        "experiences": {
+          "$ref": "#/$defs/artifact_contract"
+        },
+        "memory_rules": {
+          "$ref": "#/$defs/artifact_contract"
+        }
+      }
+    },
+    "distill": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["embeddings", "local_artifacts", "provider"],
+      "properties": {
+        "embeddings": {
+          "const": "signature"
+        },
+        "local_artifacts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["required_pull"],
+          "properties": {
+            "required_pull": {
+              "const": true
+            }
+          }
+        },
+        "provider": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["enabled"],
+          "properties": {
+            "enabled": {
+              "const": false
+            }
+          }
+        }
+      }
+    },
+    "serve": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["advisory_only"],
+      "properties": {
+        "advisory_only": {
+          "const": true
+        }
+      }
+    },
+    "gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled"],
+      "properties": {
+        "enabled": {
+          "const": false
+        }
+      }
+    }
+  },
+  "$defs": {
+    "schema_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "schema_version"],
+      "properties": {
+        "schema": {
+          "type": "string",
+          "minLength": 1
+        },
+        "schema_version": {
+          "const": "1.0"
+        }
+      }
+    },
+    "artifact_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "schema", "schema_version"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "schema": {
+          "type": "string",
+          "minLength": 1
+        },
+        "schema_version": {
+          "const": "1.0"
+        }
+      }
+    }
+  }
+}

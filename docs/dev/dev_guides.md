@@ -64,6 +64,17 @@ compensating validation evidence.
 - Deterministic bootstrap must not require network, sandbox credentials, or model keys.
 - Evidence artifacts must use repo-relative paths.
 - New dependencies must be pinned and justified.
+- `relia.yaml` is the repo-local configuration contract. It carries
+  `schema_version: "1.0"` and `artifact_contract_version: "1.0"` and is
+  validated by `relia check`.
+- Default privacy posture is local-only: `customer_safe_default: false`,
+  `org_eligible_default: false`, capture-time redaction enabled, recursive
+  nested-field redaction enabled, network disabled, and credentials set to
+  `none`.
+- MVP local artifact contracts are repo-relative and versioned:
+  `schemas/command-result.schema.json`, `schemas/relia-config.schema.json`,
+  `schemas/experience-record.schema.json`, and
+  `schemas/memory-rule.schema.json`.
 
 ## Outcome Fixture Corpus
 
@@ -131,10 +142,20 @@ The envelope preserves `object_type`, `schema_version`, `command`, `status`,
 `duration_ms`, and `redaction_status`. Human-readable output is only the default
 when stdout is an interactive terminal and no machine-readable flag is present.
 
+T2 extends `relia check` from file-presence validation to contract validation.
+The JSON envelope now reports `relia.yaml`, schema refs, `memory/` artifact
+contracts, schema versions, and privacy defaults. Unsafe config defaults, such
+as `privacy.org_eligible_default: true`, fail closed with exit `4`, a typed
+`configuration_validation_failed` error, and `redaction_status:
+failed_closed`.
+
 ## Structured Data, Proof, Budgets, And Redaction
 
 - PR, check-run, experience, memory, MCP, assessment, report, and config data
   must be handled through parsers, schemas, or stable APIs.
+- Config parsing for deterministic bootstrap is constrained to the owned
+  `relia.yaml` contract and must not require network, secrets, or third-party
+  runtime payloads.
 - Structured check-run data is preferred over log parsing; any log-parsed
   fallback must be labeled and validated.
 - Task closure must name the required proof level: syntax, source evidence,

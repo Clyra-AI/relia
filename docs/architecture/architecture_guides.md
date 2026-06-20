@@ -22,13 +22,34 @@ validation. Rollback is deletion of the T1 schema/examples and restoration of
 the previous command wrapper, but that would also remove the agent-native CLI
 baseline required by `docs/dev/dev_guides.md#agent-native-cli-policy`.
 
+## Config And Artifact Contract Boundary
+
+T2 makes `relia.yaml` a validated source of truth for local configuration,
+privacy defaults, and artifact contracts. `relia check` owns validation for the
+config file, schema refs, and repo-relative memory artifact roots. The state
+owner is the CLI package under `cmd/relia`; the durable contract files are
+`relia.yaml`, `schemas/relia-config.schema.json`,
+`schemas/experience-record.schema.json`, `schemas/memory-rule.schema.json`, and
+`memory/README.md`. Feedback sources are unit tests, `make prepush-full`, and
+Factory task-run evidence. The blast radius is local bootstrap and structured
+output only; no live provider, credential, network, model artifact, or release
+packaging posture changes in this boundary.
+
+Rollback is deletion of the T2 schemas/config fields plus restoration of the
+T1-only `relia check`, but doing so would remove executable validation for the
+PRD's schema, artifact-stability, privacy, and structured-output requirements.
+
 ## Systems Thinking Map
 
 - State lives in repo-local config, generated artifacts, source files, and Factory evidence.
 - Source of truth for product scope is docs/product/prd.md.
 - Source of truth for governed delivery state is .factory/artifacts/prd-to-plan/relia-mvp/.
+- `relia.yaml` owns local bootstrap defaults; schema files under `schemas/` own
+  structured contracts; `memory/` is the reserved local memory artifact root.
 - Feedback lives in command output, tests, coverage gates, CodeQL status, validation reports, PR lifecycle reports, and scope closure.
 - Deleting Factory artifacts breaks governed closure; deleting dev/architecture guides breaks task propagation.
+- Deleting `relia.yaml`, schema files, or `memory/README.md` breaks local
+  contract validation and should fail `relia check`.
 - Deleting required-check metadata, CODEOWNERS, action-ref exceptions, or CI workflows breaks public-repo delivery controls.
 
 ## TDD And Red-First Expectations

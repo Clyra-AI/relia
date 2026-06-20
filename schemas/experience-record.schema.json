@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Clyra-AI/relia/schemas/experience-record.schema.json",
+  "title": "Relia Experience Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "object_type",
+    "schema_version",
+    "experience_id",
+    "outcome",
+    "attribution",
+    "signature",
+    "provenance",
+    "redaction_status",
+    "org_eligible"
+  ],
+  "properties": {
+    "object_type": {
+      "const": "relia.experience_record"
+    },
+    "schema_version": {
+      "const": "1.0"
+    },
+    "experience_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "outcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "observed_at"],
+      "properties": {
+        "kind": {
+          "enum": ["ci_failed", "merged_clean", "reverted", "review_corrected"]
+        },
+        "observed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "flake_discounted": {
+          "type": "boolean"
+        }
+      }
+    },
+    "attribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "confidence"],
+      "properties": {
+        "method": {
+          "enum": ["bot_login", "coauthor_trailer", "pr_label", "unknown"]
+        },
+        "confidence": {
+          "enum": ["high", "medium", "low", "uncertain"]
+        }
+      }
+    },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "source"],
+      "properties": {
+        "key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "enum": ["structured_check_run", "log_parse_fallback", "review_correction", "revert"]
+        },
+        "confidence": {
+          "enum": ["high", "medium", "low"]
+        }
+      }
+    },
+    "provenance": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/provenance_ref"
+      }
+    },
+    "redaction_status": {
+      "enum": ["applied", "failed_closed"]
+    },
+    "org_eligible": {
+      "const": false
+    }
+  },
+  "$defs": {
+    "provenance_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "ref"],
+      "properties": {
+        "kind": {
+          "enum": ["pull_request", "check_run", "review", "revert", "artifact"]
+        },
+        "ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

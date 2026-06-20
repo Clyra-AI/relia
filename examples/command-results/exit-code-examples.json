@@ -12,12 +12,88 @@
       "exit_code": 0,
       "warnings": [],
       "errors": [],
-      "artifacts": [],
-      "evidence_refs": ["docs/product/prd.md#command-model"],
+      "artifacts": [
+        {
+          "kind": "config",
+          "path": "relia.yaml"
+        },
+        {
+          "kind": "schema",
+          "path": "schemas/command-result.schema.json"
+        },
+        {
+          "kind": "schema",
+          "path": "schemas/relia-config.schema.json"
+        },
+        {
+          "kind": "schema",
+          "path": "schemas/experience-record.schema.json"
+        },
+        {
+          "kind": "schema",
+          "path": "schemas/memory-rule.schema.json"
+        },
+        {
+          "kind": "artifact_contract",
+          "path": "memory/"
+        },
+        {
+          "kind": "example",
+          "path": "examples/command-results/exit-code-examples.json"
+        }
+      ],
+      "evidence_refs": [
+        "docs/product/prd.md#command-model",
+        "docs/dev/dev_guides.md#agent-native-cli-policy",
+        "schemas/command-result.schema.json"
+      ],
       "duration_ms": 0,
       "redaction_status": "not_applicable",
       "data": {
-        "message": "local operating pack baseline is present"
+        "artifact_contract_version": "1.0",
+        "artifact_contracts": [
+          {
+            "name": "command_results",
+            "path": "",
+            "schema": "schemas/command-result.schema.json",
+            "schema_version": "1.0"
+          },
+          {
+            "name": "config",
+            "path": "relia.yaml",
+            "schema": "schemas/relia-config.schema.json",
+            "schema_version": "1.0"
+          },
+          {
+            "name": "experiences",
+            "path": "memory/experiences.jsonl",
+            "schema": "schemas/experience-record.schema.json",
+            "schema_version": "1.0"
+          },
+          {
+            "name": "memory_rules",
+            "path": "memory/rules.jsonl",
+            "schema": "schemas/memory-rule.schema.json",
+            "schema_version": "1.0"
+          }
+        ],
+        "checked_paths": 21,
+        "config_schema_version": "1.0",
+        "message": "local operating pack baseline is present",
+        "privacy_defaults": {
+          "customer_safe_default": false,
+          "default_scope": "local_only",
+          "org_eligible_default": false,
+          "redaction_capture_time": true,
+          "redaction_recursive": true
+        },
+        "repo_root": ".",
+        "schema_versions": {
+          "schemas/command-result.schema.json": "1.0",
+          "schemas/experience-record.schema.json": "1.0",
+          "schemas/memory-rule.schema.json": "1.0",
+          "schemas/relia-config.schema.json": "1.0"
+        }
       }
     },
     {
