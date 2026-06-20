@@ -1,0 +1,221 @@
+{
+  "object_type": "relia.command_result_examples",
+  "schema_version": "1.0",
+  "source_ref": "docs/product/prd.md#exit-code-contract",
+  "examples": [
+    {
+      "object_type": "relia.command_result",
+      "schema_version": "1.0",
+      "command": "check",
+      "status": "pass",
+      "mode": "check",
+      "exit_code": 0,
+      "warnings": [],
+      "errors": [],
+      "artifacts": [],
+      "evidence_refs": ["docs/product/prd.md#command-model"],
+      "duration_ms": 0,
+      "redaction_status": "not_applicable",
+      "data": {
+        "message": "local operating pack baseline is present"
+      }
+    },
+    {
+      "object_type": "relia.command_result",
+      "schema_version": "1.0",
+      "command": "ingest",
+      "status": "error",
+      "mode": "ingest",
+      "exit_code": 1,
+      "warnings": [],
+      "errors": [
+        {
+          "type": "internal_error",
+          "message": "unexpected persistence failure",
+          "exit_code": 1,
+          "remediation": "Rerun with --json and include the command result envelope in the task evidence."
+        }
+      ],
+      "artifacts": [],
+      "evidence_refs": ["docs/product/prd.md#command-model"],
+      "duration_ms": 0,
+      "redaction_status": "not_applicable"
+    },
+    {
+      "object_type": "relia.command_result",
+      "schema_version": "1.0",
+      "command": "backtest",
+      "status": "error",
+      "mode": "backtest",
+      "exit_code": 2,
+      "warnings": [],
+      "errors": [
+        {
+          "type": "invalid_usage",
+          "message": "invalid window value",
+          "exit_code": 2,
+          "remediation": "Use a duration such as 180d.",
+          "ref": "docs/product/prd.md#command-model"
+        }
+      ],
+      "artifacts": [],
+      "evidence_refs": ["docs/product/prd.md#command-model"],
+      "duration_ms": 0,
+      "redaction_status": "not_applicable"
+    },
+    {
+      "object_type": "relia.command_result",
+      "schema_version": "1.0",
+      "command": "ingest",
+      "status": "error",
+      "mode": "ingest",
+      "exit_code": 3,
+      "warnings": [],
+      "errors": [
+        {
+          "type": "outcome_observability_failed",
+          "message": "strict attribution found no matching agent-authored PRs",
+          "exit_code": 3,
+          "remediation": "Update attribution markers or relax strict mode.",
+          "ref": "relia.yaml"
+        }
+      ],
+      "artifacts": [],
+      "evidence_refs": ["docs/product/prd.md#exit-code-contract"],
+      "duration_ms": 0,
+      "redaction_status": "not_applicable"
+    },
+    {
+      "object_type": "relia.command_result",
+      "schema_version": "1.0",
+      "command": "check",
+      "status": "error",
+      "mode": "check",
+      "exit_code": 4,
+      "warnings": [],
+      "errors": [
+        {
+          "type": "memory_artifact_validation_failed",
+          "message": "active rule has no provenance entries",
+          "exit_code": 4,
+          "remediation": "Add at least one experience and PR citation or retire the rule.",
+          "ref": "memory/rules.jsonl"
+        }
+      ],
+      "artifacts": [],
+      "evidence_refs": ["docs/product/prd.md#exit-code-contract"],
+      "duration_ms": 0,
+      "redaction_status": "not_applicable"
+    },
+    {
+      "object_type": "relia.command_result",
+      "schema_version": "1.0",
+      "command": "assess",
+      "status": "error",
+      "mode": "assess",
+      "exit_code": 5,
+      "warnings": [],
+      "errors": [
+        {
+          "type": "recurrence_gate_failed",
+          "message": "explicit recurrence gate threshold was exceeded",
+          "exit_code": 5,
+          "remediation": "Review the cited recurrence evidence or adjust the configured gate.",
+          "ref": "relia.yaml"
+        }
+      ],
+      "artifacts": [],
+      "evidence_refs": ["docs/product/prd.md#exit-code-contract"],
+      "duration_ms": 0,
+      "redaction_status": "not_applicable"
+    },
+    {
+      "object_type": "relia.command_result",
+      "schema_version": "1.0",
+      "command": "share",
+      "status": "error",
+      "mode": "share",
+      "exit_code": 6,
+      "warnings": [],
+      "errors": [
+        {
+          "type": "redaction_safety_failed",
+          "message": "unsafe value could not be confidently redacted",
+          "exit_code": 6,
+          "remediation": "Do not persist or share the artifact until redaction succeeds.",
+          "ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+        }
+      ],
+      "artifacts": [],
+      "evidence_refs": ["docs/product/prd.md#exit-code-contract"],
+      "duration_ms": 0,
+      "redaction_status": "failed_closed"
+    },
+    {
+      "object_type": "relia.command_result",
+      "schema_version": "1.0",
+      "command": "ingest",
+      "status": "error",
+      "mode": "ingest",
+      "exit_code": 7,
+      "warnings": [],
+      "errors": [
+        {
+          "type": "credential_error",
+          "message": "required GitHub credential is unavailable",
+          "exit_code": 7,
+          "remediation": "Provide an approved credential environment before live intake.",
+          "ref": "docs/architecture/architecture_guides.md#trust-mode-posture"
+        }
+      ],
+      "artifacts": [],
+      "evidence_refs": ["docs/product/prd.md#exit-code-contract"],
+      "duration_ms": 0,
+      "redaction_status": "not_applicable"
+    },
+    {
+      "object_type": "relia.command_result",
+      "schema_version": "1.0",
+      "command": "distill",
+      "status": "error",
+      "mode": "distill",
+      "exit_code": 8,
+      "warnings": [],
+      "errors": [
+        {
+          "type": "dependency_error",
+          "message": "local embedding artifact is missing",
+          "exit_code": 8,
+          "remediation": "Run relia models pull with an approved model_artifact_pull gate or use embeddings: signature.",
+          "ref": "docs/dev/dev_guides.md#model-provider-and-artifact-policy"
+        }
+      ],
+      "artifacts": [],
+      "evidence_refs": ["docs/product/prd.md#exit-code-contract"],
+      "duration_ms": 0,
+      "redaction_status": "not_applicable"
+    },
+    {
+      "object_type": "relia.command_result",
+      "schema_version": "1.0",
+      "command": "backtest",
+      "status": "error",
+      "mode": "backtest",
+      "exit_code": 9,
+      "warnings": [],
+      "errors": [
+        {
+          "type": "provenance_integrity_failed",
+          "message": "experience record cites a missing source PR",
+          "exit_code": 9,
+          "remediation": "Repair or quarantine the affected experience record.",
+          "ref": "memory/experiences.jsonl"
+        }
+      ],
+      "artifacts": [],
+      "evidence_refs": ["docs/product/prd.md#exit-code-contract"],
+      "duration_ms": 0,
+      "redaction_status": "not_applicable"
+    }
+  ]
+}

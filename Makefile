@@ -1,6 +1,8 @@
 GO ?= go
 PKG_LIST := ./cmd/...
 COVERAGE_MIN ?= 75
+TMPDIR ?= /tmp
+export GOCACHE ?= $(TMPDIR)/relia-go-build
 
 .PHONY: lint-fast test-fast test-coverage test-contracts prepush-full
 

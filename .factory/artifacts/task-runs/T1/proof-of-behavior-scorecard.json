@@ -1,0 +1,78 @@
+{
+  "artifact_type": "proof_of_behavior_scorecard",
+  "artifact_name": "proof-of-behavior-scorecard",
+  "schema_version": "1.0",
+  "task_id": "T1",
+  "status": "pass",
+  "proof_level": "user_visible_behavior",
+  "scorecard": [
+    {
+      "check_id": "stable_json_mode",
+      "status": "pass",
+      "behavior": "relia --json check emits a relia.command_result envelope with schema_version 1.0, status, exit_code, evidence_refs, and typed arrays.",
+      "evidence_refs": [
+        "cmd/relia/main_test.go",
+        "schemas/command-result.schema.json"
+      ]
+    },
+    {
+      "check_id": "non_interactive_machine_readable",
+      "status": "pass",
+      "behavior": "Non-interactive or piped stdout defaults to JSON when no human-only mode is requested.",
+      "evidence_refs": [
+        "cmd/relia/main_test.go"
+      ]
+    },
+    {
+      "check_id": "quiet_compact_preserves_contract",
+      "status": "pass",
+      "behavior": "relia --quiet --compact check emits compact JSON while preserving status, exit_code, evidence_refs, warnings, errors, and artifacts.",
+      "evidence_refs": [
+        "cmd/relia/main_test.go"
+      ]
+    },
+    {
+      "check_id": "typed_errors_and_exits",
+      "status": "pass",
+      "behavior": "Unknown commands and invalid flags return exit 2 with an invalid_usage error envelope; reserved MVP commands return typed not_implemented envelopes.",
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go"
+      ]
+    },
+    {
+      "check_id": "init_and_check_baseline",
+      "status": "pass",
+      "behavior": "relia init creates relia.yaml when missing and relia check validates the repo operating-pack baseline.",
+      "evidence_refs": [
+        "relia.yaml",
+        "cmd/relia/main_test.go"
+      ]
+    },
+    {
+      "check_id": "exit_code_examples",
+      "status": "pass",
+      "behavior": "Exit-code examples cover stable PRD exit codes 0 through 9.",
+      "evidence_refs": [
+        "examples/command-results/exit-code-examples.json",
+        "cmd/relia/main_test.go"
+      ]
+    },
+    {
+      "check_id": "validation_gate",
+      "status": "pass",
+      "behavior": "make prepush-full passes with lint, fast tests, coverage, and contract validation.",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T1/validation-report.json"
+      ]
+    }
+  ],
+  "overall_result": {
+    "status": "pass",
+    "acceptance_item_ids": [
+      "ACCEPTANCE-TESTS-001",
+      "CLI-AGENT-001"
+    ],
+    "validation_command": "make prepush-full"
+  }
+}
