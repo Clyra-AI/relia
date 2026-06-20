@@ -1,0 +1,47 @@
+{
+  "artifact_type": "work_proof_marker",
+  "schema_version": "1.0",
+  "task_id": "T1",
+  "status": "implemented",
+  "implementation_performed": true,
+  "changed_paths": [
+    "Makefile",
+    "README.md",
+    "cmd/relia/main.go",
+    "cmd/relia/main_test.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/architecture/decision-records/0001-command-result-envelope.md",
+    "docs/dev/dev_guides.md",
+    "examples/command-results/exit-0-success.json",
+    "examples/command-results/exit-1-general-error.json",
+    "examples/command-results/exit-2-invalid-usage.json",
+    "examples/command-results/exit-3-observability-attribution.json",
+    "examples/command-results/exit-4-memory-validation.json",
+    "examples/command-results/exit-5-recurrence-gate.json",
+    "examples/command-results/exit-6-redaction-safety.json",
+    "examples/command-results/exit-7-credential-auth.json",
+    "examples/command-results/exit-8-dependency-network.json",
+    "examples/command-results/exit-9-provenance-integrity.json",
+    "schemas/command-result.schema.json",
+    ".factory/artifacts/task-runs/T1/work-proof-marker.json",
+    ".factory/artifacts/task-runs/T1/validation-report.json",
+    ".factory/artifacts/task-runs/T1/proof-of-behavior-scorecard.json"
+  ],
+  "work_summary": [
+    "Implemented the Relia CLI foundation with stable command-result JSON output, automatic non-interactive JSON, compact quiet/compact modes, typed exit-code errors, and recognized MVP command stubs.",
+    "Added the CommandResult JSON schema and examples for stable exit codes 0 through 9.",
+    "Updated README, developer guide, architecture guide, and a decision record for the public output contract.",
+    "Adjusted the Makefile so local validation uses a writable Go build cache in sandboxed environments."
+  ],
+  "evidence_refs": [
+    ".factory/artifacts/task-runs/T1/validation-report.json",
+    ".factory/artifacts/task-runs/T1/proof-of-behavior-scorecard.json",
+    "schemas/command-result.schema.json",
+    "examples/command-results/"
+  ],
+  "factoryd_owned_evidence_not_authored_by_worker": [
+    "scope_closure_report",
+    "pr_lifecycle_report",
+    "factoryd_run_once_report"
+  ]
+}

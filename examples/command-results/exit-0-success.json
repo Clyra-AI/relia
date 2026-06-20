@@ -1,0 +1,26 @@
+{
+  "object_type": "relia.command_result",
+  "schema_version": "1.0",
+  "command": "status",
+  "status": "pass",
+  "mode": "status",
+  "exit_code": 0,
+  "warnings": [],
+  "errors": [],
+  "artifacts": [
+    {
+      "artifact_type": "schema",
+      "path": "schemas/command-result.schema.json",
+      "description": "CommandResult JSON schema."
+    }
+  ],
+  "evidence_refs": [
+    "docs/product/prd.md#json-envelope",
+    "docs/dev/dev_guides.md#agent-native-cli-policy"
+  ],
+  "duration_ms": 0,
+  "redaction_status": "not_applicable",
+  "metadata": {
+    "exit_meaning": "success"
+  }
+}

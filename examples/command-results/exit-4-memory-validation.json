@@ -1,0 +1,31 @@
+{
+  "object_type": "relia.command_result",
+  "schema_version": "1.0",
+  "command": "check",
+  "status": "error",
+  "mode": "check",
+  "exit_code": 4,
+  "warnings": [],
+  "errors": [
+    {
+      "type": "memory_artifact_validation_failure",
+      "message": "memory rule is missing required provenance",
+      "exit_code": 4,
+      "evidence_refs": [
+        "docs/product/prd.md#exit-codes"
+      ],
+      "metadata": {
+        "exit_meaning": "memory artifact validation failure"
+      }
+    }
+  ],
+  "artifacts": [],
+  "evidence_refs": [
+    "docs/product/prd.md#exit-codes"
+  ],
+  "duration_ms": 0,
+  "redaction_status": "not_applicable",
+  "metadata": {
+    "exit_meaning": "memory artifact validation failure"
+  }
+}

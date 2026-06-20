@@ -1,0 +1,62 @@
+{
+  "artifact_type": "proof-of-behavior-scorecard",
+  "schema_version": "1.0",
+  "task_id": "T1",
+  "status": "pass",
+  "required_proof_level": "user_visible_behavior",
+  "scorecard_items": [
+    {
+      "behavior": "Stable JSON mode emits the relia.command_result envelope.",
+      "status": "pass",
+      "evidence": [
+        "TestRunSupportsExplicitJSONModeOnTerminal",
+        "env GOCACHE=/tmp/relia-go-build go run ./cmd/relia --compact status"
+      ]
+    },
+    {
+      "behavior": "Non-interactive stdout is machine-readable by default.",
+      "status": "pass",
+      "evidence": [
+        "TestRunDefaultsToMachineReadableStatusWhenNonInteractive"
+      ]
+    },
+    {
+      "behavior": "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable fields.",
+      "status": "pass",
+      "evidence": [
+        "TestQuietAndCompactPreserveMachineReadableFields"
+      ]
+    },
+    {
+      "behavior": "Machine-readable errors use stable typed exits.",
+      "status": "pass",
+      "evidence": [
+        "TestUnknownCommandReturnsMachineReadableInvalidUsage",
+        "TestKnownMVPCommandStubReturnsTypedNotImplemented",
+        "TestModelsPullSkeletonUsesFullCommandName"
+      ]
+    },
+    {
+      "behavior": "Stable exit-code examples exist for codes 0 through 9.",
+      "status": "pass",
+      "evidence": [
+        "TestExitCodeExamplesCoverStableExitContract",
+        "examples/command-results/"
+      ]
+    },
+    {
+      "behavior": "Local operating-pack validation runs offline with a sandbox-writable Go build cache.",
+      "status": "pass",
+      "evidence": [
+        "make prepush-full",
+        "Makefile"
+      ]
+    }
+  ],
+  "validation_refs": [
+    ".factory/artifacts/task-runs/T1/validation-report.json"
+  ],
+  "notes": [
+    "Product commands beyond status/version/help are recognized as typed stubs in this foundation slice and return not_implemented until later task packets implement their behavior."
+  ]
+}

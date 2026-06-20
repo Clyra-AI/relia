@@ -14,6 +14,10 @@
 - make test-contracts: Factory planning artifact and repo-pack checks.
 - make prepush-full: full local gate before PR or merge.
 
+The Makefile runs Go tests with `GOCACHE=/tmp/relia-go-build` by default so
+sandboxed local validation does not write to a user home cache. Override with
+`RELIA_GOCACHE=/path/to/cache` when needed.
+
 ## 12-Level Test Matrix
 
 | Tier | Status | Current command, check, or evidence |
@@ -112,6 +116,19 @@ not generalize it into product behavior.
 - Task packets that touch CLI behavior must carry acceptance checks for JSON
   mode, piped or non-interactive behavior, quiet/compact posture, typed exits,
   and machine-readable errors.
+
+Current foundation contract:
+
+- `relia --json`, non-interactive stdout, `--quiet`, and `--compact` emit the
+  `relia.command_result` envelope.
+- `--quiet` and `--compact` use compact JSON and do not drop status,
+  evidence refs, typed errors, artifacts, or exit codes.
+- Unknown commands return exit `2` with an `invalid_usage` error object.
+- Recognized MVP commands whose product behavior is not implemented yet return
+  exit `1` with a `not_implemented` error object and PRD evidence refs.
+- The executable schema is `schemas/command-result.schema.json`; stable
+  examples for exit codes `0` through `9` live in
+  `examples/command-results/`.
 
 ## Structured Data, Proof, Budgets, And Redaction
 

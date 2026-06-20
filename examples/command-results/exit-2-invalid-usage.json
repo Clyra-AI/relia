@@ -1,0 +1,31 @@
+{
+  "object_type": "relia.command_result",
+  "schema_version": "1.0",
+  "command": "check",
+  "status": "error",
+  "mode": "check",
+  "exit_code": 2,
+  "warnings": [],
+  "errors": [
+    {
+      "type": "invalid_usage",
+      "message": "unknown flag or invalid local configuration",
+      "exit_code": 2,
+      "evidence_refs": [
+        "docs/product/prd.md#exit-codes"
+      ],
+      "metadata": {
+        "exit_meaning": "invalid usage, invalid input, parse error, or local configuration error"
+      }
+    }
+  ],
+  "artifacts": [],
+  "evidence_refs": [
+    "docs/product/prd.md#exit-codes"
+  ],
+  "duration_ms": 0,
+  "redaction_status": "not_applicable",
+  "metadata": {
+    "exit_meaning": "invalid usage, invalid input, parse error, or local configuration error"
+  }
+}

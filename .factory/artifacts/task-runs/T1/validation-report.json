@@ -1,0 +1,87 @@
+{
+  "artifact_type": "validation_report",
+  "schema_version": "1.0",
+  "task_id": "T1",
+  "status": "pass",
+  "commands_run": [
+    "make lint-fast",
+    "make test-fast",
+    "make test-coverage",
+    "make test-contracts",
+    "make prepush-full",
+    "python3 -m json.tool schemas/command-result.schema.json",
+    "python3 -m json.tool examples/command-results/*.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T1/work-proof-marker.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T1/validation-report.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T1/proof-of-behavior-scorecard.json"
+  ],
+  "red_first_evidence": [
+    {
+      "command": "make test-fast",
+      "status": "failed_as_expected",
+      "exit_code": 2,
+      "summary": "After adding contract tests and before implementing the CLI envelope, compilation failed on missing commandResult, exitCode, and new run signature symbols."
+    }
+  ],
+  "final_validation_evidence": [
+    {
+      "command": "make prepush-full",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "lint-fast, test-fast, test-coverage, and test-contracts passed; Go coverage total was 96.8% with a 75.0% minimum."
+    }
+  ],
+  "acceptance_results": [
+    {
+      "acceptance_item_id": "ACCEPTANCE-TESTS-001",
+      "status": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T1/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T1/proof-of-behavior-scorecard.json"
+      ]
+    },
+    {
+      "acceptance_item_id": "CLI-AGENT-001",
+      "status": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T1/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T1/proof-of-behavior-scorecard.json",
+        "schemas/command-result.schema.json",
+        "examples/command-results/"
+      ]
+    }
+  ],
+  "path_policy_result": {
+    "status": "pass",
+    "allowed_paths_checked": true,
+    "forbidden_paths_changed": [],
+    "changed_paths": [
+      "Makefile",
+      "README.md",
+      "cmd/relia/main.go",
+      "cmd/relia/main_test.go",
+      "docs/architecture/architecture_guides.md",
+      "docs/architecture/decision-records/0001-command-result-envelope.md",
+      "docs/dev/dev_guides.md",
+      "examples/command-results/exit-0-success.json",
+      "examples/command-results/exit-1-general-error.json",
+      "examples/command-results/exit-2-invalid-usage.json",
+      "examples/command-results/exit-3-observability-attribution.json",
+      "examples/command-results/exit-4-memory-validation.json",
+      "examples/command-results/exit-5-recurrence-gate.json",
+      "examples/command-results/exit-6-redaction-safety.json",
+      "examples/command-results/exit-7-credential-auth.json",
+      "examples/command-results/exit-8-dependency-network.json",
+      "examples/command-results/exit-9-provenance-integrity.json",
+      "schemas/command-result.schema.json",
+      ".factory/artifacts/task-runs/T1/work-proof-marker.json",
+      ".factory/artifacts/task-runs/T1/validation-report.json",
+      ".factory/artifacts/task-runs/T1/proof-of-behavior-scorecard.json"
+    ]
+  },
+  "factoryd_owned_evidence_not_authored_by_worker": [
+    "scope_closure_report",
+    "pr_lifecycle_report",
+    "factoryd_run_once_report"
+  ]
+}

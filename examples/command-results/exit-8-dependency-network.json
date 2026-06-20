@@ -1,0 +1,31 @@
+{
+  "object_type": "relia.command_result",
+  "schema_version": "1.0",
+  "command": "models pull",
+  "status": "error",
+  "mode": "models_pull",
+  "exit_code": 8,
+  "warnings": [],
+  "errors": [
+    {
+      "type": "dependency_network_error",
+      "message": "model artifact or provider dependency was missing, stale, unavailable, or not approved",
+      "exit_code": 8,
+      "evidence_refs": [
+        "docs/product/prd.md#exit-codes"
+      ],
+      "metadata": {
+        "exit_meaning": "dependency, model provider, or network error"
+      }
+    }
+  ],
+  "artifacts": [],
+  "evidence_refs": [
+    "docs/product/prd.md#exit-codes"
+  ],
+  "duration_ms": 0,
+  "redaction_status": "not_applicable",
+  "metadata": {
+    "exit_meaning": "dependency, model provider, or network error"
+  }
+}

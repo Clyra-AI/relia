@@ -1,6 +1,38 @@
 # Relia
 
-Generated Factory-ready repository.
+Relia is outcome memory for coding agents, built from
+[docs/product/prd.md](docs/product/prd.md). This repository is in the MVP
+foundation stage: lifecycle controls, validation lanes, and the CLI command
+result contract are established before product commands are filled in.
+
+## CLI foundation
+
+The primary binary entrypoint is `cmd/relia`.
+
+~~~sh
+go run ./cmd/relia --json
+go run ./cmd/relia --compact status
+go run ./cmd/relia --quiet version
+~~~
+
+Current implemented commands:
+
+- `status`: emits the command-result envelope and contract artifact refs.
+- `version`: emits the current development version.
+- `help`: emits usage.
+
+MVP commands such as `backtest`, `check`, `ingest`, `distill`, `review`,
+`memory`, `compile`, `serve`, `assess`, `models pull`, `demo`, and `share` are
+recognized as typed command stubs in this foundation slice. They return a
+machine-readable `not_implemented` error with exit code `1` until their product
+behavior lands in later task packets.
+
+When stdout is not a TTY, Relia emits JSON automatically. `--json`, `--quiet`,
+and `--compact` all preserve the stable `relia.command_result` envelope,
+including status, evidence refs, typed errors, and exit codes. `--quiet` and
+`--compact` use compact JSON. The schema lives at
+`schemas/command-result.schema.json`; stable exit-code examples live under
+`examples/command-results/`.
 
 ## Start
 

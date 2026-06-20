@@ -1,0 +1,31 @@
+{
+  "object_type": "relia.command_result",
+  "schema_version": "1.0",
+  "command": "backtest",
+  "status": "error",
+  "mode": "backtest",
+  "exit_code": 1,
+  "warnings": [],
+  "errors": [
+    {
+      "type": "general_error",
+      "message": "unexpected internal error while preparing the command",
+      "exit_code": 1,
+      "evidence_refs": [
+        "docs/product/prd.md#exit-codes"
+      ],
+      "metadata": {
+        "exit_meaning": "general or internal error"
+      }
+    }
+  ],
+  "artifacts": [],
+  "evidence_refs": [
+    "docs/product/prd.md#exit-codes"
+  ],
+  "duration_ms": 0,
+  "redaction_status": "not_applicable",
+  "metadata": {
+    "exit_meaning": "general or internal error"
+  }
+}

@@ -3,6 +3,7 @@
 ## Initial Boundaries
 
 - CLI command surface
+- CLI command-result schema and stable exit-code examples
 - Go module and command package layout
 - configuration loading
 - validation and evidence artifacts
@@ -17,6 +18,8 @@
 - Feedback lives in command output, tests, coverage gates, CodeQL status, validation reports, PR lifecycle reports, and scope closure.
 - Deleting Factory artifacts breaks governed closure; deleting dev/architecture guides breaks task propagation.
 - Deleting required-check metadata, CODEOWNERS, action-ref exceptions, or CI workflows breaks public-repo delivery controls.
+- Deleting `schemas/command-result.schema.json` or `examples/command-results/`
+  breaks the agent-native CLI output contract and exit-code fixtures.
 
 ## TDD And Red-First Expectations
 
@@ -26,6 +29,8 @@
 ## ADR And Decision Triggers
 
 Require a decision note when a task changes runtime pins, distribution target, credential/network posture, public output contracts, schema compatibility, or major reliability/performance tradeoffs.
+
+Current public output contract decision: [0001-command-result-envelope.md](decision-records/0001-command-result-envelope.md).
 
 Model artifact and inference-runtime decisions require an ADR before
 implementation when they affect local embeddings, packaging, release artifacts,

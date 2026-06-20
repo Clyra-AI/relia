@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "schemas/command-result.schema.json",
+  "title": "Relia CommandResult",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "object_type",
+    "schema_version",
+    "command",
+    "status",
+    "mode",
+    "exit_code",
+    "warnings",
+    "errors",
+    "artifacts",
+    "evidence_refs",
+    "duration_ms",
+    "redaction_status",
+    "metadata"
+  ],
+  "properties": {
+    "object_type": {
+      "const": "relia.command_result"
+    },
+    "schema_version": {
+      "const": "1.0"
+    },
+    "command": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "enum": [
+        "pass",
+        "warn",
+        "error"
+      ]
+    },
+    "mode": {
+      "type": "string",
+      "minLength": 1
+    },
+    "exit_code": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/diagnostic"
+      }
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/diagnostic"
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/artifact_ref"
+      }
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "duration_ms": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "redaction_status": {
+      "enum": [
+        "applied",
+        "not_applicable",
+        "failed"
+      ]
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "artifact_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_type",
+        "path",
+        "description"
+      ],
+      "properties": {
+        "artifact_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "diagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "message",
+        "exit_code",
+        "evidence_refs",
+        "metadata"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "exit_code": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "object_type": "relia.command_result",
+  "schema_version": "1.0",
+  "command": "assess",
+  "status": "error",
+  "mode": "assess",
+  "exit_code": 5,
+  "warnings": [],
+  "errors": [
+    {
+      "type": "recurrence_gate_failure",
+      "message": "explicitly configured recurrence gate threshold was tripped",
+      "exit_code": 5,
+      "evidence_refs": [
+        "docs/product/prd.md#exit-codes"
+      ],
+      "metadata": {
+        "exit_meaning": "explicitly configured recurrence or regression gate failure"
+      }
+    }
+  ],
+  "artifacts": [],
+  "evidence_refs": [
+    "docs/product/prd.md#exit-codes"
+  ],
+  "duration_ms": 0,
+  "redaction_status": "not_applicable",
+  "metadata": {
+    "exit_meaning": "explicitly configured recurrence or regression gate failure"
+  }
+}

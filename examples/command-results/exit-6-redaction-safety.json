@@ -1,0 +1,31 @@
+{
+  "object_type": "relia.command_result",
+  "schema_version": "1.0",
+  "command": "share",
+  "status": "error",
+  "mode": "share",
+  "exit_code": 6,
+  "warnings": [],
+  "errors": [
+    {
+      "type": "redaction_safety_failure",
+      "message": "artifact was unsafe to persist or share because redaction confidence was insufficient",
+      "exit_code": 6,
+      "evidence_refs": [
+        "docs/product/prd.md#exit-codes"
+      ],
+      "metadata": {
+        "exit_meaning": "redaction or share safety failure"
+      }
+    }
+  ],
+  "artifacts": [],
+  "evidence_refs": [
+    "docs/product/prd.md#exit-codes"
+  ],
+  "duration_ms": 0,
+  "redaction_status": "failed",
+  "metadata": {
+    "exit_meaning": "redaction or share safety failure"
+  }
+}

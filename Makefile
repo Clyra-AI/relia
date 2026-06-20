@@ -1,4 +1,6 @@
 GO ?= go
+RELIA_GOCACHE ?= /tmp/relia-go-build
+GO_TEST_ENV := GOCACHE='$(RELIA_GOCACHE)'
 PKG_LIST := ./cmd/...
 COVERAGE_MIN ?= 75
 
@@ -18,12 +20,12 @@ lint-fast:
 	grep -q 'make test-coverage' docs/dev/dev_guides.md
 
 test-fast:
-	$(GO) test ./... -count=1
+	env $(GO_TEST_ENV) $(GO) test ./... -count=1
 
 test-coverage:
 	mkdir -p .factory/tmp
-	$(GO) test $(PKG_LIST) -count=1 -covermode=atomic -coverprofile=.factory/tmp/coverage.out
-	python3 scripts/check_go_coverage.py .factory/tmp/coverage.out $(COVERAGE_MIN)
+	env $(GO_TEST_ENV) $(GO) test $(PKG_LIST) -count=1 -covermode=atomic -coverprofile=.factory/tmp/coverage.out
+	env $(GO_TEST_ENV) python3 scripts/check_go_coverage.py .factory/tmp/coverage.out $(COVERAGE_MIN)
 
 test-contracts:
 	python3 scripts/validate_repo_pack.py
