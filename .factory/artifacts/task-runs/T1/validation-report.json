@@ -1,0 +1,114 @@
+{
+  "artifact_type": "validation_report",
+  "schema_version": "1.0",
+  "task_id": "T1",
+  "status": "pass",
+  "commands_run": [
+    "make test-fast",
+    "make lint-fast",
+    "make test-contracts",
+    "make test-coverage",
+    "GOCACHE=/tmp/relia-go-build go run ./cmd/relia --json check",
+    "GOCACHE=/tmp/relia-go-build go run ./cmd/relia --quiet --compact check",
+    "make prepush-full"
+  ],
+  "red_first_evidence": [
+    {
+      "command": "make test-fast",
+      "status": "observed_initial",
+      "exit_code": 2,
+      "result": "Go attempted to write the build cache outside the sandbox before the Makefile cache fix."
+    },
+    {
+      "command": "make test-fast",
+      "status": "pass",
+      "exit_code": 0,
+      "result": "CLI contract tests pass after implementation."
+    }
+  ],
+  "final_validation_evidence": [
+    {
+      "command": "make lint-fast",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "make test-fast",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "make test-coverage",
+      "status": "pass",
+      "exit_code": 0,
+      "coverage_total_percent": 85.8,
+      "coverage_minimum_percent": 75.0
+    },
+    {
+      "command": "make test-contracts",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "make prepush-full",
+      "status": "pass",
+      "exit_code": 0
+    }
+  ],
+  "acceptance_results": [
+    {
+      "acceptance_item_id": "ACCEPTANCE-TESTS-001",
+      "status": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T1/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T1/proof-of-behavior-scorecard.json"
+      ]
+    },
+    {
+      "acceptance_item_id": "CLI-AGENT-001",
+      "status": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T1/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T1/proof-of-behavior-scorecard.json",
+        "schemas/command-result.schema.json",
+        "examples/command-results/exit-code-examples.json"
+      ]
+    }
+  ],
+  "path_policy_result": {
+    "status": "pass",
+    "changed_paths_checked": [
+      "Makefile",
+      "README.md",
+      "cmd/relia/main.go",
+      "cmd/relia/main_test.go",
+      "docs/architecture/architecture_guides.md",
+      "docs/architecture/decision-0001-cli-result-envelope.md",
+      "docs/dev/dev_guides.md",
+      "examples/command-results/exit-code-examples.json",
+      "relia.yaml",
+      "schemas/command-result.schema.json",
+      ".factory/artifacts/task-runs/T1/work-proof-marker.json",
+      ".factory/artifacts/task-runs/T1/validation-report.json",
+      ".factory/artifacts/task-runs/T1/proof-of-behavior-scorecard.json"
+    ],
+    "forbidden_paths_changed": []
+  },
+  "required_factory_produced_evidence": [
+    {
+      "artifact_type": "scope_closure_report",
+      "status": "not_worker_authored",
+      "expected_owner": "factoryd"
+    },
+    {
+      "artifact_type": "pr_lifecycle_report",
+      "status": "not_worker_authored",
+      "expected_owner": "factoryd"
+    },
+    {
+      "artifact_type": "factoryd_run_once_report",
+      "status": "not_worker_authored",
+      "expected_owner": "factoryd"
+    }
+  ]
+}

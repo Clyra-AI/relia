@@ -1,0 +1,28 @@
+version: 1
+
+repo:
+  provider: github
+  remote: origin
+  scopes: []
+
+attribution:
+  agent_authors: []
+  coauthor_trailers:
+    - Claude
+    - Claude Code
+  pr_labels:
+    - agent-authored
+  uncertain: exclude
+
+outcomes:
+  checks:
+    required: []
+
+distill:
+  embeddings: signature
+
+serve:
+  advisory_only: true
+
+gate:
+  enabled: false

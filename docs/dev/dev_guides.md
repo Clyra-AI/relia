@@ -6,6 +6,9 @@
 |---|---:|
 | Go | 1.26.4 |
 
+The Makefile sets `GOCACHE` under `TMPDIR` by default so sandboxed validation
+does not depend on a writable user-level Go build cache.
+
 ## Validation Matrix
 
 - make lint-fast: repo operating pack and layout checks.
@@ -112,6 +115,21 @@ not generalize it into product behavior.
 - Task packets that touch CLI behavior must carry acceptance checks for JSON
   mode, piped or non-interactive behavior, quiet/compact posture, typed exits,
   and machine-readable errors.
+
+T1 establishes the command result envelope as the baseline automation contract:
+
+- envelope schema: `schemas/command-result.schema.json`
+- examples for exit codes `0` through `9`:
+  `examples/command-results/exit-code-examples.json`
+- implemented lifecycle commands: `relia init`, `relia check`, `relia help`,
+  and `relia version`
+- primary MVP commands not implemented in T1 return a typed
+  `not_implemented` error envelope rather than an ambiguous parser failure
+
+The envelope preserves `object_type`, `schema_version`, `command`, `status`,
+`mode`, `exit_code`, `warnings`, `errors`, `artifacts`, `evidence_refs`,
+`duration_ms`, and `redaction_status`. Human-readable output is only the default
+when stdout is an interactive terminal and no machine-readable flag is present.
 
 ## Structured Data, Proof, Budgets, And Redaction
 

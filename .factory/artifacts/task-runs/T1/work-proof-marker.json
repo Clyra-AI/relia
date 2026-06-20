@@ -1,0 +1,35 @@
+{
+  "artifact_type": "work_proof_marker",
+  "schema_version": "1.0",
+  "task_id": "T1",
+  "status": "implemented",
+  "implementation_performed": true,
+  "changed_paths": [
+    "Makefile",
+    "README.md",
+    "cmd/relia/main.go",
+    "cmd/relia/main_test.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/architecture/decision-0001-cli-result-envelope.md",
+    "docs/dev/dev_guides.md",
+    "examples/command-results/exit-code-examples.json",
+    "relia.yaml",
+    "schemas/command-result.schema.json",
+    ".factory/artifacts/task-runs/T1/work-proof-marker.json",
+    ".factory/artifacts/task-runs/T1/validation-report.json",
+    ".factory/artifacts/task-runs/T1/proof-of-behavior-scorecard.json"
+  ],
+  "work_summary": [
+    "Implemented the T1 CLI lifecycle skeleton with relia init, relia check, relia help, relia version, stable command result JSON, typed errors, and PRD exit-code constants.",
+    "Added relia.yaml baseline config, command result schema, exit-code examples, and documentation/architecture decision coverage.",
+    "Updated Makefile to use a sandbox-writable Go build cache during validation."
+  ],
+  "evidence_refs": [
+    ".factory/artifacts/task-runs/T1/validation-report.json",
+    ".factory/artifacts/task-runs/T1/proof-of-behavior-scorecard.json"
+  ],
+  "acceptance_item_ids": [
+    "ACCEPTANCE-TESTS-001",
+    "CLI-AGENT-001"
+  ]
+}

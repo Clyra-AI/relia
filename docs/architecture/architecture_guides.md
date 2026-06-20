@@ -9,6 +9,19 @@
 - CI, CodeQL, and coverage feedback surfaces
 - product-specific implementation packages under internal/
 
+## CLI Result Boundary
+
+The T1 CLI skeleton owns the first public command-result contract. Command state
+returns through `relia.command_result` JSON, validated by
+`schemas/command-result.schema.json`, with examples in
+`examples/command-results/exit-code-examples.json`. The state owner is the CLI
+package under `cmd/relia`; feedback sources are unit tests, `make
+prepush-full`, Factory task-run evidence, and CI checks. The blast radius is
+limited to local command output, `relia.yaml` bootstrap, and repo operating-pack
+validation. Rollback is deletion of the T1 schema/examples and restoration of
+the previous command wrapper, but that would also remove the agent-native CLI
+baseline required by `docs/dev/dev_guides.md#agent-native-cli-policy`.
+
 ## Systems Thinking Map
 
 - State lives in repo-local config, generated artifacts, source files, and Factory evidence.
