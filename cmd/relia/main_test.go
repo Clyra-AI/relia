@@ -40,6 +40,34 @@ func TestJSONFlagEmitsStableEnvelope(t *testing.T) {
 	}
 }
 
+func TestCheckReportsPhase0ContractSurface(t *testing.T) {
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if got := int(result.Data["schema_count"].(float64)); got != len(requiredPhase0SchemaFiles) {
+		t.Fatalf("schema_count = %d, want %d", got, len(requiredPhase0SchemaFiles))
+	}
+	if got := int(result.Data["checked_paths"].(float64)); got < len(requiredPhase0SchemaFiles)+len(requiredArtifactDirs) {
+		t.Fatalf("checked_paths = %d", got)
+	}
+	privacy, ok := result.Data["privacy_defaults"].(map[string]any)
+	if !ok {
+		t.Fatalf("privacy_defaults = %#v", result.Data["privacy_defaults"])
+	}
+	if privacy["embeddings"] != "signature" {
+		t.Fatalf("embeddings default = %#v", privacy["embeddings"])
+	}
+	if privacy["commit_experiences"] != false || privacy["gate_enabled"] != false {
+		t.Fatalf("privacy defaults = %#v", privacy)
+	}
+	if privacy["entropy_scan"] != true || privacy["share_scope"] != "private" {
+		t.Fatalf("privacy defaults = %#v", privacy)
+	}
+}
+
 func TestPipedOutputDefaultsToJSON(t *testing.T) {
 	stdout, stderr, code := runForTest(t, []string{"check"}, false)
 
@@ -191,6 +219,20 @@ func TestInitCreatesBaselineConfig(t *testing.T) {
 			t.Fatalf("relia.yaml missing %q:\n%s", token, content)
 		}
 	}
+	for _, token := range []string{"entropy_scan: true", "review_required: true", "commit_experiences: false"} {
+		if !bytes.Contains(content, []byte(token)) {
+			t.Fatalf("relia.yaml missing %q:\n%s", token, content)
+		}
+	}
+	for _, rel := range requiredArtifactDirs {
+		info, err := os.Stat(filepath.Join(tempDir, rel))
+		if err != nil {
+			t.Fatalf("expected artifact dir %s: %v", rel, err)
+		}
+		if !info.IsDir() {
+			t.Fatalf("%s is not a directory", rel)
+		}
+	}
 }
 
 func TestInitRejectsPositionalArguments(t *testing.T) {
@@ -328,6 +370,42 @@ func TestCommandResultExitCodeExamplesCoverStableCodes(t *testing.T) {
 		if codes[i] != want[i] {
 			t.Fatalf("codes = %v, want %v", codes, want)
 		}
+	}
+}
+
+func TestPhase0SchemasArePresentAndVersioned(t *testing.T) {
+	root := findRepoRootForTest(t)
+	for _, rel := range requiredPhase0SchemaFiles {
+		issues, err := validateSchemaFile(filepath.Join(root, rel))
+		if err != nil {
+			t.Fatalf("%s: %v", rel, err)
+		}
+		if len(issues) > 0 {
+			t.Fatalf("%s issues = %v", rel, issues)
+		}
+	}
+}
+
+func TestConfigValidationFailsClosedWhenRedactionDefaultsAreMissing(t *testing.T) {
+	configPath := filepath.Join(t.TempDir(), "relia.yaml")
+	content := bytes.ReplaceAll([]byte(defaultConfigYAML()), []byte("  entropy_scan: true\n"), nil)
+	if err := os.WriteFile(configPath, content, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	configIssues, redactionIssues, err := validateConfigFile(configPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(configIssues) != 0 {
+		t.Fatalf("config issues = %v", configIssues)
+	}
+	if len(redactionIssues) == 0 {
+		t.Fatal("expected missing redaction default to fail closed")
+	}
+	commandErr := redactionSafetyError("unsafe")
+	if commandErr.ExitCode != ExitRedactionSafety || commandErr.Type != "redaction_safety_failed" {
+		t.Fatalf("redaction error = %#v", commandErr)
 	}
 }
 

@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Clyra-AI/relia/schemas/risk-assessment.schema.json",
+  "title": "Relia Risk Assessment",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "object_type",
+    "schema_version",
+    "assessment_id",
+    "repo",
+    "assessed_at",
+    "risk_level",
+    "citations",
+    "coverage",
+    "gate",
+    "redaction_status",
+    "relia_version",
+    "metadata"
+  ],
+  "properties": {
+    "object_type": {
+      "const": "relia.risk_assessment"
+    },
+    "schema_version": {
+      "const": "1.0"
+    },
+    "assessment_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "repo": {
+      "type": "string",
+      "minLength": 1
+    },
+    "assessed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "risk_level": {
+      "enum": ["match_high", "match_medium", "no_coverage", "covered_clean"]
+    },
+    "citations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/citation"
+      }
+    },
+    "coverage": {
+      "$ref": "#/$defs/coverage"
+    },
+    "gate": {
+      "$ref": "#/$defs/gate"
+    },
+    "redaction_status": {
+      "enum": ["applied", "failed_closed"]
+    },
+    "relia_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "metadata": {
+      "type": "object"
+    }
+  },
+  "$defs": {
+    "citation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rule_id", "experience_id", "url"],
+      "properties": {
+        "rule_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "experience_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": {
+          "enum": ["match_high", "match_medium", "no_coverage", "covered_clean"]
+        }
+      }
+    },
+    "gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled", "tripped"],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "tripped": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

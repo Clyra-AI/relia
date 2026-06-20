@@ -22,6 +22,21 @@ validation. Rollback is deletion of the T1 schema/examples and restoration of
 the previous command wrapper, but that would also remove the agent-native CLI
 baseline required by `docs/dev/dev_guides.md#agent-native-cli-policy`.
 
+## Phase 0 Contract Boundary
+
+T2 owns the first versioned product contract layer for configuration, schema
+inventory, artifact layout, privacy defaults, and validation mapping. Schema
+state lives under `schemas/`, user-approved memory state lives under `memory/`,
+and generated Relia stores remain local under `.relia/` when later commands
+create them. The state owner is the CLI package under `cmd/relia`; feedback
+sources are unit tests, `relia check`, `make prepush-full`, Factory task-run
+evidence, and CI checks. The blast radius is limited to local configuration,
+schema compatibility, artifact references, and machine-readable command output.
+Rollback is deletion of the T2 schema files and restoration of the prior
+`relia.yaml`/`relia check` behavior, but that would remove the Phase 0 contracts
+required before ingest, distill, memory, and assess work can safely build on
+shared artifacts.
+
 ## Systems Thinking Map
 
 - State lives in repo-local config, generated artifacts, source files, and Factory evidence.
@@ -30,6 +45,8 @@ baseline required by `docs/dev/dev_guides.md#agent-native-cli-policy`.
 - Feedback lives in command output, tests, coverage gates, CodeQL status, validation reports, PR lifecycle reports, and scope closure.
 - Deleting Factory artifacts breaks governed closure; deleting dev/architecture guides breaks task propagation.
 - Deleting required-check metadata, CODEOWNERS, action-ref exceptions, or CI workflows breaks public-repo delivery controls.
+- Deleting Phase 0 schemas, `relia.yaml` privacy defaults, or tracked memory
+  skeleton directories breaks artifact stability for downstream product slices.
 
 ## TDD And Red-First Expectations
 

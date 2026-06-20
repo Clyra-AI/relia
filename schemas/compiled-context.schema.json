@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Clyra-AI/relia/schemas/compiled-context.schema.json",
+  "title": "Relia Compiled Context",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "object_type",
+    "schema_version",
+    "generated_at",
+    "target",
+    "managed_block_start",
+    "managed_block_end",
+    "rules",
+    "redaction_status",
+    "relia_version",
+    "metadata"
+  ],
+  "properties": {
+    "object_type": {
+      "const": "relia.compiled_context"
+    },
+    "schema_version": {
+      "const": "1.0"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "target": {
+      "enum": ["AGENTS.md", "CLAUDE.md"]
+    },
+    "managed_block_start": {
+      "const": "<!-- BEGIN RELIA MEMORY -->"
+    },
+    "managed_block_end": {
+      "const": "<!-- END RELIA MEMORY -->"
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/compiled_rule"
+      }
+    },
+    "redaction_status": {
+      "enum": ["applied", "failed_closed"]
+    },
+    "relia_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "metadata": {
+      "type": "object"
+    }
+  },
+  "$defs": {
+    "compiled_rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rule_id", "kind", "statement", "confidence", "citations"],
+      "properties": {
+        "rule_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "enum": ["avoid", "playbook"]
+        },
+        "statement": {
+          "type": "string",
+          "minLength": 1
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "citations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/citation"
+          }
+        }
+      }
+    },
+    "citation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["experience_id", "url"],
+      "properties": {
+        "experience_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

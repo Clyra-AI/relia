@@ -30,6 +30,26 @@ const (
 	defaultConfigFile       = "relia.yaml"
 )
 
+var requiredPhase0SchemaFiles = []string{
+	"schemas/command-result.schema.json",
+	"schemas/compiled-context.schema.json",
+	"schemas/coverage-map.schema.json",
+	"schemas/experience-record.schema.json",
+	"schemas/failure-signature.schema.json",
+	"schemas/memory-rule.schema.json",
+	"schemas/outcome-evidence.schema.json",
+	"schemas/recurrence-report.schema.json",
+	"schemas/redaction-config.schema.json",
+	"schemas/risk-assessment.schema.json",
+}
+
+var requiredArtifactDirs = []string{
+	"memory/rules",
+	"memory/compiled",
+	"examples/command-results",
+	"examples/reports",
+}
+
 var requiredCheckFiles = []string{
 	"AGENTS.md",
 	"WORKFLOW.md",
@@ -46,6 +66,38 @@ var requiredCheckFiles = []string{
 	".github/workflows/codeql.yml",
 	".factory/factoryd.example.json",
 	".factory/factoryd.autoship.example.json",
+}
+
+var requiredConfigSnippets = []string{
+	"version: 1",
+	"repo:\n  provider: github",
+	"  remote: origin",
+	"  scopes: []",
+	"attribution:\n  agent_authors: []",
+	"  uncertain: exclude",
+	"outcomes:\n  checks:",
+	"  revert_detection: true",
+	"  lookback_days: 180",
+	"  fix_held:",
+	"    settle_days: 14",
+	"    min_overlapping_merges: 3",
+	"distill:\n  embeddings: signature",
+	"  review_required: true",
+	"memory:\n  decay_half_life_days: 90",
+	"  commit_experiences: false",
+	"serve:\n  mcp: true",
+	"advise:\n  enabled: true",
+	"  max_comments_per_pr: 1",
+	"gate:\n  enabled: false",
+}
+
+var requiredRedactionSnippets = []string{
+	"redaction:\n  patterns:",
+	"    - api_key",
+	"    - token",
+	"    - password",
+	"    - secret",
+	"  entropy_scan: true",
 }
 
 var primaryCommands = []string{
@@ -94,6 +146,14 @@ type CommandError struct {
 type ArtifactRef struct {
 	Kind string `json:"kind"`
 	Path string `json:"path"`
+}
+
+type schemaContract struct {
+	Schema     string         `json:"$schema"`
+	ID         string         `json:"$id"`
+	Type       string         `json:"type"`
+	Required   []string       `json:"required"`
+	Properties map[string]any `json:"properties"`
 }
 
 type globalFlags struct {
@@ -217,16 +277,23 @@ func initResult(args []string, start time.Time) CommandResult {
 	configPath := filepath.Join(root, defaultConfigFile)
 	artifact := ArtifactRef{Kind: "config", Path: defaultConfigFile}
 	if _, err := os.Stat(configPath); err == nil {
+		if err := ensureArtifactSkeleton(root); err != nil {
+			return errorResult("init", "init", internalError("could not write artifact skeleton", err), start)
+		}
 		result := passResult("init", "init", "relia.yaml already exists", start, map[string]any{
 			"config_path": defaultConfigFile,
 			"created":     false,
 		})
 		result.Artifacts = append(result.Artifacts, artifact)
+		result.Artifacts = append(result.Artifacts, artifactSkeletonRefs()...)
 		return result
 	} else if !errors.Is(err, os.ErrNotExist) {
 		return errorResult("init", "init", internalError("could not inspect relia.yaml", err), start)
 	}
 
+	if err := ensureArtifactSkeleton(root); err != nil {
+		return errorResult("init", "init", internalError("could not write artifact skeleton", err), start)
+	}
 	if err := os.WriteFile(configPath, []byte(defaultConfigYAML()), 0o644); err != nil {
 		return errorResult("init", "init", internalError("could not write relia.yaml", err), start)
 	}
@@ -235,6 +302,7 @@ func initResult(args []string, start time.Time) CommandResult {
 		"created":     true,
 	})
 	result.Artifacts = append(result.Artifacts, artifact)
+	result.Artifacts = append(result.Artifacts, artifactSkeletonRefs()...)
 	return result
 }
 
@@ -262,14 +330,157 @@ func checkResult(args []string, start time.Time) CommandResult {
 			return errorResult("check", "check", internalError("could not inspect "+rel, err), start)
 		}
 	}
+	for _, rel := range requiredPhase0SchemaFiles {
+		if _, err := os.Stat(filepath.Join(root, rel)); err != nil {
+			if errors.Is(err, os.ErrNotExist) {
+				missing = append(missing, rel)
+				continue
+			}
+			return errorResult("check", "check", internalError("could not inspect "+rel, err), start)
+		}
+	}
+	for _, rel := range requiredArtifactDirs {
+		info, err := os.Stat(filepath.Join(root, rel))
+		if err != nil {
+			if errors.Is(err, os.ErrNotExist) {
+				missing = append(missing, rel+"/")
+				continue
+			}
+			return errorResult("check", "check", internalError("could not inspect "+rel, err), start)
+		}
+		if !info.IsDir() {
+			missing = append(missing, rel+"/")
+		}
+	}
 	if len(missing) > 0 {
 		return errorResult("check", "check", validationError("required local operating-pack files are missing", missing), start)
 	}
+	configIssues, redactionIssues, err := validateConfigFile(filepath.Join(root, defaultConfigFile))
+	if err != nil {
+		return errorResult("check", "check", internalError("could not inspect relia.yaml", err), start)
+	}
+	if len(redactionIssues) > 0 {
+		return errorResult("check", "check", redactionSafetyError("relia.yaml redaction defaults are unsafe or incomplete: "+strings.Join(redactionIssues, ", ")), start)
+	}
+	if len(configIssues) > 0 {
+		return errorResult("check", "check", configError("relia.yaml is missing required PRD defaults: "+strings.Join(configIssues, ", ")), start)
+	}
+	if issues, err := validateSchemaContracts(root); err != nil {
+		return errorResult("check", "check", internalError("could not inspect schema contracts", err), start)
+	} else if len(issues) > 0 {
+		return errorResult("check", "check", schemaValidationError("schema contracts are incomplete: "+strings.Join(issues, ", ")), start)
+	}
 
 	return passResult("check", "check", "local operating pack baseline is present", start, map[string]any{
-		"checked_paths": len(requiredCheckFiles),
-		"repo_root":     ".",
+		"artifact_dirs":  requiredArtifactDirs,
+		"checked_paths":  len(requiredCheckFiles) + len(requiredPhase0SchemaFiles) + len(requiredArtifactDirs),
+		"config_path":    defaultConfigFile,
+		"repo_root":      ".",
+		"schema_count":   len(requiredPhase0SchemaFiles),
+		"schema_version": commandSchemaVersion,
+		"privacy_defaults": map[string]any{
+			"commit_experiences": false,
+			"embeddings":         "signature",
+			"entropy_scan":       true,
+			"gate_enabled":       false,
+			"share_scope":        "private",
+		},
 	})
+}
+
+func ensureArtifactSkeleton(root string) error {
+	for _, rel := range requiredArtifactDirs {
+		if err := os.MkdirAll(filepath.Join(root, rel), 0o755); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func artifactSkeletonRefs() []ArtifactRef {
+	refs := make([]ArtifactRef, 0, len(requiredArtifactDirs))
+	for _, rel := range requiredArtifactDirs {
+		refs = append(refs, ArtifactRef{Kind: "artifact_dir", Path: rel})
+	}
+	return refs
+}
+
+func validateConfigFile(path string) ([]string, []string, error) {
+	contentBytes, err := os.ReadFile(path)
+	if err != nil {
+		return nil, nil, err
+	}
+	content := string(contentBytes)
+	configIssues := missingSnippets(content, requiredConfigSnippets)
+	redactionIssues := missingSnippets(content, requiredRedactionSnippets)
+	return configIssues, redactionIssues, nil
+}
+
+func missingSnippets(content string, snippets []string) []string {
+	var missing []string
+	for _, snippet := range snippets {
+		if !strings.Contains(content, snippet) {
+			missing = append(missing, strings.ReplaceAll(snippet, "\n", " "))
+		}
+	}
+	return missing
+}
+
+func validateSchemaContracts(root string) ([]string, error) {
+	var issues []string
+	for _, rel := range requiredPhase0SchemaFiles {
+		schemaIssues, err := validateSchemaFile(filepath.Join(root, rel))
+		if err != nil {
+			return nil, err
+		}
+		for _, issue := range schemaIssues {
+			issues = append(issues, rel+" "+issue)
+		}
+	}
+	return issues, nil
+}
+
+func validateSchemaFile(path string) ([]string, error) {
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	var contract schemaContract
+	if err := json.Unmarshal(content, &contract); err != nil {
+		return []string{"is not valid JSON"}, nil
+	}
+	var issues []string
+	if contract.Schema == "" {
+		issues = append(issues, "missing $schema")
+	}
+	if contract.ID == "" {
+		issues = append(issues, "missing $id")
+	}
+	if contract.Type != "object" {
+		issues = append(issues, "must declare type object")
+	}
+	required := map[string]bool{}
+	for _, field := range contract.Required {
+		required[field] = true
+	}
+	for _, field := range []string{"object_type", "schema_version"} {
+		if !required[field] {
+			issues = append(issues, "required missing "+field)
+		}
+	}
+	if _, ok := contract.Properties["metadata"]; !ok {
+		issues = append(issues, "missing metadata property")
+	}
+	schemaVersion, ok := contract.Properties["schema_version"].(map[string]any)
+	if !ok {
+		issues = append(issues, "missing schema_version property")
+	} else if schemaVersion["const"] != commandSchemaVersion {
+		issues = append(issues, "schema_version const must be "+commandSchemaVersion)
+	}
+	if _, ok := contract.Properties["object_type"].(map[string]any); !ok {
+		issues = append(issues, "missing object_type property")
+	}
+	return issues, nil
 }
 
 func helpResult(start time.Time) CommandResult {
@@ -363,6 +574,26 @@ func validationError(message string, missing []string) *CommandError {
 		ExitCode:    ExitValidation,
 		Remediation: "Restore the required repo lifecycle files before running Relia workflows.",
 		Ref:         "docs/dev/dev_guides.md#validation-matrix",
+	}
+}
+
+func schemaValidationError(message string) *CommandError {
+	return &CommandError{
+		Type:        "artifact_schema_validation_failed",
+		Message:     message,
+		ExitCode:    ExitValidation,
+		Remediation: "Repair the versioned schemas under schemas/ before running Relia workflows.",
+		Ref:         "docs/product/prd.md#json-schema-contract",
+	}
+}
+
+func redactionSafetyError(message string) *CommandError {
+	return &CommandError{
+		Type:        "redaction_safety_failed",
+		Message:     message,
+		ExitCode:    ExitRedactionSafety,
+		Remediation: "Restore fail-closed redaction patterns and entropy scanning before persisting or sharing artifacts.",
+		Ref:         "docs/product/prd.md#redaction-pipeline-contract",
 	}
 }
 
@@ -464,14 +695,55 @@ attribution:
 outcomes:
   checks:
     required: []
+  revert_detection: true
+  review_corrections:
+    marker: "relia:correction"
+  lookback_days: 180
+  fix_held:
+    settle_days: 14
+    min_overlapping_merges: 3
+
+redaction:
+  patterns:
+    - api_key
+    - token
+    - password
+    - secret
+  entropy_scan: true
 
 distill:
   embeddings: signature
+  min_evidence_count: 2
+  review_required: true
+
+memory:
+  decay_half_life_days: 90
+  invalidate_on_path_delete: true
+  max_active_rules: 200
+  commit_experiences: false
 
 serve:
+  mcp: true
   advisory_only: true
+  compile:
+    targets:
+      - AGENTS.md
+      - CLAUDE.md
+    max_rules: 25
+
+advise:
+  enabled: true
+  max_comments_per_pr: 1
+  update_in_place: true
+  reassess_debounce_minutes: 10
+  min_confidence: 0.6
+
+badge:
+  stale_after_days: 30
+  stale_after_merged_prs: 20
 
 gate:
   enabled: false
+  max_error_recurrence_rate: null
 `
 }

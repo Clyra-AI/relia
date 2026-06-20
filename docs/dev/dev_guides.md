@@ -17,6 +17,10 @@ does not depend on a writable user-level Go build cache.
 - make test-contracts: Factory planning artifact and repo-pack checks.
 - make prepush-full: full local gate before PR or merge.
 
+`relia check` is the local Phase 0 contract check. It validates the repo
+operating pack, the versioned schema inventory under `schemas/`, the tracked
+memory/report skeleton, and the privacy defaults in `relia.yaml`.
+
 ## 12-Level Test Matrix
 
 | Tier | Status | Current command, check, or evidence |
@@ -131,6 +135,18 @@ The envelope preserves `object_type`, `schema_version`, `command`, `status`,
 `duration_ms`, and `redaction_status`. Human-readable output is only the default
 when stdout is an interactive terminal and no machine-readable flag is present.
 
+T2 establishes the Phase 0 schema and configuration contract:
+
+- schema inventory: `compiled-context`, `coverage-map`, `experience-record`,
+  `failure-signature`, `memory-rule`, `outcome-evidence`,
+  `recurrence-report`, `redaction-config`, `risk-assessment`, and
+  `command-result`
+- artifact skeleton: `memory/rules/`, `memory/compiled/`,
+  `examples/command-results/`, and `examples/reports/`
+- privacy defaults: `distill.embeddings: signature`,
+  `memory.commit_experiences: false`, `redaction.entropy_scan: true`,
+  private share posture, and `gate.enabled: false`
+
 ## Structured Data, Proof, Budgets, And Redaction
 
 - PR, check-run, experience, memory, MCP, assessment, report, and config data
@@ -145,6 +161,11 @@ when stdout is an interactive terminal and no machine-readable flag is present.
   payloads.
 - Customer-safe or public artifacts must recursively redact nested owner,
   credential, endpoint, secret, and machine-local path fields.
+- Schema files are executable contracts. Every schema must declare
+  `schema_version`, an object discriminator, required fields, enum values where
+  applicable, and a forward-compatible `metadata` object.
+- `relia check` maps unsafe or incomplete redaction defaults to exit `6`, local
+  config errors to exit `2`, and schema/artifact contract failures to exit `4`.
 
 ## Model Provider And Artifact Policy
 

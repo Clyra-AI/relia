@@ -1,0 +1,44 @@
+{
+  "artifact_type": "work_proof_marker",
+  "schema_version": "1.0",
+  "task_id": "T2",
+  "status": "implemented",
+  "implementation_performed": true,
+  "produced_at": "2026-06-20T20:30:43Z",
+  "objective": "Implement PRD-defined configuration, schemas, artifact contracts, privacy defaults, validation, and structured output guarantees.",
+  "changed_paths": [
+    ".factory/artifacts/task-runs/T2/validation-report.json",
+    ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+    "README.md",
+    "cmd/relia/main.go",
+    "cmd/relia/main_test.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/architecture/decision-0002-phase-0-contracts.md",
+    "docs/dev/changelog.md",
+    "docs/dev/dev_guides.md",
+    "examples/reports/.gitkeep",
+    "memory/compiled/.gitkeep",
+    "memory/rules/.gitkeep",
+    "relia.yaml",
+    "schemas/command-result.schema.json",
+    "schemas/compiled-context.schema.json",
+    "schemas/coverage-map.schema.json",
+    "schemas/experience-record.schema.json",
+    "schemas/failure-signature.schema.json",
+    "schemas/memory-rule.schema.json",
+    "schemas/outcome-evidence.schema.json",
+    "schemas/recurrence-report.schema.json",
+    "schemas/redaction-config.schema.json",
+    "schemas/risk-assessment.schema.json"
+  ],
+  "implemented_contracts": [
+    "relia.yaml defaults include PRD privacy, redaction, review, advisory, and disabled-gate posture",
+    "relia init creates tracked memory/report skeleton directories",
+    "relia check validates Phase 0 schema inventory, artifact directories, config defaults, and redaction safety posture",
+    "schemas are versioned with object discriminators and metadata properties",
+    "structured JSON output preserves schema count and privacy defaults in the command-result envelope"
+  ],
+  "evidence_refs": [
+    ".factory/artifacts/task-runs/T2/validation-report.json"
+  ]
+}

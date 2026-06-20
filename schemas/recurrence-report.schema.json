@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Clyra-AI/relia/schemas/recurrence-report.schema.json",
+  "title": "Relia Recurrence Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "object_type",
+    "schema_version",
+    "report_id",
+    "repo",
+    "window",
+    "generated_at",
+    "experiences_total",
+    "experiences_agent_attributed",
+    "recurrences_confirmed",
+    "recurrences_possible",
+    "error_recurrence_rate",
+    "artifacts",
+    "redaction_status",
+    "relia_version",
+    "metadata"
+  ],
+  "properties": {
+    "object_type": {
+      "const": "relia.recurrence_report"
+    },
+    "schema_version": {
+      "const": "1.0"
+    },
+    "report_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "repo": {
+      "type": "string",
+      "minLength": 1
+    },
+    "window": {
+      "$ref": "#/$defs/window"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "experiences_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "experiences_agent_attributed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "recurrences_confirmed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "recurrences_possible": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "error_recurrence_rate": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "attribution_uncertain_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "flake_discounted_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/artifact_ref"
+      }
+    },
+    "redaction_status": {
+      "enum": ["applied", "failed_closed"]
+    },
+    "relia_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "metadata": {
+      "type": "object"
+    }
+  },
+  "$defs": {
+    "window": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["since", "until"],
+      "properties": {
+        "since": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "until": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "artifact_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "path"],
+      "properties": {
+        "kind": {
+          "enum": ["html_report", "json_report", "baseline", "experience_shard"]
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}
