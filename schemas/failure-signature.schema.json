@@ -29,7 +29,7 @@
       "minLength": 1
     },
     "class": {
-      "enum": ["ci_failure", "revert", "review_correction", "held_fix", "unknown"]
+      "enum": ["test_failure", "lint_failure", "type_failure", "build_failure", "unknown"]
     },
     "check_name": {
       "type": "string"

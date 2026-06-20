@@ -27,6 +27,6 @@ contract failures to exit `4`, and unsafe redaction defaults to exit `6`.
 
 Downstream tasks can build ingest, distill, memory, and assess behavior against
 stable artifact names and typed validation exits. The first implementation uses
-standard-library JSON parsing for executable schemas and conservative
-line-oriented checks for `relia.yaml` defaults to avoid adding an offline YAML
-dependency during bootstrap.
+standard-library JSON parsing for executable schemas and a conservative
+standard-library YAML subset parser for `relia.yaml` defaults to avoid adding an
+offline YAML dependency during bootstrap.

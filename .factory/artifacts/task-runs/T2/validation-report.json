@@ -3,18 +3,19 @@
   "schema_version": "1.0",
   "task_id": "T2",
   "status": "pass",
-  "produced_at": "2026-06-20T20:30:43Z",
+  "produced_at": "2026-06-20T20:46:54Z",
+  "repair_task_id": "20260620T202029.719568000Z-relia-T2-repair",
   "commands_run": [
     "make lint-fast",
     "make test-fast",
+    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
     "make test-fast",
-    "make test-fast",
-    "for f in schemas/*.schema.json examples/command-results/*.json; do python3 -m json.tool \"$f\" >/dev/null || exit 1; done",
-    "go run ./cmd/relia --json check",
-    "GOCACHE=\"${TMPDIR:-/tmp}/relia-go-build\" go run ./cmd/relia --json check",
     "make lint-fast",
     "make test-contracts",
-    "make prepush-full"
+    "git diff --check",
+    "make prepush-full",
+    "python3 -m json.tool .factory/artifacts/task-runs/T2/work-proof-marker.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T2/validation-report.json"
   ],
   "baseline_evidence": [
     {
@@ -30,28 +31,23 @@
   ],
   "red_evidence": [
     {
-      "command": "make test-fast",
-      "status": "pass",
-      "exit_code": 0,
-      "note": "Task red-first command was run before implementation; no pre-existing failure was expected for this contract-extension slice."
+      "source": "repair_task.failed_commands[0]",
+      "command": "canonical Codex review gate",
+      "status": "actionable",
+      "exit_code": 2,
+      "evidence_summary": "Codex review blocked shipping on three latest-head findings: parsed redaction defaults, PRD outcome taxonomy, and failure-signature class taxonomy."
     }
   ],
+  "test_first_skipped_reason": {
+    "status": "recorded",
+    "reason": "The repair was driven by actionable Codex review evidence after the original T2 implementation. Baseline local tests passed before repair; the review gate output served as the red evidence for the bounded repair."
+  },
   "green_evidence": [
     {
       "command": "make test-fast",
       "status": "pass",
-      "exit_code": 0
-    },
-    {
-      "command": "for f in schemas/*.schema.json examples/command-results/*.json; do python3 -m json.tool \"$f\" >/dev/null || exit 1; done",
-      "status": "pass",
-      "exit_code": 0
-    },
-    {
-      "command": "GOCACHE=\"${TMPDIR:-/tmp}/relia-go-build\" go run ./cmd/relia --json check",
-      "status": "pass",
       "exit_code": 0,
-      "evidence_summary": "JSON envelope reported schema_count 10 and privacy defaults commit_experiences=false, embeddings=signature, entropy_scan=true, gate_enabled=false, share_scope=private."
+      "evidence_summary": "Go unit tests passed after adding parser and schema-taxonomy regression coverage."
     },
     {
       "command": "make lint-fast",
@@ -62,6 +58,11 @@
       "command": "make test-contracts",
       "status": "pass",
       "exit_code": 0
+    },
+    {
+      "command": "git diff --check",
+      "status": "pass",
+      "exit_code": 0
     }
   ],
   "final_validation_evidence": [
@@ -69,15 +70,25 @@
       "command": "make prepush-full",
       "status": "pass",
       "exit_code": 0,
-      "evidence_summary": "lint-fast, test-fast, test-coverage, and test-contracts passed; Go coverage total was 80.6% against the 75.0% minimum."
+      "evidence_summary": "lint-fast, test-fast, test-coverage, and test-contracts passed; Go coverage total was 81.3% against the 75.0% minimum."
+    },
+    {
+      "command": "python3 -m json.tool .factory/artifacts/task-runs/T2/work-proof-marker.json",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "python3 -m json.tool .factory/artifacts/task-runs/T2/validation-report.json",
+      "status": "pass",
+      "exit_code": 0
     }
   ],
   "command_attempt_notes": [
     {
-      "command": "go run ./cmd/relia --json check",
+      "command": "make test-fast",
       "status": "non_blocking_retry",
-      "exit_code": 1,
-      "note": "Plain go run attempted to use the user-level Go build cache outside the sandbox; rerun with GOCACHE under /tmp passed."
+      "exit_code": 2,
+      "note": "An intermediate run after the first parser patch exposed a compile-time return-value mismatch in validateConfigFile. The mismatch was repaired and make test-fast passed on rerun."
     }
   ],
   "acceptance_results": [
@@ -87,7 +98,7 @@
       "evidence_refs": [
         ".factory/artifacts/task-runs/T2/work-proof-marker.json",
         ".factory/artifacts/task-runs/T2/validation-report.json",
-        "schemas/command-result.schema.json",
+        "cmd/relia/main.go",
         "cmd/relia/main_test.go"
       ]
     },
@@ -98,8 +109,9 @@
         ".factory/artifacts/task-runs/T2/work-proof-marker.json",
         ".factory/artifacts/task-runs/T2/validation-report.json",
         "schemas/experience-record.schema.json",
+        "schemas/failure-signature.schema.json",
         "schemas/memory-rule.schema.json",
-        "schemas/risk-assessment.schema.json"
+        "cmd/relia/main_test.go"
       ]
     },
     {
@@ -108,8 +120,8 @@
       "evidence_refs": [
         ".factory/artifacts/task-runs/T2/work-proof-marker.json",
         ".factory/artifacts/task-runs/T2/validation-report.json",
-        "relia.yaml",
-        "README.md"
+        "cmd/relia/main.go",
+        "relia.yaml"
       ]
     },
     {
@@ -118,7 +130,6 @@
       "evidence_refs": [
         ".factory/artifacts/task-runs/T2/work-proof-marker.json",
         ".factory/artifacts/task-runs/T2/validation-report.json",
-        "docs/dev/dev_guides.md",
         "docs/architecture/decision-0002-phase-0-contracts.md"
       ]
     }
@@ -137,27 +148,33 @@
     ]
   },
   "plan_drift_result": {
-    "status": "pass"
+    "status": "pass",
+    "note": "Repair scope stayed limited to latest-head Codex review findings for T2 contracts."
+  },
+  "review_repair_result": {
+    "status": "implemented",
+    "repaired_findings": [
+      "cmd/relia/main.go parses relia.yaml structure before accepting redaction defaults.",
+      "schemas/experience-record.schema.json uses PRD outcome kind values.",
+      "schemas/failure-signature.schema.json uses PRD failure signature class values."
+    ]
   },
   "changelog_result": {
-    "status": "implemented",
-    "evidence_ref": "docs/dev/changelog.md"
+    "status": "not_applicable",
+    "note": "No new changelog file edits were required for this Codex review repair; schema/config behavior remains within the existing T2 pre-1.0 contract slice."
   },
   "versioning_result": {
     "status": "implemented",
     "schema_version": "1.0",
-    "versioning_impact": "Pre-1.0 MVP contract additions; schemas are explicitly versioned."
+    "versioning_impact": "Pre-1.0 MVP schema repair aligned existing versioned contracts with the PRD taxonomy."
   },
   "migration_result": {
-    "status": "implemented",
-    "note": "No migration required before public release; default relia.yaml was expanded in place for the MVP bootstrap contract."
+    "status": "not_applicable",
+    "note": "No migration is required before public release; this repairs pre-release schema enum values."
   },
   "docs_sync_result": {
     "status": "implemented",
     "evidence_refs": [
-      "README.md",
-      "docs/dev/dev_guides.md",
-      "docs/architecture/architecture_guides.md",
       "docs/architecture/decision-0002-phase-0-contracts.md"
     ]
   },
@@ -167,6 +184,6 @@
     "factoryd_run_once_report"
   ],
   "residual_risks": [
-    "relia.yaml validation is a conservative standard-library bootstrap check for required defaults; a full YAML parser can replace it when dependency policy permits."
+    "relia.yaml validation intentionally supports only the local Phase 0 YAML subset and can be replaced by a pinned YAML dependency if future task packets approve one."
   ]
 }

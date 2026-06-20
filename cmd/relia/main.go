@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -68,38 +69,6 @@ var requiredCheckFiles = []string{
 	".factory/factoryd.autoship.example.json",
 }
 
-var requiredConfigSnippets = []string{
-	"version: 1",
-	"repo:\n  provider: github",
-	"  remote: origin",
-	"  scopes: []",
-	"attribution:\n  agent_authors: []",
-	"  uncertain: exclude",
-	"outcomes:\n  checks:",
-	"  revert_detection: true",
-	"  lookback_days: 180",
-	"  fix_held:",
-	"    settle_days: 14",
-	"    min_overlapping_merges: 3",
-	"distill:\n  embeddings: signature",
-	"  review_required: true",
-	"memory:\n  decay_half_life_days: 90",
-	"  commit_experiences: false",
-	"serve:\n  mcp: true",
-	"advise:\n  enabled: true",
-	"  max_comments_per_pr: 1",
-	"gate:\n  enabled: false",
-}
-
-var requiredRedactionSnippets = []string{
-	"redaction:\n  patterns:",
-	"    - api_key",
-	"    - token",
-	"    - password",
-	"    - secret",
-	"  entropy_scan: true",
-}
-
 var primaryCommands = []string{
 	"init",
 	"check",
@@ -154,6 +123,27 @@ type schemaContract struct {
 	Type       string         `json:"type"`
 	Required   []string       `json:"required"`
 	Properties map[string]any `json:"properties"`
+}
+
+type yamlKind int
+
+const (
+	yamlUnset yamlKind = iota
+	yamlMap
+	yamlList
+	yamlScalar
+)
+
+type yamlNode struct {
+	kind     yamlKind
+	scalar   any
+	children map[string]*yamlNode
+	items    []*yamlNode
+}
+
+type yamlFrame struct {
+	indent int
+	node   *yamlNode
 }
 
 type globalFlags struct {
@@ -410,20 +400,310 @@ func validateConfigFile(path string) ([]string, []string, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	content := string(contentBytes)
-	configIssues := missingSnippets(content, requiredConfigSnippets)
-	redactionIssues := missingSnippets(content, requiredRedactionSnippets)
+	config, err := parseYAMLSubset(contentBytes)
+	if err != nil {
+		return []string{"parse relia.yaml: " + err.Error()}, nil, nil
+	}
+	configIssues, redactionIssues := validatePhase0Config(config)
 	return configIssues, redactionIssues, nil
 }
 
-func missingSnippets(content string, snippets []string) []string {
-	var missing []string
-	for _, snippet := range snippets {
-		if !strings.Contains(content, snippet) {
-			missing = append(missing, strings.ReplaceAll(snippet, "\n", " "))
+func validatePhase0Config(config *yamlNode) ([]string, []string) {
+	var configIssues []string
+	var redactionIssues []string
+
+	requireScalar(&configIssues, config, []string{"version"}, 1)
+	requireScalar(&configIssues, config, []string{"repo", "provider"}, "github")
+	requireScalar(&configIssues, config, []string{"repo", "remote"}, "origin")
+	requireEmptyList(&configIssues, config, []string{"repo", "scopes"})
+	requireEmptyList(&configIssues, config, []string{"attribution", "agent_authors"})
+	requireScalar(&configIssues, config, []string{"attribution", "uncertain"}, "exclude")
+	requireMap(&configIssues, config, []string{"outcomes", "checks"})
+	requireScalar(&configIssues, config, []string{"outcomes", "revert_detection"}, true)
+	requireScalar(&configIssues, config, []string{"outcomes", "lookback_days"}, 180)
+	requireScalar(&configIssues, config, []string{"outcomes", "fix_held", "settle_days"}, 14)
+	requireScalar(&configIssues, config, []string{"outcomes", "fix_held", "min_overlapping_merges"}, 3)
+	requireScalar(&configIssues, config, []string{"distill", "embeddings"}, "signature")
+	requireScalar(&configIssues, config, []string{"distill", "review_required"}, true)
+	requireScalar(&configIssues, config, []string{"memory", "decay_half_life_days"}, 90)
+	requireScalar(&configIssues, config, []string{"memory", "commit_experiences"}, false)
+	requireScalar(&configIssues, config, []string{"serve", "mcp"}, true)
+	requireScalar(&configIssues, config, []string{"advise", "enabled"}, true)
+	requireScalar(&configIssues, config, []string{"advise", "max_comments_per_pr"}, 1)
+	requireScalar(&configIssues, config, []string{"gate", "enabled"}, false)
+
+	requireListContains(&redactionIssues, config, []string{"redaction", "patterns"}, []string{"api_key", "token", "password", "secret"})
+	requireScalar(&redactionIssues, config, []string{"redaction", "entropy_scan"}, true)
+
+	return configIssues, redactionIssues
+}
+
+func requireMap(issues *[]string, root *yamlNode, path []string) {
+	node, ok := root.lookup(path...)
+	if !ok || node.kind != yamlMap {
+		*issues = append(*issues, strings.Join(path, ".")+" must be a map")
+	}
+}
+
+func requireEmptyList(issues *[]string, root *yamlNode, path []string) {
+	node, ok := root.lookup(path...)
+	if !ok || node.kind != yamlList || len(node.items) != 0 {
+		*issues = append(*issues, strings.Join(path, ".")+" must be []")
+	}
+}
+
+func requireListContains(issues *[]string, root *yamlNode, path []string, expected []string) {
+	node, ok := root.lookup(path...)
+	if !ok || node.kind != yamlList {
+		*issues = append(*issues, strings.Join(path, ".")+" must list "+strings.Join(expected, ", "))
+		return
+	}
+	present := make(map[string]bool, len(node.items))
+	for _, item := range node.items {
+		if item.kind == yamlScalar {
+			if value, ok := item.scalar.(string); ok {
+				present[value] = true
+			}
 		}
 	}
-	return missing
+	for _, value := range expected {
+		if !present[value] {
+			*issues = append(*issues, strings.Join(path, ".")+" missing "+value)
+		}
+	}
+}
+
+func requireScalar(issues *[]string, root *yamlNode, path []string, expected any) {
+	node, ok := root.lookup(path...)
+	if !ok || node.kind != yamlScalar || !scalarEqual(node.scalar, expected) {
+		*issues = append(*issues, strings.Join(path, ".")+" must be "+fmt.Sprint(expected))
+	}
+}
+
+func scalarEqual(actual any, expected any) bool {
+	switch want := expected.(type) {
+	case int:
+		got, ok := actual.(int)
+		return ok && got == want
+	case bool:
+		got, ok := actual.(bool)
+		return ok && got == want
+	case string:
+		got, ok := actual.(string)
+		return ok && got == want
+	default:
+		return actual == expected
+	}
+}
+
+func (node *yamlNode) lookup(path ...string) (*yamlNode, bool) {
+	current := node
+	for _, segment := range path {
+		if current == nil || current.kind != yamlMap {
+			return nil, false
+		}
+		next, ok := current.children[segment]
+		if !ok {
+			return nil, false
+		}
+		current = next
+	}
+	return current, true
+}
+
+func parseYAMLSubset(content []byte) (*yamlNode, error) {
+	root := &yamlNode{kind: yamlMap, children: map[string]*yamlNode{}}
+	stack := []yamlFrame{{indent: -1, node: root}}
+
+	for lineIndex, raw := range strings.Split(string(content), "\n") {
+		lineNumber := lineIndex + 1
+		line, err := stripYAMLComment(raw)
+		if err != nil {
+			return nil, fmt.Errorf("line %d: %w", lineNumber, err)
+		}
+		if strings.TrimSpace(line) == "" {
+			continue
+		}
+		if strings.Contains(line[:leadingWhitespace(line)], "\t") {
+			return nil, fmt.Errorf("line %d: tabs are not supported for indentation", lineNumber)
+		}
+
+		indent := countLeadingSpaces(line)
+		trimmed := strings.TrimSpace(line)
+		for len(stack) > 0 && stack[len(stack)-1].indent >= indent {
+			stack = stack[:len(stack)-1]
+		}
+		if len(stack) == 0 {
+			return nil, fmt.Errorf("line %d: invalid indentation", lineNumber)
+		}
+		parent := stack[len(stack)-1].node
+
+		if strings.HasPrefix(trimmed, "- ") {
+			if err := parent.ensureList(); err != nil {
+				return nil, fmt.Errorf("line %d: %w", lineNumber, err)
+			}
+			itemText := strings.TrimSpace(strings.TrimPrefix(trimmed, "- "))
+			item := &yamlNode{}
+			if itemText == "" {
+				stack = append(stack, yamlFrame{indent: indent, node: item})
+			} else {
+				item.kind = yamlScalar
+				item.scalar = parseYAMLScalar(itemText)
+			}
+			parent.items = append(parent.items, item)
+			continue
+		}
+
+		key, value, ok := splitYAMLKeyValue(trimmed)
+		if !ok {
+			return nil, fmt.Errorf("line %d: expected key: value", lineNumber)
+		}
+		if err := parent.ensureMap(); err != nil {
+			return nil, fmt.Errorf("line %d: %w", lineNumber, err)
+		}
+		child := &yamlNode{}
+		switch {
+		case value == "":
+			stack = append(stack, yamlFrame{indent: indent, node: child})
+		case value == "[]":
+			child.kind = yamlList
+		default:
+			child.kind = yamlScalar
+			child.scalar = parseYAMLScalar(value)
+		}
+		parent.children[key] = child
+	}
+
+	return root, nil
+}
+
+func (node *yamlNode) ensureMap() error {
+	switch node.kind {
+	case yamlUnset:
+		node.kind = yamlMap
+		node.children = map[string]*yamlNode{}
+	case yamlMap:
+	default:
+		return fmt.Errorf("cannot add map key under non-map value")
+	}
+	return nil
+}
+
+func (node *yamlNode) ensureList() error {
+	switch node.kind {
+	case yamlUnset:
+		node.kind = yamlList
+	case yamlList:
+	default:
+		return fmt.Errorf("cannot add list item under non-list value")
+	}
+	return nil
+}
+
+func stripYAMLComment(line string) (string, error) {
+	inSingle := false
+	inDouble := false
+	escaped := false
+	for index, r := range line {
+		switch {
+		case escaped:
+			escaped = false
+		case inDouble && r == '\\':
+			escaped = true
+		case inDouble && r == '"':
+			inDouble = !inDouble
+		case inSingle && r == '\'':
+			inSingle = !inSingle
+		case r == '"' && !inSingle && quoteStartsScalar(line, index):
+			inDouble = true
+		case r == '\'' && !inDouble && quoteStartsScalar(line, index):
+			inSingle = true
+		case r == '#' && !inSingle && !inDouble && commentStarts(line, index):
+			return strings.TrimRight(line[:index], " \t"), nil
+		}
+	}
+	if inSingle || inDouble {
+		return "", fmt.Errorf("unterminated quoted scalar")
+	}
+	return strings.TrimRight(line, " \t"), nil
+}
+
+func quoteStartsScalar(line string, index int) bool {
+	for i := index - 1; i >= 0; i-- {
+		switch line[i] {
+		case ' ', '\t':
+			continue
+		case ':', '-':
+			return true
+		default:
+			return false
+		}
+	}
+	return true
+}
+
+func commentStarts(line string, index int) bool {
+	if index == 0 {
+		return true
+	}
+	return line[index-1] == ' ' || line[index-1] == '\t'
+}
+
+func splitYAMLKeyValue(line string) (string, string, bool) {
+	key, value, ok := strings.Cut(line, ":")
+	if !ok {
+		return "", "", false
+	}
+	key = strings.TrimSpace(key)
+	if key == "" {
+		return "", "", false
+	}
+	return key, strings.TrimSpace(value), true
+}
+
+func parseYAMLScalar(value string) any {
+	switch value {
+	case "true":
+		return true
+	case "false":
+		return false
+	case "null", "~":
+		return nil
+	}
+	if strings.HasPrefix(value, "\"") && strings.HasSuffix(value, "\"") {
+		if unquoted, err := strconv.Unquote(value); err == nil {
+			return unquoted
+		}
+	}
+	if strings.HasPrefix(value, "'") && strings.HasSuffix(value, "'") {
+		return strings.ReplaceAll(strings.Trim(value, "'"), "''", "'")
+	}
+	if number, err := strconv.Atoi(value); err == nil {
+		return number
+	}
+	return value
+}
+
+func countLeadingSpaces(line string) int {
+	count := 0
+	for _, r := range line {
+		if r != ' ' {
+			return count
+		}
+		count++
+	}
+	return count
+}
+
+func leadingWhitespace(line string) int {
+	count := 0
+	for _, r := range line {
+		if r != ' ' && r != '\t' {
+			return count
+		}
+		count++
+	}
+	return count
 }
 
 func validateSchemaContracts(root string) ([]string, error) {

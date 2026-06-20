@@ -135,7 +135,7 @@
       "required": ["kind", "terminal_state", "signature"],
       "properties": {
         "kind": {
-          "enum": ["ci_failed", "merged_clean", "reverted", "review_corrected", "fix_held"]
+          "enum": ["ci_failure", "revert", "review_correction", "merge_clean", "fix_held"]
         },
         "terminal_state": {
           "enum": ["pass", "fail", "reverted", "corrected", "held"]

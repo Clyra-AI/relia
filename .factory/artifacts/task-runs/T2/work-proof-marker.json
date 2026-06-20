@@ -4,39 +4,42 @@
   "task_id": "T2",
   "status": "implemented",
   "implementation_performed": true,
-  "produced_at": "2026-06-20T20:30:43Z",
+  "produced_at": "2026-06-20T20:46:54Z",
+  "repair_task_id": "20260620T202029.719568000Z-relia-T2-repair",
   "objective": "Implement PRD-defined configuration, schemas, artifact contracts, privacy defaults, validation, and structured output guarantees.",
   "changed_paths": [
     ".factory/artifacts/task-runs/T2/validation-report.json",
     ".factory/artifacts/task-runs/T2/work-proof-marker.json",
-    "README.md",
     "cmd/relia/main.go",
     "cmd/relia/main_test.go",
-    "docs/architecture/architecture_guides.md",
     "docs/architecture/decision-0002-phase-0-contracts.md",
-    "docs/dev/changelog.md",
-    "docs/dev/dev_guides.md",
-    "examples/reports/.gitkeep",
-    "memory/compiled/.gitkeep",
-    "memory/rules/.gitkeep",
-    "relia.yaml",
-    "schemas/command-result.schema.json",
-    "schemas/compiled-context.schema.json",
-    "schemas/coverage-map.schema.json",
     "schemas/experience-record.schema.json",
     "schemas/failure-signature.schema.json",
-    "schemas/memory-rule.schema.json",
-    "schemas/outcome-evidence.schema.json",
-    "schemas/recurrence-report.schema.json",
-    "schemas/redaction-config.schema.json",
-    "schemas/risk-assessment.schema.json"
+    "schemas/memory-rule.schema.json"
   ],
   "implemented_contracts": [
-    "relia.yaml defaults include PRD privacy, redaction, review, advisory, and disabled-gate posture",
-    "relia init creates tracked memory/report skeleton directories",
-    "relia check validates Phase 0 schema inventory, artifact directories, config defaults, and redaction safety posture",
-    "schemas are versioned with object discriminators and metadata properties",
-    "structured JSON output preserves schema count and privacy defaults in the command-result envelope"
+    "relia check validates Phase 0 relia.yaml defaults from parsed YAML structure instead of raw text snippets.",
+    "Unsafe redaction defaults fail closed when entropy_scan is false even if entropy_scan: true appears in a comment.",
+    "Phase 0 outcome schema enums use the PRD outcome taxonomy: ci_failure, revert, review_correction, merge_clean, and fix_held.",
+    "Failure signature schema class values use PRD signature classes: test_failure, lint_failure, type_failure, build_failure, and unknown.",
+    "The Phase 0 architecture decision note documents the standard-library YAML subset parser used for bootstrap config validation."
+  ],
+  "review_findings_repaired": [
+    {
+      "priority": "P1",
+      "path": "cmd/relia/main.go",
+      "summary": "Parse relia.yaml before accepting redaction defaults."
+    },
+    {
+      "priority": "P2",
+      "path": "schemas/experience-record.schema.json",
+      "summary": "Use the PRD outcome taxonomy in schemas."
+    },
+    {
+      "priority": "P2",
+      "path": "schemas/failure-signature.schema.json",
+      "summary": "Allow failure-signature classes, not outcome kinds."
+    }
   ],
   "evidence_refs": [
     ".factory/artifacts/task-runs/T2/validation-report.json"

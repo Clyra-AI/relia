@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"testing"
 )
 
@@ -386,6 +387,37 @@ func TestPhase0SchemasArePresentAndVersioned(t *testing.T) {
 	}
 }
 
+func TestPhase0SchemasUsePRDTaxonomy(t *testing.T) {
+	root := findRepoRootForTest(t)
+
+	experienceSchema := decodeSchemaForTest(t, filepath.Join(root, "schemas", "experience-record.schema.json"))
+	assertSchemaEnum(t, experienceSchema, []string{"$defs", "outcome", "properties", "kind", "enum"}, []string{
+		"ci_failure",
+		"revert",
+		"review_correction",
+		"merge_clean",
+		"fix_held",
+	})
+
+	failureSignatureSchema := decodeSchemaForTest(t, filepath.Join(root, "schemas", "failure-signature.schema.json"))
+	assertSchemaEnum(t, failureSignatureSchema, []string{"properties", "class", "enum"}, []string{
+		"test_failure",
+		"lint_failure",
+		"type_failure",
+		"build_failure",
+		"unknown",
+	})
+
+	memoryRuleSchema := decodeSchemaForTest(t, filepath.Join(root, "schemas", "memory-rule.schema.json"))
+	assertSchemaEnum(t, memoryRuleSchema, []string{"$defs", "evidence_ref", "properties", "outcome_kind", "enum"}, []string{
+		"ci_failure",
+		"revert",
+		"review_correction",
+		"merge_clean",
+		"fix_held",
+	})
+}
+
 func TestConfigValidationFailsClosedWhenRedactionDefaultsAreMissing(t *testing.T) {
 	configPath := filepath.Join(t.TempDir(), "relia.yaml")
 	content := bytes.ReplaceAll([]byte(defaultConfigYAML()), []byte("  entropy_scan: true\n"), nil)
@@ -406,6 +438,75 @@ func TestConfigValidationFailsClosedWhenRedactionDefaultsAreMissing(t *testing.T
 	commandErr := redactionSafetyError("unsafe")
 	if commandErr.ExitCode != ExitRedactionSafety || commandErr.Type != "redaction_safety_failed" {
 		t.Fatalf("redaction error = %#v", commandErr)
+	}
+}
+
+func TestConfigValidationParsesRedactionDefaults(t *testing.T) {
+	configPath := filepath.Join(t.TempDir(), "relia.yaml")
+	content := bytes.ReplaceAll(
+		[]byte(defaultConfigYAML()),
+		[]byte("  entropy_scan: true\n"),
+		[]byte("  # entropy_scan: true\n  entropy_scan: false\n"),
+	)
+	if err := os.WriteFile(configPath, content, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	configIssues, redactionIssues, err := validateConfigFile(configPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(configIssues) != 0 {
+		t.Fatalf("config issues = %v", configIssues)
+	}
+	if len(redactionIssues) == 0 {
+		t.Fatal("expected unsafe parsed redaction default to fail closed")
+	}
+}
+
+func TestConfigValidationParsesConfigDefaults(t *testing.T) {
+	configPath := filepath.Join(t.TempDir(), "relia.yaml")
+	content := bytes.ReplaceAll(
+		[]byte(defaultConfigYAML()),
+		[]byte("  embeddings: signature\n"),
+		[]byte("  note: \"embeddings: signature\"\n  embeddings: provider\n"),
+	)
+	if err := os.WriteFile(configPath, content, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	configIssues, redactionIssues, err := validateConfigFile(configPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(redactionIssues) != 0 {
+		t.Fatalf("redaction issues = %v", redactionIssues)
+	}
+	if len(configIssues) == 0 {
+		t.Fatal("expected unsafe parsed config default to fail")
+	}
+}
+
+func TestConfigValidationAllowsUnrelatedUnquotedApostrophes(t *testing.T) {
+	configPath := filepath.Join(t.TempDir(), "relia.yaml")
+	content := bytes.ReplaceAll(
+		[]byte(defaultConfigYAML()),
+		[]byte("  min_evidence_count: 2\n"),
+		[]byte("  owner_note: maintainer's default\n  min_evidence_count: 2\n"),
+	)
+	if err := os.WriteFile(configPath, content, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	configIssues, redactionIssues, err := validateConfigFile(configPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(configIssues) != 0 {
+		t.Fatalf("config issues = %v", configIssues)
+	}
+	if len(redactionIssues) != 0 {
+		t.Fatalf("redaction issues = %v", redactionIssues)
 	}
 }
 
@@ -440,4 +541,62 @@ func findRepoRootForTest(t *testing.T) string {
 		t.Fatalf("could not find repo root from %s", wd)
 	}
 	return root
+}
+
+func decodeSchemaForTest(t *testing.T, path string) map[string]any {
+	t.Helper()
+
+	content, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var payload map[string]any
+	if err := json.Unmarshal(content, &payload); err != nil {
+		t.Fatalf("decode %s: %v", path, err)
+	}
+	return payload
+}
+
+func assertSchemaEnum(t *testing.T, schema map[string]any, path []string, want []string) {
+	t.Helper()
+
+	current := any(schema)
+	for _, segment := range path {
+		object, ok := current.(map[string]any)
+		if !ok {
+			t.Fatalf("%s is not an object", strings.Join(path, "."))
+		}
+		current, ok = object[segment]
+		if !ok {
+			t.Fatalf("%s missing", strings.Join(path, "."))
+		}
+	}
+
+	values, ok := current.([]any)
+	if !ok {
+		t.Fatalf("%s is not an enum array", strings.Join(path, "."))
+	}
+	got := make([]string, 0, len(values))
+	for _, value := range values {
+		text, ok := value.(string)
+		if !ok {
+			t.Fatalf("%s contains non-string value %#v", strings.Join(path, "."), value)
+		}
+		got = append(got, text)
+	}
+	if !stringSlicesEqual(got, want) {
+		t.Fatalf("%s = %v, want %v", strings.Join(path, "."), got, want)
+	}
+}
+
+func stringSlicesEqual(left []string, right []string) bool {
+	if len(left) != len(right) {
+		return false
+	}
+	for i := range left {
+		if left[i] != right[i] {
+			return false
+		}
+	}
+	return true
 }
