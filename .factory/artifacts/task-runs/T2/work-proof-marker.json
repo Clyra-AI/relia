@@ -5,39 +5,37 @@
   "status": "implemented",
   "implementation_performed": true,
   "changed_paths": [
-    "cmd/relia/main.go",
     "cmd/relia/main_test.go",
-    "docs/dev/dev_guides.md",
-    "docs/product/prd.md",
+    "schemas/experience-record.schema.json",
     ".factory/artifacts/task-runs/T2/work-proof-marker.json",
     ".factory/artifacts/task-runs/T2/validation-report.json"
   ],
   "evidence_refs": [
     ".factory/artifacts/task-runs/T2/validation-report.json"
   ],
-  "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-8",
+  "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-10",
   "summary": {
     "implemented_contracts": [
-      "relia check JSON errors with exit 6 now report redaction_status failed_closed",
-      "non-private MVP memory share_scope is classified as a fail-closed share-safety failure with exit 6",
-      "focused tests assert failed_closed redaction status for unsafe redaction defaults and non-private sharing",
-      "PRD and dev guide prose now match the stable exit-code table for share-safety failures"
+      "experience attribution records now require agent_authored so ERR denominator eligibility is explicit",
+      "experience attribution records now allow an optional tool label while preserving additionalProperties false",
+      "focused schema tests assert agent_authored is required and boolean",
+      "pre-existing redaction/share-safety repair was verified by fast and full validation"
     ],
     "resolved_review_findings": [
       {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448432007",
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448438296",
         "status": "implemented",
-        "summary": "redaction safety errors now produce redaction_status failed_closed in structured output"
+        "summary": "schemas/experience-record.schema.json now accepts and requires attribution.agent_authored for agent-attributed ERR filtering"
+      },
+      {
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448432007",
+        "status": "already_implemented_on_current_branch",
+        "summary": "redaction safety errors already produce redaction_status failed_closed in structured output"
       },
       {
         "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448432011",
-        "status": "implemented",
-        "summary": "memory.share_scope values other than private now return exit 6 with fail-closed structured output"
-      },
-      {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448415053",
         "status": "already_implemented_on_current_branch",
-        "summary": "schemas/relia-config.schema.json already locks distill.review_required to const true and tests cover it"
+        "summary": "memory.share_scope values other than private already return exit 6 with fail-closed structured output"
       }
     ],
     "lifecycle_boundary": "task-executor repair only; commit, PR update, scope closure, validation-gate, and post-merge evidence are left to their required workers"

@@ -36,11 +36,13 @@
     "attribution": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["method", "confidence"],
+      "required": ["agent_authored", "method", "confidence"],
       "properties": {
+        "agent_authored": {"type": "boolean"},
         "method": {"enum": ["bot_login", "coauthor_trailer", "pr_label", "manual", "unknown"]},
         "confidence": {"enum": ["high", "medium", "low", "uncertain"]},
-        "actor_ref": {"type": "string"}
+        "actor_ref": {"type": "string"},
+        "tool": {"type": "string", "minLength": 1}
       }
     },
     "context": {

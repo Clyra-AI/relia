@@ -649,6 +649,19 @@ func TestOutcomeSchemasUsePRDOutcomeTaxonomy(t *testing.T) {
 	root := findRepoRootForTest(t)
 	experienceSchema := readSchemaForTest(t, root, "schemas/experience-record.schema.json")
 	experienceProperties := schemaPropertiesForTest(t, "schemas/experience-record.schema.json", experienceSchema)
+	attributionProperties := schemaPropertiesForTest(t, "experience.attribution", propertyForTest(t, experienceProperties, "attribution"))
+	attributionRequired, ok := propertyForTest(t, experienceProperties, "attribution")["required"].([]any)
+	if !ok {
+		t.Fatal("experience.attribution required missing")
+	}
+	if !containsAnyString(attributionRequired, "agent_authored") {
+		t.Fatalf("experience.attribution required = %#v, want agent_authored", attributionRequired)
+	}
+	agentAuthored := propertyForTest(t, attributionProperties, "agent_authored")
+	if agentAuthored["type"] != "boolean" {
+		t.Fatalf("experience.attribution.agent_authored type = %#v, want boolean", agentAuthored["type"])
+	}
+
 	outcomeProperties := schemaPropertiesForTest(t, "experience.outcome", propertyForTest(t, experienceProperties, "outcome"))
 	kindEnum := enumForTest(t, "experience.outcome.kind", propertyForTest(t, outcomeProperties, "kind"))
 	for _, want := range []string{"ci_failure", "revert", "review_correction", "merge_clean", "fix_held"} {
