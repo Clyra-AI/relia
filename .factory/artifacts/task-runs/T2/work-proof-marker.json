@@ -4,7 +4,8 @@
   "task_id": "T2",
   "status": "implemented",
   "implementation_performed": true,
-  "produced_at": "2026-06-21T16:10:59Z",
+  "produced_at": "2026-06-21T16:17:27Z",
+  "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-15",
   "changed_paths": [
     "cmd/relia/main.go",
     "cmd/relia/main_test.go",
@@ -14,30 +15,29 @@
   "evidence_refs": [
     ".factory/artifacts/task-runs/T2/validation-report.json"
   ],
-  "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-14",
   "summary": {
-    "repair_iteration_note": "Repair-14 resolves the latest actionable Codex schema-bound finding and refreshes worker-owned evidence after rerunning baseline, red-first, focused, and final validation.",
+    "repair_iteration_note": "Repair-15 resolves the latest actionable Codex review findings for fail-closed org-sharing config, schema numeric bounds coverage, and documented nested block-list config parsing.",
     "implemented_contracts": [
-      "relia check continues to validate relia.yaml against schemas/relia-config.schema.json before reporting the local operating pack as ready",
-      "the schema walk now enforces numeric minimum and maximum constraints for scalar YAML values used by the config contract",
-      "documented advise and badge bounds such as advise.max_comments_per_pr, advise.min_confidence, and badge.stale_after_days now fail the config-contract path when out of range",
-      "memory.org_eligible: true remains on the fail-closed redaction_safety_failed exit 6 path with redaction_status failed_closed"
+      "memory.org_eligible is on the same redaction_safety_failed exit 6 path as non-private memory.share_scope when the field is present but not exactly false",
+      "relia check accepts documented nested block-list configuration such as outcomes.checks.required and serve.compile.targets without treating the nested list items as parentless top-level lists",
+      "config-contract regression coverage continues to assert minimum and maximum bounds for documented advise and badge numeric fields",
+      "the parser repair stays within the baseline validator boundary and does not add dependencies, network access, runtime pin changes, or schema version changes"
     ],
     "resolved_review_findings": [
       {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448671703",
-        "status": "implemented",
-        "summary": "loadAndValidateConfig applies schemas/relia-config.schema.json to relia.yaml and rejects missing schema-required sections such as metadata, attribution, and outcomes."
-      },
-      {
         "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448671706",
         "status": "implemented",
-        "summary": "memory.org_eligible uses the same fail-closed redaction/share-safety error path as non-private share_scope."
+        "summary": "Non-default org-sharing posture now fails closed with exit 6 and redaction_status failed_closed, including non-false scalar values."
       },
       {
         "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448698165",
         "status": "implemented",
-        "summary": "Config schema validation now enforces numeric minimum and maximum constraints for documented advisory and badge settings."
+        "summary": "Numeric-bound regression coverage verifies out-of-range advise and badge values fail config schema validation."
+      },
+      {
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448705281",
+        "status": "implemented",
+        "summary": "Nested documented block-list settings are skipped by the shallow baseline parser instead of rejected as parentless list items."
       }
     ],
     "lifecycle_boundary": "task-executor repair only; commit, PR update, scope closure, validation-gate, and post-merge evidence are left to their required workers"

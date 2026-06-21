@@ -705,10 +705,10 @@ func loadAndValidateConfig(root string) (reliaConfigSummary, []Finding, *Command
 		return summary, nil, redactionSafetyError("memory.share_scope must remain private in the MVP")
 	}
 	orgEligible, ok := parsed.boolScalar("memory.org_eligible")
-	if !ok {
+	if !ok && !parsed.pathExists("memory.org_eligible") {
 		return summary, nil, configError("memory.org_eligible must be declared")
 	}
-	if orgEligible {
+	if !ok || orgEligible {
 		return summary, nil, redactionSafetyError("memory.org_eligible must remain false in the MVP")
 	}
 	advisoryOnly, ok := parsed.boolScalar("serve.advisory_only")
@@ -1030,6 +1030,7 @@ func parseBaselineYAML(content string) (parsedYAML, error) {
 	}
 	var section string
 	var listPath string
+	var listItemIndent int
 	for lineNumber, line := range strings.Split(content, "\n") {
 		line = strings.TrimRight(line, "\r")
 		if strings.TrimSpace(line) == "" {
@@ -1042,6 +1043,20 @@ func parseBaselineYAML(content string) (parsedYAML, error) {
 		}
 		if strings.HasPrefix(trimmed, "- ") {
 			if listPath == "" {
+				if indent >= 4 {
+					continue
+				}
+				return parsed, fmt.Errorf("line %d: list item has no parent key", lineNumber+1)
+			}
+			if indent != listItemIndent {
+				if indent > listItemIndent {
+					continue
+				}
+				listPath = ""
+				listItemIndent = 0
+				if indent >= 4 {
+					continue
+				}
 				return parsed, fmt.Errorf("line %d: list item has no parent key", lineNumber+1)
 			}
 			delete(parsed.objects, listPath)
@@ -1058,6 +1073,7 @@ func parseBaselineYAML(content string) (parsedYAML, error) {
 			return parsed, fmt.Errorf("line %d: empty key", lineNumber+1)
 		}
 		listPath = ""
+		listItemIndent = 0
 		switch {
 		case indent == 0:
 			section = key
@@ -1080,6 +1096,7 @@ func parseBaselineYAML(content string) (parsedYAML, error) {
 			parsed.children[section][key] = struct{}{}
 			if value == "" {
 				listPath = path
+				listItemIndent = indent + 2
 				parsed.objects[path] = struct{}{}
 			} else if value == "[]" {
 				parsed.lists[path] = []string{}

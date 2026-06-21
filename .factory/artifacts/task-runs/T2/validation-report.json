@@ -3,13 +3,13 @@
   "schema_version": "1.0",
   "task_id": "T2",
   "status": "pass",
-  "produced_at": "2026-06-21T16:10:59Z",
+  "produced_at": "2026-06-21T16:17:27Z",
   "commands_run": [
     "make lint-fast",
     "make test-fast",
-    "go test ./cmd/relia -run TestCheckValidatesConfigAgainstSchemaNumericBounds -count=1",
+    "go test ./cmd/relia -count=1",
     "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
-    "go test ./cmd/relia -run TestCheckValidatesConfigAgainstSchemaNumericBounds -count=1",
+    "make test-fast",
     "make prepush-full",
     "python3 -m json.tool .factory/artifacts/task-runs/T2/work-proof-marker.json",
     "python3 -m json.tool .factory/artifacts/task-runs/T2/validation-report.json"
@@ -19,29 +19,29 @@
       "command": "make lint-fast",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Baseline lint-fast passed before repair-14 edits."
+      "summary": "Baseline lint-fast passed before repair-15 edits."
     },
     {
       "command": "make test-fast",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Baseline go test ./... -count=1 passed before repair-14 edits."
+      "summary": "Baseline go test ./... -count=1 passed before repair-15 edits."
     }
   ],
   "red_evidence": [
     {
-      "command": "go test ./cmd/relia -run TestCheckValidatesConfigAgainstSchemaNumericBounds -count=1",
+      "command": "go test ./cmd/relia -count=1",
       "status": "fail_expected",
       "exit_code": 1,
-      "summary": "New numeric-bound regression test failed before implementation because out-of-range advise and badge values were not rejected by config schema validation before later schema-contract checks."
+      "summary": "After adding repair-15 regression tests and before implementation, TestCheckAllowsDocumentedNestedBlockLists failed with line 23: list item has no parent key, and TestCheckFailsClosedWhenOrgSharingIsEnabled/non_false_scalar returned exit 2 instead of redaction safety exit 6."
     }
   ],
   "green_evidence": [
     {
-      "command": "go test ./cmd/relia -run TestCheckValidatesConfigAgainstSchemaNumericBounds -count=1",
+      "command": "make test-fast",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Focused regression test passed after the schema walker started enforcing minimum and maximum numeric constraints."
+      "summary": "Go unit tests passed after the parser and org-sharing fail-closed repair."
     }
   ],
   "final_validation_evidence": [
@@ -49,7 +49,7 @@
       "command": "make prepush-full",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Final gate passed lint-fast, test-fast, test-coverage, and test-contracts; coverage was 78.5% against the 75.0% threshold; repo pack reported ok."
+      "summary": "Final gate passed lint-fast, test-fast, test-coverage, and test-contracts; coverage was 78.0% against the 75.0% threshold; repo pack reported ok."
     },
     {
       "command": "python3 -m json.tool .factory/artifacts/task-runs/T2/work-proof-marker.json",
@@ -127,23 +127,12 @@
   },
   "plan_drift_result": {
     "status": "pass",
-    "note": "Repair-14 stayed within the T2 contracts-config-and-validation slice. Runtime pins, dependency policy, provider posture, release boundaries, tracker state, commits, PRs, and scope closure were not changed."
+    "note": "Repair-15 stayed within the T2 contracts-config-and-validation slice. Runtime pins, dependency policy, provider posture, release boundaries, tracker state, commits, PRs, and scope closure were not changed."
   },
   "codex_review_repair_result": {
     "status": "implemented",
-    "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-14",
-    "repair_iteration_note": "The latest-head numeric-bound finding is covered by validateYAMLPathAgainstSchema enforcing minimum and maximum and by TestCheckValidatesConfigAgainstSchemaNumericBounds.",
+    "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-15",
     "resolved_findings": [
-      {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448671703",
-        "status": "implemented",
-        "evidence_refs": [
-          "cmd/relia/main.go",
-          "cmd/relia/main_test.go",
-          "schemas/relia-config.schema.json",
-          "relia.yaml"
-        ]
-      },
       {
         "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448671706",
         "status": "implemented",
@@ -160,6 +149,16 @@
         "evidence_refs": [
           "cmd/relia/main.go",
           "cmd/relia/main_test.go",
+          "schemas/relia-config.schema.json"
+        ]
+      },
+      {
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448705281",
+        "status": "implemented",
+        "evidence_refs": [
+          "cmd/relia/main.go",
+          "cmd/relia/main_test.go",
+          "docs/product/prd.md",
           "schemas/relia-config.schema.json"
         ]
       }
@@ -180,7 +179,7 @@
   "docs_sync_result": {
     "status": "pass",
     "updated_refs": [],
-    "note": "No docs edit was needed for this repair because the PRD, schema, and dev guide already define versioned config validation, numeric advisory and badge bounds, and fail-closed non-default sharing posture."
+    "note": "No docs edit was needed for this repair because the PRD, schema, and dev guide already define numeric advisory and badge bounds, documented nested config lists, and fail-closed non-default sharing posture."
   },
   "changelog_result": {
     "status": "not_applicable",

@@ -430,6 +430,27 @@ func TestCheckValidatesConfigAgainstSchemaNumericBounds(t *testing.T) {
 	}
 }
 
+func TestCheckAllowsDocumentedNestedBlockLists(t *testing.T) {
+	config := strings.NewReplacer(
+		"  checks:\n    required: []",
+		"  checks:\n    required:\n      - pytest\n      - go test",
+		"serve:\n  advisory_only: true",
+		"serve:\n  advisory_only: true\n  compile:\n    targets:\n      - AGENTS.md\n      - CLAUDE.md",
+	).Replace(defaultConfigYAML())
+	repo := writeMinimalRepoForFullCheck(t, config)
+	t.Chdir(repo)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Status != "pass" {
+		t.Fatalf("status = %q", result.Status)
+	}
+}
+
 func TestCheckRejectsConfiguredRepoRootsOutsideContract(t *testing.T) {
 	for _, tc := range []struct {
 		name   string
@@ -532,20 +553,30 @@ func TestCheckRejectsNonPrivateShareScope(t *testing.T) {
 }
 
 func TestCheckFailsClosedWhenOrgSharingIsEnabled(t *testing.T) {
-	repo := writeMinimalRepoForCheck(t, strings.Replace(defaultConfigYAML(), "org_eligible: false", "org_eligible: true", 1))
-	t.Chdir(repo)
+	for _, tc := range []struct {
+		name  string
+		value string
+	}{
+		{name: "boolean true", value: "true"},
+		{name: "non false scalar", value: "yes"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			repo := writeMinimalRepoForCheck(t, strings.Replace(defaultConfigYAML(), "org_eligible: false", "org_eligible: "+tc.value, 1))
+			t.Chdir(repo)
 
-	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+			stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
 
-	if code != ExitRedactionSafety {
-		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
-	}
-	result := decodeResult(t, stdout)
-	if result.Errors[0].Type != "redaction_safety_failed" {
-		t.Fatalf("error type = %q", result.Errors[0].Type)
-	}
-	if result.RedactionStatus != "failed_closed" {
-		t.Fatalf("redaction_status = %q", result.RedactionStatus)
+			if code != ExitRedactionSafety {
+				t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+			}
+			result := decodeResult(t, stdout)
+			if result.Errors[0].Type != "redaction_safety_failed" {
+				t.Fatalf("error type = %q", result.Errors[0].Type)
+			}
+			if result.RedactionStatus != "failed_closed" {
+				t.Fatalf("redaction_status = %q", result.RedactionStatus)
+			}
+		})
 	}
 }
 
@@ -1020,6 +1051,27 @@ func writeMinimalRepoForConfigSchemaCheck(t *testing.T, reliaYAML string) string
 	sourceRoot := findRepoRootForTest(t)
 	root := writeMinimalRepoForCheck(t, reliaYAML)
 	for _, rel := range []string{"schemas/relia-config.schema.json"} {
+		sourceContent, err := os.ReadFile(filepath.Join(sourceRoot, rel))
+		if err != nil {
+			t.Fatal(err)
+		}
+		targetPath := filepath.Join(root, rel)
+		if err := os.MkdirAll(filepath.Dir(targetPath), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(targetPath, sourceContent, 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	return root
+}
+
+func writeMinimalRepoForFullCheck(t *testing.T, reliaYAML string) string {
+	t.Helper()
+
+	sourceRoot := findRepoRootForTest(t)
+	root := writeMinimalRepoForCheck(t, reliaYAML)
+	for _, rel := range requiredSchemaFiles {
 		sourceContent, err := os.ReadFile(filepath.Join(sourceRoot, rel))
 		if err != nil {
 			t.Fatal(err)
