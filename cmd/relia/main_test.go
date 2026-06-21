@@ -410,6 +410,9 @@ func TestCheckFailsClosedWhenRedactionDefaultsAreUnsafe(t *testing.T) {
 	if result.Errors[0].Type != "redaction_safety_failed" {
 		t.Fatalf("error type = %q", result.Errors[0].Type)
 	}
+	if result.RedactionStatus != "failed_closed" {
+		t.Fatalf("redaction_status = %q", result.RedactionStatus)
+	}
 }
 
 func TestCheckRejectsNonPrivateShareScope(t *testing.T) {
@@ -418,12 +421,15 @@ func TestCheckRejectsNonPrivateShareScope(t *testing.T) {
 
 	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
 
-	if code != ExitValidation {
+	if code != ExitRedactionSafety {
 		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
 	}
 	result := decodeResult(t, stdout)
-	if result.Errors[0].Type != "memory_artifact_validation_failed" {
+	if result.Errors[0].Type != "redaction_safety_failed" {
 		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+	if result.RedactionStatus != "failed_closed" {
+		t.Fatalf("redaction_status = %q", result.RedactionStatus)
 	}
 }
 

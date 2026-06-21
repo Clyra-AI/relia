@@ -390,6 +390,9 @@ func notImplementedResult(command string, start time.Time) CommandResult {
 
 func errorResult(command string, mode string, commandErr *CommandError, start time.Time) CommandResult {
 	result := baseResult(command, mode, "error", commandErr.ExitCode, start, nil)
+	if commandErr.ExitCode == ExitRedactionSafety {
+		result.RedactionStatus = "failed_closed"
+	}
 	result.Errors = append(result.Errors, *commandErr)
 	return result
 }
@@ -655,7 +658,7 @@ func loadAndValidateConfig(root string) (reliaConfigSummary, []Finding, *Command
 		return summary, nil, configError("memory.share_scope must be declared")
 	}
 	if shareScope != "private" {
-		return summary, nil, artifactValidationError("memory.share_scope must remain private in the MVP", defaultConfigFile)
+		return summary, nil, redactionSafetyError("memory.share_scope must remain private in the MVP")
 	}
 	orgEligible, ok := parsed.boolScalar("memory.org_eligible")
 	if !ok {

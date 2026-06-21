@@ -139,7 +139,7 @@ default config includes the documented `advise` and `badge` sections, with
 `advise.enabled: false` so bootstrap does not perform live PR advisory work by
 default.
 Unsafe redaction settings fail closed with exit `6`; non-private MVP sharing
-posture fails with exit `4`; explicit `embeddings: local` without a pulled
+posture also fails closed with exit `6`; explicit `embeddings: local` without a pulled
 artifact fails with exit `8`; disabled `distill.review_required` and unknown
 provider/config values fail with exit `2`. The executable config schema accepts
 the documented PRD `advise` and `badge` sections without enabling live network

@@ -1212,7 +1212,7 @@ Required fields:
 Reserved for post-MVP org-level memory — present in the schema, locked to defaults in the MVP:
 
 - `org` (optional organization identifier; empty in MVP)
-- `share_scope` (`private | org | public`; any value other than `private` fails validation with exit 4 in the MVP — the declared-not-enforced rule applies to sharing scope exactly as it does to provenance)
+- `share_scope` (`private | org | public`; any value other than `private` fails closed with exit 6 in the MVP — the declared-not-enforced rule applies to sharing scope exactly as it does to provenance)
 - `org_eligible` (default `false`)
 - signature and message fingerprints are already hashes; they are the only org-shareable unit and need no new fields
 
@@ -1628,7 +1628,7 @@ Formerly open questions; resolved in v1.1 and reflected throughout this document
 6. **`fix_held` requires 14 settle days AND at least 3 subsequent merges touching overlapping paths.** Elapsed time alone is not evidence on a slow repo — "nothing reappeared" means nothing if nothing was touched. The compound criterion (both required, both configurable) keeps playbook rules honest; on slow repos a fix simply stays `candidate` longer, which is the truthful state.
 7. **Review-approval signals stay deferred.** Approval semantics vary wildly across teams (rubber stamps exist), and counting them would reintroduce uncalibrated human judgment as a label — diluting the product's defining constraint that memory comes from verified outcomes. Clean merges and held fixes remain the only success signals in the MVP; approval-as-weak-evidence is a post-MVP experiment.
 8. **One living advisory comment per PR, edited in place, with a 10-minute reassessment debounce.** Force-push storms produce zero new comments: unchanged diff fingerprints are never reassessed, and changed ones update the existing comment at most once per debounce window. Comment threads from bots are the canonical way to get muted; a single self-updating comment is the standard pattern that survives.
-9. **Reserved org-memory fields: `org`, `share_scope` (locked to `private`), `org_eligible` (locked to `false`) on experiences, and `source_repo` on rules.** Non-default values fail validation (exit 4) in the MVP — the declared-not-enforced rule applies to sharing exactly as it does to provenance. Fingerprints are already hashes and are the only org-shareable unit. Nothing else is reserved; speculative fields are bloat.
+9. **Reserved org-memory fields: `org`, `share_scope` (locked to `private`), `org_eligible` (locked to `false`) on experiences, and `source_repo` on rules.** Non-default sharing values fail closed (exit 6) in the MVP — the declared-not-enforced rule applies to sharing exactly as it does to provenance. Fingerprints are already hashes and are the only org-shareable unit. Nothing else is reserved; speculative fields are bloat.
 10. **Badge staleness is activity-aware: 30 days without ingest OR 20 merged PRs since the last ingest, whichever comes first.** A pure 7-day clock nags inactive repos whose number is still true; a pure 30-day clock lets a hot repo's badge lie. Tracking merged PRs ties staleness to how much the number could actually have moved. With the Action installed, ingest is continuous and the badge stays fresh for free.
 
 ---
