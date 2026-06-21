@@ -3,16 +3,14 @@
   "schema_version": "1.0",
   "task_id": "T2",
   "status": "pass",
-  "produced_at": "2026-06-21T17:32:54Z",
-  "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-26",
+  "produced_at": "2026-06-21T17:45:36Z",
+  "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-28",
   "commands_run": [
     "make lint-fast",
     "make test-fast",
-    "go test ./cmd/relia -run TestCheckRejectsLLMDraftingProviderWithoutCompleteEndpointGrant -count=1",
+    "make test-fast",
     "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
-    "python3 -m json.tool schemas/relia-config.schema.json >/tmp/relia-config-schema-check.json",
-    "go test ./cmd/relia -run 'TestCheck(RejectsLLMDraftingProviderWithoutCompleteEndpointGrant|AcceptsLLMDraftingProviderWithCompleteEndpointGrant|RejectsProviderEmbeddingsWithoutCompleteEndpointGrant|AcceptsProviderEmbeddingsWithCompleteEndpointGrant|RejectsMemoryRuleScopePathsThatNeverExisted|RejectsPlaybookWithoutHeldOutcomeProvenance)$' -count=1",
-    "go test ./cmd/relia -run 'TestReliaConfigSchema(DefinesProviderEndpointGrantFields|RequiresEndpointGrantForProviderUse)$|TestMemoryRuleSchemaRequiresHeldOutcomeForPlaybooks' -count=1",
+    "make test-fast",
     "make prepush-full",
     "python3 -m json.tool .factory/artifacts/task-runs/T2/work-proof-marker.json",
     "python3 -m json.tool .factory/artifacts/task-runs/T2/validation-report.json",
@@ -23,35 +21,29 @@
       "command": "make lint-fast",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Baseline lint-fast passed before repair-26 edits."
+      "summary": "Baseline lint-fast passed before repair-28 edits."
     },
     {
       "command": "make test-fast",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Baseline go test ./... -count=1 passed before repair-26 edits."
+      "summary": "Baseline go test ./... -count=1 passed before repair-28 edits."
     }
   ],
   "red_evidence": [
     {
-      "command": "go test ./cmd/relia -run TestCheckRejectsLLMDraftingProviderWithoutCompleteEndpointGrant -count=1",
+      "command": "make test-fast",
       "status": "fail_expected",
-      "exit_code": 1,
-      "summary": "Red-first run failed after adding the provider-backed LLM drafting regression because relia check still returned exit 0 and only warned for distill.provider with embeddings: signature and no endpoint grant."
+      "exit_code": 2,
+      "summary": "Red-first run failed after adding regression tests because relia check still returned exit 0 for an empty statement: > block scalar and for unmatched wildcard scope cmd/relia/*.py."
     }
   ],
   "green_evidence": [
     {
-      "command": "go test ./cmd/relia -run 'TestCheck(RejectsLLMDraftingProviderWithoutCompleteEndpointGrant|AcceptsLLMDraftingProviderWithCompleteEndpointGrant|RejectsProviderEmbeddingsWithoutCompleteEndpointGrant|AcceptsProviderEmbeddingsWithCompleteEndpointGrant|RejectsMemoryRuleScopePathsThatNeverExisted|RejectsPlaybookWithoutHeldOutcomeProvenance)$' -count=1",
+      "command": "make test-fast",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Focused behavior tests passed after the provider grant fix and confirmed the already-satisfied playbook and scope-path review findings."
-    },
-    {
-      "command": "go test ./cmd/relia -run 'TestReliaConfigSchema(DefinesProviderEndpointGrantFields|RequiresEndpointGrantForProviderUse)$|TestMemoryRuleSchemaRequiresHeldOutcomeForPlaybooks' -count=1",
-      "status": "pass",
-      "exit_code": 0,
-      "summary": "Focused schema tests passed for provider endpoint grant fields, provider-use conditionals, and the already-satisfied playbook held-outcome schema conditional."
+      "summary": "Fast tests passed after parsing block scalar bodies, requiring full wildcard scope matches, and enabling existing config schema allOf/anyOf validation."
     }
   ],
   "final_validation_evidence": [
@@ -59,7 +51,7 @@
       "command": "make prepush-full",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Final gate passed lint-fast, test-fast, test-coverage, and test-contracts; coverage was 78.8% against the 75.0% threshold; repo pack reported ok."
+      "summary": "Final gate passed lint-fast, test-fast, test-coverage, and test-contracts; coverage was 79.1% against the 75.0% threshold; repo pack reported ok."
     },
     {
       "command": "python3 -m json.tool .factory/artifacts/task-runs/T2/work-proof-marker.json",
@@ -95,6 +87,7 @@
       "evidence_refs": [
         ".factory/artifacts/task-runs/T2/work-proof-marker.json",
         ".factory/artifacts/task-runs/T2/validation-report.json",
+        "cmd/relia/main.go",
         "cmd/relia/main_test.go",
         "schemas/relia-config.schema.json",
         "schemas/memory-rule.schema.json"
@@ -106,10 +99,11 @@
       "evidence_refs": [
         ".factory/artifacts/task-runs/T2/work-proof-marker.json",
         ".factory/artifacts/task-runs/T2/validation-report.json",
-        "README.md",
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        "docs/product/prd.md",
         "docs/dev/dev_guides.md",
-        "docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md",
-        "schemas/relia-config.schema.json"
+        "docs/architecture/architecture_guides.md"
       ]
     },
     {
@@ -130,12 +124,8 @@
     "changed_paths_within_allowed_paths": true,
     "forbidden_paths_changed_in_worker_diff": false,
     "checked_changed_paths": [
-      "README.md",
       "cmd/relia/main.go",
       "cmd/relia/main_test.go",
-      "docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md",
-      "docs/dev/dev_guides.md",
-      "schemas/relia-config.schema.json",
       ".factory/artifacts/task-runs/T2/work-proof-marker.json",
       ".factory/artifacts/task-runs/T2/validation-report.json"
     ],
@@ -146,11 +136,11 @@
   },
   "plan_drift_result": {
     "status": "pass",
-    "note": "Repair-26 stayed within the T2 contracts-config-and-validation slice. Runtime pins, dependency policy, release boundaries, tracker state, commits, PRs, and lifecycle gates were not changed."
+    "note": "Repair-28 stayed within the T2 contracts-config-and-validation slice. Runtime pins, dependency policy, release boundaries, tracker state, commits, PRs, and lifecycle gates were not changed."
   },
   "codex_review_repair_result": {
     "status": "implemented",
-    "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-26",
+    "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-28",
     "resolved_findings": [
       {
         "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448791057",
@@ -158,15 +148,12 @@
         "evidence_refs": [
           "cmd/relia/main.go",
           "cmd/relia/main_test.go",
-          "schemas/relia-config.schema.json",
-          "README.md",
-          "docs/dev/dev_guides.md",
-          "docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md"
+          "schemas/relia-config.schema.json"
         ]
       },
       {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448776932",
-        "status": "already_satisfied",
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448804336",
+        "status": "implemented",
         "evidence_refs": [
           "cmd/relia/main.go",
           "cmd/relia/main_test.go",
@@ -174,11 +161,12 @@
         ]
       },
       {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448776933",
-        "status": "already_satisfied",
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448804337",
+        "status": "implemented",
         "evidence_refs": [
           "cmd/relia/main.go",
-          "cmd/relia/main_test.go"
+          "cmd/relia/main_test.go",
+          "schemas/memory-rule.schema.json"
         ]
       }
     ],
@@ -187,7 +175,6 @@
       "README.md",
       "docs/dev/dev_guides.md",
       "docs/architecture/architecture_guides.md",
-      "docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md",
       "schemas/memory-rule.schema.json",
       "schemas/relia-config.schema.json",
       "cmd/relia/main.go",
@@ -196,22 +183,18 @@
   },
   "docs_sync_result": {
     "status": "pass",
-    "updated_refs": [
-      "README.md",
-      "docs/dev/dev_guides.md",
-      "docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md"
-    ],
-    "note": "Docs now state that provider-backed LLM drafting and provider embeddings both require a complete model_provider_endpoint grant."
+    "updated_refs": [],
+    "note": "No docs edits were required for this repair; existing product, dev, and architecture docs already state the provider grant and memory-rule scope validation contracts."
   },
   "changelog_result": {
     "status": "not_applicable",
-    "reason": "No changelog file exists in the allowed repo surface for this repair; the repair evidence is recorded in task-run artifacts and docs."
+    "reason": "No changelog file exists in the allowed repo surface for this repair; the repair evidence is recorded in task-run artifacts."
   },
   "versioning_result": {
     "status": "pass",
     "schema_version": "1.0",
     "relia_version": "0.0.0-dev",
-    "migration_note": "Pre-1.0 MVP repair keeps schema_version 1.0 while tightening provider-grant validation before public release."
+    "migration_note": "Pre-1.0 MVP repair keeps schema_version 1.0 while tightening validation before public release."
   },
   "blockers": [],
   "residual_risks": [

@@ -1034,7 +1034,7 @@ func normalizeScopePath(rawScopePath string) string {
 
 func currentTreeHasScopePath(root string, scopePath string) bool {
 	literalPrefix := scopePathLiteralPrefix(scopePath)
-	if literalPrefix != "" {
+	if !scopePathHasPattern(scopePath) && literalPrefix != "" {
 		if _, err := os.Stat(filepath.Join(root, filepath.FromSlash(literalPrefix))); err == nil {
 			return true
 		}
@@ -1064,16 +1064,31 @@ func currentTreeHasScopePath(root string, scopePath string) bool {
 }
 
 func gitHistoryHasScopePath(root string, scopePath string) bool {
-	pathspec := scopePathLiteralPrefix(scopePath)
-	if pathspec == "" {
-		pathspec = scopePath
+	pathspec := scopePath
+	if scopePathHasPattern(scopePath) {
+		pathspec = scopePathLiteralPrefix(scopePath)
 	}
-	cmd := exec.Command("git", "-C", root, "log", "--all", "--name-only", "--pretty=format:", "--", pathspec)
+	args := []string{"-C", root, "log", "--all", "--name-only", "--pretty=format:", "--"}
+	if pathspec != "" {
+		args = append(args, pathspec)
+	}
+	cmd := exec.Command("git", args...)
 	output, err := cmd.Output()
-	return err == nil && strings.TrimSpace(string(output)) != ""
+	if err != nil {
+		return false
+	}
+	for _, line := range strings.Split(string(output), "\n") {
+		rel := strings.TrimSpace(filepath.ToSlash(line))
+		if rel != "" && scopePathMatches(scopePath, rel) {
+			return true
+		}
+	}
+	return false
 }
 
-var errScopePathMatched = errors.New("scope path matched")
+func scopePathHasPattern(scopePath string) bool {
+	return strings.ContainsAny(scopePath, "*?[")
+}
 
 func scopePathLiteralPrefix(scopePath string) string {
 	prefix := scopePath
@@ -1088,7 +1103,7 @@ func scopePathLiteralPrefix(scopePath string) string {
 }
 
 func scopePathMatches(scopePath string, rel string) bool {
-	if !strings.ContainsAny(scopePath, "*?[") {
+	if !scopePathHasPattern(scopePath) {
 		return rel == scopePath || strings.HasPrefix(rel, scopePath+"/")
 	}
 	if strings.HasSuffix(scopePath, "/**") {
@@ -1096,12 +1111,10 @@ func scopePathMatches(scopePath string, rel string) bool {
 		return rel == prefix || strings.HasPrefix(rel, prefix+"/")
 	}
 	matched, err := path.Match(scopePath, rel)
-	if err == nil && matched {
-		return true
-	}
-	prefix := scopePathLiteralPrefix(scopePath)
-	return prefix != "" && (rel == prefix || strings.HasPrefix(rel, prefix+"/"))
+	return err == nil && matched
 }
+
+var errScopePathMatched = errors.New("scope path matched")
 
 type schemaValidationIssue struct {
 	path    string
@@ -1122,6 +1135,47 @@ func validateYAMLPathAgainstSchema(parsed parsedYAML, path string, schema map[st
 	if wantType, ok := schema["type"].(string); ok {
 		if issue := validateYAMLType(parsed, path, wantType); issue != nil {
 			return issue
+		}
+	}
+	if schemaAllOf, ok := schema["allOf"].([]any); ok {
+		for _, rawClause := range schemaAllOf {
+			clause, ok := rawClause.(map[string]any)
+			if !ok {
+				continue
+			}
+			if schemaConditionalMatches(parsed, path, clause["if"]) {
+				thenSchema, ok := clause["then"].(map[string]any)
+				if !ok {
+					continue
+				}
+				if issue := validateYAMLPathAgainstSchema(parsed, path, thenSchema); issue != nil {
+					return issue
+				}
+			}
+		}
+	}
+	if schemaAnyOf, ok := schema["anyOf"].([]any); ok {
+		matched := false
+		var firstIssue *schemaValidationIssue
+		for _, rawOption := range schemaAnyOf {
+			option, ok := rawOption.(map[string]any)
+			if !ok {
+				continue
+			}
+			if issue := validateYAMLPathAgainstSchema(parsed, path, option); issue != nil {
+				if firstIssue == nil {
+					firstIssue = issue
+				}
+				continue
+			}
+			matched = true
+			break
+		}
+		if !matched {
+			if firstIssue != nil {
+				return firstIssue
+			}
+			return &schemaValidationIssue{path: path, message: "must match at least one schema option"}
 		}
 	}
 	if wantConst, ok := schema["const"]; ok {
@@ -1176,10 +1230,17 @@ func validateYAMLPathAgainstSchema(parsed parsedYAML, path string, schema map[st
 			return issue
 		}
 	}
-	if schema["type"] == "object" || len(schemaObjectProperties(schema)) > 0 {
+	_, hasRequiredFields := schema["required"]
+	_, hasAdditionalProperties := schema["additionalProperties"]
+	if schema["type"] == "object" || len(schemaObjectProperties(schema)) > 0 || hasRequiredFields || hasAdditionalProperties {
 		return validateYAMLObjectAgainstSchema(parsed, path, schema)
 	}
 	return nil
+}
+
+func schemaConditionalMatches(parsed parsedYAML, path string, rawSchema any) bool {
+	schema, ok := rawSchema.(map[string]any)
+	return ok && validateYAMLPathAgainstSchema(parsed, path, schema) == nil
 }
 
 func validateYAMLType(parsed parsedYAML, path string, wantType string) *schemaValidationIssue {
@@ -1305,6 +1366,44 @@ func schemaValueForMessage(value any) string {
 	return string(encoded)
 }
 
+type yamlBlockScalar struct {
+	path   string
+	indent int
+	lines  []string
+}
+
+func (block yamlBlockScalar) active() bool {
+	return block.path != ""
+}
+
+func (block *yamlBlockScalar) appendLine(line string) {
+	if len(line) >= block.indent {
+		block.lines = append(block.lines, line[block.indent:])
+		return
+	}
+	block.lines = append(block.lines, strings.TrimLeft(line, " "))
+}
+
+func flushYAMLBlockScalar(parsed *parsedYAML, block yamlBlockScalar) {
+	if !block.active() {
+		return
+	}
+	lines := append([]string(nil), block.lines...)
+	for len(lines) > 0 && strings.TrimSpace(lines[len(lines)-1]) == "" {
+		lines = lines[:len(lines)-1]
+	}
+	parsed.setScalar(block.path, strings.TrimSpace(strings.Join(lines, "\n")))
+}
+
+func isYAMLBlockScalarIndicator(value string) bool {
+	switch value {
+	case ">", "|", ">-", "|-", ">+", "|+":
+		return true
+	default:
+		return false
+	}
+}
+
 func parseBaselineYAML(content string) (parsedYAML, error) {
 	parsed := parsedYAML{
 		scalars:         map[string]string{},
@@ -1317,9 +1416,24 @@ func parseBaselineYAML(content string) (parsedYAML, error) {
 	var section string
 	var listPath string
 	var listItemIndent int
-	blockScalarIndent := -1
+	var blockScalar yamlBlockScalar
 	for lineNumber, line := range strings.Split(content, "\n") {
 		line = strings.TrimRight(line, "\r")
+		if blockScalar.active() {
+			if strings.TrimSpace(line) == "" {
+				if len(blockScalar.lines) > 0 {
+					blockScalar.lines = append(blockScalar.lines, "")
+				}
+				continue
+			}
+			indent := len(line) - len(strings.TrimLeft(line, " "))
+			if indent >= blockScalar.indent {
+				blockScalar.appendLine(line)
+				continue
+			}
+			flushYAMLBlockScalar(&parsed, blockScalar)
+			blockScalar = yamlBlockScalar{}
+		}
 		if strings.TrimSpace(line) == "" {
 			continue
 		}
@@ -1327,12 +1441,6 @@ func parseBaselineYAML(content string) (parsedYAML, error) {
 		trimmed := stripYAMLComment(strings.TrimSpace(line))
 		if trimmed == "" {
 			continue
-		}
-		if blockScalarIndent >= 0 {
-			if indent >= blockScalarIndent {
-				continue
-			}
-			blockScalarIndent = -1
 		}
 		if listPath != "" && indent > listItemIndent {
 			if key, value, ok := splitYAMLKeyValue(trimmed); ok && len(parsed.listItemObjects[listPath]) > 0 {
@@ -1385,9 +1493,6 @@ func parseBaselineYAML(content string) (parsedYAML, error) {
 		}
 		listPath = ""
 		listItemIndent = 0
-		if rawValue == ">" || rawValue == "|" {
-			blockScalarIndent = indent + 2
-		}
 		switch {
 		case indent == 0:
 			section = key
@@ -1395,6 +1500,8 @@ func parseBaselineYAML(content string) (parsedYAML, error) {
 			if rawValue != "" {
 				if hasInlineList {
 					parsed.lists[key] = inlineList
+				} else if isYAMLBlockScalarIndicator(rawValue) {
+					blockScalar = yamlBlockScalar{path: key, indent: indent + 2}
 				} else {
 					parsed.scalars[key] = value
 				}
@@ -1416,6 +1523,8 @@ func parseBaselineYAML(content string) (parsedYAML, error) {
 				parsed.objects[path] = struct{}{}
 			} else if hasInlineList {
 				parsed.lists[path] = inlineList
+			} else if isYAMLBlockScalarIndicator(rawValue) {
+				blockScalar = yamlBlockScalar{path: path, indent: indent + 2}
 			} else {
 				parsed.scalars[path] = value
 			}
@@ -1426,6 +1535,7 @@ func parseBaselineYAML(content string) (parsedYAML, error) {
 			continue
 		}
 	}
+	flushYAMLBlockScalar(&parsed, blockScalar)
 	return parsed, nil
 }
 

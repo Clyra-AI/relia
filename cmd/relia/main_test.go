@@ -533,6 +533,11 @@ func TestCheckValidatesActiveMemoryRuleContractBeforePass(t *testing.T) {
 			messageWant: "confidence",
 		},
 		{
+			name:        "empty block scalar statement",
+			rule:        strings.Replace(validMemoryRuleYAMLForTest(), "statement: >\n  Keep reviewed memory rules tied to explicit experiences and PR provenance.\n", "statement: >\n", 1),
+			messageWant: "statement",
+		},
+		{
 			name:        "missing scope",
 			rule:        strings.Replace(validMemoryRuleYAMLForTest(), "scope:\n  paths:\n    - cmd/relia/**\n", "", 1),
 			messageWant: "scope",
@@ -619,6 +624,26 @@ func TestCheckRejectsPlaybookWithoutHeldOutcomeProvenance(t *testing.T) {
 
 func TestCheckRejectsMemoryRuleScopePathsThatNeverExisted(t *testing.T) {
 	rule := strings.Replace(validMemoryRuleYAMLForTest(), "cmd/relia/**", "cmd/reliaa/**", 1)
+	repo := writeMinimalRepoForFullCheck(t, defaultConfigYAML())
+	writeMemoryRuleForTest(t, repo, rule)
+	t.Chdir(repo)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitValidation {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "memory_artifact_validation_failed" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+	if !strings.Contains(result.Errors[0].Message, "scope path never existed") {
+		t.Fatalf("error message = %q, want typo-guard scope failure", result.Errors[0].Message)
+	}
+}
+
+func TestCheckRejectsMemoryRuleWildcardScopePathsWithNoMatches(t *testing.T) {
+	rule := strings.Replace(validMemoryRuleYAMLForTest(), "cmd/relia/**", "cmd/relia/*.py", 1)
 	repo := writeMinimalRepoForFullCheck(t, defaultConfigYAML())
 	writeMemoryRuleForTest(t, repo, rule)
 	t.Chdir(repo)
