@@ -67,7 +67,7 @@
       "additionalProperties": false,
       "required": ["kind", "terminal_state", "signature"],
       "properties": {
-        "kind": {"enum": ["ci_failed", "reverted", "review_correction", "merged_clean", "fix_held"]},
+        "kind": {"enum": ["ci_failure", "reverted", "review_correction", "merged_clean", "fix_held"]},
         "terminal_state": {"enum": ["passed", "failed", "reverted", "corrected", "unknown"]},
         "signature": {"$ref": "#/$defs/signature_ref"}
       }
@@ -80,7 +80,7 @@
         "refs": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/provenance_ref"}}
       }
     },
-    "flake_discount": {"type": "boolean"},
+    "flake_discount": {"type": "number", "minimum": 0, "maximum": 1},
     "org": {"type": "string"},
     "org_eligible": {"const": false},
     "share_scope": {"const": "private"},

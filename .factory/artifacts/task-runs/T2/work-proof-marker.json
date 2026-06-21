@@ -30,7 +30,7 @@
   "evidence_refs": [
     ".factory/artifacts/task-runs/T2/validation-report.json"
   ],
-  "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair",
+  "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-2",
   "summary": {
     "implemented_contracts": [
       "command-result metadata in stable JSON envelope",
@@ -41,7 +41,9 @@
     ],
     "resolved_review_findings": [
       "relia check now validates repo.artifact_root and repo.memory_root against the schema-required .relia and memory roots before returning a pass result",
-      "relia init now writes an artifact-local ignore rule for .relia/experiences by default so local experience shards stay gitignored when memory.commit_experiences is false"
+      "relia init now writes an artifact-local ignore rule for .relia/experiences by default so local experience shards stay gitignored when memory.commit_experiences is false",
+      "experience and outcome-evidence schemas now use the PRD canonical ci_failure outcome kind",
+      "experience-record flake_discount now accepts a bounded numeric discount instead of a boolean"
     ],
     "lifecycle_boundary": "task-executor only; commit, PR, scope closure, validation-gate, and post-merge evidence are left to their required workers"
   }

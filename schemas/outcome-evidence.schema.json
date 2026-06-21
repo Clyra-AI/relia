@@ -24,7 +24,7 @@
         "ref": {"type": "string", "minLength": 1}
       }
     },
-    "outcome_kind": {"enum": ["ci_failed", "reverted", "review_correction", "merged_clean", "fix_held"]},
+    "outcome_kind": {"enum": ["ci_failure", "reverted", "review_correction", "merged_clean", "fix_held"]},
     "terminal_state": {"enum": ["passed", "failed", "reverted", "corrected", "unknown"]},
     "provenance_refs": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
     "redaction_status": {"enum": ["applied", "failed_closed"]},

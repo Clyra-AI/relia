@@ -6,6 +6,8 @@
   "commands_run": [
     "make lint-fast",
     "make test-fast",
+    "python3 -m json.tool schemas/experience-record.schema.json",
+    "python3 -m json.tool schemas/outcome-evidence.schema.json",
     "make prepush-full",
     "python3 -m json.tool .factory/artifacts/task-runs/T2/work-proof-marker.json >/dev/null",
     "python3 -m json.tool .factory/artifacts/task-runs/T2/validation-report.json >/dev/null"
@@ -22,7 +24,7 @@
       "exit_code": 0
     }
   ],
-  "test_first_skipped_reason": "Repair mode was triggered by actionable Codex review findings with concrete failing scenarios. No separate pre-edit red command was run in this repair pass; focused regression tests were added for both findings and then validated with make test-fast and make prepush-full.",
+  "test_first_skipped_reason": "Repair mode was triggered by actionable Codex review findings with concrete failing scenarios. The configured pre-edit red command, make test-fast, passed before the repair because no regression test covered the schema mismatches yet; focused regression tests were added for the PRD outcome taxonomy and numeric flake_discount and then validated with make test-fast and make prepush-full.",
   "green_evidence": [
     {
       "command": "make lint-fast",
@@ -34,7 +36,7 @@
       "command": "make test-fast",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Go tests passed, including regression coverage for configured repo roots and default experience shard ignore behavior."
+      "summary": "Go tests passed, including regression coverage for configured repo roots, default experience shard ignore behavior, PRD ci_failure outcome taxonomy, and numeric flake_discount."
     }
   ],
   "final_validation_evidence": [
@@ -67,6 +69,7 @@
         "cmd/relia/main.go",
         "cmd/relia/main_test.go",
         "schemas/experience-record.schema.json",
+        "schemas/outcome-evidence.schema.json",
         "schemas/memory-rule.schema.json",
         "schemas/relia-config.schema.json"
       ]
@@ -99,8 +102,9 @@
     "changed_paths_within_allowed_paths": true,
     "forbidden_paths_changed_in_worker_diff": false,
     "checked_changed_paths": [
-      "cmd/relia/main.go",
       "cmd/relia/main_test.go",
+      "schemas/experience-record.schema.json",
+      "schemas/outcome-evidence.schema.json",
       ".factory/artifacts/task-runs/T2/work-proof-marker.json",
       ".factory/artifacts/task-runs/T2/validation-report.json"
     ],
@@ -111,11 +115,11 @@
   },
   "plan_drift_result": {
     "status": "pass",
-    "note": "Repair stayed within T2 contracts-config-and-validation scope and addressed only the actionable Codex review findings without changing runtime pins, provider posture, release boundaries, tracker state, commits, PRs, or scope closure."
+    "note": "Repair stayed within T2 contracts-config-and-validation scope and addressed only the actionable Codex review findings for schema taxonomy, flake discount typing, and default local shard ignore behavior without changing runtime pins, provider posture, release boundaries, tracker state, commits, PRs, or scope closure."
   },
   "codex_review_repair_result": {
     "status": "implemented",
-    "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair",
+    "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-2",
     "resolved_findings": [
       {
         "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3447783166",
@@ -132,6 +136,23 @@
           "cmd/relia/main.go",
           "cmd/relia/main_test.go"
         ]
+      },
+      {
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3447791560",
+        "status": "implemented",
+        "evidence_refs": [
+          "schemas/experience-record.schema.json",
+          "schemas/outcome-evidence.schema.json",
+          "cmd/relia/main_test.go"
+        ]
+      },
+      {
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3447791561",
+        "status": "implemented",
+        "evidence_refs": [
+          "schemas/experience-record.schema.json",
+          "cmd/relia/main_test.go"
+        ]
       }
     ]
   },
@@ -143,7 +164,7 @@
       "docs/architecture/architecture_guides.md",
       "docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md"
     ],
-    "repair_note": "No additional docs update was needed for the review repair because the existing T2 docs already describe fixed artifact roots and local-only experience shards."
+    "repair_note": "No additional docs update was needed for this repair because docs/product/prd.md already defines the canonical ci_failure outcome kind, numeric flake_discount example, and local-only experience shard posture."
   },
   "changelog_result": {
     "status": "not_applicable",
@@ -153,7 +174,7 @@
     "status": "pass",
     "schema_version": "1.0",
     "relia_version": "0.0.0-dev",
-    "migration_note": "Pre-1.0 MVP contract amended command-result metadata and relia.yaml schema_version before public release; no additional schema_version or relia_version change was required for this repair."
+    "migration_note": "Pre-1.0 MVP schema correction before public release; no schema_version or relia_version change was required."
   },
   "blockers": [],
   "residual_risks": [

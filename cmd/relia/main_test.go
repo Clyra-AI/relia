@@ -563,6 +563,38 @@ func TestSchemaFilesDeclareVersionMetadataAndExitMapping(t *testing.T) {
 	}
 }
 
+func TestOutcomeSchemasUsePRDOutcomeTaxonomy(t *testing.T) {
+	root := findRepoRootForTest(t)
+	experienceSchema := readSchemaForTest(t, root, "schemas/experience-record.schema.json")
+	experienceProperties := schemaPropertiesForTest(t, "schemas/experience-record.schema.json", experienceSchema)
+	outcomeProperties := schemaPropertiesForTest(t, "experience.outcome", propertyForTest(t, experienceProperties, "outcome"))
+	kindEnum := enumForTest(t, "experience.outcome.kind", propertyForTest(t, outcomeProperties, "kind"))
+	if !containsStringValue(kindEnum, "ci_failure") {
+		t.Fatalf("experience outcome enum = %#v, want ci_failure", kindEnum)
+	}
+	if containsStringValue(kindEnum, "ci_failed") {
+		t.Fatalf("experience outcome enum = %#v, must use PRD ci_failure", kindEnum)
+	}
+
+	flakeDiscount := propertyForTest(t, experienceProperties, "flake_discount")
+	if flakeDiscount["type"] != "number" {
+		t.Fatalf("flake_discount type = %#v, want number", flakeDiscount["type"])
+	}
+	if flakeDiscount["minimum"] != float64(0) || flakeDiscount["maximum"] != float64(1) {
+		t.Fatalf("flake_discount bounds = [%#v, %#v], want [0, 1]", flakeDiscount["minimum"], flakeDiscount["maximum"])
+	}
+
+	outcomeSchema := readSchemaForTest(t, root, "schemas/outcome-evidence.schema.json")
+	outcomeEvidenceProperties := schemaPropertiesForTest(t, "schemas/outcome-evidence.schema.json", outcomeSchema)
+	outcomeKindEnum := enumForTest(t, "outcome_evidence.outcome_kind", propertyForTest(t, outcomeEvidenceProperties, "outcome_kind"))
+	if !containsStringValue(outcomeKindEnum, "ci_failure") {
+		t.Fatalf("outcome evidence enum = %#v, want ci_failure", outcomeKindEnum)
+	}
+	if containsStringValue(outcomeKindEnum, "ci_failed") {
+		t.Fatalf("outcome evidence enum = %#v, must use PRD ci_failure", outcomeKindEnum)
+	}
+}
+
 func runForTest(t *testing.T, args []string, stdoutIsTTY bool) (string, string, int) {
 	t.Helper()
 
@@ -589,6 +621,46 @@ func containsStringValue(values []any, want string) bool {
 		}
 	}
 	return false
+}
+
+func readSchemaForTest(t *testing.T, root string, rel string) map[string]any {
+	t.Helper()
+	content, err := os.ReadFile(filepath.Join(root, rel))
+	if err != nil {
+		t.Fatalf("read %s: %v", rel, err)
+	}
+	var schema map[string]any
+	if err := json.Unmarshal(content, &schema); err != nil {
+		t.Fatalf("%s is not valid JSON: %v", rel, err)
+	}
+	return schema
+}
+
+func schemaPropertiesForTest(t *testing.T, name string, schema map[string]any) map[string]any {
+	t.Helper()
+	properties, ok := schema["properties"].(map[string]any)
+	if !ok {
+		t.Fatalf("%s properties missing", name)
+	}
+	return properties
+}
+
+func propertyForTest(t *testing.T, properties map[string]any, name string) map[string]any {
+	t.Helper()
+	property, ok := properties[name].(map[string]any)
+	if !ok {
+		t.Fatalf("%s property missing", name)
+	}
+	return property
+}
+
+func enumForTest(t *testing.T, name string, property map[string]any) []any {
+	t.Helper()
+	values, ok := property["enum"].([]any)
+	if !ok {
+		t.Fatalf("%s enum missing", name)
+	}
+	return values
 }
 
 func findRepoRootForTest(t *testing.T) string {
