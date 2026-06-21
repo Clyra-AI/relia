@@ -366,6 +366,72 @@ func TestCheckReportsSchemaContractsAndPrivacyDefaults(t *testing.T) {
 	}
 }
 
+func TestCheckRejectsInvalidExistingGeneratedArtifacts(t *testing.T) {
+	repo := writeMinimalRepoForFullCheck(t, defaultConfigYAML())
+	artifactPath := filepath.Join(repo, ".relia", "coverage", "map.json")
+	if err := os.MkdirAll(filepath.Dir(artifactPath), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(artifactPath, []byte(`{
+  "object_type": "relia.coverage_map",
+  "schema_version": "1.0",
+  "repo": "github.com/Clyra-AI/relia",
+  "generated_at": "2026-06-21T00:00:00Z",
+  "path_coverage": []
+}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	t.Chdir(repo)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitValidation {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "memory_artifact_validation_failed" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+	if result.Errors[0].Ref != ".relia/coverage/map.json" {
+		t.Fatalf("error ref = %q", result.Errors[0].Ref)
+	}
+	if !strings.Contains(result.Errors[0].Message, "generated artifact schema validation failed") || !strings.Contains(result.Errors[0].Message, "metadata") {
+		t.Fatalf("error message = %q, want generated artifact metadata schema failure", result.Errors[0].Message)
+	}
+}
+
+func TestCheckAcceptsValidExistingGeneratedArtifacts(t *testing.T) {
+	repo := writeMinimalRepoForFullCheck(t, defaultConfigYAML())
+	writeGeneratedArtifactForTest(t, repo, ".relia/experiences/2026-06.jsonl", compactJSONForTest(t, validExperienceRecordJSONForTest())+"\n")
+	writeGeneratedArtifactForTest(t, repo, ".relia/coverage/map.json", validCoverageMapJSONForTest())
+	writeGeneratedArtifactForTest(t, repo, ".relia/reports/backtest-2026-06-21.json", validRecurrenceReportJSONForTest())
+	t.Chdir(repo)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	artifactContract, ok := result.Data["artifact_contract"].(map[string]any)
+	if !ok {
+		t.Fatalf("artifact_contract missing from data: %#v", result.Data)
+	}
+	validatedArtifacts, ok := artifactContract["validated_artifacts"].([]any)
+	if !ok {
+		t.Fatalf("validated_artifacts = %#v", artifactContract["validated_artifacts"])
+	}
+	for _, want := range []string{
+		".relia/experiences/2026-06.jsonl",
+		".relia/coverage/map.json",
+		".relia/reports/backtest-2026-06-21.json",
+	} {
+		if !containsStringValue(validatedArtifacts, want) {
+			t.Fatalf("validated_artifacts = %#v, want %s", validatedArtifacts, want)
+		}
+	}
+}
+
 func TestCheckValidatesConfigAgainstSchemaRequiredTopLevelFields(t *testing.T) {
 	for _, key := range []string{"metadata", "attribution", "outcomes"} {
 		t.Run(key, func(t *testing.T) {
@@ -835,6 +901,35 @@ func TestCheckAcceptsLLMDraftingProviderWithCompleteEndpointGrant(t *testing.T) 
 	}
 	if len(result.Warnings) == 0 || result.Warnings[0].Type != "provider_path_configured" {
 		t.Fatalf("warnings = %#v, want provider_path_configured", result.Warnings)
+	}
+}
+
+func TestInteractiveCheckPrintsProviderWarnings(t *testing.T) {
+	config := strings.Replace(defaultConfigYAML(), "embeddings: signature", `provider: anthropic
+  model: claude-fable-5
+  base_url: https://api.anthropic.example
+  credential_env: ANTHROPIC_API_KEY
+  budget_posture: max_usd_per_run_2
+  redaction_posture: redacted_records_only
+  allowlist:
+    - api.anthropic.example
+  embeddings: signature`, 1)
+	repo := writeMinimalRepoForFullCheck(t, config)
+	t.Chdir(repo)
+
+	stdout, stderr, code := runForTest(t, []string{"check"}, true)
+
+	if code != ExitSuccess {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	if json.Valid([]byte(stdout)) {
+		t.Fatalf("interactive output should be human-readable, got JSON: %s", stdout)
+	}
+	if !bytes.Contains([]byte(stdout), []byte("warning provider_path_configured")) {
+		t.Fatalf("stdout = %q, want provider warning type", stdout)
+	}
+	if !bytes.Contains([]byte(stdout), []byte("redacted records")) {
+		t.Fatalf("stdout = %q, want redacted provider disclosure", stdout)
 	}
 }
 
@@ -1620,6 +1715,20 @@ func decodeResult(t *testing.T, output string) CommandResult {
 	return result
 }
 
+func compactJSONForTest(t *testing.T, content string) string {
+	t.Helper()
+
+	var value any
+	if err := json.Unmarshal([]byte(content), &value); err != nil {
+		t.Fatalf("decode fixture JSON: %v", err)
+	}
+	compact, err := json.Marshal(value)
+	if err != nil {
+		t.Fatalf("compact fixture JSON: %v", err)
+	}
+	return string(compact)
+}
+
 func containsStringValue(values []any, want string) bool {
 	for _, value := range values {
 		if value == want {
@@ -1804,6 +1913,104 @@ func writeMemoryRuleForTest(t *testing.T, root string, content string) {
 	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
 		t.Fatal(err)
 	}
+}
+
+func writeGeneratedArtifactForTest(t *testing.T, root string, rel string, content string) {
+	t.Helper()
+
+	path := filepath.Join(root, filepath.FromSlash(rel))
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func validExperienceRecordJSONForTest() string {
+	return `{
+  "object_type": "relia.experience_record",
+  "schema_version": "1.0",
+  "experience_id": "exp-123",
+  "repo": "github.com/Clyra-AI/relia",
+  "recorded_at": "2026-06-21T00:00:00Z",
+  "attribution": {
+    "agent_authored": true,
+    "method": "bot_login",
+    "confidence": "high",
+    "tool": "codex"
+  },
+  "context": {
+    "paths": ["cmd/relia/main.go"],
+    "diff_fingerprint": "sha256:abc123",
+    "scope": "cmd/relia"
+  },
+  "action": {
+    "pr": 18,
+    "commits": ["abc123"]
+  },
+  "outcome": {
+    "kind": "ci_failure",
+    "terminal": "failed",
+    "signature": {
+      "signature_class": "test_failure",
+      "check_name": "go test",
+      "key": "cmd/relia",
+      "message_fingerprint": "sha256:def456",
+      "extraction_confidence": "structured"
+    }
+  },
+  "provenance": {
+    "refs": [
+      {"kind": "pull_request", "url": "https://example.invalid/pr/18"}
+    ]
+  },
+  "flake_discount": 0.1,
+  "org_eligible": false,
+  "share_scope": "private",
+  "redaction_status": "applied",
+  "metadata": {"relia_version": "0.0.0-dev"}
+}`
+}
+
+func validCoverageMapJSONForTest() string {
+	return `{
+  "object_type": "relia.coverage_map",
+  "schema_version": "1.0",
+  "repo": "github.com/Clyra-AI/relia",
+  "generated_at": "2026-06-21T00:00:00Z",
+  "path_coverage": [
+    {"path_prefix": "cmd/relia", "coverage_status": "covered_risky"}
+  ],
+  "metadata": {"relia_version": "0.0.0-dev"}
+}`
+}
+
+func validRecurrenceReportJSONForTest() string {
+	return `{
+  "object_type": "relia.recurrence_report",
+  "schema_version": "1.0",
+  "report_id": "report-123",
+  "repo": "github.com/Clyra-AI/relia",
+  "window": "2026-06",
+  "generated_at": "2026-06-21T00:00:00Z",
+  "headline": {
+    "experiences_agent_attributed": 4,
+    "recurrences_confirmed": 1,
+    "recurrences_possible": 1,
+    "attribution_uncertain_count": 0,
+    "flake_discounted_count": 1,
+    "error_recurrence_rate": 0.25
+  },
+  "pairs": [
+    {
+      "match_level": "confirmed",
+      "current_experience_ref": "exp-123",
+      "prior_experience_ref": "exp-101"
+    }
+  ],
+  "metadata": {"relia_version": "0.0.0-dev"}
+}`
 }
 
 func validMemoryRuleYAMLForTest() string {

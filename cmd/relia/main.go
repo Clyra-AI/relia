@@ -93,6 +93,28 @@ var artifactSkeletonDirs = []string{
 	filepath.Join(defaultMemoryRoot, "compiled"),
 }
 
+type generatedArtifactSchemaBinding struct {
+	pattern   string
+	schemaRel string
+	jsonLines bool
+}
+
+var generatedArtifactSchemaBindings = []generatedArtifactSchemaBinding{
+	{
+		pattern:   filepath.Join(defaultArtifactRoot, "experiences", "*.jsonl"),
+		schemaRel: "schemas/experience-record.schema.json",
+		jsonLines: true,
+	},
+	{
+		pattern:   filepath.Join(defaultArtifactRoot, "coverage", "map.json"),
+		schemaRel: "schemas/coverage-map.schema.json",
+	},
+	{
+		pattern:   filepath.Join(defaultArtifactRoot, "reports", "*.json"),
+		schemaRel: "schemas/recurrence-report.schema.json",
+	},
+}
+
 const experienceGitignore = `# Relia experience shards are reproducible local caches by default.
 /experiences/
 `
@@ -332,19 +354,24 @@ func checkResult(args []string, start time.Time) CommandResult {
 	if schemaErr != nil {
 		return errorResult("check", "check", schemaErr, start)
 	}
+	generatedArtifacts, artifactErr := validateGeneratedArtifacts(root)
+	if artifactErr != nil {
+		return errorResult("check", "check", artifactErr, start)
+	}
 	rules, ruleErr := validateMemoryRules(root, config.MemoryRoot)
 	if ruleErr != nil {
 		return errorResult("check", "check", ruleErr, start)
 	}
 
 	result := passResult("check", "check", "local operating pack baseline is present", start, map[string]any{
-		"checked_paths": len(requiredCheckFiles) + len(requiredSchemaFiles) + len(rules),
+		"checked_paths": len(requiredCheckFiles) + len(requiredSchemaFiles) + len(generatedArtifacts) + len(rules),
 		"repo_root":     ".",
 		"artifact_contract": map[string]any{
 			"schema_version":          commandSchemaVersion,
 			"generated_root":          config.ArtifactRoot,
 			"user_memory_root":        config.MemoryRoot,
 			"schemas":                 schemas,
+			"validated_artifacts":     generatedArtifacts,
 			"validated_memory_rules":  rules,
 			"generated_artifacts":     []string{".relia/experiences/*.jsonl", ".relia/signatures/index.json", ".relia/coverage/map.json", ".relia/reports/*", ".relia/baselines/err-baseline.json"},
 			"user_approved_artifacts": []string{defaultConfigFile, "memory/rules/*.yaml", "memory/MEMORY.md", "memory/compiled/agents-block.md"},
@@ -854,6 +881,100 @@ func validateSchemaContracts(root string) ([]string, *CommandError) {
 	return schemas, nil
 }
 
+func validateGeneratedArtifacts(root string) ([]string, *CommandError) {
+	artifactRefs := make([]string, 0)
+	schemaCache := make(map[string]map[string]any)
+	for _, binding := range generatedArtifactSchemaBindings {
+		matches, err := filepath.Glob(filepath.Join(root, binding.pattern))
+		if err != nil {
+			return nil, internalError("could not inspect generated artifacts", err)
+		}
+		sort.Strings(matches)
+		if len(matches) == 0 {
+			continue
+		}
+		schema, schemaErr := loadJSONSchema(root, binding.schemaRel, schemaCache)
+		if schemaErr != nil {
+			return nil, schemaErr
+		}
+		for _, artifactPath := range matches {
+			info, statErr := os.Stat(artifactPath)
+			if statErr != nil {
+				return nil, internalError("could not inspect generated artifact", statErr)
+			}
+			if info.IsDir() {
+				continue
+			}
+			rel, relErr := filepath.Rel(root, artifactPath)
+			if relErr != nil {
+				return nil, internalError("could not resolve generated artifact path", relErr)
+			}
+			rel = filepath.ToSlash(rel)
+			if binding.jsonLines {
+				if err := validateJSONLinesArtifact(artifactPath, rel, schema); err != nil {
+					return nil, err
+				}
+			} else if err := validateJSONObjectArtifact(artifactPath, rel, schema); err != nil {
+				return nil, err
+			}
+			artifactRefs = append(artifactRefs, rel)
+		}
+	}
+	return artifactRefs, nil
+}
+
+func loadJSONSchema(root string, rel string, cache map[string]map[string]any) (map[string]any, *CommandError) {
+	if schema, ok := cache[rel]; ok {
+		return schema, nil
+	}
+	content, err := os.ReadFile(filepath.Join(root, rel))
+	if err != nil {
+		return nil, artifactValidationError("required schema contract is missing: "+rel, rel)
+	}
+	var schema map[string]any
+	if err := json.Unmarshal(content, &schema); err != nil {
+		return nil, artifactValidationError("schema contract is not valid JSON: "+err.Error(), rel)
+	}
+	cache[rel] = schema
+	return schema, nil
+}
+
+func validateJSONObjectArtifact(path string, rel string, schema map[string]any) *CommandError {
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return artifactValidationError("could not read generated artifact", rel)
+	}
+	var value any
+	if err := json.Unmarshal(content, &value); err != nil {
+		return artifactValidationError("generated artifact is not valid JSON: "+err.Error(), rel)
+	}
+	if issue := validateJSONValueAgainstSchema(value, "", schema, schema); issue != nil {
+		return artifactValidationError("generated artifact schema validation failed: "+issue.Error(), rel)
+	}
+	return nil
+}
+
+func validateJSONLinesArtifact(path string, rel string, schema map[string]any) *CommandError {
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return artifactValidationError("could not read generated artifact", rel)
+	}
+	for index, rawLine := range strings.Split(string(content), "\n") {
+		line := strings.TrimSpace(rawLine)
+		if line == "" {
+			continue
+		}
+		var value any
+		if err := json.Unmarshal([]byte(line), &value); err != nil {
+			return artifactValidationError("generated artifact line "+strconv.Itoa(index+1)+" is not valid JSON: "+err.Error(), rel)
+		}
+		if issue := validateJSONValueAgainstSchema(value, "", schema, schema); issue != nil {
+			return artifactValidationError("generated artifact line "+strconv.Itoa(index+1)+" schema validation failed: "+issue.Error(), rel)
+		}
+	}
+	return nil
+}
+
 func validateConfigAgainstSchema(root string, parsed parsedYAML) *CommandError {
 	const rel = "schemas/relia-config.schema.json"
 	content, err := os.ReadFile(filepath.Join(root, rel))
@@ -1033,9 +1154,8 @@ func normalizeScopePath(rawScopePath string) string {
 }
 
 func currentTreeHasScopePath(root string, scopePath string) bool {
-	literalPrefix := scopePathLiteralPrefix(scopePath)
-	if !scopePathHasPattern(scopePath) && literalPrefix != "" {
-		if _, err := os.Stat(filepath.Join(root, filepath.FromSlash(literalPrefix))); err == nil {
+	if !scopePathHasPattern(scopePath) {
+		if _, err := os.Stat(filepath.Join(root, filepath.FromSlash(scopePath))); err == nil {
 			return true
 		}
 	}
@@ -1126,6 +1246,238 @@ func (issue schemaValidationIssue) Error() string {
 		return issue.message
 	}
 	return issue.path + " " + issue.message
+}
+
+func validateJSONValueAgainstSchema(value any, valuePath string, schema map[string]any, rootSchema map[string]any) *schemaValidationIssue {
+	if ref, ok := schema["$ref"].(string); ok {
+		resolved, resolvedOK := resolveJSONSchemaRef(rootSchema, ref)
+		if !resolvedOK {
+			return &schemaValidationIssue{path: valuePath, message: "uses unresolved schema ref " + ref}
+		}
+		return validateJSONValueAgainstSchema(value, valuePath, resolved, rootSchema)
+	}
+	if schemaAllOf, ok := schema["allOf"].([]any); ok {
+		for _, rawClause := range schemaAllOf {
+			clause, ok := rawClause.(map[string]any)
+			if !ok {
+				continue
+			}
+			if issue := validateJSONValueAgainstSchema(value, valuePath, clause, rootSchema); issue != nil {
+				return issue
+			}
+		}
+	}
+	if schemaAnyOf, ok := schema["anyOf"].([]any); ok {
+		var firstIssue *schemaValidationIssue
+		for _, rawOption := range schemaAnyOf {
+			option, ok := rawOption.(map[string]any)
+			if !ok {
+				continue
+			}
+			if issue := validateJSONValueAgainstSchema(value, valuePath, option, rootSchema); issue == nil {
+				firstIssue = nil
+				break
+			} else if firstIssue == nil {
+				firstIssue = issue
+			}
+		}
+		if firstIssue != nil {
+			return &schemaValidationIssue{path: valuePath, message: "must match at least one schema option"}
+		}
+	}
+	if schemaOneOf, ok := schema["oneOf"].([]any); ok {
+		matches := 0
+		for _, rawOption := range schemaOneOf {
+			option, ok := rawOption.(map[string]any)
+			if ok && validateJSONValueAgainstSchema(value, valuePath, option, rootSchema) == nil {
+				matches++
+			}
+		}
+		if matches != 1 {
+			return &schemaValidationIssue{path: valuePath, message: "must match exactly one schema option"}
+		}
+	}
+	if wantConst, ok := schema["const"]; ok && !jsonSchemaValuesEqual(value, wantConst) {
+		return &schemaValidationIssue{path: valuePath, message: "must equal " + schemaValueForMessage(wantConst)}
+	}
+	if enumValues, ok := schema["enum"].([]any); ok {
+		matched := false
+		for _, enumValue := range enumValues {
+			if jsonSchemaValuesEqual(value, enumValue) {
+				matched = true
+				break
+			}
+		}
+		if !matched {
+			return &schemaValidationIssue{path: valuePath, message: "must be one of " + schemaValueForMessage(enumValues)}
+		}
+	}
+	if wantType, ok := schema["type"].(string); ok {
+		if issue := validateJSONType(value, valuePath, wantType); issue != nil {
+			return issue
+		}
+	}
+	if format, ok := schema["format"].(string); ok && format == "date-time" {
+		text, ok := value.(string)
+		if !ok {
+			return &schemaValidationIssue{path: valuePath, message: "must be a date-time string"}
+		}
+		if _, err := time.Parse(time.RFC3339, text); err != nil {
+			return &schemaValidationIssue{path: valuePath, message: "must be a valid RFC3339 date-time"}
+		}
+	}
+	if minimum, ok := schema["minimum"].(float64); ok {
+		number, ok := value.(float64)
+		if !ok {
+			return &schemaValidationIssue{path: valuePath, message: "must be a number"}
+		}
+		if number < minimum {
+			return &schemaValidationIssue{path: valuePath, message: "must be at least " + schemaValueForMessage(minimum)}
+		}
+	}
+	if maximum, ok := schema["maximum"].(float64); ok {
+		number, ok := value.(float64)
+		if !ok {
+			return &schemaValidationIssue{path: valuePath, message: "must be a number"}
+		}
+		if number > maximum {
+			return &schemaValidationIssue{path: valuePath, message: "must be at most " + schemaValueForMessage(maximum)}
+		}
+	}
+	if minLength, ok := schema["minLength"].(float64); ok {
+		text, ok := value.(string)
+		if !ok {
+			return &schemaValidationIssue{path: valuePath, message: "must be a string"}
+		}
+		if len(text) < int(minLength) {
+			return &schemaValidationIssue{path: valuePath, message: "must have length at least " + strconv.Itoa(int(minLength))}
+		}
+	}
+	if minItems, ok := schema["minItems"].(float64); ok {
+		items, ok := value.([]any)
+		if !ok {
+			return &schemaValidationIssue{path: valuePath, message: "must be an array"}
+		}
+		if len(items) < int(minItems) {
+			return &schemaValidationIssue{path: valuePath, message: "must have at least " + strconv.Itoa(int(minItems)) + " items"}
+		}
+	}
+	if itemsSchema, ok := schema["items"].(map[string]any); ok {
+		items, ok := value.([]any)
+		if !ok {
+			return &schemaValidationIssue{path: valuePath, message: "must be an array"}
+		}
+		for index, item := range items {
+			if issue := validateJSONValueAgainstSchema(item, joinYAMLPath(valuePath, strconv.Itoa(index)), itemsSchema, rootSchema); issue != nil {
+				return issue
+			}
+		}
+	}
+	_, hasRequiredFields := schema["required"]
+	_, hasAdditionalProperties := schema["additionalProperties"]
+	if schema["type"] == "object" || len(schemaObjectProperties(schema)) > 0 || hasRequiredFields || hasAdditionalProperties {
+		return validateJSONObjectAgainstSchema(value, valuePath, schema, rootSchema)
+	}
+	return nil
+}
+
+func resolveJSONSchemaRef(rootSchema map[string]any, ref string) (map[string]any, bool) {
+	if !strings.HasPrefix(ref, "#/") {
+		return nil, false
+	}
+	var current any = rootSchema
+	for _, segment := range strings.Split(strings.TrimPrefix(ref, "#/"), "/") {
+		object, ok := current.(map[string]any)
+		if !ok {
+			return nil, false
+		}
+		segment = strings.ReplaceAll(strings.ReplaceAll(segment, "~1", "/"), "~0", "~")
+		current, ok = object[segment]
+		if !ok {
+			return nil, false
+		}
+	}
+	resolved, ok := current.(map[string]any)
+	return resolved, ok
+}
+
+func validateJSONType(value any, valuePath string, wantType string) *schemaValidationIssue {
+	switch wantType {
+	case "object":
+		if _, ok := value.(map[string]any); !ok {
+			return &schemaValidationIssue{path: valuePath, message: "must be an object"}
+		}
+	case "array":
+		if _, ok := value.([]any); !ok {
+			return &schemaValidationIssue{path: valuePath, message: "must be an array"}
+		}
+	case "string":
+		if _, ok := value.(string); !ok {
+			return &schemaValidationIssue{path: valuePath, message: "must be a string"}
+		}
+	case "boolean":
+		if _, ok := value.(bool); !ok {
+			return &schemaValidationIssue{path: valuePath, message: "must be a boolean"}
+		}
+	case "integer":
+		number, ok := value.(float64)
+		if !ok || number != float64(int64(number)) {
+			return &schemaValidationIssue{path: valuePath, message: "must be an integer"}
+		}
+	case "number":
+		if _, ok := value.(float64); !ok {
+			return &schemaValidationIssue{path: valuePath, message: "must be a number"}
+		}
+	default:
+		return &schemaValidationIssue{path: valuePath, message: "uses unsupported schema type " + wantType}
+	}
+	return nil
+}
+
+func validateJSONObjectAgainstSchema(value any, valuePath string, schema map[string]any, rootSchema map[string]any) *schemaValidationIssue {
+	object, ok := value.(map[string]any)
+	if !ok {
+		return &schemaValidationIssue{path: valuePath, message: "must be an object"}
+	}
+	properties := schemaObjectProperties(schema)
+	if required, ok := schema["required"].([]any); ok {
+		for _, rawRequired := range required {
+			requiredField, ok := rawRequired.(string)
+			if !ok {
+				continue
+			}
+			if _, exists := object[requiredField]; !exists {
+				return &schemaValidationIssue{path: joinYAMLPath(valuePath, requiredField), message: "is required"}
+			}
+		}
+	}
+	if allowAdditional, ok := schema["additionalProperties"].(bool); ok && !allowAdditional {
+		for key := range object {
+			if _, exists := properties[key]; !exists {
+				return &schemaValidationIssue{path: joinYAMLPath(valuePath, key), message: "is not allowed by the schema"}
+			}
+		}
+	}
+	for key, rawPropertySchema := range properties {
+		propertySchema, ok := rawPropertySchema.(map[string]any)
+		if !ok {
+			continue
+		}
+		propertyValue, exists := object[key]
+		if !exists {
+			continue
+		}
+		if issue := validateJSONValueAgainstSchema(propertyValue, joinYAMLPath(valuePath, key), propertySchema, rootSchema); issue != nil {
+			return issue
+		}
+	}
+	return nil
+}
+
+func jsonSchemaValuesEqual(left any, right any) bool {
+	leftJSON, leftErr := json.Marshal(left)
+	rightJSON, rightErr := json.Marshal(right)
+	return leftErr == nil && rightErr == nil && string(leftJSON) == string(rightJSON)
 }
 
 func validateYAMLPathAgainstSchema(parsed parsedYAML, path string, schema map[string]any) *schemaValidationIssue {
@@ -1821,6 +2173,17 @@ func writeHuman(stdout io.Writer, stderr io.Writer, result CommandResult) error 
 	}
 	if _, err := fmt.Fprintf(writer, "%s %s: %s\n", result.Status, result.Command, message); err != nil {
 		return err
+	}
+	for _, warning := range result.Warnings {
+		if warning.Ref != "" {
+			if _, err := fmt.Fprintf(writer, "warning %s: %s (%s)\n", warning.Type, warning.Message, warning.Ref); err != nil {
+				return err
+			}
+			continue
+		}
+		if _, err := fmt.Fprintf(writer, "warning %s: %s\n", warning.Type, warning.Message); err != nil {
+			return err
+		}
 	}
 	if len(result.EvidenceRefs) == 0 {
 		return nil

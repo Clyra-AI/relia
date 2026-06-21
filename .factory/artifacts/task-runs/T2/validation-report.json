@@ -3,14 +3,15 @@
   "schema_version": "1.0",
   "task_id": "T2",
   "status": "pass",
-  "produced_at": "2026-06-21T17:45:36Z",
-  "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-28",
+  "produced_at": "2026-06-21T17:56:38Z",
+  "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-29",
   "commands_run": [
     "make lint-fast",
     "make test-fast",
-    "make test-fast",
     "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
-    "make test-fast",
+    "go test ./cmd/relia -count=1",
+    "make test-coverage",
+    "git diff --check",
     "make prepush-full",
     "python3 -m json.tool .factory/artifacts/task-runs/T2/work-proof-marker.json",
     "python3 -m json.tool .factory/artifacts/task-runs/T2/validation-report.json",
@@ -21,29 +22,35 @@
       "command": "make lint-fast",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Baseline lint-fast passed before repair-28 edits."
+      "summary": "Baseline lint-fast passed before repair-29 edits."
     },
     {
       "command": "make test-fast",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Baseline go test ./... -count=1 passed before repair-28 edits."
+      "summary": "Baseline go test ./... -count=1 passed before repair-29 edits."
     }
   ],
   "red_evidence": [
     {
-      "command": "make test-fast",
-      "status": "fail_expected",
+      "source": "codex_review_gate",
+      "status": "actionable_review",
       "exit_code": 2,
-      "summary": "Red-first run failed after adding regression tests because relia check still returned exit 0 for an empty statement: > block scalar and for unmatched wildcard scope cmd/relia/*.py."
+      "summary": "Repair-29 was opened from actionable Codex review findings for wildcard scope matching, provider warning visibility, and generated artifact schema validation."
     }
   ],
   "green_evidence": [
     {
-      "command": "make test-fast",
+      "command": "go test ./cmd/relia -count=1",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Fast tests passed after parsing block scalar bodies, requiring full wildcard scope matches, and enabling existing config schema allOf/anyOf validation."
+      "summary": "Focused package tests passed after adding provider-warning, generated-artifact, and wildcard scope repair coverage."
+    },
+    {
+      "command": "make test-coverage",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "Coverage gate passed at 78.0% against the 75.0% threshold."
     }
   ],
   "final_validation_evidence": [
@@ -51,7 +58,7 @@
       "command": "make prepush-full",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Final gate passed lint-fast, test-fast, test-coverage, and test-contracts; coverage was 79.1% against the 75.0% threshold; repo pack reported ok."
+      "summary": "Final gate passed lint-fast, test-fast, test-coverage, and test-contracts; coverage was 78.0% against the 75.0% threshold; repo pack reported ok."
     },
     {
       "command": "python3 -m json.tool .factory/artifacts/task-runs/T2/work-proof-marker.json",
@@ -89,8 +96,9 @@
         ".factory/artifacts/task-runs/T2/validation-report.json",
         "cmd/relia/main.go",
         "cmd/relia/main_test.go",
-        "schemas/relia-config.schema.json",
-        "schemas/memory-rule.schema.json"
+        "schemas/experience-record.schema.json",
+        "schemas/coverage-map.schema.json",
+        "schemas/recurrence-report.schema.json"
       ]
     },
     {
@@ -114,8 +122,8 @@
         ".factory/artifacts/task-runs/T2/validation-report.json",
         "cmd/relia/main.go",
         "cmd/relia/main_test.go",
-        "schemas/relia-config.schema.json",
-        "schemas/memory-rule.schema.json"
+        "schemas/command-result.schema.json",
+        "schemas/relia-config.schema.json"
       ]
     }
   ],
@@ -136,37 +144,38 @@
   },
   "plan_drift_result": {
     "status": "pass",
-    "note": "Repair-28 stayed within the T2 contracts-config-and-validation slice. Runtime pins, dependency policy, release boundaries, tracker state, commits, PRs, and lifecycle gates were not changed."
+    "note": "Repair-29 stayed within the T2 contracts-config-and-validation slice. Runtime pins, dependency policy, release boundaries, tracker state, commits, PRs, and lifecycle gates were not changed."
   },
   "codex_review_repair_result": {
     "status": "implemented",
-    "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-28",
+    "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-29",
     "resolved_findings": [
-      {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448791057",
-        "status": "implemented",
-        "evidence_refs": [
-          "cmd/relia/main.go",
-          "cmd/relia/main_test.go",
-          "schemas/relia-config.schema.json"
-        ]
-      },
-      {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448804336",
-        "status": "implemented",
-        "evidence_refs": [
-          "cmd/relia/main.go",
-          "cmd/relia/main_test.go",
-          "schemas/memory-rule.schema.json"
-        ]
-      },
       {
         "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448804337",
         "status": "implemented",
         "evidence_refs": [
           "cmd/relia/main.go",
+          "cmd/relia/main_test.go"
+        ]
+      },
+      {
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448816284",
+        "status": "implemented",
+        "evidence_refs": [
+          "cmd/relia/main.go",
           "cmd/relia/main_test.go",
-          "schemas/memory-rule.schema.json"
+          "docs/product/prd.md"
+        ]
+      },
+      {
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448816287",
+        "status": "implemented",
+        "evidence_refs": [
+          "cmd/relia/main.go",
+          "cmd/relia/main_test.go",
+          "schemas/experience-record.schema.json",
+          "schemas/coverage-map.schema.json",
+          "schemas/recurrence-report.schema.json"
         ]
       }
     ],
@@ -175,6 +184,9 @@
       "README.md",
       "docs/dev/dev_guides.md",
       "docs/architecture/architecture_guides.md",
+      "schemas/experience-record.schema.json",
+      "schemas/coverage-map.schema.json",
+      "schemas/recurrence-report.schema.json",
       "schemas/memory-rule.schema.json",
       "schemas/relia-config.schema.json",
       "cmd/relia/main.go",
@@ -184,7 +196,7 @@
   "docs_sync_result": {
     "status": "pass",
     "updated_refs": [],
-    "note": "No docs edits were required for this repair; existing product, dev, and architecture docs already state the provider grant and memory-rule scope validation contracts."
+    "note": "No docs edits were required for this repair; existing product, dev, and architecture docs already require generated artifact schema validation and explicit provider disclosure."
   },
   "changelog_result": {
     "status": "not_applicable",

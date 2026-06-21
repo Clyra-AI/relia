@@ -4,8 +4,8 @@
   "task_id": "T2",
   "status": "implemented",
   "implementation_performed": true,
-  "produced_at": "2026-06-21T17:45:36Z",
-  "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-28",
+  "produced_at": "2026-06-21T17:56:38Z",
+  "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-29",
   "changed_paths": [
     "cmd/relia/main.go",
     "cmd/relia/main_test.go",
@@ -16,27 +16,28 @@
     ".factory/artifacts/task-runs/T2/validation-report.json"
   ],
   "summary": {
-    "repair_iteration_note": "Repair-28 resolves the actionable Codex review findings on memory-rule statement validation and wildcard scope typo guarding, and keeps the provider-grant contract coherent by executing existing relia-config schema conditionals.",
+    "repair_iteration_note": "Repair-29 resolves the actionable Codex review findings on generated artifact schema validation, provider disclosure in human check output, and wildcard memory-rule scope typo guarding.",
     "implemented_contracts": [
-      "parseBaselineYAML now reads documented YAML block scalar bodies instead of storing the literal scalar marker, so an empty statement: > fails memory-rule validation.",
-      "Wildcard scope paths now require a full current-tree or git-history path match; an existing literal prefix no longer satisfies unmatched globs such as cmd/relia/*.py.",
-      "Config schema validation now evaluates existing allOf and anyOf fragments, including required fields used by the model_provider_endpoint grant conditionals."
+      "relia check now discovers existing generated .relia experience JSONL shards, coverage maps, and report JSON artifacts and validates them against their schema contracts before returning pass.",
+      "Structured check output reports validated_artifacts in the artifact_contract data object so existing generated artifact validation is visible to agents.",
+      "Interactive human check output now prints warning entries, including the provider_path_configured disclosure required by the trust-mode contract.",
+      "Current-tree memory-rule scope validation only accepts literal filesystem prefixes for non-pattern scopes; wildcard scopes must match a real path through the complete pattern."
     ],
     "resolved_review_findings": [
       {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448791057",
-        "status": "implemented",
-        "summary": "Provider-backed LLM drafting was already enforced at runtime on current head; this repair also makes the existing config schema provider-grant conditionals executable."
-      },
-      {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448804336",
-        "status": "implemented",
-        "summary": "Empty block-scalar memory rule statements now fail with memory_artifact_validation_failed."
-      },
-      {
         "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448804337",
         "status": "implemented",
-        "summary": "Wildcard scope paths now pass only when the complete pattern matches a real current or historical path."
+        "summary": "Wildcard scope paths are matched as patterns before any literal-prefix acceptance."
+      },
+      {
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448816284",
+        "status": "implemented",
+        "summary": "Human check output now surfaces provider warnings with their refs."
+      },
+      {
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448816287",
+        "status": "implemented",
+        "summary": "Existing generated artifacts are validated against the applicable schema contracts before relia check passes."
       }
     ],
     "lifecycle_boundary": "task-executor repair only; commit, PR update, scope closure, validation-gate, and post-merge evidence are left to their required workers"
