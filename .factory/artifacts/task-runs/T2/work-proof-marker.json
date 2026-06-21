@@ -4,7 +4,7 @@
   "task_id": "T2",
   "status": "implemented",
   "implementation_performed": true,
-  "produced_at": "2026-06-21T15:59:38Z",
+  "produced_at": "2026-06-21T16:06:45Z",
   "changed_paths": [
     "cmd/relia/main.go",
     "cmd/relia/main_test.go",
@@ -14,8 +14,9 @@
   "evidence_refs": [
     ".factory/artifacts/task-runs/T2/validation-report.json"
   ],
-  "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-12",
+  "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-13",
   "summary": {
+    "repair_iteration_note": "Repair-13 found the source-level schema validation repair already present in this workspace and refreshed worker-owned evidence after rerunning baseline, focused, and final validation.",
     "implemented_contracts": [
       "relia init now syncs the generated .relia/.gitignore experience-shard rule with memory.commit_experiences and removes the managed /experiences/ rule when users opt in to committing shards",
       "relia check now validates relia.yaml against schemas/relia-config.schema.json for the schema subset used by the checked-in config contract",

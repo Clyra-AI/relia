@@ -3,12 +3,11 @@
   "schema_version": "1.0",
   "task_id": "T2",
   "status": "pass",
-  "produced_at": "2026-06-21T15:59:38Z",
+  "produced_at": "2026-06-21T16:06:45Z",
   "commands_run": [
     "make lint-fast",
     "make test-fast",
-    "red-first temporary binary check for missing metadata and memory.org_eligible true",
-    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
+    "go test ./cmd/relia -run TestCheckValidatesConfigAgainstSchemaRequiredTopLevelFields -count=1",
     "make test-fast",
     "make prepush-full",
     "python3 -m json.tool .factory/artifacts/task-runs/T2/work-proof-marker.json",
@@ -19,35 +18,39 @@
       "command": "make lint-fast",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Baseline lint-fast passed before repair edits."
+      "summary": "Baseline lint-fast passed before repair-13 evidence refresh."
     },
     {
       "command": "make test-fast",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Baseline go test ./... -count=1 passed before repair edits."
+      "summary": "Baseline go test ./... -count=1 passed before repair-13 evidence refresh."
     }
   ],
-  "red_evidence": [
+  "test_first_skipped_reason": {
+    "status": "not_applicable",
+    "reason": "Repair-13 started from a workspace where the source-level Codex review repair was already present. No new production-code edit was needed before validation; the focused regression test was rerun to verify relia.yaml is checked against schemas/relia-config.schema.json."
+  },
+  "historical_red_evidence": [
     {
       "command": "red-first temporary binary check for missing metadata and memory.org_eligible true",
       "status": "captured",
       "exit_code": 0,
-      "summary": "Pre-repair behavior reproduced both findings: relia check passed with relia.yaml metadata removed (missing_metadata_exit=0), and memory.org_eligible: true returned exit 4 with redaction_status not_applicable instead of the fail-closed exit 6 path."
+      "summary": "Earlier T2 repair evidence reproduced both findings before the source repair: relia check passed with relia.yaml metadata removed, and memory.org_eligible: true returned exit 4 with redaction_status not_applicable instead of the fail-closed exit 6 path."
     }
   ],
   "green_evidence": [
     {
-      "command": "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
+      "command": "go test ./cmd/relia -run TestCheckValidatesConfigAgainstSchemaRequiredTopLevelFields -count=1",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Go sources were formatted after repair edits."
+      "summary": "Focused regression test verified schema-required top-level config sections such as metadata, attribution, and outcomes fail relia check when missing."
     },
     {
       "command": "make test-fast",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Fast Go tests passed after adding regression coverage for the review findings."
+      "summary": "Fast Go tests passed during repair-13 validation."
     }
   ],
   "final_validation_evidence": [
@@ -55,7 +58,7 @@
       "command": "make prepush-full",
       "status": "pass",
       "exit_code": 0,
-      "summary": "lint-fast, test-fast, test-coverage, and test-contracts passed; coverage was 77.7% against the 75.0% threshold; repo pack reported ok."
+      "summary": "Final rerun after evidence update passed lint-fast, test-fast, test-coverage, and test-contracts; coverage was 77.7% against the 75.0% threshold; repo pack reported ok."
     },
     {
       "command": "python3 -m json.tool .factory/artifacts/task-runs/T2/work-proof-marker.json",
@@ -121,10 +124,14 @@
     "changed_paths_within_allowed_paths": true,
     "forbidden_paths_changed_in_worker_diff": false,
     "checked_changed_paths": [
-      "cmd/relia/main.go",
-      "cmd/relia/main_test.go",
       ".factory/artifacts/task-runs/T2/work-proof-marker.json",
       ".factory/artifacts/task-runs/T2/validation-report.json"
+    ],
+    "source_paths_verified": [
+      "cmd/relia/main.go",
+      "cmd/relia/main_test.go",
+      "schemas/relia-config.schema.json",
+      "relia.yaml"
     ],
     "ignored_validation_outputs": [
       ".factory/tmp/"
@@ -133,11 +140,12 @@
   },
   "plan_drift_result": {
     "status": "pass",
-    "note": "Repair stayed within the T2 contracts-config-and-validation slice. Runtime pins, dependency policy, provider posture, release boundaries, tracker state, commits, PRs, and scope closure were not changed."
+    "note": "Repair-13 stayed within the T2 contracts-config-and-validation slice. Runtime pins, dependency policy, provider posture, release boundaries, tracker state, commits, PRs, and scope closure were not changed."
   },
   "codex_review_repair_result": {
     "status": "implemented",
-    "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-12",
+    "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-13",
+    "repair_iteration_note": "The latest-head schema-validation finding is covered by loadAndValidateConfig calling validateConfigAgainstSchema and by TestCheckValidatesConfigAgainstSchemaRequiredTopLevelFields.",
     "resolved_findings": [
       {
         "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448446323",
