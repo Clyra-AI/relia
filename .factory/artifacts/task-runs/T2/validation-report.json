@@ -6,10 +6,9 @@
   "commands_run": [
     "make lint-fast",
     "make test-fast",
-    "make test-fast",
-    "go test ./cmd/relia -count=1 -run TestCheckRejectsDisabledReviewGate",
+    "go test ./cmd/relia -count=1 -run 'Test(DefaultConfigIncludesDocumentedAdvisorySections|InitCreatesBaselineConfig)$'",
     "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
-    "make test-fast",
+    "go test ./cmd/relia -count=1 -run 'Test(DefaultConfigIncludesDocumentedAdvisorySections|InitCreatesBaselineConfig)$'",
     "make prepush-full",
     "python3 -m json.tool .factory/artifacts/task-runs/T2/work-proof-marker.json",
     "python3 -m json.tool .factory/artifacts/task-runs/T2/validation-report.json"
@@ -30,24 +29,18 @@
   ],
   "red_evidence": [
     {
-      "command": "make test-fast",
-      "status": "expected_fail",
-      "exit_code": 2,
-      "summary": "After adding focused schema tests, fast tests failed because schemas/relia-config.schema.json did not define advise or badge and distill.review_required was still an unconstrained boolean."
-    },
-    {
-      "command": "go test ./cmd/relia -count=1 -run TestCheckRejectsDisabledReviewGate",
+      "command": "go test ./cmd/relia -count=1 -run 'Test(DefaultConfigIncludesDocumentedAdvisorySections|InitCreatesBaselineConfig)$'",
       "status": "expected_fail",
       "exit_code": 1,
-      "summary": "The CLI validator did not reject distill.review_required: false before schema-file validation, proving the command-level review gate was missing."
+      "summary": "After adding the focused regression test, the generated relia.yaml was missing the documented advise and badge sections."
     }
   ],
   "green_evidence": [
     {
-      "command": "make test-fast",
+      "command": "go test ./cmd/relia -count=1 -run 'Test(DefaultConfigIncludesDocumentedAdvisorySections|InitCreatesBaselineConfig)$'",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Go tests passed after adding schema coverage for advise, badge, and review_required plus CLI validation for disabled review gate."
+      "summary": "Focused advisory-section regression tests passed after updating relia.yaml and the relia init template."
     }
   ],
   "final_validation_evidence": [
@@ -86,7 +79,9 @@
       "evidence_refs": [
         ".factory/artifacts/task-runs/T2/work-proof-marker.json",
         ".factory/artifacts/task-runs/T2/validation-report.json",
+        "relia.yaml",
         "schemas/relia-config.schema.json",
+        "schemas/memory-rule.schema.json",
         "cmd/relia/main_test.go",
         "docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md"
       ]
@@ -106,6 +101,7 @@
       "status": "implemented",
       "evidence_refs": [
         ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+        "relia.yaml",
         "schemas/relia-config.schema.json",
         "cmd/relia/main.go",
         "cmd/relia/main_test.go"
@@ -123,7 +119,7 @@
       "docs/architecture/architecture_guides.md",
       "docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md",
       "docs/dev/dev_guides.md",
-      "schemas/relia-config.schema.json",
+      "relia.yaml",
       ".factory/artifacts/task-runs/T2/work-proof-marker.json",
       ".factory/artifacts/task-runs/T2/validation-report.json"
     ],
@@ -134,31 +130,43 @@
   },
   "plan_drift_result": {
     "status": "pass",
-    "note": "Repair stayed within the T2 contracts-config-and-validation slice and addressed only actionable Codex review findings for config schema compatibility and mandatory human review gate validation. Runtime pins, provider posture, release boundaries, tracker state, commits, PRs, and scope closure were not changed."
+    "note": "Repair stayed within the T2 contracts-config-and-validation slice and addressed the actionable Codex review finding about documented advisory config compatibility. Runtime pins, provider posture, release boundaries, tracker state, commits, PRs, and scope closure were not changed."
   },
   "codex_review_repair_result": {
     "status": "implemented",
-    "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-5",
+    "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-7",
     "resolved_findings": [
       {
         "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448415052",
         "status": "implemented",
         "evidence_refs": [
-          "schemas/relia-config.schema.json",
-          "cmd/relia/main_test.go",
-          "README.md",
-          "docs/dev/dev_guides.md",
-          "docs/architecture/architecture_guides.md"
-        ]
-      },
-      {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448415053",
-        "status": "implemented",
-        "evidence_refs": [
+          "relia.yaml",
           "schemas/relia-config.schema.json",
           "cmd/relia/main.go",
           "cmd/relia/main_test.go",
+          "README.md",
+          "docs/dev/dev_guides.md",
+          "docs/architecture/architecture_guides.md",
           "docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md"
+        ]
+      }
+    ],
+    "contract_family_verified": [
+      {
+        "finding": "mandatory review gate",
+        "status": "implemented_on_current_branch",
+        "evidence_refs": [
+          "schemas/relia-config.schema.json",
+          "cmd/relia/main.go",
+          "cmd/relia/main_test.go"
+        ]
+      },
+      {
+        "finding": "memory rule PRD artifact shape",
+        "status": "implemented_on_current_branch",
+        "evidence_refs": [
+          "schemas/memory-rule.schema.json",
+          "cmd/relia/main_test.go"
         ]
       }
     ]
@@ -180,7 +188,7 @@
     "status": "pass",
     "schema_version": "1.0",
     "relia_version": "0.0.0-dev",
-    "migration_note": "Pre-1.0 MVP schema correction before public release; no schema_version or relia_version change was required."
+    "migration_note": "Pre-1.0 MVP config-template correction before public release; no schema_version or relia_version change was required."
   },
   "blockers": [],
   "residual_risks": [

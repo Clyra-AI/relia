@@ -46,6 +46,9 @@ The default config remains deterministic and offline:
 - `memory.share_scope: private`
 - `memory.org_eligible: false`
 - `serve.advisory_only: true`
+- `advise.enabled: false`
+- `badge.stale_after_days: 30`
+- `badge.stale_after_merged_prs: 20`
 
 Explicit `embeddings: local` fails closed with exit `8` until a later
 `model_artifact_pull` flow records the required artifact metadata. Non-private

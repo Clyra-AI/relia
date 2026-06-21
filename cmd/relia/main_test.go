@@ -190,7 +190,23 @@ func TestInitCreatesBaselineConfig(t *testing.T) {
 	if err != nil {
 		t.Fatalf("expected relia.yaml to be created: %v", err)
 	}
-	for _, token := range []string{"version: 1", `schema_version: "1.0"`, "embeddings: signature", "entropy_scan: true", "fail_closed: true", "commit_experiences: false", "share_scope: private", "org_eligible: false", "advisory_only: true"} {
+	for _, token := range []string{
+		"version: 1",
+		`schema_version: "1.0"`,
+		"embeddings: signature",
+		"entropy_scan: true",
+		"fail_closed: true",
+		"commit_experiences: false",
+		"share_scope: private",
+		"org_eligible: false",
+		"advisory_only: true",
+		"advise:",
+		"enabled: false",
+		"max_comments_per_pr: 1",
+		"badge:",
+		"stale_after_days: 30",
+		"stale_after_merged_prs: 20",
+	} {
 		if !bytes.Contains(content, []byte(token)) {
 			t.Fatalf("relia.yaml missing %q:\n%s", token, content)
 		}
@@ -587,6 +603,25 @@ func TestReliaConfigSchemaAllowsDocumentedAdvisorySections(t *testing.T) {
 		property := propertyForTest(t, properties, section)
 		if property["type"] != "object" {
 			t.Fatalf("%s type = %#v, want object", section, property["type"])
+		}
+	}
+}
+
+func TestDefaultConfigIncludesDocumentedAdvisorySections(t *testing.T) {
+	config := defaultConfigYAML()
+	for _, token := range []string{
+		"advise:",
+		"enabled: false",
+		"max_comments_per_pr: 1",
+		"update_in_place: true",
+		"reassess_debounce_minutes: 10",
+		"min_confidence: 0.6",
+		"badge:",
+		"stale_after_days: 30",
+		"stale_after_merged_prs: 20",
+	} {
+		if !strings.Contains(config, token) {
+			t.Fatalf("default config missing %q:\n%s", token, config)
 		}
 	}
 }

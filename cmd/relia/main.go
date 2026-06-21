@@ -998,6 +998,17 @@ memory:
 serve:
   advisory_only: true
 
+advise:
+  enabled: false
+  max_comments_per_pr: 1
+  update_in_place: true
+  reassess_debounce_minutes: 10
+  min_confidence: 0.6
+
+badge:
+  stale_after_days: 30
+  stale_after_merged_prs: 20
+
 gate:
   enabled: false
 

@@ -28,7 +28,8 @@ for local validation of config privacy defaults, schema contract presence, and
 artifact layout reporting. Those schemas follow the PRD outcome and
 failure-signature taxonomy and keep memory rules aligned to the durable
 `id`/`status`/`evidence`/`provenance` artifact shape. The config contract
-accepts documented advisory and badge settings, but the MVP review gate remains
+accepts documented advisory and badge settings, and the default config includes
+those sections with live PR advice disabled. The MVP review gate remains
 mandatory until a later approved delivery slice changes that posture. See
 [decision-0002-product-contracts-and-privacy-defaults.md](decision-0002-product-contracts-and-privacy-defaults.md).
 

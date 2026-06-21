@@ -11,25 +11,28 @@
     "docs/architecture/architecture_guides.md",
     "docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md",
     "docs/dev/dev_guides.md",
-    "schemas/relia-config.schema.json",
+    "relia.yaml",
     ".factory/artifacts/task-runs/T2/work-proof-marker.json",
     ".factory/artifacts/task-runs/T2/validation-report.json"
   ],
   "evidence_refs": [
     ".factory/artifacts/task-runs/T2/validation-report.json"
   ],
-  "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-5",
+  "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-7",
   "summary": {
     "implemented_contracts": [
-      "relia config schema accepts the PRD-documented top-level advise and badge sections while retaining a closed top-level contract",
-      "distill.review_required is locked to true in the config schema",
-      "relia check rejects disabled distill.review_required as a local configuration error",
-      "schema and CLI regression tests cover advisory sections, badge settings, and the mandatory review gate",
-      "README, dev guide, architecture guide, and T2 decision note document the repaired public config contract"
+      "relia init now generates the documented top-level advise and badge sections with offline-safe defaults",
+      "the checked-in relia.yaml carries the same documented advisory and badge settings",
+      "regression tests cover the default advisory sections so the executable config template stays aligned with the schema and PRD",
+      "README, dev guide, architecture guide, and T2 decision note document that advise is present but disabled by default"
+    ],
+    "contract_family_verified": [
+      "schemas/relia-config.schema.json already accepts top-level advise and badge while retaining additionalProperties: false",
+      "schemas/relia-config.schema.json keeps distill.review_required locked to true",
+      "schemas/memory-rule.schema.json uses the PRD durable rule fields id, status, evidence, and provenance"
     ],
     "resolved_review_findings": [
-      "allowed documented advisory config sections advise and badge in schemas/relia-config.schema.json",
-      "kept the MVP human-review gate required by rejecting distill.review_required: false in both schema and relia check validation"
+      "allowed documented advisory config sections are now present in schema, checked-in config, generated config, tests, and docs"
     ],
     "lifecycle_boundary": "task-executor repair only; commit, PR update, scope closure, validation-gate, and post-merge evidence are left to their required workers"
   }

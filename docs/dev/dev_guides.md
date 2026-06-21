@@ -134,7 +134,10 @@ when stdout is an interactive terminal and no machine-readable flag is present.
 
 T2 extends `relia check` beyond file presence. It validates the versioned
 `relia.yaml` privacy defaults, the schema contract files under `schemas/`, and
-the artifact layout contract surfaced in the command-result `data` object.
+the artifact layout contract surfaced in the command-result `data` object. The
+default config includes the documented `advise` and `badge` sections, with
+`advise.enabled: false` so bootstrap does not perform live PR advisory work by
+default.
 Unsafe redaction settings fail closed with exit `6`; non-private MVP sharing
 posture fails with exit `4`; explicit `embeddings: local` without a pulled
 artifact fails with exit `8`; disabled `distill.review_required` and unknown

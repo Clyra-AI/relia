@@ -38,9 +38,9 @@ The default `relia.yaml` is versioned with `schema_version: "1.0"`, keeps
 experience shards local by default (`commit_experiences: false`), keeps future
 organization sharing disabled (`share_scope: private`, `org_eligible: false`),
 uses deterministic `embeddings: signature`, and requires fail-closed redaction
-with entropy scanning. The config contract also accepts the documented
-`advise` and `badge` sections for the PR advisory loop while the MVP contract
-keeps `distill.review_required: true` mandatory.
+with entropy scanning. It includes the documented `advise` and `badge` sections
+for the PR advisory loop with `advise.enabled: false` by default, while the MVP
+contract keeps `distill.review_required: true` mandatory.
 
 Phase 0 artifact schemas live under `schemas/` for experience records, outcome
 evidence, failure signatures, memory rules, coverage maps, risk assessments,
