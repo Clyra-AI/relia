@@ -140,8 +140,9 @@ documented `advise` and `badge` sections, with `advise.enabled: false` so
 bootstrap does not perform live PR advisory work by default.
 Unsafe redaction settings fail closed with exit `6`; non-private MVP sharing
 posture also fails closed with exit `6`; explicit `embeddings: local` without a
-pulled artifact fails with exit `8`; `embeddings: provider` without a complete
-`model_provider_endpoint` grant fails with exit `8`; disabled
+pulled artifact fails with exit `8`; `distill.provider` or
+`embeddings: provider` without a complete `model_provider_endpoint` grant fails
+with exit `8`; disabled
 `distill.review_required` and unknown provider/config values fail with exit `2`;
 invalid memory-rule schema fields, provenance, experience citations, scope,
 scope paths that never existed, playbooks without held-outcome provenance,
@@ -201,11 +202,12 @@ not depend on a separate index being present.
   digest-mismatched, Relia must fail closed with exit `8` and clear remediation.
   It must not silently degrade to provider embeddings or unlabeled signature-only
   behavior.
-- `embeddings: provider` is a separate live provider capability. Provider
-  endpoint work must declare `provider`, `model`, `endpoint` or `base_url`,
-  `credential_env`, `budget_posture`, `redaction_posture`, and a non-empty
-  `allowlist` through a complete `model_provider_endpoint` grant. Generic
-  network or credential approval does not satisfy this gate.
+- Provider-backed LLM drafting (`distill.provider`) and `embeddings: provider`
+  are separate live provider paths. Provider endpoint work must declare
+  `provider`, `model`, `endpoint` or `base_url`, `credential_env`,
+  `budget_posture`, `redaction_posture`, and a non-empty `allowlist` through a
+  complete `model_provider_endpoint` grant. Generic network or credential
+  approval does not satisfy this gate.
 - Release binaries, containers, and tracked source must not include model weights
   or inference-runtime payloads unless a future distribution decision records
   license, size, security, cross-platform, update, and rollback evidence.

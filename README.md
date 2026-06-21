@@ -67,11 +67,12 @@ existing scoped paths, and an accepted review label before `relia check` reports
 success. Playbook rules must cite `merge_clean` or `fix_held` provenance.
 
 Provider-backed distill work requires a complete `model_provider_endpoint`
-grant in config before `embeddings: provider` is accepted: `provider`, `model`,
-`endpoint` or `base_url`, `credential_env`, `budget_posture`,
-`redaction_posture`, and non-empty `allowlist`. Local embedding artifact pulls
-require a separate `model_artifact_pull` grant. Generic network or credential
-approval does not satisfy either model-specific gate.
+grant in config before `distill.provider` or `embeddings: provider` is
+accepted: `provider`, `model`, `endpoint` or `base_url`, `credential_env`,
+`budget_posture`, `redaction_posture`, and non-empty `allowlist`. Local
+embedding artifact pulls require a separate `model_artifact_pull` grant.
+Generic network or credential approval does not satisfy either model-specific
+gate.
 
 ## Post-PRD audit or review findings
 

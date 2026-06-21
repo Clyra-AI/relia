@@ -4,16 +4,15 @@
   "task_id": "T2",
   "status": "implemented",
   "implementation_performed": true,
-  "produced_at": "2026-06-21T17:23:49Z",
-  "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-25",
+  "produced_at": "2026-06-21T17:32:54Z",
+  "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-26",
   "changed_paths": [
     "README.md",
     "cmd/relia/main.go",
     "cmd/relia/main_test.go",
-    "docs/architecture/architecture_guides.md",
     "docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md",
     "docs/dev/dev_guides.md",
-    "schemas/memory-rule.schema.json",
+    "schemas/relia-config.schema.json",
     ".factory/artifacts/task-runs/T2/work-proof-marker.json",
     ".factory/artifacts/task-runs/T2/validation-report.json"
   ],
@@ -21,29 +20,28 @@
     ".factory/artifacts/task-runs/T2/validation-report.json"
   ],
   "summary": {
-    "repair_iteration_note": "Repair-25 resolves the latest actionable Codex review findings for memory-rule playbook held evidence and typo-guarded scope paths. The older canonical experience outcome terminal finding was inspected and was already satisfied in the current head.",
+    "repair_iteration_note": "Repair-26 resolves the latest actionable Codex review batch. Provider-backed LLM drafting now requires the same complete model_provider_endpoint grant as provider embeddings; the playbook held-outcome and typo-guarded scope-path findings were inspected across the contract family and are already enforced in the current head.",
     "implemented_contracts": [
-      "relia check now rejects playbook memory rules unless provenance includes merge_clean or fix_held.",
-      "relia check now rejects scope.paths entries that cannot be found in the current tree or local Git history.",
-      "schemas/memory-rule.schema.json carries a playbook conditional requiring held-outcome provenance.",
-      "cmd/relia/main_test.go includes red/green regression coverage for playbook held evidence, typoed scope paths, and the aligned schema contract.",
-      "README.md, docs/dev/dev_guides.md, docs/architecture/architecture_guides.md, and docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md document the repaired rule-validation contract."
+      "relia check now rejects distill.provider with embeddings: signature unless the config includes provider, model, endpoint or base_url, credential_env, budget_posture, redaction_posture, and a non-empty allowlist.",
+      "schemas/relia-config.schema.json now carries conditional provider-grant requirements for both distill.provider and embeddings: provider.",
+      "cmd/relia/main_test.go includes red/green regression coverage for provider-backed LLM drafting without and with a complete grant.",
+      "README.md, docs/dev/dev_guides.md, and docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md document the repaired provider-grant contract."
     ],
     "resolved_review_findings": [
       {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448776932",
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448791057",
         "status": "implemented",
-        "summary": "Playbook rules must cite at least one held outcome, merge_clean or fix_held, before relia check reports success."
+        "summary": "Provider-backed LLM drafting with signature embeddings now fails closed with exit 8 until the model_provider_endpoint grant is complete."
+      },
+      {
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448776932",
+        "status": "already_satisfied",
+        "summary": "Current head already rejects playbook rules unless provenance includes merge_clean or fix_held."
       },
       {
         "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448776933",
-        "status": "implemented",
-        "summary": "Rule scope.paths are now checked against existing paths and local Git history so typoed scopes fail with exit 4."
-      },
-      {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448765891",
         "status": "already_satisfied",
-        "summary": "schemas/experience-record.schema.json already requires the PRD canonical outcome.terminal field in the current head."
+        "summary": "Current head already rejects scope.paths entries that cannot be found in the current tree or local Git history."
       }
     ],
     "lifecycle_boundary": "task-executor repair only; commit, PR update, scope closure, validation-gate, and post-merge evidence are left to their required workers"

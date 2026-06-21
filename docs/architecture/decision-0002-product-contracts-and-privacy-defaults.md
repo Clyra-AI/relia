@@ -71,13 +71,14 @@ The default config remains deterministic and offline:
 
 Explicit `embeddings: local` fails closed with exit `8` until a later
 `model_artifact_pull` flow records the required artifact metadata.
-`embeddings: provider` fails closed with exit `8` unless the config carries a
-complete `model_provider_endpoint` grant: `provider`, `model`, `endpoint` or
-`base_url`, `credential_env`, `budget_posture`, `redaction_posture`, and a
-non-empty `allowlist`. Non-private MVP sharing posture fails with exit `6`;
-unsafe redaction config fails with exit `6`; invalid config/provider values fail
-with exit `2`; malformed memory rules and active rules with missing or
-non-accepted review labels fail with exit `4`.
+Provider-backed LLM drafting (`distill.provider`) and `embeddings: provider`
+fail closed with exit `8` unless the config carries a complete
+`model_provider_endpoint` grant: `provider`, `model`, `endpoint` or `base_url`,
+`credential_env`, `budget_posture`, `redaction_posture`, and a non-empty
+`allowlist`. Non-private MVP sharing posture fails with exit `6`; unsafe
+redaction config fails with exit `6`; invalid config/provider values fail with
+exit `2`; malformed memory rules and active rules with missing or non-accepted
+review labels fail with exit `4`.
 
 ## Consequences
 

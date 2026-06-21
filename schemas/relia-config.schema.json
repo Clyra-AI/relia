@@ -5,6 +5,47 @@
   "type": "object",
   "additionalProperties": false,
   "required": ["version", "schema_version", "repo", "attribution", "outcomes", "redaction", "distill", "memory", "serve", "gate", "metadata"],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "distill": {
+            "type": "object",
+            "required": ["provider"]
+          }
+        },
+        "required": ["distill"]
+      },
+      "then": {
+        "properties": {
+          "distill": {
+            "required": ["provider", "model", "credential_env", "budget_posture", "redaction_posture", "allowlist"],
+            "anyOf": [{"required": ["endpoint"]}, {"required": ["base_url"]}]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "distill": {
+            "type": "object",
+            "properties": {"embeddings": {"const": "provider"}},
+            "required": ["embeddings"]
+          }
+        },
+        "required": ["distill"]
+      },
+      "then": {
+        "properties": {
+          "distill": {
+            "required": ["provider", "model", "credential_env", "budget_posture", "redaction_posture", "allowlist"],
+            "anyOf": [{"required": ["endpoint"]}, {"required": ["base_url"]}]
+          }
+        }
+      }
+    }
+  ],
   "x-relia_error_mapping": {
     "invalid_input": 2,
     "artifact_validation": 4,

@@ -694,9 +694,9 @@ func loadAndValidateConfig(root string) (reliaConfigSummary, []Finding, *Command
 	if embeddings == "provider" && provider == "" {
 		return summary, nil, providerDependencyError("provider embeddings require distill.provider and a complete model_provider_endpoint grant")
 	}
-	if embeddings == "provider" {
+	if provider != "" {
 		if missing := missingProviderEndpointGrantFields(parsed); len(missing) > 0 {
-			return summary, nil, providerDependencyError("provider embeddings require a complete model_provider_endpoint grant; missing " + strings.Join(missing, ", "))
+			return summary, nil, providerDependencyError("provider-backed distill work requires a complete model_provider_endpoint grant; missing " + strings.Join(missing, ", "))
 		}
 	}
 	reviewRequired, ok := parsed.boolScalar("distill.review_required")

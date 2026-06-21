@@ -740,6 +740,25 @@ func TestCheckRejectsProviderEmbeddingsWithoutCompleteEndpointGrant(t *testing.T
 	}
 }
 
+func TestCheckRejectsLLMDraftingProviderWithoutCompleteEndpointGrant(t *testing.T) {
+	config := strings.Replace(defaultConfigYAML(), "embeddings: signature", "provider: anthropic\n  embeddings: signature", 1)
+	repo := writeMinimalRepoForFullCheck(t, config)
+	t.Chdir(repo)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitDependency {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "dependency_error" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+	if !strings.Contains(result.Errors[0].Message, "model_provider_endpoint") {
+		t.Fatalf("error message = %q, want model_provider_endpoint", result.Errors[0].Message)
+	}
+}
+
 func TestCheckAcceptsProviderEmbeddingsWithCompleteEndpointGrant(t *testing.T) {
 	config := strings.Replace(defaultConfigYAML(), "embeddings: signature", `provider: anthropic
   model: claude-fable-5
@@ -750,6 +769,33 @@ func TestCheckAcceptsProviderEmbeddingsWithCompleteEndpointGrant(t *testing.T) {
   allowlist:
     - api.anthropic.example
   embeddings: provider`, 1)
+	repo := writeMinimalRepoForFullCheck(t, config)
+	t.Chdir(repo)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Status != "pass" {
+		t.Fatalf("status = %q", result.Status)
+	}
+	if len(result.Warnings) == 0 || result.Warnings[0].Type != "provider_path_configured" {
+		t.Fatalf("warnings = %#v, want provider_path_configured", result.Warnings)
+	}
+}
+
+func TestCheckAcceptsLLMDraftingProviderWithCompleteEndpointGrant(t *testing.T) {
+	config := strings.Replace(defaultConfigYAML(), "embeddings: signature", `provider: anthropic
+  model: claude-fable-5
+  base_url: https://api.anthropic.example
+  credential_env: ANTHROPIC_API_KEY
+  budget_posture: max_usd_per_run_2
+  redaction_posture: redacted_records_only
+  allowlist:
+    - api.anthropic.example
+  embeddings: signature`, 1)
 	repo := writeMinimalRepoForFullCheck(t, config)
 	t.Chdir(repo)
 
@@ -1076,6 +1122,49 @@ func TestReliaConfigSchemaDefinesProviderEndpointGrantFields(t *testing.T) {
 	allowlist := propertyForTest(t, distillProperties, "allowlist")
 	if allowlist["type"] != "array" || allowlist["minItems"] != float64(1) {
 		t.Fatalf("distill.allowlist = %#v, want non-empty array", allowlist)
+	}
+}
+
+func TestReliaConfigSchemaRequiresEndpointGrantForProviderUse(t *testing.T) {
+	root := findRepoRootForTest(t)
+	schema := readSchemaForTest(t, root, "schemas/relia-config.schema.json")
+	allOf, ok := schema["allOf"].([]any)
+	if !ok {
+		t.Fatal("relia-config allOf missing")
+	}
+
+	providerClauseFound := false
+	providerEmbeddingsClauseFound := false
+	for index, rawClause := range allOf {
+		clause, ok := rawClause.(map[string]any)
+		if !ok {
+			continue
+		}
+		ifClause, ok := clause["if"].(map[string]any)
+		if !ok {
+			continue
+		}
+		ifProperties := schemaPropertiesForTest(t, "relia_config.allOf.if", ifClause)
+		distill, ok := ifProperties["distill"].(map[string]any)
+		if !ok {
+			continue
+		}
+		distillRequired, _ := distill["required"].([]any)
+		distillProperties, _ := distill["properties"].(map[string]any)
+		if containsStringValue(distillRequired, "provider") {
+			assertProviderGrantThenForTest(t, clause, index)
+			providerClauseFound = true
+		}
+		if embeddings, ok := distillProperties["embeddings"].(map[string]any); ok && embeddings["const"] == "provider" {
+			assertProviderGrantThenForTest(t, clause, index)
+			providerEmbeddingsClauseFound = true
+		}
+	}
+	if !providerClauseFound {
+		t.Fatal("relia-config schema does not require provider grant when distill.provider is set")
+	}
+	if !providerEmbeddingsClauseFound {
+		t.Fatal("relia-config schema does not require provider grant for provider embeddings")
 	}
 }
 
@@ -1555,6 +1644,43 @@ func enumForTest(t *testing.T, name string, property map[string]any) []any {
 	return values
 }
 
+func assertProviderGrantThenForTest(t *testing.T, clause map[string]any, index int) {
+	t.Helper()
+	thenClause, ok := clause["then"].(map[string]any)
+	if !ok {
+		t.Fatalf("relia-config allOf[%d] then missing", index)
+	}
+	thenProperties := schemaPropertiesForTest(t, "relia_config.allOf.then", thenClause)
+	distill := propertyForTest(t, thenProperties, "distill")
+	required, ok := distill["required"].([]any)
+	if !ok {
+		t.Fatalf("relia-config allOf[%d] distill required missing", index)
+	}
+	for _, want := range []string{"provider", "model", "credential_env", "budget_posture", "redaction_posture", "allowlist"} {
+		if !containsStringValue(required, want) {
+			t.Fatalf("relia-config allOf[%d] distill required = %#v, want %s", index, required, want)
+		}
+	}
+	anyOf, ok := distill["anyOf"].([]any)
+	if !ok {
+		t.Fatalf("relia-config allOf[%d] distill endpoint/base_url anyOf missing", index)
+	}
+	endpointFound := false
+	baseURLFound := false
+	for _, rawOption := range anyOf {
+		option, ok := rawOption.(map[string]any)
+		if !ok {
+			continue
+		}
+		optionRequired, _ := option["required"].([]any)
+		endpointFound = endpointFound || containsStringValue(optionRequired, "endpoint")
+		baseURLFound = baseURLFound || containsStringValue(optionRequired, "base_url")
+	}
+	if !endpointFound || !baseURLFound {
+		t.Fatalf("relia-config allOf[%d] anyOf = %#v, want endpoint or base_url", index, anyOf)
+	}
+}
+
 func findRepoRootForTest(t *testing.T) string {
 	t.Helper()
 
@@ -1725,6 +1851,12 @@ redaction:
 distill:
   provider: anthropic
   model: claude-fable-5
+  base_url: https://api.anthropic.example
+  credential_env: ANTHROPIC_API_KEY
+  budget_posture: max_usd_per_run_2
+  redaction_posture: redacted_records_only
+  allowlist:
+    - api.anthropic.example
   max_cost_usd_per_run: 2.00
   min_evidence_count: 2
   embeddings: signature
