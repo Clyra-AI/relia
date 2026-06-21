@@ -3,8 +3,12 @@
   "schema_version": "1.0",
   "task_id": "T2",
   "status": "pass",
+  "produced_at": "2026-06-21T15:59:38Z",
   "commands_run": [
-    "gofmt -w cmd/relia/main_test.go",
+    "make lint-fast",
+    "make test-fast",
+    "red-first temporary binary check for missing metadata and memory.org_eligible true",
+    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
     "make test-fast",
     "make prepush-full",
     "python3 -m json.tool .factory/artifacts/task-runs/T2/work-proof-marker.json",
@@ -12,29 +16,38 @@
   ],
   "baseline_evidence": [
     {
-      "command": "make test-fast",
+      "command": "make lint-fast",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Fast Go tests passed after the repair change."
-    }
-  ],
-  "red_evidence": [],
-  "test_first_skipped_reason": {
-    "status": "not_applicable",
-    "reason": "This was Codex review repair on an already-reviewed branch. The actionable review output supplied the failing behavior: schema-valid canonical experience records could not carry attribution.agent_authored, so ERR denominator eligibility could not be represented. The repair added the schema contract and focused contract assertions in the same pass."
-  },
-  "green_evidence": [
-    {
-      "command": "gofmt -w cmd/relia/main_test.go",
-      "status": "pass",
-      "exit_code": 0,
-      "summary": "Go test file formatting completed."
+      "summary": "Baseline lint-fast passed before repair edits."
     },
     {
       "command": "make test-fast",
       "status": "pass",
       "exit_code": 0,
-      "summary": "go test ./... -count=1 passed for github.com/Clyra-AI/relia/cmd/relia."
+      "summary": "Baseline go test ./... -count=1 passed before repair edits."
+    }
+  ],
+  "red_evidence": [
+    {
+      "command": "red-first temporary binary check for missing metadata and memory.org_eligible true",
+      "status": "captured",
+      "exit_code": 0,
+      "summary": "Pre-repair behavior reproduced both findings: relia check passed with relia.yaml metadata removed (missing_metadata_exit=0), and memory.org_eligible: true returned exit 4 with redaction_status not_applicable instead of the fail-closed exit 6 path."
+    }
+  ],
+  "green_evidence": [
+    {
+      "command": "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "Go sources were formatted after repair edits."
+    },
+    {
+      "command": "make test-fast",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "Fast Go tests passed after adding regression coverage for the review findings."
     }
   ],
   "final_validation_evidence": [
@@ -42,7 +55,7 @@
       "command": "make prepush-full",
       "status": "pass",
       "exit_code": 0,
-      "summary": "lint-fast, test-fast, test-coverage, and test-contracts passed; coverage was 79.3% against the 75.0% threshold; repo pack reported ok."
+      "summary": "lint-fast, test-fast, test-coverage, and test-contracts passed; coverage was 77.7% against the 75.0% threshold; repo pack reported ok."
     },
     {
       "command": "python3 -m json.tool .factory/artifacts/task-runs/T2/work-proof-marker.json",
@@ -74,10 +87,10 @@
       "evidence_refs": [
         ".factory/artifacts/task-runs/T2/work-proof-marker.json",
         ".factory/artifacts/task-runs/T2/validation-report.json",
-        "schemas/experience-record.schema.json",
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
         "schemas/relia-config.schema.json",
-        "schemas/recurrence-report.schema.json",
-        "docs/product/prd.md"
+        "schemas/command-result.schema.json"
       ]
     },
     {
@@ -86,8 +99,9 @@
       "evidence_refs": [
         ".factory/artifacts/task-runs/T2/work-proof-marker.json",
         ".factory/artifacts/task-runs/T2/validation-report.json",
-        "schemas/experience-record.schema.json",
-        "docs/product/prd.md"
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        "relia.yaml"
       ]
     },
     {
@@ -96,8 +110,9 @@
       "evidence_refs": [
         ".factory/artifacts/task-runs/T2/work-proof-marker.json",
         ".factory/artifacts/task-runs/T2/validation-report.json",
+        "cmd/relia/main.go",
         "cmd/relia/main_test.go",
-        "schemas/experience-record.schema.json"
+        "schemas/command-result.schema.json"
       ]
     }
   ],
@@ -106,8 +121,8 @@
     "changed_paths_within_allowed_paths": true,
     "forbidden_paths_changed_in_worker_diff": false,
     "checked_changed_paths": [
+      "cmd/relia/main.go",
       "cmd/relia/main_test.go",
-      "schemas/experience-record.schema.json",
       ".factory/artifacts/task-runs/T2/work-proof-marker.json",
       ".factory/artifacts/task-runs/T2/validation-report.json"
     ],
@@ -118,33 +133,34 @@
   },
   "plan_drift_result": {
     "status": "pass",
-    "note": "Repair stayed within the T2 contracts-config-and-validation slice. Runtime pins, provider posture, release boundaries, tracker state, commits, PRs, and scope closure were not changed."
+    "note": "Repair stayed within the T2 contracts-config-and-validation slice. Runtime pins, dependency policy, provider posture, release boundaries, tracker state, commits, PRs, and scope closure were not changed."
   },
   "codex_review_repair_result": {
     "status": "implemented",
-    "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-10",
+    "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-12",
     "resolved_findings": [
       {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448438296",
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448446323",
         "status": "implemented",
         "evidence_refs": [
-          "schemas/experience-record.schema.json",
+          "cmd/relia/main.go",
           "cmd/relia/main_test.go",
           "docs/product/prd.md"
         ]
       },
       {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448432007",
-        "status": "already_implemented_on_current_branch",
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448671703",
+        "status": "implemented",
         "evidence_refs": [
           "cmd/relia/main.go",
           "cmd/relia/main_test.go",
-          "schemas/command-result.schema.json"
+          "schemas/relia-config.schema.json",
+          "relia.yaml"
         ]
       },
       {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448432011",
-        "status": "already_implemented_on_current_branch",
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448671706",
+        "status": "implemented",
         "evidence_refs": [
           "cmd/relia/main.go",
           "cmd/relia/main_test.go",
@@ -156,24 +172,26 @@
     "contract_family_verified": [
       "docs/product/prd.md",
       "docs/dev/dev_guides.md",
-      "schemas/experience-record.schema.json",
-      "schemas/outcome-evidence.schema.json",
-      "schemas/recurrence-report.schema.json",
-      "schemas/command-result.schema.json",
+      "docs/architecture/architecture_guides.md",
       "schemas/relia-config.schema.json",
+      "schemas/experience-record.schema.json",
+      "schemas/command-result.schema.json",
       "examples/command-results/exit-code-examples.json",
+      "relia.yaml",
       "cmd/relia/main.go",
-      "cmd/relia/main_test.go"
+      "cmd/relia/main_test.go",
+      ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+      ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json"
     ]
   },
   "docs_sync_result": {
     "status": "pass",
     "updated_refs": [],
-    "note": "No documentation edit was needed for this repair because docs/product/prd.md already shows attribution.agent_authored in the canonical experience example and defines ERR over agent-attributed outcomes."
+    "note": "No docs edit was needed for this repair because the PRD and dev guide already define commit_experiences opt-in behavior, versioned config/schema validation, and fail-closed non-default sharing posture."
   },
   "changelog_result": {
     "status": "not_applicable",
-    "reason": "No changelog file exists in the allowed repo surface for this repair; the schema contract evidence is recorded in the task-run artifacts."
+    "reason": "No changelog file exists in the allowed repo surface for this repair; the repair evidence is recorded in task-run artifacts."
   },
   "versioning_result": {
     "status": "pass",

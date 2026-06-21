@@ -4,38 +4,39 @@
   "task_id": "T2",
   "status": "implemented",
   "implementation_performed": true,
+  "produced_at": "2026-06-21T15:59:38Z",
   "changed_paths": [
+    "cmd/relia/main.go",
     "cmd/relia/main_test.go",
-    "schemas/experience-record.schema.json",
     ".factory/artifacts/task-runs/T2/work-proof-marker.json",
     ".factory/artifacts/task-runs/T2/validation-report.json"
   ],
   "evidence_refs": [
     ".factory/artifacts/task-runs/T2/validation-report.json"
   ],
-  "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-10",
+  "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-12",
   "summary": {
     "implemented_contracts": [
-      "experience attribution records now require agent_authored so ERR denominator eligibility is explicit",
-      "experience attribution records now allow an optional tool label while preserving additionalProperties false",
-      "focused schema tests assert agent_authored is required and boolean",
-      "pre-existing redaction/share-safety repair was verified by fast and full validation"
+      "relia init now syncs the generated .relia/.gitignore experience-shard rule with memory.commit_experiences and removes the managed /experiences/ rule when users opt in to committing shards",
+      "relia check now validates relia.yaml against schemas/relia-config.schema.json for the schema subset used by the checked-in config contract",
+      "memory.org_eligible: true now fails closed through redaction_safety_failed with exit 6 and redaction_status failed_closed",
+      "focused regression tests cover schema-required top-level config sections, org-sharing fail-closed behavior, and init reruns after commit_experiences is enabled"
     ],
     "resolved_review_findings": [
       {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448438296",
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448446323",
         "status": "implemented",
-        "summary": "schemas/experience-record.schema.json now accepts and requires attribution.agent_authored for agent-attributed ERR filtering"
+        "summary": "Existing relia.yaml configs now remove the generated .relia/.gitignore /experiences/ rule when memory.commit_experiences is true."
       },
       {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448432007",
-        "status": "already_implemented_on_current_branch",
-        "summary": "redaction safety errors already produce redaction_status failed_closed in structured output"
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448671703",
+        "status": "implemented",
+        "summary": "loadAndValidateConfig now applies schemas/relia-config.schema.json to relia.yaml and rejects missing schema-required sections such as metadata, attribution, and outcomes."
       },
       {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448432011",
-        "status": "already_implemented_on_current_branch",
-        "summary": "memory.share_scope values other than private already return exit 6 with fail-closed structured output"
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448671706",
+        "status": "implemented",
+        "summary": "memory.org_eligible now uses the same fail-closed redaction/share-safety error path as non-private share_scope."
       }
     ],
     "lifecycle_boundary": "task-executor repair only; commit, PR update, scope closure, validation-gate, and post-merge evidence are left to their required workers"

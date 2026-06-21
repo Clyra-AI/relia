@@ -7,6 +7,8 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -259,10 +261,8 @@ func initResult(args []string, start time.Time) CommandResult {
 		if err := ensureArtifactSkeleton(root); err != nil {
 			return errorResult("init", "init", internalError("could not create artifact skeleton", err), start)
 		}
-		if shouldIgnoreExperienceShards(root) {
-			if err := ensureExperienceGitignore(root); err != nil {
-				return errorResult("init", "init", internalError("could not create experience cache ignore rule", err), start)
-			}
+		if err := syncExperienceGitignore(root); err != nil {
+			return errorResult("init", "init", internalError("could not sync experience cache ignore rule", err), start)
 		}
 		result := passResult("init", "init", "relia.yaml already exists", start, map[string]any{
 			"config_path":   defaultConfigFile,
@@ -281,8 +281,8 @@ func initResult(args []string, start time.Time) CommandResult {
 	if err := ensureArtifactSkeleton(root); err != nil {
 		return errorResult("init", "init", internalError("could not create artifact skeleton", err), start)
 	}
-	if err := ensureExperienceGitignore(root); err != nil {
-		return errorResult("init", "init", internalError("could not create experience cache ignore rule", err), start)
+	if err := syncExperienceGitignore(root); err != nil {
+		return errorResult("init", "init", internalError("could not sync experience cache ignore rule", err), start)
 	}
 	result := passResult("init", "init", "created relia.yaml", start, map[string]any{
 		"config_path":   defaultConfigFile,
@@ -496,8 +496,11 @@ func internalError(message string, err error) *CommandError {
 }
 
 type parsedYAML struct {
-	scalars map[string]string
-	lists   map[string][]string
+	scalars  map[string]string
+	lists    map[string][]string
+	objects  map[string]struct{}
+	keys     map[string]struct{}
+	children map[string]map[string]struct{}
 }
 
 type reliaConfigSummary struct {
@@ -535,6 +538,13 @@ func ensureArtifactSkeleton(root string) error {
 	return nil
 }
 
+func syncExperienceGitignore(root string) error {
+	if shouldIgnoreExperienceShards(root) {
+		return ensureExperienceGitignore(root)
+	}
+	return removeExperienceGitignore(root)
+}
+
 func ensureExperienceGitignore(root string) error {
 	path := filepath.Join(root, defaultArtifactRoot, ".gitignore")
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
@@ -559,6 +569,40 @@ func ensureExperienceGitignore(root string) error {
 	}
 	_, err = file.WriteString(experienceGitignore)
 	return err
+}
+
+func removeExperienceGitignore(root string) error {
+	path := filepath.Join(root, defaultArtifactRoot, ".gitignore")
+	content, err := os.ReadFile(path)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+
+	existing := string(content)
+	updated := strings.ReplaceAll(existing, experienceGitignore, "")
+	if updated == existing {
+		lines := strings.Split(existing, "\n")
+		kept := make([]string, 0, len(lines))
+		for index := 0; index < len(lines); index++ {
+			if lines[index] == "# Relia experience shards are reproducible local caches by default." &&
+				index+1 < len(lines) && lines[index+1] == "/experiences/" {
+				index++
+				continue
+			}
+			kept = append(kept, lines[index])
+		}
+		updated = strings.Join(kept, "\n")
+	}
+	if strings.TrimSpace(updated) == "" {
+		return os.Remove(path)
+	}
+	if !strings.HasSuffix(updated, "\n") {
+		updated += "\n"
+	}
+	return os.WriteFile(path, []byte(updated), 0o644)
 }
 
 func shouldIgnoreExperienceShards(root string) bool {
@@ -665,7 +709,7 @@ func loadAndValidateConfig(root string) (reliaConfigSummary, []Finding, *Command
 		return summary, nil, configError("memory.org_eligible must be declared")
 	}
 	if orgEligible {
-		return summary, nil, artifactValidationError("memory.org_eligible must remain false in the MVP", defaultConfigFile)
+		return summary, nil, redactionSafetyError("memory.org_eligible must remain false in the MVP")
 	}
 	advisoryOnly, ok := parsed.boolScalar("serve.advisory_only")
 	if !ok {
@@ -700,6 +744,9 @@ func loadAndValidateConfig(root string) (reliaConfigSummary, []Finding, *Command
 			Message: "distill provider use must send only redacted records after an approved model_provider_endpoint gate",
 			Ref:     "docs/architecture/architecture_guides.md#trust-mode-posture",
 		})
+	}
+	if err := validateConfigAgainstSchema(root, parsed); err != nil {
+		return summary, nil, err
 	}
 
 	return reliaConfigSummary{
@@ -755,10 +802,213 @@ func validateSchemaContracts(root string) ([]string, *CommandError) {
 	return schemas, nil
 }
 
+func validateConfigAgainstSchema(root string, parsed parsedYAML) *CommandError {
+	const rel = "schemas/relia-config.schema.json"
+	content, err := os.ReadFile(filepath.Join(root, rel))
+	if err != nil {
+		return artifactValidationError("required config schema contract is missing: "+rel, rel)
+	}
+	var schema map[string]any
+	if err := json.Unmarshal(content, &schema); err != nil {
+		return artifactValidationError("config schema contract is not valid JSON: "+err.Error(), rel)
+	}
+	if issue := validateYAMLPathAgainstSchema(parsed, "", schema); issue != nil {
+		return configError("relia.yaml schema validation failed: " + issue.Error())
+	}
+	return nil
+}
+
+type schemaValidationIssue struct {
+	path    string
+	message string
+}
+
+func (issue schemaValidationIssue) Error() string {
+	if issue.path == "" {
+		return issue.message
+	}
+	return issue.path + " " + issue.message
+}
+
+func validateYAMLPathAgainstSchema(parsed parsedYAML, path string, schema map[string]any) *schemaValidationIssue {
+	if path != "" && !parsed.pathExists(path) {
+		return nil
+	}
+	if wantType, ok := schema["type"].(string); ok {
+		if issue := validateYAMLType(parsed, path, wantType); issue != nil {
+			return issue
+		}
+	}
+	if wantConst, ok := schema["const"]; ok {
+		if !parsed.scalarMatches(path, wantConst) {
+			return &schemaValidationIssue{path: path, message: "must equal " + schemaValueForMessage(wantConst)}
+		}
+	}
+	if enumValues, ok := schema["enum"].([]any); ok {
+		matched := false
+		for _, enumValue := range enumValues {
+			if parsed.scalarMatches(path, enumValue) {
+				matched = true
+				break
+			}
+		}
+		if !matched {
+			return &schemaValidationIssue{path: path, message: "must be one of " + schemaValueForMessage(enumValues)}
+		}
+	}
+	if minLength, ok := schema["minLength"].(float64); ok {
+		value, ok := parsed.scalars[path]
+		if !ok || len(value) < int(minLength) {
+			return &schemaValidationIssue{path: path, message: "must have length at least " + strconv.Itoa(int(minLength))}
+		}
+	}
+	if minItems, ok := schema["minItems"].(float64); ok {
+		values, ok := parsed.lists[path]
+		if !ok || len(values) < int(minItems) {
+			return &schemaValidationIssue{path: path, message: "must have at least " + strconv.Itoa(int(minItems)) + " items"}
+		}
+	}
+	if itemsSchema, ok := schema["items"].(map[string]any); ok {
+		if issue := validateYAMLArrayItems(parsed, path, itemsSchema); issue != nil {
+			return issue
+		}
+	}
+	if schema["type"] == "object" || len(schemaObjectProperties(schema)) > 0 {
+		return validateYAMLObjectAgainstSchema(parsed, path, schema)
+	}
+	return nil
+}
+
+func validateYAMLType(parsed parsedYAML, path string, wantType string) *schemaValidationIssue {
+	switch wantType {
+	case "object":
+		if !parsed.isObject(path) {
+			return &schemaValidationIssue{path: path, message: "must be an object"}
+		}
+	case "array":
+		if _, ok := parsed.lists[path]; !ok {
+			return &schemaValidationIssue{path: path, message: "must be an array"}
+		}
+	case "string":
+		if _, ok := parsed.scalars[path]; !ok {
+			return &schemaValidationIssue{path: path, message: "must be a string"}
+		}
+	case "boolean":
+		if _, ok := parsed.boolScalar(path); !ok {
+			return &schemaValidationIssue{path: path, message: "must be a boolean"}
+		}
+	case "integer":
+		value, ok := parsed.scalars[path]
+		if !ok {
+			return &schemaValidationIssue{path: path, message: "must be an integer"}
+		}
+		if _, err := strconv.Atoi(value); err != nil {
+			return &schemaValidationIssue{path: path, message: "must be an integer"}
+		}
+	case "number":
+		value, ok := parsed.scalars[path]
+		if !ok {
+			return &schemaValidationIssue{path: path, message: "must be a number"}
+		}
+		if _, err := strconv.ParseFloat(value, 64); err != nil {
+			return &schemaValidationIssue{path: path, message: "must be a number"}
+		}
+	}
+	return nil
+}
+
+func validateYAMLArrayItems(parsed parsedYAML, path string, itemsSchema map[string]any) *schemaValidationIssue {
+	values, ok := parsed.lists[path]
+	if !ok {
+		return nil
+	}
+	itemType, _ := itemsSchema["type"].(string)
+	minLength, hasMinLength := itemsSchema["minLength"].(float64)
+	for index, value := range values {
+		itemPath := path + "[" + strconv.Itoa(index) + "]"
+		if itemType == "string" && value == "" {
+			return &schemaValidationIssue{path: itemPath, message: "must be a string"}
+		}
+		if hasMinLength && len(value) < int(minLength) {
+			return &schemaValidationIssue{path: itemPath, message: "must have length at least " + strconv.Itoa(int(minLength))}
+		}
+	}
+	return nil
+}
+
+func validateYAMLObjectAgainstSchema(parsed parsedYAML, path string, schema map[string]any) *schemaValidationIssue {
+	properties := schemaObjectProperties(schema)
+	if required, ok := schema["required"].([]any); ok {
+		for _, rawName := range required {
+			name, ok := rawName.(string)
+			if !ok {
+				continue
+			}
+			childPath := joinYAMLPath(path, name)
+			if !parsed.pathExists(childPath) {
+				return &schemaValidationIssue{path: childPath, message: "is required"}
+			}
+		}
+	}
+	if allowAdditional, ok := schema["additionalProperties"].(bool); ok && !allowAdditional {
+		childKeys := parsed.childKeys(path)
+		for _, childKey := range childKeys {
+			if _, ok := properties[childKey]; !ok {
+				return &schemaValidationIssue{path: joinYAMLPath(path, childKey), message: "is not allowed by the schema"}
+			}
+		}
+	}
+	propertyNames := make([]string, 0, len(properties))
+	for name := range properties {
+		propertyNames = append(propertyNames, name)
+	}
+	sort.Strings(propertyNames)
+	for _, name := range propertyNames {
+		childPath := joinYAMLPath(path, name)
+		if !parsed.pathExists(childPath) {
+			continue
+		}
+		childSchema, ok := properties[name].(map[string]any)
+		if !ok {
+			continue
+		}
+		if issue := validateYAMLPathAgainstSchema(parsed, childPath, childSchema); issue != nil {
+			return issue
+		}
+	}
+	return nil
+}
+
+func schemaObjectProperties(schema map[string]any) map[string]any {
+	properties, ok := schema["properties"].(map[string]any)
+	if !ok {
+		return map[string]any{}
+	}
+	return properties
+}
+
+func joinYAMLPath(parent string, child string) string {
+	if parent == "" {
+		return child
+	}
+	return parent + "." + child
+}
+
+func schemaValueForMessage(value any) string {
+	encoded, err := json.Marshal(value)
+	if err != nil {
+		return fmt.Sprint(value)
+	}
+	return string(encoded)
+}
+
 func parseBaselineYAML(content string) (parsedYAML, error) {
 	parsed := parsedYAML{
-		scalars: map[string]string{},
-		lists:   map[string][]string{},
+		scalars:  map[string]string{},
+		lists:    map[string][]string{},
+		objects:  map[string]struct{}{},
+		keys:     map[string]struct{}{},
+		children: map[string]map[string]struct{}{},
 	}
 	var section string
 	var listPath string
@@ -776,6 +1026,7 @@ func parseBaselineYAML(content string) (parsedYAML, error) {
 			if listPath == "" {
 				return parsed, fmt.Errorf("line %d: list item has no parent key", lineNumber+1)
 			}
+			delete(parsed.objects, listPath)
 			parsed.lists[listPath] = append(parsed.lists[listPath], cleanYAMLScalar(strings.TrimSpace(strings.TrimPrefix(trimmed, "- "))))
 			continue
 		}
@@ -792,16 +1043,28 @@ func parseBaselineYAML(content string) (parsedYAML, error) {
 		switch {
 		case indent == 0:
 			section = key
+			parsed.keys[key] = struct{}{}
 			if value != "" {
-				parsed.scalars[key] = value
+				if value == "[]" {
+					parsed.lists[key] = []string{}
+				} else {
+					parsed.scalars[key] = value
+				}
+			} else {
+				parsed.objects[key] = struct{}{}
 			}
 		case indent == 2 && section != "":
 			path := section + "." + key
+			parsed.keys[path] = struct{}{}
+			if parsed.children[section] == nil {
+				parsed.children[section] = map[string]struct{}{}
+			}
+			parsed.children[section][key] = struct{}{}
 			if value == "" {
 				listPath = path
-				if _, ok := parsed.lists[path]; !ok {
-					parsed.lists[path] = []string{}
-				}
+				parsed.objects[path] = struct{}{}
+			} else if value == "[]" {
+				parsed.lists[path] = []string{}
 			} else {
 				parsed.scalars[path] = value
 			}
@@ -831,6 +1094,69 @@ func (parsed parsedYAML) boolScalar(path string) (bool, bool) {
 		return false, true
 	default:
 		return false, false
+	}
+}
+
+func (parsed parsedYAML) pathExists(path string) bool {
+	if path == "" {
+		return true
+	}
+	if _, ok := parsed.keys[path]; ok {
+		return true
+	}
+	if _, ok := parsed.scalars[path]; ok {
+		return true
+	}
+	if _, ok := parsed.lists[path]; ok {
+		return true
+	}
+	if _, ok := parsed.objects[path]; ok {
+		return true
+	}
+	return false
+}
+
+func (parsed parsedYAML) isObject(path string) bool {
+	if path == "" {
+		return true
+	}
+	_, ok := parsed.objects[path]
+	return ok
+}
+
+func (parsed parsedYAML) childKeys(path string) []string {
+	keys := []string{}
+	if path == "" {
+		for key := range parsed.keys {
+			if !strings.Contains(key, ".") {
+				keys = append(keys, key)
+			}
+		}
+	} else {
+		for key := range parsed.children[path] {
+			keys = append(keys, key)
+		}
+	}
+	sort.Strings(keys)
+	return keys
+}
+
+func (parsed parsedYAML) scalarMatches(path string, want any) bool {
+	switch typed := want.(type) {
+	case string:
+		return parsed.scalar(path) == typed
+	case bool:
+		value, ok := parsed.boolScalar(path)
+		return ok && value == typed
+	case float64:
+		value, ok := parsed.scalars[path]
+		if !ok {
+			return false
+		}
+		parsedNumber, err := strconv.ParseFloat(value, 64)
+		return err == nil && parsedNumber == typed
+	default:
+		return false
 	}
 }
 

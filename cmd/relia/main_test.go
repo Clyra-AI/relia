@@ -285,6 +285,40 @@ func TestInitDoesNotIgnoreExperiencesWhenExistingConfigOptsIn(t *testing.T) {
 	}
 }
 
+func TestInitRemovesManagedExperienceIgnoreWhenExistingConfigOptsIn(t *testing.T) {
+	tempDir := t.TempDir()
+	t.Chdir(tempDir)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "init"}, false)
+	if code != ExitSuccess {
+		t.Fatalf("initial init exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	configPath := filepath.Join(tempDir, "relia.yaml")
+	config, err := os.ReadFile(configPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	config = []byte(strings.Replace(string(config), "commit_experiences: false", "commit_experiences: true", 1))
+	if err := os.WriteFile(configPath, config, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	stdout, stderr, code = runForTest(t, []string{"--json", "init"}, false)
+	if code != ExitSuccess {
+		t.Fatalf("second init exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	ignoreContent, err := os.ReadFile(filepath.Join(tempDir, ".relia", ".gitignore"))
+	if errors.Is(err, os.ErrNotExist) {
+		return
+	}
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bytes.Contains(ignoreContent, []byte("/experiences/")) {
+		t.Fatalf(".relia/.gitignore = %q, must not ignore opted-in experience shards", ignoreContent)
+	}
+}
+
 func TestCheckReportsSchemaContractsAndPrivacyDefaults(t *testing.T) {
 	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
 
@@ -329,6 +363,28 @@ func TestCheckReportsSchemaContractsAndPrivacyDefaults(t *testing.T) {
 		if privacy[key] != want {
 			t.Fatalf("privacy_defaults[%s] = %#v, want %#v", key, privacy[key], want)
 		}
+	}
+}
+
+func TestCheckValidatesConfigAgainstSchemaRequiredTopLevelFields(t *testing.T) {
+	for _, key := range []string{"metadata", "attribution", "outcomes"} {
+		t.Run(key, func(t *testing.T) {
+			repo := writeMinimalRepoForConfigSchemaCheck(t, removeTopLevelYAMLBlock(defaultConfigYAML(), key))
+			t.Chdir(repo)
+
+			stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+			if code != ExitUsage {
+				t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+			}
+			result := decodeResult(t, stdout)
+			if result.Errors[0].Type != "local_configuration_error" {
+				t.Fatalf("error type = %q", result.Errors[0].Type)
+			}
+			if !strings.Contains(result.Errors[0].Message, key) {
+				t.Fatalf("error message = %q, want schema field %q", result.Errors[0].Message, key)
+			}
+		})
 	}
 }
 
@@ -417,6 +473,24 @@ func TestCheckFailsClosedWhenRedactionDefaultsAreUnsafe(t *testing.T) {
 
 func TestCheckRejectsNonPrivateShareScope(t *testing.T) {
 	repo := writeMinimalRepoForCheck(t, strings.Replace(defaultConfigYAML(), "share_scope: private", "share_scope: org", 1))
+	t.Chdir(repo)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitRedactionSafety {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "redaction_safety_failed" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+	if result.RedactionStatus != "failed_closed" {
+		t.Fatalf("redaction_status = %q", result.RedactionStatus)
+	}
+}
+
+func TestCheckFailsClosedWhenOrgSharingIsEnabled(t *testing.T) {
+	repo := writeMinimalRepoForCheck(t, strings.Replace(defaultConfigYAML(), "org_eligible: false", "org_eligible: true", 1))
 	t.Chdir(repo)
 
 	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
@@ -896,4 +970,48 @@ func writeMinimalRepoForCheck(t *testing.T, reliaYAML string) string {
 		}
 	}
 	return root
+}
+
+func writeMinimalRepoForConfigSchemaCheck(t *testing.T, reliaYAML string) string {
+	t.Helper()
+
+	sourceRoot := findRepoRootForTest(t)
+	root := writeMinimalRepoForCheck(t, reliaYAML)
+	for _, rel := range []string{"schemas/relia-config.schema.json"} {
+		sourceContent, err := os.ReadFile(filepath.Join(sourceRoot, rel))
+		if err != nil {
+			t.Fatal(err)
+		}
+		targetPath := filepath.Join(root, rel)
+		if err := os.MkdirAll(filepath.Dir(targetPath), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(targetPath, sourceContent, 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	return root
+}
+
+func removeTopLevelYAMLBlock(content string, key string) string {
+	lines := strings.Split(content, "\n")
+	blockStart := key + ":"
+	output := make([]string, 0, len(lines))
+	skipping := false
+	for _, line := range lines {
+		if !skipping && strings.HasPrefix(line, blockStart) {
+			skipping = true
+			continue
+		}
+		if skipping {
+			trimmed := strings.TrimSpace(line)
+			indent := len(line) - len(strings.TrimLeft(line, " "))
+			if trimmed == "" || indent > 0 {
+				continue
+			}
+			skipping = false
+		}
+		output = append(output, line)
+	}
+	return strings.Join(output, "\n")
 }
