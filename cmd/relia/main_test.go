@@ -212,6 +212,13 @@ func TestInitCreatesBaselineConfig(t *testing.T) {
 			t.Fatalf("%s is not a directory", rel)
 		}
 	}
+	ignoreContent, err := os.ReadFile(filepath.Join(tempDir, ".relia", ".gitignore"))
+	if err != nil {
+		t.Fatalf("expected experience cache ignore rule: %v", err)
+	}
+	if !bytes.Contains(ignoreContent, []byte("/experiences/")) {
+		t.Fatalf(".relia/.gitignore = %q, want /experiences/", ignoreContent)
+	}
 }
 
 func TestInitRejectsPositionalArguments(t *testing.T) {
@@ -244,6 +251,24 @@ func TestInitExistingConfigIsIdempotent(t *testing.T) {
 	}
 }
 
+func TestInitDoesNotIgnoreExperiencesWhenExistingConfigOptsIn(t *testing.T) {
+	tempDir := t.TempDir()
+	t.Chdir(tempDir)
+	config := strings.Replace(defaultConfigYAML(), "commit_experiences: false", "commit_experiences: true", 1)
+	if err := os.WriteFile("relia.yaml", []byte(config), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "init"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	if _, err := os.Stat(filepath.Join(tempDir, ".relia", ".gitignore")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("experience cache ignore rule err = %v, want not exist", err)
+	}
+}
+
 func TestCheckReportsSchemaContractsAndPrivacyDefaults(t *testing.T) {
 	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
 
@@ -260,6 +285,12 @@ func TestCheckReportsSchemaContractsAndPrivacyDefaults(t *testing.T) {
 	}
 	if artifactContract["schema_version"] != "1.0" {
 		t.Fatalf("artifact_contract.schema_version = %#v", artifactContract["schema_version"])
+	}
+	if artifactContract["generated_root"] != ".relia" {
+		t.Fatalf("artifact_contract.generated_root = %#v", artifactContract["generated_root"])
+	}
+	if artifactContract["user_memory_root"] != "memory" {
+		t.Fatalf("artifact_contract.user_memory_root = %#v", artifactContract["user_memory_root"])
 	}
 	schemas, ok := artifactContract["schemas"].([]any)
 	if !ok || len(schemas) < len(requiredSchemaFiles) {
@@ -282,6 +313,37 @@ func TestCheckReportsSchemaContractsAndPrivacyDefaults(t *testing.T) {
 		if privacy[key] != want {
 			t.Fatalf("privacy_defaults[%s] = %#v, want %#v", key, privacy[key], want)
 		}
+	}
+}
+
+func TestCheckRejectsConfiguredRepoRootsOutsideContract(t *testing.T) {
+	for _, tc := range []struct {
+		name   string
+		config string
+	}{
+		{
+			name:   "artifact root",
+			config: strings.Replace(defaultConfigYAML(), "artifact_root: .relia", "artifact_root: artifacts", 1),
+		},
+		{
+			name:   "memory root",
+			config: strings.Replace(defaultConfigYAML(), "memory_root: memory", "memory_root: docs/memory", 1),
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			repo := writeMinimalRepoForCheck(t, tc.config)
+			t.Chdir(repo)
+
+			stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+			if code != ExitValidation {
+				t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+			}
+			result := decodeResult(t, stdout)
+			if result.Errors[0].Type != "memory_artifact_validation_failed" {
+				t.Fatalf("error type = %q", result.Errors[0].Type)
+			}
+		})
 	}
 }
 

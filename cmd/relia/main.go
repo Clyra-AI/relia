@@ -29,6 +29,8 @@ const (
 	commandSchemaVersion    = "1.0"
 	reliaVersion            = "0.0.0-dev"
 	defaultConfigFile       = "relia.yaml"
+	defaultArtifactRoot     = ".relia"
+	defaultMemoryRoot       = "memory"
 )
 
 var requiredCheckFiles = []string{
@@ -77,14 +79,18 @@ var requiredSchemaFiles = []string{
 }
 
 var artifactSkeletonDirs = []string{
-	filepath.Join(".relia", "experiences"),
-	filepath.Join(".relia", "signatures"),
-	filepath.Join(".relia", "coverage"),
-	filepath.Join(".relia", "reports"),
-	filepath.Join(".relia", "baselines"),
-	filepath.Join("memory", "rules"),
-	filepath.Join("memory", "compiled"),
+	filepath.Join(defaultArtifactRoot, "experiences"),
+	filepath.Join(defaultArtifactRoot, "signatures"),
+	filepath.Join(defaultArtifactRoot, "coverage"),
+	filepath.Join(defaultArtifactRoot, "reports"),
+	filepath.Join(defaultArtifactRoot, "baselines"),
+	filepath.Join(defaultMemoryRoot, "rules"),
+	filepath.Join(defaultMemoryRoot, "compiled"),
 }
+
+const experienceGitignore = `# Relia experience shards are reproducible local caches by default.
+/experiences/
+`
 
 var standardRedactionPatterns = []string{
 	"api_key",
@@ -253,6 +259,11 @@ func initResult(args []string, start time.Time) CommandResult {
 		if err := ensureArtifactSkeleton(root); err != nil {
 			return errorResult("init", "init", internalError("could not create artifact skeleton", err), start)
 		}
+		if shouldIgnoreExperienceShards(root) {
+			if err := ensureExperienceGitignore(root); err != nil {
+				return errorResult("init", "init", internalError("could not create experience cache ignore rule", err), start)
+			}
+		}
 		result := passResult("init", "init", "relia.yaml already exists", start, map[string]any{
 			"config_path":   defaultConfigFile,
 			"created":       false,
@@ -270,12 +281,15 @@ func initResult(args []string, start time.Time) CommandResult {
 	if err := ensureArtifactSkeleton(root); err != nil {
 		return errorResult("init", "init", internalError("could not create artifact skeleton", err), start)
 	}
+	if err := ensureExperienceGitignore(root); err != nil {
+		return errorResult("init", "init", internalError("could not create experience cache ignore rule", err), start)
+	}
 	result := passResult("init", "init", "created relia.yaml", start, map[string]any{
 		"config_path":   defaultConfigFile,
 		"created":       true,
 		"artifact_dirs": artifactSkeletonDirs,
 	})
-	result.Artifacts = append(result.Artifacts, artifact)
+	result.Artifacts = append(result.Artifacts, artifact, ArtifactRef{Kind: "ignore_rule", Path: filepath.ToSlash(filepath.Join(defaultArtifactRoot, ".gitignore"))})
 	return result
 }
 
@@ -321,8 +335,8 @@ func checkResult(args []string, start time.Time) CommandResult {
 		"repo_root":     ".",
 		"artifact_contract": map[string]any{
 			"schema_version":          commandSchemaVersion,
-			"generated_root":          ".relia",
-			"user_memory_root":        "memory",
+			"generated_root":          config.ArtifactRoot,
+			"user_memory_root":        config.MemoryRoot,
 			"schemas":                 schemas,
 			"generated_artifacts":     []string{".relia/experiences/*.jsonl", ".relia/signatures/index.json", ".relia/coverage/map.json", ".relia/reports/*", ".relia/baselines/err-baseline.json"},
 			"user_approved_artifacts": []string{defaultConfigFile, "memory/rules/*.yaml", "memory/MEMORY.md", "memory/compiled/agents-block.md"},
@@ -484,6 +498,8 @@ type parsedYAML struct {
 }
 
 type reliaConfigSummary struct {
+	ArtifactRoot        string
+	MemoryRoot          string
 	Embeddings          string
 	ProviderConfigured  bool
 	RedactionFailClosed bool
@@ -516,6 +532,45 @@ func ensureArtifactSkeleton(root string) error {
 	return nil
 }
 
+func ensureExperienceGitignore(root string) error {
+	path := filepath.Join(root, defaultArtifactRoot, ".gitignore")
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return err
+	}
+	existing, err := os.ReadFile(path)
+	if err == nil && strings.Contains(string(existing), "/experiences/") {
+		return nil
+	}
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
+		return err
+	}
+	file, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	if len(existing) > 0 && !strings.HasSuffix(string(existing), "\n") {
+		if _, err := file.WriteString("\n"); err != nil {
+			return err
+		}
+	}
+	_, err = file.WriteString(experienceGitignore)
+	return err
+}
+
+func shouldIgnoreExperienceShards(root string) bool {
+	content, err := os.ReadFile(filepath.Join(root, defaultConfigFile))
+	if err != nil {
+		return true
+	}
+	parsed, err := parseBaselineYAML(string(content))
+	if err != nil {
+		return true
+	}
+	commitExperiences, ok := parsed.boolScalar("memory.commit_experiences")
+	return !ok || !commitExperiences
+}
+
 func loadAndValidateConfig(root string) (reliaConfigSummary, []Finding, *CommandError) {
 	var summary reliaConfigSummary
 	content, err := os.ReadFile(filepath.Join(root, defaultConfigFile))
@@ -532,6 +587,20 @@ func loadAndValidateConfig(root string) (reliaConfigSummary, []Finding, *Command
 	}
 	if parsed.scalar("schema_version") != commandSchemaVersion {
 		return summary, nil, configError(`relia.yaml must declare schema_version: "1.0"`)
+	}
+	artifactRoot := parsed.scalar("repo.artifact_root")
+	if artifactRoot == "" {
+		return summary, nil, configError("repo.artifact_root must be declared")
+	}
+	if artifactRoot != defaultArtifactRoot {
+		return summary, nil, artifactValidationError("repo.artifact_root must remain "+defaultArtifactRoot+" in the MVP", defaultConfigFile)
+	}
+	memoryRoot := parsed.scalar("repo.memory_root")
+	if memoryRoot == "" {
+		return summary, nil, configError("repo.memory_root must be declared")
+	}
+	if memoryRoot != defaultMemoryRoot {
+		return summary, nil, artifactValidationError("repo.memory_root must remain "+defaultMemoryRoot+" in the MVP", defaultConfigFile)
 	}
 
 	embeddings := parsed.scalar("distill.embeddings")
@@ -624,6 +693,8 @@ func loadAndValidateConfig(root string) (reliaConfigSummary, []Finding, *Command
 	}
 
 	return reliaConfigSummary{
+		ArtifactRoot:        artifactRoot,
+		MemoryRoot:          memoryRoot,
 		Embeddings:          embeddings,
 		ProviderConfigured:  provider != "",
 		RedactionFailClosed: failClosed,

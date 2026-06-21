@@ -6,11 +6,9 @@
   "commands_run": [
     "make lint-fast",
     "make test-fast",
-    "for f in schemas/*.schema.json examples/command-results/*.json; do python3 -m json.tool \"$f\" >/dev/null || exit 1; done",
-    "GOCACHE=\"${TMPDIR:-/tmp}/relia-go-build\" go run ./cmd/relia --json check",
+    "make prepush-full",
     "python3 -m json.tool .factory/artifacts/task-runs/T2/work-proof-marker.json >/dev/null",
-    "python3 -m json.tool .factory/artifacts/task-runs/T2/validation-report.json >/dev/null",
-    "make prepush-full"
+    "python3 -m json.tool .factory/artifacts/task-runs/T2/validation-report.json >/dev/null"
   ],
   "baseline_evidence": [
     {
@@ -24,39 +22,19 @@
       "exit_code": 0
     }
   ],
-  "red_evidence": [
-    {
-      "command": "make test-fast",
-      "status": "fail_expected",
-      "exit_code": 2,
-      "reason": "Red-first tests referenced the new T2 command metadata field, schema file list, config validation behavior, and schema contracts before implementation."
-    }
-  ],
+  "test_first_skipped_reason": "Repair mode was triggered by actionable Codex review findings with concrete failing scenarios. No separate pre-edit red command was run in this repair pass; focused regression tests were added for both findings and then validated with make test-fast and make prepush-full.",
   "green_evidence": [
     {
-      "command": "for f in schemas/*.schema.json examples/command-results/*.json; do python3 -m json.tool \"$f\" >/dev/null || exit 1; done",
+      "command": "make lint-fast",
       "status": "pass",
-      "exit_code": 0
+      "exit_code": 0,
+      "summary": "Repo pack file, toolchain, and validation guidance checks passed."
     },
     {
       "command": "make test-fast",
       "status": "pass",
-      "exit_code": 0
-    },
-    {
-      "command": "GOCACHE=\"${TMPDIR:-/tmp}/relia-go-build\" go run ./cmd/relia --json check",
-      "status": "pass",
-      "exit_code": 0
-    },
-    {
-      "command": "python3 -m json.tool .factory/artifacts/task-runs/T2/work-proof-marker.json >/dev/null",
-      "status": "pass",
-      "exit_code": 0
-    },
-    {
-      "command": "python3 -m json.tool .factory/artifacts/task-runs/T2/validation-report.json >/dev/null",
-      "status": "pass",
-      "exit_code": 0
+      "exit_code": 0,
+      "summary": "Go tests passed, including regression coverage for configured repo roots and default experience shard ignore behavior."
     }
   ],
   "final_validation_evidence": [
@@ -64,7 +42,7 @@
       "command": "make prepush-full",
       "status": "pass",
       "exit_code": 0,
-      "summary": "lint-fast, test-fast, test-coverage, and test-contracts passed; coverage was 80.0% against the 75.0% threshold; repo pack reported ok."
+      "summary": "lint-fast, test-fast, test-coverage, and test-contracts passed; coverage was 79.2% against the 75.0% threshold; repo pack reported ok."
     }
   ],
   "acceptance_results": [
@@ -73,9 +51,11 @@
       "status": "implemented",
       "evidence_refs": [
         ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T2/validation-report.json",
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
         "schemas/command-result.schema.json",
-        "examples/command-results/exit-code-examples.json",
-        "cmd/relia/main_test.go"
+        "examples/command-results/exit-code-examples.json"
       ]
     },
     {
@@ -83,10 +63,12 @@
       "status": "implemented",
       "evidence_refs": [
         ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T2/validation-report.json",
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
         "schemas/experience-record.schema.json",
         "schemas/memory-rule.schema.json",
-        "schemas/relia-config.schema.json",
-        "cmd/relia/main_test.go"
+        "schemas/relia-config.schema.json"
       ]
     },
     {
@@ -94,8 +76,9 @@
       "status": "implemented",
       "evidence_refs": [
         ".factory/artifacts/task-runs/T2/work-proof-marker.json",
-        "relia.yaml",
         "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        "relia.yaml",
         "README.md"
       ]
     },
@@ -105,6 +88,7 @@
       "evidence_refs": [
         ".factory/artifacts/task-runs/T2/work-proof-marker.json",
         "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
         "schemas/command-result.schema.json",
         "docs/dev/dev_guides.md"
       ]
@@ -114,6 +98,12 @@
     "status": "pass",
     "changed_paths_within_allowed_paths": true,
     "forbidden_paths_changed_in_worker_diff": false,
+    "checked_changed_paths": [
+      "cmd/relia/main.go",
+      "cmd/relia/main_test.go",
+      ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+      ".factory/artifacts/task-runs/T2/validation-report.json"
+    ],
     "ignored_validation_outputs": [
       ".factory/tmp/"
     ],
@@ -121,7 +111,29 @@
   },
   "plan_drift_result": {
     "status": "pass",
-    "note": "Implementation stayed within T2 contracts-config-and-validation scope and did not change runtime pins, provider posture, release boundaries, tracker state, commits, PRs, or scope closure."
+    "note": "Repair stayed within T2 contracts-config-and-validation scope and addressed only the actionable Codex review findings without changing runtime pins, provider posture, release boundaries, tracker state, commits, PRs, or scope closure."
+  },
+  "codex_review_repair_result": {
+    "status": "implemented",
+    "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair",
+    "resolved_findings": [
+      {
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3447783166",
+        "status": "implemented",
+        "evidence_refs": [
+          "cmd/relia/main.go",
+          "cmd/relia/main_test.go"
+        ]
+      },
+      {
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3447783169",
+        "status": "implemented",
+        "evidence_refs": [
+          "cmd/relia/main.go",
+          "cmd/relia/main_test.go"
+        ]
+      }
+    ]
   },
   "docs_sync_result": {
     "status": "pass",
@@ -130,17 +142,18 @@
       "docs/dev/dev_guides.md",
       "docs/architecture/architecture_guides.md",
       "docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md"
-    ]
+    ],
+    "repair_note": "No additional docs update was needed for the review repair because the existing T2 docs already describe fixed artifact roots and local-only experience shards."
   },
   "changelog_result": {
     "status": "not_applicable",
-    "reason": "No changelog file exists in the allowed repo surface for this task; user-facing behavior is documented in README and dev/architecture guides."
+    "reason": "No changelog file exists in the allowed repo surface for this repair; user-facing T2 behavior remains covered by existing README and dev/architecture guide updates."
   },
   "versioning_result": {
     "status": "pass",
     "schema_version": "1.0",
     "relia_version": "0.0.0-dev",
-    "migration_note": "Pre-1.0 MVP contract amended command-result metadata and relia.yaml schema_version before public release."
+    "migration_note": "Pre-1.0 MVP contract amended command-result metadata and relia.yaml schema_version before public release; no additional schema_version or relia_version change was required for this repair."
   },
   "blockers": [],
   "residual_risks": [
