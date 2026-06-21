@@ -3,33 +3,32 @@
   "schema_version": "1.0",
   "task_id": "T2",
   "status": "pass",
-  "produced_at": "2026-06-21T17:02:57Z",
-  "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-22",
+  "produced_at": "2026-06-21T17:13:18Z",
+  "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-23",
   "commands_run": [
     "make lint-fast",
     "make test-fast",
     "make test-fast",
-    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
     "make test-fast",
-    "make lint-fast",
+    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
     "make test-fast",
     "make prepush-full",
     "python3 -m json.tool .factory/artifacts/task-runs/T2/work-proof-marker.json",
     "python3 -m json.tool .factory/artifacts/task-runs/T2/validation-report.json",
-    "python3 -c \"import json, sys; bad=[]; [bad.append(p) for p in sys.argv[1:] if json.load(open(p)).get('status') in ('', None, 'blocked', 'failed', 'needs_repair')]; sys.exit(1 if bad else 0)\" .factory/artifacts/task-runs/T2/work-proof-marker.json .factory/artifacts/task-runs/T2/validation-report.json"
+    "python3 -c \"import json,sys; sys.exit(any(json.load(open(p)).get('status') in ('',None,'blocked','failed','needs_repair') for p in sys.argv[1:]))\" .factory/artifacts/task-runs/T2/work-proof-marker.json .factory/artifacts/task-runs/T2/validation-report.json"
   ],
   "baseline_evidence": [
     {
       "command": "make lint-fast",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Baseline lint-fast passed before repair-22 edits."
+      "summary": "Baseline lint-fast passed before repair-23 edits."
     },
     {
       "command": "make test-fast",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Baseline go test ./... -count=1 passed before repair-22 edits and served as the packet red_first command baseline."
+      "summary": "Baseline go test ./... -count=1 passed before repair-23 edits."
     }
   ],
   "red_evidence": [
@@ -37,7 +36,13 @@
       "command": "make test-fast",
       "status": "fail_expected",
       "exit_code": 2,
-      "summary": "After adding repair-22 regression tests and before implementation, relia check still passed memory rules missing kind, confidence, scope, metadata, or provenance outcome, and the experience-record signature schema lacked key and message_fingerprint requirements."
+      "summary": "Initial repair-23 red run failed after adding tests; inline provenance without pr and outcome terminal tests exposed contract gaps, while the provider test needed the full schema fixture to reach config validation."
+    },
+    {
+      "command": "make test-fast",
+      "status": "fail_expected",
+      "exit_code": 2,
+      "summary": "Corrected red run failed for all reviewed defects: relia check accepted inline provenance without a PR, accepted provider embeddings with only distill.provider, and the experience schema required terminal_state instead of terminal."
     }
   ],
   "green_evidence": [
@@ -45,19 +50,7 @@
       "command": "make test-fast",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Fast test lane passed after implementing full memory-rule validation and embedded signature schema details."
-    },
-    {
-      "command": "make lint-fast",
-      "status": "pass",
-      "exit_code": 0,
-      "summary": "Repo-pack lint passed after repair-22 code and docs updates."
-    },
-    {
-      "command": "make test-fast",
-      "status": "pass",
-      "exit_code": 0,
-      "summary": "Fast test lane remained green after docs sync."
+      "summary": "Fast test lane passed after implementing provider grant validation, provenance object validation, and the canonical experience outcome terminal schema."
     }
   ],
   "final_validation_evidence": [
@@ -65,7 +58,7 @@
       "command": "make prepush-full",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Final gate passed lint-fast, test-fast, test-coverage, and test-contracts; coverage was 78.4% against the 75.0% threshold; repo pack reported ok."
+      "summary": "Final gate passed lint-fast, test-fast, test-coverage, and test-contracts; coverage was 79.0% against the 75.0% threshold; repo pack reported ok."
     },
     {
       "command": "python3 -m json.tool .factory/artifacts/task-runs/T2/work-proof-marker.json",
@@ -78,7 +71,7 @@
       "exit_code": 0
     },
     {
-      "command": "python3 -c \"import json, sys; bad=[]; [bad.append(p) for p in sys.argv[1:] if json.load(open(p)).get('status') in ('', None, 'blocked', 'failed', 'needs_repair')]; sys.exit(1 if bad else 0)\" .factory/artifacts/task-runs/T2/work-proof-marker.json .factory/artifacts/task-runs/T2/validation-report.json",
+      "command": "python3 -c \"import json,sys; sys.exit(any(json.load(open(p)).get('status') in ('',None,'blocked','failed','needs_repair') for p in sys.argv[1:]))\" .factory/artifacts/task-runs/T2/work-proof-marker.json .factory/artifacts/task-runs/T2/validation-report.json",
       "status": "pass",
       "exit_code": 0
     }
@@ -101,9 +94,9 @@
       "evidence_refs": [
         ".factory/artifacts/task-runs/T2/work-proof-marker.json",
         ".factory/artifacts/task-runs/T2/validation-report.json",
-        "cmd/relia/main.go",
         "cmd/relia/main_test.go",
         "schemas/experience-record.schema.json",
+        "schemas/relia-config.schema.json",
         "schemas/memory-rule.schema.json"
       ]
     },
@@ -117,8 +110,8 @@
         "docs/dev/dev_guides.md",
         "docs/architecture/architecture_guides.md",
         "docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md",
-        "docs/product/prd.md",
-        "schemas/experience-record.schema.json"
+        "schemas/experience-record.schema.json",
+        "schemas/relia-config.schema.json"
       ]
     },
     {
@@ -127,11 +120,10 @@
       "evidence_refs": [
         ".factory/artifacts/task-runs/T2/work-proof-marker.json",
         ".factory/artifacts/task-runs/T2/validation-report.json",
-        "docs/product/prd.md",
         "cmd/relia/main.go",
         "cmd/relia/main_test.go",
         "schemas/experience-record.schema.json",
-        "schemas/memory-rule.schema.json"
+        "schemas/relia-config.schema.json"
       ]
     }
   ],
@@ -146,40 +138,31 @@
       "docs/architecture/architecture_guides.md",
       "docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md",
       "docs/dev/dev_guides.md",
-      "docs/product/prd.md",
       "schemas/experience-record.schema.json",
+      "schemas/relia-config.schema.json",
       ".factory/artifacts/task-runs/T2/work-proof-marker.json",
       ".factory/artifacts/task-runs/T2/validation-report.json"
     ],
     "ignored_validation_outputs": [
       ".factory/tmp/coverage.out"
     ],
-    "note": "make prepush-full wrote ignored coverage output under .factory/tmp/ as defined by the repo Makefile; no worker diff was authored there."
+    "note": "make prepush-full wrote ignored coverage output under .factory/tmp/ as defined by the repo Makefile; no tracked worker diff was authored there."
   },
   "plan_drift_result": {
     "status": "pass",
-    "note": "Repair-22 stayed within the T2 contracts-config-and-validation slice. Runtime pins, dependency policy, provider posture, release boundaries, tracker state, commits, PRs, and lifecycle gates were not changed."
+    "note": "Repair-23 stayed within the T2 contracts-config-and-validation slice. Runtime pins, dependency policy, release boundaries, tracker state, commits, PRs, and lifecycle gates were not changed."
   },
   "codex_review_repair_result": {
     "status": "implemented",
-    "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-22",
+    "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-23",
     "resolved_findings": [
       {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448744665",
-        "status": "already_implemented_verified",
-        "evidence_refs": [
-          "cmd/relia/main.go",
-          "cmd/relia/main_test.go",
-          "schemas/memory-rule.schema.json"
-        ]
-      },
-      {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448756512",
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448765888",
         "status": "implemented",
         "evidence_refs": [
           "cmd/relia/main.go",
           "cmd/relia/main_test.go",
-          "docs/product/prd.md",
+          "schemas/relia-config.schema.json",
           "README.md",
           "docs/dev/dev_guides.md",
           "docs/architecture/architecture_guides.md",
@@ -187,12 +170,22 @@
         ]
       },
       {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448756513",
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448765889",
+        "status": "implemented",
+        "evidence_refs": [
+          "cmd/relia/main.go",
+          "cmd/relia/main_test.go",
+          "schemas/memory-rule.schema.json",
+          "README.md",
+          "docs/dev/dev_guides.md"
+        ]
+      },
+      {
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448765891",
         "status": "implemented",
         "evidence_refs": [
           "schemas/experience-record.schema.json",
           "cmd/relia/main_test.go",
-          "docs/product/prd.md",
           "README.md",
           "docs/dev/dev_guides.md",
           "docs/architecture/architecture_guides.md",
@@ -207,7 +200,7 @@
       "docs/architecture/architecture_guides.md",
       "docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md",
       "schemas/experience-record.schema.json",
-      "schemas/failure-signature.schema.json",
+      "schemas/relia-config.schema.json",
       "schemas/memory-rule.schema.json",
       "cmd/relia/main.go",
       "cmd/relia/main_test.go"
@@ -219,10 +212,9 @@
       "README.md",
       "docs/dev/dev_guides.md",
       "docs/architecture/architecture_guides.md",
-      "docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md",
-      "docs/product/prd.md"
+      "docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md"
     ],
-    "note": "Docs now state that memory rules use the full versioned schema envelope and experience signatures preserve recurrence-pairing details."
+    "note": "Docs now state the provider endpoint grant field names and the experience-record outcome.terminal contract."
   },
   "changelog_result": {
     "status": "not_applicable",

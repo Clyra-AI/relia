@@ -139,11 +139,12 @@ surfaced in the command-result `data` object. The default config includes the
 documented `advise` and `badge` sections, with `advise.enabled: false` so
 bootstrap does not perform live PR advisory work by default.
 Unsafe redaction settings fail closed with exit `6`; non-private MVP sharing
-posture also fails closed with exit `6`; explicit `embeddings: local` without a pulled
-artifact fails with exit `8`; disabled `distill.review_required` and unknown
-provider/config values fail with exit `2`; invalid memory-rule schema fields,
-provenance, experience citations, scope, metadata, or missing/non-accepted
-active review labels fail with exit `4`. The executable
+posture also fails closed with exit `6`; explicit `embeddings: local` without a
+pulled artifact fails with exit `8`; `embeddings: provider` without a complete
+`model_provider_endpoint` grant fails with exit `8`; disabled
+`distill.review_required` and unknown provider/config values fail with exit `2`;
+invalid memory-rule schema fields, provenance, experience citations, scope,
+metadata, or missing/non-accepted active review labels fail with exit `4`. The executable
 config schema accepts the documented PRD `advise` and `badge` sections without
 enabling live network or credentialed work by default. Config arrays may use
 block or inline YAML sequence syntax, including `redaction.patterns: [api_key,
@@ -163,7 +164,8 @@ not depend on a separate index being present.
 - Phase 0 schema contracts must declare `schema_version`, required fields,
   allowed enum values, a forward-compatible `metadata` object, and
   `x-relia_error_mapping` for stable CLI exits.
-- Experience record action blocks use canonical `pr` and `commits` fields;
+- Experience record action blocks use canonical `pr` and `commits` fields, and
+  outcome blocks use canonical `terminal`;
   embedded signatures preserve signature class, check name, key, message
   fingerprint, and extraction confidence; experience, coverage, and recurrence
   artifact schemas use canonical repo identifier strings, and recurrence report
@@ -199,10 +201,10 @@ not depend on a separate index being present.
   It must not silently degrade to provider embeddings or unlabeled signature-only
   behavior.
 - `embeddings: provider` is a separate live provider capability. Provider
-  endpoint work must declare provider, model, endpoint or `base_url`, credential
-  environment, cost cap, redaction posture, and network allowlist through a
-  complete `model_provider_endpoint` grant. Generic network or credential
-  approval does not satisfy this gate.
+  endpoint work must declare `provider`, `model`, `endpoint` or `base_url`,
+  `credential_env`, `budget_posture`, `redaction_posture`, and a non-empty
+  `allowlist` through a complete `model_provider_endpoint` grant. Generic
+  network or credential approval does not satisfy this gate.
 - Release binaries, containers, and tracked source must not include model weights
   or inference-runtime payloads unless a future distribution decision records
   license, size, security, cross-platform, update, and rollback evidence.

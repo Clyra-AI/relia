@@ -51,9 +51,10 @@ recurrence reports, compiled context, command results, redaction config, and the
 repo config contract. Outcome schemas use the PRD names `ci_failure`, `revert`,
 `review_correction`, `merge_clean`, and `fix_held`; type-check signatures use
 `type_failure`. Experience records use canonical action fields `pr` and
-`commits`, and their embedded signatures retain signature class, check name,
-key, message fingerprint, and extraction confidence so recurrence pairing can be
-computed from the shard. Experience, coverage, and recurrence artifacts use
+`commits`, canonical outcome field `terminal`, and embedded signatures retain
+signature class, check name, key, message fingerprint, and extraction confidence
+so recurrence pairing can be computed from the shard. Experience, coverage, and
+recurrence artifacts use
 canonical repo identifier strings such as `owner/name`, and recurrence report
 ERR values are bounded proportions from `0` through `1`. Recurrence headlines
 preserve `attribution_uncertain_count` and `flake_discounted_count`, and risk
@@ -65,8 +66,9 @@ OOD signal. Memory rules use the documented durable-artifact shape with
 and an accepted review label before `relia check` reports success.
 
 Provider-backed distill work requires a complete `model_provider_endpoint`
-grant naming provider, model, endpoint or `base_url`, credential environment,
-budget posture, redaction posture, and allowlist. Local embedding artifact pulls
+grant in config before `embeddings: provider` is accepted: `provider`, `model`,
+`endpoint` or `base_url`, `credential_env`, `budget_posture`,
+`redaction_posture`, and non-empty `allowlist`. Local embedding artifact pulls
 require a separate `model_artifact_pull` grant. Generic network or credential
 approval does not satisfy either model-specific gate.
 

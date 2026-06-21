@@ -4,8 +4,8 @@
   "task_id": "T2",
   "status": "implemented",
   "implementation_performed": true,
-  "produced_at": "2026-06-21T17:02:57Z",
-  "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-22",
+  "produced_at": "2026-06-21T17:13:18Z",
+  "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-23",
   "changed_paths": [
     "README.md",
     "cmd/relia/main.go",
@@ -13,8 +13,8 @@
     "docs/architecture/architecture_guides.md",
     "docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md",
     "docs/dev/dev_guides.md",
-    "docs/product/prd.md",
     "schemas/experience-record.schema.json",
+    "schemas/relia-config.schema.json",
     ".factory/artifacts/task-runs/T2/work-proof-marker.json",
     ".factory/artifacts/task-runs/T2/validation-report.json"
   ],
@@ -22,29 +22,30 @@
     ".factory/artifacts/task-runs/T2/validation-report.json"
   ],
   "summary": {
-    "repair_iteration_note": "Repair-22 resolves the latest actionable Codex review findings for full memory-rule contract validation and embedded experience signature details, while preserving the already-repaired accepted-review-label behavior for active rules.",
+    "repair_iteration_note": "Repair-23 resolves the latest actionable Codex review findings for provider endpoint gating, PR-backed rule provenance, and the canonical experience outcome terminal field.",
     "implemented_contracts": [
-      "cmd/relia/main.go now validates memory rules for object_type, schema_version, id, kind, status, statement, confidence, evidence count, experience citations, review label, scope, provenance pr/outcome, metadata.relia_version, and accepted active review labels before relia check passes.",
-      "cmd/relia/main.go now preserves parsed object fields inside YAML list entries so provenance entries under memory/rules/*.yaml can be validated coherently.",
-      "schemas/experience-record.schema.json now preserves embedded signature class, check name, key, message fingerprint, and extraction confidence in experience records, with PRD alias fields accepted for class/check.",
-      "cmd/relia/main_test.go includes regression coverage for missing memory-rule schema fields, malformed provenance outcomes, and embedded experience signature details.",
-      "README.md, docs/dev/dev_guides.md, docs/architecture/architecture_guides.md, docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md, and docs/product/prd.md document the repaired contracts."
+      "relia check now fails closed with exit 8 when distill.embeddings is provider and the config lacks a complete model_provider_endpoint grant.",
+      "The provider endpoint grant contract is represented in schemas/relia-config.schema.json with provider, model, endpoint or base_url, credential_env, budget_posture, redaction_posture, and allowlist fields.",
+      "relia check now rejects memory rule provenance lists that are present but do not parse as PR-backed provenance objects.",
+      "schemas/experience-record.schema.json now uses canonical outcome.terminal instead of requiring non-canonical terminal_state.",
+      "cmd/relia/main_test.go includes red/green regression coverage for the repaired provider, provenance, and experience-record contracts.",
+      "README.md, docs/dev/dev_guides.md, docs/architecture/architecture_guides.md, and docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md document the repaired contracts."
     ],
     "resolved_review_findings": [
       {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448744665",
-        "status": "already_implemented_verified",
-        "summary": "Active memory rules already require review.label: accepted in both relia check and the memory-rule schema; repair-22 preserved that behavior."
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448765888",
+        "status": "implemented",
+        "summary": "Provider embeddings now require a complete model_provider_endpoint grant before relia check accepts the config."
       },
       {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448756512",
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448765889",
         "status": "implemented",
-        "summary": "relia check now rejects reviewed memory rules that omit schema-required fields such as kind, confidence, scope, metadata, object_type, schema_version, or provenance outcome details."
+        "summary": "Memory rule provenance validation now rejects non-object or inline scalar provenance lists that lack PR citations."
       },
       {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448756513",
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448765891",
         "status": "implemented",
-        "summary": "Experience-record signatures now retain the recurrence-pairing details required by the PRD instead of forcing those fields into a separate signature index."
+        "summary": "The experience record schema accepts the PRD canonical outcome.terminal field."
       }
     ],
     "lifecycle_boundary": "task-executor repair only; commit, PR update, scope closure, validation-gate, and post-merge evidence are left to their required workers"

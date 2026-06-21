@@ -33,8 +33,9 @@ artifact shape: `object_type`, `schema_version`, `id`, `kind`, `status`,
 experience citations, provenance entries, complete rule fields, scoped
 statements, metadata, and accepted review labels before reporting the operating
 pack as ready. Experience record action blocks use canonical `pr` and `commits`
-fields, and embedded signatures preserve signature class, check name, key,
-message fingerprint, and extraction confidence for recurrence pairing from the
+fields, outcome blocks use canonical `terminal`, and embedded signatures
+preserve signature class, check name, key, message fingerprint, and extraction
+confidence for recurrence pairing from the
 experience shard. Experience, coverage, and recurrence artifacts use canonical
 repo identifier strings, and recurrence report ERR is bounded as a `0` through
 `1` proportion. Recurrence reports keep flake-discounted and
@@ -86,9 +87,9 @@ and cache-location implications.
   grant before any artifact download or refresh.
 - Provider embeddings and LLM rule drafting are opt-in live provider paths, not
   substitutes for deterministic provenance. They require an approved
-  `model_provider_endpoint` grant naming provider, model, endpoint or
-  `base_url`, credential environment, budget posture, redaction posture, and
-  allowlist before live provider calls.
+  `model_provider_endpoint` grant naming `provider`, `model`, `endpoint` or
+  `base_url`, `credential_env`, `budget_posture`, `redaction_posture`, and a
+  non-empty `allowlist` before live provider calls.
 - Missing local artifacts must fail closed for explicit local mode or be
   represented as signature-only provenance when signature mode is selected.
 

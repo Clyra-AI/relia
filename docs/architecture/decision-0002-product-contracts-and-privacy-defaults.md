@@ -37,9 +37,10 @@ non-empty PR-backed `provenance`, and `metadata`; `relia check` fails with exit
 `4` when rules lack schema-required fields, experience citations, provenance
 entries, provenance outcomes, scope, metadata, or an accepted review label for
 active rules. Experience record action blocks use the PRD canonical `pr` and
-`commits` field names, and embedded signatures preserve signature class, check
-name, key, message fingerprint, and extraction confidence so recurrence pairing
-does not depend on a separate signature index being present. Experience,
+`commits` field names, outcome blocks use canonical `terminal`, and embedded
+signatures preserve signature class, check name, key, message fingerprint, and
+extraction confidence so recurrence pairing does not depend on a separate
+signature index being present. Experience,
 coverage, and recurrence contracts use the PRD canonical repo string shape, and
 recurrence report `error_recurrence_rate` remains a bounded `0` through `1`
 proportion. Recurrence report headlines also require
@@ -67,11 +68,14 @@ The default config remains deterministic and offline:
 - `badge.stale_after_merged_prs: 20`
 
 Explicit `embeddings: local` fails closed with exit `8` until a later
-`model_artifact_pull` flow records the required artifact metadata. Non-private
-MVP sharing posture fails with exit `6`; unsafe redaction config fails with
-exit `6`; invalid config/provider values fail with exit `2`; malformed memory
-rules and active rules with missing or non-accepted review labels fail with exit
-`4`.
+`model_artifact_pull` flow records the required artifact metadata.
+`embeddings: provider` fails closed with exit `8` unless the config carries a
+complete `model_provider_endpoint` grant: `provider`, `model`, `endpoint` or
+`base_url`, `credential_env`, `budget_posture`, `redaction_posture`, and a
+non-empty `allowlist`. Non-private MVP sharing posture fails with exit `6`;
+unsafe redaction config fails with exit `6`; invalid config/provider values fail
+with exit `2`; malformed memory rules and active rules with missing or
+non-accepted review labels fail with exit `4`.
 
 ## Consequences
 

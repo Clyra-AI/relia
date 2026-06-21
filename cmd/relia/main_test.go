@@ -548,6 +548,11 @@ func TestCheckValidatesActiveMemoryRuleContractBeforePass(t *testing.T) {
 			messageWant: "provenance outcome",
 		},
 		{
+			name:        "inline provenance without pr",
+			rule:        strings.Replace(validMemoryRuleYAMLForTest(), "provenance:\n  - pr: 123\n    outcome: ci_failure\n    url: https://example.invalid/pr/123\n", "provenance: [outcome: ci_failure]\n", 1),
+			messageWant: "provenance pr",
+		},
+		{
 			name:        "missing active review label",
 			rule:        strings.Replace(validMemoryRuleYAMLForTest(), "  label: accepted\n", "", 1),
 			messageWant: "review label",
@@ -646,6 +651,52 @@ func TestCheckRejectsUnknownDistillProvider(t *testing.T) {
 	result := decodeResult(t, stdout)
 	if result.Errors[0].Type != "local_configuration_error" {
 		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+}
+
+func TestCheckRejectsProviderEmbeddingsWithoutCompleteEndpointGrant(t *testing.T) {
+	config := strings.Replace(defaultConfigYAML(), "embeddings: signature", "provider: anthropic\n  embeddings: provider", 1)
+	repo := writeMinimalRepoForFullCheck(t, config)
+	t.Chdir(repo)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitDependency {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "dependency_error" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+	if !strings.Contains(result.Errors[0].Message, "model_provider_endpoint") {
+		t.Fatalf("error message = %q, want model_provider_endpoint", result.Errors[0].Message)
+	}
+}
+
+func TestCheckAcceptsProviderEmbeddingsWithCompleteEndpointGrant(t *testing.T) {
+	config := strings.Replace(defaultConfigYAML(), "embeddings: signature", `provider: anthropic
+  model: claude-fable-5
+  base_url: https://api.anthropic.example
+  credential_env: ANTHROPIC_API_KEY
+  budget_posture: max_usd_per_run_2
+  redaction_posture: redacted_records_only
+  allowlist:
+    - api.anthropic.example
+  embeddings: provider`, 1)
+	repo := writeMinimalRepoForFullCheck(t, config)
+	t.Chdir(repo)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Status != "pass" {
+		t.Fatalf("status = %q", result.Status)
+	}
+	if len(result.Warnings) == 0 || result.Warnings[0].Type != "provider_path_configured" {
+		t.Fatalf("warnings = %#v, want provider_path_configured", result.Warnings)
 	}
 }
 
@@ -944,6 +995,23 @@ func TestReliaConfigSchemaRequiresReviewGate(t *testing.T) {
 	}
 }
 
+func TestReliaConfigSchemaDefinesProviderEndpointGrantFields(t *testing.T) {
+	root := findRepoRootForTest(t)
+	schema := readSchemaForTest(t, root, "schemas/relia-config.schema.json")
+	properties := schemaPropertiesForTest(t, "schemas/relia-config.schema.json", schema)
+	distillProperties := schemaPropertiesForTest(t, "relia_config.distill", propertyForTest(t, properties, "distill"))
+
+	for _, want := range []string{"provider", "model", "endpoint", "base_url", "credential_env", "budget_posture", "redaction_posture", "allowlist"} {
+		if _, ok := distillProperties[want]; !ok {
+			t.Fatalf("relia_config.distill properties = %#v, want %s", distillProperties, want)
+		}
+	}
+	allowlist := propertyForTest(t, distillProperties, "allowlist")
+	if allowlist["type"] != "array" || allowlist["minItems"] != float64(1) {
+		t.Fatalf("distill.allowlist = %#v, want non-empty array", allowlist)
+	}
+}
+
 func TestOutcomeSchemasUsePRDOutcomeTaxonomy(t *testing.T) {
 	root := findRepoRootForTest(t)
 	experienceSchema := readSchemaForTest(t, root, "schemas/experience-record.schema.json")
@@ -1020,6 +1088,28 @@ func TestExperienceRecordSchemaAcceptsCanonicalActionNames(t *testing.T) {
 		if _, ok := actionProperties[want]; !ok {
 			t.Fatalf("experience.action properties = %#v, want %s", actionProperties, want)
 		}
+	}
+}
+
+func TestExperienceRecordSchemaAcceptsCanonicalOutcomeTerminal(t *testing.T) {
+	root := findRepoRootForTest(t)
+	schema := readSchemaForTest(t, root, "schemas/experience-record.schema.json")
+	experienceProperties := schemaPropertiesForTest(t, "schemas/experience-record.schema.json", schema)
+	outcome := propertyForTest(t, experienceProperties, "outcome")
+	outcomeProperties := schemaPropertiesForTest(t, "experience.outcome", outcome)
+	outcomeRequired, ok := outcome["required"].([]any)
+	if !ok {
+		t.Fatal("experience.outcome required missing")
+	}
+
+	if !containsStringValue(outcomeRequired, "terminal") {
+		t.Fatalf("experience.outcome required = %#v, want terminal", outcomeRequired)
+	}
+	if _, ok := outcomeProperties["terminal"]; !ok {
+		t.Fatalf("experience.outcome properties = %#v, want terminal", outcomeProperties)
+	}
+	if containsStringValue(outcomeRequired, "terminal_state") {
+		t.Fatalf("experience.outcome required = %#v, must not require non-canonical terminal_state", outcomeRequired)
 	}
 }
 

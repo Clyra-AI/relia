@@ -488,6 +488,16 @@ func dependencyError(message string, ref string) *CommandError {
 	}
 }
 
+func providerDependencyError(message string) *CommandError {
+	return &CommandError{
+		Type:        "dependency_error",
+		Message:     message,
+		ExitCode:    ExitDependency,
+		Remediation: "Use embeddings: signature or complete the model_provider_endpoint grant before provider-backed distill work.",
+		Ref:         "docs/dev/dev_guides.md#model-provider-and-artifact-policy",
+	}
+}
+
 func internalError(message string, err error) *CommandError {
 	if err != nil {
 		message += ": " + err.Error()
@@ -679,7 +689,12 @@ func loadAndValidateConfig(root string) (reliaConfigSummary, []Finding, *Command
 		return summary, nil, dependencyError("local embedding artifact is missing", "docs/dev/dev_guides.md#model-provider-and-artifact-policy")
 	}
 	if embeddings == "provider" && provider == "" {
-		return summary, nil, dependencyError("provider embeddings require distill.provider", defaultConfigFile)
+		return summary, nil, providerDependencyError("provider embeddings require distill.provider and a complete model_provider_endpoint grant")
+	}
+	if embeddings == "provider" {
+		if missing := missingProviderEndpointGrantFields(parsed); len(missing) > 0 {
+			return summary, nil, providerDependencyError("provider embeddings require a complete model_provider_endpoint grant; missing " + strings.Join(missing, ", "))
+		}
 	}
 	reviewRequired, ok := parsed.boolScalar("distill.review_required")
 	if !ok {
@@ -774,6 +789,27 @@ func loadAndValidateConfig(root string) (reliaConfigSummary, []Finding, *Command
 		OrgEligible:         orgEligible,
 		AdvisoryOnly:        advisoryOnly,
 	}, warnings, nil
+}
+
+func missingProviderEndpointGrantFields(parsed parsedYAML) []string {
+	var missing []string
+	for _, path := range []string{
+		"distill.model",
+		"distill.credential_env",
+		"distill.budget_posture",
+		"distill.redaction_posture",
+	} {
+		if parsed.scalar(path) == "" {
+			missing = append(missing, path)
+		}
+	}
+	if parsed.scalar("distill.endpoint") == "" && parsed.scalar("distill.base_url") == "" {
+		missing = append(missing, "distill.endpoint_or_base_url")
+	}
+	if len(parsed.lists["distill.allowlist"]) == 0 {
+		missing = append(missing, "distill.allowlist")
+	}
+	return missing
 }
 
 func validateSchemaContracts(root string) ([]string, *CommandError) {
@@ -930,7 +966,11 @@ func validateMemoryRuleContract(rel string, parsed parsedYAML) *CommandError {
 	if len(parsed.lists["provenance"]) == 0 {
 		return artifactValidationError("memory rule has no provenance entries", rel)
 	}
-	for _, item := range parsed.listItemObjects["provenance"] {
+	provenanceObjects := parsed.listItemObjects["provenance"]
+	if len(provenanceObjects) != len(parsed.lists["provenance"]) {
+		return artifactValidationError("memory rule provenance pr is required", rel)
+	}
+	for _, item := range provenanceObjects {
 		if item["pr"] == "" {
 			return artifactValidationError("memory rule provenance pr is required", rel)
 		}
