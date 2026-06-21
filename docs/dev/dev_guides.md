@@ -141,9 +141,9 @@ bootstrap does not perform live PR advisory work by default.
 Unsafe redaction settings fail closed with exit `6`; non-private MVP sharing
 posture also fails closed with exit `6`; explicit `embeddings: local` without a pulled
 artifact fails with exit `8`; disabled `distill.review_required` and unknown
-provider/config values fail with exit `2`; invalid memory-rule provenance,
-experience citations, or missing/non-accepted active review labels fail with
-exit `4`. The executable
+provider/config values fail with exit `2`; invalid memory-rule schema fields,
+provenance, experience citations, scope, metadata, or missing/non-accepted
+active review labels fail with exit `4`. The executable
 config schema accepts the documented PRD `advise` and `badge` sections without
 enabling live network or credentialed work by default. Config arrays may use
 block or inline YAML sequence syntax, including `redaction.patterns: [api_key,
@@ -152,6 +152,9 @@ token, password, secret]`. Version-only PRD bootstrap configs are normalized to
 validation. The risk-assessment schema keeps PRD-required matched rules with
 citations and coverage stats explicit, and the recurrence-report headline keeps
 flake-discounted and uncertain-attribution counts explicit.
+Experience-record signatures keep signature class, check name, key, message
+fingerprint, and extraction confidence in the shard so recurrence pairing does
+not depend on a separate index being present.
 
 ## Structured Data, Proof, Budgets, And Redaction
 
@@ -161,16 +164,18 @@ flake-discounted and uncertain-attribution counts explicit.
   allowed enum values, a forward-compatible `metadata` object, and
   `x-relia_error_mapping` for stable CLI exits.
 - Experience record action blocks use canonical `pr` and `commits` fields;
-  experience, coverage, and recurrence artifact schemas use canonical repo
-  identifier strings, and recurrence report `error_recurrence_rate` is a
-  bounded `0` through `1` proportion.
+  embedded signatures preserve signature class, check name, key, message
+  fingerprint, and extraction confidence; experience, coverage, and recurrence
+  artifact schemas use canonical repo identifier strings, and recurrence report
+  `error_recurrence_rate` is a bounded `0` through `1` proportion.
 - Risk-assessment artifacts must preserve `matched_rules` with citations and
   `coverage_stats`, and recurrence reports must preserve
   `attribution_uncertain_count` and `flake_discounted_count`.
 - Outcome and failure-signature schemas must use the PRD taxonomy names:
   `revert`, `merge_clean`, and `type_failure`. Memory-rule schemas must keep
-  the durable artifact fields `id`, `status`, `evidence`, and PR-backed
-  `provenance`.
+  the durable artifact fields `object_type`, `schema_version`, `id`, `kind`,
+  `status`, `statement`, `confidence`, `evidence`, `review`, `scope`,
+  PR-backed `provenance`, and `metadata`.
 - Structured check-run data is preferred over log parsing; any log-parsed
   fallback must be labeled and validated.
 - Task closure must name the required proof level: syntax, source evidence,

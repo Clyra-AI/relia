@@ -501,11 +501,12 @@ func internalError(message string, err error) *CommandError {
 }
 
 type parsedYAML struct {
-	scalars  map[string]string
-	lists    map[string][]string
-	objects  map[string]struct{}
-	keys     map[string]struct{}
-	children map[string]map[string]struct{}
+	scalars         map[string]string
+	lists           map[string][]string
+	listItemObjects map[string][]map[string]string
+	objects         map[string]struct{}
+	keys            map[string]struct{}
+	children        map[string]map[string]struct{}
 }
 
 type reliaConfigSummary struct {
@@ -882,14 +883,67 @@ func validateMemoryRules(root string, memoryRoot string) ([]string, *CommandErro
 }
 
 func validateMemoryRuleContract(rel string, parsed parsedYAML) *CommandError {
+	if parsed.scalar("object_type") != "relia.memory_rule" {
+		return artifactValidationError("memory rule object_type must be relia.memory_rule", rel)
+	}
+	if parsed.scalar("schema_version") != commandSchemaVersion {
+		return artifactValidationError(`memory rule schema_version must be "1.0"`, rel)
+	}
+	if parsed.scalar("id") == "" {
+		return artifactValidationError("memory rule id is required", rel)
+	}
+	if !containsString([]string{"avoid", "playbook"}, parsed.scalar("kind")) {
+		return artifactValidationError("memory rule kind must be avoid or playbook", rel)
+	}
 	if parsed.scalar("status") == "" {
 		return artifactValidationError("memory rule status is required", rel)
+	}
+	if !containsString([]string{"candidate", "active", "stale", "contradicted", "retired"}, parsed.scalar("status")) {
+		return artifactValidationError("memory rule status is not valid", rel)
+	}
+	if parsed.scalar("statement") == "" {
+		return artifactValidationError("memory rule statement is required", rel)
+	}
+	confidence, ok := parsed.numberScalar("confidence")
+	if !ok || confidence < 0 || confidence > 1 {
+		return artifactValidationError("memory rule confidence must be a number between 0 and 1", rel)
+	}
+	if !parsed.pathExists("evidence.count") {
+		return artifactValidationError("memory rule evidence count is required", rel)
+	}
+	evidenceCount, err := strconv.Atoi(parsed.scalar("evidence.count"))
+	if err != nil || evidenceCount < 1 {
+		return artifactValidationError("memory rule evidence count must be at least 1", rel)
 	}
 	if len(parsed.lists["evidence.experiences"]) == 0 {
 		return artifactValidationError("memory rule has no experience citations", rel)
 	}
+	if !parsed.pathExists("review.label") {
+		return artifactValidationError("memory rule review label is required", rel)
+	}
+	if !containsString([]string{"accepted", "suggested", "needs_user_input", "rejected"}, parsed.scalar("review.label")) {
+		return artifactValidationError("memory rule review label is not valid", rel)
+	}
+	if len(parsed.lists["scope.paths"]) == 0 && len(parsed.lists["scope.signals"]) == 0 {
+		return artifactValidationError("memory rule scope must include paths or signals", rel)
+	}
 	if len(parsed.lists["provenance"]) == 0 {
 		return artifactValidationError("memory rule has no provenance entries", rel)
+	}
+	for _, item := range parsed.listItemObjects["provenance"] {
+		if item["pr"] == "" {
+			return artifactValidationError("memory rule provenance pr is required", rel)
+		}
+		outcome := item["outcome"]
+		if outcome == "" {
+			return artifactValidationError("memory rule provenance outcome is required", rel)
+		}
+		if !containsString([]string{"ci_failure", "revert", "review_correction", "merge_clean", "fix_held"}, outcome) {
+			return artifactValidationError("memory rule provenance outcome is not valid", rel)
+		}
+	}
+	if parsed.scalar("metadata.relia_version") == "" {
+		return artifactValidationError("memory rule metadata.relia_version is required", rel)
 	}
 	if parsed.scalar("status") == "active" {
 		label := parsed.scalar("review.label")
@@ -1107,11 +1161,12 @@ func schemaValueForMessage(value any) string {
 
 func parseBaselineYAML(content string) (parsedYAML, error) {
 	parsed := parsedYAML{
-		scalars:  map[string]string{},
-		lists:    map[string][]string{},
-		objects:  map[string]struct{}{},
-		keys:     map[string]struct{}{},
-		children: map[string]map[string]struct{}{},
+		scalars:         map[string]string{},
+		lists:           map[string][]string{},
+		listItemObjects: map[string][]map[string]string{},
+		objects:         map[string]struct{}{},
+		keys:            map[string]struct{}{},
+		children:        map[string]map[string]struct{}{},
 	}
 	var section string
 	var listPath string
@@ -1134,6 +1189,10 @@ func parseBaselineYAML(content string) (parsedYAML, error) {
 			blockScalarIndent = -1
 		}
 		if listPath != "" && indent > listItemIndent {
+			if key, value, ok := splitYAMLKeyValue(trimmed); ok && len(parsed.listItemObjects[listPath]) > 0 {
+				lastIndex := len(parsed.listItemObjects[listPath]) - 1
+				parsed.listItemObjects[listPath][lastIndex][key] = value
+			}
 			continue
 		}
 		if strings.HasPrefix(trimmed, "- ") {
@@ -1155,7 +1214,13 @@ func parseBaselineYAML(content string) (parsedYAML, error) {
 				return parsed, fmt.Errorf("line %d: list item has no parent key", lineNumber+1)
 			}
 			delete(parsed.objects, listPath)
-			parsed.lists[listPath] = append(parsed.lists[listPath], cleanYAMLScalar(strings.TrimSpace(strings.TrimPrefix(trimmed, "- "))))
+			item := cleanYAMLScalar(strings.TrimSpace(strings.TrimPrefix(trimmed, "- ")))
+			parsed.lists[listPath] = append(parsed.lists[listPath], item)
+			itemObject := map[string]string{}
+			if key, value, ok := splitYAMLKeyValue(item); ok {
+				itemObject[key] = value
+			}
+			parsed.listItemObjects[listPath] = append(parsed.listItemObjects[listPath], itemObject)
 			continue
 		}
 		key, rawValue, ok := strings.Cut(trimmed, ":")
@@ -1272,9 +1337,13 @@ func (parsed *parsedYAML) setScalar(path string, value string) {
 	if parsed.lists == nil {
 		parsed.lists = map[string][]string{}
 	}
+	if parsed.listItemObjects == nil {
+		parsed.listItemObjects = map[string][]map[string]string{}
+	}
 	parsed.scalars[path] = value
 	parsed.keys[path] = struct{}{}
 	delete(parsed.lists, path)
+	delete(parsed.listItemObjects, path)
 	delete(parsed.objects, path)
 	if parent, child, ok := strings.Cut(path, "."); ok {
 		parsed.keys[parent] = struct{}{}
@@ -1359,6 +1428,18 @@ func stripYAMLComment(value string) string {
 		}
 	}
 	return strings.TrimSpace(value)
+}
+
+func splitYAMLKeyValue(value string) (string, string, bool) {
+	key, rawValue, ok := strings.Cut(value, ":")
+	if !ok {
+		return "", "", false
+	}
+	key = strings.TrimSpace(key)
+	if key == "" || strings.ContainsAny(key, " \t") {
+		return "", "", false
+	}
+	return key, cleanYAMLScalar(rawValue), true
 }
 
 func parseInlineYAMLSequence(value string) ([]string, bool, error) {

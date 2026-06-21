@@ -98,10 +98,20 @@
     "signature_ref": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["signature_id", "extraction_confidence"],
+      "required": ["key", "message_fingerprint", "extraction_confidence"],
+      "anyOf": [
+        {"required": ["signature_class"]},
+        {"required": ["class"]}
+      ],
       "properties": {
         "signature_id": {"type": "string", "minLength": 1},
-        "extraction_confidence": {"enum": ["structured", "log_parse_high", "log_parse_low"]}
+        "signature_class": {"enum": ["test_failure", "lint_failure", "type_failure", "build_failure", "review_correction", "revert"]},
+        "class": {"enum": ["test_failure", "lint_failure", "type_failure", "build_failure", "review_correction", "revert"]},
+        "check_name": {"type": "string", "minLength": 1},
+        "check": {"type": "string", "minLength": 1},
+        "key": {"type": "string", "minLength": 1},
+        "message_fingerprint": {"type": "string", "minLength": 1},
+        "extraction_confidence": {"enum": ["structured", "log_parse_high", "log_parse_low", "high", "medium", "low"]}
       }
     },
     "provenance_ref": {

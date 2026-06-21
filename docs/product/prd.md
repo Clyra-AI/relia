@@ -514,7 +514,8 @@ It must be:
 ### Minimal Rule
 
 ```yaml
-version: 1
+object_type: relia.memory_rule
+schema_version: "1.0"
 id: avoid-mocking-datetime-directly
 kind: avoid              # avoid | playbook
 status: active           # candidate | active | stale | contradicted | retired
@@ -561,11 +562,14 @@ review:
   label: accepted        # accepted | suggested | needs_user_input
   reviewed_by: maintainer
   statement_origin: llm_drafted   # llm_drafted | cluster_summary | human_authored
+
+metadata:
+  relia_version: 0.0.0-dev
 ```
 
 ### Contract Rules
 
-- A minimal rule must include `id`, `kind`, `status`, `statement`, `confidence`, `evidence` with at least one experience citation, and `provenance` with at least one PR reference.
+- A minimal rule must include `object_type`, `schema_version`, `id`, `kind`, `status`, `statement`, `confidence`, `evidence` with at least one experience citation, `review`, `scope`, `provenance` with at least one PR reference, and `metadata`.
 - A rule with zero provenance entries must fail `relia check` (exit 4) and must never render in the memory page, the compiled block, an MCP response, or a PR comment.
 - Drafted rules must be reviewed and labeled before reaching `active`. `review_required: true` is the default; turning it off is an explicit configuration choice surfaced in `relia check`.
 - Statements must be scoped and falsifiable. A drafted statement with no path scope and no signal scope must be labeled `needs_user_input`, never `suggested`.
@@ -1205,7 +1209,7 @@ Required fields:
 - attribution block with method and confidence
 - context block with paths and diff fingerprint
 - action block with PR and commit references
-- outcome block with kind, terminal state, and signature (including extraction confidence)
+- outcome block with kind, terminal state, and signature (including signature class, check name, key, message fingerprint, and extraction confidence)
 - provenance block with resolvable URLs
 - `flake_discount`, `org_eligible`, `redaction_status`
 

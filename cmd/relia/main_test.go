@@ -513,6 +513,41 @@ func TestCheckValidatesActiveMemoryRuleContractBeforePass(t *testing.T) {
 			messageWant: "experience citations",
 		},
 		{
+			name:        "missing object type",
+			rule:        strings.Replace(validMemoryRuleYAMLForTest(), "object_type: relia.memory_rule\n", "", 1),
+			messageWant: "object_type",
+		},
+		{
+			name:        "missing schema version",
+			rule:        strings.Replace(validMemoryRuleYAMLForTest(), "schema_version: \"1.0\"\n", "", 1),
+			messageWant: "schema_version",
+		},
+		{
+			name:        "missing kind",
+			rule:        strings.Replace(validMemoryRuleYAMLForTest(), "kind: avoid\n", "", 1),
+			messageWant: "kind",
+		},
+		{
+			name:        "missing confidence",
+			rule:        strings.Replace(validMemoryRuleYAMLForTest(), "confidence: 0.82\n", "", 1),
+			messageWant: "confidence",
+		},
+		{
+			name:        "missing scope",
+			rule:        strings.Replace(validMemoryRuleYAMLForTest(), "scope:\n  paths:\n    - cmd/relia/**\n", "", 1),
+			messageWant: "scope",
+		},
+		{
+			name:        "missing metadata",
+			rule:        strings.Replace(validMemoryRuleYAMLForTest(), "metadata:\n  relia_version: 0.0.0-dev\n", "", 1),
+			messageWant: "metadata",
+		},
+		{
+			name:        "missing provenance outcome",
+			rule:        strings.Replace(validMemoryRuleYAMLForTest(), "    outcome: ci_failure\n", "", 1),
+			messageWant: "provenance outcome",
+		},
+		{
 			name:        "missing active review label",
 			rule:        strings.Replace(validMemoryRuleYAMLForTest(), "  label: accepted\n", "", 1),
 			messageWant: "review label",
@@ -988,6 +1023,38 @@ func TestExperienceRecordSchemaAcceptsCanonicalActionNames(t *testing.T) {
 	}
 }
 
+func TestExperienceRecordSchemaPreservesEmbeddedSignatureDetails(t *testing.T) {
+	root := findRepoRootForTest(t)
+	schema := readSchemaForTest(t, root, "schemas/experience-record.schema.json")
+	defs, ok := schema["$defs"].(map[string]any)
+	if !ok {
+		t.Fatal("experience schema definitions missing")
+	}
+	signature, ok := defs["signature_ref"].(map[string]any)
+	if !ok {
+		t.Fatal("signature_ref definition missing")
+	}
+	signatureRequired, ok := signature["required"].([]any)
+	if !ok {
+		t.Fatal("signature_ref required missing")
+	}
+	for _, want := range []string{"key", "message_fingerprint", "extraction_confidence"} {
+		if !containsStringValue(signatureRequired, want) {
+			t.Fatalf("signature_ref required = %#v, want %s", signatureRequired, want)
+		}
+	}
+	signatureProperties := schemaPropertiesForTest(t, "experience.signature_ref", signature)
+	for _, want := range []string{"signature_id", "signature_class", "check_name", "key", "message_fingerprint", "extraction_confidence"} {
+		if _, ok := signatureProperties[want]; !ok {
+			t.Fatalf("signature_ref properties = %#v, want %s", signatureProperties, want)
+		}
+	}
+	signatureClassEnum := enumForTest(t, "experience.signature_ref.signature_class", propertyForTest(t, signatureProperties, "signature_class"))
+	if !containsStringValue(signatureClassEnum, "type_failure") {
+		t.Fatalf("signature_ref signature_class enum = %#v, want type_failure", signatureClassEnum)
+	}
+}
+
 func TestRecurrenceReportSchemaCapsErrorRecurrenceRate(t *testing.T) {
 	root := findRepoRootForTest(t)
 	schema := readSchemaForTest(t, root, "schemas/recurrence-report.schema.json")
@@ -1379,7 +1446,8 @@ func writeMemoryRuleForTest(t *testing.T, root string, content string) {
 }
 
 func validMemoryRuleYAMLForTest() string {
-	return `version: 1
+	return `object_type: relia.memory_rule
+schema_version: "1.0"
 id: active-rule
 kind: avoid
 status: active
