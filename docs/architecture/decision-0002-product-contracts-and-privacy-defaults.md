@@ -32,11 +32,14 @@ validates the schema files before reporting the local operating pack as ready.
 Outcome and failure-signature contracts use the PRD taxonomy names `revert`,
 `merge_clean`, and `type_failure`. Memory-rule contracts use the documented
 durable-rule shape with `id`, `status`, required `evidence`, and non-empty
-PR-backed `provenance`.
+PR-backed `provenance`. The config contract admits the documented PR advisory
+and badge sections while keeping the human review gate mandatory for MVP
+configs.
 
 The default config remains deterministic and offline:
 
 - `distill.embeddings: signature`
+- `distill.review_required: true`
 - `redaction.entropy_scan: true`
 - `redaction.fail_closed: true`
 - `memory.commit_experiences: false`

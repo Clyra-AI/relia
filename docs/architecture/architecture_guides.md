@@ -27,7 +27,9 @@ adds Phase 0 artifact schemas under `schemas/`. `relia check` is the state owner
 for local validation of config privacy defaults, schema contract presence, and
 artifact layout reporting. Those schemas follow the PRD outcome and
 failure-signature taxonomy and keep memory rules aligned to the durable
-`id`/`status`/`evidence`/`provenance` artifact shape. See
+`id`/`status`/`evidence`/`provenance` artifact shape. The config contract
+accepts documented advisory and badge settings, but the MVP review gate remains
+mandatory until a later approved delivery slice changes that posture. See
 [decision-0002-product-contracts-and-privacy-defaults.md](decision-0002-product-contracts-and-privacy-defaults.md).
 
 ## Systems Thinking Map

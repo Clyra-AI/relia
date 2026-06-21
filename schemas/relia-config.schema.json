@@ -51,7 +51,7 @@
       "properties": {
         "provider": {"enum": ["anthropic", "openai-compatible"]},
         "embeddings": {"enum": ["signature", "local", "provider"]},
-        "review_required": {"type": "boolean"}
+        "review_required": {"const": true}
       }
     },
     "memory": {
@@ -70,6 +70,25 @@
       "required": ["advisory_only"],
       "properties": {
         "advisory_only": {"const": true}
+      }
+    },
+    "advise": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "max_comments_per_pr": {"type": "integer", "minimum": 1},
+        "update_in_place": {"type": "boolean"},
+        "reassess_debounce_minutes": {"type": "integer", "minimum": 0},
+        "min_confidence": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "badge": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "stale_after_days": {"type": "integer", "minimum": 1},
+        "stale_after_merged_prs": {"type": "integer", "minimum": 1}
       }
     },
     "gate": {

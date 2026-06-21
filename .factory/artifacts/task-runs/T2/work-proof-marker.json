@@ -6,33 +6,30 @@
   "implementation_performed": true,
   "changed_paths": [
     "README.md",
+    "cmd/relia/main.go",
     "cmd/relia/main_test.go",
     "docs/architecture/architecture_guides.md",
     "docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md",
     "docs/dev/dev_guides.md",
-    "schemas/experience-record.schema.json",
-    "schemas/failure-signature.schema.json",
-    "schemas/memory-rule.schema.json",
-    "schemas/outcome-evidence.schema.json",
+    "schemas/relia-config.schema.json",
     ".factory/artifacts/task-runs/T2/work-proof-marker.json",
     ".factory/artifacts/task-runs/T2/validation-report.json"
   ],
   "evidence_refs": [
     ".factory/artifacts/task-runs/T2/validation-report.json"
   ],
-  "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-4",
+  "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-5",
   "summary": {
     "implemented_contracts": [
-      "experience and outcome-evidence schemas use the PRD canonical outcome kinds revert and merge_clean",
-      "failure-signature schema uses the PRD canonical type_failure signature class",
-      "memory-rule schema uses the PRD durable artifact fields id, status, evidence, and PR-backed provenance",
-      "schema regression tests assert the canonical taxonomy and memory-rule artifact shape",
-      "README, dev guide, architecture guide, and T2 architecture decision document the corrected public schema contract"
+      "relia config schema accepts the PRD-documented top-level advise and badge sections while retaining a closed top-level contract",
+      "distill.review_required is locked to true in the config schema",
+      "relia check rejects disabled distill.review_required as a local configuration error",
+      "schema and CLI regression tests cover advisory sections, badge settings, and the mandatory review gate",
+      "README, dev guide, architecture guide, and T2 decision note document the repaired public config contract"
     ],
     "resolved_review_findings": [
-      "accepted PRD outcome kind names in experience-record and outcome-evidence contracts",
-      "replaced typecheck_failure with type_failure in the failure-signature contract",
-      "aligned memory-rule required fields and provenance shape with the PRD minimal durable-artifact format"
+      "allowed documented advisory config sections advise and badge in schemas/relia-config.schema.json",
+      "kept the MVP human-review gate required by rejecting distill.review_required: false in both schema and relia check validation"
     ],
     "lifecycle_boundary": "task-executor repair only; commit, PR update, scope closure, validation-gate, and post-merge evidence are left to their required workers"
   }

@@ -137,7 +137,10 @@ T2 extends `relia check` beyond file presence. It validates the versioned
 the artifact layout contract surfaced in the command-result `data` object.
 Unsafe redaction settings fail closed with exit `6`; non-private MVP sharing
 posture fails with exit `4`; explicit `embeddings: local` without a pulled
-artifact fails with exit `8`; unknown provider/config values fail with exit `2`.
+artifact fails with exit `8`; disabled `distill.review_required` and unknown
+provider/config values fail with exit `2`. The executable config schema accepts
+the documented PRD `advise` and `badge` sections without enabling live network
+or credentialed work by default.
 
 ## Structured Data, Proof, Budgets, And Redaction
 

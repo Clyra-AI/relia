@@ -362,6 +362,21 @@ func TestCheckRejectsUnknownDistillProvider(t *testing.T) {
 	}
 }
 
+func TestCheckRejectsDisabledReviewGate(t *testing.T) {
+	repo := writeMinimalRepoForCheck(t, strings.Replace(defaultConfigYAML(), "review_required: true", "review_required: false", 1))
+	t.Chdir(repo)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitUsage {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "local_configuration_error" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+}
+
 func TestCheckFailsClosedWhenRedactionDefaultsAreUnsafe(t *testing.T) {
 	config := strings.NewReplacer(
 		"entropy_scan: true", "entropy_scan: false",
@@ -560,6 +575,32 @@ func TestSchemaFilesDeclareVersionMetadataAndExitMapping(t *testing.T) {
 		if _, ok := schema["x-relia_error_mapping"].(map[string]any); !ok {
 			t.Fatalf("%s missing x-relia_error_mapping", rel)
 		}
+	}
+}
+
+func TestReliaConfigSchemaAllowsDocumentedAdvisorySections(t *testing.T) {
+	root := findRepoRootForTest(t)
+	schema := readSchemaForTest(t, root, "schemas/relia-config.schema.json")
+	properties := schemaPropertiesForTest(t, "schemas/relia-config.schema.json", schema)
+
+	for _, section := range []string{"advise", "badge"} {
+		property := propertyForTest(t, properties, section)
+		if property["type"] != "object" {
+			t.Fatalf("%s type = %#v, want object", section, property["type"])
+		}
+	}
+}
+
+func TestReliaConfigSchemaRequiresReviewGate(t *testing.T) {
+	root := findRepoRootForTest(t)
+	schema := readSchemaForTest(t, root, "schemas/relia-config.schema.json")
+	properties := schemaPropertiesForTest(t, "schemas/relia-config.schema.json", schema)
+	distill := propertyForTest(t, properties, "distill")
+	distillProperties := schemaPropertiesForTest(t, "relia_config.distill", distill)
+	reviewRequired := propertyForTest(t, distillProperties, "review_required")
+
+	if reviewRequired["const"] != true {
+		t.Fatalf("distill.review_required = %#v, want const true", reviewRequired)
 	}
 }
 

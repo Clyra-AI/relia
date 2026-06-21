@@ -620,6 +620,13 @@ func loadAndValidateConfig(root string) (reliaConfigSummary, []Finding, *Command
 	if embeddings == "provider" && provider == "" {
 		return summary, nil, dependencyError("provider embeddings require distill.provider", defaultConfigFile)
 	}
+	reviewRequired, ok := parsed.boolScalar("distill.review_required")
+	if !ok {
+		return summary, nil, configError("distill.review_required must be declared")
+	}
+	if !reviewRequired {
+		return summary, nil, configError("distill.review_required must remain true in the MVP")
+	}
 
 	entropyScan, ok := parsed.boolScalar("redaction.entropy_scan")
 	if !ok {
