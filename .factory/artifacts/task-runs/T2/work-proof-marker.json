@@ -4,16 +4,17 @@
   "task_id": "T2",
   "status": "implemented",
   "implementation_performed": true,
-  "produced_at": "2026-06-21T16:43:36Z",
-  "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-19",
+  "produced_at": "2026-06-21T16:51:32Z",
+  "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-21",
   "changed_paths": [
     "README.md",
+    "cmd/relia/main.go",
     "cmd/relia/main_test.go",
     "docs/architecture/architecture_guides.md",
     "docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md",
     "docs/dev/dev_guides.md",
-    "schemas/recurrence-report.schema.json",
-    "schemas/risk-assessment.schema.json",
+    "schemas/experience-record.schema.json",
+    "schemas/memory-rule.schema.json",
     ".factory/artifacts/task-runs/T2/work-proof-marker.json",
     ".factory/artifacts/task-runs/T2/validation-report.json"
   ],
@@ -21,28 +22,29 @@
     ".factory/artifacts/task-runs/T2/validation-report.json"
   ],
   "summary": {
-    "repair_iteration_note": "Repair-19 resolves the latest actionable Codex review findings by preserving matched-rule, citation, coverage, flake-discount, and uncertain-attribution fields in the sealed artifact schemas.",
+    "repair_iteration_note": "Repair-21 resolves the latest actionable Codex review findings for canonical experience action fields and active memory-rule review labels, while verifying the recurrence-report flake and attribution count repair is already present on this head.",
     "implemented_contracts": [
-      "schemas/risk-assessment.schema.json now requires matched_rules and coverage_stats so relia assess, MCP assess, and the PR advisor can share one RiskAssessment contract with citations and OOD coverage detail.",
-      "schemas/recurrence-report.schema.json now requires attribution_uncertain_count and flake_discounted_count in headline reports so trust-critical exclusions remain visible in JSON output.",
-      "cmd/relia/main_test.go includes regression tests that fail when those schema fields are missing.",
-      "README, dev guide, architecture guide, and the T2 decision note document the repaired schema contract."
+      "schemas/experience-record.schema.json now uses the PRD canonical action fields pr and commits.",
+      "cmd/relia/main.go now rejects active memory rules unless review.label is accepted.",
+      "schemas/memory-rule.schema.json now encodes the same active-status accepted-review constraint.",
+      "cmd/relia/main_test.go includes regression coverage for canonical action names, rejected or needs_user_input active review labels, and the memory-rule schema conditional.",
+      "README, dev guide, architecture guide, and the T2 decision note document the repaired schema and validator contracts."
     ],
     "resolved_review_findings": [
       {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448730703",
-        "status": "implemented",
-        "summary": "RiskAssessment schema now carries matched_rules with citations and coverage_stats."
-      },
-      {
         "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448730706",
-        "status": "implemented",
-        "summary": "Recurrence report headline schema now preserves flake-discounted and uncertain-attribution counts."
+        "status": "already_implemented_verified",
+        "summary": "The recurrence-report headline schema already requires attribution_uncertain_count and flake_discounted_count, with regression coverage in cmd/relia/main_test.go."
       },
       {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448723354",
-        "status": "already_implemented_verified",
-        "summary": "The documented version-only PRD bootstrap config repair remains covered by the existing test suite and docs."
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448744661",
+        "status": "implemented",
+        "summary": "The experience-record action schema now accepts the PRD canonical pr and commits field names."
+      },
+      {
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448744665",
+        "status": "implemented",
+        "summary": "Active memory rules now require an accepted review label in both relia check and the memory-rule schema contract."
       }
     ],
     "lifecycle_boundary": "task-executor repair only; commit, PR update, scope closure, validation-gate, and post-merge evidence are left to their required workers"

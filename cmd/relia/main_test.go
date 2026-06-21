@@ -517,6 +517,16 @@ func TestCheckValidatesActiveMemoryRuleContractBeforePass(t *testing.T) {
 			rule:        strings.Replace(validMemoryRuleYAMLForTest(), "  label: accepted\n", "", 1),
 			messageWant: "review label",
 		},
+		{
+			name:        "rejected active review label",
+			rule:        strings.Replace(validMemoryRuleYAMLForTest(), "  label: accepted\n", "  label: rejected\n", 1),
+			messageWant: "accepted",
+		},
+		{
+			name:        "needs input active review label",
+			rule:        strings.Replace(validMemoryRuleYAMLForTest(), "  label: accepted\n", "  label: needs_user_input\n", 1),
+			messageWant: "accepted",
+		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			repo := writeMinimalRepoForFullCheck(t, defaultConfigYAML())
@@ -957,6 +967,27 @@ func TestOutcomeSchemasUsePRDOutcomeTaxonomy(t *testing.T) {
 	}
 }
 
+func TestExperienceRecordSchemaAcceptsCanonicalActionNames(t *testing.T) {
+	root := findRepoRootForTest(t)
+	schema := readSchemaForTest(t, root, "schemas/experience-record.schema.json")
+	experienceProperties := schemaPropertiesForTest(t, "schemas/experience-record.schema.json", schema)
+	action := propertyForTest(t, experienceProperties, "action")
+	actionProperties := schemaPropertiesForTest(t, "experience.action", action)
+	actionRequired, ok := action["required"].([]any)
+	if !ok {
+		t.Fatal("experience.action required missing")
+	}
+
+	for _, want := range []string{"pr", "commits"} {
+		if !containsStringValue(actionRequired, want) {
+			t.Fatalf("experience.action required = %#v, want %s", actionRequired, want)
+		}
+		if _, ok := actionProperties[want]; !ok {
+			t.Fatalf("experience.action properties = %#v, want %s", actionProperties, want)
+		}
+	}
+}
+
 func TestRecurrenceReportSchemaCapsErrorRecurrenceRate(t *testing.T) {
 	root := findRepoRootForTest(t)
 	schema := readSchemaForTest(t, root, "schemas/recurrence-report.schema.json")
@@ -1145,6 +1176,45 @@ func TestMemoryRuleSchemaMatchesPRDArtifactShape(t *testing.T) {
 			t.Fatalf("memory-rule provenance outcome enum = %#v, must use PRD outcome names", provenanceOutcomeEnum)
 		}
 	}
+}
+
+func TestMemoryRuleSchemaRequiresAcceptedReviewForActiveStatus(t *testing.T) {
+	root := findRepoRootForTest(t)
+	schema := readSchemaForTest(t, root, "schemas/memory-rule.schema.json")
+	allOf, ok := schema["allOf"].([]any)
+	if !ok {
+		t.Fatal("memory-rule allOf missing")
+	}
+
+	for _, rawClause := range allOf {
+		clause, ok := rawClause.(map[string]any)
+		if !ok {
+			continue
+		}
+		ifClause, ok := clause["if"].(map[string]any)
+		if !ok {
+			continue
+		}
+		ifProperties := schemaPropertiesForTest(t, "memory_rule.allOf.if", ifClause)
+		status, ok := ifProperties["status"].(map[string]any)
+		if !ok || status["const"] != "active" {
+			continue
+		}
+		thenClause, ok := clause["then"].(map[string]any)
+		if !ok {
+			t.Fatal("active status conditional missing then clause")
+		}
+		thenProperties := schemaPropertiesForTest(t, "memory_rule.allOf.then", thenClause)
+		review := propertyForTest(t, thenProperties, "review")
+		reviewProperties := schemaPropertiesForTest(t, "memory_rule.allOf.then.review", review)
+		label := propertyForTest(t, reviewProperties, "label")
+		if label["const"] != "accepted" {
+			t.Fatalf("active review label const = %#v, want accepted", label["const"])
+		}
+		return
+	}
+
+	t.Fatal("memory-rule schema does not constrain active rules to accepted review labels")
 }
 
 func runForTest(t *testing.T, args []string, stdoutIsTTY bool) (string, string, int) {

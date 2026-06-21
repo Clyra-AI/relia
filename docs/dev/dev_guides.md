@@ -142,7 +142,8 @@ Unsafe redaction settings fail closed with exit `6`; non-private MVP sharing
 posture also fails closed with exit `6`; explicit `embeddings: local` without a pulled
 artifact fails with exit `8`; disabled `distill.review_required` and unknown
 provider/config values fail with exit `2`; invalid memory-rule provenance,
-experience citations, or active review labels fail with exit `4`. The executable
+experience citations, or missing/non-accepted active review labels fail with
+exit `4`. The executable
 config schema accepts the documented PRD `advise` and `badge` sections without
 enabling live network or credentialed work by default. Config arrays may use
 block or inline YAML sequence syntax, including `redaction.patterns: [api_key,
@@ -159,7 +160,8 @@ flake-discounted and uncertain-attribution counts explicit.
 - Phase 0 schema contracts must declare `schema_version`, required fields,
   allowed enum values, a forward-compatible `metadata` object, and
   `x-relia_error_mapping` for stable CLI exits.
-- Experience, coverage, and recurrence artifact schemas use canonical repo
+- Experience record action blocks use canonical `pr` and `commits` fields;
+  experience, coverage, and recurrence artifact schemas use canonical repo
   identifier strings, and recurrence report `error_recurrence_rate` is a
   bounded `0` through `1` proportion.
 - Risk-assessment artifacts must preserve `matched_rules` with citations and

@@ -891,8 +891,14 @@ func validateMemoryRuleContract(rel string, parsed parsedYAML) *CommandError {
 	if len(parsed.lists["provenance"]) == 0 {
 		return artifactValidationError("memory rule has no provenance entries", rel)
 	}
-	if parsed.scalar("status") == "active" && parsed.scalar("review.label") == "" {
-		return artifactValidationError("active rule has no review label", rel)
+	if parsed.scalar("status") == "active" {
+		label := parsed.scalar("review.label")
+		if label == "" {
+			return artifactValidationError("active rule has no accepted review label", rel)
+		}
+		if label != "accepted" {
+			return artifactValidationError("active rule review label must be accepted", rel)
+		}
 	}
 	return nil
 }

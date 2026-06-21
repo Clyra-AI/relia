@@ -5,6 +5,23 @@
   "type": "object",
   "additionalProperties": false,
   "required": ["object_type", "schema_version", "id", "kind", "status", "statement", "confidence", "evidence", "review", "scope", "provenance", "metadata"],
+  "allOf": [
+    {
+      "if": {
+        "properties": {"status": {"const": "active"}},
+        "required": ["status"]
+      },
+      "then": {
+        "properties": {
+          "review": {
+            "properties": {
+              "label": {"const": "accepted"}
+            }
+          }
+        }
+      }
+    }
+  ],
   "x-relia_error_mapping": {
     "invalid_input": 2,
     "artifact_validation": 4,

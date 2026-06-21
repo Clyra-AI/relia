@@ -28,8 +28,9 @@ for local validation of config privacy defaults, schema contract presence, and
 artifact layout reporting. Those schemas follow the PRD outcome and
 failure-signature taxonomy and keep memory rules aligned to the durable
 `id`/`status`/`evidence`/`provenance` artifact shape. `relia check` validates
-active rules for experience citations, provenance entries, and review labels
-before reporting the operating pack as ready. Experience, coverage, and
+active rules for experience citations, provenance entries, and accepted review
+labels before reporting the operating pack as ready. Experience record action
+blocks use canonical `pr` and `commits` fields. Experience, coverage, and
 recurrence artifacts use canonical repo identifier strings, and recurrence
 report ERR is bounded as a `0` through `1` proportion. Recurrence reports keep
 flake-discounted and uncertain-attribution counts visible, while risk

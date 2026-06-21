@@ -3,78 +3,62 @@
   "schema_version": "1.0",
   "task_id": "T2",
   "status": "pass",
-  "produced_at": "2026-06-21T16:43:36Z",
+  "produced_at": "2026-06-21T16:51:32Z",
+  "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-21",
   "commands_run": [
     "make lint-fast",
     "make test-fast",
-    "go test ./cmd/relia -run 'TestRecurrenceReportSchemaPreservesFlakeAndAttributionCounts|TestRiskAssessmentSchemaIncludesMatchedRulesAndCoverageStats' -count=1",
-    "gofmt -w cmd/relia/main_test.go",
-    "go test ./cmd/relia -run 'TestRecurrenceReportSchemaPreservesFlakeAndAttributionCounts|TestRiskAssessmentSchemaIncludesMatchedRulesAndCoverageStats' -count=1",
     "make test-fast",
-    "python3 -m json.tool schemas/risk-assessment.schema.json",
-    "python3 -m json.tool schemas/recurrence-report.schema.json",
-    "git diff --check",
+    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
+    "make test-fast",
+    "make lint-fast",
     "make prepush-full",
     "python3 -m json.tool .factory/artifacts/task-runs/T2/work-proof-marker.json",
-    "python3 -m json.tool .factory/artifacts/task-runs/T2/validation-report.json"
+    "python3 -m json.tool .factory/artifacts/task-runs/T2/validation-report.json",
+    "python3 -c \"import json, sys; bad=[]; [bad.append(p) for p in sys.argv[1:] if json.load(open(p)).get('status') in ('', None, 'blocked', 'failed', 'needs_repair')]; sys.exit(1 if bad else 0)\" .factory/artifacts/task-runs/T2/work-proof-marker.json .factory/artifacts/task-runs/T2/validation-report.json"
   ],
   "baseline_evidence": [
     {
       "command": "make lint-fast",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Baseline lint-fast passed before repair-19 edits."
+      "summary": "Baseline lint-fast passed before repair-21 edits."
     },
     {
       "command": "make test-fast",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Baseline go test ./... -count=1 passed before repair-19 edits."
+      "summary": "Baseline go test ./... -count=1 passed before repair-21 edits."
     }
   ],
   "red_evidence": [
     {
-      "command": "go test ./cmd/relia -run 'TestRecurrenceReportSchemaPreservesFlakeAndAttributionCounts|TestRiskAssessmentSchemaIncludesMatchedRulesAndCoverageStats' -count=1",
+      "command": "make test-fast",
       "status": "fail_expected",
-      "exit_code": 1,
-      "summary": "After adding repair-19 regression tests and before implementation, recurrence-report headline lacked attribution_uncertain_count and risk-assessment required lacked matched_rules."
+      "exit_code": 2,
+      "summary": "After adding repair-21 regression tests and before implementation, rejected and needs_user_input active review labels passed validation, and the experience-record action schema still required pr_ref and commit_refs."
     }
   ],
   "green_evidence": [
     {
-      "command": "go test ./cmd/relia -run 'TestRecurrenceReportSchemaPreservesFlakeAndAttributionCounts|TestRiskAssessmentSchemaIncludesMatchedRulesAndCoverageStats' -count=1",
-      "status": "pass",
-      "exit_code": 0,
-      "summary": "Focused repair tests passed after adding the required risk-assessment and recurrence-report schema fields."
-    },
-    {
       "command": "make test-fast",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Fast test lane passed after repair-19 edits."
+      "summary": "Fast test lane passed after implementing canonical action field names and accepted-review validation."
+    },
+    {
+      "command": "make lint-fast",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "Repo-pack lint passed after repair-21 edits."
     }
   ],
   "final_validation_evidence": [
     {
-      "command": "python3 -m json.tool schemas/risk-assessment.schema.json",
-      "status": "pass",
-      "exit_code": 0
-    },
-    {
-      "command": "python3 -m json.tool schemas/recurrence-report.schema.json",
-      "status": "pass",
-      "exit_code": 0
-    },
-    {
-      "command": "git diff --check",
-      "status": "pass",
-      "exit_code": 0
-    },
-    {
       "command": "make prepush-full",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Final gate passed lint-fast, test-fast, test-coverage, and test-contracts; coverage was 78.0% against the 75.0% threshold; repo pack reported ok."
+      "summary": "Final gate passed lint-fast, test-fast, test-coverage, and test-contracts; coverage was 78.1% against the 75.0% threshold; repo pack reported ok."
     },
     {
       "command": "python3 -m json.tool .factory/artifacts/task-runs/T2/work-proof-marker.json",
@@ -83,6 +67,11 @@
     },
     {
       "command": "python3 -m json.tool .factory/artifacts/task-runs/T2/validation-report.json",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "python3 -c \"import json, sys; bad=[]; [bad.append(p) for p in sys.argv[1:] if json.load(open(p)).get('status') in ('', None, 'blocked', 'failed', 'needs_repair')]; sys.exit(1 if bad else 0)\" .factory/artifacts/task-runs/T2/work-proof-marker.json .factory/artifacts/task-runs/T2/validation-report.json",
       "status": "pass",
       "exit_code": 0
     }
@@ -94,9 +83,9 @@
       "evidence_refs": [
         ".factory/artifacts/task-runs/T2/work-proof-marker.json",
         ".factory/artifacts/task-runs/T2/validation-report.json",
+        "cmd/relia/main.go",
         "cmd/relia/main_test.go",
-        "schemas/command-result.schema.json",
-        "examples/command-results/exit-code-examples.json"
+        "schemas/command-result.schema.json"
       ]
     },
     {
@@ -106,7 +95,8 @@
         ".factory/artifacts/task-runs/T2/work-proof-marker.json",
         ".factory/artifacts/task-runs/T2/validation-report.json",
         "cmd/relia/main_test.go",
-        "schemas/risk-assessment.schema.json",
+        "schemas/experience-record.schema.json",
+        "schemas/memory-rule.schema.json",
         "schemas/recurrence-report.schema.json"
       ]
     },
@@ -120,8 +110,8 @@
         "docs/dev/dev_guides.md",
         "docs/architecture/architecture_guides.md",
         "docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md",
-        "schemas/risk-assessment.schema.json",
-        "schemas/recurrence-report.schema.json"
+        "schemas/experience-record.schema.json",
+        "schemas/memory-rule.schema.json"
       ]
     },
     {
@@ -131,7 +121,8 @@
         ".factory/artifacts/task-runs/T2/work-proof-marker.json",
         ".factory/artifacts/task-runs/T2/validation-report.json",
         "docs/product/prd.md",
-        "schemas/risk-assessment.schema.json",
+        "schemas/experience-record.schema.json",
+        "schemas/memory-rule.schema.json",
         "schemas/recurrence-report.schema.json"
       ]
     }
@@ -142,12 +133,13 @@
     "forbidden_paths_changed_in_worker_diff": false,
     "checked_changed_paths": [
       "README.md",
+      "cmd/relia/main.go",
       "cmd/relia/main_test.go",
       "docs/architecture/architecture_guides.md",
       "docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md",
       "docs/dev/dev_guides.md",
-      "schemas/recurrence-report.schema.json",
-      "schemas/risk-assessment.schema.json",
+      "schemas/experience-record.schema.json",
+      "schemas/memory-rule.schema.json",
       ".factory/artifacts/task-runs/T2/work-proof-marker.json",
       ".factory/artifacts/task-runs/T2/validation-report.json"
     ],
@@ -158,27 +150,15 @@
   },
   "plan_drift_result": {
     "status": "pass",
-    "note": "Repair-19 stayed within the T2 contracts-config-and-validation slice. Runtime pins, dependency policy, provider posture, release boundaries, tracker state, commits, PRs, and scope closure were not changed."
+    "note": "Repair-21 stayed within the T2 contracts-config-and-validation slice. Runtime pins, dependency policy, provider posture, release boundaries, tracker state, commits, PRs, and scope closure were not changed."
   },
   "codex_review_repair_result": {
     "status": "implemented",
-    "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-19",
+    "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-21",
     "resolved_findings": [
       {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448730703",
-        "status": "implemented",
-        "evidence_refs": [
-          "cmd/relia/main_test.go",
-          "schemas/risk-assessment.schema.json",
-          "README.md",
-          "docs/dev/dev_guides.md",
-          "docs/architecture/architecture_guides.md",
-          "docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md"
-        ]
-      },
-      {
         "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448730706",
-        "status": "implemented",
+        "status": "already_implemented_verified",
         "evidence_refs": [
           "cmd/relia/main_test.go",
           "schemas/recurrence-report.schema.json",
@@ -189,13 +169,28 @@
         ]
       },
       {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448723354",
-        "status": "already_implemented_verified",
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448744661",
+        "status": "implemented",
+        "evidence_refs": [
+          "cmd/relia/main_test.go",
+          "schemas/experience-record.schema.json",
+          "README.md",
+          "docs/dev/dev_guides.md",
+          "docs/architecture/architecture_guides.md",
+          "docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md"
+        ]
+      },
+      {
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448744665",
+        "status": "implemented",
         "evidence_refs": [
           "cmd/relia/main.go",
           "cmd/relia/main_test.go",
-          "schemas/relia-config.schema.json",
-          "docs/dev/dev_guides.md"
+          "schemas/memory-rule.schema.json",
+          "README.md",
+          "docs/dev/dev_guides.md",
+          "docs/architecture/architecture_guides.md",
+          "docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md"
         ]
       }
     ],
@@ -205,11 +200,9 @@
       "docs/dev/dev_guides.md",
       "docs/architecture/architecture_guides.md",
       "docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md",
-      "schemas/risk-assessment.schema.json",
-      "schemas/recurrence-report.schema.json",
-      "schemas/coverage-map.schema.json",
+      "schemas/experience-record.schema.json",
       "schemas/memory-rule.schema.json",
-      "schemas/relia-config.schema.json",
+      "schemas/recurrence-report.schema.json",
       "cmd/relia/main.go",
       "cmd/relia/main_test.go"
     ]
@@ -222,7 +215,7 @@
       "docs/architecture/architecture_guides.md",
       "docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md"
     ],
-    "note": "Docs now state that risk assessments preserve matched rules with citations and coverage stats, and recurrence reports preserve flake-discounted and uncertain-attribution counts."
+    "note": "Docs now state that experience records use canonical pr/commits fields and active rules require accepted review labels."
   },
   "changelog_result": {
     "status": "not_applicable",
@@ -232,7 +225,7 @@
     "status": "pass",
     "schema_version": "1.0",
     "relia_version": "0.0.0-dev",
-    "migration_note": "Pre-1.0 MVP repair preserves schema_version 1.0 while extending sealed Phase 0 schemas before public release."
+    "migration_note": "Pre-1.0 MVP repair keeps schema_version 1.0 while aligning sealed Phase 0 schemas with the PRD before public release."
   },
   "blockers": [],
   "residual_risks": [
