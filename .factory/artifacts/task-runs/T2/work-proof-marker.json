@@ -4,8 +4,8 @@
   "task_id": "T2",
   "status": "implemented",
   "implementation_performed": true,
-  "produced_at": "2026-06-21T16:26:21Z",
-  "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-17",
+  "produced_at": "2026-06-21T16:36:44Z",
+  "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-18",
   "changed_paths": [
     "README.md",
     "cmd/relia/main.go",
@@ -13,8 +13,6 @@
     "docs/architecture/architecture_guides.md",
     "docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md",
     "docs/dev/dev_guides.md",
-    "schemas/experience-record.schema.json",
-    "schemas/recurrence-report.schema.json",
     ".factory/artifacts/task-runs/T2/work-proof-marker.json",
     ".factory/artifacts/task-runs/T2/validation-report.json"
   ],
@@ -22,28 +20,28 @@
     ".factory/artifacts/task-runs/T2/validation-report.json"
   ],
   "summary": {
-    "repair_iteration_note": "Repair-17 resolves the latest actionable Codex review findings for experience-record repo shape, recurrence ERR bounds, and inline YAML sequence parsing.",
+    "repair_iteration_note": "Repair-18 resolves the latest actionable Codex review findings for memory-rule validation before pass, documented version-only PRD bootstrap configs, and verifies the inline YAML sequence repair remains covered.",
     "implemented_contracts": [
-      "schemas/experience-record.schema.json accepts the PRD canonical repo identifier as a non-empty string.",
-      "schemas/recurrence-report.schema.json caps headline.error_recurrence_rate at 1 because ERR is confirmed recurrences divided by total agent-attributed failures.",
-      "relia check accepts inline scalar YAML sequences such as redaction.patterns: [api_key, token, password, secret] without weakening fail-closed redaction checks.",
-      "README, dev guide, architecture guide, and T2 decision note document the repaired schema and config contracts."
+      "relia check now validates memory/rules/*.yaml before constructing a pass result and fails with exit 4 when rules lack experience citations, provenance entries, or active review labels.",
+      "relia check accepts version-only PRD bootstrap configs by normalizing them to schema_version 1.0 with MVP-safe privacy and artifact defaults before schema validation.",
+      "The baseline YAML parser accepts top-level lists, list-item map continuations, folded scalar blocks, and inline YAML sequences needed by the PRD config and memory-rule examples.",
+      "README, dev guide, architecture guide, and the T2 decision note document the repaired config compatibility and memory-rule validation contracts."
     ],
     "resolved_review_findings": [
       {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448713664",
-        "status": "implemented",
-        "summary": "Experience records now use the PRD canonical repo string shape, aligned with coverage and recurrence schemas."
-      },
-      {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448713667",
-        "status": "implemented",
-        "summary": "Recurrence report ERR is bounded from 0 through 1 and covered by contract tests."
-      },
-      {
         "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448713669",
         "status": "implemented",
-        "summary": "The baseline YAML parser now treats inline sequence values as arrays, with regression coverage through relia check."
+        "summary": "Inline redaction.patterns arrays remain accepted by relia check with regression coverage."
+      },
+      {
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448723353",
+        "status": "implemented",
+        "summary": "relia check now validates memory/rules/*.yaml before pass and blocks invalid active rules with exit 4."
+      },
+      {
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448723354",
+        "status": "implemented",
+        "summary": "Version-only PRD bootstrap configs no longer fail only because schema_version is absent; safe MVP defaults are applied before schema validation."
       }
     ],
     "lifecycle_boundary": "task-executor repair only; commit, PR update, scope closure, validation-gate, and post-merge evidence are left to their required workers"

@@ -133,19 +133,22 @@ with the Relia version and schema id. Human-readable output is only the default
 when stdout is an interactive terminal and no machine-readable flag is present.
 
 T2 extends `relia check` beyond file presence. It validates the versioned
-`relia.yaml` privacy defaults, the schema contract files under `schemas/`, and
-the artifact layout contract surfaced in the command-result `data` object. The
-default config includes the documented `advise` and `badge` sections, with
-`advise.enabled: false` so bootstrap does not perform live PR advisory work by
-default.
+`relia.yaml` privacy defaults, the schema contract files under `schemas/`,
+reviewed rules under `memory/rules/*.yaml`, and the artifact layout contract
+surfaced in the command-result `data` object. The default config includes the
+documented `advise` and `badge` sections, with `advise.enabled: false` so
+bootstrap does not perform live PR advisory work by default.
 Unsafe redaction settings fail closed with exit `6`; non-private MVP sharing
 posture also fails closed with exit `6`; explicit `embeddings: local` without a pulled
 artifact fails with exit `8`; disabled `distill.review_required` and unknown
-provider/config values fail with exit `2`. The executable config schema accepts
-the documented PRD `advise` and `badge` sections without enabling live network
-or credentialed work by default. Config arrays may use block or inline YAML
-sequence syntax, including `redaction.patterns: [api_key, token, password,
-secret]`.
+provider/config values fail with exit `2`; invalid memory-rule provenance,
+experience citations, or active review labels fail with exit `4`. The executable
+config schema accepts the documented PRD `advise` and `badge` sections without
+enabling live network or credentialed work by default. Config arrays may use
+block or inline YAML sequence syntax, including `redaction.patterns: [api_key,
+token, password, secret]`. Version-only PRD bootstrap configs are normalized to
+`schema_version: "1.0"` with MVP-safe privacy and artifact defaults before schema
+validation.
 
 ## Structured Data, Proof, Budgets, And Redaction
 

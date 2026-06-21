@@ -23,7 +23,8 @@ output contract:
 - `relia init` creates `relia.yaml` if it is missing, preserves an existing
   config, and creates the repo-native artifact directory skeleton.
 - `relia check` validates the repo-local operating pack baseline, schema
-  contract files, and fail-closed privacy defaults.
+  contract files, fail-closed privacy defaults, and reviewed memory rules under
+  `memory/rules/*.yaml`.
 - `--json` always emits the stable command result envelope.
 - piped or non-interactive stdout defaults to JSON.
 - `--quiet` and `--compact` emit compact JSON while preserving status,
@@ -40,7 +41,9 @@ organization sharing disabled (`share_scope: private`, `org_eligible: false`),
 uses deterministic `embeddings: signature`, and requires fail-closed redaction
 with entropy scanning. It includes the documented `advise` and `badge` sections
 for the PR advisory loop with `advise.enabled: false` by default, while the MVP
-contract keeps `distill.review_required: true` mandatory.
+contract keeps `distill.review_required: true` mandatory. Existing PRD-style
+configs that declare only `version: 1` are normalized to the MVP-safe
+`schema_version: "1.0"` defaults during `relia check`.
 
 Phase 0 artifact schemas live under `schemas/` for experience records, outcome
 evidence, failure signatures, memory rules, coverage maps, risk assessments,
@@ -51,6 +54,8 @@ repo config contract. Outcome schemas use the PRD names `ci_failure`, `revert`,
 repo identifier strings such as `owner/name`, and recurrence report ERR values
 are bounded proportions from `0` through `1`. Memory rules use the documented
 durable-artifact shape: `id`, `status`, `evidence`, and PR-backed `provenance`.
+Active rules must include experience citations, provenance entries, and a review
+label before `relia check` reports success.
 
 Provider-backed distill work requires a complete `model_provider_endpoint`
 grant naming provider, model, endpoint or `base_url`, credential environment,

@@ -329,15 +329,20 @@ func checkResult(args []string, start time.Time) CommandResult {
 	if schemaErr != nil {
 		return errorResult("check", "check", schemaErr, start)
 	}
+	rules, ruleErr := validateMemoryRules(root, config.MemoryRoot)
+	if ruleErr != nil {
+		return errorResult("check", "check", ruleErr, start)
+	}
 
 	result := passResult("check", "check", "local operating pack baseline is present", start, map[string]any{
-		"checked_paths": len(requiredCheckFiles) + len(requiredSchemaFiles),
+		"checked_paths": len(requiredCheckFiles) + len(requiredSchemaFiles) + len(rules),
 		"repo_root":     ".",
 		"artifact_contract": map[string]any{
 			"schema_version":          commandSchemaVersion,
 			"generated_root":          config.ArtifactRoot,
 			"user_memory_root":        config.MemoryRoot,
 			"schemas":                 schemas,
+			"validated_memory_rules":  rules,
 			"generated_artifacts":     []string{".relia/experiences/*.jsonl", ".relia/signatures/index.json", ".relia/coverage/map.json", ".relia/reports/*", ".relia/baselines/err-baseline.json"},
 			"user_approved_artifacts": []string{defaultConfigFile, "memory/rules/*.yaml", "memory/MEMORY.md", "memory/compiled/agents-block.md"},
 		},
@@ -632,7 +637,15 @@ func loadAndValidateConfig(root string) (reliaConfigSummary, []Finding, *Command
 	if parsed.scalar("version") != "1" {
 		return summary, nil, configError("relia.yaml must declare version: 1")
 	}
-	if parsed.scalar("schema_version") != commandSchemaVersion {
+	var warnings []Finding
+	if parsed.scalar("schema_version") == "" {
+		applyPRDBootstrapDefaults(&parsed)
+		warnings = append(warnings, Finding{
+			Type:    "prd_bootstrap_config_normalized",
+			Message: `relia.yaml omits schema_version; treating version: 1 as schema_version "1.0" and applying MVP-safe privacy/artifact defaults`,
+			Ref:     "docs/product/prd.md#project-configuration",
+		})
+	} else if parsed.scalar("schema_version") != commandSchemaVersion {
 		return summary, nil, configError(`relia.yaml must declare schema_version: "1.0"`)
 	}
 	artifactRoot := parsed.scalar("repo.artifact_root")
@@ -719,7 +732,6 @@ func loadAndValidateConfig(root string) (reliaConfigSummary, []Finding, *Command
 		return summary, nil, configError("serve.advisory_only must remain true unless a later gate explicitly enables blocking behavior")
 	}
 
-	var warnings []Finding
 	gateEnabled, gateEnabledSet := parsed.boolScalar("gate.enabled")
 	if !gateEnabledSet {
 		return summary, nil, configError("gate.enabled must be declared")
@@ -814,6 +826,73 @@ func validateConfigAgainstSchema(root string, parsed parsedYAML) *CommandError {
 	}
 	if issue := validateYAMLPathAgainstSchema(parsed, "", schema); issue != nil {
 		return configError("relia.yaml schema validation failed: " + issue.Error())
+	}
+	return nil
+}
+
+func applyPRDBootstrapDefaults(parsed *parsedYAML) {
+	for _, entry := range []struct {
+		path  string
+		value string
+	}{
+		{"schema_version", commandSchemaVersion},
+		{"repo.artifact_root", defaultArtifactRoot},
+		{"repo.memory_root", defaultMemoryRoot},
+		{"redaction.fail_closed", "true"},
+		{"memory.share_scope", "private"},
+		{"memory.org_eligible", "false"},
+		{"serve.advisory_only", "true"},
+		{"metadata.relia_version", reliaVersion},
+		{"metadata.contract", "schemas/relia-config.schema.json"},
+	} {
+		if !parsed.pathExists(entry.path) {
+			parsed.setScalar(entry.path, entry.value)
+		}
+	}
+}
+
+func validateMemoryRules(root string, memoryRoot string) ([]string, *CommandError) {
+	pattern := filepath.Join(root, memoryRoot, "rules", "*.yaml")
+	matches, err := filepath.Glob(pattern)
+	if err != nil {
+		return nil, internalError("could not inspect memory rules", err)
+	}
+	sort.Strings(matches)
+	rules := make([]string, 0, len(matches))
+	for _, path := range matches {
+		rel, relErr := filepath.Rel(root, path)
+		if relErr != nil {
+			return nil, internalError("could not resolve memory rule path", relErr)
+		}
+		rel = filepath.ToSlash(rel)
+		content, readErr := os.ReadFile(path)
+		if readErr != nil {
+			return nil, artifactValidationError("could not read memory rule", rel)
+		}
+		parsed, parseErr := parseBaselineYAML(string(content))
+		if parseErr != nil {
+			return nil, artifactValidationError("memory rule is not valid baseline YAML: "+parseErr.Error(), rel)
+		}
+		if validationErr := validateMemoryRuleContract(rel, parsed); validationErr != nil {
+			return nil, validationErr
+		}
+		rules = append(rules, rel)
+	}
+	return rules, nil
+}
+
+func validateMemoryRuleContract(rel string, parsed parsedYAML) *CommandError {
+	if parsed.scalar("status") == "" {
+		return artifactValidationError("memory rule status is required", rel)
+	}
+	if len(parsed.lists["evidence.experiences"]) == 0 {
+		return artifactValidationError("memory rule has no experience citations", rel)
+	}
+	if len(parsed.lists["provenance"]) == 0 {
+		return artifactValidationError("memory rule has no provenance entries", rel)
+	}
+	if parsed.scalar("status") == "active" && parsed.scalar("review.label") == "" {
+		return artifactValidationError("active rule has no review label", rel)
 	}
 	return nil
 }
@@ -1031,6 +1110,7 @@ func parseBaselineYAML(content string) (parsedYAML, error) {
 	var section string
 	var listPath string
 	var listItemIndent int
+	blockScalarIndent := -1
 	for lineNumber, line := range strings.Split(content, "\n") {
 		line = strings.TrimRight(line, "\r")
 		if strings.TrimSpace(line) == "" {
@@ -1039,6 +1119,15 @@ func parseBaselineYAML(content string) (parsedYAML, error) {
 		indent := len(line) - len(strings.TrimLeft(line, " "))
 		trimmed := stripYAMLComment(strings.TrimSpace(line))
 		if trimmed == "" {
+			continue
+		}
+		if blockScalarIndent >= 0 {
+			if indent >= blockScalarIndent {
+				continue
+			}
+			blockScalarIndent = -1
+		}
+		if listPath != "" && indent > listItemIndent {
 			continue
 		}
 		if strings.HasPrefix(trimmed, "- ") {
@@ -1079,6 +1168,9 @@ func parseBaselineYAML(content string) (parsedYAML, error) {
 		}
 		listPath = ""
 		listItemIndent = 0
+		if rawValue == ">" || rawValue == "|" {
+			blockScalarIndent = indent + 2
+		}
 		switch {
 		case indent == 0:
 			section = key
@@ -1091,6 +1183,8 @@ func parseBaselineYAML(content string) (parsedYAML, error) {
 				}
 			} else {
 				parsed.objects[key] = struct{}{}
+				listPath = key
+				listItemIndent = indent + 2
 			}
 		case indent == 2 && section != "":
 			path := section + "." + key
@@ -1154,6 +1248,36 @@ func (parsed parsedYAML) pathExists(path string) bool {
 		return true
 	}
 	return false
+}
+
+func (parsed *parsedYAML) setScalar(path string, value string) {
+	if parsed.scalars == nil {
+		parsed.scalars = map[string]string{}
+	}
+	if parsed.keys == nil {
+		parsed.keys = map[string]struct{}{}
+	}
+	if parsed.children == nil {
+		parsed.children = map[string]map[string]struct{}{}
+	}
+	if parsed.objects == nil {
+		parsed.objects = map[string]struct{}{}
+	}
+	if parsed.lists == nil {
+		parsed.lists = map[string][]string{}
+	}
+	parsed.scalars[path] = value
+	parsed.keys[path] = struct{}{}
+	delete(parsed.lists, path)
+	delete(parsed.objects, path)
+	if parent, child, ok := strings.Cut(path, "."); ok {
+		parsed.keys[parent] = struct{}{}
+		parsed.objects[parent] = struct{}{}
+		if parsed.children[parent] == nil {
+			parsed.children[parent] = map[string]struct{}{}
+		}
+		parsed.children[parent][child] = struct{}{}
+	}
 }
 
 func (parsed parsedYAML) isObject(path string) bool {

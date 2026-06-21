@@ -27,13 +27,16 @@ adds Phase 0 artifact schemas under `schemas/`. `relia check` is the state owner
 for local validation of config privacy defaults, schema contract presence, and
 artifact layout reporting. Those schemas follow the PRD outcome and
 failure-signature taxonomy and keep memory rules aligned to the durable
-`id`/`status`/`evidence`/`provenance` artifact shape. Experience, coverage, and
+`id`/`status`/`evidence`/`provenance` artifact shape. `relia check` validates
+active rules for experience citations, provenance entries, and review labels
+before reporting the operating pack as ready. Experience, coverage, and
 recurrence artifacts use canonical repo identifier strings, and recurrence
 report ERR is bounded as a `0` through `1` proportion. The config contract
 accepts documented advisory and badge settings plus block or inline YAML
-sequences for arrays, and the default config includes those sections with live
-PR advice disabled. The MVP review gate remains mandatory until a later
-approved delivery slice changes that posture. See
+sequences for arrays, and version-only PRD bootstrap configs are normalized to
+the MVP-safe `schema_version: "1.0"` defaults. The default config includes those
+sections with live PR advice disabled. The MVP review gate remains mandatory
+until a later approved delivery slice changes that posture. See
 [decision-0002-product-contracts-and-privacy-defaults.md](decision-0002-product-contracts-and-privacy-defaults.md).
 
 ## Systems Thinking Map

@@ -32,12 +32,14 @@ validates the schema files before reporting the local operating pack as ready.
 Outcome and failure-signature contracts use the PRD taxonomy names `revert`,
 `merge_clean`, and `type_failure`. Memory-rule contracts use the documented
 durable-rule shape with `id`, `status`, required `evidence`, and non-empty
-PR-backed `provenance`. Experience, coverage, and recurrence contracts use the
-PRD canonical repo string shape, and recurrence report
-`error_recurrence_rate` remains a bounded `0` through `1` proportion. The config
-contract admits the documented PR advisory and badge sections, plus block or
-inline YAML sequences for config arrays, while keeping the human review gate
-mandatory for MVP configs.
+PR-backed `provenance`; `relia check` fails with exit `4` when active rules lack
+experience citations, provenance entries, or a review label. Experience,
+coverage, and recurrence contracts use the PRD canonical repo string shape, and
+recurrence report `error_recurrence_rate` remains a bounded `0` through `1`
+proportion. The config contract admits the documented PR advisory and badge
+sections, plus block or inline YAML sequences for config arrays. Version-only
+PRD bootstrap configs are treated as `schema_version: "1.0"` and receive the
+same MVP-safe privacy and artifact defaults before schema validation.
 
 The default config remains deterministic and offline:
 
@@ -55,7 +57,7 @@ The default config remains deterministic and offline:
 
 Explicit `embeddings: local` fails closed with exit `8` until a later
 `model_artifact_pull` flow records the required artifact metadata. Non-private
-MVP sharing posture fails with exit `4`; unsafe redaction config fails with
+MVP sharing posture fails with exit `6`; unsafe redaction config fails with
 exit `6`; invalid config/provider values fail with exit `2`.
 
 ## Consequences

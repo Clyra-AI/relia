@@ -467,6 +467,97 @@ func TestCheckAllowsInlineYAMLSequenceForRedactionPatterns(t *testing.T) {
 	}
 }
 
+func TestCheckAcceptsVersionOnlyPRDBootstrapConfig(t *testing.T) {
+	repo := writeMinimalRepoForFullCheck(t, prdBootstrapConfigForTest())
+	t.Chdir(repo)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Status != "pass" {
+		t.Fatalf("status = %q", result.Status)
+	}
+	privacy, ok := result.Data["privacy_defaults"].(map[string]any)
+	if !ok {
+		t.Fatalf("privacy_defaults missing from data: %#v", result.Data)
+	}
+	for key, want := range map[string]any{
+		"redaction_fail_closed": true,
+		"share_scope":           "private",
+		"org_eligible":          false,
+		"advisory_only":         true,
+	} {
+		if privacy[key] != want {
+			t.Fatalf("privacy_defaults[%s] = %#v, want %#v", key, privacy[key], want)
+		}
+	}
+}
+
+func TestCheckValidatesActiveMemoryRuleContractBeforePass(t *testing.T) {
+	for _, tc := range []struct {
+		name        string
+		rule        string
+		messageWant string
+	}{
+		{
+			name:        "missing provenance",
+			rule:        strings.Replace(validMemoryRuleYAMLForTest(), "provenance:\n  - pr: 123\n    outcome: ci_failure\n    url: https://example.invalid/pr/123\n", "", 1),
+			messageWant: "provenance",
+		},
+		{
+			name:        "missing experience citations",
+			rule:        strings.Replace(validMemoryRuleYAMLForTest(), "  experiences:\n    - exp-123\n", "", 1),
+			messageWant: "experience citations",
+		},
+		{
+			name:        "missing active review label",
+			rule:        strings.Replace(validMemoryRuleYAMLForTest(), "  label: accepted\n", "", 1),
+			messageWant: "review label",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			repo := writeMinimalRepoForFullCheck(t, defaultConfigYAML())
+			writeMemoryRuleForTest(t, repo, tc.rule)
+			t.Chdir(repo)
+
+			stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+			if code != ExitValidation {
+				t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+			}
+			result := decodeResult(t, stdout)
+			if result.Errors[0].Type != "memory_artifact_validation_failed" {
+				t.Fatalf("error type = %q", result.Errors[0].Type)
+			}
+			if !strings.Contains(result.Errors[0].Message, tc.messageWant) {
+				t.Fatalf("error message = %q, want %q", result.Errors[0].Message, tc.messageWant)
+			}
+			if result.Errors[0].Ref != filepath.Join("memory", "rules", "active-rule.yaml") {
+				t.Fatalf("error ref = %q", result.Errors[0].Ref)
+			}
+		})
+	}
+}
+
+func TestCheckAcceptsValidActiveMemoryRule(t *testing.T) {
+	repo := writeMinimalRepoForFullCheck(t, defaultConfigYAML())
+	writeMemoryRuleForTest(t, repo, validMemoryRuleYAMLForTest())
+	t.Chdir(repo)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Status != "pass" {
+		t.Fatalf("status = %q", result.Status)
+	}
+}
+
 func TestCheckRejectsConfiguredRepoRootsOutsideContract(t *testing.T) {
 	for _, tc := range []struct {
 		name   string
@@ -1121,6 +1212,123 @@ func writeMinimalRepoForFullCheck(t *testing.T, reliaYAML string) string {
 		}
 	}
 	return root
+}
+
+func writeMemoryRuleForTest(t *testing.T, root string, content string) {
+	t.Helper()
+
+	path := filepath.Join(root, "memory", "rules", "active-rule.yaml")
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func validMemoryRuleYAMLForTest() string {
+	return `version: 1
+id: active-rule
+kind: avoid
+status: active
+statement: >
+  Keep reviewed memory rules tied to explicit experiences and PR provenance.
+confidence: 0.82
+evidence:
+  count: 1
+  experiences:
+    - exp-123
+review:
+  label: accepted
+  reviewed_by: relia-test
+scope:
+  paths:
+    - cmd/relia/**
+provenance:
+  - pr: 123
+    outcome: ci_failure
+    url: https://example.invalid/pr/123
+metadata:
+  relia_version: 0.0.0-dev
+`
+}
+
+func prdBootstrapConfigForTest() string {
+	return `version: 1
+
+repo:
+  provider: github
+  remote: origin
+  scopes: []
+
+attribution:
+  agent_authors:
+    - login: acme-claude-bot
+  coauthor_trailers:
+    - "Claude"
+    - "Claude Code"
+  pr_labels:
+    - agent-authored
+  uncertain: exclude
+
+outcomes:
+  checks:
+    required:
+      - pytest
+      - eslint
+  revert_detection: true
+  review_corrections:
+    marker: "relia:correction"
+  lookback_days: 180
+  fix_held:
+    settle_days: 14
+    min_overlapping_merges: 3
+
+redaction:
+  patterns:
+    - api_key
+    - token
+    - password
+    - secret
+  entropy_scan: true
+
+distill:
+  provider: anthropic
+  model: claude-fable-5
+  max_cost_usd_per_run: 2.00
+  min_evidence_count: 2
+  embeddings: signature
+  review_required: true
+
+memory:
+  decay_half_life_days: 90
+  invalidate_on_path_delete: true
+  max_active_rules: 200
+  commit_experiences: false
+
+serve:
+  mcp: true
+  compile:
+    targets:
+      - AGENTS.md
+      - CLAUDE.md
+    max_rules: 25
+
+advise:
+  enabled: true
+  max_comments_per_pr: 1
+  update_in_place: true
+  reassess_debounce_minutes: 10
+  min_confidence: 0.6
+
+badge:
+  stale_after_days: 30
+  stale_after_merged_prs: 20
+
+gate:
+  enabled: false
+  max_error_recurrence_rate: null
+`
 }
 
 func removeTopLevelYAMLBlock(content string, key string) string {
