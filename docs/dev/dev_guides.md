@@ -146,6 +146,10 @@ artifact fails with exit `8`; unknown provider/config values fail with exit `2`.
 - Phase 0 schema contracts must declare `schema_version`, required fields,
   allowed enum values, a forward-compatible `metadata` object, and
   `x-relia_error_mapping` for stable CLI exits.
+- Outcome and failure-signature schemas must use the PRD taxonomy names:
+  `revert`, `merge_clean`, and `type_failure`. Memory-rule schemas must keep
+  the durable artifact fields `id`, `status`, `evidence`, and PR-backed
+  `provenance`.
 - Structured check-run data is preferred over log parsing; any log-parsed
   fallback must be labeled and validated.
 - Task closure must name the required proof level: syntax, source evidence,

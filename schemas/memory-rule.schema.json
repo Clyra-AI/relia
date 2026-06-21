@@ -4,7 +4,7 @@
   "title": "Relia Memory Rule",
   "type": "object",
   "additionalProperties": false,
-  "required": ["object_type", "schema_version", "rule_id", "kind", "lifecycle", "statement", "confidence", "review", "scope", "provenance", "metadata"],
+  "required": ["object_type", "schema_version", "id", "kind", "status", "statement", "confidence", "evidence", "review", "scope", "provenance", "metadata"],
   "x-relia_error_mapping": {
     "invalid_input": 2,
     "artifact_validation": 4,
@@ -14,40 +14,94 @@
   "properties": {
     "object_type": {"const": "relia.memory_rule"},
     "schema_version": {"const": "1.0"},
-    "rule_id": {"type": "string", "minLength": 1},
+    "id": {"type": "string", "minLength": 1},
     "source_repo": {"type": "string"},
     "kind": {"enum": ["avoid", "playbook"]},
-    "lifecycle": {"enum": ["candidate", "active", "stale", "contradicted", "retired"]},
+    "status": {"enum": ["candidate", "active", "stale", "contradicted", "retired"]},
     "statement": {"type": "string", "minLength": 1},
     "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["count", "experiences"],
+      "properties": {
+        "count": {"type": "integer", "minimum": 1},
+        "contradictions": {"type": "integer", "minimum": 0},
+        "first_seen": {"type": "string"},
+        "last_seen": {"type": "string"},
+        "experiences": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+      }
+    },
     "review": {
       "type": "object",
       "additionalProperties": false,
       "required": ["label"],
       "properties": {
         "label": {"enum": ["accepted", "suggested", "needs_user_input", "rejected"]},
-        "reviewer": {"type": "string"},
-        "reviewed_at": {"type": "string", "format": "date-time"}
+        "reviewed_by": {"type": "string"},
+        "reviewed_at": {"type": "string", "format": "date-time"},
+        "statement_origin": {"enum": ["llm_drafted", "cluster_summary", "human_authored"]}
       }
     },
     "scope": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["paths"],
+      "anyOf": [{"required": ["paths"]}, {"required": ["signals"]}],
       "properties": {
-        "paths": {"type": "array", "items": {"type": "string", "minLength": 1}}
+        "paths": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "signals": {"type": "array", "items": {"type": "string", "minLength": 1}}
       }
     },
     "provenance": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["experience_refs", "citation_refs"],
-      "properties": {
-        "experience_refs": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
-        "citation_refs": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["pr", "outcome"],
+        "properties": {
+          "pr": {
+            "oneOf": [
+              {"type": "integer", "minimum": 1},
+              {"type": "string", "minLength": 1}
+            ]
+          },
+          "outcome": {"enum": ["ci_failure", "revert", "review_correction", "merge_clean", "fix_held"]},
+          "url": {"type": "string", "minLength": 1}
+        }
       }
     },
-    "decay_half_life_days": {"type": "integer", "minimum": 1},
+    "counter_pattern": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "rule": {"type": "string", "minLength": 1},
+        "held_in": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["pr"],
+            "properties": {
+              "pr": {
+                "oneOf": [
+                  {"type": "integer", "minimum": 1},
+                  {"type": "string", "minLength": 1}
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "decay": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "half_life_days": {"type": "integer", "minimum": 1},
+        "invalidate_on_path_delete": {"type": "boolean"}
+      }
+    },
     "redaction_status": {"enum": ["applied", "failed_closed"]},
     "metadata": {"$ref": "#/$defs/metadata"}
   },

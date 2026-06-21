@@ -25,7 +25,9 @@ baseline required by `docs/dev/dev_guides.md#agent-native-cli-policy`.
 T2 amends the pre-release command-result envelope with required `metadata` and
 adds Phase 0 artifact schemas under `schemas/`. `relia check` is the state owner
 for local validation of config privacy defaults, schema contract presence, and
-artifact layout reporting. See
+artifact layout reporting. Those schemas follow the PRD outcome and
+failure-signature taxonomy and keep memory rules aligned to the durable
+`id`/`status`/`evidence`/`provenance` artifact shape. See
 [decision-0002-product-contracts-and-privacy-defaults.md](decision-0002-product-contracts-and-privacy-defaults.md).
 
 ## Systems Thinking Map

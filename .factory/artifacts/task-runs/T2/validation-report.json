@@ -6,37 +6,57 @@
   "commands_run": [
     "make lint-fast",
     "make test-fast",
-    "python3 -m json.tool schemas/experience-record.schema.json",
-    "python3 -m json.tool schemas/outcome-evidence.schema.json",
+    "gofmt -w cmd/relia/main_test.go",
+    "python3 -m json.tool schemas/experience-record.schema.json >/tmp/experience-record.schema.json.pretty",
+    "python3 -m json.tool schemas/outcome-evidence.schema.json >/tmp/outcome-evidence.schema.json.pretty",
+    "python3 -m json.tool schemas/failure-signature.schema.json >/tmp/failure-signature.schema.json.pretty",
+    "python3 -m json.tool schemas/memory-rule.schema.json >/tmp/memory-rule.schema.json.pretty",
+    "make test-fast",
     "make prepush-full",
-    "python3 -m json.tool .factory/artifacts/task-runs/T2/work-proof-marker.json >/dev/null",
-    "python3 -m json.tool .factory/artifacts/task-runs/T2/validation-report.json >/dev/null"
+    "python3 -m json.tool .factory/artifacts/task-runs/T2/work-proof-marker.json >/tmp/t2-work-proof-marker.json.pretty",
+    "python3 -m json.tool .factory/artifacts/task-runs/T2/validation-report.json >/tmp/t2-validation-report.json.pretty"
   ],
   "baseline_evidence": [
     {
       "command": "make lint-fast",
       "status": "pass",
-      "exit_code": 0
+      "exit_code": 0,
+      "summary": "Pre-edit repo pack, toolchain, and validation guidance checks passed."
     },
     {
       "command": "make test-fast",
       "status": "pass",
-      "exit_code": 0
+      "exit_code": 0,
+      "summary": "Pre-edit Go fast tests passed before repair."
     }
   ],
-  "test_first_skipped_reason": "Repair mode was triggered by actionable Codex review findings with concrete failing scenarios. The configured pre-edit red command, make test-fast, passed before the repair because no regression test covered the schema mismatches yet; focused regression tests were added for the PRD outcome taxonomy and numeric flake_discount and then validated with make test-fast and make prepush-full.",
+  "test_first_skipped_reason": "Repair mode was triggered by actionable Codex review findings with concrete schema drift scenarios. The configured pre-edit red command, make test-fast, passed because the reviewed taxonomy and memory-rule schema mismatches were not yet covered by tests; focused regression tests were added for the PRD outcome taxonomy, type_failure class, and memory-rule durable artifact shape.",
   "green_evidence": [
     {
-      "command": "make lint-fast",
+      "command": "python3 -m json.tool schemas/experience-record.schema.json >/tmp/experience-record.schema.json.pretty",
       "status": "pass",
-      "exit_code": 0,
-      "summary": "Repo pack file, toolchain, and validation guidance checks passed."
+      "exit_code": 0
+    },
+    {
+      "command": "python3 -m json.tool schemas/outcome-evidence.schema.json >/tmp/outcome-evidence.schema.json.pretty",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "python3 -m json.tool schemas/failure-signature.schema.json >/tmp/failure-signature.schema.json.pretty",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "python3 -m json.tool schemas/memory-rule.schema.json >/tmp/memory-rule.schema.json.pretty",
+      "status": "pass",
+      "exit_code": 0
     },
     {
       "command": "make test-fast",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Go tests passed, including regression coverage for configured repo roots, default experience shard ignore behavior, PRD ci_failure outcome taxonomy, and numeric flake_discount."
+      "summary": "Go tests passed after adding schema regression coverage for PRD outcome kinds, type_failure, and memory-rule id/status/evidence/provenance shape."
     }
   ],
   "final_validation_evidence": [
@@ -45,6 +65,16 @@
       "status": "pass",
       "exit_code": 0,
       "summary": "lint-fast, test-fast, test-coverage, and test-contracts passed; coverage was 79.2% against the 75.0% threshold; repo pack reported ok."
+    },
+    {
+      "command": "python3 -m json.tool .factory/artifacts/task-runs/T2/work-proof-marker.json >/tmp/t2-work-proof-marker.json.pretty",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "python3 -m json.tool .factory/artifacts/task-runs/T2/validation-report.json >/tmp/t2-validation-report.json.pretty",
+      "status": "pass",
+      "exit_code": 0
     }
   ],
   "acceptance_results": [
@@ -54,10 +84,8 @@
       "evidence_refs": [
         ".factory/artifacts/task-runs/T2/work-proof-marker.json",
         ".factory/artifacts/task-runs/T2/validation-report.json",
-        "cmd/relia/main.go",
         "cmd/relia/main_test.go",
-        "schemas/command-result.schema.json",
-        "examples/command-results/exit-code-examples.json"
+        "schemas/command-result.schema.json"
       ]
     },
     {
@@ -66,12 +94,12 @@
       "evidence_refs": [
         ".factory/artifacts/task-runs/T2/work-proof-marker.json",
         ".factory/artifacts/task-runs/T2/validation-report.json",
-        "cmd/relia/main.go",
         "cmd/relia/main_test.go",
         "schemas/experience-record.schema.json",
         "schemas/outcome-evidence.schema.json",
+        "schemas/failure-signature.schema.json",
         "schemas/memory-rule.schema.json",
-        "schemas/relia-config.schema.json"
+        "docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md"
       ]
     },
     {
@@ -79,10 +107,9 @@
       "status": "implemented",
       "evidence_refs": [
         ".factory/artifacts/task-runs/T2/work-proof-marker.json",
-        "cmd/relia/main.go",
-        "cmd/relia/main_test.go",
-        "relia.yaml",
-        "README.md"
+        "README.md",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md"
       ]
     },
     {
@@ -90,10 +117,11 @@
       "status": "implemented",
       "evidence_refs": [
         ".factory/artifacts/task-runs/T2/work-proof-marker.json",
-        "cmd/relia/main.go",
         "cmd/relia/main_test.go",
-        "schemas/command-result.schema.json",
-        "docs/dev/dev_guides.md"
+        "schemas/experience-record.schema.json",
+        "schemas/outcome-evidence.schema.json",
+        "schemas/failure-signature.schema.json",
+        "schemas/memory-rule.schema.json"
       ]
     }
   ],
@@ -102,8 +130,14 @@
     "changed_paths_within_allowed_paths": true,
     "forbidden_paths_changed_in_worker_diff": false,
     "checked_changed_paths": [
+      "README.md",
       "cmd/relia/main_test.go",
+      "docs/architecture/architecture_guides.md",
+      "docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md",
+      "docs/dev/dev_guides.md",
       "schemas/experience-record.schema.json",
+      "schemas/failure-signature.schema.json",
+      "schemas/memory-rule.schema.json",
       "schemas/outcome-evidence.schema.json",
       ".factory/artifacts/task-runs/T2/work-proof-marker.json",
       ".factory/artifacts/task-runs/T2/validation-report.json"
@@ -115,30 +149,14 @@
   },
   "plan_drift_result": {
     "status": "pass",
-    "note": "Repair stayed within T2 contracts-config-and-validation scope and addressed only the actionable Codex review findings for schema taxonomy, flake discount typing, and default local shard ignore behavior without changing runtime pins, provider posture, release boundaries, tracker state, commits, PRs, or scope closure."
+    "note": "Repair stayed within the T2 contracts-config-and-validation slice and addressed only the actionable Codex review findings for schema taxonomy and durable memory-rule shape without changing runtime pins, provider posture, release boundaries, tracker state, commits, PRs, or scope closure."
   },
   "codex_review_repair_result": {
     "status": "implemented",
-    "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-2",
+    "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-4",
     "resolved_findings": [
       {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3447783166",
-        "status": "implemented",
-        "evidence_refs": [
-          "cmd/relia/main.go",
-          "cmd/relia/main_test.go"
-        ]
-      },
-      {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3447783169",
-        "status": "implemented",
-        "evidence_refs": [
-          "cmd/relia/main.go",
-          "cmd/relia/main_test.go"
-        ]
-      },
-      {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3447791560",
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3447798679",
         "status": "implemented",
         "evidence_refs": [
           "schemas/experience-record.schema.json",
@@ -147,10 +165,18 @@
         ]
       },
       {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3447791561",
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3447798680",
         "status": "implemented",
         "evidence_refs": [
-          "schemas/experience-record.schema.json",
+          "schemas/failure-signature.schema.json",
+          "cmd/relia/main_test.go"
+        ]
+      },
+      {
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3447798681",
+        "status": "implemented",
+        "evidence_refs": [
+          "schemas/memory-rule.schema.json",
           "cmd/relia/main_test.go"
         ]
       }
@@ -163,12 +189,11 @@
       "docs/dev/dev_guides.md",
       "docs/architecture/architecture_guides.md",
       "docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md"
-    ],
-    "repair_note": "No additional docs update was needed for this repair because docs/product/prd.md already defines the canonical ci_failure outcome kind, numeric flake_discount example, and local-only experience shard posture."
+    ]
   },
   "changelog_result": {
     "status": "not_applicable",
-    "reason": "No changelog file exists in the allowed repo surface for this repair; user-facing T2 behavior remains covered by existing README and dev/architecture guide updates."
+    "reason": "No changelog file exists in the allowed repo surface for this repair; user-facing T2 schema behavior is documented in README and dev/architecture refs."
   },
   "versioning_result": {
     "status": "pass",

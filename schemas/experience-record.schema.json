@@ -67,7 +67,7 @@
       "additionalProperties": false,
       "required": ["kind", "terminal_state", "signature"],
       "properties": {
-        "kind": {"enum": ["ci_failure", "reverted", "review_correction", "merged_clean", "fix_held"]},
+        "kind": {"enum": ["ci_failure", "revert", "review_correction", "merge_clean", "fix_held"]},
         "terminal_state": {"enum": ["passed", "failed", "reverted", "corrected", "unknown"]},
         "signature": {"$ref": "#/$defs/signature_ref"}
       }

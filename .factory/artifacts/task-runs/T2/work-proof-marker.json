@@ -6,45 +6,34 @@
   "implementation_performed": true,
   "changed_paths": [
     "README.md",
-    "cmd/relia/main.go",
     "cmd/relia/main_test.go",
     "docs/architecture/architecture_guides.md",
     "docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md",
     "docs/dev/dev_guides.md",
-    "examples/command-results/exit-code-examples.json",
-    "relia.yaml",
-    "schemas/command-result.schema.json",
-    "schemas/compiled-context.schema.json",
-    "schemas/coverage-map.schema.json",
     "schemas/experience-record.schema.json",
     "schemas/failure-signature.schema.json",
     "schemas/memory-rule.schema.json",
     "schemas/outcome-evidence.schema.json",
-    "schemas/recurrence-report.schema.json",
-    "schemas/redaction-config.schema.json",
-    "schemas/relia-config.schema.json",
-    "schemas/risk-assessment.schema.json",
     ".factory/artifacts/task-runs/T2/work-proof-marker.json",
     ".factory/artifacts/task-runs/T2/validation-report.json"
   ],
   "evidence_refs": [
     ".factory/artifacts/task-runs/T2/validation-report.json"
   ],
-  "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-2",
+  "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-4",
   "summary": {
     "implemented_contracts": [
-      "command-result metadata in stable JSON envelope",
-      "versioned relia.yaml privacy defaults",
-      "Phase 0 artifact schema contract files",
-      "relia check validation for config privacy, schema contracts, and artifact layout",
-      "typed fail-closed exits for invalid config, schema/artifact contract violations, redaction safety, and missing local embedding artifacts"
+      "experience and outcome-evidence schemas use the PRD canonical outcome kinds revert and merge_clean",
+      "failure-signature schema uses the PRD canonical type_failure signature class",
+      "memory-rule schema uses the PRD durable artifact fields id, status, evidence, and PR-backed provenance",
+      "schema regression tests assert the canonical taxonomy and memory-rule artifact shape",
+      "README, dev guide, architecture guide, and T2 architecture decision document the corrected public schema contract"
     ],
     "resolved_review_findings": [
-      "relia check now validates repo.artifact_root and repo.memory_root against the schema-required .relia and memory roots before returning a pass result",
-      "relia init now writes an artifact-local ignore rule for .relia/experiences by default so local experience shards stay gitignored when memory.commit_experiences is false",
-      "experience and outcome-evidence schemas now use the PRD canonical ci_failure outcome kind",
-      "experience-record flake_discount now accepts a bounded numeric discount instead of a boolean"
+      "accepted PRD outcome kind names in experience-record and outcome-evidence contracts",
+      "replaced typecheck_failure with type_failure in the failure-signature contract",
+      "aligned memory-rule required fields and provenance shape with the PRD minimal durable-artifact format"
     ],
-    "lifecycle_boundary": "task-executor only; commit, PR, scope closure, validation-gate, and post-merge evidence are left to their required workers"
+    "lifecycle_boundary": "task-executor repair only; commit, PR update, scope closure, validation-gate, and post-merge evidence are left to their required workers"
   }
 }

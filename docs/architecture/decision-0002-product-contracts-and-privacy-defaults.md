@@ -29,6 +29,10 @@ Phase 0 artifact contracts live in `schemas/` and must declare
 `schema_version`, required fields, allowed enum values, forward-compatible
 `metadata`, and `x-relia_error_mapping` for stable exits. `relia check`
 validates the schema files before reporting the local operating pack as ready.
+Outcome and failure-signature contracts use the PRD taxonomy names `revert`,
+`merge_clean`, and `type_failure`. Memory-rule contracts use the documented
+durable-rule shape with `id`, `status`, required `evidence`, and non-empty
+PR-backed `provenance`.
 
 The default config remains deterministic and offline:
 

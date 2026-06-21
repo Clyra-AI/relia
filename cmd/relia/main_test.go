@@ -569,11 +569,15 @@ func TestOutcomeSchemasUsePRDOutcomeTaxonomy(t *testing.T) {
 	experienceProperties := schemaPropertiesForTest(t, "schemas/experience-record.schema.json", experienceSchema)
 	outcomeProperties := schemaPropertiesForTest(t, "experience.outcome", propertyForTest(t, experienceProperties, "outcome"))
 	kindEnum := enumForTest(t, "experience.outcome.kind", propertyForTest(t, outcomeProperties, "kind"))
-	if !containsStringValue(kindEnum, "ci_failure") {
-		t.Fatalf("experience outcome enum = %#v, want ci_failure", kindEnum)
+	for _, want := range []string{"ci_failure", "revert", "review_correction", "merge_clean", "fix_held"} {
+		if !containsStringValue(kindEnum, want) {
+			t.Fatalf("experience outcome enum = %#v, want %s", kindEnum, want)
+		}
 	}
-	if containsStringValue(kindEnum, "ci_failed") {
-		t.Fatalf("experience outcome enum = %#v, must use PRD ci_failure", kindEnum)
+	for _, forbidden := range []string{"ci_failed", "reverted", "merged_clean"} {
+		if containsStringValue(kindEnum, forbidden) {
+			t.Fatalf("experience outcome enum = %#v, must use PRD outcome names", kindEnum)
+		}
 	}
 
 	flakeDiscount := propertyForTest(t, experienceProperties, "flake_discount")
@@ -587,11 +591,108 @@ func TestOutcomeSchemasUsePRDOutcomeTaxonomy(t *testing.T) {
 	outcomeSchema := readSchemaForTest(t, root, "schemas/outcome-evidence.schema.json")
 	outcomeEvidenceProperties := schemaPropertiesForTest(t, "schemas/outcome-evidence.schema.json", outcomeSchema)
 	outcomeKindEnum := enumForTest(t, "outcome_evidence.outcome_kind", propertyForTest(t, outcomeEvidenceProperties, "outcome_kind"))
-	if !containsStringValue(outcomeKindEnum, "ci_failure") {
-		t.Fatalf("outcome evidence enum = %#v, want ci_failure", outcomeKindEnum)
+	for _, want := range []string{"ci_failure", "revert", "review_correction", "merge_clean", "fix_held"} {
+		if !containsStringValue(outcomeKindEnum, want) {
+			t.Fatalf("outcome evidence enum = %#v, want %s", outcomeKindEnum, want)
+		}
 	}
-	if containsStringValue(outcomeKindEnum, "ci_failed") {
-		t.Fatalf("outcome evidence enum = %#v, must use PRD ci_failure", outcomeKindEnum)
+	for _, forbidden := range []string{"ci_failed", "reverted", "merged_clean"} {
+		if containsStringValue(outcomeKindEnum, forbidden) {
+			t.Fatalf("outcome evidence enum = %#v, must use PRD outcome names", outcomeKindEnum)
+		}
+	}
+}
+
+func TestFailureSignatureSchemaUsesPRDSignatureClasses(t *testing.T) {
+	root := findRepoRootForTest(t)
+	schema := readSchemaForTest(t, root, "schemas/failure-signature.schema.json")
+	properties := schemaPropertiesForTest(t, "schemas/failure-signature.schema.json", schema)
+	signatureClassEnum := enumForTest(t, "failure_signature.signature_class", propertyForTest(t, properties, "signature_class"))
+
+	for _, want := range []string{"test_failure", "lint_failure", "type_failure", "build_failure"} {
+		if !containsStringValue(signatureClassEnum, want) {
+			t.Fatalf("signature_class enum = %#v, want %s", signatureClassEnum, want)
+		}
+	}
+	if containsStringValue(signatureClassEnum, "typecheck_failure") {
+		t.Fatalf("signature_class enum = %#v, must use PRD type_failure", signatureClassEnum)
+	}
+}
+
+func TestMemoryRuleSchemaMatchesPRDArtifactShape(t *testing.T) {
+	root := findRepoRootForTest(t)
+	schema := readSchemaForTest(t, root, "schemas/memory-rule.schema.json")
+	properties := schemaPropertiesForTest(t, "schemas/memory-rule.schema.json", schema)
+	required, ok := schema["required"].([]any)
+	if !ok {
+		t.Fatal("memory-rule required missing")
+	}
+
+	for _, want := range []string{"id", "status", "evidence", "provenance"} {
+		if !containsStringValue(required, want) {
+			t.Fatalf("memory-rule required = %#v, want %s", required, want)
+		}
+	}
+	for _, forbidden := range []string{"rule_id", "lifecycle"} {
+		if containsStringValue(required, forbidden) {
+			t.Fatalf("memory-rule required = %#v, must use PRD artifact field names", required)
+		}
+		if _, ok := properties[forbidden]; ok {
+			t.Fatalf("memory-rule properties include %s, must use PRD artifact field names", forbidden)
+		}
+	}
+
+	statusEnum := enumForTest(t, "memory_rule.status", propertyForTest(t, properties, "status"))
+	for _, want := range []string{"candidate", "active", "stale", "contradicted", "retired"} {
+		if !containsStringValue(statusEnum, want) {
+			t.Fatalf("memory rule status enum = %#v, want %s", statusEnum, want)
+		}
+	}
+
+	evidence := propertyForTest(t, properties, "evidence")
+	evidenceRequired, ok := evidence["required"].([]any)
+	if !ok {
+		t.Fatal("memory-rule evidence required missing")
+	}
+	for _, want := range []string{"count", "experiences"} {
+		if !containsStringValue(evidenceRequired, want) {
+			t.Fatalf("memory-rule evidence required = %#v, want %s", evidenceRequired, want)
+		}
+	}
+	evidenceProperties := schemaPropertiesForTest(t, "memory_rule.evidence", evidence)
+	experiences := propertyForTest(t, evidenceProperties, "experiences")
+	if experiences["minItems"] != float64(1) {
+		t.Fatalf("memory-rule evidence experiences minItems = %#v, want 1", experiences["minItems"])
+	}
+
+	provenance := propertyForTest(t, properties, "provenance")
+	if provenance["type"] != "array" || provenance["minItems"] != float64(1) {
+		t.Fatalf("memory-rule provenance = %#v, want non-empty array", provenance)
+	}
+	items, ok := provenance["items"].(map[string]any)
+	if !ok {
+		t.Fatal("memory-rule provenance items missing")
+	}
+	provenanceRequired, ok := items["required"].([]any)
+	if !ok {
+		t.Fatal("memory-rule provenance item required missing")
+	}
+	for _, want := range []string{"pr", "outcome"} {
+		if !containsStringValue(provenanceRequired, want) {
+			t.Fatalf("memory-rule provenance required = %#v, want %s", provenanceRequired, want)
+		}
+	}
+	provenanceProperties := schemaPropertiesForTest(t, "memory_rule.provenance.item", items)
+	provenanceOutcomeEnum := enumForTest(t, "memory_rule.provenance.outcome", propertyForTest(t, provenanceProperties, "outcome"))
+	for _, want := range []string{"ci_failure", "revert", "review_correction", "merge_clean", "fix_held"} {
+		if !containsStringValue(provenanceOutcomeEnum, want) {
+			t.Fatalf("memory-rule provenance outcome enum = %#v, want %s", provenanceOutcomeEnum, want)
+		}
+	}
+	for _, forbidden := range []string{"reverted", "merged_clean"} {
+		if containsStringValue(provenanceOutcomeEnum, forbidden) {
+			t.Fatalf("memory-rule provenance outcome enum = %#v, must use PRD outcome names", provenanceOutcomeEnum)
+		}
 	}
 }
 

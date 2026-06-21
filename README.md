@@ -43,7 +43,10 @@ with entropy scanning.
 Phase 0 artifact schemas live under `schemas/` for experience records, outcome
 evidence, failure signatures, memory rules, coverage maps, risk assessments,
 recurrence reports, compiled context, command results, redaction config, and the
-repo config contract.
+repo config contract. Outcome schemas use the PRD names `ci_failure`, `revert`,
+`review_correction`, `merge_clean`, and `fix_held`; type-check signatures use
+`type_failure`. Memory rules use the documented durable-artifact shape:
+`id`, `status`, `evidence`, and PR-backed `provenance`.
 
 Provider-backed distill work requires a complete `model_provider_endpoint`
 grant naming provider, model, endpoint or `base_url`, credential environment,
