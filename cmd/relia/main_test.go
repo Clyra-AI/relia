@@ -388,6 +388,48 @@ func TestCheckValidatesConfigAgainstSchemaRequiredTopLevelFields(t *testing.T) {
 	}
 }
 
+func TestCheckValidatesConfigAgainstSchemaNumericBounds(t *testing.T) {
+	for _, tc := range []struct {
+		name        string
+		config      string
+		messageWant string
+	}{
+		{
+			name:        "max comments minimum",
+			config:      strings.Replace(defaultConfigYAML(), "max_comments_per_pr: 1", "max_comments_per_pr: 0", 1),
+			messageWant: "advise.max_comments_per_pr",
+		},
+		{
+			name:        "badge stale days minimum",
+			config:      strings.Replace(defaultConfigYAML(), "stale_after_days: 30", "stale_after_days: 0", 1),
+			messageWant: "badge.stale_after_days",
+		},
+		{
+			name:        "minimum confidence maximum",
+			config:      strings.Replace(defaultConfigYAML(), "min_confidence: 0.6", "min_confidence: 2", 1),
+			messageWant: "advise.min_confidence",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			repo := writeMinimalRepoForConfigSchemaCheck(t, tc.config)
+			t.Chdir(repo)
+
+			stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+			if code != ExitUsage {
+				t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+			}
+			result := decodeResult(t, stdout)
+			if result.Errors[0].Type != "local_configuration_error" {
+				t.Fatalf("error type = %q", result.Errors[0].Type)
+			}
+			if !strings.Contains(result.Errors[0].Message, tc.messageWant) {
+				t.Fatalf("error message = %q, want schema field %q", result.Errors[0].Message, tc.messageWant)
+			}
+		})
+	}
+}
+
 func TestCheckRejectsConfiguredRepoRootsOutsideContract(t *testing.T) {
 	for _, tc := range []struct {
 		name   string

@@ -4,7 +4,7 @@
   "task_id": "T2",
   "status": "implemented",
   "implementation_performed": true,
-  "produced_at": "2026-06-21T16:06:45Z",
+  "produced_at": "2026-06-21T16:10:59Z",
   "changed_paths": [
     "cmd/relia/main.go",
     "cmd/relia/main_test.go",
@@ -14,30 +14,30 @@
   "evidence_refs": [
     ".factory/artifacts/task-runs/T2/validation-report.json"
   ],
-  "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-13",
+  "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-14",
   "summary": {
-    "repair_iteration_note": "Repair-13 found the source-level schema validation repair already present in this workspace and refreshed worker-owned evidence after rerunning baseline, focused, and final validation.",
+    "repair_iteration_note": "Repair-14 resolves the latest actionable Codex schema-bound finding and refreshes worker-owned evidence after rerunning baseline, red-first, focused, and final validation.",
     "implemented_contracts": [
-      "relia init now syncs the generated .relia/.gitignore experience-shard rule with memory.commit_experiences and removes the managed /experiences/ rule when users opt in to committing shards",
-      "relia check now validates relia.yaml against schemas/relia-config.schema.json for the schema subset used by the checked-in config contract",
-      "memory.org_eligible: true now fails closed through redaction_safety_failed with exit 6 and redaction_status failed_closed",
-      "focused regression tests cover schema-required top-level config sections, org-sharing fail-closed behavior, and init reruns after commit_experiences is enabled"
+      "relia check continues to validate relia.yaml against schemas/relia-config.schema.json before reporting the local operating pack as ready",
+      "the schema walk now enforces numeric minimum and maximum constraints for scalar YAML values used by the config contract",
+      "documented advise and badge bounds such as advise.max_comments_per_pr, advise.min_confidence, and badge.stale_after_days now fail the config-contract path when out of range",
+      "memory.org_eligible: true remains on the fail-closed redaction_safety_failed exit 6 path with redaction_status failed_closed"
     ],
     "resolved_review_findings": [
       {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448446323",
-        "status": "implemented",
-        "summary": "Existing relia.yaml configs now remove the generated .relia/.gitignore /experiences/ rule when memory.commit_experiences is true."
-      },
-      {
         "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448671703",
         "status": "implemented",
-        "summary": "loadAndValidateConfig now applies schemas/relia-config.schema.json to relia.yaml and rejects missing schema-required sections such as metadata, attribution, and outcomes."
+        "summary": "loadAndValidateConfig applies schemas/relia-config.schema.json to relia.yaml and rejects missing schema-required sections such as metadata, attribution, and outcomes."
       },
       {
         "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448671706",
         "status": "implemented",
-        "summary": "memory.org_eligible now uses the same fail-closed redaction/share-safety error path as non-private share_scope."
+        "summary": "memory.org_eligible uses the same fail-closed redaction/share-safety error path as non-private share_scope."
+      },
+      {
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448698165",
+        "status": "implemented",
+        "summary": "Config schema validation now enforces numeric minimum and maximum constraints for documented advisory and badge settings."
       }
     ],
     "lifecycle_boundary": "task-executor repair only; commit, PR update, scope closure, validation-gate, and post-merge evidence are left to their required workers"

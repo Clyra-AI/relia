@@ -856,6 +856,24 @@ func validateYAMLPathAgainstSchema(parsed parsedYAML, path string, schema map[st
 			return &schemaValidationIssue{path: path, message: "must be one of " + schemaValueForMessage(enumValues)}
 		}
 	}
+	if minimum, ok := schema["minimum"].(float64); ok {
+		value, ok := parsed.numberScalar(path)
+		if !ok {
+			return &schemaValidationIssue{path: path, message: "must be a number"}
+		}
+		if value < minimum {
+			return &schemaValidationIssue{path: path, message: "must be at least " + schemaValueForMessage(minimum)}
+		}
+	}
+	if maximum, ok := schema["maximum"].(float64); ok {
+		value, ok := parsed.numberScalar(path)
+		if !ok {
+			return &schemaValidationIssue{path: path, message: "must be a number"}
+		}
+		if value > maximum {
+			return &schemaValidationIssue{path: path, message: "must be at most " + schemaValueForMessage(maximum)}
+		}
+	}
 	if minLength, ok := schema["minLength"].(float64); ok {
 		value, ok := parsed.scalars[path]
 		if !ok || len(value) < int(minLength) {
@@ -1158,6 +1176,15 @@ func (parsed parsedYAML) scalarMatches(path string, want any) bool {
 	default:
 		return false
 	}
+}
+
+func (parsed parsedYAML) numberScalar(path string) (float64, bool) {
+	value, ok := parsed.scalars[path]
+	if !ok {
+		return 0, false
+	}
+	number, err := strconv.ParseFloat(value, 64)
+	return number, err == nil
 }
 
 func stripYAMLComment(value string) string {
