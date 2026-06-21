@@ -4,11 +4,17 @@
   "task_id": "T2",
   "status": "implemented",
   "implementation_performed": true,
-  "produced_at": "2026-06-21T16:17:27Z",
-  "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-15",
+  "produced_at": "2026-06-21T16:26:21Z",
+  "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-17",
   "changed_paths": [
+    "README.md",
     "cmd/relia/main.go",
     "cmd/relia/main_test.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md",
+    "docs/dev/dev_guides.md",
+    "schemas/experience-record.schema.json",
+    "schemas/recurrence-report.schema.json",
     ".factory/artifacts/task-runs/T2/work-proof-marker.json",
     ".factory/artifacts/task-runs/T2/validation-report.json"
   ],
@@ -16,28 +22,28 @@
     ".factory/artifacts/task-runs/T2/validation-report.json"
   ],
   "summary": {
-    "repair_iteration_note": "Repair-15 resolves the latest actionable Codex review findings for fail-closed org-sharing config, schema numeric bounds coverage, and documented nested block-list config parsing.",
+    "repair_iteration_note": "Repair-17 resolves the latest actionable Codex review findings for experience-record repo shape, recurrence ERR bounds, and inline YAML sequence parsing.",
     "implemented_contracts": [
-      "memory.org_eligible is on the same redaction_safety_failed exit 6 path as non-private memory.share_scope when the field is present but not exactly false",
-      "relia check accepts documented nested block-list configuration such as outcomes.checks.required and serve.compile.targets without treating the nested list items as parentless top-level lists",
-      "config-contract regression coverage continues to assert minimum and maximum bounds for documented advise and badge numeric fields",
-      "the parser repair stays within the baseline validator boundary and does not add dependencies, network access, runtime pin changes, or schema version changes"
+      "schemas/experience-record.schema.json accepts the PRD canonical repo identifier as a non-empty string.",
+      "schemas/recurrence-report.schema.json caps headline.error_recurrence_rate at 1 because ERR is confirmed recurrences divided by total agent-attributed failures.",
+      "relia check accepts inline scalar YAML sequences such as redaction.patterns: [api_key, token, password, secret] without weakening fail-closed redaction checks.",
+      "README, dev guide, architecture guide, and T2 decision note document the repaired schema and config contracts."
     ],
     "resolved_review_findings": [
       {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448671706",
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448713664",
         "status": "implemented",
-        "summary": "Non-default org-sharing posture now fails closed with exit 6 and redaction_status failed_closed, including non-false scalar values."
+        "summary": "Experience records now use the PRD canonical repo string shape, aligned with coverage and recurrence schemas."
       },
       {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448698165",
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448713667",
         "status": "implemented",
-        "summary": "Numeric-bound regression coverage verifies out-of-range advise and badge values fail config schema validation."
+        "summary": "Recurrence report ERR is bounded from 0 through 1 and covered by contract tests."
       },
       {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448705281",
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448713669",
         "status": "implemented",
-        "summary": "Nested documented block-list settings are skipped by the shallow baseline parser instead of rejected as parentless list items."
+        "summary": "The baseline YAML parser now treats inline sequence values as arrays, with regression coverage through relia check."
       }
     ],
     "lifecycle_boundary": "task-executor repair only; commit, PR update, scope closure, validation-gate, and post-merge evidence are left to their required workers"

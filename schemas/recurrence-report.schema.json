@@ -26,7 +26,7 @@
         "experiences_agent_attributed": {"type": "integer", "minimum": 0},
         "recurrences_confirmed": {"type": "integer", "minimum": 0},
         "recurrences_possible": {"type": "integer", "minimum": 0},
-        "error_recurrence_rate": {"type": "number", "minimum": 0}
+        "error_recurrence_rate": {"type": "number", "minimum": 0, "maximum": 1}
       }
     },
     "pairs": {

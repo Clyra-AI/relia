@@ -3,14 +3,17 @@
   "schema_version": "1.0",
   "task_id": "T2",
   "status": "pass",
-  "produced_at": "2026-06-21T16:17:27Z",
+  "produced_at": "2026-06-21T16:26:21Z",
   "commands_run": [
     "make lint-fast",
     "make test-fast",
-    "go test ./cmd/relia -count=1",
+    "go test ./cmd/relia -run 'TestCheckAllowsInlineYAMLSequenceForRedactionPatterns|TestOutcomeSchemasUsePRDOutcomeTaxonomy|TestRecurrenceReportSchemaCapsErrorRecurrenceRate' -count=1",
     "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
-    "make test-fast",
+    "go test ./cmd/relia -run 'TestCheckAllowsInlineYAMLSequenceForRedactionPatterns|TestOutcomeSchemasUsePRDOutcomeTaxonomy|TestRecurrenceReportSchemaCapsErrorRecurrenceRate' -count=1",
+    "python3 -m json.tool schemas/experience-record.schema.json",
+    "python3 -m json.tool schemas/recurrence-report.schema.json",
     "make prepush-full",
+    "git diff --check",
     "python3 -m json.tool .factory/artifacts/task-runs/T2/work-proof-marker.json",
     "python3 -m json.tool .factory/artifacts/task-runs/T2/validation-report.json"
   ],
@@ -19,37 +22,52 @@
       "command": "make lint-fast",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Baseline lint-fast passed before repair-15 edits."
+      "summary": "Baseline lint-fast passed before repair-17 edits."
     },
     {
       "command": "make test-fast",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Baseline go test ./... -count=1 passed before repair-15 edits."
+      "summary": "Baseline go test ./... -count=1 passed before repair-17 edits."
     }
   ],
   "red_evidence": [
     {
-      "command": "go test ./cmd/relia -count=1",
+      "command": "go test ./cmd/relia -run 'TestCheckAllowsInlineYAMLSequenceForRedactionPatterns|TestOutcomeSchemasUsePRDOutcomeTaxonomy|TestRecurrenceReportSchemaCapsErrorRecurrenceRate' -count=1",
       "status": "fail_expected",
       "exit_code": 1,
-      "summary": "After adding repair-15 regression tests and before implementation, TestCheckAllowsDocumentedNestedBlockLists failed with line 23: list item has no parent key, and TestCheckFailsClosedWhenOrgSharingIsEnabled/non_false_scalar returned exit 2 instead of redaction safety exit 6."
+      "summary": "After adding repair-17 regression tests and before implementation, inline redaction.patterns returned exit 6, experience repo was still an object $ref, and recurrence error_recurrence_rate lacked maximum 1."
     }
   ],
   "green_evidence": [
     {
-      "command": "make test-fast",
+      "command": "go test ./cmd/relia -run 'TestCheckAllowsInlineYAMLSequenceForRedactionPatterns|TestOutcomeSchemasUsePRDOutcomeTaxonomy|TestRecurrenceReportSchemaCapsErrorRecurrenceRate' -count=1",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Go unit tests passed after the parser and org-sharing fail-closed repair."
+      "summary": "Focused repair tests passed after schema, parser, and docs repairs."
     }
   ],
   "final_validation_evidence": [
     {
+      "command": "python3 -m json.tool schemas/experience-record.schema.json",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "python3 -m json.tool schemas/recurrence-report.schema.json",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
       "command": "make prepush-full",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Final gate passed lint-fast, test-fast, test-coverage, and test-contracts; coverage was 78.0% against the 75.0% threshold; repo pack reported ok."
+      "summary": "Final gate passed lint-fast, test-fast, test-coverage, and test-contracts; coverage was 76.8% against the 75.0% threshold; repo pack reported ok."
+    },
+    {
+      "command": "git diff --check",
+      "status": "pass",
+      "exit_code": 0
     },
     {
       "command": "python3 -m json.tool .factory/artifacts/task-runs/T2/work-proof-marker.json",
@@ -81,10 +99,10 @@
       "evidence_refs": [
         ".factory/artifacts/task-runs/T2/work-proof-marker.json",
         ".factory/artifacts/task-runs/T2/validation-report.json",
-        "cmd/relia/main.go",
-        "cmd/relia/main_test.go",
+        "schemas/experience-record.schema.json",
+        "schemas/recurrence-report.schema.json",
         "schemas/relia-config.schema.json",
-        "schemas/command-result.schema.json"
+        "cmd/relia/main_test.go"
       ]
     },
     {
@@ -95,7 +113,10 @@
         ".factory/artifacts/task-runs/T2/validation-report.json",
         "cmd/relia/main.go",
         "cmd/relia/main_test.go",
-        "relia.yaml"
+        "relia.yaml",
+        "README.md",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md"
       ]
     },
     {
@@ -106,7 +127,8 @@
         ".factory/artifacts/task-runs/T2/validation-report.json",
         "cmd/relia/main.go",
         "cmd/relia/main_test.go",
-        "schemas/command-result.schema.json"
+        "schemas/experience-record.schema.json",
+        "schemas/recurrence-report.schema.json"
       ]
     }
   ],
@@ -115,8 +137,14 @@
     "changed_paths_within_allowed_paths": true,
     "forbidden_paths_changed_in_worker_diff": false,
     "checked_changed_paths": [
+      "README.md",
       "cmd/relia/main.go",
       "cmd/relia/main_test.go",
+      "docs/architecture/architecture_guides.md",
+      "docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md",
+      "docs/dev/dev_guides.md",
+      "schemas/experience-record.schema.json",
+      "schemas/recurrence-report.schema.json",
       ".factory/artifacts/task-runs/T2/work-proof-marker.json",
       ".factory/artifacts/task-runs/T2/validation-report.json"
     ],
@@ -127,50 +155,53 @@
   },
   "plan_drift_result": {
     "status": "pass",
-    "note": "Repair-15 stayed within the T2 contracts-config-and-validation slice. Runtime pins, dependency policy, provider posture, release boundaries, tracker state, commits, PRs, and scope closure were not changed."
+    "note": "Repair-17 stayed within the T2 contracts-config-and-validation slice. Runtime pins, dependency policy, provider posture, release boundaries, tracker state, commits, PRs, and scope closure were not changed."
   },
   "codex_review_repair_result": {
     "status": "implemented",
-    "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-15",
+    "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-17",
     "resolved_findings": [
       {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448671706",
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448713664",
         "status": "implemented",
         "evidence_refs": [
-          "cmd/relia/main.go",
-          "cmd/relia/main_test.go",
           "docs/product/prd.md",
-          "docs/dev/dev_guides.md"
+          "schemas/experience-record.schema.json",
+          "schemas/coverage-map.schema.json",
+          "schemas/recurrence-report.schema.json",
+          "cmd/relia/main_test.go"
         ]
       },
       {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448698165",
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448713667",
         "status": "implemented",
         "evidence_refs": [
-          "cmd/relia/main.go",
-          "cmd/relia/main_test.go",
-          "schemas/relia-config.schema.json"
+          "docs/product/prd.md",
+          "schemas/recurrence-report.schema.json",
+          "cmd/relia/main_test.go"
         ]
       },
       {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448705281",
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448713669",
         "status": "implemented",
         "evidence_refs": [
           "cmd/relia/main.go",
           "cmd/relia/main_test.go",
-          "docs/product/prd.md",
+          "relia.yaml",
           "schemas/relia-config.schema.json"
         ]
       }
     ],
     "contract_family_verified": [
       "docs/product/prd.md",
+      "README.md",
       "docs/dev/dev_guides.md",
       "docs/architecture/architecture_guides.md",
-      "schemas/relia-config.schema.json",
+      "docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md",
       "schemas/experience-record.schema.json",
-      "schemas/command-result.schema.json",
-      "examples/command-results/exit-code-examples.json",
+      "schemas/coverage-map.schema.json",
+      "schemas/recurrence-report.schema.json",
+      "schemas/relia-config.schema.json",
       "relia.yaml",
       "cmd/relia/main.go",
       "cmd/relia/main_test.go"
@@ -178,12 +209,17 @@
   },
   "docs_sync_result": {
     "status": "pass",
-    "updated_refs": [],
-    "note": "No docs edit was needed for this repair because the PRD, schema, and dev guide already define numeric advisory and badge bounds, documented nested config lists, and fail-closed non-default sharing posture."
+    "updated_refs": [
+      "README.md",
+      "docs/dev/dev_guides.md",
+      "docs/architecture/architecture_guides.md",
+      "docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md"
+    ],
+    "note": "Docs now state canonical repo string artifacts, bounded ERR proportions, and inline YAML sequence support for config arrays."
   },
   "changelog_result": {
     "status": "not_applicable",
-    "reason": "No changelog file exists in the allowed repo surface for this repair; the repair evidence is recorded in task-run artifacts."
+    "reason": "No changelog file exists in the allowed repo surface for this repair; the repair evidence is recorded in task-run artifacts and docs."
   },
   "versioning_result": {
     "status": "pass",

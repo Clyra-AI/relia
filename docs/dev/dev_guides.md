@@ -143,7 +143,9 @@ posture also fails closed with exit `6`; explicit `embeddings: local` without a 
 artifact fails with exit `8`; disabled `distill.review_required` and unknown
 provider/config values fail with exit `2`. The executable config schema accepts
 the documented PRD `advise` and `badge` sections without enabling live network
-or credentialed work by default.
+or credentialed work by default. Config arrays may use block or inline YAML
+sequence syntax, including `redaction.patterns: [api_key, token, password,
+secret]`.
 
 ## Structured Data, Proof, Budgets, And Redaction
 
@@ -152,6 +154,9 @@ or credentialed work by default.
 - Phase 0 schema contracts must declare `schema_version`, required fields,
   allowed enum values, a forward-compatible `metadata` object, and
   `x-relia_error_mapping` for stable CLI exits.
+- Experience, coverage, and recurrence artifact schemas use canonical repo
+  identifier strings, and recurrence report `error_recurrence_rate` is a
+  bounded `0` through `1` proportion.
 - Outcome and failure-signature schemas must use the PRD taxonomy names:
   `revert`, `merge_clean`, and `type_failure`. Memory-rule schemas must keep
   the durable artifact fields `id`, `status`, `evidence`, and PR-backed

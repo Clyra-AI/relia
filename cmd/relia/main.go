@@ -1063,12 +1063,17 @@ func parseBaselineYAML(content string) (parsedYAML, error) {
 			parsed.lists[listPath] = append(parsed.lists[listPath], cleanYAMLScalar(strings.TrimSpace(strings.TrimPrefix(trimmed, "- "))))
 			continue
 		}
-		key, value, ok := strings.Cut(trimmed, ":")
+		key, rawValue, ok := strings.Cut(trimmed, ":")
 		if !ok {
 			return parsed, fmt.Errorf("line %d: expected key: value", lineNumber+1)
 		}
 		key = strings.TrimSpace(key)
-		value = cleanYAMLScalar(strings.TrimSpace(value))
+		rawValue = strings.TrimSpace(rawValue)
+		inlineList, hasInlineList, inlineListErr := parseInlineYAMLSequence(rawValue)
+		if inlineListErr != nil {
+			return parsed, fmt.Errorf("line %d: %w", lineNumber+1, inlineListErr)
+		}
+		value := cleanYAMLScalar(rawValue)
 		if key == "" {
 			return parsed, fmt.Errorf("line %d: empty key", lineNumber+1)
 		}
@@ -1078,9 +1083,9 @@ func parseBaselineYAML(content string) (parsedYAML, error) {
 		case indent == 0:
 			section = key
 			parsed.keys[key] = struct{}{}
-			if value != "" {
-				if value == "[]" {
-					parsed.lists[key] = []string{}
+			if rawValue != "" {
+				if hasInlineList {
+					parsed.lists[key] = inlineList
 				} else {
 					parsed.scalars[key] = value
 				}
@@ -1094,12 +1099,12 @@ func parseBaselineYAML(content string) (parsedYAML, error) {
 				parsed.children[section] = map[string]struct{}{}
 			}
 			parsed.children[section][key] = struct{}{}
-			if value == "" {
+			if rawValue == "" {
 				listPath = path
 				listItemIndent = indent + 2
 				parsed.objects[path] = struct{}{}
-			} else if value == "[]" {
-				parsed.lists[path] = []string{}
+			} else if hasInlineList {
+				parsed.lists[path] = inlineList
 			} else {
 				parsed.scalars[path] = value
 			}
@@ -1224,6 +1229,67 @@ func stripYAMLComment(value string) string {
 		}
 	}
 	return strings.TrimSpace(value)
+}
+
+func parseInlineYAMLSequence(value string) ([]string, bool, error) {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return nil, false, nil
+	}
+	if !strings.HasPrefix(value, "[") && !strings.HasSuffix(value, "]") {
+		return nil, false, nil
+	}
+	if !strings.HasPrefix(value, "[") || !strings.HasSuffix(value, "]") {
+		return nil, false, errors.New("inline sequence must be enclosed in []")
+	}
+	body := strings.TrimSpace(value[1 : len(value)-1])
+	if body == "" {
+		return []string{}, true, nil
+	}
+
+	var items []string
+	var token strings.Builder
+	inSingleQuote := false
+	inDoubleQuote := false
+	escaped := false
+	for _, char := range body {
+		if escaped {
+			token.WriteRune(char)
+			escaped = false
+			continue
+		}
+		if inDoubleQuote && char == '\\' {
+			token.WriteRune(char)
+			escaped = true
+			continue
+		}
+		switch char {
+		case '\'':
+			if !inDoubleQuote {
+				inSingleQuote = !inSingleQuote
+			}
+			token.WriteRune(char)
+		case '"':
+			if !inSingleQuote {
+				inDoubleQuote = !inDoubleQuote
+			}
+			token.WriteRune(char)
+		case ',':
+			if inSingleQuote || inDoubleQuote {
+				token.WriteRune(char)
+				continue
+			}
+			items = append(items, cleanYAMLScalar(token.String()))
+			token.Reset()
+		default:
+			token.WriteRune(char)
+		}
+	}
+	if inSingleQuote || inDoubleQuote {
+		return nil, false, errors.New("inline sequence has an unterminated quoted scalar")
+	}
+	items = append(items, cleanYAMLScalar(token.String()))
+	return items, true, nil
 }
 
 func cleanYAMLScalar(value string) string {

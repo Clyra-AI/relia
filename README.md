@@ -47,8 +47,10 @@ evidence, failure signatures, memory rules, coverage maps, risk assessments,
 recurrence reports, compiled context, command results, redaction config, and the
 repo config contract. Outcome schemas use the PRD names `ci_failure`, `revert`,
 `review_correction`, `merge_clean`, and `fix_held`; type-check signatures use
-`type_failure`. Memory rules use the documented durable-artifact shape:
-`id`, `status`, `evidence`, and PR-backed `provenance`.
+`type_failure`. Experience, coverage, and recurrence artifacts use canonical
+repo identifier strings such as `owner/name`, and recurrence report ERR values
+are bounded proportions from `0` through `1`. Memory rules use the documented
+durable-artifact shape: `id`, `status`, `evidence`, and PR-backed `provenance`.
 
 Provider-backed distill work requires a complete `model_provider_endpoint`
 grant naming provider, model, endpoint or `base_url`, credential environment,

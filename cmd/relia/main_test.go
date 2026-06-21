@@ -451,6 +451,22 @@ func TestCheckAllowsDocumentedNestedBlockLists(t *testing.T) {
 	}
 }
 
+func TestCheckAllowsInlineYAMLSequenceForRedactionPatterns(t *testing.T) {
+	config := strings.Replace(defaultConfigYAML(), "patterns:\n    - api_key\n    - token\n    - password\n    - secret\n    - private_key", "patterns: [api_key, token, password, secret, private_key]", 1)
+	repo := writeMinimalRepoForFullCheck(t, config)
+	t.Chdir(repo)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Status != "pass" {
+		t.Fatalf("status = %q", result.Status)
+	}
+}
+
 func TestCheckRejectsConfiguredRepoRootsOutsideContract(t *testing.T) {
 	for _, tc := range []struct {
 		name   string
@@ -796,6 +812,11 @@ func TestOutcomeSchemasUsePRDOutcomeTaxonomy(t *testing.T) {
 	root := findRepoRootForTest(t)
 	experienceSchema := readSchemaForTest(t, root, "schemas/experience-record.schema.json")
 	experienceProperties := schemaPropertiesForTest(t, "schemas/experience-record.schema.json", experienceSchema)
+	repo := propertyForTest(t, experienceProperties, "repo")
+	if repo["type"] != "string" || repo["minLength"] != float64(1) {
+		t.Fatalf("experience repo = %#v, want non-empty canonical repo string", repo)
+	}
+
 	attributionProperties := schemaPropertiesForTest(t, "experience.attribution", propertyForTest(t, experienceProperties, "attribution"))
 	attributionRequired, ok := propertyForTest(t, experienceProperties, "attribution")["required"].([]any)
 	if !ok {
@@ -842,6 +863,21 @@ func TestOutcomeSchemasUsePRDOutcomeTaxonomy(t *testing.T) {
 		if containsStringValue(outcomeKindEnum, forbidden) {
 			t.Fatalf("outcome evidence enum = %#v, must use PRD outcome names", outcomeKindEnum)
 		}
+	}
+}
+
+func TestRecurrenceReportSchemaCapsErrorRecurrenceRate(t *testing.T) {
+	root := findRepoRootForTest(t)
+	schema := readSchemaForTest(t, root, "schemas/recurrence-report.schema.json")
+	properties := schemaPropertiesForTest(t, "schemas/recurrence-report.schema.json", schema)
+	headlineProperties := schemaPropertiesForTest(t, "recurrence_report.headline", propertyForTest(t, properties, "headline"))
+	errRate := propertyForTest(t, headlineProperties, "error_recurrence_rate")
+
+	if errRate["type"] != "number" {
+		t.Fatalf("error_recurrence_rate type = %#v, want number", errRate["type"])
+	}
+	if errRate["minimum"] != float64(0) || errRate["maximum"] != float64(1) {
+		t.Fatalf("error_recurrence_rate bounds = [%#v, %#v], want [0, 1]", errRate["minimum"], errRate["maximum"])
 	}
 }
 
