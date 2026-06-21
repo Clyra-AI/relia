@@ -63,7 +63,8 @@ OOD signal. Memory rules use the documented durable-artifact shape with
 `object_type`, `schema_version`, `id`, `kind`, `status`, `statement`,
 `confidence`, `evidence`, `review`, `scope`, PR-backed `provenance`, and
 `metadata`. Active rules must include experience citations, provenance entries,
-and an accepted review label before `relia check` reports success.
+existing scoped paths, and an accepted review label before `relia check` reports
+success. Playbook rules must cite `merge_clean` or `fix_held` provenance.
 
 Provider-backed distill work requires a complete `model_provider_endpoint`
 grant in config before `embeddings: provider` is accepted: `provider`, `model`,

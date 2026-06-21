@@ -36,7 +36,9 @@ durable-rule shape with `object_type`, `schema_version`, `id`, `kind`, `status`,
 non-empty PR-backed `provenance`, and `metadata`; `relia check` fails with exit
 `4` when rules lack schema-required fields, experience citations, provenance
 entries, provenance outcomes, scope, metadata, or an accepted review label for
-active rules. Experience record action blocks use the PRD canonical `pr` and
+active rules; it also fails when rules declare scope paths that never existed in
+repository history or playbooks lack held-outcome provenance. Experience record
+action blocks use the PRD canonical `pr` and
 `commits` field names, outcome blocks use canonical `terminal`, and embedded
 signatures preserve signature class, check name, key, message fingerprint, and
 extraction confidence so recurrence pairing does not depend on a separate

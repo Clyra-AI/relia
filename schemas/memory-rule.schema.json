@@ -20,6 +20,25 @@
           }
         }
       }
+    },
+    {
+      "if": {
+        "properties": {"kind": {"const": "playbook"}},
+        "required": ["kind"]
+      },
+      "then": {
+        "properties": {
+          "provenance": {
+            "contains": {
+              "type": "object",
+              "required": ["outcome"],
+              "properties": {
+                "outcome": {"enum": ["merge_clean", "fix_held"]}
+              }
+            }
+          }
+        }
+      }
     }
   ],
   "x-relia_error_mapping": {

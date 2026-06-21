@@ -5,7 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
+	"os/exec"
+	"path"
 	"path/filepath"
 	"sort"
 	"strconv"
@@ -910,7 +913,7 @@ func validateMemoryRules(root string, memoryRoot string) ([]string, *CommandErro
 		if parseErr != nil {
 			return nil, artifactValidationError("memory rule is not valid baseline YAML: "+parseErr.Error(), rel)
 		}
-		if validationErr := validateMemoryRuleContract(rel, parsed); validationErr != nil {
+		if validationErr := validateMemoryRuleContract(root, rel, parsed); validationErr != nil {
 			return nil, validationErr
 		}
 		rules = append(rules, rel)
@@ -918,7 +921,7 @@ func validateMemoryRules(root string, memoryRoot string) ([]string, *CommandErro
 	return rules, nil
 }
 
-func validateMemoryRuleContract(rel string, parsed parsedYAML) *CommandError {
+func validateMemoryRuleContract(root string, rel string, parsed parsedYAML) *CommandError {
 	if parsed.scalar("object_type") != "relia.memory_rule" {
 		return artifactValidationError("memory rule object_type must be relia.memory_rule", rel)
 	}
@@ -963,6 +966,11 @@ func validateMemoryRuleContract(rel string, parsed parsedYAML) *CommandError {
 	if len(parsed.lists["scope.paths"]) == 0 && len(parsed.lists["scope.signals"]) == 0 {
 		return artifactValidationError("memory rule scope must include paths or signals", rel)
 	}
+	for _, scopePath := range parsed.lists["scope.paths"] {
+		if !memoryRuleScopePathExisted(root, scopePath) {
+			return artifactValidationError("memory rule scope path never existed in repository history: "+scopePath, rel)
+		}
+	}
 	if len(parsed.lists["provenance"]) == 0 {
 		return artifactValidationError("memory rule has no provenance entries", rel)
 	}
@@ -970,6 +978,7 @@ func validateMemoryRuleContract(rel string, parsed parsedYAML) *CommandError {
 	if len(provenanceObjects) != len(parsed.lists["provenance"]) {
 		return artifactValidationError("memory rule provenance pr is required", rel)
 	}
+	hasHeldOutcome := false
 	for _, item := range provenanceObjects {
 		if item["pr"] == "" {
 			return artifactValidationError("memory rule provenance pr is required", rel)
@@ -981,6 +990,12 @@ func validateMemoryRuleContract(rel string, parsed parsedYAML) *CommandError {
 		if !containsString([]string{"ci_failure", "revert", "review_correction", "merge_clean", "fix_held"}, outcome) {
 			return artifactValidationError("memory rule provenance outcome is not valid", rel)
 		}
+		if outcome == "merge_clean" || outcome == "fix_held" {
+			hasHeldOutcome = true
+		}
+	}
+	if parsed.scalar("kind") == "playbook" && !hasHeldOutcome {
+		return artifactValidationError("playbook memory rule must cite merge_clean or fix_held provenance", rel)
 	}
 	if parsed.scalar("metadata.relia_version") == "" {
 		return artifactValidationError("memory rule metadata.relia_version is required", rel)
@@ -995,6 +1010,97 @@ func validateMemoryRuleContract(rel string, parsed parsedYAML) *CommandError {
 		}
 	}
 	return nil
+}
+
+func memoryRuleScopePathExisted(root string, rawScopePath string) bool {
+	scopePath := normalizeScopePath(rawScopePath)
+	if scopePath == "" || scopePath == "." || strings.HasPrefix(scopePath, "../") {
+		return false
+	}
+	if currentTreeHasScopePath(root, scopePath) {
+		return true
+	}
+	return gitHistoryHasScopePath(root, scopePath)
+}
+
+func normalizeScopePath(rawScopePath string) string {
+	scopePath := strings.TrimSpace(filepath.ToSlash(rawScopePath))
+	scopePath = strings.TrimPrefix(scopePath, "./")
+	if path.IsAbs(scopePath) {
+		return ""
+	}
+	return path.Clean(scopePath)
+}
+
+func currentTreeHasScopePath(root string, scopePath string) bool {
+	literalPrefix := scopePathLiteralPrefix(scopePath)
+	if literalPrefix != "" {
+		if _, err := os.Stat(filepath.Join(root, filepath.FromSlash(literalPrefix))); err == nil {
+			return true
+		}
+	}
+
+	walkErr := filepath.WalkDir(root, func(candidate string, entry fs.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return nil
+		}
+		rel, relErr := filepath.Rel(root, candidate)
+		if relErr != nil {
+			return nil
+		}
+		rel = filepath.ToSlash(rel)
+		if rel == "." {
+			return nil
+		}
+		if entry.IsDir() && (rel == ".git" || rel == ".factoryd" || rel == ".factory/tmp") {
+			return filepath.SkipDir
+		}
+		if scopePathMatches(scopePath, rel) {
+			return errScopePathMatched
+		}
+		return nil
+	})
+	return errors.Is(walkErr, errScopePathMatched)
+}
+
+func gitHistoryHasScopePath(root string, scopePath string) bool {
+	pathspec := scopePathLiteralPrefix(scopePath)
+	if pathspec == "" {
+		pathspec = scopePath
+	}
+	cmd := exec.Command("git", "-C", root, "log", "--all", "--name-only", "--pretty=format:", "--", pathspec)
+	output, err := cmd.Output()
+	return err == nil && strings.TrimSpace(string(output)) != ""
+}
+
+var errScopePathMatched = errors.New("scope path matched")
+
+func scopePathLiteralPrefix(scopePath string) string {
+	prefix := scopePath
+	if index := strings.IndexAny(scopePath, "*?["); index >= 0 {
+		prefix = scopePath[:index]
+	}
+	prefix = strings.TrimSuffix(prefix, "/")
+	if prefix == "" {
+		return ""
+	}
+	return path.Clean(prefix)
+}
+
+func scopePathMatches(scopePath string, rel string) bool {
+	if !strings.ContainsAny(scopePath, "*?[") {
+		return rel == scopePath || strings.HasPrefix(rel, scopePath+"/")
+	}
+	if strings.HasSuffix(scopePath, "/**") {
+		prefix := strings.TrimSuffix(scopePath, "/**")
+		return rel == prefix || strings.HasPrefix(rel, prefix+"/")
+	}
+	matched, err := path.Match(scopePath, rel)
+	if err == nil && matched {
+		return true
+	}
+	prefix := scopePathLiteralPrefix(scopePath)
+	return prefix != "" && (rel == prefix || strings.HasPrefix(rel, prefix+"/"))
 }
 
 type schemaValidationIssue struct {

@@ -144,8 +144,9 @@ pulled artifact fails with exit `8`; `embeddings: provider` without a complete
 `model_provider_endpoint` grant fails with exit `8`; disabled
 `distill.review_required` and unknown provider/config values fail with exit `2`;
 invalid memory-rule schema fields, provenance, experience citations, scope,
-metadata, or missing/non-accepted active review labels fail with exit `4`. The executable
-config schema accepts the documented PRD `advise` and `badge` sections without
+scope paths that never existed, playbooks without held-outcome provenance,
+metadata, or missing/non-accepted active review labels fail with exit `4`. The
+executable config schema accepts the documented PRD `advise` and `badge` sections without
 enabling live network or credentialed work by default. Config arrays may use
 block or inline YAML sequence syntax, including `redaction.patterns: [api_key,
 token, password, secret]`. Version-only PRD bootstrap configs are normalized to

@@ -31,7 +31,8 @@ artifact shape: `object_type`, `schema_version`, `id`, `kind`, `status`,
 `statement`, `confidence`, `evidence`, `review`, `scope`, PR-backed
 `provenance`, and `metadata`. `relia check` validates active rules for
 experience citations, provenance entries, complete rule fields, scoped
-statements, metadata, and accepted review labels before reporting the operating
+statements, scope paths that exist or have existed, playbook held-outcome
+provenance, metadata, and accepted review labels before reporting the operating
 pack as ready. Experience record action blocks use canonical `pr` and `commits`
 fields, outcome blocks use canonical `terminal`, and embedded signatures
 preserve signature class, check name, key, message fingerprint, and extraction

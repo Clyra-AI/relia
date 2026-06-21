@@ -592,6 +592,73 @@ func TestCheckValidatesActiveMemoryRuleContractBeforePass(t *testing.T) {
 	}
 }
 
+func TestCheckRejectsPlaybookWithoutHeldOutcomeProvenance(t *testing.T) {
+	rule := strings.NewReplacer(
+		"kind: avoid",
+		"kind: playbook",
+		"outcome: ci_failure",
+		"outcome: revert",
+	).Replace(validMemoryRuleYAMLForTest())
+	repo := writeMinimalRepoForFullCheck(t, defaultConfigYAML())
+	writeMemoryRuleForTest(t, repo, rule)
+	t.Chdir(repo)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitValidation {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "memory_artifact_validation_failed" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+	if !strings.Contains(result.Errors[0].Message, "merge_clean or fix_held") {
+		t.Fatalf("error message = %q, want held provenance", result.Errors[0].Message)
+	}
+}
+
+func TestCheckRejectsMemoryRuleScopePathsThatNeverExisted(t *testing.T) {
+	rule := strings.Replace(validMemoryRuleYAMLForTest(), "cmd/relia/**", "cmd/reliaa/**", 1)
+	repo := writeMinimalRepoForFullCheck(t, defaultConfigYAML())
+	writeMemoryRuleForTest(t, repo, rule)
+	t.Chdir(repo)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitValidation {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "memory_artifact_validation_failed" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+	if !strings.Contains(result.Errors[0].Message, "scope path never existed") {
+		t.Fatalf("error message = %q, want typo-guard scope failure", result.Errors[0].Message)
+	}
+}
+
+func TestCheckAcceptsPlaybookWithHeldOutcomeProvenance(t *testing.T) {
+	rule := strings.NewReplacer(
+		"kind: avoid",
+		"kind: playbook",
+		"outcome: ci_failure",
+		"outcome: fix_held",
+	).Replace(validMemoryRuleYAMLForTest())
+	repo := writeMinimalRepoForFullCheck(t, defaultConfigYAML())
+	writeMemoryRuleForTest(t, repo, rule)
+	t.Chdir(repo)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Status != "pass" {
+		t.Fatalf("status = %q", result.Status)
+	}
+}
+
 func TestCheckAcceptsValidActiveMemoryRule(t *testing.T) {
 	repo := writeMinimalRepoForFullCheck(t, defaultConfigYAML())
 	writeMemoryRuleForTest(t, repo, validMemoryRuleYAMLForTest())
@@ -1374,6 +1441,52 @@ func TestMemoryRuleSchemaRequiresAcceptedReviewForActiveStatus(t *testing.T) {
 	t.Fatal("memory-rule schema does not constrain active rules to accepted review labels")
 }
 
+func TestMemoryRuleSchemaRequiresHeldOutcomeForPlaybooks(t *testing.T) {
+	root := findRepoRootForTest(t)
+	schema := readSchemaForTest(t, root, "schemas/memory-rule.schema.json")
+	allOf, ok := schema["allOf"].([]any)
+	if !ok {
+		t.Fatal("memory-rule allOf missing")
+	}
+
+	for _, rawClause := range allOf {
+		clause, ok := rawClause.(map[string]any)
+		if !ok {
+			continue
+		}
+		ifClause, ok := clause["if"].(map[string]any)
+		if !ok {
+			continue
+		}
+		ifProperties := schemaPropertiesForTest(t, "memory_rule.allOf.if", ifClause)
+		kind, ok := ifProperties["kind"].(map[string]any)
+		if !ok || kind["const"] != "playbook" {
+			continue
+		}
+		thenClause, ok := clause["then"].(map[string]any)
+		if !ok {
+			t.Fatal("playbook conditional missing then clause")
+		}
+		thenProperties := schemaPropertiesForTest(t, "memory_rule.allOf.then", thenClause)
+		provenance := propertyForTest(t, thenProperties, "provenance")
+		contains, ok := provenance["contains"].(map[string]any)
+		if !ok {
+			t.Fatal("playbook provenance held-outcome contains clause missing")
+		}
+		containsProperties := schemaPropertiesForTest(t, "memory_rule.playbook.provenance.contains", contains)
+		outcome := propertyForTest(t, containsProperties, "outcome")
+		outcomeEnum := enumForTest(t, "memory_rule.playbook.provenance.outcome", outcome)
+		for _, want := range []string{"merge_clean", "fix_held"} {
+			if !containsStringValue(outcomeEnum, want) {
+				t.Fatalf("playbook held outcome enum = %#v, want %s", outcomeEnum, want)
+			}
+		}
+		return
+	}
+
+	t.Fatal("memory-rule schema does not require held outcomes for playbooks")
+}
+
 func runForTest(t *testing.T, args []string, stdoutIsTTY bool) (string, string, int) {
 	t.Helper()
 
@@ -1477,6 +1590,13 @@ func writeMinimalRepoForCheck(t *testing.T, reliaYAML string) string {
 		if err := os.WriteFile(path, content, 0o644); err != nil {
 			t.Fatal(err)
 		}
+	}
+	commandPath := filepath.Join(root, "cmd", "relia", "main.go")
+	if err := os.MkdirAll(filepath.Dir(commandPath), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(commandPath, []byte("package main\n"), 0o644); err != nil {
+		t.Fatal(err)
 	}
 	return root
 }
