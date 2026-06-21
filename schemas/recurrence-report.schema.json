@@ -21,11 +21,13 @@
     "headline": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["experiences_agent_attributed", "recurrences_confirmed", "recurrences_possible", "error_recurrence_rate"],
+      "required": ["experiences_agent_attributed", "recurrences_confirmed", "recurrences_possible", "attribution_uncertain_count", "flake_discounted_count", "error_recurrence_rate"],
       "properties": {
         "experiences_agent_attributed": {"type": "integer", "minimum": 0},
         "recurrences_confirmed": {"type": "integer", "minimum": 0},
         "recurrences_possible": {"type": "integer", "minimum": 0},
+        "attribution_uncertain_count": {"type": "integer", "minimum": 0},
+        "flake_discounted_count": {"type": "integer", "minimum": 0},
         "error_recurrence_rate": {"type": "number", "minimum": 0, "maximum": 1}
       }
     },

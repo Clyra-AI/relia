@@ -36,7 +36,12 @@ PR-backed `provenance`; `relia check` fails with exit `4` when active rules lack
 experience citations, provenance entries, or a review label. Experience,
 coverage, and recurrence contracts use the PRD canonical repo string shape, and
 recurrence report `error_recurrence_rate` remains a bounded `0` through `1`
-proportion. The config contract admits the documented PR advisory and badge
+proportion. Recurrence report headlines also require
+`attribution_uncertain_count` and `flake_discounted_count` so trust-relevant
+exclusions cannot disappear from JSON output. The risk-assessment contract
+requires `matched_rules` with citations and `coverage_stats` so the shared
+CLI/MCP/PR-advisor assessment surface can explain risky matches and OOD
+coverage. The config contract admits the documented PR advisory and badge
 sections, plus block or inline YAML sequences for config arrays. Version-only
 PRD bootstrap configs are treated as `schema_version: "1.0"` and receive the
 same MVP-safe privacy and artifact defaults before schema validation.

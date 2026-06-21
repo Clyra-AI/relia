@@ -4,7 +4,7 @@
   "title": "Relia Risk Assessment",
   "type": "object",
   "additionalProperties": false,
-  "required": ["object_type", "schema_version", "assessment_id", "generated_at", "risk_match", "advisory_only", "evidence_refs", "metadata"],
+  "required": ["object_type", "schema_version", "assessment_id", "generated_at", "risk_match", "advisory_only", "matched_rules", "coverage_stats", "evidence_refs", "metadata"],
   "x-relia_error_mapping": {
     "invalid_input": 2,
     "artifact_validation": 4,
@@ -19,6 +19,61 @@
     "risk_match": {"enum": ["match_high", "match_medium", "no_coverage", "covered_clean"]},
     "advisory_only": {"type": "boolean"},
     "summary": {"type": "string"},
+    "matched_rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["rule_id", "match_level", "confidence", "citations"],
+        "properties": {
+          "rule_id": {"type": "string", "minLength": 1},
+          "rule_kind": {"enum": ["avoid", "playbook"]},
+          "rule_status": {"enum": ["active"]},
+          "statement": {"type": "string", "minLength": 1},
+          "match_level": {"enum": ["match_high", "match_medium"]},
+          "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+          "citations": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["experience_ref"],
+              "properties": {
+                "experience_ref": {"type": "string", "minLength": 1},
+                "provenance_ref": {"type": "string", "minLength": 1},
+                "pr_url": {"type": "string", "minLength": 1}
+              }
+            }
+          }
+        }
+      }
+    },
+    "coverage_stats": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["coverage_status", "path_count", "paths_with_experience", "experience_density", "path_coverage"],
+      "properties": {
+        "coverage_status": {"enum": ["no_coverage", "covered_clean", "covered_risky"]},
+        "path_count": {"type": "integer", "minimum": 0},
+        "paths_with_experience": {"type": "integer", "minimum": 0},
+        "experience_density": {"type": "number", "minimum": 0, "maximum": 1},
+        "path_coverage": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["path_prefix", "coverage_status", "experience_count"],
+            "properties": {
+              "path_prefix": {"type": "string", "minLength": 1},
+              "coverage_status": {"enum": ["no_coverage", "covered_clean", "covered_risky"]},
+              "experience_count": {"type": "integer", "minimum": 0},
+              "rule_count": {"type": "integer", "minimum": 0}
+            }
+          }
+        }
+      }
+    },
     "evidence_refs": {"type": "array", "items": {"type": "string", "minLength": 1}},
     "metadata": {"$ref": "#/$defs/metadata"}
   },

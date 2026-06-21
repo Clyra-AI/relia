@@ -972,6 +972,88 @@ func TestRecurrenceReportSchemaCapsErrorRecurrenceRate(t *testing.T) {
 	}
 }
 
+func TestRecurrenceReportSchemaPreservesFlakeAndAttributionCounts(t *testing.T) {
+	root := findRepoRootForTest(t)
+	schema := readSchemaForTest(t, root, "schemas/recurrence-report.schema.json")
+	properties := schemaPropertiesForTest(t, "schemas/recurrence-report.schema.json", schema)
+	headline := propertyForTest(t, properties, "headline")
+	headlineRequired, ok := headline["required"].([]any)
+	if !ok {
+		t.Fatal("recurrence_report.headline required missing")
+	}
+	headlineProperties := schemaPropertiesForTest(t, "recurrence_report.headline", headline)
+
+	for _, want := range []string{"attribution_uncertain_count", "flake_discounted_count"} {
+		if !containsStringValue(headlineRequired, want) {
+			t.Fatalf("recurrence_report.headline required = %#v, want %s", headlineRequired, want)
+		}
+		property := propertyForTest(t, headlineProperties, want)
+		if property["type"] != "integer" || property["minimum"] != float64(0) {
+			t.Fatalf("recurrence_report.headline.%s = %#v, want non-negative integer", want, property)
+		}
+	}
+}
+
+func TestRiskAssessmentSchemaIncludesMatchedRulesAndCoverageStats(t *testing.T) {
+	root := findRepoRootForTest(t)
+	schema := readSchemaForTest(t, root, "schemas/risk-assessment.schema.json")
+	properties := schemaPropertiesForTest(t, "schemas/risk-assessment.schema.json", schema)
+	required, ok := schema["required"].([]any)
+	if !ok {
+		t.Fatal("risk-assessment required missing")
+	}
+	for _, want := range []string{"matched_rules", "coverage_stats"} {
+		if !containsStringValue(required, want) {
+			t.Fatalf("risk-assessment required = %#v, want %s", required, want)
+		}
+	}
+
+	matchedRules := propertyForTest(t, properties, "matched_rules")
+	if matchedRules["type"] != "array" {
+		t.Fatalf("matched_rules type = %#v, want array", matchedRules["type"])
+	}
+	matchedRuleItem, ok := matchedRules["items"].(map[string]any)
+	if !ok {
+		t.Fatal("matched_rules.items missing")
+	}
+	matchedRuleRequired, ok := matchedRuleItem["required"].([]any)
+	if !ok {
+		t.Fatal("matched_rules item required missing")
+	}
+	for _, want := range []string{"rule_id", "match_level", "confidence", "citations"} {
+		if !containsStringValue(matchedRuleRequired, want) {
+			t.Fatalf("matched_rules item required = %#v, want %s", matchedRuleRequired, want)
+		}
+	}
+	matchedRuleProperties := schemaPropertiesForTest(t, "risk_assessment.matched_rules.item", matchedRuleItem)
+	citations := propertyForTest(t, matchedRuleProperties, "citations")
+	if citations["type"] != "array" || citations["minItems"] != float64(1) {
+		t.Fatalf("matched_rules.citations = %#v, want non-empty array", citations)
+	}
+
+	coverageStats := propertyForTest(t, properties, "coverage_stats")
+	coverageRequired, ok := coverageStats["required"].([]any)
+	if !ok {
+		t.Fatal("coverage_stats required missing")
+	}
+	for _, want := range []string{"coverage_status", "path_count", "paths_with_experience", "experience_density", "path_coverage"} {
+		if !containsStringValue(coverageRequired, want) {
+			t.Fatalf("coverage_stats required = %#v, want %s", coverageRequired, want)
+		}
+	}
+	coverageProperties := schemaPropertiesForTest(t, "risk_assessment.coverage_stats", coverageStats)
+	coverageStatusEnum := enumForTest(t, "risk_assessment.coverage_stats.coverage_status", propertyForTest(t, coverageProperties, "coverage_status"))
+	for _, want := range []string{"no_coverage", "covered_clean", "covered_risky"} {
+		if !containsStringValue(coverageStatusEnum, want) {
+			t.Fatalf("coverage_status enum = %#v, want %s", coverageStatusEnum, want)
+		}
+	}
+	experienceDensity := propertyForTest(t, coverageProperties, "experience_density")
+	if experienceDensity["type"] != "number" || experienceDensity["minimum"] != float64(0) || experienceDensity["maximum"] != float64(1) {
+		t.Fatalf("experience_density = %#v, want bounded number", experienceDensity)
+	}
+}
+
 func TestFailureSignatureSchemaUsesPRDSignatureClasses(t *testing.T) {
 	root := findRepoRootForTest(t)
 	schema := readSchemaForTest(t, root, "schemas/failure-signature.schema.json")

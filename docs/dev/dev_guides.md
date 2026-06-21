@@ -148,7 +148,9 @@ enabling live network or credentialed work by default. Config arrays may use
 block or inline YAML sequence syntax, including `redaction.patterns: [api_key,
 token, password, secret]`. Version-only PRD bootstrap configs are normalized to
 `schema_version: "1.0"` with MVP-safe privacy and artifact defaults before schema
-validation.
+validation. The risk-assessment schema keeps PRD-required matched rules with
+citations and coverage stats explicit, and the recurrence-report headline keeps
+flake-discounted and uncertain-attribution counts explicit.
 
 ## Structured Data, Proof, Budgets, And Redaction
 
@@ -160,6 +162,9 @@ validation.
 - Experience, coverage, and recurrence artifact schemas use canonical repo
   identifier strings, and recurrence report `error_recurrence_rate` is a
   bounded `0` through `1` proportion.
+- Risk-assessment artifacts must preserve `matched_rules` with citations and
+  `coverage_stats`, and recurrence reports must preserve
+  `attribution_uncertain_count` and `flake_discounted_count`.
 - Outcome and failure-signature schemas must use the PRD taxonomy names:
   `revert`, `merge_clean`, and `type_failure`. Memory-rule schemas must keep
   the durable artifact fields `id`, `status`, `evidence`, and PR-backed

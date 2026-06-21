@@ -4,15 +4,16 @@
   "task_id": "T2",
   "status": "implemented",
   "implementation_performed": true,
-  "produced_at": "2026-06-21T16:36:44Z",
-  "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-18",
+  "produced_at": "2026-06-21T16:43:36Z",
+  "repair_task_id": "20260621T014044.821132000Z-relia-T2-repair-19",
   "changed_paths": [
     "README.md",
-    "cmd/relia/main.go",
     "cmd/relia/main_test.go",
     "docs/architecture/architecture_guides.md",
     "docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md",
     "docs/dev/dev_guides.md",
+    "schemas/recurrence-report.schema.json",
+    "schemas/risk-assessment.schema.json",
     ".factory/artifacts/task-runs/T2/work-proof-marker.json",
     ".factory/artifacts/task-runs/T2/validation-report.json"
   ],
@@ -20,28 +21,28 @@
     ".factory/artifacts/task-runs/T2/validation-report.json"
   ],
   "summary": {
-    "repair_iteration_note": "Repair-18 resolves the latest actionable Codex review findings for memory-rule validation before pass, documented version-only PRD bootstrap configs, and verifies the inline YAML sequence repair remains covered.",
+    "repair_iteration_note": "Repair-19 resolves the latest actionable Codex review findings by preserving matched-rule, citation, coverage, flake-discount, and uncertain-attribution fields in the sealed artifact schemas.",
     "implemented_contracts": [
-      "relia check now validates memory/rules/*.yaml before constructing a pass result and fails with exit 4 when rules lack experience citations, provenance entries, or active review labels.",
-      "relia check accepts version-only PRD bootstrap configs by normalizing them to schema_version 1.0 with MVP-safe privacy and artifact defaults before schema validation.",
-      "The baseline YAML parser accepts top-level lists, list-item map continuations, folded scalar blocks, and inline YAML sequences needed by the PRD config and memory-rule examples.",
-      "README, dev guide, architecture guide, and the T2 decision note document the repaired config compatibility and memory-rule validation contracts."
+      "schemas/risk-assessment.schema.json now requires matched_rules and coverage_stats so relia assess, MCP assess, and the PR advisor can share one RiskAssessment contract with citations and OOD coverage detail.",
+      "schemas/recurrence-report.schema.json now requires attribution_uncertain_count and flake_discounted_count in headline reports so trust-critical exclusions remain visible in JSON output.",
+      "cmd/relia/main_test.go includes regression tests that fail when those schema fields are missing.",
+      "README, dev guide, architecture guide, and the T2 decision note document the repaired schema contract."
     ],
     "resolved_review_findings": [
       {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448713669",
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448730703",
         "status": "implemented",
-        "summary": "Inline redaction.patterns arrays remain accepted by relia check with regression coverage."
+        "summary": "RiskAssessment schema now carries matched_rules with citations and coverage_stats."
       },
       {
-        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448723353",
+        "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448730706",
         "status": "implemented",
-        "summary": "relia check now validates memory/rules/*.yaml before pass and blocks invalid active rules with exit 4."
+        "summary": "Recurrence report headline schema now preserves flake-discounted and uncertain-attribution counts."
       },
       {
         "comment_ref": "https://github.com/Clyra-AI/relia/pull/18#discussion_r3448723354",
-        "status": "implemented",
-        "summary": "Version-only PRD bootstrap configs no longer fail only because schema_version is absent; safe MVP defaults are applied before schema validation."
+        "status": "already_implemented_verified",
+        "summary": "The documented version-only PRD bootstrap config repair remains covered by the existing test suite and docs."
       }
     ],
     "lifecycle_boundary": "task-executor repair only; commit, PR update, scope closure, validation-gate, and post-merge evidence are left to their required workers"
