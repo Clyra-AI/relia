@@ -128,13 +128,24 @@ T1 establishes the command result envelope as the baseline automation contract:
 
 The envelope preserves `object_type`, `schema_version`, `command`, `status`,
 `mode`, `exit_code`, `warnings`, `errors`, `artifacts`, `evidence_refs`,
-`duration_ms`, and `redaction_status`. Human-readable output is only the default
+`duration_ms`, `redaction_status`, and a forward-compatible `metadata` object
+with the Relia version and schema id. Human-readable output is only the default
 when stdout is an interactive terminal and no machine-readable flag is present.
+
+T2 extends `relia check` beyond file presence. It validates the versioned
+`relia.yaml` privacy defaults, the schema contract files under `schemas/`, and
+the artifact layout contract surfaced in the command-result `data` object.
+Unsafe redaction settings fail closed with exit `6`; non-private MVP sharing
+posture fails with exit `4`; explicit `embeddings: local` without a pulled
+artifact fails with exit `8`; unknown provider/config values fail with exit `2`.
 
 ## Structured Data, Proof, Budgets, And Redaction
 
 - PR, check-run, experience, memory, MCP, assessment, report, and config data
   must be handled through parsers, schemas, or stable APIs.
+- Phase 0 schema contracts must declare `schema_version`, required fields,
+  allowed enum values, a forward-compatible `metadata` object, and
+  `x-relia_error_mapping` for stable CLI exits.
 - Structured check-run data is preferred over log parsing; any log-parsed
   fallback must be labeled and validated.
 - Task closure must name the required proof level: syntax, source evidence,

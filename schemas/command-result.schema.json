@@ -16,8 +16,15 @@
     "artifacts",
     "evidence_refs",
     "duration_ms",
-    "redaction_status"
+    "redaction_status",
+    "metadata"
   ],
+  "x-relia_error_mapping": {
+    "invalid_input": 2,
+    "artifact_validation": 4,
+    "redaction_safety": 6,
+    "provenance_integrity": 9
+  },
   "properties": {
     "object_type": {
       "const": "relia.command_result"
@@ -73,6 +80,20 @@
     },
     "redaction_status": {
       "enum": ["not_applicable", "applied", "failed_closed"]
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["relia_version", "schema_id"],
+      "properties": {
+        "relia_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "schema_id": {
+          "const": "schemas/command-result.schema.json"
+        }
+      }
     },
     "data": {
       "type": "object"

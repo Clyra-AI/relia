@@ -22,6 +22,12 @@ validation. Rollback is deletion of the T1 schema/examples and restoration of
 the previous command wrapper, but that would also remove the agent-native CLI
 baseline required by `docs/dev/dev_guides.md#agent-native-cli-policy`.
 
+T2 amends the pre-release command-result envelope with required `metadata` and
+adds Phase 0 artifact schemas under `schemas/`. `relia check` is the state owner
+for local validation of config privacy defaults, schema contract presence, and
+artifact layout reporting. See
+[decision-0002-product-contracts-and-privacy-defaults.md](decision-0002-product-contracts-and-privacy-defaults.md).
+
 ## Systems Thinking Map
 
 - State lives in repo-local config, generated artifacts, source files, and Factory evidence.

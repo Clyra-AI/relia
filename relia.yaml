@@ -1,8 +1,11 @@
 version: 1
+schema_version: "1.0"
 
 repo:
   provider: github
   remote: origin
+  artifact_root: .relia
+  memory_root: memory
   scopes: []
 
 attribution:
@@ -17,12 +20,37 @@ attribution:
 outcomes:
   checks:
     required: []
+  revert_detection: true
+  lookback_days: 180
+
+redaction:
+  patterns:
+    - api_key
+    - token
+    - password
+    - secret
+    - private_key
+  entropy_scan: true
+  fail_closed: true
 
 distill:
   embeddings: signature
+  review_required: true
+
+memory:
+  decay_half_life_days: 90
+  invalidate_on_path_delete: true
+  max_active_rules: 200
+  commit_experiences: false
+  share_scope: private
+  org_eligible: false
 
 serve:
   advisory_only: true
 
 gate:
   enabled: false
+
+metadata:
+  relia_version: 0.0.0-dev
+  contract: schemas/relia-config.schema.json

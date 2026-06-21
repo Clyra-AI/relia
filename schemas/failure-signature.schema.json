@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Clyra-AI/relia/schemas/failure-signature.schema.json",
+  "title": "Relia Failure Signature",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["object_type", "schema_version", "signature_id", "signature_class", "key", "message_fingerprint", "extraction", "metadata"],
+  "x-relia_error_mapping": {
+    "invalid_input": 2,
+    "artifact_validation": 4,
+    "redaction_safety": 6,
+    "provenance_integrity": 9
+  },
+  "properties": {
+    "object_type": {"const": "relia.failure_signature"},
+    "schema_version": {"const": "1.0"},
+    "signature_id": {"type": "string", "minLength": 1},
+    "signature_class": {"enum": ["test_failure", "lint_failure", "build_failure", "typecheck_failure", "review_correction", "revert"]},
+    "check_name": {"type": "string"},
+    "key": {"type": "string", "minLength": 1},
+    "message_fingerprint": {"type": "string", "minLength": 1},
+    "extraction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "confidence"],
+      "properties": {
+        "source": {"enum": ["structured_check_run", "log_parse"]},
+        "confidence": {"enum": ["high", "medium", "low"]}
+      }
+    },
+    "metadata": {"$ref": "#/$defs/metadata"}
+  },
+  "$defs": {
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["relia_version"],
+      "properties": {"relia_version": {"type": "string", "minLength": 1}}
+    }
+  }
+}

@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"testing"
 )
 
@@ -37,6 +38,9 @@ func TestJSONFlagEmitsStableEnvelope(t *testing.T) {
 	}
 	if result.RedactionStatus == "" {
 		t.Fatal("expected redaction_status")
+	}
+	if result.Metadata["schema_id"] != "schemas/command-result.schema.json" {
+		t.Fatalf("metadata.schema_id = %#v", result.Metadata["schema_id"])
 	}
 }
 
@@ -186,9 +190,26 @@ func TestInitCreatesBaselineConfig(t *testing.T) {
 	if err != nil {
 		t.Fatalf("expected relia.yaml to be created: %v", err)
 	}
-	for _, token := range []string{"version: 1", "embeddings: signature", "advisory_only: true"} {
+	for _, token := range []string{"version: 1", `schema_version: "1.0"`, "embeddings: signature", "entropy_scan: true", "fail_closed: true", "commit_experiences: false", "share_scope: private", "org_eligible: false", "advisory_only: true"} {
 		if !bytes.Contains(content, []byte(token)) {
 			t.Fatalf("relia.yaml missing %q:\n%s", token, content)
+		}
+	}
+	for _, rel := range []string{
+		filepath.Join(".relia", "experiences"),
+		filepath.Join(".relia", "signatures"),
+		filepath.Join(".relia", "coverage"),
+		filepath.Join(".relia", "reports"),
+		filepath.Join(".relia", "baselines"),
+		filepath.Join("memory", "rules"),
+		filepath.Join("memory", "compiled"),
+	} {
+		info, err := os.Stat(filepath.Join(tempDir, rel))
+		if err != nil {
+			t.Fatalf("expected init artifact directory %s: %v", rel, err)
+		}
+		if !info.IsDir() {
+			t.Fatalf("%s is not a directory", rel)
 		}
 	}
 }
@@ -220,6 +241,111 @@ func TestInitExistingConfigIsIdempotent(t *testing.T) {
 	result := decodeResult(t, stdout)
 	if created, ok := result.Data["created"].(bool); !ok || created {
 		t.Fatalf("created = %#v, want false", result.Data["created"])
+	}
+}
+
+func TestCheckReportsSchemaContractsAndPrivacyDefaults(t *testing.T) {
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Command != "check" || result.Status != "pass" {
+		t.Fatalf("result = %#v", result)
+	}
+	artifactContract, ok := result.Data["artifact_contract"].(map[string]any)
+	if !ok {
+		t.Fatalf("artifact_contract missing from data: %#v", result.Data)
+	}
+	if artifactContract["schema_version"] != "1.0" {
+		t.Fatalf("artifact_contract.schema_version = %#v", artifactContract["schema_version"])
+	}
+	schemas, ok := artifactContract["schemas"].([]any)
+	if !ok || len(schemas) < len(requiredSchemaFiles) {
+		t.Fatalf("schemas = %#v", artifactContract["schemas"])
+	}
+	privacy, ok := result.Data["privacy_defaults"].(map[string]any)
+	if !ok {
+		t.Fatalf("privacy_defaults missing from data: %#v", result.Data)
+	}
+	for key, want := range map[string]any{
+		"redaction_fail_closed": true,
+		"entropy_scan":          true,
+		"embeddings":            "signature",
+		"commit_experiences":    false,
+		"share_scope":           "private",
+		"org_eligible":          false,
+		"advisory_only":         true,
+		"provider_configured":   false,
+	} {
+		if privacy[key] != want {
+			t.Fatalf("privacy_defaults[%s] = %#v, want %#v", key, privacy[key], want)
+		}
+	}
+}
+
+func TestCheckRejectsUnknownDistillProvider(t *testing.T) {
+	repo := writeMinimalRepoForCheck(t, strings.Replace(defaultConfigYAML(), "embeddings: signature", "provider: mystery-ai\n  embeddings: signature", 1))
+	t.Chdir(repo)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitUsage {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "local_configuration_error" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+}
+
+func TestCheckFailsClosedWhenRedactionDefaultsAreUnsafe(t *testing.T) {
+	config := strings.NewReplacer(
+		"entropy_scan: true", "entropy_scan: false",
+		"fail_closed: true", "fail_closed: false",
+	).Replace(defaultConfigYAML())
+	repo := writeMinimalRepoForCheck(t, config)
+	t.Chdir(repo)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitRedactionSafety {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "redaction_safety_failed" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+}
+
+func TestCheckRejectsNonPrivateShareScope(t *testing.T) {
+	repo := writeMinimalRepoForCheck(t, strings.Replace(defaultConfigYAML(), "share_scope: private", "share_scope: org", 1))
+	t.Chdir(repo)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitValidation {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "memory_artifact_validation_failed" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+}
+
+func TestCheckRejectsLocalEmbeddingsWithoutArtifact(t *testing.T) {
+	repo := writeMinimalRepoForCheck(t, strings.Replace(defaultConfigYAML(), "embeddings: signature", "embeddings: local", 1))
+	t.Chdir(repo)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitDependency {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "dependency_error" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
 	}
 }
 
@@ -298,6 +424,7 @@ func TestCommandResultExitCodeExamplesCoverStableCodes(t *testing.T) {
 	var payload struct {
 		ObjectType    string          `json:"object_type"`
 		SchemaVersion string          `json:"schema_version"`
+		Metadata      map[string]any  `json:"metadata"`
 		Examples      []CommandResult `json:"examples"`
 	}
 	if err := json.Unmarshal(content, &payload); err != nil {
@@ -305,6 +432,9 @@ func TestCommandResultExitCodeExamplesCoverStableCodes(t *testing.T) {
 	}
 	if payload.ObjectType != "relia.command_result_examples" {
 		t.Fatalf("object_type = %q", payload.ObjectType)
+	}
+	if payload.Metadata["schema_id"] != "schemas/command-result.schema.json" {
+		t.Fatalf("metadata.schema_id = %#v", payload.Metadata["schema_id"])
 	}
 	codes := make([]int, 0, len(payload.Examples))
 	for _, example := range payload.Examples {
@@ -317,6 +447,9 @@ func TestCommandResultExitCodeExamplesCoverStableCodes(t *testing.T) {
 		if example.ExitCode < ExitSuccess || example.ExitCode > ExitProvenanceIntegrity {
 			t.Fatalf("unexpected exit code in example: %d", example.ExitCode)
 		}
+		if example.Metadata["schema_id"] != "schemas/command-result.schema.json" {
+			t.Fatalf("example %d metadata.schema_id = %#v", example.ExitCode, example.Metadata["schema_id"])
+		}
 		codes = append(codes, example.ExitCode)
 	}
 	sort.Ints(codes)
@@ -327,6 +460,43 @@ func TestCommandResultExitCodeExamplesCoverStableCodes(t *testing.T) {
 	for i := range want {
 		if codes[i] != want[i] {
 			t.Fatalf("codes = %v, want %v", codes, want)
+		}
+	}
+}
+
+func TestSchemaFilesDeclareVersionMetadataAndExitMapping(t *testing.T) {
+	root := findRepoRootForTest(t)
+	for _, rel := range requiredSchemaFiles {
+		content, err := os.ReadFile(filepath.Join(root, rel))
+		if err != nil {
+			t.Fatalf("read %s: %v", rel, err)
+		}
+		var schema map[string]any
+		if err := json.Unmarshal(content, &schema); err != nil {
+			t.Fatalf("%s is not valid JSON: %v", rel, err)
+		}
+		if schema["type"] != "object" {
+			t.Fatalf("%s type = %#v", rel, schema["type"])
+		}
+		properties, ok := schema["properties"].(map[string]any)
+		if !ok {
+			t.Fatalf("%s properties missing", rel)
+		}
+		if _, ok := properties["schema_version"]; !ok {
+			t.Fatalf("%s missing schema_version property", rel)
+		}
+		if _, ok := properties["metadata"]; !ok {
+			t.Fatalf("%s missing metadata property", rel)
+		}
+		required, ok := schema["required"].([]any)
+		if !ok {
+			t.Fatalf("%s required missing", rel)
+		}
+		if !containsStringValue(required, "schema_version") || !containsStringValue(required, "metadata") {
+			t.Fatalf("%s required = %#v", rel, required)
+		}
+		if _, ok := schema["x-relia_error_mapping"].(map[string]any); !ok {
+			t.Fatalf("%s missing x-relia_error_mapping", rel)
 		}
 	}
 }
@@ -350,6 +520,15 @@ func decodeResult(t *testing.T, output string) CommandResult {
 	return result
 }
 
+func containsStringValue(values []any, want string) bool {
+	for _, value := range values {
+		if value == want {
+			return true
+		}
+	}
+	return false
+}
+
 func findRepoRootForTest(t *testing.T) string {
 	t.Helper()
 
@@ -360,6 +539,31 @@ func findRepoRootForTest(t *testing.T) string {
 	root, ok := findRepoRoot(wd)
 	if !ok {
 		t.Fatalf("could not find repo root from %s", wd)
+	}
+	return root
+}
+
+func writeMinimalRepoForCheck(t *testing.T, reliaYAML string) string {
+	t.Helper()
+
+	root := t.TempDir()
+	for _, rel := range requiredCheckFiles {
+		path := filepath.Join(root, rel)
+		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		content := []byte("placeholder\n")
+		switch rel {
+		case "go.mod":
+			content = []byte("module github.com/Clyra-AI/relia\n\ngo 1.26.4\n")
+		case defaultConfigFile:
+			content = []byte(reliaYAML)
+		case ".tool-versions":
+			content = []byte("golang 1.26.4\n")
+		}
+		if err := os.WriteFile(path, content, 0o644); err != nil {
+			t.Fatal(err)
+		}
 	}
 	return root
 }

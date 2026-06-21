@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Clyra-AI/relia/schemas/memory-rule.schema.json",
+  "title": "Relia Memory Rule",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["object_type", "schema_version", "rule_id", "kind", "lifecycle", "statement", "confidence", "review", "scope", "provenance", "metadata"],
+  "x-relia_error_mapping": {
+    "invalid_input": 2,
+    "artifact_validation": 4,
+    "redaction_safety": 6,
+    "provenance_integrity": 9
+  },
+  "properties": {
+    "object_type": {"const": "relia.memory_rule"},
+    "schema_version": {"const": "1.0"},
+    "rule_id": {"type": "string", "minLength": 1},
+    "source_repo": {"type": "string"},
+    "kind": {"enum": ["avoid", "playbook"]},
+    "lifecycle": {"enum": ["candidate", "active", "stale", "contradicted", "retired"]},
+    "statement": {"type": "string", "minLength": 1},
+    "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label"],
+      "properties": {
+        "label": {"enum": ["accepted", "suggested", "needs_user_input", "rejected"]},
+        "reviewer": {"type": "string"},
+        "reviewed_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["paths"],
+      "properties": {
+        "paths": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["experience_refs", "citation_refs"],
+      "properties": {
+        "experience_refs": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "citation_refs": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "decay_half_life_days": {"type": "integer", "minimum": 1},
+    "redaction_status": {"enum": ["applied", "failed_closed"]},
+    "metadata": {"$ref": "#/$defs/metadata"}
+  },
+  "$defs": {
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["relia_version"],
+      "properties": {"relia_version": {"type": "string", "minLength": 1}}
+    }
+  }
+}

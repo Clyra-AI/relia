@@ -2,6 +2,10 @@
   "object_type": "relia.command_result_examples",
   "schema_version": "1.0",
   "source_ref": "docs/product/prd.md#exit-code-contract",
+  "metadata": {
+    "relia_version": "0.0.0-dev",
+    "schema_id": "schemas/command-result.schema.json"
+  },
   "examples": [
     {
       "object_type": "relia.command_result",
@@ -16,6 +20,10 @@
       "evidence_refs": ["docs/product/prd.md#command-model"],
       "duration_ms": 0,
       "redaction_status": "not_applicable",
+      "metadata": {
+        "relia_version": "0.0.0-dev",
+        "schema_id": "schemas/command-result.schema.json"
+      },
       "data": {
         "message": "local operating pack baseline is present"
       }
@@ -39,7 +47,11 @@
       "artifacts": [],
       "evidence_refs": ["docs/product/prd.md#command-model"],
       "duration_ms": 0,
-      "redaction_status": "not_applicable"
+      "redaction_status": "not_applicable",
+      "metadata": {
+        "relia_version": "0.0.0-dev",
+        "schema_id": "schemas/command-result.schema.json"
+      }
     },
     {
       "object_type": "relia.command_result",
@@ -61,7 +73,11 @@
       "artifacts": [],
       "evidence_refs": ["docs/product/prd.md#command-model"],
       "duration_ms": 0,
-      "redaction_status": "not_applicable"
+      "redaction_status": "not_applicable",
+      "metadata": {
+        "relia_version": "0.0.0-dev",
+        "schema_id": "schemas/command-result.schema.json"
+      }
     },
     {
       "object_type": "relia.command_result",
@@ -83,7 +99,11 @@
       "artifacts": [],
       "evidence_refs": ["docs/product/prd.md#exit-code-contract"],
       "duration_ms": 0,
-      "redaction_status": "not_applicable"
+      "redaction_status": "not_applicable",
+      "metadata": {
+        "relia_version": "0.0.0-dev",
+        "schema_id": "schemas/command-result.schema.json"
+      }
     },
     {
       "object_type": "relia.command_result",
@@ -105,7 +125,11 @@
       "artifacts": [],
       "evidence_refs": ["docs/product/prd.md#exit-code-contract"],
       "duration_ms": 0,
-      "redaction_status": "not_applicable"
+      "redaction_status": "not_applicable",
+      "metadata": {
+        "relia_version": "0.0.0-dev",
+        "schema_id": "schemas/command-result.schema.json"
+      }
     },
     {
       "object_type": "relia.command_result",
@@ -127,7 +151,11 @@
       "artifacts": [],
       "evidence_refs": ["docs/product/prd.md#exit-code-contract"],
       "duration_ms": 0,
-      "redaction_status": "not_applicable"
+      "redaction_status": "not_applicable",
+      "metadata": {
+        "relia_version": "0.0.0-dev",
+        "schema_id": "schemas/command-result.schema.json"
+      }
     },
     {
       "object_type": "relia.command_result",
@@ -149,7 +177,11 @@
       "artifacts": [],
       "evidence_refs": ["docs/product/prd.md#exit-code-contract"],
       "duration_ms": 0,
-      "redaction_status": "failed_closed"
+      "redaction_status": "failed_closed",
+      "metadata": {
+        "relia_version": "0.0.0-dev",
+        "schema_id": "schemas/command-result.schema.json"
+      }
     },
     {
       "object_type": "relia.command_result",
@@ -171,7 +203,11 @@
       "artifacts": [],
       "evidence_refs": ["docs/product/prd.md#exit-code-contract"],
       "duration_ms": 0,
-      "redaction_status": "not_applicable"
+      "redaction_status": "not_applicable",
+      "metadata": {
+        "relia_version": "0.0.0-dev",
+        "schema_id": "schemas/command-result.schema.json"
+      }
     },
     {
       "object_type": "relia.command_result",
@@ -193,7 +229,11 @@
       "artifacts": [],
       "evidence_refs": ["docs/product/prd.md#exit-code-contract"],
       "duration_ms": 0,
-      "redaction_status": "not_applicable"
+      "redaction_status": "not_applicable",
+      "metadata": {
+        "relia_version": "0.0.0-dev",
+        "schema_id": "schemas/command-result.schema.json"
+      }
     },
     {
       "object_type": "relia.command_result",
@@ -215,7 +255,11 @@
       "artifacts": [],
       "evidence_refs": ["docs/product/prd.md#exit-code-contract"],
       "duration_ms": 0,
-      "redaction_status": "not_applicable"
+      "redaction_status": "not_applicable",
+      "metadata": {
+        "relia_version": "0.0.0-dev",
+        "schema_id": "schemas/command-result.schema.json"
+      }
     }
   ]
 }

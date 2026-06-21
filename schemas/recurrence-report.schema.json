@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Clyra-AI/relia/schemas/recurrence-report.schema.json",
+  "title": "Relia Recurrence Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["object_type", "schema_version", "report_id", "repo", "window", "generated_at", "headline", "pairs", "metadata"],
+  "x-relia_error_mapping": {
+    "invalid_input": 2,
+    "artifact_validation": 4,
+    "redaction_safety": 6,
+    "provenance_integrity": 9
+  },
+  "properties": {
+    "object_type": {"const": "relia.recurrence_report"},
+    "schema_version": {"const": "1.0"},
+    "report_id": {"type": "string", "minLength": 1},
+    "repo": {"type": "string", "minLength": 1},
+    "window": {"type": "string", "minLength": 1},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "headline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["experiences_agent_attributed", "recurrences_confirmed", "recurrences_possible", "error_recurrence_rate"],
+      "properties": {
+        "experiences_agent_attributed": {"type": "integer", "minimum": 0},
+        "recurrences_confirmed": {"type": "integer", "minimum": 0},
+        "recurrences_possible": {"type": "integer", "minimum": 0},
+        "error_recurrence_rate": {"type": "number", "minimum": 0}
+      }
+    },
+    "pairs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["match_level", "current_experience_ref", "prior_experience_ref"],
+        "properties": {
+          "match_level": {"enum": ["confirmed", "possible"]},
+          "current_experience_ref": {"type": "string", "minLength": 1},
+          "prior_experience_ref": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "metadata": {"$ref": "#/$defs/metadata"}
+  },
+  "$defs": {
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["relia_version"],
+      "properties": {"relia_version": {"type": "string", "minLength": 1}}
+    }
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Clyra-AI/relia/schemas/relia-config.schema.json",
+  "title": "Relia Repository Configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "schema_version", "repo", "attribution", "outcomes", "redaction", "distill", "memory", "serve", "gate", "metadata"],
+  "x-relia_error_mapping": {
+    "invalid_input": 2,
+    "artifact_validation": 4,
+    "redaction_safety": 6,
+    "provenance_integrity": 9
+  },
+  "properties": {
+    "version": {"const": 1},
+    "schema_version": {"const": "1.0"},
+    "repo": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["provider", "remote", "artifact_root", "memory_root"],
+      "properties": {
+        "provider": {"const": "github"},
+        "remote": {"type": "string", "minLength": 1},
+        "artifact_root": {"const": ".relia"},
+        "memory_root": {"const": "memory"}
+      }
+    },
+    "attribution": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["uncertain"],
+      "properties": {
+        "uncertain": {"enum": ["exclude", "include_flagged"]}
+      }
+    },
+    "outcomes": {"type": "object", "additionalProperties": true},
+    "redaction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["patterns", "entropy_scan", "fail_closed"],
+      "properties": {
+        "patterns": {"type": "array", "minItems": 4, "items": {"type": "string", "minLength": 1}},
+        "entropy_scan": {"const": true},
+        "fail_closed": {"const": true}
+      }
+    },
+    "distill": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["embeddings", "review_required"],
+      "properties": {
+        "provider": {"enum": ["anthropic", "openai-compatible"]},
+        "embeddings": {"enum": ["signature", "local", "provider"]},
+        "review_required": {"type": "boolean"}
+      }
+    },
+    "memory": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["commit_experiences", "share_scope", "org_eligible"],
+      "properties": {
+        "commit_experiences": {"type": "boolean"},
+        "share_scope": {"const": "private"},
+        "org_eligible": {"const": false}
+      }
+    },
+    "serve": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["advisory_only"],
+      "properties": {
+        "advisory_only": {"const": true}
+      }
+    },
+    "gate": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["enabled"],
+      "properties": {
+        "enabled": {"type": "boolean"}
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["relia_version", "contract"],
+      "properties": {
+        "relia_version": {"type": "string", "minLength": 1},
+        "contract": {"const": "schemas/relia-config.schema.json"}
+      }
+    }
+  }
+}

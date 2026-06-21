@@ -1,0 +1,43 @@
+{
+  "artifact_type": "work_proof_marker",
+  "schema_version": "1.0",
+  "task_id": "T2",
+  "status": "implemented",
+  "implementation_performed": true,
+  "changed_paths": [
+    "README.md",
+    "cmd/relia/main.go",
+    "cmd/relia/main_test.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md",
+    "docs/dev/dev_guides.md",
+    "examples/command-results/exit-code-examples.json",
+    "relia.yaml",
+    "schemas/command-result.schema.json",
+    "schemas/compiled-context.schema.json",
+    "schemas/coverage-map.schema.json",
+    "schemas/experience-record.schema.json",
+    "schemas/failure-signature.schema.json",
+    "schemas/memory-rule.schema.json",
+    "schemas/outcome-evidence.schema.json",
+    "schemas/recurrence-report.schema.json",
+    "schemas/redaction-config.schema.json",
+    "schemas/relia-config.schema.json",
+    "schemas/risk-assessment.schema.json",
+    ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+    ".factory/artifacts/task-runs/T2/validation-report.json"
+  ],
+  "evidence_refs": [
+    ".factory/artifacts/task-runs/T2/validation-report.json"
+  ],
+  "summary": {
+    "implemented_contracts": [
+      "command-result metadata in stable JSON envelope",
+      "versioned relia.yaml privacy defaults",
+      "Phase 0 artifact schema contract files",
+      "relia check validation for config privacy, schema contracts, and artifact layout",
+      "typed fail-closed exits for invalid config, schema/artifact contract violations, redaction safety, and missing local embedding artifacts"
+    ],
+    "lifecycle_boundary": "task-executor only; commit, PR, scope closure, validation-gate, and post-merge evidence are left to their required workers"
+  }
+}

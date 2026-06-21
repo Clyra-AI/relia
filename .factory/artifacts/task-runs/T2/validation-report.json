@@ -1,0 +1,149 @@
+{
+  "artifact_type": "validation_report",
+  "schema_version": "1.0",
+  "task_id": "T2",
+  "status": "pass",
+  "commands_run": [
+    "make lint-fast",
+    "make test-fast",
+    "for f in schemas/*.schema.json examples/command-results/*.json; do python3 -m json.tool \"$f\" >/dev/null || exit 1; done",
+    "GOCACHE=\"${TMPDIR:-/tmp}/relia-go-build\" go run ./cmd/relia --json check",
+    "python3 -m json.tool .factory/artifacts/task-runs/T2/work-proof-marker.json >/dev/null",
+    "python3 -m json.tool .factory/artifacts/task-runs/T2/validation-report.json >/dev/null",
+    "make prepush-full"
+  ],
+  "baseline_evidence": [
+    {
+      "command": "make lint-fast",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "make test-fast",
+      "status": "pass",
+      "exit_code": 0
+    }
+  ],
+  "red_evidence": [
+    {
+      "command": "make test-fast",
+      "status": "fail_expected",
+      "exit_code": 2,
+      "reason": "Red-first tests referenced the new T2 command metadata field, schema file list, config validation behavior, and schema contracts before implementation."
+    }
+  ],
+  "green_evidence": [
+    {
+      "command": "for f in schemas/*.schema.json examples/command-results/*.json; do python3 -m json.tool \"$f\" >/dev/null || exit 1; done",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "make test-fast",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "GOCACHE=\"${TMPDIR:-/tmp}/relia-go-build\" go run ./cmd/relia --json check",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "python3 -m json.tool .factory/artifacts/task-runs/T2/work-proof-marker.json >/dev/null",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "python3 -m json.tool .factory/artifacts/task-runs/T2/validation-report.json >/dev/null",
+      "status": "pass",
+      "exit_code": 0
+    }
+  ],
+  "final_validation_evidence": [
+    {
+      "command": "make prepush-full",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "lint-fast, test-fast, test-coverage, and test-contracts passed; coverage was 80.0% against the 75.0% threshold; repo pack reported ok."
+    }
+  ],
+  "acceptance_results": [
+    {
+      "acceptance_item_id": "FR22-STABLE-CLI-OUTPUT-001",
+      "status": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+        "schemas/command-result.schema.json",
+        "examples/command-results/exit-code-examples.json",
+        "cmd/relia/main_test.go"
+      ]
+    },
+    {
+      "acceptance_item_id": "NFR12-ARTIFACT-STABILITY-001",
+      "status": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+        "schemas/experience-record.schema.json",
+        "schemas/memory-rule.schema.json",
+        "schemas/relia-config.schema.json",
+        "cmd/relia/main_test.go"
+      ]
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-001",
+      "status": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+        "relia.yaml",
+        "cmd/relia/main.go",
+        "README.md"
+      ]
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-021",
+      "status": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+        "cmd/relia/main.go",
+        "schemas/command-result.schema.json",
+        "docs/dev/dev_guides.md"
+      ]
+    }
+  ],
+  "path_policy_result": {
+    "status": "pass",
+    "changed_paths_within_allowed_paths": true,
+    "forbidden_paths_changed_in_worker_diff": false,
+    "ignored_validation_outputs": [
+      ".factory/tmp/"
+    ],
+    "note": "make prepush-full wrote ignored coverage output under .factory/tmp/ as defined by the repo Makefile; no implementation diff was authored there."
+  },
+  "plan_drift_result": {
+    "status": "pass",
+    "note": "Implementation stayed within T2 contracts-config-and-validation scope and did not change runtime pins, provider posture, release boundaries, tracker state, commits, PRs, or scope closure."
+  },
+  "docs_sync_result": {
+    "status": "pass",
+    "updated_refs": [
+      "README.md",
+      "docs/dev/dev_guides.md",
+      "docs/architecture/architecture_guides.md",
+      "docs/architecture/decision-0002-product-contracts-and-privacy-defaults.md"
+    ]
+  },
+  "changelog_result": {
+    "status": "not_applicable",
+    "reason": "No changelog file exists in the allowed repo surface for this task; user-facing behavior is documented in README and dev/architecture guides."
+  },
+  "versioning_result": {
+    "status": "pass",
+    "schema_version": "1.0",
+    "relia_version": "0.0.0-dev",
+    "migration_note": "Pre-1.0 MVP contract amended command-result metadata and relia.yaml schema_version before public release."
+  },
+  "blockers": [],
+  "residual_risks": [
+    "Factoryd-owned scope_closure_report, pr_lifecycle_report, and factoryd_run_once_report are intentionally not authored by the task-executor worker."
+  ]
+}

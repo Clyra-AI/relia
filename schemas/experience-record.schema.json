@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Clyra-AI/relia/schemas/experience-record.schema.json",
+  "title": "Relia Experience Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "object_type",
+    "schema_version",
+    "experience_id",
+    "repo",
+    "recorded_at",
+    "attribution",
+    "context",
+    "action",
+    "outcome",
+    "provenance",
+    "flake_discount",
+    "org_eligible",
+    "share_scope",
+    "redaction_status",
+    "metadata"
+  ],
+  "x-relia_error_mapping": {
+    "invalid_input": 2,
+    "artifact_validation": 4,
+    "redaction_safety": 6,
+    "provenance_integrity": 9
+  },
+  "properties": {
+    "object_type": {"const": "relia.experience_record"},
+    "schema_version": {"const": "1.0"},
+    "experience_id": {"type": "string", "minLength": 1},
+    "repo": {"$ref": "#/$defs/repo_ref"},
+    "recorded_at": {"type": "string", "format": "date-time"},
+    "attribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "confidence"],
+      "properties": {
+        "method": {"enum": ["bot_login", "coauthor_trailer", "pr_label", "manual", "unknown"]},
+        "confidence": {"enum": ["high", "medium", "low", "uncertain"]},
+        "actor_ref": {"type": "string"}
+      }
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["paths", "diff_fingerprint"],
+      "properties": {
+        "paths": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "diff_fingerprint": {"type": "string", "minLength": 1},
+        "scope": {"type": "string"}
+      }
+    },
+    "action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pr_ref", "commit_refs"],
+      "properties": {
+        "pr_ref": {"type": "string", "minLength": 1},
+        "commit_refs": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "outcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "terminal_state", "signature"],
+      "properties": {
+        "kind": {"enum": ["ci_failed", "reverted", "review_correction", "merged_clean", "fix_held"]},
+        "terminal_state": {"enum": ["passed", "failed", "reverted", "corrected", "unknown"]},
+        "signature": {"$ref": "#/$defs/signature_ref"}
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["refs"],
+      "properties": {
+        "refs": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/provenance_ref"}}
+      }
+    },
+    "flake_discount": {"type": "boolean"},
+    "org": {"type": "string"},
+    "org_eligible": {"const": false},
+    "share_scope": {"const": "private"},
+    "redaction_status": {"enum": ["applied", "failed_closed"]},
+    "metadata": {"$ref": "#/$defs/metadata"}
+  },
+  "$defs": {
+    "repo_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "remote"],
+      "properties": {
+        "provider": {"const": "github"},
+        "remote": {"type": "string", "minLength": 1}
+      }
+    },
+    "signature_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["signature_id", "extraction_confidence"],
+      "properties": {
+        "signature_id": {"type": "string", "minLength": 1},
+        "extraction_confidence": {"enum": ["structured", "log_parse_high", "log_parse_low"]}
+      }
+    },
+    "provenance_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "url"],
+      "properties": {
+        "kind": {"enum": ["pull_request", "check_run", "commit", "review_comment"]},
+        "url": {"type": "string", "minLength": 1}
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["relia_version"],
+      "properties": {
+        "relia_version": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

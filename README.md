@@ -20,9 +20,10 @@ FACTORY_REPO=/path/to/factory factoryd run --config .factory/factoryd.autoship.e
 The T1 command surface establishes the lifecycle skeleton and agent-native
 output contract:
 
-- `relia init` creates `relia.yaml` if it is missing and is idempotent when the
-  file already exists.
-- `relia check` validates the repo-local operating pack baseline.
+- `relia init` creates `relia.yaml` if it is missing, preserves an existing
+  config, and creates the repo-native artifact directory skeleton.
+- `relia check` validates the repo-local operating pack baseline, schema
+  contract files, and fail-closed privacy defaults.
 - `--json` always emits the stable command result envelope.
 - piped or non-interactive stdout defaults to JSON.
 - `--quiet` and `--compact` emit compact JSON while preserving status,
@@ -30,7 +31,19 @@ output contract:
 
 The command result schema is `schemas/command-result.schema.json`. Stable
 exit-code examples for codes `0` through `9` are in
-`examples/command-results/exit-code-examples.json`.
+`examples/command-results/exit-code-examples.json`. Command results include a
+`metadata` object with the Relia version and schema id.
+
+The default `relia.yaml` is versioned with `schema_version: "1.0"`, keeps
+experience shards local by default (`commit_experiences: false`), keeps future
+organization sharing disabled (`share_scope: private`, `org_eligible: false`),
+uses deterministic `embeddings: signature`, and requires fail-closed redaction
+with entropy scanning.
+
+Phase 0 artifact schemas live under `schemas/` for experience records, outcome
+evidence, failure signatures, memory rules, coverage maps, risk assessments,
+recurrence reports, compiled context, command results, redaction config, and the
+repo config contract.
 
 Provider-backed distill work requires a complete `model_provider_endpoint`
 grant naming provider, model, endpoint or `base_url`, credential environment,
