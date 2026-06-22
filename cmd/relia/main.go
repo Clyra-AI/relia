@@ -919,6 +919,10 @@ func parseYAMLDocument(content string) (yamlDocument, error) {
 		stack = append(stack[:depth], yamlContext{Path: path})
 		if value == "" {
 			document.Containers[path] = yamlScalar{Line: lineNumber}
+			if listParent, listIndex, itemPath, ok := nearestListItem(stack[:depth]); ok {
+				field := strings.TrimPrefix(path, itemPath+".")
+				recordListMapScalar(document, listParent, listIndex, field, yamlScalar{Line: lineNumber})
+			}
 			continue
 		}
 		scalarValue := unquoteScalar(value)

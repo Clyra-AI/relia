@@ -514,6 +514,47 @@ metadata: {}
 	}
 }
 
+func TestYAMLParserRecordsNestedFieldsInListMapItems(t *testing.T) {
+	document, err := parseYAMLDocument(`repo:
+  scopes:
+    - prefix: packages/billing/
+      checks:
+        - pytest-billing
+provenance:
+  - pr: 142
+    outcome: revert
+`)
+	if err != nil {
+		t.Fatalf("parseYAMLDocument returned error: %v", err)
+	}
+
+	scopes := document.ListMaps["repo.scopes"]
+	if len(scopes) != 1 {
+		t.Fatalf("repo.scopes list maps = %#v", scopes)
+	}
+	if got := scopes[0]["prefix"].Value; got != "packages/billing/" {
+		t.Fatalf("scope prefix = %q", got)
+	}
+	if _, ok := scopes[0]["checks"]; !ok {
+		t.Fatalf("scope list-map fields = %#v, want checks container", scopes[0])
+	}
+	scopeChecks := document.Lists["repo.scopes[0].checks"]
+	if len(scopeChecks) != 1 || scopeChecks[0].Value != "pytest-billing" {
+		t.Fatalf("scope checks = %#v", scopeChecks)
+	}
+
+	provenance := document.ListMaps["provenance"]
+	if len(provenance) != 1 {
+		t.Fatalf("provenance list maps = %#v", provenance)
+	}
+	if got := provenance[0]["pr"].Value; got != "142" {
+		t.Fatalf("provenance pr = %q", got)
+	}
+	if got := provenance[0]["outcome"].Value; got != "revert" {
+		t.Fatalf("provenance outcome = %q", got)
+	}
+}
+
 func TestCheckRejectsMemoryRuleMissingSchemaRequiredFields(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)

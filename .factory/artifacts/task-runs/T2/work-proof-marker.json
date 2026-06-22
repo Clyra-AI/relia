@@ -4,8 +4,8 @@
   "task_id": "T2",
   "status": "implemented",
   "implementation_performed": true,
-  "repair_task_id": "20260622T133602.913452000Z-relia-T2-repair",
-  "updated_at": "2026-06-22T14:02:25Z",
+  "repair_task_id": "20260622T133602.913452000Z-relia-T2-repair-2",
+  "updated_at": "2026-06-22T14:10:29Z",
   "changed_paths": [
     ".factory/artifacts/task-runs/T2/validation-report.json",
     ".factory/artifacts/task-runs/T2/work-proof-marker.json",
@@ -19,5 +19,5 @@
     "schemas/memory-rule.schema.json",
     "docs/product/prd.md"
   ],
-  "summary": "Repaired Codex review findings by parsing YAML list items with nested fields and validating memory-rule artifacts against schema-required object, evidence, provenance, review, and metadata fields."
+  "summary": "Repaired Codex review feedback by preserving YAML list-map context for documented scoped config and memory-rule provenance, and by recording nested container fields inside list-map items for downstream validators."
 }

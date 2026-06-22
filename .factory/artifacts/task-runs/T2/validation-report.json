@@ -3,12 +3,14 @@
   "schema_version": "1.0",
   "task_id": "T2",
   "status": "pass",
-  "repair_task_id": "20260622T133602.913452000Z-relia-T2-repair",
-  "updated_at": "2026-06-22T14:02:25Z",
+  "repair_task_id": "20260622T133602.913452000Z-relia-T2-repair-2",
+  "updated_at": "2026-06-22T14:10:29Z",
   "commands_run": [
     "make lint-fast",
     "make test-fast",
-    "make test-fast",
+    "go test ./... -run TestYAMLParserRecordsNestedFieldsInListMapItems -count=1",
+    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
+    "go test ./... -run TestYAMLParserRecordsNestedFieldsInListMapItems -count=1",
     "make test-fast",
     "git diff --check",
     "make prepush-full",
@@ -30,18 +32,24 @@
   ],
   "red_evidence": [
     {
-      "command": "make test-fast",
+      "command": "go test ./... -run TestYAMLParserRecordsNestedFieldsInListMapItems -count=1",
       "status": "fail",
-      "exit_code": 2,
-      "summary": "After adding focused regression tests and before implementation repair, documented scoped config failed with `missing parent for checks` and list-map provenance failed with `missing parent for outcome`."
+      "exit_code": 1,
+      "summary": "After adding the focused parser regression and before implementation repair, nested `checks:` under a `repo.scopes` list-map item was not recorded on the list-map entry."
     }
   ],
   "green_evidence": [
     {
+      "command": "go test ./... -run TestYAMLParserRecordsNestedFieldsInListMapItems -count=1",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "Focused parser regression for nested list-map fields passed."
+    },
+    {
       "command": "make test-fast",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Focused regressions for YAML list-map parsing and memory-rule schema-required fields passed."
+      "summary": "Fast Go test lane passed after the repair."
     },
     {
       "command": "git diff --check",
@@ -54,7 +62,7 @@
       "command": "make prepush-full",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Passed lint-fast, test-fast, test-coverage at 78.6% over cmd packages, and test-contracts."
+      "summary": "Passed lint-fast, test-fast, test-coverage at 78.7% over cmd packages, and test-contracts."
     }
   ],
   "evidence_validation": [
@@ -147,6 +155,6 @@
     "notes": "factoryd_run_once_report is Factoryd-produced evidence per the task packet."
   },
   "residual_risks": [
-    "The repo-local YAML parser remains intentionally narrow and standard-library based; it now covers the PRD-documented list-of-map forms used by scoped config and memory-rule provenance."
+    "The repo-local YAML parser remains intentionally narrow and standard-library based; it now covers the PRD-documented list-of-map forms used by scoped config and memory-rule provenance, including nested container fields inside list-map items."
   ]
 }
