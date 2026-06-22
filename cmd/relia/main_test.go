@@ -472,6 +472,40 @@ func TestCheckValidatesLocalModelManifestDigest(t *testing.T) {
 	}
 }
 
+func TestCheckRejectsEscapedLocalModelCachePath(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	replaceInFile(t, filepath.Join(tempDir, "relia.yaml"), "embeddings: signature", "embeddings: local")
+	artifactContent := []byte("outside model artifact")
+	outsideRel := "outside-model.bin"
+	writeFileForTest(t, filepath.Join(tempDir, outsideRel), string(artifactContent))
+	digest := sha256.Sum256(artifactContent)
+	writeFileForTest(t, filepath.Join(tempDir, ".relia", "models", "manifest.json"), fmt.Sprintf(`{
+  "model_id": "text-embedding-test",
+  "version": "2026-06-22",
+  "source_url": "https://example.test/model.bin",
+  "license": "Apache-2.0",
+  "digest": "%x",
+  "cache_path": "../%s",
+  "update_policy": "manual",
+  "rollback_policy": "delete artifact and restore signature embeddings"
+}
+`, digest, outsideRel))
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitDependency {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "dependency_error" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+	if !strings.Contains(result.Errors[0].Message, "inside the repository") {
+		t.Fatalf("error message = %q", result.Errors[0].Message)
+	}
+}
+
 func TestCheckRejectsRuleWithoutProvenance(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
@@ -615,6 +649,96 @@ metadata: {}
 		t.Fatalf("error type = %q", result.Errors[0].Type)
 	}
 	if !strings.Contains(result.Errors[0].Message, "fix_held or merged_clean") {
+		t.Fatalf("error message = %q", result.Errors[0].Message)
+	}
+}
+
+func TestCheckRejectsActiveUnacceptedMemoryRule(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	rulesDir := filepath.Join(tempDir, "memory", "rules")
+	if err := os.MkdirAll(rulesDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	rule := `object_type: relia.memory_rule
+schema_version: "1.0"
+id: avoid-direct-time
+kind: avoid
+status: active
+statement: >
+  Do not mock time directly.
+scope:
+  paths:
+    - tests/
+confidence: 0.8
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_001
+provenance:
+  - pr: 142
+    outcome: revert
+review:
+  label: suggested
+  statement_origin: human_authored
+metadata: {}
+`
+	if err := os.WriteFile(filepath.Join(rulesDir, "avoid-direct-time.yaml"), []byte(rule), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitValidation {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if !strings.Contains(result.Errors[0].Message, "review.label must be accepted") {
+		t.Fatalf("error message = %q", result.Errors[0].Message)
+	}
+}
+
+func TestCheckRejectsMemoryRuleWithoutConcreteScope(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	rulesDir := filepath.Join(tempDir, "memory", "rules")
+	if err := os.MkdirAll(rulesDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	rule := `object_type: relia.memory_rule
+schema_version: "1.0"
+id: avoid-direct-time
+kind: avoid
+status: active
+statement: >
+  Do not mock time directly.
+scope: {}
+confidence: 0.8
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_001
+provenance:
+  - pr: 142
+    outcome: revert
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`
+	if err := os.WriteFile(filepath.Join(rulesDir, "avoid-direct-time.yaml"), []byte(rule), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitValidation {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if !strings.Contains(result.Errors[0].Message, "scope path or signal") {
 		t.Fatalf("error message = %q", result.Errors[0].Message)
 	}
 }

@@ -726,10 +726,15 @@ func validateLocalModelManifest(root string, manifestScalar yamlScalar) *Command
 	if len(digest) != 64 || !isHexDigest(digest) {
 		return dependencyError("local model manifest digest must be a SHA-256 hex digest", manifestRel)
 	}
-	if filepath.IsAbs(manifest.CachePath) {
-		return dependencyError("local model manifest cache_path must be repo-relative", manifestRel)
+	cachePath := filepath.Clean(manifest.CachePath)
+	cachePathSlash := filepath.ToSlash(cachePath)
+	if filepath.IsAbs(manifest.CachePath) || cachePath == "." || cachePath == ".." || strings.HasPrefix(cachePathSlash, "../") {
+		return dependencyError("local model manifest cache_path must stay inside the repository", manifestRel)
 	}
-	artifactPath := filepath.Join(root, manifest.CachePath)
+	if cachePathSlash == ".relia/models" || !strings.HasPrefix(cachePathSlash, ".relia/models/") {
+		return dependencyError("local model manifest cache_path must stay under .relia/models", manifestRel)
+	}
+	artifactPath := filepath.Join(root, cachePath)
 	artifactContent, err := os.ReadFile(artifactPath)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
@@ -855,6 +860,9 @@ func validateMemoryRuleArtifact(root string, path string) *CommandError {
 	if len(document.Lists["evidence.experiences"]) == 0 {
 		return artifactContractError("memory rule must cite at least one experience", rel)
 	}
+	if len(document.Lists["scope.paths"]) == 0 && len(document.Lists["scope.signals"]) == 0 {
+		return artifactContractError("memory rule must declare at least one scope path or signal", rel)
+	}
 	evidenceCount, ok := document.Scalars["evidence.count"]
 	if !ok {
 		return artifactContractError("memory rule missing required key evidence.count", rel)
@@ -913,6 +921,9 @@ func validateMemoryRuleArtifact(root string, path string) *CommandError {
 	case "accepted", "suggested", "needs_user_input":
 	default:
 		return artifactContractError("memory rule review.label is invalid", configRefWithPath(rel, reviewLabel))
+	}
+	if status == "active" && reviewLabel.Value != "accepted" {
+		return artifactContractError("active memory rule review.label must be accepted", configRefWithPath(rel, reviewLabel))
 	}
 	statementOrigin, ok := document.Scalars["review.statement_origin"]
 	if !ok {
