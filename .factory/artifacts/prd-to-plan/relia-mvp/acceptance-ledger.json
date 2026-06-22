@@ -261,7 +261,7 @@
       "notes": [],
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#fr11-calibrated-confidence",
-      "source_text": "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence \u2014 never from the drafting model.",
+      "source_text": "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence — never from the drafting model.",
       "status": "planned",
       "task_refs": [
         "T6"
@@ -528,13 +528,22 @@
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#fr22-stable-cli-output",
       "source_text": "Relia must support stable exit codes and `--json`.",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T2"
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/1/validation_commands"
-      ]
+      ],
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T2/validation-report.json",
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        "https://github.com/Clyra-AI/relia/pull/19"
+      ],
+      "recorded_by": "factoryd sync-task-closure",
+      "recorded_at": "2026-06-22T17:19:36Z"
     },
     {
       "acceptance_item_id": "FR23-PROVIDER-ADAPTERS-AND-NO-LLM-MODE-001",
@@ -893,13 +902,22 @@
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#nfr12-artifact-stability",
       "source_text": "Schemas and artifacts must be versioned.",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T2"
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/1/validation_commands"
-      ]
+      ],
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T2/validation-report.json",
+        "schemas/command-result.schema.json",
+        "schemas/memory-rule.schema.json",
+        "https://github.com/Clyra-AI/relia/pull/19"
+      ],
+      "recorded_by": "factoryd sync-task-closure",
+      "recorded_at": "2026-06-22T17:19:36Z"
     },
     {
       "acceptance_item_id": "NFR13-INFERENCE-HUMILITY-001",
@@ -985,13 +1003,22 @@
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
       "source_text": "local OSS CLI",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T2"
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/1/validation_commands"
-      ]
+      ],
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T2/validation-report.json",
+        "cmd/relia/main.go",
+        "relia.yaml",
+        "https://github.com/Clyra-AI/relia/pull/19"
+      ],
+      "recorded_by": "factoryd sync-task-closure",
+      "recorded_at": "2026-06-22T17:19:36Z"
     },
     {
       "acceptance_item_id": "MVP-IN-SCOPE-002",
@@ -1453,13 +1480,22 @@
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
       "source_text": "stable exit codes and `--json",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T2"
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/1/validation_commands"
-      ]
+      ],
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T2/validation-report.json",
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        "https://github.com/Clyra-AI/relia/pull/19"
+      ],
+      "recorded_by": "factoryd sync-task-closure",
+      "recorded_at": "2026-06-22T17:19:36Z"
     },
     {
       "acceptance_item_id": "MVP-IN-SCOPE-022",
@@ -2882,5 +2918,6 @@
   ],
   "schema_version": "1.0",
   "source_prd_ref": "docs/product/prd.md",
-  "source_ref": "docs/product/prd.md"
+  "source_ref": "docs/product/prd.md",
+  "last_updated_at": "2026-06-22T17:19:36Z"
 }

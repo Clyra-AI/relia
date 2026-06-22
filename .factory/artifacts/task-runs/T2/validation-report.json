@@ -18,6 +18,40 @@
     "python3 -m json.tool .factory/artifacts/task-runs/T2/validation-report.json",
     "python3 -c 'verify top-level non-blocking status fields'"
   ],
+  "validation_commands": [
+    {
+      "command": "make prepush-full",
+      "exit_code": 0,
+      "output_sha256": "sha256:30de84dd54a350f0f8cf94efd5b08438b8d4733ea673a6c7f1fae2d1ee6892b4",
+      "output_bytes": 801,
+      "started_at": "2026-06-22T16:53:53Z",
+      "completed_at": "2026-06-22T16:53:54Z",
+      "runner_identity": "codex-cli",
+      "repo_ref": "6ef565b71bb0e75201ed8ea4ba9f27bbdc8fdf35"
+    }
+  ],
+  "changed_paths": [
+    ".factory/artifacts/task-runs/T2/validation-report.json",
+    ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+    "README.md",
+    "cmd/relia/main.go",
+    "cmd/relia/main_test.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/architecture/decision-0002-phase0-contracts.md",
+    "docs/dev/dev_guides.md",
+    "examples/command-results/exit-code-examples.json",
+    "relia.yaml",
+    "schemas/command-result.schema.json",
+    "schemas/compiled-context.schema.json",
+    "schemas/coverage-map.schema.json",
+    "schemas/experience-record.schema.json",
+    "schemas/failure-signature.schema.json",
+    "schemas/memory-rule.schema.json",
+    "schemas/outcome-evidence.schema.json",
+    "schemas/recurrence-report.schema.json",
+    "schemas/redaction-config.schema.json",
+    "schemas/risk-assessment.schema.json"
+  ],
   "baseline_evidence": [
     {
       "command": "make lint-fast",

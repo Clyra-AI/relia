@@ -1,0 +1,33 @@
+{
+  "artifact_type": "factoryd_run_once_report",
+  "schema_version": "0.1",
+  "generated_at": "2026-06-22T16:54:00Z",
+  "repo": "relia",
+  "task_id": "T2",
+  "selected_task": {
+    "task_id": "T2",
+    "objective": "Implement PRD-defined configuration, schemas, artifact contracts, privacy defaults, validation, and structured output guarantees."
+  },
+  "status": "pass",
+  "ok": true,
+  "validation_status": "pass",
+  "checks": [
+    {
+      "name": "make prepush-full",
+      "status": "pass",
+      "exit_code": 0
+    }
+  ],
+  "work_proof_marker_ref": ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+  "validation_report_ref": ".factory/artifacts/task-runs/T2/validation-report.json",
+  "scope_closure_report_ref": ".factory/artifacts/task-runs/T2/scope-closure-report.json",
+  "pr_lifecycle_report_ref": ".factory/artifacts/pr-lifecycle/relia-mvp-t2/pr-lifecycle-report.json",
+  "evidence_refs": [
+    ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+    ".factory/artifacts/task-runs/T2/validation-report.json",
+    ".factory/artifacts/task-runs/T2/scope-closure-map.json",
+    ".factory/artifacts/task-runs/T2/scope-closure-report.json",
+    ".factory/artifacts/pr-lifecycle/relia-mvp-t2/pr-lifecycle-report.json",
+    "https://github.com/Clyra-AI/relia/pull/19"
+  ]
+}
