@@ -796,6 +796,52 @@ metadata: {}
 	}
 }
 
+func TestCheckAcceptsMemoryRuleWithWorkingTreeGlobScope(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	rulesDir := filepath.Join(tempDir, "memory", "rules")
+	if err := os.MkdirAll(rulesDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	rule := `object_type: relia.memory_rule
+schema_version: "1.0"
+id: avoid-direct-time
+kind: avoid
+status: active
+statement: >
+  Do not mock time directly.
+scope:
+  paths:
+    - tests/**
+confidence: 0.8
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_001
+provenance:
+  - pr: 142
+    outcome: revert
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`
+	if err := os.WriteFile(filepath.Join(rulesDir, "avoid-direct-time.yaml"), []byte(rule), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Status != "pass" {
+		t.Fatalf("status = %q", result.Status)
+	}
+}
+
 func TestCheckAcceptsPlaybookRuleWithCleanMergeEvidence(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
