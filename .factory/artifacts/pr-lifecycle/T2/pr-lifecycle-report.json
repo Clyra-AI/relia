@@ -1,0 +1,77 @@
+{
+  "artifact_type": "pr_lifecycle_report",
+  "schema_version": "0.1",
+  "work_item_id": "T2",
+  "task_id": "T2",
+  "status": "complete",
+  "pr_ref": "https://github.com/Clyra-AI/relia/pull/19",
+  "branch_name": "codex/relia-T2-20260622T133602.913452000Z",
+  "commit_set": [
+    "3f36fc206cc7ed5f6754ef7943d0c1714c7a8f29"
+  ],
+  "local_validation": {
+    "status": "pass",
+    "commands": [
+      "make prepush-full"
+    ],
+    "validation_report_ref": ".factory/artifacts/task-runs/T2/validation-report.json"
+  },
+  "ci_checks": [
+    {
+      "name": "validate",
+      "status": "pass",
+      "details_ref": "https://github.com/Clyra-AI/relia/actions/runs/27964349530"
+    },
+    {
+      "name": "CodeQL analyze",
+      "status": "pass",
+      "details_ref": "https://github.com/Clyra-AI/relia/actions/runs/27964349419"
+    }
+  ],
+  "code_review": {
+    "required": false,
+    "status": "not_required"
+  },
+  "codex_review": {
+    "enabled": true,
+    "status": "approved",
+    "head_sha": "3f36fc206cc7ed5f6754ef7943d0c1714c7a8f29",
+    "reviewer_identity": "chatgpt-codex-connector",
+    "settle_evidence_ref": "https://github.com/Clyra-AI/relia/pull/19#pullrequestreview-4545725697",
+    "unresolved_actionable_comments": 0,
+    "late_review_after_merge": false
+  },
+  "shipping_status": {
+    "commit_created": true,
+    "push_performed": true,
+    "pr_created": true,
+    "pr_ref": "https://github.com/Clyra-AI/relia/pull/19"
+  },
+  "ship_pr": {
+    "status": "shipped",
+    "ship_packet_ref": ".factory/artifacts/pr-lifecycle/T2/ship-packet.json"
+  },
+  "merge_status": {
+    "status": "merged",
+    "merge_performed": true,
+    "merged_commit": "607d4b61e02a54cb8d8c2cd44edddff2772eec94"
+  },
+  "merge": {
+    "status": "merged",
+    "method": "squash",
+    "merged_commit": "607d4b61e02a54cb8d8c2cd44edddff2772eec94"
+  },
+  "post_merge": {
+    "status": "healthy",
+    "post_merge_report_ref": ".factory/artifacts/pr-lifecycle/T2/post-merge-report.json"
+  },
+  "work_proof_marker_refs": [
+    ".factory/artifacts/task-runs/T2/work-proof-marker.json"
+  ],
+  "evidence_refs": [
+    ".factory/artifacts/task-runs/T2/validation-report.json",
+    ".factory/artifacts/task-runs/T2/scope-closure-report.json",
+    "https://github.com/Clyra-AI/relia/pull/19"
+  ],
+  "skipped_gates": []
+}

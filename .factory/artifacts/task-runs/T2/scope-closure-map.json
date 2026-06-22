@@ -1,0 +1,57 @@
+{
+  "artifact_type": "task_scope_closure_map",
+  "schema_version": "0.1",
+  "task_id": "T2",
+  "canonical_scope_closure_map_ref": ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+  "canonical_scope_closure_map_modified": false,
+  "acceptance_results": [
+    {
+      "acceptance_item_id": "FR22-STABLE-CLI-OUTPUT-001",
+      "status": "implemented",
+      "summary": "Stable CLI JSON output and typed exit behavior were implemented and validated in the T2 task run.",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T2/validation-report.json",
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        "https://github.com/Clyra-AI/relia/pull/19"
+      ]
+    },
+    {
+      "acceptance_item_id": "NFR12-ARTIFACT-STABILITY-001",
+      "status": "implemented",
+      "summary": "Versioned schemas and artifact stability contracts were implemented and validated in the T2 task run.",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T2/validation-report.json",
+        "schemas/command-result.schema.json",
+        "schemas/memory-rule.schema.json",
+        "https://github.com/Clyra-AI/relia/pull/19"
+      ]
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-001",
+      "status": "implemented",
+      "summary": "The local OSS CLI baseline remains implemented through the T2 command and configuration surface.",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T2/validation-report.json",
+        "cmd/relia/main.go",
+        "relia.yaml",
+        "https://github.com/Clyra-AI/relia/pull/19"
+      ]
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-021",
+      "status": "implemented",
+      "summary": "Stable exit codes and JSON mode were implemented and covered by command tests.",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T2/validation-report.json",
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        "https://github.com/Clyra-AI/relia/pull/19"
+      ]
+    }
+  ]
+}

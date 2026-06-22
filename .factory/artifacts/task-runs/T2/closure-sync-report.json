@@ -1,0 +1,32 @@
+{
+  "artifact_type": "factoryd_task_closure_sync_report",
+  "schema_version": "0.1",
+  "generated_at": "2026-06-22T16:56:12Z",
+  "repo": "relia",
+  "task_id": "T2",
+  "ok": true,
+  "evidence_dir_ref": ".factory/artifacts/task-runs/T2",
+  "work_proof_marker_ref": ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+  "validation_report_ref": ".factory/artifacts/task-runs/T2/validation-report.json",
+  "task_scope_closure_map_ref": ".factory/artifacts/task-runs/T2/scope-closure-map.json",
+  "lifecycle_evidence_refs": [
+    ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+    ".factory/artifacts/task-runs/T2/validation-report.json",
+    ".factory/artifacts/task-runs/T2/scope-closure-report.json",
+    ".factory/artifacts/pr-lifecycle/T2/pr-lifecycle-report.json",
+    ".factory/artifacts/task-runs/T2/factoryd-run-once-report.json"
+  ],
+  "canonical_scope_closure_map_ref": ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+  "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+  "report_ref": ".factory/artifacts/task-runs/T2/closure-sync-report.json",
+  "updated_task_refs": [
+    "T2"
+  ],
+  "updated_acceptance_item_ids": [
+    "FR22-STABLE-CLI-OUTPUT-001",
+    "MVP-IN-SCOPE-001",
+    "MVP-IN-SCOPE-021",
+    "NFR12-ARTIFACT-STABILITY-001"
+  ],
+  "closure_status": "partial"
+}
