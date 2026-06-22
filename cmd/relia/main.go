@@ -1017,7 +1017,10 @@ func workingTreePathMatches(root string, scope string) bool {
 	}
 	matched := false
 	_ = filepath.WalkDir(root, func(candidate string, entry os.DirEntry, err error) error {
-		if err != nil || matched {
+		if matched {
+			return filepath.SkipAll
+		}
+		if err != nil {
 			return nil
 		}
 		if entry.IsDir() {
@@ -1034,6 +1037,7 @@ func workingTreePathMatches(root string, scope string) bool {
 		}
 		if scopePatternMatches(scopeSlash, filepath.ToSlash(rel)) {
 			matched = true
+			return filepath.SkipAll
 		}
 		return nil
 	})
