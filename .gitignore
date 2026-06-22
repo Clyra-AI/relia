@@ -1,6 +1,7 @@
 .factory/tmp/
 .factory/factoryd.json
 .factoryd/
+.relia/
 __pycache__/
 *.pyc
 dist/

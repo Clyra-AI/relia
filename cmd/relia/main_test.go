@@ -202,6 +202,13 @@ func TestInitCreatesBaselineConfig(t *testing.T) {
 			t.Fatalf("expected artifact skeleton dir %s: info=%#v err=%v", dir, info, err)
 		}
 	}
+	ignoreContent, err := os.ReadFile(filepath.Join(tempDir, ".gitignore"))
+	if err != nil {
+		t.Fatalf("expected .gitignore to be created: %v", err)
+	}
+	if !bytes.Contains(ignoreContent, []byte(".relia/")) {
+		t.Fatalf(".gitignore missing .relia/:\n%s", ignoreContent)
+	}
 }
 
 func TestInitRejectsPositionalArguments(t *testing.T) {
@@ -743,6 +750,52 @@ metadata: {}
 	}
 }
 
+func TestCheckRejectsMemoryRuleWithUnknownScopePath(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	rulesDir := filepath.Join(tempDir, "memory", "rules")
+	if err := os.MkdirAll(rulesDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	rule := `object_type: relia.memory_rule
+schema_version: "1.0"
+id: avoid-unknown-path
+kind: avoid
+status: active
+statement: >
+  Do not depend on unknown packages.
+scope:
+  paths:
+    - pakcages/billing/
+confidence: 0.8
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_001
+provenance:
+  - pr: 142
+    outcome: revert
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`
+	if err := os.WriteFile(filepath.Join(rulesDir, "avoid-unknown-path.yaml"), []byte(rule), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitValidation {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if !strings.Contains(result.Errors[0].Message, "scope path does not exist") {
+		t.Fatalf("error message = %q", result.Errors[0].Message)
+	}
+}
+
 func TestCheckAcceptsPlaybookRuleWithCleanMergeEvidence(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
@@ -974,6 +1027,8 @@ func setupContractRepo(t *testing.T) string {
 		"docs/product/prd.md":    "prd\n",
 		"docs/dev/dev_guides.md": "dev guides\n",
 		"docs/architecture/architecture_guides.md": "architecture guides\n",
+		"packages/billing/.keep":                   "\n",
+		"tests/.keep":                              "\n",
 		".github/required-checks.json":             "{}\n",
 		".github/workflows/validate.yml":           "name: validate\n",
 		".github/workflows/codeql.yml":             "name: codeql\n",
