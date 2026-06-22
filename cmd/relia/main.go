@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -981,7 +982,7 @@ func repoPathExists(root string, rel string) bool {
 	if !ok {
 		return false
 	}
-	if _, err := os.Stat(filepath.Join(root, clean)); err == nil {
+	if workingTreePathMatches(root, clean) {
 		return true
 	}
 	if output, err := exec.Command("git", "-C", root, "log", "--all", "--name-only", "--format=", "--", clean).Output(); err == nil {
@@ -1006,6 +1007,50 @@ func cleanRepoPath(rel string) (string, bool) {
 		}
 	}
 	return clean, true
+}
+
+func workingTreePathMatches(root string, scope string) bool {
+	scopeSlash := filepath.ToSlash(scope)
+	if !hasGlobMagic(scopeSlash) {
+		_, err := os.Stat(filepath.Join(root, scope))
+		return err == nil
+	}
+	matched := false
+	_ = filepath.WalkDir(root, func(candidate string, entry os.DirEntry, err error) error {
+		if err != nil || matched {
+			return nil
+		}
+		if entry.IsDir() {
+			switch entry.Name() {
+			case ".git", ".factory", ".factoryd", ".relia":
+				if candidate != root {
+					return filepath.SkipDir
+				}
+			}
+		}
+		rel, err := filepath.Rel(root, candidate)
+		if err != nil || rel == "." {
+			return nil
+		}
+		if scopePatternMatches(scopeSlash, filepath.ToSlash(rel)) {
+			matched = true
+		}
+		return nil
+	})
+	return matched
+}
+
+func hasGlobMagic(value string) bool {
+	return strings.ContainsAny(value, "*?[")
+}
+
+func scopePatternMatches(pattern string, rel string) bool {
+	if strings.HasSuffix(pattern, "/**") {
+		prefix := strings.TrimSuffix(pattern, "/**")
+		return rel == prefix || strings.HasPrefix(rel, prefix+"/")
+	}
+	matched, err := path.Match(pattern, rel)
+	return err == nil && matched
 }
 
 func parseYAMLDocument(content string) (yamlDocument, error) {
