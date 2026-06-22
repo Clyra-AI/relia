@@ -1,5 +1,6 @@
 {
-  "work_item_id": "T2",
+  "task_id": "T2",
+  "work_item_id": "relia-mvp-t2",
   "mission_contract_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T2",
   "intent_source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T2",
   "event_log_ref": "https://github.com/Clyra-AI/relia/pull/19",

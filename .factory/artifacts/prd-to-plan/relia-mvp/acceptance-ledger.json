@@ -261,7 +261,7 @@
       "notes": [],
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#fr11-calibrated-confidence",
-      "source_text": "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence \u2014 never from the drafting model.",
+      "source_text": "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence — never from the drafting model.",
       "status": "planned",
       "task_refs": [
         "T6"
@@ -543,7 +543,7 @@
         "https://github.com/Clyra-AI/relia/pull/19"
       ],
       "recorded_by": "factoryd sync-task-closure",
-      "recorded_at": "2026-06-22T16:56:12Z"
+      "recorded_at": "2026-06-22T17:19:36Z"
     },
     {
       "acceptance_item_id": "FR23-PROVIDER-ADAPTERS-AND-NO-LLM-MODE-001",
@@ -917,7 +917,7 @@
         "https://github.com/Clyra-AI/relia/pull/19"
       ],
       "recorded_by": "factoryd sync-task-closure",
-      "recorded_at": "2026-06-22T16:56:12Z"
+      "recorded_at": "2026-06-22T17:19:36Z"
     },
     {
       "acceptance_item_id": "NFR13-INFERENCE-HUMILITY-001",
@@ -1018,7 +1018,7 @@
         "https://github.com/Clyra-AI/relia/pull/19"
       ],
       "recorded_by": "factoryd sync-task-closure",
-      "recorded_at": "2026-06-22T16:56:12Z"
+      "recorded_at": "2026-06-22T17:19:36Z"
     },
     {
       "acceptance_item_id": "MVP-IN-SCOPE-002",
@@ -1495,7 +1495,7 @@
         "https://github.com/Clyra-AI/relia/pull/19"
       ],
       "recorded_by": "factoryd sync-task-closure",
-      "recorded_at": "2026-06-22T16:56:12Z"
+      "recorded_at": "2026-06-22T17:19:36Z"
     },
     {
       "acceptance_item_id": "MVP-IN-SCOPE-022",
@@ -2919,5 +2919,5 @@
   "schema_version": "1.0",
   "source_prd_ref": "docs/product/prd.md",
   "source_ref": "docs/product/prd.md",
-  "last_updated_at": "2026-06-22T16:56:12Z"
+  "last_updated_at": "2026-06-22T17:19:36Z"
 }

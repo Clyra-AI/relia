@@ -1,7 +1,7 @@
 {
   "artifact_type": "factoryd_task_closure_sync_report",
   "schema_version": "0.1",
-  "generated_at": "2026-06-22T16:56:12Z",
+  "generated_at": "2026-06-22T17:19:36Z",
   "repo": "relia",
   "task_id": "T2",
   "ok": true,
@@ -13,7 +13,7 @@
     ".factory/artifacts/task-runs/T2/work-proof-marker.json",
     ".factory/artifacts/task-runs/T2/validation-report.json",
     ".factory/artifacts/task-runs/T2/scope-closure-report.json",
-    ".factory/artifacts/pr-lifecycle/T2/pr-lifecycle-report.json",
+    ".factory/artifacts/pr-lifecycle/relia-mvp-t2/pr-lifecycle-report.json",
     ".factory/artifacts/task-runs/T2/factoryd-run-once-report.json"
   ],
   "canonical_scope_closure_map_ref": ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",

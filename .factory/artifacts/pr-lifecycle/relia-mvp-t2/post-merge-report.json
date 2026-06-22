@@ -1,0 +1,36 @@
+{
+  "artifact_type": "post_merge_report",
+  "schema_version": "0.1",
+  "task_id": "T2",
+  "work_item_id": "relia-mvp-t2",
+  "merge_reference": "607d4b61e02a54cb8d8c2cd44edddff2772eec94",
+  "merge_performed": true,
+  "default_branch_checked": true,
+  "default_branch_ref": "origin/main contains 607d4b61e02a54cb8d8c2cd44edddff2772eec94",
+  "post_merge_evidence_ref": "https://github.com/Clyra-AI/relia/pull/19",
+  "checks_observed": [
+    {
+      "name": "validate",
+      "status": "pass",
+      "details_ref": "https://github.com/Clyra-AI/relia/actions/runs/27964349530"
+    },
+    {
+      "name": "CodeQL analyze",
+      "status": "pass",
+      "details_ref": "https://github.com/Clyra-AI/relia/actions/runs/27964349419"
+    }
+  ],
+  "status": "healthy",
+  "regressions_detected": [],
+  "work_proof_marker_refs": [
+    ".factory/artifacts/task-runs/T2/work-proof-marker.json"
+  ],
+  "scope_closure_report_ref": ".factory/artifacts/task-runs/T2/scope-closure-report.json",
+  "operator_notes": "PR #19 merged after local validation, CI, and Codex review were clear.",
+  "human_intervention_count": 0,
+  "human_review_minutes": 0,
+  "blocked_wait_time": "PT0M",
+  "attention_reason": "none",
+  "avoidable_interruption": false,
+  "automation_candidate": "Use factoryd autoship lifecycle hooks for future tasks."
+}
