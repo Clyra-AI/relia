@@ -4,9 +4,9 @@
   "task_id": "T3",
   "status": "implemented",
   "implementation_performed": true,
-  "updated_at": "2026-06-22T19:07:24Z",
+  "updated_at": "2026-06-22T19:32:50Z",
   "objective": "Implement PRD-defined input ingestion, attribution, normalization, redaction, persistence, and provenance capture.",
-  "repair_task_id": "20260622T182307.849520000Z-relia-T3-repair-2",
+  "repair_task_id": "20260622T182307.849520000Z-relia-T3-repair-4",
   "changed_paths": [
     "cmd/relia/main.go",
     "cmd/relia/main_test.go",
@@ -15,22 +15,38 @@
     ".factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json"
   ],
   "implemented_behaviors": [
-    "Generated experience IDs now include PR, commit, recorded time, outcome kind, terminal state, signature ID, extraction confidence, signature class, check name, signature key, message fingerprint when present, and sorted provenance URLs.",
-    "Same-PR, same-commit, same-outcome records with different check or signature keys no longer overwrite each other during .relia/experiences/YYYY-MM.jsonl upsert.",
-    "Explicit input experience_id values remain authoritative and unchanged."
+    "Plural secret-named fields such as metadata.secrets, tokens, passwords, api_keys, access_tokens, refresh_tokens, private_keys, and client_secrets are redacted before persistence.",
+    "Hash-like fields no longer bypass entropy scanning by key name alone; commit, signature, digest, checksum, and fingerprint fields are entropy-exempt only when their values match expected hash or fingerprint formats.",
+    "Malformed high-entropy values in action.commit fail closed with exit 6 before any .relia/experiences shard is written.",
+    "Existing canonical ingest, provenance, idempotent upsert, and fail-closed redaction behaviors remain covered by the full prepush validation lane."
   ],
   "review_repair": {
-    "finding": "Include signature fields in generated experience IDs",
     "status": "implemented",
-    "evidence_refs": [
-      "cmd/relia/main.go",
-      "cmd/relia/main_test.go",
-      ".factory/artifacts/task-runs/T3/validation-report.json"
+    "findings": [
+      {
+        "finding": "Redact plural secret fields",
+        "status": "implemented",
+        "evidence_refs": [
+          "cmd/relia/main.go",
+          "cmd/relia/main_test.go",
+          ".factory/artifacts/task-runs/T3/validation-report.json"
+        ]
+      },
+      {
+        "finding": "Validate hashes before skipping entropy scans",
+        "status": "implemented",
+        "evidence_refs": [
+          "cmd/relia/main.go",
+          "cmd/relia/main_test.go",
+          ".factory/artifacts/task-runs/T3/validation-report.json"
+        ]
+      }
     ]
   },
   "evidence_refs": [
     ".factory/artifacts/task-runs/T3/validation-report.json",
     ".factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json",
+    "cmd/relia/main.go",
     "cmd/relia/main_test.go",
     "docs/product/prd.md#2-ingest",
     "schemas/experience-record.schema.json"

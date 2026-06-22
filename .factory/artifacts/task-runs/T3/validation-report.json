@@ -3,19 +3,13 @@
   "schema_version": "1.0",
   "task_id": "T3",
   "status": "pass",
-  "updated_at": "2026-06-22T19:07:24Z",
+  "updated_at": "2026-06-22T19:32:50Z",
   "commands_run": [
     "make lint-fast",
     "make test-fast",
-    "go test ./cmd/relia -run TestIngestGeneratedExperienceIDIncludesSignatureIdentity -count=1",
+    "make test-fast",
     "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
-    "go test ./cmd/relia -run TestIngestGeneratedExperienceIDIncludesSignatureIdentity -count=1",
-    "make prepush-full",
-    "python3 -m json.tool .factory/artifacts/task-runs/T3/work-proof-marker.json",
-    "python3 -m json.tool .factory/artifacts/task-runs/T3/validation-report.json",
-    "python3 -m json.tool .factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json",
-    "git diff --check",
-    "python3 - <<'PY' ... top-level non-blocking status check ... PY",
+    "make test-fast",
     "make prepush-full"
   ],
   "baseline_evidence": [
@@ -34,18 +28,18 @@
   ],
   "red_first_evidence": [
     {
-      "command": "go test ./cmd/relia -run TestIngestGeneratedExperienceIDIncludesSignatureIdentity -count=1",
+      "command": "make test-fast",
       "status": "fail",
-      "exit_code": 1,
-      "summary": "Regression reproduced the review finding: two same-PR/same-commit/same-outcome records with different signature keys collapsed to one shard record."
+      "exit_code": 2,
+      "summary": "After adding repair tests and before implementation, fast tests failed because metadata.secrets persisted low-entropy values and malformed high-entropy action.commit bypassed entropy scanning."
     }
   ],
   "green_evidence": [
     {
-      "command": "go test ./cmd/relia -run TestIngestGeneratedExperienceIDIncludesSignatureIdentity -count=1",
+      "command": "make test-fast",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Focused regression passed after generated experience IDs included signature/event identity fields."
+      "summary": "Fast Go tests passed after plural secret fields were redacted and hash-like entropy exemptions became value-aware."
     }
   ],
   "final_validation_evidence": [
@@ -53,13 +47,7 @@
       "command": "make prepush-full",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Passed lint-fast, test-fast, test-coverage at 77.6% over cmd packages, and test-contracts."
-    },
-    {
-      "command": "make prepush-full",
-      "status": "pass",
-      "exit_code": 0,
-      "summary": "Post-evidence rerun passed lint-fast, test-fast, test-coverage at 77.6% over cmd packages, and test-contracts."
+      "summary": "Passed lint-fast, test-fast, test-coverage at 77.1% over cmd packages, and test-contracts."
     }
   ],
   "acceptance_results": [
@@ -79,6 +67,7 @@
       "evidence_refs": [
         ".factory/artifacts/task-runs/T3/work-proof-marker.json",
         ".factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json",
+        "cmd/relia/main.go",
         "cmd/relia/main_test.go"
       ]
     },
@@ -112,11 +101,12 @@
       ".factory/artifacts/task-runs/T3/validation-report.json",
       ".factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json"
     ],
-    "forbidden_paths_changed": []
+    "forbidden_paths_changed": [],
+    "notes": "make prepush-full writes ignored coverage output under .factory/tmp; no forbidden path is present in the tracked worker diff."
   },
   "plan_drift_result": {
     "status": "pass",
-    "summary": "Repair stayed within the Codex review finding and T3 allowed paths."
+    "summary": "Repair stayed within the two latest-head Codex review findings and T3 allowed paths."
   },
   "lifecycle_evidence_result": {
     "status": "pass",
