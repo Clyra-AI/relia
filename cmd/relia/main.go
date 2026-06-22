@@ -781,7 +781,7 @@ func normalizeExperienceAttribution(config yamlDocument, event map[string]any, r
 		case overlaps(stringListField(event, "coauthors", "coauthor_trailers"), yamlListValues(config, "attribution.coauthor_trailers")):
 			attribution.ActorKind = "agent"
 			attribution.Method = "coauthor_trailer"
-		case containsStringValue(yamlListValues(config, "attribution.agent_authors"), stringField(event, "actor", "author")):
+		case containsStringValue(yamlListValuesWithMapFields(config, "attribution.agent_authors", "login"), attributionActorLogin(event)):
 			attribution.ActorKind = "agent"
 			attribution.Method = "bot_login"
 		default:
@@ -794,7 +794,7 @@ func normalizeExperienceAttribution(config yamlDocument, event map[string]any, r
 	default:
 		return attribution, false, artifactContractError("attribution actor_kind must be agent, human, or uncertain", ref)
 	}
-	if attribution.ActorKind == "uncertain" && config.Scalars["attribution.uncertain"].Value == "exclude" {
+	if attribution.ActorKind == "uncertain" && attributionUncertainPolicy(config) == "exclude" {
 		return attribution, true, nil
 	}
 	if attribution.Method == "" {
@@ -816,6 +816,22 @@ func normalizeExperienceAttribution(config yamlDocument, event map[string]any, r
 		return attribution, false, artifactContractError("attribution confidence must be between 0 and 1", ref)
 	}
 	return attribution, false, nil
+}
+
+func attributionActorLogin(event map[string]any) string {
+	return stringField(event, "actor.login", "author.login", "actor", "author")
+}
+
+func attributionUncertainPolicy(document yamlDocument) string {
+	if scalar, ok := document.Scalars["attribution.uncertain"]; ok {
+		switch scalar.Value {
+		case "include_flagged":
+			return "include_flagged"
+		case "exclude":
+			return "exclude"
+		}
+	}
+	return "exclude"
 }
 
 func normalizeExperienceOutcome(event map[string]any, action experienceAction, paths []string, ref string) (experienceOutcome, map[string]any, *CommandError) {
@@ -943,11 +959,11 @@ func upsertExperienceShard(path string, records []experienceRecord) *CommandErro
 		}
 		var existing map[string]any
 		if err := json.Unmarshal([]byte(line), &existing); err != nil {
-			return artifactContractError(fmt.Sprintf("existing experience shard line %d is not valid JSON", lineNumber+1), filepath.ToSlash(path))
+			return provenanceIntegrityError(fmt.Sprintf("existing experience shard line %d is not valid JSON", lineNumber+1), filepath.ToSlash(path))
 		}
 		experienceID := stringFromAny(existing["experience_id"])
 		if experienceID == "" {
-			return artifactContractError(fmt.Sprintf("existing experience shard line %d missing experience_id", lineNumber+1), filepath.ToSlash(path))
+			return provenanceIntegrityError(fmt.Sprintf("existing experience shard line %d missing experience_id", lineNumber+1), filepath.ToSlash(path))
 		}
 		if _, ok := byID[experienceID]; !ok {
 			order = append(order, experienceID)
@@ -1304,6 +1320,20 @@ func yamlListValues(document yamlDocument, path string) []string {
 		}
 	}
 	return values
+}
+
+func yamlListValuesWithMapFields(document yamlDocument, path string, fields ...string) []string {
+	values := yamlListValues(document, path)
+	for _, mapping := range document.ListMaps[path] {
+		for _, field := range fields {
+			scalar, ok := mapping[field]
+			if !ok || strings.TrimSpace(scalar.Value) == "" {
+				continue
+			}
+			values = append(values, scalar.Value)
+		}
+	}
+	return uniqueStrings(values)
 }
 
 func overlaps(left []string, right []string) bool {

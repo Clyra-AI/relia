@@ -3,14 +3,17 @@
   "schema_version": "1.0",
   "task_id": "T3",
   "status": "pass",
-  "updated_at": "2026-06-22T19:32:50Z",
+  "updated_at": "2026-06-22T19:47:42Z",
   "commands_run": [
     "make lint-fast",
     "make test-fast",
-    "make test-fast",
+    "go test ./cmd/relia -run 'TestIngest(InfersBotLoginFromMappedAgentAuthor|DefaultsMissingOrInvalidUncertainPolicyToExclude|ReportsCorruptShardAsProvenanceIntegrity)' -count=1",
     "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
-    "make test-fast",
-    "make prepush-full"
+    "go test ./cmd/relia -run 'TestIngest(InfersBotLoginFromMappedAgentAuthor|DefaultsMissingOrInvalidUncertainPolicyToExclude|ReportsCorruptShardAsProvenanceIntegrity)' -count=1",
+    "make prepush-full",
+    "python3 -m json.tool .factory/artifacts/task-runs/T3/work-proof-marker.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T3/validation-report.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json"
   ],
   "baseline_evidence": [
     {
@@ -28,18 +31,18 @@
   ],
   "red_first_evidence": [
     {
-      "command": "make test-fast",
+      "command": "go test ./cmd/relia -run 'TestIngest(InfersBotLoginFromMappedAgentAuthor|DefaultsMissingOrInvalidUncertainPolicyToExclude|ReportsCorruptShardAsProvenanceIntegrity)' -count=1",
       "status": "fail",
-      "exit_code": 2,
-      "summary": "After adding repair tests and before implementation, fast tests failed because metadata.secrets persisted low-entropy values and malformed high-entropy action.commit bypassed entropy scanning."
+      "exit_code": 1,
+      "summary": "New focused tests failed before implementation: mapped agent author login did not attribute as agent, missing/invalid attribution.uncertain persisted uncertain events, and corrupt shards returned exit 4."
     }
   ],
   "green_evidence": [
     {
-      "command": "make test-fast",
+      "command": "go test ./cmd/relia -run 'TestIngest(InfersBotLoginFromMappedAgentAuthor|DefaultsMissingOrInvalidUncertainPolicyToExclude|ReportsCorruptShardAsProvenanceIntegrity)' -count=1",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Fast Go tests passed after plural secret fields were redacted and hash-like entropy exemptions became value-aware."
+      "summary": "Focused repair tests passed after implementation."
     }
   ],
   "final_validation_evidence": [
@@ -47,7 +50,7 @@
       "command": "make prepush-full",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Passed lint-fast, test-fast, test-coverage at 77.1% over cmd packages, and test-contracts."
+      "summary": "Passed lint-fast, test-fast, test-coverage at 77.6% over cmd packages, and test-contracts."
     }
   ],
   "acceptance_results": [
@@ -106,7 +109,7 @@
   },
   "plan_drift_result": {
     "status": "pass",
-    "summary": "Repair stayed within the two latest-head Codex review findings and T3 allowed paths."
+    "summary": "Repair stayed within latest-head Codex review findings for T3 and declared allowed paths."
   },
   "lifecycle_evidence_result": {
     "status": "pass",
