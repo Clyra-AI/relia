@@ -17,7 +17,7 @@ FACTORY_REPO=/path/to/factory factoryd run --config .factory/factoryd.autoship.e
 
 ## CLI Baseline
 
-The T1/T2 command surface establishes the lifecycle skeleton, configuration
+The T1/T2/T3 command surface establishes the lifecycle skeleton, configuration
 contract, and agent-native output contract:
 
 - `relia init` creates `relia.yaml` if it is missing and is idempotent when the
@@ -26,6 +26,11 @@ contract, and agent-native output contract:
 - `relia check` validates the repo-local operating pack baseline, required
   Phase 0 schemas, explicit privacy defaults, fail-closed redaction defaults,
   local model-artifact posture, and any `memory/rules/*.yaml` artifacts present.
+- `relia ingest --input <path>` reads local JSON or JSONL outcome events,
+  redacts and entropy-scans them before persistence, normalizes canonical
+  experience records, and upserts monthly shards under `.relia/experiences/`.
+  This task slice is offline only; live GitHub intake remains behind future
+  credential and network gates.
 - `--json` always emits the stable command result envelope.
 - piped or non-interactive stdout defaults to JSON.
 - `--quiet` and `--compact` emit compact JSON while preserving status,
@@ -40,6 +45,11 @@ experience records are not sent anywhere; share scope is `private`; redaction
 uses entropy scanning and fails closed. `distill.embeddings: signature` is the
 zero-install default. `distill.embeddings: local` requires a pulled model
 manifest and fails closed with exit `8` when it is absent.
+
+Ingested records must include PR provenance. Known token shapes and
+secret-named fields are redacted before `.relia/experiences/*.jsonl` is written;
+opaque high-entropy values that Relia cannot classify fail closed with exit `6`
+and do not create or update a shard.
 
 Phase 0 artifact schemas live under `schemas/` for experience records, outcome
 evidence, failure signatures, memory rules, coverage maps, risk assessments,

@@ -148,7 +148,7 @@ func TestHelpAndVersionUseEnvelope(t *testing.T) {
 
 func TestReservedCommandsReturnTypedNotImplemented(t *testing.T) {
 	for _, args := range [][]string{
-		{"--json", "ingest"},
+		{"--json", "backtest"},
 		{"--json", "models", "pull"},
 	} {
 		stdout, stderr, code := runForTest(t, args, false)
@@ -159,6 +159,226 @@ func TestReservedCommandsReturnTypedNotImplemented(t *testing.T) {
 		if result.Errors[0].Type != "not_implemented" {
 			t.Fatalf("%v error type = %q", args, result.Errors[0].Type)
 		}
+	}
+}
+
+func TestIngestPersistsCanonicalExperienceWithRedactionAndProvenance(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	inputPath := filepath.Join(tempDir, "fixtures", "outcomes.jsonl")
+	writeFileForTest(t, inputPath, `{"experience_id":"exp_0142","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-04-02T18:21:00Z","pr":142,"commit":"abc1234","paths":["packages/billing/invoice.py","tests/test_invoice.py"],"actor_kind":"agent","attribution_method":"coauthor_trailer","attribution_confidence":0.91,"outcome_kind":"ci_failure","terminal_state":"failed","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/test_invoice.py::test_tz_rollover","extraction_confidence":"structured","message":"Authorization failed for Bearer ghp_1234567890abcdef1234567890abcdef123456","provenance_urls":["https://github.com/acme/billing-service/pull/142","https://github.com/acme/billing-service/actions/runs/981"],"metadata":{"raw_log":"token ghp_1234567890abcdef1234567890abcdef123456 was rejected"}}
+`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Command != "ingest" || result.Status != "pass" {
+		t.Fatalf("result = %#v", result)
+	}
+	if result.RedactionStatus != "applied" {
+		t.Fatalf("redaction_status = %q", result.RedactionStatus)
+	}
+	if got := int(result.Data["experiences_persisted"].(float64)); got != 1 {
+		t.Fatalf("experiences_persisted = %d", got)
+	}
+	shardPath := filepath.Join(tempDir, ".relia", "experiences", "2026-04.jsonl")
+	content, err := os.ReadFile(shardPath)
+	if err != nil {
+		t.Fatalf("expected persisted experience shard: %v", err)
+	}
+	if bytes.Contains(content, []byte("ghp_1234567890abcdef")) {
+		t.Fatalf("persisted shard contains unredacted token:\n%s", content)
+	}
+	if !bytes.Contains(content, []byte("[REDACTED:token]")) {
+		t.Fatalf("persisted shard missing token redaction:\n%s", content)
+	}
+	records := decodeJSONLines(t, string(content))
+	if len(records) != 1 {
+		t.Fatalf("records = %#v", records)
+	}
+	record := records[0]
+	if record["object_type"] != "relia.experience_record" {
+		t.Fatalf("object_type = %#v", record["object_type"])
+	}
+	if record["schema_version"] != "1.0" {
+		t.Fatalf("schema_version = %#v", record["schema_version"])
+	}
+	if record["redaction_status"] != "applied" {
+		t.Fatalf("record redaction_status = %#v", record["redaction_status"])
+	}
+	repo := record["repo"].(map[string]any)
+	if repo["owner"] != "acme" || repo["name"] != "billing-service" {
+		t.Fatalf("repo = %#v", repo)
+	}
+	attribution := record["attribution"].(map[string]any)
+	if attribution["actor_kind"] != "agent" || attribution["method"] != "coauthor_trailer" {
+		t.Fatalf("attribution = %#v", attribution)
+	}
+	provenance := record["provenance"].(map[string]any)
+	if urls := provenance["urls"].([]any); len(urls) != 2 {
+		t.Fatalf("provenance urls = %#v", urls)
+	}
+}
+
+func TestIngestFailsClosedBeforePersistenceForUnrecognizedSecret(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	inputPath := filepath.Join(tempDir, "fixtures", "outcomes.json")
+	writeFileForTest(t, inputPath, `[
+  {
+    "experience_id": "exp_0143",
+    "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},
+    "recorded_at": "2026-04-03T18:21:00Z",
+    "pr": 143,
+    "commit": "def5678",
+    "paths": ["packages/billing/invoice.py"],
+    "actor_kind": "agent",
+    "attribution_method": "manual",
+    "outcome_kind": "ci_failure",
+    "signature_class": "test_failure",
+    "check_name": "pytest-billing",
+    "signature_key": "tests/test_invoice.py::test_total",
+    "extraction_confidence": "structured",
+    "provenance_urls": ["https://github.com/acme/billing-service/pull/143"],
+    "metadata": {"opaque": "z6MvN2p9QxR4sT8aK3vY7bL0cD5eF1gH2jP9mQ4rS6tU"}
+  }
+]`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+
+	if code != ExitRedactionSafety {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "redaction_safety_failed" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+	if result.RedactionStatus != "failed_closed" {
+		t.Fatalf("redaction_status = %q", result.RedactionStatus)
+	}
+	if _, err := os.Stat(filepath.Join(tempDir, ".relia", "experiences", "2026-04.jsonl")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("experience shard should not be persisted on redaction failure: %v", err)
+	}
+}
+
+func TestIngestRejectsExperienceWithoutProvenance(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	inputPath := filepath.Join(tempDir, "fixtures", "outcomes.json")
+	writeFileForTest(t, inputPath, `{
+  "events": [
+    {
+      "experience_id": "exp_0144",
+      "repo": "acme/billing-service",
+      "recorded_at": "2026-04-04T18:21:00Z",
+      "pr": 144,
+      "commit": "abc9999",
+      "paths": ["packages/billing/invoice.py"],
+      "actor_kind": "human",
+      "attribution_method": "manual",
+      "outcome_kind": "merged_clean",
+      "signature_class": "unknown",
+      "check_name": "merge",
+      "signature_key": "packages/billing/invoice.py",
+      "extraction_confidence": "unknown"
+    }
+  ]
+}`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+
+	if code != ExitProvenanceIntegrity {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "provenance_integrity_failed" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+}
+
+func TestIngestInfersAttributionAndUpsertsIdempotently(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	inputPath := filepath.Join(tempDir, "fixtures", "outcomes.json")
+	writeFileForTest(t, inputPath, `[
+  {
+    "repo": "acme/billing-service",
+    "recorded_at": "2026-05-01T12:00:00Z",
+    "pr": 210,
+    "commit": "abc210",
+    "paths": ["packages/billing/invoice.py"],
+    "labels": ["agent-authored"],
+    "outcome_kind": "merged_clean",
+    "check_name": "merge",
+    "signature_key": "packages/billing/invoice.py",
+    "extraction_confidence": "structured",
+    "provenance_urls": ["https://github.com/acme/billing-service/pull/210"]
+  }
+]`)
+
+	for run := 0; run < 2; run++ {
+		stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+		if code != ExitSuccess {
+			t.Fatalf("run %d exit code = %d, stderr = %q, stdout = %q", run, code, stderr, stdout)
+		}
+		result := decodeResult(t, stdout)
+		if got := int(result.Data["experiences_agent_attributed"].(float64)); got != 1 {
+			t.Fatalf("run %d experiences_agent_attributed = %d", run, got)
+		}
+	}
+	content, err := os.ReadFile(filepath.Join(tempDir, ".relia", "experiences", "2026-05.jsonl"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	records := decodeJSONLines(t, string(content))
+	if len(records) != 1 {
+		t.Fatalf("idempotent upsert wrote %d records:\n%s", len(records), content)
+	}
+	attribution := records[0]["attribution"].(map[string]any)
+	if attribution["actor_kind"] != "agent" || attribution["method"] != "pr_label" {
+		t.Fatalf("attribution = %#v", attribution)
+	}
+	if records[0]["experience_id"] == "" {
+		t.Fatalf("expected deterministic experience_id: %#v", records[0])
+	}
+}
+
+func TestIngestSkipsUncertainAttributionByDefault(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	inputPath := filepath.Join(tempDir, "fixtures", "outcomes.json")
+	writeFileForTest(t, inputPath, `[
+  {
+    "repo": "acme/billing-service",
+    "recorded_at": "2026-05-02T12:00:00Z",
+    "pr": 211,
+    "commit": "abc211",
+    "paths": ["packages/billing/invoice.py"],
+    "outcome_kind": "merged_clean",
+    "check_name": "merge",
+    "signature_key": "packages/billing/invoice.py",
+    "extraction_confidence": "structured",
+    "provenance_urls": ["https://github.com/acme/billing-service/pull/211"]
+  }
+]`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if got := int(result.Data["experiences_persisted"].(float64)); got != 0 {
+		t.Fatalf("experiences_persisted = %d", got)
+	}
+	if got := int(result.Data["experiences_skipped_uncertain"].(float64)); got != 1 {
+		t.Fatalf("experiences_skipped_uncertain = %d", got)
+	}
+	if _, err := os.Stat(filepath.Join(tempDir, ".relia", "experiences", "2026-05.jsonl")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("uncertain experience should not be persisted: %v", err)
 	}
 }
 
@@ -1041,6 +1261,23 @@ func decodeResult(t *testing.T, output string) CommandResult {
 		t.Fatalf("decode command result from %q: %v", output, err)
 	}
 	return result
+}
+
+func decodeJSONLines(t *testing.T, content string) []map[string]any {
+	t.Helper()
+
+	var records []map[string]any
+	for _, line := range strings.Split(content, "\n") {
+		if strings.TrimSpace(line) == "" {
+			continue
+		}
+		var record map[string]any
+		if err := json.Unmarshal([]byte(line), &record); err != nil {
+			t.Fatalf("decode JSON line %q: %v", line, err)
+		}
+		records = append(records, record)
+	}
+	return records
 }
 
 func findRepoRootForTest(t *testing.T) string {
