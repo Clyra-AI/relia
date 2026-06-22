@@ -6,10 +6,13 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math"
 	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
+	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -89,6 +92,13 @@ var primaryCommands = []string{
 	"assess",
 }
 
+var knownSecretPatterns = []*regexp.Regexp{
+	regexp.MustCompile(`(?i)\bgithub_pat_[A-Za-z0-9_]{20,}\b`),
+	regexp.MustCompile(`(?i)\bgh[opusr]_[A-Za-z0-9_]{20,}\b`),
+	regexp.MustCompile(`\bAKIA[0-9A-Z]{16}\b`),
+	regexp.MustCompile(`(?i)\bBearer\s+[A-Za-z0-9._~+/=-]{20,}\b`),
+}
+
 type CommandResult struct {
 	ObjectType      string         `json:"object_type"`
 	SchemaVersion   string         `json:"schema_version"`
@@ -156,6 +166,65 @@ type parsedArgs struct {
 	flags       globalFlags
 	command     string
 	commandArgs []string
+}
+
+type ingestOptions struct {
+	InputPath string
+}
+
+type experienceRecord struct {
+	ObjectType      string                `json:"object_type"`
+	SchemaVersion   string                `json:"schema_version"`
+	ExperienceID    string                `json:"experience_id"`
+	Repo            experienceRepo        `json:"repo"`
+	RecordedAt      string                `json:"recorded_at"`
+	Attribution     experienceAttribution `json:"attribution"`
+	Context         experienceContext     `json:"context"`
+	Action          experienceAction      `json:"action"`
+	Outcome         experienceOutcome     `json:"outcome"`
+	Provenance      experienceProvenance  `json:"provenance"`
+	FlakeDiscount   float64               `json:"flake_discount"`
+	OrgEligible     bool                  `json:"org_eligible"`
+	ShareScope      string                `json:"share_scope"`
+	RedactionStatus string                `json:"redaction_status"`
+	Metadata        map[string]any        `json:"metadata"`
+}
+
+type experienceRepo struct {
+	Provider string `json:"provider"`
+	Owner    string `json:"owner"`
+	Name     string `json:"name"`
+}
+
+type experienceAttribution struct {
+	ActorKind  string  `json:"actor_kind"`
+	Method     string  `json:"method"`
+	Confidence float64 `json:"confidence"`
+}
+
+type experienceContext struct {
+	Paths           []string `json:"paths"`
+	DiffFingerprint string   `json:"diff_fingerprint"`
+}
+
+type experienceAction struct {
+	PR     int    `json:"pr"`
+	Commit string `json:"commit"`
+}
+
+type experienceOutcome struct {
+	Kind          string              `json:"kind"`
+	TerminalState string              `json:"terminal_state"`
+	Signature     experienceSignature `json:"signature"`
+}
+
+type experienceSignature struct {
+	SignatureID          string `json:"signature_id"`
+	ExtractionConfidence string `json:"extraction_confidence"`
+}
+
+type experienceProvenance struct {
+	URLs []string `json:"urls"`
 }
 
 func main() {
@@ -237,12 +306,14 @@ func dispatch(parsed parsedArgs, start time.Time) CommandResult {
 		return initResult(parsed.commandArgs, start)
 	case "check":
 		return checkResult(parsed.commandArgs, start)
+	case "ingest":
+		return ingestResult(parsed.commandArgs, start)
 	case "models":
 		if len(parsed.commandArgs) == 1 && parsed.commandArgs[0] == "pull" {
 			return notImplementedResult("models pull", start)
 		}
 		return errorResult("models", "models", usageError("expected subcommand: pull"), start)
-	case "ingest", "backtest", "distill", "review", "memory", "compile", "serve", "assess", "demo", "share":
+	case "backtest", "distill", "review", "memory", "compile", "serve", "assess", "demo", "share":
 		return notImplementedResult(command, start)
 	default:
 		return errorResult(command, command, usageError(fmt.Sprintf("unknown command %q", command)), start)
@@ -360,6 +431,944 @@ func checkResult(args []string, start time.Time) CommandResult {
 	return result
 }
 
+func ingestResult(args []string, start time.Time) CommandResult {
+	options, commandErr := parseIngestArgs(args)
+	if commandErr != nil {
+		return errorResult("ingest", "ingest", commandErr, start)
+	}
+	wd, err := os.Getwd()
+	if err != nil {
+		return errorResult("ingest", "ingest", internalError("could not inspect working directory", err), start)
+	}
+	root, ok := findRepoRoot(wd)
+	if !ok {
+		return errorResult("ingest", "ingest", configError("could not locate repository root from current directory"), start)
+	}
+	warnings, commandErr := validateReliaConfig(root)
+	if commandErr != nil {
+		return errorResult("ingest", "ingest", commandErr, start)
+	}
+	config, commandErr := readReliaConfig(root)
+	if commandErr != nil {
+		return errorResult("ingest", "ingest", commandErr, start)
+	}
+	inputPath := resolveInputPath(root, options.InputPath)
+	inputContent, err := os.ReadFile(inputPath)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return errorResult("ingest", "ingest", artifactContractError("ingest input is missing", displayPath(root, inputPath)), start)
+		}
+		return errorResult("ingest", "ingest", internalError("could not read ingest input", err), start)
+	}
+	events, commandErr := parseIngestEvents(inputContent, displayPath(root, inputPath))
+	if commandErr != nil {
+		return errorResult("ingest", "ingest", commandErr, start)
+	}
+
+	records := make([]experienceRecord, 0, len(events))
+	skippedUncertain := 0
+	agentAttributed := 0
+	humanAttributed := 0
+	for index, event := range events {
+		redacted, commandErr := redactForPersistence(event, displayPath(root, inputPath))
+		if commandErr != nil {
+			return errorResult("ingest", "ingest", commandErr, start)
+		}
+		redactedEvent, ok := redacted.(map[string]any)
+		if !ok {
+			return errorResult("ingest", "ingest", artifactContractError("ingest event must be a JSON object", displayPath(root, inputPath)), start)
+		}
+		record, skipped, commandErr := normalizeExperienceRecord(config, redactedEvent, index, displayPath(root, inputPath))
+		if commandErr != nil {
+			return errorResult("ingest", "ingest", commandErr, start)
+		}
+		if skipped {
+			skippedUncertain++
+			continue
+		}
+		switch record.Attribution.ActorKind {
+		case "agent":
+			agentAttributed++
+		case "human":
+			humanAttributed++
+		}
+		records = append(records, record)
+	}
+
+	shards, commandErr := persistExperienceRecords(root, records)
+	if commandErr != nil {
+		return errorResult("ingest", "ingest", commandErr, start)
+	}
+	result := passResult("ingest", "ingest", "ingested canonical experience records", start, map[string]any{
+		"input_path":                    displayPath(root, inputPath),
+		"experiences_total":             len(events),
+		"experiences_persisted":         len(records),
+		"experiences_agent_attributed":  agentAttributed,
+		"experiences_human_attributed":  humanAttributed,
+		"experiences_skipped_uncertain": skippedUncertain,
+		"artifact_root":                 ".relia",
+		"commit_experiences":            false,
+		"experience_shards":             shards,
+	})
+	result.Warnings = append(result.Warnings, warnings...)
+	result.RedactionStatus = "applied"
+	result.EvidenceRefs = append(result.EvidenceRefs,
+		"docs/product/prd.md#2-ingest",
+		"schemas/experience-record.schema.json",
+	)
+	result.Artifacts = append(result.Artifacts, ArtifactRef{Kind: "input", Path: displayPath(root, inputPath)})
+	for _, shard := range shards {
+		result.Artifacts = append(result.Artifacts, ArtifactRef{Kind: "experience_shard", Path: shard})
+	}
+	return result
+}
+
+func parseIngestArgs(args []string) (ingestOptions, *CommandError) {
+	var options ingestOptions
+	for index := 0; index < len(args); index++ {
+		arg := args[index]
+		switch arg {
+		case "--input", "-i":
+			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
+				return options, usageError("ingest requires a path after --input")
+			}
+			options.InputPath = args[index+1]
+			index++
+		default:
+			return options, usageError(fmt.Sprintf("unknown ingest argument %q", arg))
+		}
+	}
+	if strings.TrimSpace(options.InputPath) == "" {
+		return options, usageError("ingest requires --input <json-or-jsonl> in offline mode")
+	}
+	return options, nil
+}
+
+func readReliaConfig(root string) (yamlDocument, *CommandError) {
+	content, err := os.ReadFile(filepath.Join(root, defaultConfigFile))
+	if err != nil {
+		return yamlDocument{}, internalError("could not read relia.yaml", err)
+	}
+	document, parseErr := parseYAMLDocument(string(content))
+	if parseErr != nil {
+		return yamlDocument{}, configError(parseErr.Error())
+	}
+	return document, nil
+}
+
+func resolveInputPath(root string, input string) string {
+	if filepath.IsAbs(input) {
+		return filepath.Clean(input)
+	}
+	return filepath.Clean(filepath.Join(root, input))
+}
+
+func parseIngestEvents(content []byte, ref string) ([]map[string]any, *CommandError) {
+	trimmed := strings.TrimSpace(string(content))
+	if trimmed == "" {
+		return nil, artifactContractError("ingest input is empty", ref)
+	}
+	var decoded any
+	if err := json.Unmarshal([]byte(trimmed), &decoded); err == nil {
+		return ingestEventsFromJSON(decoded, ref)
+	}
+	var events []map[string]any
+	for lineNumber, line := range strings.Split(trimmed, "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+		var event map[string]any
+		if err := json.Unmarshal([]byte(line), &event); err != nil {
+			return nil, artifactContractError(fmt.Sprintf("ingest JSONL line %d is not a JSON object", lineNumber+1), ref)
+		}
+		events = append(events, event)
+	}
+	if len(events) == 0 {
+		return nil, artifactContractError("ingest input contains no events", ref)
+	}
+	return events, nil
+}
+
+func ingestEventsFromJSON(value any, ref string) ([]map[string]any, *CommandError) {
+	switch typed := value.(type) {
+	case []any:
+		return ingestEventsFromArray(typed, ref)
+	case map[string]any:
+		if nested, ok := typed["events"]; ok {
+			events, ok := nested.([]any)
+			if !ok {
+				return nil, artifactContractError("ingest events must be an array", ref)
+			}
+			return ingestEventsFromArray(events, ref)
+		}
+		return []map[string]any{typed}, nil
+	default:
+		return nil, artifactContractError("ingest input must be a JSON object, array, or JSONL stream", ref)
+	}
+}
+
+func ingestEventsFromArray(values []any, ref string) ([]map[string]any, *CommandError) {
+	if len(values) == 0 {
+		return nil, artifactContractError("ingest input contains no events", ref)
+	}
+	events := make([]map[string]any, 0, len(values))
+	for index, value := range values {
+		event, ok := value.(map[string]any)
+		if !ok {
+			return nil, artifactContractError(fmt.Sprintf("ingest event %d must be a JSON object", index+1), ref)
+		}
+		events = append(events, event)
+	}
+	return events, nil
+}
+
+func normalizeExperienceRecord(config yamlDocument, event map[string]any, index int, ref string) (experienceRecord, bool, *CommandError) {
+	repo, commandErr := normalizeExperienceRepo(event, ref)
+	if commandErr != nil {
+		return experienceRecord{}, false, commandErr
+	}
+	recordedAt := stringField(event, "recorded_at")
+	if recordedAt == "" {
+		return experienceRecord{}, false, artifactContractError("experience record missing recorded_at", ref)
+	}
+	parsedRecordedAt, err := time.Parse(time.RFC3339, recordedAt)
+	if err != nil {
+		return experienceRecord{}, false, artifactContractError("experience record recorded_at must be RFC3339", ref)
+	}
+	action, commandErr := normalizeExperienceAction(event, ref)
+	if commandErr != nil {
+		return experienceRecord{}, false, commandErr
+	}
+	attribution, skipped, commandErr := normalizeExperienceAttribution(config, event, ref)
+	if commandErr != nil || skipped {
+		return experienceRecord{}, skipped, commandErr
+	}
+	paths := stringListField(event, "paths", "context.paths")
+	if len(paths) == 0 {
+		return experienceRecord{}, false, artifactContractError("experience record must include at least one context path", ref)
+	}
+	context := experienceContext{
+		Paths:           paths,
+		DiffFingerprint: stringField(event, "diff_fingerprint", "context.diff_fingerprint"),
+	}
+	if context.DiffFingerprint == "" {
+		context.DiffFingerprint = sha256String(fmt.Sprintf("%d|%s|%s", action.PR, action.Commit, strings.Join(paths, "|")))
+	}
+	outcome, signatureMetadata, commandErr := normalizeExperienceOutcome(event, action, paths, ref)
+	if commandErr != nil {
+		return experienceRecord{}, false, commandErr
+	}
+	provenance, commandErr := normalizeExperienceProvenance(event, ref)
+	if commandErr != nil {
+		return experienceRecord{}, false, commandErr
+	}
+	flakeDiscount := floatField(event, 0, "flake_discount")
+	if flakeDiscount < 0 || flakeDiscount > 1 {
+		return experienceRecord{}, false, artifactContractError("flake_discount must be between 0 and 1", ref)
+	}
+	metadata := metadataField(event)
+	metadata["source_input_index"] = index
+	metadata["source_kind"] = "local_input"
+	metadata["signature"] = signatureMetadata
+	experienceID := stringField(event, "experience_id")
+	if experienceID == "" {
+		experienceID = fmt.Sprintf("exp_%04d_%s", action.PR, shortHash(outcome.Kind+"|"+action.Commit))
+	}
+	return experienceRecord{
+		ObjectType:      "relia.experience_record",
+		SchemaVersion:   commandSchemaVersion,
+		ExperienceID:    experienceID,
+		Repo:            repo,
+		RecordedAt:      parsedRecordedAt.UTC().Format(time.RFC3339),
+		Attribution:     attribution,
+		Context:         context,
+		Action:          action,
+		Outcome:         outcome,
+		Provenance:      provenance,
+		FlakeDiscount:   flakeDiscount,
+		OrgEligible:     false,
+		ShareScope:      "private",
+		RedactionStatus: "applied",
+		Metadata:        metadata,
+	}, false, nil
+}
+
+func normalizeExperienceRepo(event map[string]any, ref string) (experienceRepo, *CommandError) {
+	repo := experienceRepo{Provider: "github"}
+	if value, ok := nestedField(event, "repo"); ok {
+		switch typed := value.(type) {
+		case map[string]any:
+			if provider := stringFromAny(typed["provider"]); provider != "" {
+				repo.Provider = provider
+			}
+			repo.Owner = stringFromAny(typed["owner"])
+			repo.Name = stringFromAny(typed["name"])
+		case string:
+			owner, name, ok := strings.Cut(typed, "/")
+			if ok {
+				repo.Owner = strings.TrimSpace(owner)
+				repo.Name = strings.TrimSpace(name)
+			}
+		}
+	}
+	if repo.Owner == "" {
+		repo.Owner = stringField(event, "repo_owner")
+	}
+	if repo.Name == "" {
+		repo.Name = stringField(event, "repo_name")
+	}
+	if repo.Provider != "github" {
+		return repo, artifactContractError("experience repo.provider must be github", ref)
+	}
+	if repo.Owner == "" || repo.Name == "" {
+		return repo, artifactContractError("experience repo must include owner and name", ref)
+	}
+	return repo, nil
+}
+
+func normalizeExperienceAction(event map[string]any, ref string) (experienceAction, *CommandError) {
+	action := experienceAction{
+		PR:     intField(event, 0, "pr", "action.pr"),
+		Commit: stringField(event, "commit", "action.commit"),
+	}
+	if action.Commit == "" {
+		commits := stringListField(event, "commits", "action.commits")
+		if len(commits) > 0 {
+			action.Commit = commits[0]
+		}
+	}
+	if action.PR < 1 {
+		return action, provenanceIntegrityError("experience record must include a PR number", ref)
+	}
+	if action.Commit == "" {
+		return action, artifactContractError("experience record must include commit", ref)
+	}
+	return action, nil
+}
+
+func normalizeExperienceAttribution(config yamlDocument, event map[string]any, ref string) (experienceAttribution, bool, *CommandError) {
+	attribution := experienceAttribution{
+		ActorKind:  stringField(event, "actor_kind", "attribution.actor_kind"),
+		Method:     stringField(event, "attribution_method", "attribution.method"),
+		Confidence: floatField(event, -1, "attribution_confidence", "attribution.confidence"),
+	}
+	if attribution.ActorKind == "" {
+		switch {
+		case overlaps(stringListField(event, "labels", "pr_labels"), yamlListValues(config, "attribution.pr_labels")):
+			attribution.ActorKind = "agent"
+			attribution.Method = "pr_label"
+		case overlaps(stringListField(event, "coauthors", "coauthor_trailers"), yamlListValues(config, "attribution.coauthor_trailers")):
+			attribution.ActorKind = "agent"
+			attribution.Method = "coauthor_trailer"
+		case containsStringValue(yamlListValues(config, "attribution.agent_authors"), stringField(event, "actor", "author")):
+			attribution.ActorKind = "agent"
+			attribution.Method = "bot_login"
+		default:
+			attribution.ActorKind = "uncertain"
+			attribution.Method = "uncertain"
+		}
+	}
+	switch attribution.ActorKind {
+	case "agent", "human", "uncertain":
+	default:
+		return attribution, false, artifactContractError("attribution actor_kind must be agent, human, or uncertain", ref)
+	}
+	if attribution.ActorKind == "uncertain" && config.Scalars["attribution.uncertain"].Value == "exclude" {
+		return attribution, true, nil
+	}
+	if attribution.Method == "" {
+		if attribution.ActorKind == "human" {
+			attribution.Method = "manual"
+		} else {
+			attribution.Method = "uncertain"
+		}
+	}
+	switch attribution.Method {
+	case "bot_login", "coauthor_trailer", "pr_label", "manual", "uncertain":
+	default:
+		return attribution, false, artifactContractError("attribution method is invalid", ref)
+	}
+	if attribution.Confidence < 0 {
+		attribution.Confidence = defaultAttributionConfidence(attribution.Method)
+	}
+	if attribution.Confidence < 0 || attribution.Confidence > 1 {
+		return attribution, false, artifactContractError("attribution confidence must be between 0 and 1", ref)
+	}
+	return attribution, false, nil
+}
+
+func normalizeExperienceOutcome(event map[string]any, action experienceAction, paths []string, ref string) (experienceOutcome, map[string]any, *CommandError) {
+	kind := stringField(event, "outcome_kind", "outcome.kind")
+	if !validOutcomeKind(kind) {
+		return experienceOutcome{}, nil, artifactContractError("outcome kind is invalid", ref)
+	}
+	terminalState := stringField(event, "terminal_state", "terminal", "outcome.terminal_state", "outcome.terminal")
+	if terminalState == "" {
+		terminalState = terminalStateForOutcome(kind)
+	}
+	if !validTerminalState(terminalState) {
+		return experienceOutcome{}, nil, artifactContractError("outcome terminal_state is invalid", ref)
+	}
+	signatureClass := stringField(event, "signature_class", "outcome.signature.class")
+	if signatureClass == "" {
+		signatureClass = signatureClassForOutcome(kind)
+	}
+	checkName := stringField(event, "check_name", "outcome.signature.check", "outcome.signature.check_name")
+	if checkName == "" {
+		checkName = kind
+	}
+	signatureKey := stringField(event, "signature_key", "outcome.signature.key")
+	if signatureKey == "" && len(paths) > 0 {
+		signatureKey = paths[0]
+	}
+	if signatureKey == "" {
+		signatureKey = action.Commit
+	}
+	extractionConfidence := stringField(event, "extraction_confidence", "outcome.signature.extraction_confidence")
+	if extractionConfidence == "" {
+		extractionConfidence = "structured"
+	}
+	if !validExtractionConfidence(extractionConfidence) {
+		return experienceOutcome{}, nil, artifactContractError("signature extraction_confidence is invalid", ref)
+	}
+	messageFingerprint := stringField(event, "message_fingerprint", "outcome.signature.message_fingerprint")
+	if messageFingerprint == "" {
+		message := stringField(event, "message", "log", "outcome.message")
+		if message != "" {
+			messageFingerprint = sha256String(strings.TrimSpace(message))
+		}
+	}
+	signatureID := stringField(event, "signature_id", "outcome.signature.signature_id")
+	if signatureID == "" {
+		signatureID = "sig_" + shortHash(signatureClass+"|"+checkName+"|"+signatureKey)
+	}
+	metadata := map[string]any{
+		"class":             signatureClass,
+		"check_name":        checkName,
+		"key":               signatureKey,
+		"extraction_method": extractionMethodForConfidence(extractionConfidence),
+	}
+	if messageFingerprint != "" {
+		metadata["message_fingerprint"] = messageFingerprint
+	}
+	return experienceOutcome{
+		Kind:          kind,
+		TerminalState: terminalState,
+		Signature: experienceSignature{
+			SignatureID:          signatureID,
+			ExtractionConfidence: extractionConfidence,
+		},
+	}, metadata, nil
+}
+
+func normalizeExperienceProvenance(event map[string]any, ref string) (experienceProvenance, *CommandError) {
+	urls := stringListField(event, "provenance_urls", "provenance.urls")
+	for _, key := range []string{"pr_url", "check_run_url", "revert_url", "review_url"} {
+		if value := stringField(event, key, "provenance."+key); value != "" {
+			urls = append(urls, value)
+		}
+	}
+	urls = uniqueStrings(urls)
+	if len(urls) == 0 {
+		return experienceProvenance{}, provenanceIntegrityError("experience record must include at least one provenance URL", ref)
+	}
+	for _, value := range urls {
+		if !strings.HasPrefix(value, "https://github.com/") {
+			return experienceProvenance{}, provenanceIntegrityError("experience provenance URL must be an https://github.com/ URL", ref)
+		}
+	}
+	return experienceProvenance{URLs: urls}, nil
+}
+
+func persistExperienceRecords(root string, records []experienceRecord) ([]string, *CommandError) {
+	if len(records) == 0 {
+		return []string{}, nil
+	}
+	grouped := map[string][]experienceRecord{}
+	for _, record := range records {
+		recordedAt, err := time.Parse(time.RFC3339, record.RecordedAt)
+		if err != nil {
+			return nil, artifactContractError("experience recorded_at must remain RFC3339 before persistence", record.ExperienceID)
+		}
+		shard := filepath.ToSlash(filepath.Join(".relia", "experiences", recordedAt.UTC().Format("2006-01")+".jsonl"))
+		grouped[shard] = append(grouped[shard], record)
+	}
+	shards := make([]string, 0, len(grouped))
+	for shard := range grouped {
+		shards = append(shards, shard)
+	}
+	sort.Strings(shards)
+	for _, shard := range shards {
+		if commandErr := upsertExperienceShard(filepath.Join(root, filepath.FromSlash(shard)), grouped[shard]); commandErr != nil {
+			return nil, commandErr
+		}
+	}
+	return shards, nil
+}
+
+func upsertExperienceShard(path string, records []experienceRecord) *CommandError {
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return internalError("could not create experience shard directory", err)
+	}
+	order := []string{}
+	byID := map[string]json.RawMessage{}
+	content, err := os.ReadFile(path)
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
+		return internalError("could not read existing experience shard", err)
+	}
+	for lineNumber, line := range strings.Split(strings.TrimSpace(string(content)), "\n") {
+		if strings.TrimSpace(line) == "" {
+			continue
+		}
+		var existing map[string]any
+		if err := json.Unmarshal([]byte(line), &existing); err != nil {
+			return artifactContractError(fmt.Sprintf("existing experience shard line %d is not valid JSON", lineNumber+1), filepath.ToSlash(path))
+		}
+		experienceID := stringFromAny(existing["experience_id"])
+		if experienceID == "" {
+			return artifactContractError(fmt.Sprintf("existing experience shard line %d missing experience_id", lineNumber+1), filepath.ToSlash(path))
+		}
+		if _, ok := byID[experienceID]; !ok {
+			order = append(order, experienceID)
+		}
+		byID[experienceID] = append(json.RawMessage(nil), []byte(line)...)
+	}
+	for _, record := range records {
+		content, err := json.Marshal(record)
+		if err != nil {
+			return internalError("could not encode experience record", err)
+		}
+		if _, ok := byID[record.ExperienceID]; !ok {
+			order = append(order, record.ExperienceID)
+		}
+		byID[record.ExperienceID] = content
+	}
+	var builder strings.Builder
+	for _, experienceID := range order {
+		builder.Write(byID[experienceID])
+		builder.WriteByte('\n')
+	}
+	if err := os.WriteFile(path, []byte(builder.String()), 0o644); err != nil {
+		return internalError("could not write experience shard", err)
+	}
+	return nil
+}
+
+func redactForPersistence(event map[string]any, ref string) (any, *CommandError) {
+	return redactValue(event, nil, ref)
+}
+
+func redactValue(value any, fieldPath []string, ref string) (any, *CommandError) {
+	switch typed := value.(type) {
+	case map[string]any:
+		redacted := make(map[string]any, len(typed))
+		for key, child := range typed {
+			childPath := append(append([]string{}, fieldPath...), key)
+			if isSecretField(key) {
+				redacted[key] = "[REDACTED:secret]"
+				continue
+			}
+			next, commandErr := redactValue(child, childPath, ref)
+			if commandErr != nil {
+				return nil, commandErr
+			}
+			redacted[key] = next
+		}
+		return redacted, nil
+	case []any:
+		redacted := make([]any, 0, len(typed))
+		for index, child := range typed {
+			childPath := append(append([]string{}, fieldPath...), strconv.Itoa(index))
+			next, commandErr := redactValue(child, childPath, ref)
+			if commandErr != nil {
+				return nil, commandErr
+			}
+			redacted = append(redacted, next)
+		}
+		return redacted, nil
+	case string:
+		return redactStringValue(typed, fieldPath, ref)
+	default:
+		return value, nil
+	}
+}
+
+func redactStringValue(value string, fieldPath []string, ref string) (string, *CommandError) {
+	redacted := value
+	for _, pattern := range knownSecretPatterns {
+		redacted = pattern.ReplaceAllString(redacted, "[REDACTED:token]")
+	}
+	if token := unsafeEntropyToken(redacted, fieldPath); token != "" {
+		pathRef := strings.Join(fieldPath, ".")
+		if pathRef == "" {
+			pathRef = "<root>"
+		}
+		return "", redactionSafetyError(fmt.Sprintf("unrecognized high-entropy value at %s", pathRef), ref)
+	}
+	return redacted, nil
+}
+
+func isSecretField(key string) bool {
+	normalized := strings.ToLower(strings.ReplaceAll(strings.ReplaceAll(key, "-", "_"), " ", "_"))
+	switch normalized {
+	case "token", "secret", "password", "credential", "credentials", "api_key", "access_token", "refresh_token", "private_key", "client_secret":
+		return true
+	}
+	return strings.HasSuffix(normalized, "_token") ||
+		strings.HasSuffix(normalized, "_secret") ||
+		strings.HasSuffix(normalized, "_password") ||
+		strings.Contains(normalized, "credential")
+}
+
+func unsafeEntropyToken(value string, fieldPath []string) string {
+	if entropySafeFieldPath(fieldPath) {
+		return ""
+	}
+	candidates := strings.FieldsFunc(value, func(r rune) bool {
+		return !((r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') || r == '+' || r == '/' || r == '_' || r == '-' || r == '=')
+	})
+	for _, candidate := range candidates {
+		candidate = strings.Trim(candidate, "-_=+/")
+		if len(candidate) < 32 {
+			continue
+		}
+		if !hasMixedSecretAlphabet(candidate) {
+			continue
+		}
+		if shannonEntropy(candidate) > 4.2 {
+			return candidate
+		}
+	}
+	return ""
+}
+
+func entropySafeFieldPath(fieldPath []string) bool {
+	for _, part := range fieldPath {
+		normalized := strings.ToLower(part)
+		switch normalized {
+		case "commit", "commits", "diff_fingerprint", "signature_id", "message_fingerprint", "digest", "checksum":
+			return true
+		}
+		if strings.Contains(normalized, "fingerprint") {
+			return true
+		}
+	}
+	return false
+}
+
+func hasMixedSecretAlphabet(value string) bool {
+	hasLower := false
+	hasUpper := false
+	hasDigit := false
+	for _, r := range value {
+		switch {
+		case r >= 'a' && r <= 'z':
+			hasLower = true
+		case r >= 'A' && r <= 'Z':
+			hasUpper = true
+		case r >= '0' && r <= '9':
+			hasDigit = true
+		}
+	}
+	categories := 0
+	for _, present := range []bool{hasLower, hasUpper, hasDigit} {
+		if present {
+			categories++
+		}
+	}
+	return categories >= 2
+}
+
+func shannonEntropy(value string) float64 {
+	if value == "" {
+		return 0
+	}
+	counts := map[rune]int{}
+	for _, r := range value {
+		counts[r]++
+	}
+	length := float64(len([]rune(value)))
+	entropy := 0.0
+	for _, count := range counts {
+		probability := float64(count) / length
+		entropy -= probability * math.Log2(probability)
+	}
+	return entropy
+}
+
+func nestedField(event map[string]any, path string) (any, bool) {
+	parts := strings.Split(path, ".")
+	var current any = event
+	for _, part := range parts {
+		mapping, ok := current.(map[string]any)
+		if !ok {
+			return nil, false
+		}
+		current, ok = mapping[part]
+		if !ok {
+			return nil, false
+		}
+	}
+	return current, true
+}
+
+func stringField(event map[string]any, paths ...string) string {
+	for _, path := range paths {
+		if value, ok := nestedField(event, path); ok {
+			if converted := stringFromAny(value); converted != "" {
+				return converted
+			}
+		}
+	}
+	return ""
+}
+
+func intField(event map[string]any, fallback int, paths ...string) int {
+	for _, path := range paths {
+		if value, ok := nestedField(event, path); ok {
+			switch typed := value.(type) {
+			case float64:
+				return int(typed)
+			case int:
+				return typed
+			case json.Number:
+				converted, err := typed.Int64()
+				if err == nil {
+					return int(converted)
+				}
+			case string:
+				converted, err := strconv.Atoi(strings.TrimSpace(typed))
+				if err == nil {
+					return converted
+				}
+			}
+		}
+	}
+	return fallback
+}
+
+func floatField(event map[string]any, fallback float64, paths ...string) float64 {
+	for _, path := range paths {
+		if value, ok := nestedField(event, path); ok {
+			switch typed := value.(type) {
+			case float64:
+				return typed
+			case int:
+				return float64(typed)
+			case json.Number:
+				converted, err := typed.Float64()
+				if err == nil {
+					return converted
+				}
+			case string:
+				converted, err := strconv.ParseFloat(strings.TrimSpace(typed), 64)
+				if err == nil {
+					return converted
+				}
+			}
+		}
+	}
+	return fallback
+}
+
+func stringListField(event map[string]any, paths ...string) []string {
+	for _, path := range paths {
+		if value, ok := nestedField(event, path); ok {
+			switch typed := value.(type) {
+			case []any:
+				var result []string
+				for _, item := range typed {
+					if converted := stringFromAny(item); converted != "" {
+						result = append(result, converted)
+					}
+				}
+				if len(result) > 0 {
+					return result
+				}
+			case []string:
+				if len(typed) > 0 {
+					return typed
+				}
+			case string:
+				if strings.TrimSpace(typed) != "" {
+					return []string{strings.TrimSpace(typed)}
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func metadataField(event map[string]any) map[string]any {
+	metadata := map[string]any{}
+	if value, ok := nestedField(event, "metadata"); ok {
+		if source, ok := value.(map[string]any); ok {
+			for key, item := range source {
+				metadata[key] = item
+			}
+		}
+	}
+	return metadata
+}
+
+func stringFromAny(value any) string {
+	switch typed := value.(type) {
+	case string:
+		return strings.TrimSpace(typed)
+	case fmt.Stringer:
+		return strings.TrimSpace(typed.String())
+	default:
+		return ""
+	}
+}
+
+func yamlListValues(document yamlDocument, path string) []string {
+	scalars := document.Lists[path]
+	values := make([]string, 0, len(scalars))
+	for _, scalar := range scalars {
+		if strings.TrimSpace(scalar.Value) != "" {
+			values = append(values, scalar.Value)
+		}
+	}
+	return values
+}
+
+func overlaps(left []string, right []string) bool {
+	for _, candidate := range left {
+		if containsStringValue(right, candidate) {
+			return true
+		}
+	}
+	return false
+}
+
+func containsStringValue(values []string, want string) bool {
+	want = strings.TrimSpace(strings.ToLower(want))
+	if want == "" {
+		return false
+	}
+	for _, value := range values {
+		if strings.TrimSpace(strings.ToLower(value)) == want {
+			return true
+		}
+	}
+	return false
+}
+
+func defaultAttributionConfidence(method string) float64 {
+	switch method {
+	case "manual":
+		return 1
+	case "pr_label", "coauthor_trailer", "bot_login":
+		return 0.9
+	default:
+		return 0
+	}
+}
+
+func validOutcomeKind(kind string) bool {
+	switch kind {
+	case "merged_clean", "ci_failure", "revert", "review_correction", "fix_held":
+		return true
+	default:
+		return false
+	}
+}
+
+func terminalStateForOutcome(kind string) string {
+	switch kind {
+	case "merged_clean":
+		return "passed"
+	case "ci_failure":
+		return "failed"
+	case "revert":
+		return "reverted"
+	case "review_correction":
+		return "corrected"
+	case "fix_held":
+		return "held"
+	default:
+		return ""
+	}
+}
+
+func validTerminalState(value string) bool {
+	switch value {
+	case "passed", "failed", "reverted", "corrected", "held":
+		return true
+	default:
+		return false
+	}
+}
+
+func signatureClassForOutcome(kind string) string {
+	switch kind {
+	case "revert":
+		return "revert"
+	case "review_correction":
+		return "review_correction"
+	case "ci_failure":
+		return "test_failure"
+	default:
+		return "unknown"
+	}
+}
+
+func validExtractionConfidence(value string) bool {
+	switch value {
+	case "structured", "log_parsed_high", "log_parsed_low", "unknown":
+		return true
+	default:
+		return false
+	}
+}
+
+func extractionMethodForConfidence(value string) string {
+	switch value {
+	case "log_parsed_high", "log_parsed_low":
+		return "log_parse"
+	case "unknown":
+		return "revert_metadata"
+	default:
+		return "structured_check_run"
+	}
+}
+
+func sha256String(value string) string {
+	digest := sha256.Sum256([]byte(value))
+	return "sha256:" + fmt.Sprintf("%x", digest)
+}
+
+func shortHash(value string) string {
+	digest := sha256.Sum256([]byte(value))
+	return fmt.Sprintf("%x", digest)[:12]
+}
+
+func uniqueStrings(values []string) []string {
+	seen := map[string]struct{}{}
+	var result []string
+	for _, value := range values {
+		value = strings.TrimSpace(value)
+		if value == "" {
+			continue
+		}
+		if _, ok := seen[value]; ok {
+			continue
+		}
+		seen[value] = struct{}{}
+		result = append(result, value)
+	}
+	return result
+}
+
+func displayPath(root string, path string) string {
+	if rel, err := filepath.Rel(root, path); err == nil && rel != "." && !strings.HasPrefix(filepath.ToSlash(rel), "../") {
+		return filepath.ToSlash(rel)
+	}
+	return filepath.ToSlash(filepath.Join("external-input", filepath.Base(path)))
+}
+
 func helpResult(start time.Time) CommandResult {
 	return passResult("help", "help", "relia command surface", start, map[string]any{
 		"primary_commands": primaryCommands,
@@ -399,6 +1408,9 @@ func notImplementedResult(command string, start time.Time) CommandResult {
 func errorResult(command string, mode string, commandErr *CommandError, start time.Time) CommandResult {
 	result := baseResult(command, mode, "error", commandErr.ExitCode, start, nil)
 	result.Errors = append(result.Errors, *commandErr)
+	if commandErr.ExitCode == ExitRedactionSafety {
+		result.RedactionStatus = "failed_closed"
+	}
 	return result
 }
 
@@ -475,6 +1487,16 @@ func redactionSafetyError(message string, ref string) *CommandError {
 		Message:     message,
 		ExitCode:    ExitRedactionSafety,
 		Remediation: "Keep local-only privacy and fail-closed redaction enabled before persisting or sharing artifacts.",
+		Ref:         ref,
+	}
+}
+
+func provenanceIntegrityError(message string, ref string) *CommandError {
+	return &CommandError{
+		Type:        "provenance_integrity_failed",
+		Message:     message,
+		ExitCode:    ExitProvenanceIntegrity,
+		Remediation: "Provide PR and source evidence URLs before persisting canonical experience records.",
 		Ref:         ref,
 	}
 }

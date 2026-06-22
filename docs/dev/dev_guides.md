@@ -145,6 +145,22 @@ T2 extends the contract layer:
 - `distill.embeddings: local` fails closed with exit `8` until an approved
   model-artifact pull writes the configured local manifest.
 
+T3 adds offline ingestion:
+
+- `relia ingest --input <path>` accepts local JSON, JSON arrays, `{"events":[]}`
+  objects, or JSONL streams of outcome events.
+- Input is recursively redacted and entropy-scanned before any artifact is
+  opened for write. Known token shapes and secret-named fields are redacted;
+  unclassified high-entropy values fail closed with exit `6`.
+- Normalized records use `schemas/experience-record.schema.json` and are
+  idempotently upserted into monthly `.relia/experiences/YYYY-MM.jsonl` shards.
+- Each persisted experience requires a PR number and at least one
+  `https://github.com/` provenance URL. Missing or invalid provenance fails with
+  exit `9`.
+- `attribution.uncertain: exclude` remains the default; uncertain events are
+  skipped instead of persisted, while explicit human and agent outcomes can both
+  become rule evidence.
+
 ## Structured Data, Proof, Budgets, And Redaction
 
 - PR, check-run, experience, memory, MCP, assessment, report, and config data

@@ -41,6 +41,15 @@ creates the directory skeleton, but no generated experience, report, model, or
 provider artifact is bundled in source. Local embedding refinement remains
 blocked until `relia models pull` records the approved model manifest.
 
+T3 makes `.relia/experiences/YYYY-MM.jsonl` the local generated store for
+canonical experience records. The state owner remains `cmd/relia`; feedback
+sources are ingest unit tests, command-result envelopes, `make prepush-full`,
+and Factory task-run evidence. Redaction and entropy scanning run before shard
+writes, and missing PR or URL provenance fails with exit `9`. Rollback is safe
+deletion of generated `.relia/experiences` shards followed by a repeat
+`relia ingest --input <path>` run, because the source of truth remains the
+input event stream or future GitHub history.
+
 ## Systems Thinking Map
 
 - State lives in repo-local config, generated artifacts, source files, and Factory evidence.

@@ -1,0 +1,39 @@
+{
+  "artifact_type": "work_proof_marker",
+  "schema_version": "1.0",
+  "task_id": "T3",
+  "status": "implemented",
+  "implementation_performed": true,
+  "objective": "Implement PRD-defined input ingestion, attribution, normalization, redaction, persistence, and provenance capture.",
+  "changed_paths": [
+    "README.md",
+    "cmd/relia/main.go",
+    "cmd/relia/main_test.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/dev/dev_guides.md",
+    ".factory/artifacts/task-runs/T3/work-proof-marker.json",
+    ".factory/artifacts/task-runs/T3/validation-report.json",
+    ".factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json"
+  ],
+  "implemented_behaviors": [
+    "relia ingest --input accepts local JSON, JSON arrays, {\"events\": []} objects, and JSONL outcome streams.",
+    "Ingested events are recursively redacted and entropy-scanned before any experience shard is opened for write.",
+    "Known token shapes and secret-named fields are redacted in persisted canonical records.",
+    "Unclassified high-entropy values fail closed with exit 6 and do not create or update experience shards.",
+    "Canonical experience records are normalized to schemas/experience-record.schema.json shape and upserted into .relia/experiences/YYYY-MM.jsonl.",
+    "Each persisted experience requires a PR number and at least one https://github.com/ provenance URL; missing provenance exits 9.",
+    "Attribution is captured explicitly or inferred from configured PR labels, coauthor trailers, or agent authors; uncertain attribution is skipped by default."
+  ],
+  "evidence_refs": [
+    ".factory/artifacts/task-runs/T3/validation-report.json",
+    ".factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json",
+    "cmd/relia/main_test.go",
+    "docs/product/prd.md#2-ingest",
+    "schemas/experience-record.schema.json"
+  ],
+  "factoryd_produced_evidence_not_authored": [
+    "scope_closure_report",
+    "pr_lifecycle_report",
+    "factoryd_run_once_report"
+  ]
+}
