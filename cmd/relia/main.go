@@ -673,7 +673,7 @@ func normalizeExperienceRecord(config yamlDocument, event map[string]any, index 
 	metadata["signature"] = signatureMetadata
 	experienceID := stringField(event, "experience_id")
 	if experienceID == "" {
-		experienceID = fmt.Sprintf("exp_%04d_%s", action.PR, shortHash(outcome.Kind+"|"+action.Commit))
+		experienceID = generatedExperienceID(action, parsedRecordedAt, outcome, signatureMetadata, provenance)
 	}
 	return experienceRecord{
 		ObjectType:      "relia.experience_record",
@@ -692,6 +692,26 @@ func normalizeExperienceRecord(config yamlDocument, event map[string]any, index 
 		RedactionStatus: "applied",
 		Metadata:        metadata,
 	}, false, nil
+}
+
+func generatedExperienceID(action experienceAction, recordedAt time.Time, outcome experienceOutcome, signatureMetadata map[string]any, provenance experienceProvenance) string {
+	provenanceURLs := append([]string(nil), provenance.URLs...)
+	sort.Strings(provenanceURLs)
+	identityParts := []string{
+		strconv.Itoa(action.PR),
+		action.Commit,
+		recordedAt.UTC().Format(time.RFC3339),
+		outcome.Kind,
+		outcome.TerminalState,
+		outcome.Signature.SignatureID,
+		outcome.Signature.ExtractionConfidence,
+		stringFromAny(signatureMetadata["class"]),
+		stringFromAny(signatureMetadata["check_name"]),
+		stringFromAny(signatureMetadata["key"]),
+		stringFromAny(signatureMetadata["message_fingerprint"]),
+	}
+	identityParts = append(identityParts, provenanceURLs...)
+	return fmt.Sprintf("exp_%04d_%s", action.PR, shortHash(strings.Join(identityParts, "\x00")))
 }
 
 func normalizeExperienceRepo(event map[string]any, ref string) (experienceRepo, *CommandError) {

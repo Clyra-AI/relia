@@ -4,26 +4,30 @@
   "task_id": "T3",
   "status": "implemented",
   "implementation_performed": true,
+  "updated_at": "2026-06-22T19:07:24Z",
   "objective": "Implement PRD-defined input ingestion, attribution, normalization, redaction, persistence, and provenance capture.",
+  "repair_task_id": "20260622T182307.849520000Z-relia-T3-repair-2",
   "changed_paths": [
-    "README.md",
     "cmd/relia/main.go",
     "cmd/relia/main_test.go",
-    "docs/architecture/architecture_guides.md",
-    "docs/dev/dev_guides.md",
     ".factory/artifacts/task-runs/T3/work-proof-marker.json",
     ".factory/artifacts/task-runs/T3/validation-report.json",
     ".factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json"
   ],
   "implemented_behaviors": [
-    "relia ingest --input accepts local JSON, JSON arrays, {\"events\": []} objects, and JSONL outcome streams.",
-    "Ingested events are recursively redacted and entropy-scanned before any experience shard is opened for write.",
-    "Known token shapes and secret-named fields are redacted in persisted canonical records.",
-    "Unclassified high-entropy values fail closed with exit 6 and do not create or update experience shards.",
-    "Canonical experience records are normalized to schemas/experience-record.schema.json shape and upserted into .relia/experiences/YYYY-MM.jsonl.",
-    "Each persisted experience requires a PR number and at least one https://github.com/ provenance URL; missing provenance exits 9.",
-    "Attribution is captured explicitly or inferred from configured PR labels, coauthor trailers, or agent authors; uncertain attribution is skipped by default."
+    "Generated experience IDs now include PR, commit, recorded time, outcome kind, terminal state, signature ID, extraction confidence, signature class, check name, signature key, message fingerprint when present, and sorted provenance URLs.",
+    "Same-PR, same-commit, same-outcome records with different check or signature keys no longer overwrite each other during .relia/experiences/YYYY-MM.jsonl upsert.",
+    "Explicit input experience_id values remain authoritative and unchanged."
   ],
+  "review_repair": {
+    "finding": "Include signature fields in generated experience IDs",
+    "status": "implemented",
+    "evidence_refs": [
+      "cmd/relia/main.go",
+      "cmd/relia/main_test.go",
+      ".factory/artifacts/task-runs/T3/validation-report.json"
+    ]
+  },
   "evidence_refs": [
     ".factory/artifacts/task-runs/T3/validation-report.json",
     ".factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json",

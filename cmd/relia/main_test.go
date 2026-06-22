@@ -346,6 +346,75 @@ func TestIngestInfersAttributionAndUpsertsIdempotently(t *testing.T) {
 	}
 }
 
+func TestIngestGeneratedExperienceIDIncludesSignatureIdentity(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	inputPath := filepath.Join(tempDir, "fixtures", "outcomes.json")
+	writeFileForTest(t, inputPath, `[
+  {
+    "repo": "acme/billing-service",
+    "recorded_at": "2026-05-03T12:00:00Z",
+    "pr": 212,
+    "commit": "abc212",
+    "paths": ["packages/billing/invoice.py"],
+    "actor_kind": "agent",
+    "attribution_method": "manual",
+    "outcome_kind": "ci_failure",
+    "terminal_state": "failed",
+    "signature_class": "test_failure",
+    "check_name": "pytest-billing",
+    "signature_key": "tests/test_invoice.py::test_total",
+    "extraction_confidence": "structured",
+    "provenance_urls": ["https://github.com/acme/billing-service/pull/212"]
+  },
+  {
+    "repo": "acme/billing-service",
+    "recorded_at": "2026-05-03T12:05:00Z",
+    "pr": 212,
+    "commit": "abc212",
+    "paths": ["packages/billing/tax.py"],
+    "actor_kind": "agent",
+    "attribution_method": "manual",
+    "outcome_kind": "ci_failure",
+    "terminal_state": "failed",
+    "signature_class": "test_failure",
+    "check_name": "pytest-billing",
+    "signature_key": "tests/test_tax.py::test_rounding",
+    "extraction_confidence": "structured",
+    "provenance_urls": ["https://github.com/acme/billing-service/pull/212"]
+  }
+]`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if got := int(result.Data["experiences_persisted"].(float64)); got != 2 {
+		t.Fatalf("experiences_persisted = %d", got)
+	}
+	content, err := os.ReadFile(filepath.Join(tempDir, ".relia", "experiences", "2026-05.jsonl"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	records := decodeJSONLines(t, string(content))
+	if len(records) != 2 {
+		t.Fatalf("same PR/commit/outcome records should not overwrite each other, got %d:\n%s", len(records), content)
+	}
+	ids := map[string]bool{}
+	for _, record := range records {
+		id, ok := record["experience_id"].(string)
+		if !ok || id == "" {
+			t.Fatalf("record missing generated experience_id: %#v", record)
+		}
+		if ids[id] {
+			t.Fatalf("duplicate generated experience_id %q in records:\n%s", id, content)
+		}
+		ids[id] = true
+	}
+}
+
 func TestIngestSkipsUncertainAttributionByDefault(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
