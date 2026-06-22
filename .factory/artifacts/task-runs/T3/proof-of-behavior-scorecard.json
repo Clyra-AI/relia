@@ -4,55 +4,50 @@
   "schema_version": "1.0",
   "task_id": "T3",
   "status": "pass",
+  "updated_at": "2026-06-22T19:07:24Z",
   "proof_level": "workflow_behavior",
   "scorecard": [
     {
-      "behavior": "Canonical experience persistence",
+      "behavior": "Generated experience IDs preserve distinct evidence",
       "status": "pass",
-      "proof": "TestIngestPersistsCanonicalExperienceWithRedactionAndProvenance asserts a persisted .relia/experiences/YYYY-MM.jsonl record with relia.experience_record shape, attribution, provenance URLs, and redaction_status applied.",
+      "proof": "TestIngestGeneratedExperienceIDIncludesSignatureIdentity first failed because two same-PR/same-commit/same-outcome records with different signature keys collapsed to one shard record, then passed after the fallback ID included signature and event identity fields.",
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        ".factory/artifacts/task-runs/T3/validation-report.json"
+      ]
+    },
+    {
+      "behavior": "Idempotent canonical experience upsert",
+      "status": "pass",
+      "proof": "Existing idempotent ingest coverage remains green, and distinct signature identities now produce distinct generated IDs rather than overwriting records in the monthly shard.",
       "evidence_refs": [
         "cmd/relia/main_test.go",
         ".factory/artifacts/task-runs/T3/validation-report.json"
       ]
     },
     {
-      "behavior": "Capture-time redaction with entropy scanning",
+      "behavior": "Provenance remains bound to persisted records",
       "status": "pass",
-      "proof": "Known GitHub token shapes are redacted before persistence, and TestIngestFailsClosedBeforePersistenceForUnrecognizedSecret verifies unclassified high-entropy input exits 6 without creating a shard.",
+      "proof": "The generated ID identity includes sorted provenance URLs after provenance validation succeeds, while explicit provenance requirements and exit 9 behavior remain covered by existing ingest tests.",
       "evidence_refs": [
         "cmd/relia/main.go",
         "cmd/relia/main_test.go"
       ]
     },
     {
-      "behavior": "Mandatory PR provenance",
+      "behavior": "Capture-time redaction remains before persistence",
       "status": "pass",
-      "proof": "TestIngestRejectsExperienceWithoutProvenance verifies missing provenance exits 9 with a provenance_integrity_failed typed error.",
-      "evidence_refs": [
-        "cmd/relia/main_test.go"
-      ]
-    },
-    {
-      "behavior": "Attribution and normalization",
-      "status": "pass",
-      "proof": "TestIngestInfersAttributionAndUpsertsIdempotently verifies configured PR label attribution, deterministic experience IDs, inferred terminal state, and idempotent shard upsert.",
-      "evidence_refs": [
-        "cmd/relia/main_test.go"
-      ]
-    },
-    {
-      "behavior": "Uncertain attribution default",
-      "status": "pass",
-      "proof": "TestIngestSkipsUncertainAttributionByDefault verifies attribution.uncertain: exclude skips uncertain outcomes instead of persisting them.",
+      "proof": "Full prepush validation kept the existing fail-closed redaction coverage green, including the test that exits 6 without creating a shard for unclassified high-entropy input.",
       "evidence_refs": [
         "cmd/relia/main_test.go",
-        "relia.yaml"
+        ".factory/artifacts/task-runs/T3/validation-report.json"
       ]
     }
   ],
   "commands": [
     {
-      "command": "go test ./... -run TestIngest -count=1",
+      "command": "go test ./cmd/relia -run TestIngestGeneratedExperienceIDIncludesSignatureIdentity -count=1",
       "status": "pass",
       "exit_code": 0
     },
