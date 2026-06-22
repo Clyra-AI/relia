@@ -4,9 +4,9 @@
   "task_id": "T3",
   "status": "implemented",
   "implementation_performed": true,
-  "updated_at": "2026-06-22T19:32:50Z",
+  "updated_at": "2026-06-22T19:47:42Z",
   "objective": "Implement PRD-defined input ingestion, attribution, normalization, redaction, persistence, and provenance capture.",
-  "repair_task_id": "20260622T182307.849520000Z-relia-T3-repair-4",
+  "repair_task_id": "20260622T182307.849520000Z-relia-T3-repair-6",
   "changed_paths": [
     "cmd/relia/main.go",
     "cmd/relia/main_test.go",
@@ -15,16 +15,16 @@
     ".factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json"
   ],
   "implemented_behaviors": [
-    "Plural secret-named fields such as metadata.secrets, tokens, passwords, api_keys, access_tokens, refresh_tokens, private_keys, and client_secrets are redacted before persistence.",
-    "Hash-like fields no longer bypass entropy scanning by key name alone; commit, signature, digest, checksum, and fingerprint fields are entropy-exempt only when their values match expected hash or fingerprint formats.",
-    "Malformed high-entropy values in action.commit fail closed with exit 6 before any .relia/experiences shard is written.",
-    "Existing canonical ingest, provenance, idempotent upsert, and fail-closed redaction behaviors remain covered by the full prepush validation lane."
+    "Mapped attribution.agent_authors list entries with login fields now match actor.login, author.login, actor, and author values for bot-login attribution.",
+    "Missing or invalid attribution.uncertain now defaults to exclude so ambiguous events are skipped instead of persisted.",
+    "Corrupt existing .relia/experiences JSONL shards now return provenance_integrity_failed with exit 9 instead of artifact contract exit 4.",
+    "Focused red-first tests reproduced the three Codex review findings before implementation and passed after repair."
   ],
   "review_repair": {
     "status": "implemented",
     "findings": [
       {
-        "finding": "Redact plural secret fields",
+        "finding": "Read login values from mapped attribution.agent_authors entries for bot-login attribution.",
         "status": "implemented",
         "evidence_refs": [
           "cmd/relia/main.go",
@@ -33,7 +33,16 @@
         ]
       },
       {
-        "finding": "Validate hashes before skipping entropy scans",
+        "finding": "Default missing or invalid attribution.uncertain to exclude.",
+        "status": "implemented",
+        "evidence_refs": [
+          "cmd/relia/main.go",
+          "cmd/relia/main_test.go",
+          ".factory/artifacts/task-runs/T3/validation-report.json"
+        ]
+      },
+      {
+        "finding": "Use exit 9 for corrupt existing experience shards.",
         "status": "implemented",
         "evidence_refs": [
           "cmd/relia/main.go",

@@ -531,6 +531,134 @@ func TestIngestSkipsUncertainAttributionByDefault(t *testing.T) {
 	}
 }
 
+func TestIngestInfersBotLoginFromMappedAgentAuthor(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	replaceInFile(t, filepath.Join(tempDir, "relia.yaml"), "  agent_authors: []", `  agent_authors:
+    - login: acme-claude-bot`)
+	inputPath := filepath.Join(tempDir, "fixtures", "outcomes.json")
+	writeFileForTest(t, inputPath, `[
+  {
+    "repo": "acme/billing-service",
+    "recorded_at": "2026-05-04T12:00:00Z",
+    "pr": 213,
+    "commit": "abc213",
+    "paths": ["packages/billing/invoice.py"],
+    "actor": {"login": "acme-claude-bot"},
+    "outcome_kind": "ci_failure",
+    "terminal_state": "failed",
+    "signature_class": "test_failure",
+    "check_name": "pytest-billing",
+    "signature_key": "tests/test_invoice.py::test_total",
+    "extraction_confidence": "structured",
+    "provenance_urls": ["https://github.com/acme/billing-service/pull/213"]
+  }
+]`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if got := int(result.Data["experiences_agent_attributed"].(float64)); got != 1 {
+		t.Fatalf("experiences_agent_attributed = %d", got)
+	}
+	content, err := os.ReadFile(filepath.Join(tempDir, ".relia", "experiences", "2026-05.jsonl"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	records := decodeJSONLines(t, string(content))
+	attribution := records[0]["attribution"].(map[string]any)
+	if attribution["actor_kind"] != "agent" || attribution["method"] != "bot_login" {
+		t.Fatalf("attribution = %#v", attribution)
+	}
+}
+
+func TestIngestDefaultsMissingOrInvalidUncertainPolicyToExclude(t *testing.T) {
+	for _, tc := range []struct {
+		name        string
+		replacement string
+	}{
+		{name: "missing", replacement: ""},
+		{name: "invalid", replacement: "  uncertain: exlcude\n"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			tempDir := setupContractRepo(t)
+			t.Chdir(tempDir)
+			replaceInFile(t, filepath.Join(tempDir, "relia.yaml"), "  uncertain: exclude\n", tc.replacement)
+			inputPath := filepath.Join(tempDir, "fixtures", "outcomes.json")
+			writeFileForTest(t, inputPath, `[
+  {
+    "repo": "acme/billing-service",
+    "recorded_at": "2026-05-05T12:00:00Z",
+    "pr": 214,
+    "commit": "abc214",
+    "paths": ["packages/billing/invoice.py"],
+    "outcome_kind": "ci_failure",
+    "terminal_state": "failed",
+    "signature_class": "test_failure",
+    "check_name": "pytest-billing",
+    "signature_key": "tests/test_invoice.py::test_total",
+    "extraction_confidence": "structured",
+    "provenance_urls": ["https://github.com/acme/billing-service/pull/214"]
+  }
+]`)
+
+			stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+
+			if code != ExitSuccess {
+				t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+			}
+			result := decodeResult(t, stdout)
+			if got := int(result.Data["experiences_persisted"].(float64)); got != 0 {
+				t.Fatalf("experiences_persisted = %d", got)
+			}
+			if got := int(result.Data["experiences_skipped_uncertain"].(float64)); got != 1 {
+				t.Fatalf("experiences_skipped_uncertain = %d", got)
+			}
+			if _, err := os.Stat(filepath.Join(tempDir, ".relia", "experiences", "2026-05.jsonl")); !errors.Is(err, os.ErrNotExist) {
+				t.Fatalf("uncertain experience should not be persisted: %v", err)
+			}
+		})
+	}
+}
+
+func TestIngestReportsCorruptShardAsProvenanceIntegrity(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, ".relia", "experiences", "2026-05.jsonl"), "{not-json}\n")
+	inputPath := filepath.Join(tempDir, "fixtures", "outcomes.json")
+	writeFileForTest(t, inputPath, `[
+  {
+    "repo": "acme/billing-service",
+    "recorded_at": "2026-05-06T12:00:00Z",
+    "pr": 215,
+    "commit": "abc215",
+    "paths": ["packages/billing/invoice.py"],
+    "actor_kind": "agent",
+    "attribution_method": "manual",
+    "outcome_kind": "ci_failure",
+    "terminal_state": "failed",
+    "signature_class": "test_failure",
+    "check_name": "pytest-billing",
+    "signature_key": "tests/test_invoice.py::test_total",
+    "extraction_confidence": "structured",
+    "provenance_urls": ["https://github.com/acme/billing-service/pull/215"]
+  }
+]`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+
+	if code != ExitProvenanceIntegrity {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "provenance_integrity_failed" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+}
+
 func TestModelsRejectsUnsupportedSubcommand(t *testing.T) {
 	stdout, stderr, code := runForTest(t, []string{"--json", "models"}, false)
 
