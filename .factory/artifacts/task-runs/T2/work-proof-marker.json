@@ -1,0 +1,23 @@
+{
+  "artifact_type": "work_proof_marker",
+  "schema_version": "1.0",
+  "task_id": "T2",
+  "status": "implemented",
+  "implementation_performed": true,
+  "repair_task_id": "20260622T133602.913452000Z-relia-T2-repair-2",
+  "updated_at": "2026-06-22T14:10:29Z",
+  "changed_paths": [
+    ".factory/artifacts/task-runs/T2/validation-report.json",
+    ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+    "cmd/relia/main.go",
+    "cmd/relia/main_test.go"
+  ],
+  "evidence_refs": [
+    ".factory/artifacts/task-runs/T2/validation-report.json",
+    "cmd/relia/main.go",
+    "cmd/relia/main_test.go",
+    "schemas/memory-rule.schema.json",
+    "docs/product/prd.md"
+  ],
+  "summary": "Repaired Codex review feedback by preserving YAML list-map context for documented scoped config and memory-rule provenance, and by recording nested container fields inside list-map items for downstream validators."
+}

@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Clyra-AI/relia/schemas/recurrence-report.schema.json",
+  "title": "Relia Recurrence Report",
+  "type": "object",
+  "additionalProperties": false,
+  "x-relia-exit-codes": [2, 4, 9],
+  "required": [
+    "object_type",
+    "schema_version",
+    "report_id",
+    "window",
+    "headline_err",
+    "confirmed_recurrences",
+    "possible_recurrences",
+    "metadata"
+  ],
+  "properties": {
+    "object_type": {
+      "const": "relia.recurrence_report"
+    },
+    "schema_version": {
+      "const": "1.0"
+    },
+    "report_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "window": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start", "end"],
+      "properties": {
+        "start": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "headline_err": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "confirmed_recurrences": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/recurrence_pair"
+      }
+    },
+    "possible_recurrences": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/recurrence_pair"
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "recurrence_pair": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["current_experience_id", "prior_experience_id", "confidence"],
+      "properties": {
+        "current_experience_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "prior_experience_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "confidence": {
+          "enum": ["confirmed", "possible"]
+        }
+      }
+    }
+  }
+}

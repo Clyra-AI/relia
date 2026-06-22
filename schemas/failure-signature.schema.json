@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Clyra-AI/relia/schemas/failure-signature.schema.json",
+  "title": "Relia Failure Signature",
+  "type": "object",
+  "additionalProperties": false,
+  "x-relia-exit-codes": [2, 4, 9],
+  "required": [
+    "object_type",
+    "schema_version",
+    "signature_id",
+    "class",
+    "check_name",
+    "key",
+    "extraction_method",
+    "confidence",
+    "metadata"
+  ],
+  "properties": {
+    "object_type": {
+      "const": "relia.failure_signature"
+    },
+    "schema_version": {
+      "const": "1.0"
+    },
+    "signature_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "class": {
+      "enum": ["test_failure", "build_failure", "lint_failure", "review_correction", "revert", "unknown"]
+    },
+    "check_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "message_fingerprint": {
+      "type": "string"
+    },
+    "extraction_method": {
+      "enum": ["structured_check_run", "log_parse", "review_marker", "revert_metadata"]
+    },
+    "confidence": {
+      "enum": ["high", "medium", "low"]
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

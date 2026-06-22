@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Clyra-AI/relia/schemas/coverage-map.schema.json",
+  "title": "Relia Coverage Map",
+  "type": "object",
+  "additionalProperties": false,
+  "x-relia-exit-codes": [2, 4, 9],
+  "required": [
+    "object_type",
+    "schema_version",
+    "repo",
+    "generated_at",
+    "entries",
+    "metadata"
+  ],
+  "properties": {
+    "object_type": {
+      "const": "relia.coverage_map"
+    },
+    "schema_version": {
+      "const": "1.0"
+    },
+    "repo": {
+      "type": "string",
+      "minLength": 1
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path_prefix", "coverage"],
+        "properties": {
+          "path_prefix": {
+            "type": "string",
+            "minLength": 1
+          },
+          "coverage": {
+            "enum": ["covered_clean", "covered_risky", "no_coverage"]
+          }
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

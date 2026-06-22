@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Clyra-AI/relia/schemas/risk-assessment.schema.json",
+  "title": "Relia Risk Assessment",
+  "type": "object",
+  "additionalProperties": false,
+  "x-relia-exit-codes": [2, 4, 5, 9],
+  "required": [
+    "object_type",
+    "schema_version",
+    "assessment_id",
+    "risk_level",
+    "matches",
+    "citations",
+    "metadata"
+  ],
+  "properties": {
+    "object_type": {
+      "const": "relia.risk_assessment"
+    },
+    "schema_version": {
+      "const": "1.0"
+    },
+    "assessment_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "risk_level": {
+      "enum": ["match_high", "match_medium", "no_coverage", "covered_clean"]
+    },
+    "matches": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["rule_id", "confidence"],
+        "properties": {
+          "rule_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        }
+      }
+    },
+    "citations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

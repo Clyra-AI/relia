@@ -16,7 +16,8 @@
     "artifacts",
     "evidence_refs",
     "duration_ms",
-    "redaction_status"
+    "redaction_status",
+    "metadata"
   ],
   "properties": {
     "object_type": {
@@ -74,11 +75,32 @@
     "redaction_status": {
       "enum": ["not_applicable", "applied", "failed_closed"]
     },
+    "metadata": {
+      "$ref": "#/$defs/metadata"
+    },
     "data": {
       "type": "object"
     }
   },
   "$defs": {
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["relia_version", "schema_ref", "schema_version"],
+      "properties": {
+        "relia_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "schema_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "schema_version": {
+          "const": "1.0"
+        }
+      }
+    },
     "finding": {
       "type": "object",
       "additionalProperties": false,

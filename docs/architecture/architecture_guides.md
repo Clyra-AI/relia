@@ -11,16 +11,35 @@
 
 ## CLI Result Boundary
 
-The T1 CLI skeleton owns the first public command-result contract. Command state
-returns through `relia.command_result` JSON, validated by
-`schemas/command-result.schema.json`, with examples in
-`examples/command-results/exit-code-examples.json`. The state owner is the CLI
-package under `cmd/relia`; feedback sources are unit tests, `make
-prepush-full`, Factory task-run evidence, and CI checks. The blast radius is
-limited to local command output, `relia.yaml` bootstrap, and repo operating-pack
-validation. Rollback is deletion of the T1 schema/examples and restoration of
-the previous command wrapper, but that would also remove the agent-native CLI
-baseline required by `docs/dev/dev_guides.md#agent-native-cli-policy`.
+The T1/T2 CLI skeleton owns the first public command-result and Phase 0
+contract surface. Command state returns through `relia.command_result` JSON,
+validated by `schemas/command-result.schema.json`, with examples in
+`examples/command-results/exit-code-examples.json`. The envelope includes
+`metadata` so downstream automation can bind output to the Relia version and
+schema reference.
+
+The state owner is the CLI package under `cmd/relia`; feedback sources are unit
+tests, `make prepush-full`, Factory task-run evidence, and CI checks. The blast
+radius is limited to local command output, `relia.yaml` bootstrap, schema
+contracts under `schemas/`, local memory rule validation, and repo
+operating-pack validation. Rollback is deletion of the T1/T2 schema/examples
+and restoration of the previous command wrapper, but that would also remove the
+agent-native CLI baseline required by
+`docs/dev/dev_guides.md#agent-native-cli-policy`.
+
+## Configuration And Artifact Boundary
+
+`relia.yaml` is the repo-local source of truth for bootstrap configuration. T2
+locks the MVP defaults to local-only privacy, private share scope, fail-closed
+redaction, signature-only embeddings, no committed experience shards, advisory
+serving, and disabled recurrence gates. `relia check` validates those defaults
+offline and maps failures to stable command-model exit codes.
+
+Generated stores live under `.relia/`; reviewed user-owned memory lives under
+`memory/`; executable artifact schemas live under `schemas/`. `relia init`
+creates the directory skeleton, but no generated experience, report, model, or
+provider artifact is bundled in source. Local embedding refinement remains
+blocked until `relia models pull` records the approved model manifest.
 
 ## Systems Thinking Map
 

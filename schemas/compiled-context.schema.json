@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Clyra-AI/relia/schemas/compiled-context.schema.json",
+  "title": "Relia Compiled Context",
+  "type": "object",
+  "additionalProperties": false,
+  "x-relia-exit-codes": [2, 4, 9],
+  "required": [
+    "object_type",
+    "schema_version",
+    "context_id",
+    "target",
+    "rules",
+    "metadata"
+  ],
+  "properties": {
+    "object_type": {
+      "const": "relia.compiled_context"
+    },
+    "schema_version": {
+      "const": "1.0"
+    },
+    "context_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target": {
+      "enum": ["AGENTS.md", "CLAUDE.md"]
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["rule_id", "status", "citation_count"],
+        "properties": {
+          "rule_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "enum": ["active"]
+          },
+          "citation_count": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

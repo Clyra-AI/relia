@@ -2,11 +2,14 @@ package main
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"testing"
 )
 
@@ -37,6 +40,9 @@ func TestJSONFlagEmitsStableEnvelope(t *testing.T) {
 	}
 	if result.RedactionStatus == "" {
 		t.Fatal("expected redaction_status")
+	}
+	if result.Metadata["schema_ref"] != "schemas/command-result.schema.json" {
+		t.Fatalf("metadata = %#v", result.Metadata)
 	}
 }
 
@@ -186,9 +192,14 @@ func TestInitCreatesBaselineConfig(t *testing.T) {
 	if err != nil {
 		t.Fatalf("expected relia.yaml to be created: %v", err)
 	}
-	for _, token := range []string{"version: 1", "embeddings: signature", "advisory_only: true"} {
+	for _, token := range []string{"version: 1", "schema_version: \"1.0\"", "local_only: true", "fail_closed: true", "embeddings: signature", "advisory_only: true"} {
 		if !bytes.Contains(content, []byte(token)) {
 			t.Fatalf("relia.yaml missing %q:\n%s", token, content)
+		}
+	}
+	for _, dir := range artifactSkeletonDirs {
+		if info, err := os.Stat(filepath.Join(tempDir, dir)); err != nil || !info.IsDir() {
+			t.Fatalf("expected artifact skeleton dir %s: info=%#v err=%v", dir, info, err)
 		}
 	}
 }
@@ -314,6 +325,9 @@ func TestCommandResultExitCodeExamplesCoverStableCodes(t *testing.T) {
 		if example.SchemaVersion != "1.0" {
 			t.Fatalf("example schema_version = %q", example.SchemaVersion)
 		}
+		if example.Metadata["schema_version"] != "1.0" {
+			t.Fatalf("example metadata = %#v", example.Metadata)
+		}
 		if example.ExitCode < ExitSuccess || example.ExitCode > ExitProvenanceIntegrity {
 			t.Fatalf("unexpected exit code in example: %d", example.ExitCode)
 		}
@@ -328,6 +342,586 @@ func TestCommandResultExitCodeExamplesCoverStableCodes(t *testing.T) {
 		if codes[i] != want[i] {
 			t.Fatalf("codes = %v, want %v", codes, want)
 		}
+	}
+}
+
+func TestPhase0SchemasDeclareMetadata(t *testing.T) {
+	root := findRepoRootForTest(t)
+	if commandErr := validateSchemaContracts(root); commandErr != nil {
+		t.Fatalf("schema contracts failed: %#v", commandErr)
+	}
+}
+
+func TestCheckReportsPhase0ContractRefs(t *testing.T) {
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if got, ok := result.Data["schema_contracts"].(float64); !ok || int(got) != len(requiredSchemaFiles) {
+		t.Fatalf("schema_contracts = %#v, want %d", result.Data["schema_contracts"], len(requiredSchemaFiles))
+	}
+	if result.Data["privacy_default"] != "local_only" {
+		t.Fatalf("privacy_default = %#v", result.Data["privacy_default"])
+	}
+	if len(result.Artifacts) <= len(requiredSchemaFiles) {
+		t.Fatalf("expected schema artifacts in result: %#v", result.Artifacts)
+	}
+}
+
+func TestCheckRejectsUnsafePrivacyConfig(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	replaceInFile(t, filepath.Join(tempDir, "relia.yaml"), "send_code: false", "send_code: true")
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitValidation {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "artifact_contract_validation_failed" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+}
+
+func TestCheckFailsClosedForDisabledRedaction(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	replaceInFile(t, filepath.Join(tempDir, "relia.yaml"), "fail_closed: true", "fail_closed: false")
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitRedactionSafety {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "redaction_safety_failed" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+}
+
+func TestCheckRequiresLocalModelManifest(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	replaceInFile(t, filepath.Join(tempDir, "relia.yaml"), "embeddings: signature", "embeddings: local")
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitDependency {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "dependency_error" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+}
+
+func TestCheckRejectsIncompleteLocalModelManifest(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	replaceInFile(t, filepath.Join(tempDir, "relia.yaml"), "embeddings: signature", "embeddings: local")
+	writeFileForTest(t, filepath.Join(tempDir, ".relia", "models", "manifest.json"), `{
+  "model_id": "text-embedding-test"
+}
+`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitDependency {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "dependency_error" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+	if !strings.Contains(result.Errors[0].Message, "missing required field") {
+		t.Fatalf("error message = %q", result.Errors[0].Message)
+	}
+}
+
+func TestCheckValidatesLocalModelManifestDigest(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	replaceInFile(t, filepath.Join(tempDir, "relia.yaml"), "embeddings: signature", "embeddings: local")
+	artifactContent := []byte("deterministic local model artifact")
+	artifactRel := filepath.Join(".relia", "models", "artifact.bin")
+	writeFileForTest(t, filepath.Join(tempDir, artifactRel), string(artifactContent))
+	digest := sha256.Sum256(artifactContent)
+	writeFileForTest(t, filepath.Join(tempDir, ".relia", "models", "manifest.json"), fmt.Sprintf(`{
+  "model_id": "text-embedding-test",
+  "version": "2026-06-22",
+  "source_url": "https://example.test/model.bin",
+  "license": "Apache-2.0",
+  "digest": "%x",
+  "cache_path": "%s",
+  "update_policy": "manual",
+  "rollback_policy": "delete artifact and restore signature embeddings"
+}
+`, digest, filepath.ToSlash(artifactRel)))
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Status != "pass" {
+		t.Fatalf("status = %q", result.Status)
+	}
+}
+
+func TestCheckRejectsEscapedLocalModelCachePath(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	replaceInFile(t, filepath.Join(tempDir, "relia.yaml"), "embeddings: signature", "embeddings: local")
+	artifactContent := []byte("outside model artifact")
+	outsideRel := "outside-model.bin"
+	writeFileForTest(t, filepath.Join(tempDir, outsideRel), string(artifactContent))
+	digest := sha256.Sum256(artifactContent)
+	writeFileForTest(t, filepath.Join(tempDir, ".relia", "models", "manifest.json"), fmt.Sprintf(`{
+  "model_id": "text-embedding-test",
+  "version": "2026-06-22",
+  "source_url": "https://example.test/model.bin",
+  "license": "Apache-2.0",
+  "digest": "%x",
+  "cache_path": "../%s",
+  "update_policy": "manual",
+  "rollback_policy": "delete artifact and restore signature embeddings"
+}
+`, digest, outsideRel))
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitDependency {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "dependency_error" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+	if !strings.Contains(result.Errors[0].Message, "inside the repository") {
+		t.Fatalf("error message = %q", result.Errors[0].Message)
+	}
+}
+
+func TestCheckRejectsRuleWithoutProvenance(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	rulesDir := filepath.Join(tempDir, "memory", "rules")
+	if err := os.MkdirAll(rulesDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	rule := `object_type: relia.memory_rule
+schema_version: "1.0"
+id: avoid-direct-time
+kind: avoid
+status: active
+statement: >
+  Do not mock time directly.
+scope:
+  paths:
+    - tests/
+confidence: 0.8
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_001
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`
+	if err := os.WriteFile(filepath.Join(rulesDir, "avoid-direct-time.yaml"), []byte(rule), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitValidation {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "artifact_contract_validation_failed" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+	if !strings.Contains(result.Errors[0].Message, "provenance") {
+		t.Fatalf("error message = %q", result.Errors[0].Message)
+	}
+}
+
+func TestCheckAcceptsDocumentedScopedConfigAndMemoryRuleListMaps(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	replaceInFile(t, filepath.Join(tempDir, "relia.yaml"), "  scopes: []", `  scopes:
+    - prefix: packages/billing/
+      checks: [pytest-billing]`)
+
+	rulesDir := filepath.Join(tempDir, "memory", "rules")
+	if err := os.MkdirAll(rulesDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	rule := `object_type: relia.memory_rule
+schema_version: "1.0"
+id: avoid-direct-time
+kind: avoid
+status: active
+statement: >
+  Do not mock time directly.
+scope:
+  paths:
+    - packages/billing/
+  signals:
+    - pytest-billing
+confidence: 0.8
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_001
+provenance:
+  - pr: 142
+    outcome: revert
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`
+	if err := os.WriteFile(filepath.Join(rulesDir, "avoid-direct-time.yaml"), []byte(rule), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Status != "pass" {
+		t.Fatalf("status = %q", result.Status)
+	}
+}
+
+func TestCheckRejectsPlaybookRuleWithoutPositiveEvidence(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	rulesDir := filepath.Join(tempDir, "memory", "rules")
+	if err := os.MkdirAll(rulesDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	rule := `object_type: relia.memory_rule
+schema_version: "1.0"
+id: playbook-freeze-time
+kind: playbook
+status: active
+statement: >
+  Use the freeze-time fixture for billing rollover tests.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.8
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_held_candidate
+provenance:
+  - pr: 210
+    outcome: ci_failure
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`
+	if err := os.WriteFile(filepath.Join(rulesDir, "playbook-freeze-time.yaml"), []byte(rule), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitValidation {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "artifact_contract_validation_failed" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+	if !strings.Contains(result.Errors[0].Message, "fix_held or merged_clean") {
+		t.Fatalf("error message = %q", result.Errors[0].Message)
+	}
+}
+
+func TestCheckRejectsActiveUnacceptedMemoryRule(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	rulesDir := filepath.Join(tempDir, "memory", "rules")
+	if err := os.MkdirAll(rulesDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	rule := `object_type: relia.memory_rule
+schema_version: "1.0"
+id: avoid-direct-time
+kind: avoid
+status: active
+statement: >
+  Do not mock time directly.
+scope:
+  paths:
+    - tests/
+confidence: 0.8
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_001
+provenance:
+  - pr: 142
+    outcome: revert
+review:
+  label: suggested
+  statement_origin: human_authored
+metadata: {}
+`
+	if err := os.WriteFile(filepath.Join(rulesDir, "avoid-direct-time.yaml"), []byte(rule), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitValidation {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if !strings.Contains(result.Errors[0].Message, "review.label must be accepted") {
+		t.Fatalf("error message = %q", result.Errors[0].Message)
+	}
+}
+
+func TestCheckRejectsMemoryRuleWithoutConcreteScope(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	rulesDir := filepath.Join(tempDir, "memory", "rules")
+	if err := os.MkdirAll(rulesDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	rule := `object_type: relia.memory_rule
+schema_version: "1.0"
+id: avoid-direct-time
+kind: avoid
+status: active
+statement: >
+  Do not mock time directly.
+scope: {}
+confidence: 0.8
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_001
+provenance:
+  - pr: 142
+    outcome: revert
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`
+	if err := os.WriteFile(filepath.Join(rulesDir, "avoid-direct-time.yaml"), []byte(rule), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitValidation {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if !strings.Contains(result.Errors[0].Message, "scope path or signal") {
+		t.Fatalf("error message = %q", result.Errors[0].Message)
+	}
+}
+
+func TestCheckAcceptsPlaybookRuleWithCleanMergeEvidence(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	rulesDir := filepath.Join(tempDir, "memory", "rules")
+	if err := os.MkdirAll(rulesDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	rule := `object_type: relia.memory_rule
+schema_version: "1.0"
+id: playbook-freeze-time
+kind: playbook
+status: active
+statement: >
+  Use the freeze-time fixture for billing rollover tests.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.8
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_clean_merge
+provenance:
+  - pr: 210
+    outcome: merged_clean
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`
+	if err := os.WriteFile(filepath.Join(rulesDir, "playbook-freeze-time.yaml"), []byte(rule), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Status != "pass" {
+		t.Fatalf("status = %q", result.Status)
+	}
+}
+
+func TestYAMLParserRecordsNestedFieldsInListMapItems(t *testing.T) {
+	document, err := parseYAMLDocument(`repo:
+  scopes:
+    - prefix: packages/billing/
+      checks:
+        - pytest-billing
+provenance:
+  -
+    pr: 141
+    outcome: ci_failure
+  - pr: 142
+    outcome: revert
+`)
+	if err != nil {
+		t.Fatalf("parseYAMLDocument returned error: %v", err)
+	}
+
+	scopes := document.ListMaps["repo.scopes"]
+	if len(scopes) != 1 {
+		t.Fatalf("repo.scopes list maps = %#v", scopes)
+	}
+	if got := scopes[0]["prefix"].Value; got != "packages/billing/" {
+		t.Fatalf("scope prefix = %q", got)
+	}
+	if _, ok := scopes[0]["checks"]; !ok {
+		t.Fatalf("scope list-map fields = %#v, want checks container", scopes[0])
+	}
+	scopeChecks := document.Lists["repo.scopes[0].checks"]
+	if len(scopeChecks) != 1 || scopeChecks[0].Value != "pytest-billing" {
+		t.Fatalf("scope checks = %#v", scopeChecks)
+	}
+
+	provenance := document.ListMaps["provenance"]
+	if len(provenance) != 2 {
+		t.Fatalf("provenance list maps = %#v", provenance)
+	}
+	if got := provenance[0]["pr"].Value; got != "141" {
+		t.Fatalf("provenance pr = %q", got)
+	}
+	if got := provenance[0]["outcome"].Value; got != "ci_failure" {
+		t.Fatalf("provenance outcome = %q", got)
+	}
+	if got := provenance[1]["pr"].Value; got != "142" {
+		t.Fatalf("provenance pr = %q", got)
+	}
+	if got := provenance[1]["outcome"].Value; got != "revert" {
+		t.Fatalf("provenance outcome = %q", got)
+	}
+}
+
+func TestCheckRejectsMemoryRuleMissingSchemaRequiredFields(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	rulesDir := filepath.Join(tempDir, "memory", "rules")
+	if err := os.MkdirAll(rulesDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	rule := `schema_version: "1.0"
+id: avoid-direct-time
+kind: avoid
+status: active
+statement: >
+  Do not mock time directly.
+confidence: 0.8
+evidence:
+  experiences:
+    - exp_001
+provenance:
+  - pr: 142
+    outcome: revert
+review:
+  label: accepted
+`
+	if err := os.WriteFile(filepath.Join(rulesDir, "avoid-direct-time.yaml"), []byte(rule), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitValidation {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "artifact_contract_validation_failed" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+	if !strings.Contains(result.Errors[0].Message, "object_type") {
+		t.Fatalf("error message = %q", result.Errors[0].Message)
+	}
+}
+
+func TestCheckRejectsScalarMemoryRuleProvenanceEntry(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	rulesDir := filepath.Join(tempDir, "memory", "rules")
+	if err := os.MkdirAll(rulesDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	rule := `object_type: relia.memory_rule
+schema_version: "1.0"
+id: avoid-direct-time
+kind: avoid
+status: active
+statement: >
+  Do not mock time directly.
+scope:
+  paths:
+    - tests/
+confidence: 0.8
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_001
+provenance:
+  - pr-142
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`
+	if err := os.WriteFile(filepath.Join(rulesDir, "avoid-direct-time.yaml"), []byte(rule), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitValidation {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if !strings.Contains(result.Errors[0].Message, "provenance") {
+		t.Fatalf("error message = %q", result.Errors[0].Message)
 	}
 }
 
@@ -362,4 +956,66 @@ func findRepoRootForTest(t *testing.T) string {
 		t.Fatalf("could not find repo root from %s", wd)
 	}
 	return root
+}
+
+func setupContractRepo(t *testing.T) string {
+	t.Helper()
+
+	sourceRoot := findRepoRootForTest(t)
+	tempDir := t.TempDir()
+	files := map[string]string{
+		"AGENTS.md":              "repo contract\n",
+		"WORKFLOW.md":            "workflow contract\n",
+		"README.md":              "readme\n",
+		"Makefile":               "prepush-full:\n",
+		".tool-versions":         "golang 1.26.4\n",
+		"go.mod":                 "module github.com/Clyra-AI/relia\n\ngo 1.26.4\n",
+		"relia.yaml":             defaultConfigYAML(),
+		"docs/product/prd.md":    "prd\n",
+		"docs/dev/dev_guides.md": "dev guides\n",
+		"docs/architecture/architecture_guides.md": "architecture guides\n",
+		".github/required-checks.json":             "{}\n",
+		".github/workflows/validate.yml":           "name: validate\n",
+		".github/workflows/codeql.yml":             "name: codeql\n",
+		".factory/factoryd.example.json":           "{}\n",
+		".factory/factoryd.autoship.example.json":  "{}\n",
+	}
+	for rel, content := range files {
+		writeFileForTest(t, filepath.Join(tempDir, rel), content)
+	}
+	for _, rel := range requiredSchemaFiles {
+		content, err := os.ReadFile(filepath.Join(sourceRoot, rel))
+		if err != nil {
+			t.Fatal(err)
+		}
+		writeFileForTest(t, filepath.Join(tempDir, rel), string(content))
+	}
+	return tempDir
+}
+
+func writeFileForTest(t *testing.T, path string, content string) {
+	t.Helper()
+
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func replaceInFile(t *testing.T, path string, old string, new string) {
+	t.Helper()
+
+	content, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	next := strings.Replace(string(content), old, new, 1)
+	if next == string(content) {
+		t.Fatalf("expected to replace %q in %s", old, path)
+	}
+	if err := os.WriteFile(path, []byte(next), 0o644); err != nil {
+		t.Fatal(err)
+	}
 }
