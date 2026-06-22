@@ -1032,17 +1032,20 @@ func redactStringValue(value string, fieldPath []string, ref string) (string, *C
 func isSecretField(key string) bool {
 	normalized := strings.ToLower(strings.ReplaceAll(strings.ReplaceAll(key, "-", "_"), " ", "_"))
 	switch normalized {
-	case "token", "secret", "password", "credential", "credentials", "api_key", "access_token", "refresh_token", "private_key", "client_secret":
+	case "token", "tokens", "secret", "secrets", "password", "passwords", "credential", "credentials", "api_key", "api_keys", "access_token", "access_tokens", "refresh_token", "refresh_tokens", "private_key", "private_keys", "client_secret", "client_secrets":
 		return true
 	}
 	return strings.HasSuffix(normalized, "_token") ||
+		strings.HasSuffix(normalized, "_tokens") ||
 		strings.HasSuffix(normalized, "_secret") ||
+		strings.HasSuffix(normalized, "_secrets") ||
 		strings.HasSuffix(normalized, "_password") ||
+		strings.HasSuffix(normalized, "_passwords") ||
 		strings.Contains(normalized, "credential")
 }
 
 func unsafeEntropyToken(value string, fieldPath []string) string {
-	if entropySafeFieldPath(fieldPath) {
+	if entropySafeFieldValue(fieldPath, value) {
 		return ""
 	}
 	candidates := strings.FieldsFunc(value, func(r rune) bool {
@@ -1063,18 +1066,67 @@ func unsafeEntropyToken(value string, fieldPath []string) string {
 	return ""
 }
 
-func entropySafeFieldPath(fieldPath []string) bool {
+func entropySafeFieldValue(fieldPath []string, value string) bool {
 	for _, part := range fieldPath {
 		normalized := strings.ToLower(part)
 		switch normalized {
-		case "commit", "commits", "diff_fingerprint", "signature_id", "message_fingerprint", "digest", "checksum":
-			return true
+		case "commit", "commits":
+			return validGitCommitHash(value)
+		case "signature_id":
+			return validSignatureIDValue(value)
+		case "diff_fingerprint", "message_fingerprint", "digest", "checksum":
+			return validHashLikeValue(value)
 		}
 		if strings.Contains(normalized, "fingerprint") {
-			return true
+			return validHashLikeValue(value)
 		}
 	}
 	return false
+}
+
+func validGitCommitHash(value string) bool {
+	return isHexString(strings.TrimSpace(value), 6, 64)
+}
+
+func validSignatureIDValue(value string) bool {
+	value = strings.TrimSpace(value)
+	if strings.HasPrefix(value, "sig_") {
+		return isHexString(strings.TrimPrefix(value, "sig_"), 6, 64)
+	}
+	return validHashLikeValue(value)
+}
+
+func validHashLikeValue(value string) bool {
+	value = strings.TrimSpace(value)
+	if isHexString(value, 6, 128) {
+		return true
+	}
+	for prefix, length := range map[string]int{
+		"sha1:":   40,
+		"sha256:": 64,
+		"sha512:": 128,
+	} {
+		if strings.HasPrefix(strings.ToLower(value), prefix) {
+			return isHexString(value[len(prefix):], length, length)
+		}
+	}
+	return false
+}
+
+func isHexString(value string, minLength int, maxLength int) bool {
+	if len(value) < minLength || len(value) > maxLength {
+		return false
+	}
+	for _, r := range value {
+		switch {
+		case r >= '0' && r <= '9':
+		case r >= 'a' && r <= 'f':
+		case r >= 'A' && r <= 'F':
+		default:
+			return false
+		}
+	}
+	return true
 }
 
 func hasMixedSecretAlphabet(value string) bool {
