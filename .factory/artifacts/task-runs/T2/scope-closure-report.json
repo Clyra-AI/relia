@@ -1,4 +1,6 @@
 {
+  "artifact_type": "scope_closure_report",
+  "schema_version": "0.1",
   "task_id": "T2",
   "work_item_id": "relia-mvp-t2",
   "mission_contract_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T2",
