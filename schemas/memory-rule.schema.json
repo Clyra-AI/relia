@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Clyra-AI/relia/schemas/memory-rule.schema.json",
+  "title": "Relia Memory Rule",
+  "type": "object",
+  "additionalProperties": false,
+  "x-relia-exit-codes": [2, 4, 9],
+  "required": [
+    "object_type",
+    "schema_version",
+    "id",
+    "kind",
+    "status",
+    "statement",
+    "scope",
+    "confidence",
+    "evidence",
+    "provenance",
+    "review",
+    "metadata"
+  ],
+  "properties": {
+    "object_type": {
+      "const": "relia.memory_rule"
+    },
+    "schema_version": {
+      "const": "1.0"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "kind": {
+      "enum": ["avoid", "playbook"]
+    },
+    "status": {
+      "enum": ["candidate", "active", "stale", "contradicted", "retired"]
+    },
+    "statement": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "paths": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "signals": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["count", "contradictions", "experiences"],
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "contradictions": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "experiences": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "provenance": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["pr", "outcome"],
+        "properties": {
+          "pr": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "outcome": {
+            "enum": ["ci_failure", "revert", "review_correction", "fix_held", "merged_clean"]
+          }
+        }
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label", "statement_origin"],
+      "properties": {
+        "label": {
+          "enum": ["accepted", "suggested", "needs_user_input"]
+        },
+        "statement_origin": {
+          "enum": ["llm_drafted", "cluster_summary", "human_authored"]
+        }
+      }
+    },
+    "source_repo": {
+      "type": "string"
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

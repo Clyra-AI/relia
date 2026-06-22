@@ -1,5 +1,11 @@
 version: 1
 
+artifacts:
+  schema_version: "1.0"
+  relia_version: "0.0.0-dev"
+  root: .relia
+  commit_experiences: false
+
 repo:
   provider: github
   remote: origin
@@ -18,8 +24,27 @@ outcomes:
   checks:
     required: []
 
+privacy:
+  local_only: true
+  send_code: false
+  send_diffs: false
+  send_logs: false
+  send_experience_records: false
+  share_scope: private
+
+redaction:
+  schema_version: "1.0"
+  entropy_scan: true
+  fail_closed: true
+  standard_token_shapes: true
+
 distill:
   embeddings: signature
+  provider: none
+  review_required: true
+
+models:
+  local_manifest: .relia/models/manifest.json
 
 serve:
   advisory_only: true

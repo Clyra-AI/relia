@@ -17,12 +17,15 @@ FACTORY_REPO=/path/to/factory factoryd run --config .factory/factoryd.autoship.e
 
 ## CLI Baseline
 
-The T1 command surface establishes the lifecycle skeleton and agent-native
-output contract:
+The T1/T2 command surface establishes the lifecycle skeleton, configuration
+contract, and agent-native output contract:
 
 - `relia init` creates `relia.yaml` if it is missing and is idempotent when the
-  file already exists.
-- `relia check` validates the repo-local operating pack baseline.
+  file already exists. It also creates the repo-native artifact skeleton under
+  `.relia/` and `memory/`.
+- `relia check` validates the repo-local operating pack baseline, required
+  Phase 0 schemas, explicit privacy defaults, fail-closed redaction defaults,
+  local model-artifact posture, and any `memory/rules/*.yaml` artifacts present.
 - `--json` always emits the stable command result envelope.
 - piped or non-interactive stdout defaults to JSON.
 - `--quiet` and `--compact` emit compact JSON while preserving status,
@@ -31,6 +34,17 @@ output contract:
 The command result schema is `schemas/command-result.schema.json`. Stable
 exit-code examples for codes `0` through `9` are in
 `examples/command-results/exit-code-examples.json`.
+
+The config in `relia.yaml` is local-only by default: code, diffs, logs, and
+experience records are not sent anywhere; share scope is `private`; redaction
+uses entropy scanning and fails closed. `distill.embeddings: signature` is the
+zero-install default. `distill.embeddings: local` requires a pulled model
+manifest and fails closed with exit `8` when it is absent.
+
+Phase 0 artifact schemas live under `schemas/` for experience records, outcome
+evidence, failure signatures, memory rules, coverage maps, risk assessments,
+recurrence reports, compiled context, command results, and redaction config.
+Every schema is versioned and requires forward-compatible `metadata`.
 
 Provider-backed distill work requires a complete `model_provider_endpoint`
 grant naming provider, model, endpoint or `base_url`, credential environment,

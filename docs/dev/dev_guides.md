@@ -128,13 +128,31 @@ T1 establishes the command result envelope as the baseline automation contract:
 
 The envelope preserves `object_type`, `schema_version`, `command`, `status`,
 `mode`, `exit_code`, `warnings`, `errors`, `artifacts`, `evidence_refs`,
-`duration_ms`, and `redaction_status`. Human-readable output is only the default
-when stdout is an interactive terminal and no machine-readable flag is present.
+`duration_ms`, `redaction_status`, and `metadata`. Human-readable output is only
+the default when stdout is an interactive terminal and no machine-readable flag
+is present.
+
+T2 extends the contract layer:
+
+- `relia init` writes the artifact skeleton for `.relia/experiences`,
+  `.relia/signatures`, `.relia/coverage`, `.relia/reports`,
+  `.relia/baselines`, `memory/rules`, and `memory/compiled`.
+- `relia check` validates the explicit local-only config defaults in
+  `relia.yaml`, required Phase 0 schema files, and memory rule provenance when
+  rule artifacts exist.
+- Unsafe privacy or redaction settings fail closed with the stable exit code
+  assigned by the command model.
+- `distill.embeddings: local` fails closed with exit `8` until an approved
+  model-artifact pull writes the configured local manifest.
 
 ## Structured Data, Proof, Budgets, And Redaction
 
 - PR, check-run, experience, memory, MCP, assessment, report, and config data
   must be handled through parsers, schemas, or stable APIs.
+- Phase 0 schemas are required for experience records, outcome evidence,
+  failure signatures, memory rules, coverage maps, risk assessments, recurrence
+  reports, compiled context, command results, and redaction config. Every schema
+  must require `schema_version` and forward-compatible `metadata`.
 - Structured check-run data is preferred over log parsing; any log-parsed
   fallback must be labeled and validated.
 - Task closure must name the required proof level: syntax, source evidence,

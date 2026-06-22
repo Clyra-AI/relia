@@ -1,0 +1,158 @@
+{
+  "artifact_type": "validation_report",
+  "schema_version": "1.0",
+  "task_id": "T2",
+  "status": "pass",
+  "commands_run": [
+    "make lint-fast",
+    "make test-fast",
+    "make test-contracts",
+    "GOCACHE=/tmp/relia-go-build go run ./cmd/relia --json check",
+    "for f in schemas/*.json examples/command-results/*.json; do python3 -m json.tool \"$f\" >/dev/null || exit 1; done",
+    "make prepush-full",
+    "python3 -m json.tool .factory/artifacts/task-runs/T2/work-proof-marker.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T2/validation-report.json",
+    "python3 -c 'verify top-level non-blocking status fields'"
+  ],
+  "baseline_evidence": [
+    {
+      "command": "make lint-fast",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "make test-fast",
+      "status": "pass",
+      "exit_code": 0
+    }
+  ],
+  "test_first_skipped_reason": {
+    "status": "skipped",
+    "reason": "The packet required creating the initial T2 contract surface, so no pre-existing focused T2 failure existed before implementation. The configured red_first command `make test-fast` was run before edits and passed; focused contract tests were added in this implementation slice."
+  },
+  "green_evidence": [
+    {
+      "command": "make test-fast",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "make test-contracts",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "GOCACHE=/tmp/relia-go-build go run ./cmd/relia --json check",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "for f in schemas/*.json examples/command-results/*.json; do python3 -m json.tool \"$f\" >/dev/null || exit 1; done",
+      "status": "pass",
+      "exit_code": 0
+    }
+  ],
+  "final_validation_evidence": [
+    {
+      "command": "make prepush-full",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "Passed lint-fast, test-fast, test-coverage at 77.3% over cmd packages, and test-contracts."
+    }
+  ],
+  "evidence_validation": [
+    {
+      "command": "python3 -m json.tool .factory/artifacts/task-runs/T2/work-proof-marker.json",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "python3 -m json.tool .factory/artifacts/task-runs/T2/validation-report.json",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "python3 -c 'verify top-level non-blocking status fields'",
+      "status": "pass",
+      "exit_code": 0,
+      "observed_statuses": {
+        ".factory/artifacts/task-runs/T2/work-proof-marker.json": "implemented",
+        ".factory/artifacts/task-runs/T2/validation-report.json": "pass"
+      }
+    }
+  ],
+  "acceptance_results": [
+    {
+      "acceptance_item_id": "FR22-STABLE-CLI-OUTPUT-001",
+      "status": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+        "schemas/command-result.schema.json",
+        "examples/command-results/exit-code-examples.json",
+        "cmd/relia/main_test.go"
+      ]
+    },
+    {
+      "acceptance_item_id": "NFR12-ARTIFACT-STABILITY-001",
+      "status": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+        "schemas/experience-record.schema.json",
+        "schemas/memory-rule.schema.json",
+        "schemas/risk-assessment.schema.json",
+        "cmd/relia/main_test.go"
+      ]
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-001",
+      "status": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+        "relia.yaml",
+        "README.md",
+        "docs/dev/dev_guides.md"
+      ]
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-021",
+      "status": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        "docs/architecture/decision-0002-phase0-contracts.md"
+      ]
+    }
+  ],
+  "path_policy_result": {
+    "status": "pass",
+    "changed_paths_checked": true,
+    "forbidden_paths_changed": [],
+    "note": "The required make prepush-full command generated ignored coverage output under .factory/tmp/coverage.out; it is not a tracked worker diff."
+  },
+  "plan_drift_result": {
+    "status": "pass",
+    "notes": "Implementation stayed within T2 Phase 0 config, schema, privacy, validation, and structured-output contract scope."
+  },
+  "docs_sync_result": {
+    "status": "pass",
+    "updated_refs": [
+      "README.md",
+      "docs/dev/dev_guides.md",
+      "docs/architecture/architecture_guides.md",
+      "docs/architecture/decision-0002-phase0-contracts.md"
+    ]
+  },
+  "factoryd_owned_evidence": {
+    "status": "not_authored_by_worker",
+    "expected_artifacts": [
+      "scope_closure_report",
+      "pr_lifecycle_report",
+      "factoryd_run_once_report"
+    ]
+  },
+  "residual_risks": [
+    "Schema validation is currently contract-shape validation through the standard library; full JSON Schema instance validation can be deepened in later runtime slices.",
+    "Live GitHub, provider, and model-artifact checks remain out of scope for this offline T2 worker."
+  ]
+}

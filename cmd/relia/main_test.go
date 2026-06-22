@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"testing"
 )
 
@@ -37,6 +38,9 @@ func TestJSONFlagEmitsStableEnvelope(t *testing.T) {
 	}
 	if result.RedactionStatus == "" {
 		t.Fatal("expected redaction_status")
+	}
+	if result.Metadata["schema_ref"] != "schemas/command-result.schema.json" {
+		t.Fatalf("metadata = %#v", result.Metadata)
 	}
 }
 
@@ -186,9 +190,14 @@ func TestInitCreatesBaselineConfig(t *testing.T) {
 	if err != nil {
 		t.Fatalf("expected relia.yaml to be created: %v", err)
 	}
-	for _, token := range []string{"version: 1", "embeddings: signature", "advisory_only: true"} {
+	for _, token := range []string{"version: 1", "schema_version: \"1.0\"", "local_only: true", "fail_closed: true", "embeddings: signature", "advisory_only: true"} {
 		if !bytes.Contains(content, []byte(token)) {
 			t.Fatalf("relia.yaml missing %q:\n%s", token, content)
+		}
+	}
+	for _, dir := range artifactSkeletonDirs {
+		if info, err := os.Stat(filepath.Join(tempDir, dir)); err != nil || !info.IsDir() {
+			t.Fatalf("expected artifact skeleton dir %s: info=%#v err=%v", dir, info, err)
 		}
 	}
 }
@@ -314,6 +323,9 @@ func TestCommandResultExitCodeExamplesCoverStableCodes(t *testing.T) {
 		if example.SchemaVersion != "1.0" {
 			t.Fatalf("example schema_version = %q", example.SchemaVersion)
 		}
+		if example.Metadata["schema_version"] != "1.0" {
+			t.Fatalf("example metadata = %#v", example.Metadata)
+		}
 		if example.ExitCode < ExitSuccess || example.ExitCode > ExitProvenanceIntegrity {
 			t.Fatalf("unexpected exit code in example: %d", example.ExitCode)
 		}
@@ -328,6 +340,117 @@ func TestCommandResultExitCodeExamplesCoverStableCodes(t *testing.T) {
 		if codes[i] != want[i] {
 			t.Fatalf("codes = %v, want %v", codes, want)
 		}
+	}
+}
+
+func TestPhase0SchemasDeclareMetadata(t *testing.T) {
+	root := findRepoRootForTest(t)
+	if commandErr := validateSchemaContracts(root); commandErr != nil {
+		t.Fatalf("schema contracts failed: %#v", commandErr)
+	}
+}
+
+func TestCheckReportsPhase0ContractRefs(t *testing.T) {
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if got, ok := result.Data["schema_contracts"].(float64); !ok || int(got) != len(requiredSchemaFiles) {
+		t.Fatalf("schema_contracts = %#v, want %d", result.Data["schema_contracts"], len(requiredSchemaFiles))
+	}
+	if result.Data["privacy_default"] != "local_only" {
+		t.Fatalf("privacy_default = %#v", result.Data["privacy_default"])
+	}
+	if len(result.Artifacts) <= len(requiredSchemaFiles) {
+		t.Fatalf("expected schema artifacts in result: %#v", result.Artifacts)
+	}
+}
+
+func TestCheckRejectsUnsafePrivacyConfig(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	replaceInFile(t, filepath.Join(tempDir, "relia.yaml"), "send_code: false", "send_code: true")
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitValidation {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "artifact_contract_validation_failed" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+}
+
+func TestCheckFailsClosedForDisabledRedaction(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	replaceInFile(t, filepath.Join(tempDir, "relia.yaml"), "fail_closed: true", "fail_closed: false")
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitRedactionSafety {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "redaction_safety_failed" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+}
+
+func TestCheckRequiresLocalModelManifest(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	replaceInFile(t, filepath.Join(tempDir, "relia.yaml"), "embeddings: signature", "embeddings: local")
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitDependency {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "dependency_error" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+}
+
+func TestCheckRejectsRuleWithoutProvenance(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	rulesDir := filepath.Join(tempDir, "memory", "rules")
+	if err := os.MkdirAll(rulesDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	rule := `schema_version: "1.0"
+id: avoid-direct-time
+kind: avoid
+status: active
+statement: >
+  Do not mock time directly.
+confidence: 0.8
+evidence:
+  experiences:
+    - exp_001
+review:
+  label: accepted
+`
+	if err := os.WriteFile(filepath.Join(rulesDir, "avoid-direct-time.yaml"), []byte(rule), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitValidation {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "artifact_contract_validation_failed" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+	if !strings.Contains(result.Errors[0].Message, "provenance") {
+		t.Fatalf("error message = %q", result.Errors[0].Message)
 	}
 }
 
@@ -362,4 +485,66 @@ func findRepoRootForTest(t *testing.T) string {
 		t.Fatalf("could not find repo root from %s", wd)
 	}
 	return root
+}
+
+func setupContractRepo(t *testing.T) string {
+	t.Helper()
+
+	sourceRoot := findRepoRootForTest(t)
+	tempDir := t.TempDir()
+	files := map[string]string{
+		"AGENTS.md":              "repo contract\n",
+		"WORKFLOW.md":            "workflow contract\n",
+		"README.md":              "readme\n",
+		"Makefile":               "prepush-full:\n",
+		".tool-versions":         "golang 1.26.4\n",
+		"go.mod":                 "module github.com/Clyra-AI/relia\n\ngo 1.26.4\n",
+		"relia.yaml":             defaultConfigYAML(),
+		"docs/product/prd.md":    "prd\n",
+		"docs/dev/dev_guides.md": "dev guides\n",
+		"docs/architecture/architecture_guides.md": "architecture guides\n",
+		".github/required-checks.json":             "{}\n",
+		".github/workflows/validate.yml":           "name: validate\n",
+		".github/workflows/codeql.yml":             "name: codeql\n",
+		".factory/factoryd.example.json":           "{}\n",
+		".factory/factoryd.autoship.example.json":  "{}\n",
+	}
+	for rel, content := range files {
+		writeFileForTest(t, filepath.Join(tempDir, rel), content)
+	}
+	for _, rel := range requiredSchemaFiles {
+		content, err := os.ReadFile(filepath.Join(sourceRoot, rel))
+		if err != nil {
+			t.Fatal(err)
+		}
+		writeFileForTest(t, filepath.Join(tempDir, rel), string(content))
+	}
+	return tempDir
+}
+
+func writeFileForTest(t *testing.T, path string, content string) {
+	t.Helper()
+
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func replaceInFile(t *testing.T, path string, old string, new string) {
+	t.Helper()
+
+	content, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	next := strings.Replace(string(content), old, new, 1)
+	if next == string(content) {
+		t.Fatalf("expected to replace %q in %s", old, path)
+	}
+	if err := os.WriteFile(path, []byte(next), 0o644); err != nil {
+		t.Fatal(err)
+	}
 }

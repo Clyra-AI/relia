@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Clyra-AI/relia/schemas/redaction-config.schema.json",
+  "title": "Relia Redaction Config",
+  "type": "object",
+  "additionalProperties": false,
+  "x-relia-exit-codes": [2, 6],
+  "required": [
+    "object_type",
+    "schema_version",
+    "entropy_scan",
+    "fail_closed",
+    "standard_token_shapes",
+    "recursive_fields",
+    "metadata"
+  ],
+  "properties": {
+    "object_type": {
+      "const": "relia.redaction_config"
+    },
+    "schema_version": {
+      "const": "1.0"
+    },
+    "entropy_scan": {
+      "const": true
+    },
+    "fail_closed": {
+      "const": true
+    },
+    "standard_token_shapes": {
+      "const": true
+    },
+    "recursive_fields": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "enum": ["owner", "credential", "secret", "endpoint", "machine_local_path"]
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

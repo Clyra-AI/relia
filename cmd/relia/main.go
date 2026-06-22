@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -27,6 +28,7 @@ const (
 const (
 	commandResultObjectType = "relia.command_result"
 	commandSchemaVersion    = "1.0"
+	reliaVersion            = "0.0.0-dev"
 	defaultConfigFile       = "relia.yaml"
 )
 
@@ -46,6 +48,29 @@ var requiredCheckFiles = []string{
 	".github/workflows/codeql.yml",
 	".factory/factoryd.example.json",
 	".factory/factoryd.autoship.example.json",
+}
+
+var requiredSchemaFiles = []string{
+	"schemas/experience-record.schema.json",
+	"schemas/outcome-evidence.schema.json",
+	"schemas/failure-signature.schema.json",
+	"schemas/memory-rule.schema.json",
+	"schemas/coverage-map.schema.json",
+	"schemas/risk-assessment.schema.json",
+	"schemas/recurrence-report.schema.json",
+	"schemas/compiled-context.schema.json",
+	"schemas/command-result.schema.json",
+	"schemas/redaction-config.schema.json",
+}
+
+var artifactSkeletonDirs = []string{
+	".relia/experiences",
+	".relia/signatures",
+	".relia/coverage",
+	".relia/reports",
+	".relia/baselines",
+	"memory/rules",
+	"memory/compiled",
 }
 
 var primaryCommands = []string{
@@ -74,6 +99,7 @@ type CommandResult struct {
 	EvidenceRefs    []string       `json:"evidence_refs"`
 	DurationMS      int64          `json:"duration_ms"`
 	RedactionStatus string         `json:"redaction_status"`
+	Metadata        map[string]any `json:"metadata"`
 	Data            map[string]any `json:"data,omitempty"`
 }
 
@@ -94,6 +120,16 @@ type CommandError struct {
 type ArtifactRef struct {
 	Kind string `json:"kind"`
 	Path string `json:"path"`
+}
+
+type yamlScalar struct {
+	Value string
+	Line  int
+}
+
+type yamlDocument struct {
+	Scalars map[string]yamlScalar
+	Lists   map[string][]yamlScalar
 }
 
 type globalFlags struct {
@@ -182,7 +218,7 @@ func dispatch(parsed parsedArgs, start time.Time) CommandResult {
 		})
 	case "version":
 		return passResult(command, "version", "relia 0.0.0-dev", start, map[string]any{
-			"version":        "0.0.0-dev",
+			"version":        reliaVersion,
 			"schema_version": commandSchemaVersion,
 		})
 	case "init":
@@ -217,11 +253,18 @@ func initResult(args []string, start time.Time) CommandResult {
 	configPath := filepath.Join(root, defaultConfigFile)
 	artifact := ArtifactRef{Kind: "config", Path: defaultConfigFile}
 	if _, err := os.Stat(configPath); err == nil {
+		if err := ensureArtifactSkeleton(root); err != nil {
+			return errorResult("init", "init", internalError("could not write artifact skeleton", err), start)
+		}
 		result := passResult("init", "init", "relia.yaml already exists", start, map[string]any{
-			"config_path": defaultConfigFile,
-			"created":     false,
+			"config_path":             defaultConfigFile,
+			"created":                 false,
+			"artifact_skeleton_paths": artifactSkeletonDirs,
 		})
 		result.Artifacts = append(result.Artifacts, artifact)
+		for _, dir := range artifactSkeletonDirs {
+			result.Artifacts = append(result.Artifacts, ArtifactRef{Kind: "artifact_directory", Path: dir})
+		}
 		return result
 	} else if !errors.Is(err, os.ErrNotExist) {
 		return errorResult("init", "init", internalError("could not inspect relia.yaml", err), start)
@@ -230,11 +273,18 @@ func initResult(args []string, start time.Time) CommandResult {
 	if err := os.WriteFile(configPath, []byte(defaultConfigYAML()), 0o644); err != nil {
 		return errorResult("init", "init", internalError("could not write relia.yaml", err), start)
 	}
+	if err := ensureArtifactSkeleton(root); err != nil {
+		return errorResult("init", "init", internalError("could not write artifact skeleton", err), start)
+	}
 	result := passResult("init", "init", "created relia.yaml", start, map[string]any{
-		"config_path": defaultConfigFile,
-		"created":     true,
+		"config_path":             defaultConfigFile,
+		"created":                 true,
+		"artifact_skeleton_paths": artifactSkeletonDirs,
 	})
 	result.Artifacts = append(result.Artifacts, artifact)
+	for _, dir := range artifactSkeletonDirs {
+		result.Artifacts = append(result.Artifacts, ArtifactRef{Kind: "artifact_directory", Path: dir})
+	}
 	return result
 }
 
@@ -266,10 +316,30 @@ func checkResult(args []string, start time.Time) CommandResult {
 		return errorResult("check", "check", validationError("required local operating-pack files are missing", missing), start)
 	}
 
-	return passResult("check", "check", "local operating pack baseline is present", start, map[string]any{
-		"checked_paths": len(requiredCheckFiles),
-		"repo_root":     ".",
+	warnings, commandErr := validateReliaConfig(root)
+	if commandErr != nil {
+		return errorResult("check", "check", commandErr, start)
+	}
+	if commandErr := validateSchemaContracts(root); commandErr != nil {
+		return errorResult("check", "check", commandErr, start)
+	}
+	if commandErr := validateMemoryRuleArtifacts(root); commandErr != nil {
+		return errorResult("check", "check", commandErr, start)
+	}
+
+	result := passResult("check", "check", "local operating pack baseline is present", start, map[string]any{
+		"checked_paths":        len(requiredCheckFiles),
+		"repo_root":            ".",
+		"schema_contracts":     len(requiredSchemaFiles),
+		"privacy_default":      "local_only",
+		"artifact_schema_refs": requiredSchemaFiles,
 	})
+	result.Warnings = append(result.Warnings, warnings...)
+	result.Artifacts = append(result.Artifacts, ArtifactRef{Kind: "config", Path: defaultConfigFile})
+	for _, schemaFile := range requiredSchemaFiles {
+		result.Artifacts = append(result.Artifacts, ArtifactRef{Kind: "schema", Path: schemaFile})
+	}
+	return result
 }
 
 func helpResult(start time.Time) CommandResult {
@@ -332,7 +402,12 @@ func baseResult(command string, mode string, status string, exitCode int, start 
 		},
 		DurationMS:      time.Since(start).Milliseconds(),
 		RedactionStatus: "not_applicable",
-		Data:            data,
+		Metadata: map[string]any{
+			"relia_version":  reliaVersion,
+			"schema_ref":     "schemas/command-result.schema.json",
+			"schema_version": commandSchemaVersion,
+		},
+		Data: data,
 	}
 }
 
@@ -363,6 +438,36 @@ func validationError(message string, missing []string) *CommandError {
 		ExitCode:    ExitValidation,
 		Remediation: "Restore the required repo lifecycle files before running Relia workflows.",
 		Ref:         "docs/dev/dev_guides.md#validation-matrix",
+	}
+}
+
+func artifactContractError(message string, ref string) *CommandError {
+	return &CommandError{
+		Type:        "artifact_contract_validation_failed",
+		Message:     message,
+		ExitCode:    ExitValidation,
+		Remediation: "Repair the schema, config, or memory artifact so it matches the versioned Relia contract.",
+		Ref:         ref,
+	}
+}
+
+func redactionSafetyError(message string, ref string) *CommandError {
+	return &CommandError{
+		Type:        "redaction_safety_failed",
+		Message:     message,
+		ExitCode:    ExitRedactionSafety,
+		Remediation: "Keep local-only privacy and fail-closed redaction enabled before persisting or sharing artifacts.",
+		Ref:         ref,
+	}
+}
+
+func dependencyError(message string, ref string) *CommandError {
+	return &CommandError{
+		Type:        "dependency_error",
+		Message:     message,
+		ExitCode:    ExitDependency,
+		Remediation: "Run relia models pull with an approved model_artifact_pull gate or use embeddings: signature.",
+		Ref:         ref,
 	}
 }
 
@@ -444,8 +549,380 @@ func findRepoRoot(start string) (string, bool) {
 	}
 }
 
+func ensureArtifactSkeleton(root string) error {
+	for _, dir := range artifactSkeletonDirs {
+		if err := os.MkdirAll(filepath.Join(root, dir), 0o755); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func validateReliaConfig(root string) ([]Finding, *CommandError) {
+	path := filepath.Join(root, defaultConfigFile)
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return nil, internalError("could not read relia.yaml", err)
+	}
+	document, parseErr := parseYAMLDocument(string(content))
+	if parseErr != nil {
+		return nil, configError(parseErr.Error())
+	}
+
+	requiredExact := map[string]string{
+		"version":                         "1",
+		"artifacts.schema_version":        commandSchemaVersion,
+		"artifacts.relia_version":         reliaVersion,
+		"artifacts.root":                  ".relia",
+		"artifacts.commit_experiences":    "false",
+		"privacy.local_only":              "true",
+		"privacy.send_code":               "false",
+		"privacy.send_diffs":              "false",
+		"privacy.send_logs":               "false",
+		"privacy.send_experience_records": "false",
+		"privacy.share_scope":             "private",
+		"redaction.schema_version":        commandSchemaVersion,
+		"redaction.entropy_scan":          "true",
+		"redaction.fail_closed":           "true",
+		"redaction.standard_token_shapes": "true",
+		"models.local_manifest":           ".relia/models/manifest.json",
+		"serve.advisory_only":             "true",
+		"gate.enabled":                    "false",
+	}
+	for key, want := range requiredExact {
+		scalar, ok := document.Scalars[key]
+		if !ok {
+			return nil, configError(fmt.Sprintf("relia.yaml missing required key %s", key))
+		}
+		if scalar.Value != want {
+			switch key {
+			case "artifacts.commit_experiences", "privacy.local_only", "privacy.send_code", "privacy.send_diffs", "privacy.send_logs", "privacy.send_experience_records", "privacy.share_scope":
+				return nil, artifactContractError(fmt.Sprintf("%s must be %s for the MVP artifact contract", key, want), configRef(scalar))
+			case "redaction.entropy_scan", "redaction.fail_closed", "redaction.standard_token_shapes":
+				return nil, redactionSafetyError(fmt.Sprintf("%s must be %s", key, want), configRef(scalar))
+			default:
+				return nil, configError(fmt.Sprintf("%s must be %s", key, want))
+			}
+		}
+	}
+
+	embeddings, ok := document.Scalars["distill.embeddings"]
+	if !ok {
+		return nil, configError("relia.yaml missing required key distill.embeddings")
+	}
+	switch embeddings.Value {
+	case "signature":
+	case "local":
+		manifest := document.Scalars["models.local_manifest"]
+		if _, err := os.Stat(filepath.Join(root, manifest.Value)); err != nil {
+			if errors.Is(err, os.ErrNotExist) {
+				return nil, dependencyError("local embedding artifact manifest is missing", configRef(manifest))
+			}
+			return nil, internalError("could not inspect local model manifest", err)
+		}
+	case "provider":
+		return nil, dependencyError("provider embeddings require an approved model_provider_endpoint gate", configRef(embeddings))
+	default:
+		return nil, configError("distill.embeddings must be signature, local, or provider")
+	}
+
+	provider, ok := document.Scalars["distill.provider"]
+	if !ok {
+		return nil, configError("relia.yaml missing required key distill.provider")
+	}
+	var warnings []Finding
+	switch provider.Value {
+	case "none":
+	case "openai_compatible", "anthropic":
+		warnings = append(warnings, Finding{
+			Type:    "provider_data_disclosure",
+			Message: "provider-backed distill may send redacted experience records outside the machine when explicitly run",
+			Ref:     configRef(provider),
+		})
+	default:
+		return nil, configError("distill.provider must be none, openai_compatible, or anthropic")
+	}
+
+	reviewRequired, ok := document.Scalars["distill.review_required"]
+	if !ok {
+		return nil, configError("relia.yaml missing required key distill.review_required")
+	}
+	switch reviewRequired.Value {
+	case "true":
+	case "false":
+		warnings = append(warnings, Finding{
+			Type:    "review_gate_disabled",
+			Message: "distill.review_required is disabled; drafted rules can bypass the default human review posture",
+			Ref:     configRef(reviewRequired),
+		})
+	default:
+		return nil, configError("distill.review_required must be true or false")
+	}
+
+	if gateLimit, ok := document.Scalars["gate.max_error_recurrence_rate"]; ok {
+		warnings = append(warnings, Finding{
+			Type:    "unenforced_gate_setting",
+			Message: "gate.max_error_recurrence_rate is configured while gate.enabled is false",
+			Ref:     configRef(gateLimit),
+		})
+	}
+	return warnings, nil
+}
+
+func validateSchemaContracts(root string) *CommandError {
+	for _, rel := range requiredSchemaFiles {
+		content, err := os.ReadFile(filepath.Join(root, rel))
+		if err != nil {
+			if errors.Is(err, os.ErrNotExist) {
+				return artifactContractError("required schema is missing: "+rel, rel)
+			}
+			return internalError("could not read schema "+rel, err)
+		}
+		var schema map[string]any
+		if err := json.Unmarshal(content, &schema); err != nil {
+			return artifactContractError("schema is not valid JSON: "+rel, rel)
+		}
+		if schema["type"] != "object" {
+			return artifactContractError("schema must describe a JSON object: "+rel, rel)
+		}
+		required, ok := schema["required"].([]any)
+		if !ok {
+			return artifactContractError("schema missing required array: "+rel, rel)
+		}
+		if !containsString(required, "schema_version") {
+			return artifactContractError("schema must require schema_version: "+rel, rel)
+		}
+		if !containsString(required, "metadata") {
+			return artifactContractError("schema must require metadata: "+rel, rel)
+		}
+		properties, ok := schema["properties"].(map[string]any)
+		if !ok {
+			return artifactContractError("schema missing properties object: "+rel, rel)
+		}
+		if _, ok := properties["schema_version"]; !ok {
+			return artifactContractError("schema missing schema_version property: "+rel, rel)
+		}
+		if _, ok := properties["metadata"]; !ok {
+			return artifactContractError("schema missing metadata property: "+rel, rel)
+		}
+	}
+	return nil
+}
+
+func validateMemoryRuleArtifacts(root string) *CommandError {
+	patterns := []string{
+		filepath.Join(root, "memory", "rules", "*.yaml"),
+		filepath.Join(root, "memory", "rules", "*.yml"),
+	}
+	for _, pattern := range patterns {
+		matches, err := filepath.Glob(pattern)
+		if err != nil {
+			return internalError("could not inspect memory rule artifacts", err)
+		}
+		for _, path := range matches {
+			if commandErr := validateMemoryRuleArtifact(root, path); commandErr != nil {
+				return commandErr
+			}
+		}
+	}
+	return nil
+}
+
+func validateMemoryRuleArtifact(root string, path string) *CommandError {
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return internalError("could not read memory rule artifact", err)
+	}
+	rel, err := filepath.Rel(root, path)
+	if err != nil {
+		rel = path
+	}
+	document, parseErr := parseYAMLDocument(string(content))
+	if parseErr != nil {
+		return artifactContractError(parseErr.Error(), rel)
+	}
+	required := []string{"schema_version", "id", "kind", "status", "statement", "confidence"}
+	for _, key := range required {
+		if _, ok := document.Scalars[key]; !ok {
+			return artifactContractError("memory rule missing required key "+key, rel)
+		}
+	}
+	if document.Scalars["schema_version"].Value != commandSchemaVersion {
+		return artifactContractError("memory rule schema_version must be "+commandSchemaVersion, rel)
+	}
+	kind := document.Scalars["kind"].Value
+	if kind != "avoid" && kind != "playbook" {
+		return artifactContractError("memory rule kind must be avoid or playbook", configRefWithPath(rel, document.Scalars["kind"]))
+	}
+	status := document.Scalars["status"].Value
+	switch status {
+	case "candidate", "active", "stale", "contradicted", "retired":
+	default:
+		return artifactContractError("memory rule status is invalid", configRefWithPath(rel, document.Scalars["status"]))
+	}
+	confidence, err := strconv.ParseFloat(document.Scalars["confidence"].Value, 64)
+	if err != nil || confidence < 0 || confidence > 1 {
+		return artifactContractError("memory rule confidence must be between 0 and 1", configRefWithPath(rel, document.Scalars["confidence"]))
+	}
+	if len(document.Lists["evidence.experiences"]) == 0 {
+		return artifactContractError("memory rule must cite at least one experience", rel)
+	}
+	if len(document.Lists["provenance"]) == 0 {
+		return artifactContractError("memory rule must include at least one provenance entry", rel)
+	}
+	if status == "active" {
+		reviewLabel, ok := document.Scalars["review.label"]
+		if !ok {
+			return artifactContractError("active memory rule must include review.label", rel)
+		}
+		switch reviewLabel.Value {
+		case "accepted", "suggested", "needs_user_input":
+		default:
+			return artifactContractError("memory rule review.label is invalid", configRefWithPath(rel, reviewLabel))
+		}
+	}
+	return nil
+}
+
+func parseYAMLDocument(content string) (yamlDocument, error) {
+	document := yamlDocument{
+		Scalars: map[string]yamlScalar{},
+		Lists:   map[string][]yamlScalar{},
+	}
+	var stack []string
+	blockScalarIndent := -1
+	lines := strings.Split(content, "\n")
+	for index, raw := range lines {
+		lineNumber := index + 1
+		if strings.TrimSpace(raw) == "" || strings.HasPrefix(strings.TrimSpace(raw), "#") {
+			continue
+		}
+		indent := leadingSpaces(raw)
+		if blockScalarIndent >= 0 {
+			if indent > blockScalarIndent {
+				continue
+			}
+			blockScalarIndent = -1
+		}
+		if indent%2 != 0 {
+			return document, fmt.Errorf("invalid YAML indentation at line %d", lineNumber)
+		}
+		depth := indent / 2
+		trimmed := stripInlineComment(strings.TrimSpace(raw))
+		if strings.TrimSpace(trimmed) == "" {
+			continue
+		}
+		if strings.HasPrefix(trimmed, "- ") {
+			if depth > len(stack) {
+				return document, fmt.Errorf("list item without parent at line %d", lineNumber)
+			}
+			parent := strings.Join(stack[:depth], ".")
+			if parent == "" {
+				return document, fmt.Errorf("top-level lists are not supported at line %d", lineNumber)
+			}
+			document.Lists[parent] = append(document.Lists[parent], yamlScalar{
+				Value: strings.TrimSpace(strings.TrimPrefix(trimmed, "- ")),
+				Line:  lineNumber,
+			})
+			continue
+		}
+		key, value, ok := strings.Cut(trimmed, ":")
+		if !ok {
+			return document, fmt.Errorf("expected key/value pair at line %d", lineNumber)
+		}
+		key = strings.TrimSpace(key)
+		if key == "" {
+			return document, fmt.Errorf("empty key at line %d", lineNumber)
+		}
+		if depth > len(stack) {
+			return document, fmt.Errorf("missing parent for %s at line %d", key, lineNumber)
+		}
+		stack = append(stack[:depth], key)
+		value = strings.TrimSpace(value)
+		if value == "" {
+			continue
+		}
+		path := strings.Join(stack, ".")
+		scalarValue := unquoteScalar(value)
+		document.Scalars[path] = yamlScalar{Value: scalarValue, Line: lineNumber}
+		if scalarValue == ">" || scalarValue == "|" {
+			blockScalarIndent = indent
+		}
+	}
+	return document, nil
+}
+
+func leadingSpaces(value string) int {
+	count := 0
+	for _, r := range value {
+		if r != ' ' {
+			return count
+		}
+		count++
+	}
+	return count
+}
+
+func stripInlineComment(value string) string {
+	inSingle := false
+	inDouble := false
+	for index, r := range value {
+		switch r {
+		case '\'':
+			if !inDouble {
+				inSingle = !inSingle
+			}
+		case '"':
+			if !inSingle {
+				inDouble = !inDouble
+			}
+		case '#':
+			if !inSingle && !inDouble && (index == 0 || value[index-1] == ' ' || value[index-1] == '\t') {
+				return strings.TrimSpace(value[:index])
+			}
+		}
+	}
+	return value
+}
+
+func unquoteScalar(value string) string {
+	value = strings.TrimSpace(value)
+	if len(value) >= 2 {
+		if (value[0] == '"' && value[len(value)-1] == '"') || (value[0] == '\'' && value[len(value)-1] == '\'') {
+			return value[1 : len(value)-1]
+		}
+	}
+	return value
+}
+
+func containsString(values []any, want string) bool {
+	for _, value := range values {
+		if value == want {
+			return true
+		}
+	}
+	return false
+}
+
+func configRef(scalar yamlScalar) string {
+	return configRefWithPath(defaultConfigFile, scalar)
+}
+
+func configRefWithPath(path string, scalar yamlScalar) string {
+	if scalar.Line <= 0 {
+		return path
+	}
+	return fmt.Sprintf("%s:%d", path, scalar.Line)
+}
+
 func defaultConfigYAML() string {
 	return `version: 1
+
+artifacts:
+  schema_version: "1.0"
+  relia_version: "0.0.0-dev"
+  root: .relia
+  commit_experiences: false
 
 repo:
   provider: github
@@ -465,8 +942,27 @@ outcomes:
   checks:
     required: []
 
+privacy:
+  local_only: true
+  send_code: false
+  send_diffs: false
+  send_logs: false
+  send_experience_records: false
+  share_scope: private
+
+redaction:
+  schema_version: "1.0"
+  entropy_scan: true
+  fail_closed: true
+  standard_token_shapes: true
+
 distill:
   embeddings: signature
+  provider: none
+  review_required: true
+
+models:
+  local_manifest: .relia/models/manifest.json
 
 serve:
   advisory_only: true
