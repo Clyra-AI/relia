@@ -3,7 +3,7 @@
   "schema_version": "0.1",
   "task_id": "T2",
   "canonical_scope_closure_map_ref": ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
-  "canonical_scope_closure_map_modified": false,
+  "canonical_scope_closure_map_modified": true,
   "acceptance_results": [
     {
       "acceptance_item_id": "FR22-STABLE-CLI-OUTPUT-001",
