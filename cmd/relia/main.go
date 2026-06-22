@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/sha256"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -623,11 +624,8 @@ func validateReliaConfig(root string) ([]Finding, *CommandError) {
 	case "signature":
 	case "local":
 		manifest := document.Scalars["models.local_manifest"]
-		if _, err := os.Stat(filepath.Join(root, manifest.Value)); err != nil {
-			if errors.Is(err, os.ErrNotExist) {
-				return nil, dependencyError("local embedding artifact manifest is missing", configRef(manifest))
-			}
-			return nil, internalError("could not inspect local model manifest", err)
+		if commandErr := validateLocalModelManifest(root, manifest); commandErr != nil {
+			return nil, commandErr
 		}
 	case "provider":
 		return nil, dependencyError("provider embeddings require an approved model_provider_endpoint gate", configRef(embeddings))
@@ -676,6 +674,84 @@ func validateReliaConfig(root string) ([]Finding, *CommandError) {
 		})
 	}
 	return warnings, nil
+}
+
+type localModelManifest struct {
+	ModelID        string `json:"model_id"`
+	Version        string `json:"version"`
+	SourceURL      string `json:"source_url"`
+	License        string `json:"license"`
+	Digest         string `json:"digest"`
+	CachePath      string `json:"cache_path"`
+	UpdatePolicy   string `json:"update_policy"`
+	RollbackPolicy string `json:"rollback_policy"`
+}
+
+func validateLocalModelManifest(root string, manifestScalar yamlScalar) *CommandError {
+	manifestRel := strings.TrimSpace(manifestScalar.Value)
+	if manifestRel == "" || filepath.IsAbs(manifestRel) {
+		return dependencyError("local model manifest path must be repo-relative", configRef(manifestScalar))
+	}
+	manifestPath := filepath.Join(root, manifestRel)
+	content, err := os.ReadFile(manifestPath)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return dependencyError("local embedding artifact manifest is missing", configRef(manifestScalar))
+		}
+		return internalError("could not read local model manifest", err)
+	}
+	var manifest localModelManifest
+	if err := json.Unmarshal(content, &manifest); err != nil {
+		return dependencyError("local model manifest is not valid JSON", manifestRel)
+	}
+	required := map[string]string{
+		"model_id":        manifest.ModelID,
+		"version":         manifest.Version,
+		"source_url":      manifest.SourceURL,
+		"license":         manifest.License,
+		"digest":          manifest.Digest,
+		"cache_path":      manifest.CachePath,
+		"update_policy":   manifest.UpdatePolicy,
+		"rollback_policy": manifest.RollbackPolicy,
+	}
+	for field, value := range required {
+		if strings.TrimSpace(value) == "" {
+			return dependencyError("local model manifest missing required field "+field, manifestRel)
+		}
+	}
+	if !strings.HasPrefix(manifest.SourceURL, "https://") {
+		return dependencyError("local model manifest source_url must be https", manifestRel)
+	}
+	digest := strings.TrimPrefix(strings.ToLower(strings.TrimSpace(manifest.Digest)), "sha256:")
+	if len(digest) != 64 || !isHexDigest(digest) {
+		return dependencyError("local model manifest digest must be a SHA-256 hex digest", manifestRel)
+	}
+	if filepath.IsAbs(manifest.CachePath) {
+		return dependencyError("local model manifest cache_path must be repo-relative", manifestRel)
+	}
+	artifactPath := filepath.Join(root, manifest.CachePath)
+	artifactContent, err := os.ReadFile(artifactPath)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return dependencyError("local model artifact is missing", manifestRel)
+		}
+		return internalError("could not read local model artifact", err)
+	}
+	actual := fmt.Sprintf("%x", sha256.Sum256(artifactContent))
+	if actual != digest {
+		return dependencyError("local model artifact digest does not match manifest", manifestRel)
+	}
+	return nil
+}
+
+func isHexDigest(value string) bool {
+	for _, r := range value {
+		if (r >= '0' && r <= '9') || (r >= 'a' && r <= 'f') {
+			continue
+		}
+		return false
+	}
+	return true
 }
 
 func validateSchemaContracts(root string) *CommandError {
@@ -803,6 +879,7 @@ func validateMemoryRuleArtifact(root string, path string) *CommandError {
 	if len(provenanceMaps) != len(provenanceEntries) {
 		return artifactContractError("memory rule provenance entries must include pr and outcome", rel)
 	}
+	hasHeldFixEvidence := false
 	for _, provenance := range provenanceMaps {
 		pr, ok := provenance["pr"]
 		if !ok {
@@ -818,9 +895,15 @@ func validateMemoryRuleArtifact(root string, path string) *CommandError {
 		}
 		switch outcome.Value {
 		case "ci_failure", "revert", "review_correction", "fix_held", "merged_clean":
+			if outcome.Value == "fix_held" {
+				hasHeldFixEvidence = true
+			}
 		default:
 			return artifactContractError("memory rule provenance outcome is invalid", configRefWithPath(rel, outcome))
 		}
+	}
+	if kind == "playbook" && !hasHeldFixEvidence {
+		return artifactContractError("playbook memory rule must cite at least one fix_held provenance outcome", rel)
 	}
 	reviewLabel, ok := document.Scalars["review.label"]
 	if !ok {
@@ -873,7 +956,7 @@ func parseYAMLDocument(content string) (yamlDocument, error) {
 		if strings.TrimSpace(trimmed) == "" {
 			continue
 		}
-		if strings.HasPrefix(trimmed, "- ") {
+		if trimmed == "-" || strings.HasPrefix(trimmed, "- ") {
 			if depth > len(stack) {
 				return document, fmt.Errorf("list item without parent at line %d", lineNumber)
 			}
@@ -881,7 +964,10 @@ func parseYAMLDocument(content string) (yamlDocument, error) {
 			if parent == "" {
 				return document, fmt.Errorf("top-level lists are not supported at line %d", lineNumber)
 			}
-			itemValue := strings.TrimSpace(strings.TrimPrefix(trimmed, "- "))
+			itemValue := ""
+			if strings.HasPrefix(trimmed, "- ") {
+				itemValue = strings.TrimSpace(strings.TrimPrefix(trimmed, "- "))
+			}
 			document.Lists[parent] = append(document.Lists[parent], yamlScalar{
 				Value: itemValue,
 				Line:  lineNumber,

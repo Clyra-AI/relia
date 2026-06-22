@@ -2,8 +2,10 @@ package main
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"sort"
@@ -416,6 +418,60 @@ func TestCheckRequiresLocalModelManifest(t *testing.T) {
 	}
 }
 
+func TestCheckRejectsIncompleteLocalModelManifest(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	replaceInFile(t, filepath.Join(tempDir, "relia.yaml"), "embeddings: signature", "embeddings: local")
+	writeFileForTest(t, filepath.Join(tempDir, ".relia", "models", "manifest.json"), `{
+  "model_id": "text-embedding-test"
+}
+`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitDependency {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "dependency_error" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+	if !strings.Contains(result.Errors[0].Message, "missing required field") {
+		t.Fatalf("error message = %q", result.Errors[0].Message)
+	}
+}
+
+func TestCheckValidatesLocalModelManifestDigest(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	replaceInFile(t, filepath.Join(tempDir, "relia.yaml"), "embeddings: signature", "embeddings: local")
+	artifactContent := []byte("deterministic local model artifact")
+	artifactRel := filepath.Join(".relia", "models", "artifact.bin")
+	writeFileForTest(t, filepath.Join(tempDir, artifactRel), string(artifactContent))
+	digest := sha256.Sum256(artifactContent)
+	writeFileForTest(t, filepath.Join(tempDir, ".relia", "models", "manifest.json"), fmt.Sprintf(`{
+  "model_id": "text-embedding-test",
+  "version": "2026-06-22",
+  "source_url": "https://example.test/model.bin",
+  "license": "Apache-2.0",
+  "digest": "%x",
+  "cache_path": "%s",
+  "update_policy": "manual",
+  "rollback_policy": "delete artifact and restore signature embeddings"
+}
+`, digest, filepath.ToSlash(artifactRel)))
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Status != "pass" {
+		t.Fatalf("status = %q", result.Status)
+	}
+}
+
 func TestCheckRejectsRuleWithoutProvenance(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
@@ -514,6 +570,55 @@ metadata: {}
 	}
 }
 
+func TestCheckRejectsPlaybookRuleWithoutHeldFixEvidence(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	rulesDir := filepath.Join(tempDir, "memory", "rules")
+	if err := os.MkdirAll(rulesDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	rule := `object_type: relia.memory_rule
+schema_version: "1.0"
+id: playbook-freeze-time
+kind: playbook
+status: active
+statement: >
+  Use the freeze-time fixture for billing rollover tests.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.8
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_held_candidate
+provenance:
+  - pr: 210
+    outcome: merged_clean
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`
+	if err := os.WriteFile(filepath.Join(rulesDir, "playbook-freeze-time.yaml"), []byte(rule), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitValidation {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "artifact_contract_validation_failed" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+	if !strings.Contains(result.Errors[0].Message, "fix_held") {
+		t.Fatalf("error message = %q", result.Errors[0].Message)
+	}
+}
+
 func TestYAMLParserRecordsNestedFieldsInListMapItems(t *testing.T) {
 	document, err := parseYAMLDocument(`repo:
   scopes:
@@ -521,6 +626,9 @@ func TestYAMLParserRecordsNestedFieldsInListMapItems(t *testing.T) {
       checks:
         - pytest-billing
 provenance:
+  -
+    pr: 141
+    outcome: ci_failure
   - pr: 142
     outcome: revert
 `)
@@ -544,13 +652,19 @@ provenance:
 	}
 
 	provenance := document.ListMaps["provenance"]
-	if len(provenance) != 1 {
+	if len(provenance) != 2 {
 		t.Fatalf("provenance list maps = %#v", provenance)
 	}
-	if got := provenance[0]["pr"].Value; got != "142" {
+	if got := provenance[0]["pr"].Value; got != "141" {
 		t.Fatalf("provenance pr = %q", got)
 	}
-	if got := provenance[0]["outcome"].Value; got != "revert" {
+	if got := provenance[0]["outcome"].Value; got != "ci_failure" {
+		t.Fatalf("provenance outcome = %q", got)
+	}
+	if got := provenance[1]["pr"].Value; got != "142" {
+		t.Fatalf("provenance pr = %q", got)
+	}
+	if got := provenance[1]["outcome"].Value; got != "revert" {
 		t.Fatalf("provenance outcome = %q", got)
 	}
 }
