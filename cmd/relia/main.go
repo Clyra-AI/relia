@@ -879,7 +879,7 @@ func validateMemoryRuleArtifact(root string, path string) *CommandError {
 	if len(provenanceMaps) != len(provenanceEntries) {
 		return artifactContractError("memory rule provenance entries must include pr and outcome", rel)
 	}
-	hasHeldFixEvidence := false
+	hasPositivePlaybookEvidence := false
 	for _, provenance := range provenanceMaps {
 		pr, ok := provenance["pr"]
 		if !ok {
@@ -895,15 +895,15 @@ func validateMemoryRuleArtifact(root string, path string) *CommandError {
 		}
 		switch outcome.Value {
 		case "ci_failure", "revert", "review_correction", "fix_held", "merged_clean":
-			if outcome.Value == "fix_held" {
-				hasHeldFixEvidence = true
+			if outcome.Value == "fix_held" || outcome.Value == "merged_clean" {
+				hasPositivePlaybookEvidence = true
 			}
 		default:
 			return artifactContractError("memory rule provenance outcome is invalid", configRefWithPath(rel, outcome))
 		}
 	}
-	if kind == "playbook" && !hasHeldFixEvidence {
-		return artifactContractError("playbook memory rule must cite at least one fix_held provenance outcome", rel)
+	if kind == "playbook" && !hasPositivePlaybookEvidence {
+		return artifactContractError("playbook memory rule must cite at least one fix_held or merged_clean provenance outcome", rel)
 	}
 	reviewLabel, ok := document.Scalars["review.label"]
 	if !ok {
