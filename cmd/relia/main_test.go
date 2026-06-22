@@ -423,6 +423,104 @@ func TestCheckRejectsRuleWithoutProvenance(t *testing.T) {
 	if err := os.MkdirAll(rulesDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
+	rule := `object_type: relia.memory_rule
+schema_version: "1.0"
+id: avoid-direct-time
+kind: avoid
+status: active
+statement: >
+  Do not mock time directly.
+scope:
+  paths:
+    - tests/
+confidence: 0.8
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_001
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`
+	if err := os.WriteFile(filepath.Join(rulesDir, "avoid-direct-time.yaml"), []byte(rule), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitValidation {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "artifact_contract_validation_failed" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+	if !strings.Contains(result.Errors[0].Message, "provenance") {
+		t.Fatalf("error message = %q", result.Errors[0].Message)
+	}
+}
+
+func TestCheckAcceptsDocumentedScopedConfigAndMemoryRuleListMaps(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	replaceInFile(t, filepath.Join(tempDir, "relia.yaml"), "  scopes: []", `  scopes:
+    - prefix: packages/billing/
+      checks: [pytest-billing]`)
+
+	rulesDir := filepath.Join(tempDir, "memory", "rules")
+	if err := os.MkdirAll(rulesDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	rule := `object_type: relia.memory_rule
+schema_version: "1.0"
+id: avoid-direct-time
+kind: avoid
+status: active
+statement: >
+  Do not mock time directly.
+scope:
+  paths:
+    - packages/billing/
+  signals:
+    - pytest-billing
+confidence: 0.8
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_001
+provenance:
+  - pr: 142
+    outcome: revert
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`
+	if err := os.WriteFile(filepath.Join(rulesDir, "avoid-direct-time.yaml"), []byte(rule), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Status != "pass" {
+		t.Fatalf("status = %q", result.Status)
+	}
+}
+
+func TestCheckRejectsMemoryRuleMissingSchemaRequiredFields(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	rulesDir := filepath.Join(tempDir, "memory", "rules")
+	if err := os.MkdirAll(rulesDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
 	rule := `schema_version: "1.0"
 id: avoid-direct-time
 kind: avoid
@@ -433,6 +531,9 @@ confidence: 0.8
 evidence:
   experiences:
     - exp_001
+provenance:
+  - pr: 142
+    outcome: revert
 review:
   label: accepted
 `
@@ -449,6 +550,51 @@ review:
 	if result.Errors[0].Type != "artifact_contract_validation_failed" {
 		t.Fatalf("error type = %q", result.Errors[0].Type)
 	}
+	if !strings.Contains(result.Errors[0].Message, "object_type") {
+		t.Fatalf("error message = %q", result.Errors[0].Message)
+	}
+}
+
+func TestCheckRejectsScalarMemoryRuleProvenanceEntry(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	rulesDir := filepath.Join(tempDir, "memory", "rules")
+	if err := os.MkdirAll(rulesDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	rule := `object_type: relia.memory_rule
+schema_version: "1.0"
+id: avoid-direct-time
+kind: avoid
+status: active
+statement: >
+  Do not mock time directly.
+scope:
+  paths:
+    - tests/
+confidence: 0.8
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_001
+provenance:
+  - pr-142
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`
+	if err := os.WriteFile(filepath.Join(rulesDir, "avoid-direct-time.yaml"), []byte(rule), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitValidation {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
 	if !strings.Contains(result.Errors[0].Message, "provenance") {
 		t.Fatalf("error message = %q", result.Errors[0].Message)
 	}

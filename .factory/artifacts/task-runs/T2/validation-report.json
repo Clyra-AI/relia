@@ -3,12 +3,14 @@
   "schema_version": "1.0",
   "task_id": "T2",
   "status": "pass",
+  "repair_task_id": "20260622T133602.913452000Z-relia-T2-repair",
+  "updated_at": "2026-06-22T14:02:25Z",
   "commands_run": [
     "make lint-fast",
     "make test-fast",
-    "make test-contracts",
-    "GOCACHE=/tmp/relia-go-build go run ./cmd/relia --json check",
-    "for f in schemas/*.json examples/command-results/*.json; do python3 -m json.tool \"$f\" >/dev/null || exit 1; done",
+    "make test-fast",
+    "make test-fast",
+    "git diff --check",
     "make prepush-full",
     "python3 -m json.tool .factory/artifacts/task-runs/T2/work-proof-marker.json",
     "python3 -m json.tool .factory/artifacts/task-runs/T2/validation-report.json",
@@ -26,28 +28,23 @@
       "exit_code": 0
     }
   ],
-  "test_first_skipped_reason": {
-    "status": "skipped",
-    "reason": "The packet required creating the initial T2 contract surface, so no pre-existing focused T2 failure existed before implementation. The configured red_first command `make test-fast` was run before edits and passed; focused contract tests were added in this implementation slice."
-  },
+  "red_evidence": [
+    {
+      "command": "make test-fast",
+      "status": "fail",
+      "exit_code": 2,
+      "summary": "After adding focused regression tests and before implementation repair, documented scoped config failed with `missing parent for checks` and list-map provenance failed with `missing parent for outcome`."
+    }
+  ],
   "green_evidence": [
     {
       "command": "make test-fast",
       "status": "pass",
-      "exit_code": 0
+      "exit_code": 0,
+      "summary": "Focused regressions for YAML list-map parsing and memory-rule schema-required fields passed."
     },
     {
-      "command": "make test-contracts",
-      "status": "pass",
-      "exit_code": 0
-    },
-    {
-      "command": "GOCACHE=/tmp/relia-go-build go run ./cmd/relia --json check",
-      "status": "pass",
-      "exit_code": 0
-    },
-    {
-      "command": "for f in schemas/*.json examples/command-results/*.json; do python3 -m json.tool \"$f\" >/dev/null || exit 1; done",
+      "command": "git diff --check",
       "status": "pass",
       "exit_code": 0
     }
@@ -57,7 +54,7 @@
       "command": "make prepush-full",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Passed lint-fast, test-fast, test-coverage at 77.3% over cmd packages, and test-contracts."
+      "summary": "Passed lint-fast, test-fast, test-coverage at 78.6% over cmd packages, and test-contracts."
     }
   ],
   "evidence_validation": [
@@ -87,8 +84,7 @@
       "status": "implemented",
       "evidence_refs": [
         ".factory/artifacts/task-runs/T2/work-proof-marker.json",
-        "schemas/command-result.schema.json",
-        "examples/command-results/exit-code-examples.json",
+        ".factory/artifacts/task-runs/T2/validation-report.json",
         "cmd/relia/main_test.go"
       ]
     },
@@ -97,10 +93,10 @@
       "status": "implemented",
       "evidence_refs": [
         ".factory/artifacts/task-runs/T2/work-proof-marker.json",
-        "schemas/experience-record.schema.json",
-        "schemas/memory-rule.schema.json",
-        "schemas/risk-assessment.schema.json",
-        "cmd/relia/main_test.go"
+        ".factory/artifacts/task-runs/T2/validation-report.json",
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        "schemas/memory-rule.schema.json"
       ]
     },
     {
@@ -108,9 +104,8 @@
       "status": "implemented",
       "evidence_refs": [
         ".factory/artifacts/task-runs/T2/work-proof-marker.json",
-        "relia.yaml",
-        "README.md",
-        "docs/dev/dev_guides.md"
+        ".factory/artifacts/task-runs/T2/validation-report.json",
+        "cmd/relia/main.go"
       ]
     },
     {
@@ -118,41 +113,40 @@
       "status": "implemented",
       "evidence_refs": [
         ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T2/validation-report.json",
         "cmd/relia/main.go",
-        "cmd/relia/main_test.go",
-        "docs/architecture/decision-0002-phase0-contracts.md"
+        "cmd/relia/main_test.go"
       ]
     }
   ],
   "path_policy_result": {
     "status": "pass",
-    "changed_paths_checked": true,
+    "changed_paths": [
+      ".factory/artifacts/task-runs/T2/validation-report.json",
+      ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+      "cmd/relia/main.go",
+      "cmd/relia/main_test.go"
+    ],
     "forbidden_paths_changed": [],
-    "note": "The required make prepush-full command generated ignored coverage output under .factory/tmp/coverage.out; it is not a tracked worker diff."
+    "note": "The required make prepush-full command uses ignored coverage output under .factory/tmp/coverage.out; it is not present in the tracked worker diff."
   },
   "plan_drift_result": {
     "status": "pass",
-    "notes": "Implementation stayed within T2 Phase 0 config, schema, privacy, validation, and structured-output contract scope."
+    "notes": "Repair stayed within T2 configuration, schema, artifact contract, validation, and structured output scope."
   },
-  "docs_sync_result": {
-    "status": "pass",
-    "updated_refs": [
-      "README.md",
-      "docs/dev/dev_guides.md",
-      "docs/architecture/architecture_guides.md",
-      "docs/architecture/decision-0002-phase0-contracts.md"
-    ]
-  },
-  "factoryd_owned_evidence": {
+  "scope_closure_result": {
     "status": "not_authored_by_worker",
-    "expected_artifacts": [
-      "scope_closure_report",
-      "pr_lifecycle_report",
-      "factoryd_run_once_report"
-    ]
+    "notes": "scope_closure_report is Factoryd-produced evidence per the task packet."
+  },
+  "pr_lifecycle_result": {
+    "status": "not_authored_by_worker",
+    "notes": "pr_lifecycle_report is Factoryd-produced evidence per the task packet."
+  },
+  "factoryd_run_once_result": {
+    "status": "not_authored_by_worker",
+    "notes": "factoryd_run_once_report is Factoryd-produced evidence per the task packet."
   },
   "residual_risks": [
-    "Schema validation is currently contract-shape validation through the standard library; full JSON Schema instance validation can be deepened in later runtime slices.",
-    "Live GitHub, provider, and model-artifact checks remain out of scope for this offline T2 worker."
+    "The repo-local YAML parser remains intentionally narrow and standard-library based; it now covers the PRD-documented list-of-map forms used by scoped config and memory-rule provenance."
   ]
 }

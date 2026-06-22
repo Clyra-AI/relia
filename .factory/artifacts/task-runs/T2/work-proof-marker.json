@@ -4,34 +4,20 @@
   "task_id": "T2",
   "status": "implemented",
   "implementation_performed": true,
+  "repair_task_id": "20260622T133602.913452000Z-relia-T2-repair",
+  "updated_at": "2026-06-22T14:02:25Z",
   "changed_paths": [
     ".factory/artifacts/task-runs/T2/validation-report.json",
     ".factory/artifacts/task-runs/T2/work-proof-marker.json",
-    "README.md",
     "cmd/relia/main.go",
-    "cmd/relia/main_test.go",
-    "docs/architecture/architecture_guides.md",
-    "docs/architecture/decision-0002-phase0-contracts.md",
-    "docs/dev/dev_guides.md",
-    "examples/command-results/exit-code-examples.json",
-    "relia.yaml",
-    "schemas/command-result.schema.json",
-    "schemas/compiled-context.schema.json",
-    "schemas/coverage-map.schema.json",
-    "schemas/experience-record.schema.json",
-    "schemas/failure-signature.schema.json",
-    "schemas/memory-rule.schema.json",
-    "schemas/outcome-evidence.schema.json",
-    "schemas/recurrence-report.schema.json",
-    "schemas/redaction-config.schema.json",
-    "schemas/risk-assessment.schema.json"
+    "cmd/relia/main_test.go"
   ],
   "evidence_refs": [
     ".factory/artifacts/task-runs/T2/validation-report.json",
+    "cmd/relia/main.go",
     "cmd/relia/main_test.go",
-    "schemas/command-result.schema.json",
-    "schemas/experience-record.schema.json",
-    "relia.yaml"
+    "schemas/memory-rule.schema.json",
+    "docs/product/prd.md"
   ],
-  "summary": "Implemented Phase 0 config defaults, versioned schema contracts, artifact skeleton refs, privacy/redaction fail-closed validation, local model manifest validation, memory rule provenance validation, and command-result metadata."
+  "summary": "Repaired Codex review findings by parsing YAML list items with nested fields and validating memory-rule artifacts against schema-required object, evidence, provenance, review, and metadata fields."
 }

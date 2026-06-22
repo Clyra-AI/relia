@@ -128,8 +128,17 @@ type yamlScalar struct {
 }
 
 type yamlDocument struct {
-	Scalars map[string]yamlScalar
-	Lists   map[string][]yamlScalar
+	Scalars    map[string]yamlScalar
+	Lists      map[string][]yamlScalar
+	ListMaps   map[string][]map[string]yamlScalar
+	Containers map[string]yamlScalar
+}
+
+type yamlContext struct {
+	Path       string
+	ListItem   bool
+	ListParent string
+	ListIndex  int
 }
 
 type globalFlags struct {
@@ -741,11 +750,14 @@ func validateMemoryRuleArtifact(root string, path string) *CommandError {
 	if parseErr != nil {
 		return artifactContractError(parseErr.Error(), rel)
 	}
-	required := []string{"schema_version", "id", "kind", "status", "statement", "confidence"}
+	required := []string{"object_type", "schema_version", "id", "kind", "status", "statement", "scope", "confidence", "evidence", "provenance", "review", "metadata"}
 	for _, key := range required {
-		if _, ok := document.Scalars[key]; !ok {
+		if !hasYAMLPath(document, key) {
 			return artifactContractError("memory rule missing required key "+key, rel)
 		}
+	}
+	if document.Scalars["object_type"].Value != "relia.memory_rule" {
+		return artifactContractError("memory rule object_type must be relia.memory_rule", configRefWithPath(rel, document.Scalars["object_type"]))
 	}
 	if document.Scalars["schema_version"].Value != commandSchemaVersion {
 		return artifactContractError("memory rule schema_version must be "+commandSchemaVersion, rel)
@@ -767,29 +779,78 @@ func validateMemoryRuleArtifact(root string, path string) *CommandError {
 	if len(document.Lists["evidence.experiences"]) == 0 {
 		return artifactContractError("memory rule must cite at least one experience", rel)
 	}
-	if len(document.Lists["provenance"]) == 0 {
+	evidenceCount, ok := document.Scalars["evidence.count"]
+	if !ok {
+		return artifactContractError("memory rule missing required key evidence.count", rel)
+	}
+	count, err := strconv.Atoi(evidenceCount.Value)
+	if err != nil || count < 1 {
+		return artifactContractError("memory rule evidence.count must be at least 1", configRefWithPath(rel, evidenceCount))
+	}
+	contradictionsScalar, ok := document.Scalars["evidence.contradictions"]
+	if !ok {
+		return artifactContractError("memory rule missing required key evidence.contradictions", rel)
+	}
+	contradictions, err := strconv.Atoi(contradictionsScalar.Value)
+	if err != nil || contradictions < 0 {
+		return artifactContractError("memory rule evidence.contradictions must be at least 0", configRefWithPath(rel, contradictionsScalar))
+	}
+	provenanceEntries := document.Lists["provenance"]
+	if len(provenanceEntries) == 0 {
 		return artifactContractError("memory rule must include at least one provenance entry", rel)
 	}
-	if status == "active" {
-		reviewLabel, ok := document.Scalars["review.label"]
+	provenanceMaps := document.ListMaps["provenance"]
+	if len(provenanceMaps) != len(provenanceEntries) {
+		return artifactContractError("memory rule provenance entries must include pr and outcome", rel)
+	}
+	for _, provenance := range provenanceMaps {
+		pr, ok := provenance["pr"]
 		if !ok {
-			return artifactContractError("active memory rule must include review.label", rel)
+			return artifactContractError("memory rule provenance entry missing pr", rel)
 		}
-		switch reviewLabel.Value {
-		case "accepted", "suggested", "needs_user_input":
+		prNumber, err := strconv.Atoi(pr.Value)
+		if err != nil || prNumber < 1 {
+			return artifactContractError("memory rule provenance pr must be at least 1", configRefWithPath(rel, pr))
+		}
+		outcome, ok := provenance["outcome"]
+		if !ok {
+			return artifactContractError("memory rule provenance entry missing outcome", rel)
+		}
+		switch outcome.Value {
+		case "ci_failure", "revert", "review_correction", "fix_held", "merged_clean":
 		default:
-			return artifactContractError("memory rule review.label is invalid", configRefWithPath(rel, reviewLabel))
+			return artifactContractError("memory rule provenance outcome is invalid", configRefWithPath(rel, outcome))
 		}
+	}
+	reviewLabel, ok := document.Scalars["review.label"]
+	if !ok {
+		return artifactContractError("memory rule missing required key review.label", rel)
+	}
+	switch reviewLabel.Value {
+	case "accepted", "suggested", "needs_user_input":
+	default:
+		return artifactContractError("memory rule review.label is invalid", configRefWithPath(rel, reviewLabel))
+	}
+	statementOrigin, ok := document.Scalars["review.statement_origin"]
+	if !ok {
+		return artifactContractError("memory rule missing required key review.statement_origin", rel)
+	}
+	switch statementOrigin.Value {
+	case "llm_drafted", "cluster_summary", "human_authored":
+	default:
+		return artifactContractError("memory rule review.statement_origin is invalid", configRefWithPath(rel, statementOrigin))
 	}
 	return nil
 }
 
 func parseYAMLDocument(content string) (yamlDocument, error) {
 	document := yamlDocument{
-		Scalars: map[string]yamlScalar{},
-		Lists:   map[string][]yamlScalar{},
+		Scalars:    map[string]yamlScalar{},
+		Lists:      map[string][]yamlScalar{},
+		ListMaps:   map[string][]map[string]yamlScalar{},
+		Containers: map[string]yamlScalar{},
 	}
-	var stack []string
+	var stack []yamlContext
 	blockScalarIndent := -1
 	lines := strings.Split(content, "\n")
 	for index, raw := range lines {
@@ -816,40 +877,133 @@ func parseYAMLDocument(content string) (yamlDocument, error) {
 			if depth > len(stack) {
 				return document, fmt.Errorf("list item without parent at line %d", lineNumber)
 			}
-			parent := strings.Join(stack[:depth], ".")
+			parent := yamlParentPath(stack, depth)
 			if parent == "" {
 				return document, fmt.Errorf("top-level lists are not supported at line %d", lineNumber)
 			}
+			itemValue := strings.TrimSpace(strings.TrimPrefix(trimmed, "- "))
 			document.Lists[parent] = append(document.Lists[parent], yamlScalar{
-				Value: strings.TrimSpace(strings.TrimPrefix(trimmed, "- ")),
+				Value: itemValue,
 				Line:  lineNumber,
 			})
+			itemIndex := len(document.Lists[parent]) - 1
+			stack = append(stack[:depth], yamlContext{
+				Path:       fmt.Sprintf("%s[%d]", parent, itemIndex),
+				ListItem:   true,
+				ListParent: parent,
+				ListIndex:  itemIndex,
+			})
+			if key, value, ok := cutYAMLMapping(itemValue); ok {
+				scalarValue := unquoteScalar(value)
+				recordListMapScalar(document, parent, itemIndex, key, yamlScalar{Value: scalarValue, Line: lineNumber})
+				if scalarValue == ">" || scalarValue == "|" {
+					blockScalarIndent = indent
+				}
+			}
 			continue
 		}
-		key, value, ok := strings.Cut(trimmed, ":")
+		key, value, ok := cutYAMLMapping(trimmed)
 		if !ok {
 			return document, fmt.Errorf("expected key/value pair at line %d", lineNumber)
 		}
-		key = strings.TrimSpace(key)
 		if key == "" {
 			return document, fmt.Errorf("empty key at line %d", lineNumber)
 		}
 		if depth > len(stack) {
 			return document, fmt.Errorf("missing parent for %s at line %d", key, lineNumber)
 		}
-		stack = append(stack[:depth], key)
-		value = strings.TrimSpace(value)
+		path := key
+		if parent := yamlParentPath(stack, depth); parent != "" {
+			path = parent + "." + key
+		}
+		stack = append(stack[:depth], yamlContext{Path: path})
 		if value == "" {
+			document.Containers[path] = yamlScalar{Line: lineNumber}
 			continue
 		}
-		path := strings.Join(stack, ".")
 		scalarValue := unquoteScalar(value)
 		document.Scalars[path] = yamlScalar{Value: scalarValue, Line: lineNumber}
+		if listParent, listIndex, itemPath, ok := nearestListItem(stack[:depth]); ok {
+			field := strings.TrimPrefix(path, itemPath+".")
+			recordListMapScalar(document, listParent, listIndex, field, yamlScalar{Value: scalarValue, Line: lineNumber})
+		}
 		if scalarValue == ">" || scalarValue == "|" {
 			blockScalarIndent = indent
 		}
 	}
 	return document, nil
+}
+
+func yamlParentPath(stack []yamlContext, depth int) string {
+	if depth <= 0 {
+		return ""
+	}
+	return stack[depth-1].Path
+}
+
+func cutYAMLMapping(value string) (string, string, bool) {
+	key, rest, ok := strings.Cut(value, ":")
+	if !ok {
+		return "", "", false
+	}
+	if rest != "" && rest[0] != ' ' && rest[0] != '\t' {
+		return "", "", false
+	}
+	key = strings.TrimSpace(key)
+	if key == "" {
+		return "", "", false
+	}
+	return key, strings.TrimSpace(rest), true
+}
+
+func nearestListItem(stack []yamlContext) (string, int, string, bool) {
+	for index := len(stack) - 1; index >= 0; index-- {
+		context := stack[index]
+		if context.ListItem {
+			return context.ListParent, context.ListIndex, context.Path, true
+		}
+	}
+	return "", 0, "", false
+}
+
+func recordListMapScalar(document yamlDocument, parent string, index int, key string, scalar yamlScalar) {
+	for len(document.ListMaps[parent]) <= index {
+		document.ListMaps[parent] = append(document.ListMaps[parent], map[string]yamlScalar{})
+	}
+	document.ListMaps[parent][index][key] = scalar
+}
+
+func hasYAMLPath(document yamlDocument, path string) bool {
+	if _, ok := document.Scalars[path]; ok {
+		return true
+	}
+	if _, ok := document.Containers[path]; ok {
+		return true
+	}
+	if _, ok := document.Lists[path]; ok {
+		return true
+	}
+	if _, ok := document.ListMaps[path]; ok {
+		return true
+	}
+	prefix := path + "."
+	indexedPrefix := path + "["
+	for key := range document.Scalars {
+		if strings.HasPrefix(key, prefix) || strings.HasPrefix(key, indexedPrefix) {
+			return true
+		}
+	}
+	for key := range document.Containers {
+		if strings.HasPrefix(key, prefix) || strings.HasPrefix(key, indexedPrefix) {
+			return true
+		}
+	}
+	for key := range document.Lists {
+		if strings.HasPrefix(key, prefix) || strings.HasPrefix(key, indexedPrefix) {
+			return true
+		}
+	}
+	return false
 }
 
 func leadingSpaces(value string) int {
