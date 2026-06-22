@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -266,6 +267,9 @@ func initResult(args []string, start time.Time) CommandResult {
 		if err := ensureArtifactSkeleton(root); err != nil {
 			return errorResult("init", "init", internalError("could not write artifact skeleton", err), start)
 		}
+		if err := ensureReliaGitIgnore(root); err != nil {
+			return errorResult("init", "init", internalError("could not update .gitignore", err), start)
+		}
 		result := passResult("init", "init", "relia.yaml already exists", start, map[string]any{
 			"config_path":             defaultConfigFile,
 			"created":                 false,
@@ -285,6 +289,9 @@ func initResult(args []string, start time.Time) CommandResult {
 	}
 	if err := ensureArtifactSkeleton(root); err != nil {
 		return errorResult("init", "init", internalError("could not write artifact skeleton", err), start)
+	}
+	if err := ensureReliaGitIgnore(root); err != nil {
+		return errorResult("init", "init", internalError("could not update .gitignore", err), start)
 	}
 	result := passResult("init", "init", "created relia.yaml", start, map[string]any{
 		"config_path":             defaultConfigFile,
@@ -566,6 +573,33 @@ func ensureArtifactSkeleton(root string) error {
 		}
 	}
 	return nil
+}
+
+func ensureReliaGitIgnore(root string) error {
+	path := filepath.Join(root, ".gitignore")
+	content, err := os.ReadFile(path)
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
+		return err
+	}
+	if gitIgnoreContainsRelia(content) {
+		return nil
+	}
+	next := strings.TrimRight(string(content), "\n")
+	if next != "" {
+		next += "\n"
+	}
+	next += ".relia/\n"
+	return os.WriteFile(path, []byte(next), 0o644)
+}
+
+func gitIgnoreContainsRelia(content []byte) bool {
+	for _, line := range strings.Split(string(content), "\n") {
+		switch strings.TrimSpace(line) {
+		case ".relia", ".relia/", ".relia/*":
+			return true
+		}
+	}
+	return false
 }
 
 func validateReliaConfig(root string) ([]Finding, *CommandError) {
@@ -863,6 +897,11 @@ func validateMemoryRuleArtifact(root string, path string) *CommandError {
 	if len(document.Lists["scope.paths"]) == 0 && len(document.Lists["scope.signals"]) == 0 {
 		return artifactContractError("memory rule must declare at least one scope path or signal", rel)
 	}
+	for _, scopePath := range document.Lists["scope.paths"] {
+		if !repoPathExists(root, scopePath.Value) {
+			return artifactContractError("memory rule scope path does not exist in the repo", configRefWithPath(rel, scopePath))
+		}
+	}
 	evidenceCount, ok := document.Scalars["evidence.count"]
 	if !ok {
 		return artifactContractError("memory rule missing required key evidence.count", rel)
@@ -935,6 +974,38 @@ func validateMemoryRuleArtifact(root string, path string) *CommandError {
 		return artifactContractError("memory rule review.statement_origin is invalid", configRefWithPath(rel, statementOrigin))
 	}
 	return nil
+}
+
+func repoPathExists(root string, rel string) bool {
+	clean, ok := cleanRepoPath(rel)
+	if !ok {
+		return false
+	}
+	if _, err := os.Stat(filepath.Join(root, clean)); err == nil {
+		return true
+	}
+	if output, err := exec.Command("git", "-C", root, "log", "--all", "--name-only", "--format=", "--", clean).Output(); err == nil {
+		return strings.TrimSpace(string(output)) != ""
+	}
+	return false
+}
+
+func cleanRepoPath(rel string) (string, bool) {
+	trimmed := strings.TrimSpace(rel)
+	if trimmed == "" || filepath.IsAbs(trimmed) {
+		return "", false
+	}
+	clean := filepath.Clean(trimmed)
+	cleanSlash := filepath.ToSlash(clean)
+	if clean == "." || clean == ".." || strings.HasPrefix(cleanSlash, "../") {
+		return "", false
+	}
+	for _, part := range strings.Split(cleanSlash, "/") {
+		if part == ".." {
+			return "", false
+		}
+	}
+	return clean, true
 }
 
 func parseYAMLDocument(content string) (yamlDocument, error) {
