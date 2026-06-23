@@ -253,6 +253,21 @@ def validate_lifecycle_path_ownership(task, task_id):
         for item in task.get("lifecycle_evidence_required") or []
         if normalized_evidence_key(item)
     }
+    inheritance = task.get("validation_contract_inheritance")
+    if isinstance(inheritance, dict):
+        lifecycle_keys.update(
+            normalized_evidence_key(item)
+            for item in inheritance.get("lifecycle_evidence_required") or []
+            if normalized_evidence_key(item)
+        )
+    for requirement in task.get("acceptance_result_requirements") or []:
+        if not isinstance(requirement, dict):
+            continue
+        lifecycle_keys.update(
+            normalized_evidence_key(item)
+            for item in requirement.get("lifecycle_evidence_required") or []
+            if normalized_evidence_key(item)
+        )
     if not lifecycle_keys:
         return
     allowed = {normalize_repo_path(path) for path in task.get("allowed_paths") or []}
@@ -275,10 +290,9 @@ def validate_lifecycle_path_ownership(task, task_id):
     if "pr_lifecycle_report" in lifecycle_keys or "ship_packet" in lifecycle_keys or "post_merge_report" in lifecycle_keys:
         required_forbidden.append(pr_lifecycle_dir)
     if "scope_closure_report" in lifecycle_keys:
-        required_forbidden.extend([
-            task_run_dir + "scope-closure-report.json",
-            task_run_dir + "scope-closure-map.json",
-        ])
+        required_forbidden.append(task_run_dir + "scope-closure-report.json")
+    if "scope_closure_map" in lifecycle_keys or "scope_closure_report" in lifecycle_keys:
+        required_forbidden.append(task_run_dir + "scope-closure-map.json")
     if "factoryd_run_once_report" in lifecycle_keys:
         required_forbidden.append(task_run_dir + "factoryd-run-once-report.json")
 
@@ -983,6 +997,44 @@ def self_test():
                 raise
         else:
             fail("missing lifecycle forbidden path fixture did not fail closed")
+
+        nested_lifecycle_missing_forbidden = {
+            "work_item_id": "relia-mvp-t1",
+            "allowed_paths": [".factory/artifacts/task-runs/T1/"],
+            "forbidden_paths": [
+                ".factory/artifacts/pr-lifecycle/relia-mvp-t1/",
+                ".factory/artifacts/task-runs/T1/scope-closure-report.json",
+                ".factory/artifacts/task-runs/T1/scope-closure-map.json",
+            ],
+            "lifecycle_evidence_required": ["scope_closure_report"],
+            "acceptance_result_requirements": [
+                {
+                    "acceptance_item_id": "A1",
+                    "lifecycle_evidence_required": ["factoryd_run_once_report"],
+                }
+            ],
+        }
+        try:
+            validate_lifecycle_path_ownership(nested_lifecycle_missing_forbidden, "T1")
+        except AssertionError as exc:
+            if "factoryd-run-once-report.json" not in str(exc):
+                raise
+        else:
+            fail("nested lifecycle forbidden path fixture did not fail closed")
+
+        scope_closure_map_missing_forbidden = {
+            "work_item_id": "relia-mvp-t1",
+            "allowed_paths": [".factory/artifacts/task-runs/T1/"],
+            "forbidden_paths": [],
+            "lifecycle_evidence_required": ["scope_closure_map"],
+        }
+        try:
+            validate_lifecycle_path_ownership(scope_closure_map_missing_forbidden, "T1")
+        except AssertionError as exc:
+            if "scope-closure-map.json" not in str(exc):
+                raise
+        else:
+            fail("scope closure map forbidden path fixture did not fail closed")
 
         non_list_evidence_required = dict(sample_task)
         non_list_evidence_required["evidence_required"] = "validation_report"
