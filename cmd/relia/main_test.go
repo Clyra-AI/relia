@@ -307,6 +307,44 @@ func TestIngestFailsClosedBeforePersistenceForUnrecognizedSecret(t *testing.T) {
 	}
 }
 
+func TestIngestFailsClosedBeforePersistenceForSecretShapedMetadataKey(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	inputPath := filepath.Join(tempDir, "fixtures", "outcomes.json")
+	writeFileForTest(t, inputPath, `[
+  {
+    "experience_id": "exp_0143_key_secret",
+    "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},
+    "recorded_at": "2026-04-03T18:21:00Z",
+    "pr": 143,
+    "commit": "def5678",
+    "paths": ["packages/billing/invoice.py"],
+    "actor_kind": "agent",
+    "attribution_method": "manual",
+    "outcome_kind": "ci_failure",
+    "signature_class": "test_failure",
+    "check_name": "pytest-billing",
+    "signature_key": "tests/test_invoice.py::test_total",
+    "extraction_confidence": "structured",
+    "provenance_urls": ["https://github.com/acme/billing-service/pull/143"],
+    "metadata": {"ghp_1234567890abcdef1234567890abcdef123456": "seen"}
+  }
+]`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+
+	if code != ExitRedactionSafety {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "redaction_safety_failed" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+	if _, err := os.Stat(filepath.Join(tempDir, ".relia", "experiences", "2026-04.jsonl")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("experience shard should not be persisted on secret-shaped metadata key: %v", err)
+	}
+}
+
 func TestIngestScansMalformedCommitBeforePersistence(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
@@ -341,6 +379,66 @@ func TestIngestScansMalformedCommitBeforePersistence(t *testing.T) {
 	}
 	if _, err := os.Stat(filepath.Join(tempDir, ".relia", "experiences", "2026-04.jsonl")); !errors.Is(err, os.ErrNotExist) {
 		t.Fatalf("experience shard should not be persisted on malformed high-entropy commit: %v", err)
+	}
+}
+
+func TestIngestRejectsMalformedNumericFieldsBeforePersistence(t *testing.T) {
+	for _, testCase := range []struct {
+		name       string
+		extraField string
+		wantError  string
+	}{
+		{
+			name:       "flake_discount",
+			extraField: `"flake_discount": "0.5x",`,
+			wantError:  "flake_discount must be numeric",
+		},
+		{
+			name:       "attribution_confidence",
+			extraField: `"attribution_confidence": "high",`,
+			wantError:  "attribution confidence must be numeric",
+		},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			tempDir := setupContractRepo(t)
+			t.Chdir(tempDir)
+			inputPath := filepath.Join(tempDir, "fixtures", "outcomes.json")
+			writeFileForTest(t, inputPath, `[
+  {
+    "experience_id": "exp_0143_numeric",
+    "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},
+    "recorded_at": "2026-04-03T18:21:00Z",
+    "pr": 143,
+    "commit": "def5678",
+    "paths": ["packages/billing/invoice.py"],
+    "actor_kind": "agent",
+    "attribution_method": "manual",
+    `+testCase.extraField+`
+    "outcome_kind": "ci_failure",
+    "signature_class": "test_failure",
+    "check_name": "pytest-billing",
+    "signature_key": "tests/test_invoice.py::test_total",
+    "extraction_confidence": "structured",
+    "provenance_urls": ["https://github.com/acme/billing-service/pull/143"]
+  }
+]`)
+
+			stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+
+			if code != ExitValidation {
+				t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+			}
+			result := decodeResult(t, stdout)
+			if result.Errors[0].Type != "artifact_contract_validation_failed" {
+				t.Fatalf("error type = %q", result.Errors[0].Type)
+			}
+			if !strings.Contains(result.Errors[0].Message, testCase.wantError) {
+				t.Fatalf("error message = %q, want %q", result.Errors[0].Message, testCase.wantError)
+			}
+			if _, err := os.Stat(filepath.Join(tempDir, ".relia", "experiences", "2026-04.jsonl")); !errors.Is(err, os.ErrNotExist) {
+				t.Fatalf("experience shard should not be persisted on malformed numeric field: %v", err)
+			}
+		})
 	}
 }
 
