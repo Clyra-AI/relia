@@ -2,7 +2,7 @@
   "alignment_decisions": {
     "acceptance_group_count": 47,
     "blocking_questions": [],
-    "factoryd_dispatch_policy": "runner-ready task packets must declare worker_type, factoryd_runtime, validation_commands, evidence_required, stop_conditions, path policy, lifecycle gates, and scope exclusions before dispatch",
+    "factoryd_dispatch_policy": "runner-ready task packets must declare worker_type, factoryd_runtime, validation_commands, worker-owned evidence_required, worker_evidence_required, lifecycle_evidence_required, stop_conditions, path policy, lifecycle gates, and scope exclusions before dispatch",
     "implementation_may_start": false,
     "live_work_unlock_requirement": "human approval plus credential and network posture update",
     "repo_local_profile_ref": ".factory/profile.yaml",

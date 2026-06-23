@@ -531,6 +531,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -546,6 +554,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         }
@@ -574,8 +590,7 @@
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T1/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t1/"
+        ".factory/artifacts/task-runs/T1/"
       ],
       "architecture_guidance_refs": [
         {
@@ -728,9 +743,6 @@
       "evidence_required": [
         "work_proof_marker",
         "validation_report",
-        "scope_closure_report",
-        "pr_lifecycle_report",
-        "factoryd_run_once_report",
         "proof-of-behavior-scorecard"
       ],
       "factory_compatibility": {
@@ -777,7 +789,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t1/",
+        ".factory/artifacts/task-runs/T1/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T1/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T1/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -912,9 +928,6 @@
         "evidence_required": [
           "work_proof_marker",
           "validation_report",
-          "scope_closure_report",
-          "pr_lifecycle_report",
-          "factoryd_run_once_report",
           "proof-of-behavior-scorecard"
         ],
         "required_checks": [
@@ -933,11 +946,31 @@
           "required validation command failed",
           "plan drift detected",
           "scope closure did not advance"
+        ],
+        "worker_evidence_required": [
+          "work_proof_marker",
+          "validation_report",
+          "proof-of-behavior-scorecard"
+        ],
+        "lifecycle_evidence_required": [
+          "scope_closure_report",
+          "pr_lifecycle_report",
+          "factoryd_run_once_report"
         ]
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t1",
-      "worker_type": "codex_cli"
+      "worker_type": "codex_cli",
+      "worker_evidence_required": [
+        "work_proof_marker",
+        "validation_report",
+        "proof-of-behavior-scorecard"
+      ],
+      "lifecycle_evidence_required": [
+        "scope_closure_report",
+        "pr_lifecycle_report",
+        "factoryd_run_once_report"
+      ]
     },
     {
       "acceptance_checks": [
@@ -972,7 +1005,13 @@
           ],
           "evidence_required": [
             "validation_report",
-            "work_proof_marker",
+            "work_proof_marker"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -987,7 +1026,13 @@
           ],
           "evidence_required": [
             "validation_report",
-            "work_proof_marker",
+            "work_proof_marker"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -1002,7 +1047,13 @@
           ],
           "evidence_required": [
             "validation_report",
-            "work_proof_marker",
+            "work_proof_marker"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -1017,7 +1068,13 @@
           ],
           "evidence_required": [
             "validation_report",
-            "work_proof_marker",
+            "work_proof_marker"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         }
@@ -1046,8 +1103,7 @@
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T2/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t2/"
+        ".factory/artifacts/task-runs/T2/"
       ],
       "architecture_guidance_refs": [
         {
@@ -1201,10 +1257,7 @@
       ],
       "evidence_required": [
         "work_proof_marker",
-        "validation_report",
-        "scope_closure_report",
-        "pr_lifecycle_report",
-        "factoryd_run_once_report"
+        "validation_report"
       ],
       "factory_compatibility": {
         "factory_contract_version": "1.0",
@@ -1250,7 +1303,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t2/",
+        ".factory/artifacts/task-runs/T2/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T2/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T2/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -1388,10 +1445,7 @@
         "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
         "evidence_required": [
           "work_proof_marker",
-          "validation_report",
-          "scope_closure_report",
-          "pr_lifecycle_report",
-          "factoryd_run_once_report"
+          "validation_report"
         ],
         "required_checks": [
           "make prepush-full"
@@ -1409,11 +1463,29 @@
           "required validation command failed",
           "plan drift detected",
           "scope closure did not advance"
+        ],
+        "worker_evidence_required": [
+          "work_proof_marker",
+          "validation_report"
+        ],
+        "lifecycle_evidence_required": [
+          "scope_closure_report",
+          "pr_lifecycle_report",
+          "factoryd_run_once_report"
         ]
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t2",
-      "worker_type": "codex_cli"
+      "worker_type": "codex_cli",
+      "worker_evidence_required": [
+        "work_proof_marker",
+        "validation_report"
+      ],
+      "lifecycle_evidence_required": [
+        "scope_closure_report",
+        "pr_lifecycle_report",
+        "factoryd_run_once_report"
+      ]
     },
     {
       "acceptance_checks": [
@@ -1449,6 +1521,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -1464,6 +1544,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -1479,6 +1567,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -1494,6 +1590,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         }
@@ -1522,8 +1626,7 @@
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T3/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t3/"
+        ".factory/artifacts/task-runs/T3/"
       ],
       "architecture_guidance_refs": [
         {
@@ -1678,9 +1781,7 @@
       "evidence_required": [
         "work_proof_marker",
         "validation_report",
-        "scope_closure_report",
-        "pr_lifecycle_report",
-        "factoryd_run_once_report"
+        "proof-of-behavior-scorecard"
       ],
       "factory_compatibility": {
         "factory_contract_version": "1.0",
@@ -1726,7 +1827,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t3/",
+        ".factory/artifacts/task-runs/T3/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T3/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T3/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -1865,9 +1970,7 @@
         "evidence_required": [
           "work_proof_marker",
           "validation_report",
-          "scope_closure_report",
-          "pr_lifecycle_report",
-          "factoryd_run_once_report"
+          "proof-of-behavior-scorecard"
         ],
         "required_checks": [
           "make prepush-full"
@@ -1885,11 +1988,31 @@
           "required validation command failed",
           "plan drift detected",
           "scope closure did not advance"
+        ],
+        "worker_evidence_required": [
+          "work_proof_marker",
+          "validation_report",
+          "proof-of-behavior-scorecard"
+        ],
+        "lifecycle_evidence_required": [
+          "scope_closure_report",
+          "pr_lifecycle_report",
+          "factoryd_run_once_report"
         ]
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t3",
-      "worker_type": "codex_cli"
+      "worker_type": "codex_cli",
+      "worker_evidence_required": [
+        "work_proof_marker",
+        "validation_report",
+        "proof-of-behavior-scorecard"
+      ],
+      "lifecycle_evidence_required": [
+        "scope_closure_report",
+        "pr_lifecycle_report",
+        "factoryd_run_once_report"
+      ]
     },
     {
       "acceptance_checks": [
@@ -1928,6 +2051,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -1943,6 +2074,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -1958,6 +2097,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -1973,6 +2120,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -1988,6 +2143,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -2003,6 +2166,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         }
@@ -2031,8 +2202,7 @@
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T4.1/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t4-1/"
+        ".factory/artifacts/task-runs/T4.1/"
       ],
       "architecture_guidance_refs": [
         {
@@ -2187,9 +2357,6 @@
       "evidence_required": [
         "work_proof_marker",
         "validation_report",
-        "scope_closure_report",
-        "pr_lifecycle_report",
-        "factoryd_run_once_report",
         "proof-of-behavior-scorecard"
       ],
       "factory_compatibility": {
@@ -2236,7 +2403,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t4-1/",
+        ".factory/artifacts/task-runs/T4.1/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T4.1/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T4.1/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -2380,9 +2551,7 @@
         "evidence_required": [
           "work_proof_marker",
           "validation_report",
-          "scope_closure_report",
-          "pr_lifecycle_report",
-          "factoryd_run_once_report"
+          "proof-of-behavior-scorecard"
         ],
         "required_checks": [
           "make prepush-full"
@@ -2400,11 +2569,31 @@
           "required validation command failed",
           "plan drift detected",
           "scope closure did not advance"
+        ],
+        "worker_evidence_required": [
+          "work_proof_marker",
+          "validation_report",
+          "proof-of-behavior-scorecard"
+        ],
+        "lifecycle_evidence_required": [
+          "scope_closure_report",
+          "pr_lifecycle_report",
+          "factoryd_run_once_report"
         ]
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t4-1",
-      "worker_type": "codex_cli"
+      "worker_type": "codex_cli",
+      "worker_evidence_required": [
+        "work_proof_marker",
+        "validation_report",
+        "proof-of-behavior-scorecard"
+      ],
+      "lifecycle_evidence_required": [
+        "scope_closure_report",
+        "pr_lifecycle_report",
+        "factoryd_run_once_report"
+      ]
     },
     {
       "acceptance_checks": [
@@ -2437,6 +2626,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -2452,6 +2649,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -2467,6 +2672,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         }
@@ -2495,8 +2708,7 @@
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T4.2/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t4-2/"
+        ".factory/artifacts/task-runs/T4.2/"
       ],
       "architecture_guidance_refs": [
         {
@@ -2651,9 +2863,6 @@
       "evidence_required": [
         "work_proof_marker",
         "validation_report",
-        "scope_closure_report",
-        "pr_lifecycle_report",
-        "factoryd_run_once_report",
         "proof-of-behavior-scorecard"
       ],
       "factory_compatibility": {
@@ -2700,7 +2909,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t4-2/",
+        ".factory/artifacts/task-runs/T4.2/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T4.2/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T4.2/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -2838,9 +3051,7 @@
         "evidence_required": [
           "work_proof_marker",
           "validation_report",
-          "scope_closure_report",
-          "pr_lifecycle_report",
-          "factoryd_run_once_report"
+          "proof-of-behavior-scorecard"
         ],
         "required_checks": [
           "make prepush-full"
@@ -2858,11 +3069,31 @@
           "required validation command failed",
           "plan drift detected",
           "scope closure did not advance"
+        ],
+        "worker_evidence_required": [
+          "work_proof_marker",
+          "validation_report",
+          "proof-of-behavior-scorecard"
+        ],
+        "lifecycle_evidence_required": [
+          "scope_closure_report",
+          "pr_lifecycle_report",
+          "factoryd_run_once_report"
         ]
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t4-2",
-      "worker_type": "codex_cli"
+      "worker_type": "codex_cli",
+      "worker_evidence_required": [
+        "work_proof_marker",
+        "validation_report",
+        "proof-of-behavior-scorecard"
+      ],
+      "lifecycle_evidence_required": [
+        "scope_closure_report",
+        "pr_lifecycle_report",
+        "factoryd_run_once_report"
+      ]
     },
     {
       "acceptance_checks": [
@@ -2892,6 +3123,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         }
@@ -2920,8 +3159,7 @@
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T4.3/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t4-3/"
+        ".factory/artifacts/task-runs/T4.3/"
       ],
       "architecture_guidance_refs": [
         {
@@ -3076,9 +3314,6 @@
       "evidence_required": [
         "work_proof_marker",
         "validation_report",
-        "scope_closure_report",
-        "pr_lifecycle_report",
-        "factoryd_run_once_report",
         "proof-of-behavior-scorecard"
       ],
       "factory_compatibility": {
@@ -3125,7 +3360,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t4-3/",
+        ".factory/artifacts/task-runs/T4.3/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T4.3/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T4.3/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -3259,9 +3498,7 @@
         "evidence_required": [
           "work_proof_marker",
           "validation_report",
-          "scope_closure_report",
-          "pr_lifecycle_report",
-          "factoryd_run_once_report"
+          "proof-of-behavior-scorecard"
         ],
         "required_checks": [
           "make prepush-full"
@@ -3279,11 +3516,31 @@
           "required validation command failed",
           "plan drift detected",
           "scope closure did not advance"
+        ],
+        "worker_evidence_required": [
+          "work_proof_marker",
+          "validation_report",
+          "proof-of-behavior-scorecard"
+        ],
+        "lifecycle_evidence_required": [
+          "scope_closure_report",
+          "pr_lifecycle_report",
+          "factoryd_run_once_report"
         ]
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t4-3",
-      "worker_type": "codex_cli"
+      "worker_type": "codex_cli",
+      "worker_evidence_required": [
+        "work_proof_marker",
+        "validation_report",
+        "proof-of-behavior-scorecard"
+      ],
+      "lifecycle_evidence_required": [
+        "scope_closure_report",
+        "pr_lifecycle_report",
+        "factoryd_run_once_report"
+      ]
     },
     {
       "acceptance_checks": [
@@ -3340,6 +3597,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -3355,6 +3620,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -3370,6 +3643,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -3385,6 +3666,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -3400,6 +3689,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -3415,6 +3712,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -3430,6 +3735,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -3445,6 +3758,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -3460,6 +3781,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -3475,6 +3804,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -3490,6 +3827,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -3505,6 +3850,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -3520,6 +3873,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         }
@@ -3548,8 +3909,7 @@
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T5/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t5/"
+        ".factory/artifacts/task-runs/T5/"
       ],
       "architecture_guidance_refs": [
         {
@@ -3704,9 +4064,7 @@
       "evidence_required": [
         "work_proof_marker",
         "validation_report",
-        "scope_closure_report",
-        "pr_lifecycle_report",
-        "factoryd_run_once_report"
+        "proof-of-behavior-scorecard"
       ],
       "factory_compatibility": {
         "factory_contract_version": "1.0",
@@ -3752,7 +4110,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t5/",
+        ".factory/artifacts/task-runs/T5/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T5/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T5/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -3909,9 +4271,7 @@
         "evidence_required": [
           "work_proof_marker",
           "validation_report",
-          "scope_closure_report",
-          "pr_lifecycle_report",
-          "factoryd_run_once_report"
+          "proof-of-behavior-scorecard"
         ],
         "required_checks": [
           "make prepush-full"
@@ -3929,11 +4289,31 @@
           "required validation command failed",
           "plan drift detected",
           "scope closure did not advance"
+        ],
+        "worker_evidence_required": [
+          "work_proof_marker",
+          "validation_report",
+          "proof-of-behavior-scorecard"
+        ],
+        "lifecycle_evidence_required": [
+          "scope_closure_report",
+          "pr_lifecycle_report",
+          "factoryd_run_once_report"
         ]
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t5",
-      "worker_type": "codex_cli"
+      "worker_type": "codex_cli",
+      "worker_evidence_required": [
+        "work_proof_marker",
+        "validation_report",
+        "proof-of-behavior-scorecard"
+      ],
+      "lifecycle_evidence_required": [
+        "scope_closure_report",
+        "pr_lifecycle_report",
+        "factoryd_run_once_report"
+      ]
     },
     {
       "acceptance_checks": [
@@ -4004,6 +4384,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -4019,6 +4407,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -4034,6 +4430,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -4049,6 +4453,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -4064,6 +4476,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -4079,6 +4499,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -4094,6 +4522,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -4109,6 +4545,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -4124,6 +4568,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -4139,6 +4591,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -4154,6 +4614,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -4169,6 +4637,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -4184,6 +4660,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -4199,6 +4683,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -4214,6 +4706,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         }
@@ -4242,8 +4742,7 @@
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T6/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t6/"
+        ".factory/artifacts/task-runs/T6/"
       ],
       "architecture_guidance_refs": [
         {
@@ -4398,9 +4897,7 @@
       "evidence_required": [
         "work_proof_marker",
         "validation_report",
-        "scope_closure_report",
-        "pr_lifecycle_report",
-        "factoryd_run_once_report"
+        "proof-of-behavior-scorecard"
       ],
       "factory_compatibility": {
         "factory_contract_version": "1.0",
@@ -4446,7 +4943,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t6/",
+        ".factory/artifacts/task-runs/T6/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T6/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T6/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -4611,9 +5112,7 @@
         "evidence_required": [
           "work_proof_marker",
           "validation_report",
-          "scope_closure_report",
-          "pr_lifecycle_report",
-          "factoryd_run_once_report"
+          "proof-of-behavior-scorecard"
         ],
         "required_checks": [
           "make prepush-full"
@@ -4633,11 +5132,31 @@
           "scope closure did not advance",
           "live credential or network work attempted without approval",
           "manual, product-signal, or judgment-only acceptance closed without approval evidence"
+        ],
+        "worker_evidence_required": [
+          "work_proof_marker",
+          "validation_report",
+          "proof-of-behavior-scorecard"
+        ],
+        "lifecycle_evidence_required": [
+          "scope_closure_report",
+          "pr_lifecycle_report",
+          "factoryd_run_once_report"
         ]
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t6",
-      "worker_type": "codex_cli"
+      "worker_type": "codex_cli",
+      "worker_evidence_required": [
+        "work_proof_marker",
+        "validation_report",
+        "proof-of-behavior-scorecard"
+      ],
+      "lifecycle_evidence_required": [
+        "scope_closure_report",
+        "pr_lifecycle_report",
+        "factoryd_run_once_report"
+      ]
     },
     {
       "acceptance_checks": [
@@ -4708,6 +5227,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -4723,6 +5250,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -4738,6 +5273,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -4753,6 +5296,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -4768,6 +5319,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -4783,6 +5342,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -4798,6 +5365,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -4813,6 +5388,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -4828,6 +5411,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -4843,6 +5434,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -4858,6 +5457,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -4873,6 +5480,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -4888,6 +5503,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -4903,6 +5526,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -4918,6 +5549,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         }
@@ -4946,8 +5585,7 @@
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T7/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t7/"
+        ".factory/artifacts/task-runs/T7/"
       ],
       "architecture_guidance_refs": [
         {
@@ -5110,9 +5748,7 @@
       "evidence_required": [
         "work_proof_marker",
         "validation_report",
-        "scope_closure_report",
-        "pr_lifecycle_report",
-        "factoryd_run_once_report"
+        "proof-of-behavior-scorecard"
       ],
       "factory_compatibility": {
         "factory_contract_version": "1.0",
@@ -5174,7 +5810,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t7/",
+        ".factory/artifacts/task-runs/T7/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T7/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T7/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -5365,9 +6005,7 @@
         "evidence_required": [
           "work_proof_marker",
           "validation_report",
-          "scope_closure_report",
-          "pr_lifecycle_report",
-          "factoryd_run_once_report"
+          "proof-of-behavior-scorecard"
         ],
         "required_checks": [
           "make prepush-full"
@@ -5391,11 +6029,31 @@
           "model artifact download attempted without explicit relia models pull scope or approved network posture",
           "model weights or inference-runtime payloads are added to source, binary, container, or release artifacts without an approved distribution decision",
           "embeddings: local silently falls back instead of failing closed on missing or digest-mismatched artifact"
+        ],
+        "worker_evidence_required": [
+          "work_proof_marker",
+          "validation_report",
+          "proof-of-behavior-scorecard"
+        ],
+        "lifecycle_evidence_required": [
+          "scope_closure_report",
+          "pr_lifecycle_report",
+          "factoryd_run_once_report"
         ]
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t7",
-      "worker_type": "codex_cli"
+      "worker_type": "codex_cli",
+      "worker_evidence_required": [
+        "work_proof_marker",
+        "validation_report",
+        "proof-of-behavior-scorecard"
+      ],
+      "lifecycle_evidence_required": [
+        "scope_closure_report",
+        "pr_lifecycle_report",
+        "factoryd_run_once_report"
+      ]
     },
     {
       "acceptance_checks": [
@@ -5423,6 +6081,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         }
@@ -5451,8 +6117,7 @@
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T8/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t8/"
+        ".factory/artifacts/task-runs/T8/"
       ],
       "architecture_guidance_refs": [
         {
@@ -5607,9 +6272,7 @@
       "evidence_required": [
         "work_proof_marker",
         "validation_report",
-        "scope_closure_report",
-        "pr_lifecycle_report",
-        "factoryd_run_once_report"
+        "proof-of-behavior-scorecard"
       ],
       "factory_compatibility": {
         "factory_contract_version": "1.0",
@@ -5655,7 +6318,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t8/",
+        ".factory/artifacts/task-runs/T8/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T8/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T8/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -5788,9 +6455,7 @@
         "evidence_required": [
           "work_proof_marker",
           "validation_report",
-          "scope_closure_report",
-          "pr_lifecycle_report",
-          "factoryd_run_once_report"
+          "proof-of-behavior-scorecard"
         ],
         "required_checks": [
           "make prepush-full"
@@ -5808,11 +6473,31 @@
           "required validation command failed",
           "plan drift detected",
           "scope closure did not advance"
+        ],
+        "worker_evidence_required": [
+          "work_proof_marker",
+          "validation_report",
+          "proof-of-behavior-scorecard"
+        ],
+        "lifecycle_evidence_required": [
+          "scope_closure_report",
+          "pr_lifecycle_report",
+          "factoryd_run_once_report"
         ]
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t8",
-      "worker_type": "codex_cli"
+      "worker_type": "codex_cli",
+      "worker_evidence_required": [
+        "work_proof_marker",
+        "validation_report",
+        "proof-of-behavior-scorecard"
+      ],
+      "lifecycle_evidence_required": [
+        "scope_closure_report",
+        "pr_lifecycle_report",
+        "factoryd_run_once_report"
+      ]
     },
     {
       "acceptance_checks": [
@@ -5864,6 +6549,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -5879,6 +6572,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -5894,6 +6595,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -5909,6 +6618,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -5924,6 +6641,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -5939,6 +6664,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -5954,6 +6687,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -5969,6 +6710,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -5984,6 +6733,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         }
@@ -6012,8 +6769,7 @@
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T9/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t9/"
+        ".factory/artifacts/task-runs/T9/"
       ],
       "architecture_guidance_refs": [
         {
@@ -6168,9 +6924,7 @@
       "evidence_required": [
         "work_proof_marker",
         "validation_report",
-        "scope_closure_report",
-        "pr_lifecycle_report",
-        "factoryd_run_once_report"
+        "proof-of-behavior-scorecard"
       ],
       "factory_compatibility": {
         "factory_contract_version": "1.0",
@@ -6232,7 +6986,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t9/",
+        ".factory/artifacts/task-runs/T9/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T9/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -6404,9 +7162,7 @@
         "evidence_required": [
           "work_proof_marker",
           "validation_report",
-          "scope_closure_report",
-          "pr_lifecycle_report",
-          "factoryd_run_once_report"
+          "proof-of-behavior-scorecard"
         ],
         "required_checks": [
           "make prepush-full"
@@ -6425,11 +7181,31 @@
           "plan drift detected",
           "scope closure did not advance",
           "live credential or network work attempted without approval"
+        ],
+        "worker_evidence_required": [
+          "work_proof_marker",
+          "validation_report",
+          "proof-of-behavior-scorecard"
+        ],
+        "lifecycle_evidence_required": [
+          "scope_closure_report",
+          "pr_lifecycle_report",
+          "factoryd_run_once_report"
         ]
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t9",
-      "worker_type": "codex_cli"
+      "worker_type": "codex_cli",
+      "worker_evidence_required": [
+        "work_proof_marker",
+        "validation_report",
+        "proof-of-behavior-scorecard"
+      ],
+      "lifecycle_evidence_required": [
+        "scope_closure_report",
+        "pr_lifecycle_report",
+        "factoryd_run_once_report"
+      ]
     },
     {
       "acceptance_checks": [
@@ -6468,6 +7244,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -6483,6 +7267,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -6498,6 +7290,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -6513,6 +7313,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -6528,6 +7336,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         }
@@ -6556,8 +7372,7 @@
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T10/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t10/"
+        ".factory/artifacts/task-runs/T10/"
       ],
       "architecture_guidance_refs": [
         {
@@ -6712,9 +7527,7 @@
       "evidence_required": [
         "work_proof_marker",
         "validation_report",
-        "scope_closure_report",
-        "pr_lifecycle_report",
-        "factoryd_run_once_report"
+        "proof-of-behavior-scorecard"
       ],
       "factory_compatibility": {
         "factory_contract_version": "1.0",
@@ -6760,7 +7573,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t10/",
+        ".factory/artifacts/task-runs/T10/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T10/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T10/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -6905,9 +7722,7 @@
         "evidence_required": [
           "work_proof_marker",
           "validation_report",
-          "scope_closure_report",
-          "pr_lifecycle_report",
-          "factoryd_run_once_report"
+          "proof-of-behavior-scorecard"
         ],
         "required_checks": [
           "make prepush-full"
@@ -6927,11 +7742,31 @@
           "scope closure did not advance",
           "live credential or network work attempted without approval",
           "manual, product-signal, or judgment-only acceptance closed without approval evidence"
+        ],
+        "worker_evidence_required": [
+          "work_proof_marker",
+          "validation_report",
+          "proof-of-behavior-scorecard"
+        ],
+        "lifecycle_evidence_required": [
+          "scope_closure_report",
+          "pr_lifecycle_report",
+          "factoryd_run_once_report"
         ]
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t10",
-      "worker_type": "codex_cli"
+      "worker_type": "codex_cli",
+      "worker_evidence_required": [
+        "work_proof_marker",
+        "validation_report",
+        "proof-of-behavior-scorecard"
+      ],
+      "lifecycle_evidence_required": [
+        "scope_closure_report",
+        "pr_lifecycle_report",
+        "factoryd_run_once_report"
+      ]
     },
     {
       "acceptance_checks": [
@@ -6959,6 +7794,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         }
@@ -6987,8 +7830,7 @@
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T11/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t11/"
+        ".factory/artifacts/task-runs/T11/"
       ],
       "architecture_guidance_refs": [
         {
@@ -7143,9 +7985,7 @@
       "evidence_required": [
         "work_proof_marker",
         "validation_report",
-        "scope_closure_report",
-        "pr_lifecycle_report",
-        "factoryd_run_once_report"
+        "proof-of-behavior-scorecard"
       ],
       "factory_compatibility": {
         "factory_contract_version": "1.0",
@@ -7191,7 +8031,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t11/",
+        ".factory/artifacts/task-runs/T11/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T11/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T11/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -7324,9 +8168,7 @@
         "evidence_required": [
           "work_proof_marker",
           "validation_report",
-          "scope_closure_report",
-          "pr_lifecycle_report",
-          "factoryd_run_once_report"
+          "proof-of-behavior-scorecard"
         ],
         "required_checks": [
           "make prepush-full"
@@ -7344,11 +8186,31 @@
           "required validation command failed",
           "plan drift detected",
           "scope closure did not advance"
+        ],
+        "worker_evidence_required": [
+          "work_proof_marker",
+          "validation_report",
+          "proof-of-behavior-scorecard"
+        ],
+        "lifecycle_evidence_required": [
+          "scope_closure_report",
+          "pr_lifecycle_report",
+          "factoryd_run_once_report"
         ]
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t11",
-      "worker_type": "codex_cli"
+      "worker_type": "codex_cli",
+      "worker_evidence_required": [
+        "work_proof_marker",
+        "validation_report",
+        "proof-of-behavior-scorecard"
+      ],
+      "lifecycle_evidence_required": [
+        "scope_closure_report",
+        "pr_lifecycle_report",
+        "factoryd_run_once_report"
+      ]
     },
     {
       "acceptance_checks": [
@@ -7380,6 +8242,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -7395,6 +8265,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -7410,6 +8288,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         }
@@ -7438,8 +8324,7 @@
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T12/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t12/"
+        ".factory/artifacts/task-runs/T12/"
       ],
       "architecture_guidance_refs": [
         {
@@ -7594,9 +8479,7 @@
       "evidence_required": [
         "work_proof_marker",
         "validation_report",
-        "scope_closure_report",
-        "pr_lifecycle_report",
-        "factoryd_run_once_report"
+        "proof-of-behavior-scorecard"
       ],
       "factory_compatibility": {
         "factory_contract_version": "1.0",
@@ -7642,7 +8525,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t12/",
+        ".factory/artifacts/task-runs/T12/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T12/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T12/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -7779,9 +8666,7 @@
         "evidence_required": [
           "work_proof_marker",
           "validation_report",
-          "scope_closure_report",
-          "pr_lifecycle_report",
-          "factoryd_run_once_report"
+          "proof-of-behavior-scorecard"
         ],
         "required_checks": [
           "make prepush-full"
@@ -7799,11 +8684,31 @@
           "required validation command failed",
           "plan drift detected",
           "scope closure did not advance"
+        ],
+        "worker_evidence_required": [
+          "work_proof_marker",
+          "validation_report",
+          "proof-of-behavior-scorecard"
+        ],
+        "lifecycle_evidence_required": [
+          "scope_closure_report",
+          "pr_lifecycle_report",
+          "factoryd_run_once_report"
         ]
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t12",
-      "worker_type": "codex_cli"
+      "worker_type": "codex_cli",
+      "worker_evidence_required": [
+        "work_proof_marker",
+        "validation_report",
+        "proof-of-behavior-scorecard"
+      ],
+      "lifecycle_evidence_required": [
+        "scope_closure_report",
+        "pr_lifecycle_report",
+        "factoryd_run_once_report"
+      ]
     },
     {
       "acceptance_checks": [
@@ -7840,6 +8745,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -7855,6 +8768,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -7870,6 +8791,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -7885,6 +8814,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         }
@@ -7913,8 +8850,7 @@
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T13/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t13/"
+        ".factory/artifacts/task-runs/T13/"
       ],
       "architecture_guidance_refs": [
         {
@@ -8069,9 +9005,7 @@
       "evidence_required": [
         "work_proof_marker",
         "validation_report",
-        "scope_closure_report",
-        "pr_lifecycle_report",
-        "factoryd_run_once_report"
+        "proof-of-behavior-scorecard"
       ],
       "factory_compatibility": {
         "factory_contract_version": "1.0",
@@ -8117,7 +9051,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t13/",
+        ".factory/artifacts/task-runs/T13/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T13/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T13/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -8256,9 +9194,7 @@
         "evidence_required": [
           "work_proof_marker",
           "validation_report",
-          "scope_closure_report",
-          "pr_lifecycle_report",
-          "factoryd_run_once_report"
+          "proof-of-behavior-scorecard"
         ],
         "required_checks": [
           "make prepush-full"
@@ -8276,11 +9212,31 @@
           "required validation command failed",
           "plan drift detected",
           "scope closure did not advance"
+        ],
+        "worker_evidence_required": [
+          "work_proof_marker",
+          "validation_report",
+          "proof-of-behavior-scorecard"
+        ],
+        "lifecycle_evidence_required": [
+          "scope_closure_report",
+          "pr_lifecycle_report",
+          "factoryd_run_once_report"
         ]
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t13",
-      "worker_type": "codex_cli"
+      "worker_type": "codex_cli",
+      "worker_evidence_required": [
+        "work_proof_marker",
+        "validation_report",
+        "proof-of-behavior-scorecard"
+      ],
+      "lifecycle_evidence_required": [
+        "scope_closure_report",
+        "pr_lifecycle_report",
+        "factoryd_run_once_report"
+      ]
     },
     {
       "acceptance_checks": [
@@ -8330,6 +9286,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -8345,6 +9309,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -8360,6 +9332,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -8375,6 +9355,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -8390,6 +9378,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -8405,6 +9401,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -8420,6 +9424,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -8435,6 +9447,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -8450,6 +9470,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         }
@@ -8478,8 +9506,7 @@
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T14/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t14/"
+        ".factory/artifacts/task-runs/T14/"
       ],
       "architecture_guidance_refs": [
         {
@@ -8634,9 +9661,7 @@
       "evidence_required": [
         "work_proof_marker",
         "validation_report",
-        "scope_closure_report",
-        "pr_lifecycle_report",
-        "factoryd_run_once_report"
+        "proof-of-behavior-scorecard"
       ],
       "factory_compatibility": {
         "factory_contract_version": "1.0",
@@ -8682,7 +9707,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t14/",
+        ".factory/artifacts/task-runs/T14/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T14/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T14/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -8831,9 +9860,7 @@
         "evidence_required": [
           "work_proof_marker",
           "validation_report",
-          "scope_closure_report",
-          "pr_lifecycle_report",
-          "factoryd_run_once_report"
+          "proof-of-behavior-scorecard"
         ],
         "required_checks": [
           "make prepush-full"
@@ -8851,11 +9878,31 @@
           "required validation command failed",
           "plan drift detected",
           "scope closure did not advance"
+        ],
+        "worker_evidence_required": [
+          "work_proof_marker",
+          "validation_report",
+          "proof-of-behavior-scorecard"
+        ],
+        "lifecycle_evidence_required": [
+          "scope_closure_report",
+          "pr_lifecycle_report",
+          "factoryd_run_once_report"
         ]
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t14",
-      "worker_type": "codex_cli"
+      "worker_type": "codex_cli",
+      "worker_evidence_required": [
+        "work_proof_marker",
+        "validation_report",
+        "proof-of-behavior-scorecard"
+      ],
+      "lifecycle_evidence_required": [
+        "scope_closure_report",
+        "pr_lifecycle_report",
+        "factoryd_run_once_report"
+      ]
     },
     {
       "acceptance_checks": [
@@ -8918,6 +9965,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -8933,6 +9988,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -8948,6 +10011,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -8963,6 +10034,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -8978,6 +10057,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -8993,6 +10080,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -9008,6 +10103,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -9023,6 +10126,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -9038,6 +10149,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -9053,6 +10172,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -9068,6 +10195,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -9083,6 +10218,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -9098,6 +10241,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -9113,6 +10264,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -9128,6 +10287,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         }
@@ -9156,8 +10323,7 @@
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T15/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t15/"
+        ".factory/artifacts/task-runs/T15/"
       ],
       "architecture_guidance_refs": [
         {
@@ -9316,9 +10482,7 @@
       "evidence_required": [
         "work_proof_marker",
         "validation_report",
-        "scope_closure_report",
-        "pr_lifecycle_report",
-        "factoryd_run_once_report"
+        "proof-of-behavior-scorecard"
       ],
       "factory_compatibility": {
         "factory_contract_version": "1.0",
@@ -9364,7 +10528,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t15/",
+        ".factory/artifacts/task-runs/T15/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T15/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T15/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -9529,9 +10697,7 @@
         "evidence_required": [
           "work_proof_marker",
           "validation_report",
-          "scope_closure_report",
-          "pr_lifecycle_report",
-          "factoryd_run_once_report"
+          "proof-of-behavior-scorecard"
         ],
         "required_checks": [
           "make prepush-full"
@@ -9550,11 +10716,31 @@
           "plan drift detected",
           "scope closure did not advance",
           "live credential or network work attempted without approval"
+        ],
+        "worker_evidence_required": [
+          "work_proof_marker",
+          "validation_report",
+          "proof-of-behavior-scorecard"
+        ],
+        "lifecycle_evidence_required": [
+          "scope_closure_report",
+          "pr_lifecycle_report",
+          "factoryd_run_once_report"
         ]
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t15",
-      "worker_type": "codex_cli"
+      "worker_type": "codex_cli",
+      "worker_evidence_required": [
+        "work_proof_marker",
+        "validation_report",
+        "proof-of-behavior-scorecard"
+      ],
+      "lifecycle_evidence_required": [
+        "scope_closure_report",
+        "pr_lifecycle_report",
+        "factoryd_run_once_report"
+      ]
     },
     {
       "acceptance_checks": [
@@ -9613,6 +10799,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -9628,6 +10822,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -9643,6 +10845,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -9658,6 +10868,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -9673,6 +10891,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -9688,6 +10914,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -9703,6 +10937,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -9718,6 +10960,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -9733,6 +10983,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -9748,6 +11006,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -9763,6 +11029,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -9778,6 +11052,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -9793,6 +11075,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         }
@@ -9821,8 +11111,7 @@
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T16/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t16/"
+        ".factory/artifacts/task-runs/T16/"
       ],
       "architecture_guidance_refs": [
         {
@@ -9981,9 +11270,7 @@
       "evidence_required": [
         "work_proof_marker",
         "validation_report",
-        "scope_closure_report",
-        "pr_lifecycle_report",
-        "factoryd_run_once_report"
+        "proof-of-behavior-scorecard"
       ],
       "factory_compatibility": {
         "factory_contract_version": "1.0",
@@ -10029,7 +11316,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t16/",
+        ".factory/artifacts/task-runs/T16/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T16/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T16/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -10190,9 +11481,7 @@
         "evidence_required": [
           "work_proof_marker",
           "validation_report",
-          "scope_closure_report",
-          "pr_lifecycle_report",
-          "factoryd_run_once_report"
+          "proof-of-behavior-scorecard"
         ],
         "required_checks": [
           "make prepush-full"
@@ -10211,11 +11500,31 @@
           "plan drift detected",
           "scope closure did not advance",
           "live credential or network work attempted without approval"
+        ],
+        "worker_evidence_required": [
+          "work_proof_marker",
+          "validation_report",
+          "proof-of-behavior-scorecard"
+        ],
+        "lifecycle_evidence_required": [
+          "scope_closure_report",
+          "pr_lifecycle_report",
+          "factoryd_run_once_report"
         ]
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t16",
-      "worker_type": "codex_cli"
+      "worker_type": "codex_cli",
+      "worker_evidence_required": [
+        "work_proof_marker",
+        "validation_report",
+        "proof-of-behavior-scorecard"
+      ],
+      "lifecycle_evidence_required": [
+        "scope_closure_report",
+        "pr_lifecycle_report",
+        "factoryd_run_once_report"
+      ]
     },
     {
       "acceptance_checks": [
@@ -10248,6 +11557,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -10263,6 +11580,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -10278,6 +11603,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         }
@@ -10307,7 +11640,6 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T17/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t17/",
         "docs/product/",
         "docs/dev/",
         ".factory/artifacts/customer-failure-intake/",
@@ -10466,9 +11798,6 @@
       "evidence_required": [
         "work_proof_marker",
         "validation_report",
-        "scope_closure_report",
-        "pr_lifecycle_report",
-        "factoryd_run_once_report",
         "proof-of-behavior-scorecard"
       ],
       "factory_compatibility": {
@@ -10515,7 +11844,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t17/",
+        ".factory/artifacts/task-runs/T17/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T17/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T17/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -10653,9 +11986,7 @@
         "evidence_required": [
           "work_proof_marker",
           "validation_report",
-          "scope_closure_report",
-          "pr_lifecycle_report",
-          "factoryd_run_once_report"
+          "proof-of-behavior-scorecard"
         ],
         "required_checks": [
           "make prepush-full"
@@ -10673,11 +12004,31 @@
           "required validation command failed",
           "plan drift detected",
           "scope closure did not advance"
+        ],
+        "worker_evidence_required": [
+          "work_proof_marker",
+          "validation_report",
+          "proof-of-behavior-scorecard"
+        ],
+        "lifecycle_evidence_required": [
+          "scope_closure_report",
+          "pr_lifecycle_report",
+          "factoryd_run_once_report"
         ]
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t17",
-      "worker_type": "codex_cli"
+      "worker_type": "codex_cli",
+      "worker_evidence_required": [
+        "work_proof_marker",
+        "validation_report",
+        "proof-of-behavior-scorecard"
+      ],
+      "lifecycle_evidence_required": [
+        "scope_closure_report",
+        "pr_lifecycle_report",
+        "factoryd_run_once_report"
+      ]
     },
     {
       "acceptance_checks": [
@@ -10711,6 +12062,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -10726,6 +12085,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -10741,6 +12108,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         },
@@ -10756,6 +12131,14 @@
           "evidence_required": [
             "validation_report",
             "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
             "scope_closure_report"
           ]
         }
@@ -10785,7 +12168,6 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T18/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t18/",
         "docs/architecture/",
         "docs/dev/",
         ".factory/artifacts/lesson-records/",
@@ -10944,9 +12326,6 @@
       "evidence_required": [
         "work_proof_marker",
         "validation_report",
-        "scope_closure_report",
-        "pr_lifecycle_report",
-        "factoryd_run_once_report",
         "proof-of-behavior-scorecard"
       ],
       "factory_compatibility": {
@@ -10993,7 +12372,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t18/",
+        ".factory/artifacts/task-runs/T18/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T18/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T18/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -11133,9 +12516,7 @@
         "evidence_required": [
           "work_proof_marker",
           "validation_report",
-          "scope_closure_report",
-          "pr_lifecycle_report",
-          "factoryd_run_once_report"
+          "proof-of-behavior-scorecard"
         ],
         "required_checks": [
           "make prepush-full"
@@ -11153,11 +12534,31 @@
           "required validation command failed",
           "plan drift detected",
           "scope closure did not advance"
+        ],
+        "worker_evidence_required": [
+          "work_proof_marker",
+          "validation_report",
+          "proof-of-behavior-scorecard"
+        ],
+        "lifecycle_evidence_required": [
+          "scope_closure_report",
+          "pr_lifecycle_report",
+          "factoryd_run_once_report"
         ]
       },
       "versioning_impact": "Pre-1.0 MVP work; public output, schema, or artifact changes must preserve explicit migration notes before release.",
       "work_item_id": "relia-mvp-t18",
-      "worker_type": "codex_cli"
+      "worker_type": "codex_cli",
+      "worker_evidence_required": [
+        "work_proof_marker",
+        "validation_report",
+        "proof-of-behavior-scorecard"
+      ],
+      "lifecycle_evidence_required": [
+        "scope_closure_report",
+        "pr_lifecycle_report",
+        "factoryd_run_once_report"
+      ]
     }
   ]
 }

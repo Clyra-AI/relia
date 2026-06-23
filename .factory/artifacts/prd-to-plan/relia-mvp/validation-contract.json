@@ -1127,6 +1127,8 @@
       "factoryd_runtime",
       "validation_commands",
       "evidence_required",
+      "worker_evidence_required",
+      "lifecycle_evidence_required",
       "stop_conditions",
       "required_proof_level",
       "engineering_policy_refs",
@@ -1185,5 +1187,14 @@
     "path policy violation",
     "closure did not advance",
     "alignment drift detected"
+  ],
+  "worker_evidence_required": [
+    "work_proof_marker",
+    "validation_report"
+  ],
+  "lifecycle_evidence_required": [
+    "scope_closure_report",
+    "pr_lifecycle_report",
+    "factoryd_run_once_report"
   ]
 }

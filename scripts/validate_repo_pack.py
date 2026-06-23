@@ -26,6 +26,8 @@ RUNNER_READY_TASK_FIELDS = [
     "final_validation_commands",
     "acceptance_result_requirements",
     "evidence_required",
+    "worker_evidence_required",
+    "lifecycle_evidence_required",
     "stop_conditions",
     "worker_type",
     "factoryd_runtime",
@@ -56,6 +58,19 @@ REQUIRED_PROOF_LEVELS = {
     "source_evidence",
     "workflow_behavior",
     "user_visible_behavior",
+}
+LIFECYCLE_EVIDENCE_KEYS = {
+    "factoryd_run_once_report",
+    "post_merge_report",
+    "pr_lifecycle_report",
+    "scope_closure_map",
+    "scope_closure_report",
+    "ship_packet",
+}
+WORKER_EVIDENCE_KEYS = {
+    "proof_of_behavior_scorecard",
+    "validation_report",
+    "work_proof_marker",
 }
 
 REQUIRED = [
@@ -121,6 +136,228 @@ def duplicate_values(values):
             duplicates.append(value)
         seen.add(value)
     return duplicates
+
+def lifecycle_evidence_items(values):
+    if not isinstance(values, list):
+        return []
+    return [
+        item
+        for item in values
+        if str(item).strip().lower().replace("-", "_") in LIFECYCLE_EVIDENCE_KEYS
+    ]
+
+def non_lifecycle_evidence_items(values):
+    if not isinstance(values, list):
+        return []
+    return [
+        item
+        for item in values
+        if str(item).strip().lower().replace("-", "_") not in LIFECYCLE_EVIDENCE_KEYS
+    ]
+
+def worker_evidence_items(values):
+    if not isinstance(values, list):
+        return []
+    return [
+        item
+        for item in values
+        if str(item).strip().lower().replace("-", "_") in WORKER_EVIDENCE_KEYS
+    ]
+
+def non_worker_evidence_items(values):
+    if not isinstance(values, list):
+        return []
+    return [
+        item
+        for item in values
+        if str(item).strip().lower().replace("-", "_") not in WORKER_EVIDENCE_KEYS
+    ]
+
+def normalized_evidence_key(value):
+    return str(value).strip().lower().replace("-", "_")
+
+def require_worker_evidence_mirror(label, evidence_required, worker_evidence):
+    evidence_defaults = {
+        normalized_evidence_key(item)
+        for item in worker_evidence_items(evidence_required)
+    }
+    worker_keys = {
+        normalized_evidence_key(item)
+        for item in worker_evidence_items(worker_evidence)
+        if normalized_evidence_key(item)
+    }
+    if evidence_defaults and (not isinstance(worker_evidence, list) or not worker_evidence):
+        fail(f"{label}.worker_evidence_required must mirror worker-owned evidence_required defaults: {sorted(evidence_defaults)!r}")
+    if worker_keys and (not isinstance(evidence_required, list) or not evidence_required):
+        fail(f"{label}.evidence_required must mirror worker-owned worker_evidence_required defaults: {sorted(worker_keys)!r}")
+    missing_worker = sorted(evidence_defaults - worker_keys)
+    if missing_worker:
+        fail(f"{label}.worker_evidence_required must mirror worker-owned evidence_required defaults: {missing_worker!r}")
+    missing_evidence = sorted(worker_keys - evidence_defaults)
+    if missing_evidence:
+        fail(f"{label}.evidence_required must mirror worker-owned worker_evidence_required defaults: {missing_evidence!r}")
+
+def require_worker_values_present(field_label, required_worker_values, actual_values):
+    required_defaults = {
+        normalized_evidence_key(item)
+        for item in worker_evidence_items(required_worker_values)
+    }
+    if not required_defaults:
+        return
+    if not isinstance(actual_values, list) or not actual_values:
+        fail(f"{field_label} must mirror inherited worker-owned evidence defaults: {sorted(required_defaults)!r}")
+    actual_keys = {
+        normalized_evidence_key(item)
+        for item in actual_values
+        if normalized_evidence_key(item)
+    }
+    missing_worker = sorted(required_defaults - actual_keys)
+    if missing_worker:
+        fail(f"{field_label} must mirror inherited worker-owned evidence defaults: {missing_worker!r}")
+
+def require_lifecycle_evidence_mirror(field_label, lifecycle_defaults, lifecycle_evidence):
+    required_defaults = {
+        normalized_evidence_key(item)
+        for item in lifecycle_evidence_items(lifecycle_defaults)
+    }
+    if not required_defaults:
+        return
+    if not isinstance(lifecycle_evidence, list) or not lifecycle_evidence:
+        fail(f"{field_label} must mirror lifecycle-owned evidence defaults: {sorted(required_defaults)!r}")
+    lifecycle_keys = {
+        normalized_evidence_key(item)
+        for item in lifecycle_evidence
+        if normalized_evidence_key(item)
+    }
+    missing_lifecycle = sorted(required_defaults - lifecycle_keys)
+    if missing_lifecycle:
+        fail(f"{field_label} must mirror lifecycle-owned evidence defaults: {missing_lifecycle!r}")
+
+def normalize_repo_path(path):
+    parts = []
+    for part in str(path).replace("\\", "/").split("/"):
+        if part in ("", "."):
+            continue
+        if part == "..":
+            if parts:
+                parts.pop()
+            else:
+                parts.append(part)
+            continue
+        parts.append(part)
+    normalized = "/".join(parts)
+    if str(path).endswith("/") and normalized:
+        normalized += "/"
+    return normalized
+
+def path_matches_or_contains(path, root):
+    path = normalize_repo_path(path).rstrip("/")
+    root = normalize_repo_path(root).rstrip("/")
+    return bool(path) and (path == root or path.startswith(root + "/"))
+
+def path_is_ancestor_of(path, root):
+    path = normalize_repo_path(path).rstrip("/")
+    root = normalize_repo_path(root).rstrip("/")
+    return bool(path) and path != root and root.startswith(path + "/")
+
+def validate_lifecycle_path_ownership(task, task_id):
+    lifecycle_keys = {
+        normalized_evidence_key(item)
+        for item in task.get("lifecycle_evidence_required") or []
+        if normalized_evidence_key(item)
+    }
+    inheritance = task.get("validation_contract_inheritance")
+    if isinstance(inheritance, dict):
+        lifecycle_keys.update(
+            normalized_evidence_key(item)
+            for item in inheritance.get("lifecycle_evidence_required") or []
+            if normalized_evidence_key(item)
+        )
+    for requirement in task.get("acceptance_result_requirements") or []:
+        if not isinstance(requirement, dict):
+            continue
+        lifecycle_keys.update(
+            normalized_evidence_key(item)
+            for item in requirement.get("lifecycle_evidence_required") or []
+            if normalized_evidence_key(item)
+        )
+    if not lifecycle_keys:
+        return
+    allowed = {normalize_repo_path(path) for path in task.get("allowed_paths") or []}
+    forbidden = {normalize_repo_path(path) for path in task.get("forbidden_paths") or []}
+    work_item_id = str(task.get("work_item_id") or task_id).strip()
+    task_runs_root = ".factory/artifacts/task-runs/"
+    task_run_dir = f".factory/artifacts/task-runs/{task_id}/"
+    pr_lifecycle_root = ".factory/artifacts/pr-lifecycle/"
+    pr_lifecycle_dir = f".factory/artifacts/pr-lifecycle/{work_item_id}/"
+
+    allowed_lifecycle_paths = sorted(
+        path for path in allowed
+        if path_matches_or_contains(path, pr_lifecycle_root)
+        or path_is_ancestor_of(path, pr_lifecycle_root)
+        or path_matches_or_contains(path, pr_lifecycle_dir)
+        or path_is_ancestor_of(path, pr_lifecycle_dir)
+        or (
+            path_matches_or_contains(path, task_runs_root)
+            and not path_matches_or_contains(path, task_run_dir)
+        )
+        or path_is_ancestor_of(path, task_runs_root)
+    )
+    if allowed_lifecycle_paths:
+        fail(
+            f"{task_id}.allowed_paths includes daemon-owned lifecycle evidence paths: "
+            f"{allowed_lifecycle_paths}"
+        )
+
+    required_forbidden = []
+    if "pr_lifecycle_report" in lifecycle_keys or "ship_packet" in lifecycle_keys or "post_merge_report" in lifecycle_keys:
+        required_forbidden.append(pr_lifecycle_dir)
+    if "scope_closure_report" in lifecycle_keys:
+        required_forbidden.append(task_run_dir + "scope-closure-report.json")
+    if "scope_closure_map" in lifecycle_keys or "scope_closure_report" in lifecycle_keys:
+        required_forbidden.append(task_run_dir + "scope-closure-map.json")
+    if "factoryd_run_once_report" in lifecycle_keys:
+        required_forbidden.append(task_run_dir + "factoryd-run-once-report.json")
+
+    missing_forbidden = sorted(path for path in required_forbidden if path not in forbidden)
+    if missing_forbidden:
+        fail(
+            f"{task_id}.forbidden_paths must reserve daemon-owned lifecycle evidence paths: "
+            f"{missing_forbidden}"
+        )
+
+def validate_validation_contract_evidence_split(contract, label):
+    if not isinstance(contract, dict):
+        fail(f"{label} must be an object")
+    evidence_required = contract.get("evidence_required")
+    worker_evidence = contract.get("worker_evidence_required")
+    lifecycle_evidence = contract.get("lifecycle_evidence_required")
+    if isinstance(worker_evidence, list):
+        unknown_worker = non_worker_evidence_items(worker_evidence)
+        if unknown_worker:
+            fail(f"{label}.worker_evidence_required contains unsupported worker evidence keys: {unknown_worker!r}")
+        lifecycle_in_worker = lifecycle_evidence_items(worker_evidence)
+        if lifecycle_in_worker:
+            fail(f"{label}.worker_evidence_required must only contain worker-owned evidence: {lifecycle_in_worker!r}")
+    if isinstance(lifecycle_evidence, list):
+        unknown_lifecycle = non_lifecycle_evidence_items(lifecycle_evidence)
+        if unknown_lifecycle:
+            fail(f"{label}.lifecycle_evidence_required contains unsupported lifecycle evidence keys: {unknown_lifecycle!r}")
+        worker_in_lifecycle = worker_evidence_items(lifecycle_evidence)
+        if worker_in_lifecycle:
+            fail(f"{label}.lifecycle_evidence_required must only contain factoryd-owned lifecycle evidence: {worker_in_lifecycle!r}")
+    if not isinstance(evidence_required, list) or not any(str(item).strip() for item in evidence_required):
+        fail(f"{label}.evidence_required must be a non-empty list")
+    known_evidence_keys = WORKER_EVIDENCE_KEYS | LIFECYCLE_EVIDENCE_KEYS
+    unknown_evidence = [
+        item for item in evidence_required
+        if str(item).strip().lower().replace("-", "_") not in known_evidence_keys
+    ]
+    if unknown_evidence:
+        fail(f"{label}.evidence_required contains unsupported evidence keys: {unknown_evidence!r}")
+    require_worker_evidence_mirror(label, evidence_required, worker_evidence)
+    lifecycle_defaults = lifecycle_evidence_items(evidence_required)
+    require_lifecycle_evidence_mirror(f"{label}.lifecycle_evidence_required", lifecycle_defaults, lifecycle_evidence)
 
 def missing_grant_value(value):
     if value is None or value == []:
@@ -369,6 +606,229 @@ def validate_runner_ready_task_fields(task, task_id):
     for key in RUNNER_READY_TASK_FIELDS:
         if key not in task or task[key] in (None, "", []):
             fail(f"{task_id} missing runner-ready field: {key}")
+    worker_evidence = task.get("worker_evidence_required")
+    if not isinstance(worker_evidence, list) or not any(str(item).strip() for item in worker_evidence):
+        fail(f"{task_id}.worker_evidence_required must be a non-empty list")
+    unknown_worker = non_worker_evidence_items(worker_evidence)
+    if unknown_worker:
+        fail(f"{task_id}.worker_evidence_required contains unsupported worker evidence keys: {unknown_worker!r}")
+    lifecycle_evidence = task.get("lifecycle_evidence_required")
+    if not isinstance(lifecycle_evidence, list) or not any(str(item).strip() for item in lifecycle_evidence):
+        fail(f"{task_id}.lifecycle_evidence_required must be a non-empty list")
+    unknown_lifecycle = non_lifecycle_evidence_items(lifecycle_evidence)
+    if unknown_lifecycle:
+        fail(f"{task_id}.lifecycle_evidence_required contains unsupported lifecycle evidence keys: {unknown_lifecycle!r}")
+    worker_in_lifecycle = worker_evidence_items(lifecycle_evidence)
+    if worker_in_lifecycle:
+        fail(
+            f"{task_id}.lifecycle_evidence_required must only contain factoryd-owned lifecycle evidence; "
+            f"move worker evidence to worker_evidence_required: {worker_in_lifecycle!r}"
+        )
+    evidence_required = task.get("evidence_required")
+    if not isinstance(evidence_required, list) or not any(str(item).strip() for item in evidence_required):
+        fail(f"{task_id}.evidence_required must be a non-empty list")
+    unknown_evidence = non_worker_evidence_items(evidence_required)
+    if unknown_evidence:
+        fail(f"{task_id}.evidence_required contains unsupported worker evidence keys: {unknown_evidence!r}")
+    lifecycle_in_worker = lifecycle_evidence_items(evidence_required)
+    if lifecycle_in_worker:
+        fail(
+            f"{task_id}.evidence_required must only contain worker-owned evidence; "
+            f"move lifecycle evidence to lifecycle_evidence_required: {lifecycle_in_worker!r}"
+        )
+    require_worker_evidence_mirror(task_id, evidence_required, worker_evidence)
+    lifecycle_in_worker_subset = lifecycle_evidence_items(worker_evidence)
+    if lifecycle_in_worker_subset:
+        fail(
+            f"{task_id}.worker_evidence_required must only contain worker-owned evidence; "
+            f"move lifecycle evidence to lifecycle_evidence_required: {lifecycle_in_worker_subset!r}"
+        )
+    inheritance = task.get("validation_contract_inheritance")
+    if isinstance(inheritance, dict):
+        inherited_evidence = inheritance.get("evidence_required")
+        if "evidence_required" in inheritance and not isinstance(inherited_evidence, list):
+            fail(f"{task_id}.validation_contract_inheritance.evidence_required must be a list")
+        if isinstance(inherited_evidence, list):
+            unknown_inherited_evidence = non_worker_evidence_items(inherited_evidence)
+            if unknown_inherited_evidence:
+                fail(
+                    f"{task_id}.validation_contract_inheritance.evidence_required "
+                    f"contains unsupported worker evidence keys: {unknown_inherited_evidence!r}"
+                )
+            inherited_lifecycle_in_worker = lifecycle_evidence_items(inherited_evidence)
+            if inherited_lifecycle_in_worker:
+                fail(
+                    f"{task_id}.validation_contract_inheritance.evidence_required must only contain "
+                    f"worker-owned evidence; move lifecycle evidence to lifecycle_evidence_required: "
+                    f"{inherited_lifecycle_in_worker!r}"
+                )
+            require_worker_evidence_mirror(
+                f"{task_id}.validation_contract_inheritance",
+                inherited_evidence,
+                inheritance.get("worker_evidence_required"),
+            )
+        inherited_worker = inheritance.get("worker_evidence_required")
+        if "worker_evidence_required" in inheritance and not isinstance(inherited_worker, list):
+            fail(f"{task_id}.validation_contract_inheritance.worker_evidence_required must be a list")
+        if isinstance(inherited_worker, list):
+            unknown_inherited_worker = non_worker_evidence_items(inherited_worker)
+            if unknown_inherited_worker:
+                fail(
+                    f"{task_id}.validation_contract_inheritance.worker_evidence_required "
+                    f"contains unsupported worker evidence keys: {unknown_inherited_worker!r}"
+                )
+            inherited_lifecycle_in_worker_subset = lifecycle_evidence_items(inherited_worker)
+            if inherited_lifecycle_in_worker_subset:
+                fail(
+                    f"{task_id}.validation_contract_inheritance.worker_evidence_required must only contain "
+                    f"worker-owned evidence; move lifecycle evidence to lifecycle_evidence_required: "
+                    f"{inherited_lifecycle_in_worker_subset!r}"
+                )
+            require_worker_values_present(
+                f"{task_id}.worker_evidence_required",
+                inherited_worker,
+                worker_evidence,
+            )
+            require_worker_values_present(
+                f"{task_id}.evidence_required",
+                inherited_worker,
+                evidence_required,
+            )
+        inherited_lifecycle = inheritance.get("lifecycle_evidence_required")
+        if "lifecycle_evidence_required" in inheritance and not isinstance(inherited_lifecycle, list):
+            fail(f"{task_id}.validation_contract_inheritance.lifecycle_evidence_required must be a list")
+        if isinstance(inherited_lifecycle, list):
+            unknown_inherited_lifecycle = non_lifecycle_evidence_items(inherited_lifecycle)
+            if unknown_inherited_lifecycle:
+                fail(
+                    f"{task_id}.validation_contract_inheritance.lifecycle_evidence_required "
+                    f"contains unsupported lifecycle evidence keys: {unknown_inherited_lifecycle!r}"
+                )
+            inherited_worker_in_lifecycle = worker_evidence_items(inherited_lifecycle)
+            if inherited_worker_in_lifecycle:
+                fail(
+                    f"{task_id}.validation_contract_inheritance.lifecycle_evidence_required must only contain "
+                    f"factoryd-owned lifecycle evidence; move worker evidence to worker_evidence_required: "
+                    f"{inherited_worker_in_lifecycle!r}"
+                )
+            require_lifecycle_evidence_mirror(
+                f"{task_id}.lifecycle_evidence_required",
+                inherited_lifecycle,
+                lifecycle_evidence,
+            )
+    required_scorecard_key = "proof_of_behavior_scorecard"
+    proof_level = str(task.get("required_proof_level", "")).strip()
+    scorecard_required = task.get("proof_scorecard_required") is True or proof_level in {
+        "workflow_behavior",
+        "user_visible_behavior",
+    }
+    if scorecard_required:
+        normalized_worker = {
+            str(item).strip().lower().replace("-", "_")
+            for item in worker_evidence
+        }
+        normalized_evidence = {
+            str(item).strip().lower().replace("-", "_")
+            for item in evidence_required or []
+        }
+        if required_scorecard_key not in normalized_worker or required_scorecard_key not in normalized_evidence:
+            fail(
+                f"{task_id} requires a proof-of-behavior scorecard but does not list "
+                "proof-of-behavior-scorecard in worker evidence"
+            )
+        if isinstance(inheritance, dict):
+            inherited_worker = inheritance.get("worker_evidence_required")
+            inherited_evidence = inheritance.get("evidence_required")
+            normalized_inherited_worker = {
+                str(item).strip().lower().replace("-", "_")
+                for item in inherited_worker or []
+            }
+            normalized_inherited_evidence = {
+                str(item).strip().lower().replace("-", "_")
+                for item in inherited_evidence or []
+            }
+            if (
+                isinstance(inherited_worker, list)
+                and required_scorecard_key not in normalized_inherited_worker
+            ) or (
+                isinstance(inherited_evidence, list)
+                and required_scorecard_key not in normalized_inherited_evidence
+            ):
+                fail(
+                    f"{task_id}.validation_contract_inheritance must preserve "
+                    "proof-of-behavior-scorecard worker evidence"
+                )
+    for index, requirement in enumerate(task.get("acceptance_result_requirements") or []):
+        if not isinstance(requirement, dict):
+            fail(f"{task_id}.acceptance_result_requirements[{index}] must be an object")
+        requirement_evidence = requirement.get("evidence_required")
+        if not isinstance(requirement_evidence, list) or not any(str(item).strip() for item in requirement_evidence):
+            fail(f"{task_id}.acceptance_result_requirements[{index}].evidence_required must be a non-empty list")
+        unknown_requirement_evidence = non_worker_evidence_items(requirement_evidence)
+        if unknown_requirement_evidence:
+            fail(
+                f"{task_id}.acceptance_result_requirements[{index}].evidence_required "
+                f"contains unsupported worker evidence keys: {unknown_requirement_evidence!r}"
+            )
+        nested_lifecycle_in_worker = lifecycle_evidence_items(requirement_evidence)
+        if nested_lifecycle_in_worker:
+            fail(
+                f"{task_id}.acceptance_result_requirements[{index}].evidence_required must only contain "
+                f"worker-owned evidence; move lifecycle evidence to lifecycle_evidence_required: "
+                f"{nested_lifecycle_in_worker!r}"
+            )
+        nested_worker = requirement.get("worker_evidence_required")
+        if not isinstance(nested_worker, list) or not any(str(item).strip() for item in nested_worker):
+            fail(f"{task_id}.acceptance_result_requirements[{index}].worker_evidence_required must be a non-empty list")
+        unknown_nested_worker = non_worker_evidence_items(nested_worker)
+        if unknown_nested_worker:
+            fail(
+                f"{task_id}.acceptance_result_requirements[{index}].worker_evidence_required "
+                f"contains unsupported worker evidence keys: {unknown_nested_worker!r}"
+            )
+        nested_lifecycle = requirement.get("lifecycle_evidence_required")
+        if not isinstance(nested_lifecycle, list) or not any(str(item).strip() for item in nested_lifecycle):
+            fail(f"{task_id}.acceptance_result_requirements[{index}].lifecycle_evidence_required must be a non-empty list")
+        unknown_nested_lifecycle = non_lifecycle_evidence_items(nested_lifecycle)
+        if unknown_nested_lifecycle:
+            fail(
+                f"{task_id}.acceptance_result_requirements[{index}].lifecycle_evidence_required "
+                f"contains unsupported lifecycle evidence keys: {unknown_nested_lifecycle!r}"
+            )
+        nested_worker_in_lifecycle = worker_evidence_items(nested_lifecycle)
+        if nested_worker_in_lifecycle:
+            fail(
+                f"{task_id}.acceptance_result_requirements[{index}].lifecycle_evidence_required must only contain "
+                f"factoryd-owned lifecycle evidence: {nested_worker_in_lifecycle!r}"
+            )
+        nested_lifecycle_in_worker_subset = lifecycle_evidence_items(nested_worker)
+        if nested_lifecycle_in_worker_subset:
+            fail(
+                f"{task_id}.acceptance_result_requirements[{index}].worker_evidence_required must only contain "
+                f"worker-owned evidence: {nested_lifecycle_in_worker_subset!r}"
+            )
+        require_worker_evidence_mirror(
+            f"{task_id}.acceptance_result_requirements[{index}]",
+            requirement_evidence,
+            nested_worker,
+        )
+        if scorecard_required:
+            normalized_nested_worker = {
+                str(item).strip().lower().replace("-", "_")
+                for item in nested_worker
+            }
+            normalized_nested_evidence = {
+                str(item).strip().lower().replace("-", "_")
+                for item in requirement_evidence
+            }
+            if (
+                required_scorecard_key not in normalized_nested_worker
+                or required_scorecard_key not in normalized_nested_evidence
+            ):
+                fail(
+                    f"{task_id}.acceptance_result_requirements[{index}] requires "
+                    "proof-of-behavior scorecard worker evidence"
+                )
     if task.get("required_proof_level") not in REQUIRED_PROOF_LEVELS:
         fail(f"{task_id}.required_proof_level must be one of {sorted(REQUIRED_PROOF_LEVELS)}")
     if not isinstance(task.get("artifact_budget_refs"), list):
@@ -453,6 +913,8 @@ def self_test():
         "final_validation_commands",
         "acceptance_result_requirements",
         "evidence_required",
+        "worker_evidence_required",
+        "lifecycle_evidence_required",
         "stop_conditions",
         "required_worker_chain",
         "test_matrix_refs",
@@ -467,11 +929,42 @@ def self_test():
         "artifact_budget_refs",
     ]:
         sample_task[key] = ["value"]
+    sample_task["evidence_required"] = ["validation_report", "proof-of-behavior-scorecard"]
+    sample_task["worker_evidence_required"] = ["validation_report", "proof-of-behavior-scorecard"]
+    sample_task["lifecycle_evidence_required"] = ["scope_closure_report"]
     sample_task["factoryd_runtime"] = {"worker_type": "codex_cli"}
     sample_task["lifecycle_gates"] = {"commit_push_required": True}
+    sample_task["acceptance_result_requirements"] = [
+        {
+            "acceptance_item_id": "value",
+            "allowed_statuses": ["implemented", "partial", "missing", "blocked", "deferred_with_approval"],
+            "evidence_required": ["validation_report", "work_proof_marker", "proof-of-behavior-scorecard"],
+            "worker_evidence_required": ["validation_report", "work_proof_marker", "proof-of-behavior-scorecard"],
+            "lifecycle_evidence_required": ["scope_closure_report"],
+        }
+    ]
+    sample_task["proof_scorecard_required"] = True
     sample_task["required_proof_level"] = "workflow_behavior"
     sample_task["redaction_posture"] = {"classification": "internal", "customer_safe": False}
     validate_runner_ready_task_fields(sample_task, "self-test")
+    validate_lifecycle_path_ownership(
+        {
+            "work_item_id": "relia-mvp-t1",
+            "allowed_paths": [".factory/artifacts/task-runs/T1/"],
+            "forbidden_paths": [
+                ".factory/artifacts/pr-lifecycle/relia-mvp-t1/",
+                ".factory/artifacts/task-runs/T1/scope-closure-report.json",
+                ".factory/artifacts/task-runs/T1/scope-closure-map.json",
+                ".factory/artifacts/task-runs/T1/factoryd-run-once-report.json",
+            ],
+            "lifecycle_evidence_required": [
+                "scope_closure_report",
+                "pr_lifecycle_report",
+                "factoryd_run_once_report",
+            ],
+        },
+        "T1",
+    )
 
     original_fail = fail
     original_config_grants = factoryd_config_capability_grants
@@ -489,6 +982,324 @@ def self_test():
                 raise
         else:
             fail("missing runner-ready proof field fixture did not fail closed")
+
+        lifecycle_allowed_path = {
+            "work_item_id": "relia-mvp-t1",
+            "allowed_paths": [
+                ".factory/artifacts/task-runs/T1/",
+                ".factory/artifacts/pr-lifecycle/relia-mvp-t1/",
+            ],
+            "forbidden_paths": [
+                ".factory/artifacts/pr-lifecycle/relia-mvp-t1/",
+                ".factory/artifacts/task-runs/T1/scope-closure-report.json",
+                ".factory/artifacts/task-runs/T1/scope-closure-map.json",
+                ".factory/artifacts/task-runs/T1/factoryd-run-once-report.json",
+            ],
+            "lifecycle_evidence_required": [
+                "scope_closure_report",
+                "pr_lifecycle_report",
+                "factoryd_run_once_report",
+            ],
+        }
+        try:
+            validate_lifecycle_path_ownership(lifecycle_allowed_path, "T1")
+        except AssertionError as exc:
+            if ".allowed_paths includes daemon-owned lifecycle evidence paths" not in str(exc):
+                raise
+        else:
+            fail("lifecycle allowed path fixture did not fail closed")
+
+        lifecycle_root_allowed_path = json.loads(json.dumps(lifecycle_allowed_path))
+        lifecycle_root_allowed_path["allowed_paths"] = [
+            ".factory/artifacts/task-runs/T1/",
+            ".factory/artifacts/pr-lifecycle/",
+        ]
+        try:
+            validate_lifecycle_path_ownership(lifecycle_root_allowed_path, "T1")
+        except AssertionError as exc:
+            if ".allowed_paths includes daemon-owned lifecycle evidence paths" not in str(exc):
+                raise
+        else:
+            fail("lifecycle root allowed path fixture did not fail closed")
+
+        lifecycle_ancestor_allowed_path = json.loads(json.dumps(lifecycle_allowed_path))
+        lifecycle_ancestor_allowed_path["allowed_paths"] = [
+            ".factory/",
+        ]
+        try:
+            validate_lifecycle_path_ownership(lifecycle_ancestor_allowed_path, "T1")
+        except AssertionError as exc:
+            if ".allowed_paths includes daemon-owned lifecycle evidence paths" not in str(exc):
+                raise
+        else:
+            fail("lifecycle ancestor allowed path fixture did not fail closed")
+
+        task_runs_root_allowed_path = json.loads(json.dumps(lifecycle_allowed_path))
+        task_runs_root_allowed_path["allowed_paths"] = [
+            ".factory/artifacts/task-runs/",
+        ]
+        try:
+            validate_lifecycle_path_ownership(task_runs_root_allowed_path, "T1")
+        except AssertionError as exc:
+            if ".allowed_paths includes daemon-owned lifecycle evidence paths" not in str(exc):
+                raise
+        else:
+            fail("task-runs root allowed path fixture did not fail closed")
+
+        other_task_run_allowed_path = json.loads(json.dumps(lifecycle_allowed_path))
+        other_task_run_allowed_path["allowed_paths"] = [
+            ".factory/artifacts/task-runs/T2/",
+        ]
+        try:
+            validate_lifecycle_path_ownership(other_task_run_allowed_path, "T1")
+        except AssertionError as exc:
+            if ".allowed_paths includes daemon-owned lifecycle evidence paths" not in str(exc):
+                raise
+        else:
+            fail("other task-run allowed path fixture did not fail closed")
+
+        lifecycle_missing_forbidden = {
+            "work_item_id": "relia-mvp-t1",
+            "allowed_paths": [".factory/artifacts/task-runs/T1/"],
+            "forbidden_paths": [".factory/artifacts/pr-lifecycle/relia-mvp-t1/"],
+            "lifecycle_evidence_required": [
+                "scope_closure_report",
+                "pr_lifecycle_report",
+                "factoryd_run_once_report",
+            ],
+        }
+        try:
+            validate_lifecycle_path_ownership(lifecycle_missing_forbidden, "T1")
+        except AssertionError as exc:
+            if ".forbidden_paths must reserve daemon-owned lifecycle evidence paths" not in str(exc):
+                raise
+        else:
+            fail("missing lifecycle forbidden path fixture did not fail closed")
+
+        nested_lifecycle_missing_forbidden = {
+            "work_item_id": "relia-mvp-t1",
+            "allowed_paths": [".factory/artifacts/task-runs/T1/"],
+            "forbidden_paths": [
+                ".factory/artifacts/pr-lifecycle/relia-mvp-t1/",
+                ".factory/artifacts/task-runs/T1/scope-closure-report.json",
+                ".factory/artifacts/task-runs/T1/scope-closure-map.json",
+            ],
+            "lifecycle_evidence_required": ["scope_closure_report"],
+            "acceptance_result_requirements": [
+                {
+                    "acceptance_item_id": "A1",
+                    "lifecycle_evidence_required": ["factoryd_run_once_report"],
+                }
+            ],
+        }
+        try:
+            validate_lifecycle_path_ownership(nested_lifecycle_missing_forbidden, "T1")
+        except AssertionError as exc:
+            if "factoryd-run-once-report.json" not in str(exc):
+                raise
+        else:
+            fail("nested lifecycle forbidden path fixture did not fail closed")
+
+        scope_closure_map_missing_forbidden = {
+            "work_item_id": "relia-mvp-t1",
+            "allowed_paths": [".factory/artifacts/task-runs/T1/"],
+            "forbidden_paths": [],
+            "lifecycle_evidence_required": ["scope_closure_map"],
+        }
+        try:
+            validate_lifecycle_path_ownership(scope_closure_map_missing_forbidden, "T1")
+        except AssertionError as exc:
+            if "scope-closure-map.json" not in str(exc):
+                raise
+        else:
+            fail("scope closure map forbidden path fixture did not fail closed")
+
+        non_list_evidence_required = dict(sample_task)
+        non_list_evidence_required["evidence_required"] = "validation_report"
+        try:
+            validate_runner_ready_task_fields(non_list_evidence_required, "self-test")
+        except AssertionError as exc:
+            if ".evidence_required must be a non-empty list" not in str(exc):
+                raise
+        else:
+            fail("non-list evidence_required fixture did not fail closed")
+
+        non_list_inherited_evidence = json.loads(json.dumps(sample_task))
+        non_list_inherited_evidence["validation_contract_inheritance"] = {
+            "evidence_required": "validation_report",
+            "worker_evidence_required": ["validation_report"],
+            "lifecycle_evidence_required": ["scope_closure_report"],
+        }
+        try:
+            validate_runner_ready_task_fields(non_list_inherited_evidence, "self-test")
+        except AssertionError as exc:
+            if "validation_contract_inheritance.evidence_required must be a list" not in str(exc):
+                raise
+        else:
+            fail("non-list inherited evidence_required fixture did not fail closed")
+
+        misplaced_inherited_evidence = json.loads(json.dumps(sample_task))
+        misplaced_inherited_evidence["validation_contract_inheritance"] = {
+            "evidence_required": ["validation_report"],
+            "worker_evidence_required": ["scope_closure_report"],
+            "lifecycle_evidence_required": ["scope_closure_report"],
+        }
+        try:
+            validate_runner_ready_task_fields(misplaced_inherited_evidence, "self-test")
+        except AssertionError as exc:
+            if "validation_contract_inheritance.worker_evidence_required" not in str(exc):
+                raise
+        else:
+            fail("misplaced inherited worker evidence fixture did not fail closed")
+
+        missing_worker_mirror = json.loads(json.dumps(sample_task))
+        missing_worker_mirror["proof_scorecard_required"] = False
+        missing_worker_mirror["required_proof_level"] = "source_evidence"
+        missing_worker_mirror["evidence_required"] = ["validation_report", "work_proof_marker"]
+        missing_worker_mirror["worker_evidence_required"] = ["validation_report"]
+        try:
+            validate_runner_ready_task_fields(missing_worker_mirror, "self-test")
+        except AssertionError as exc:
+            if ".worker_evidence_required must mirror worker-owned evidence_required defaults" not in str(exc):
+                raise
+        else:
+            fail("missing worker evidence mirror fixture did not fail closed")
+
+        missing_evidence_mirror = json.loads(json.dumps(sample_task))
+        missing_evidence_mirror["proof_scorecard_required"] = False
+        missing_evidence_mirror["required_proof_level"] = "source_evidence"
+        missing_evidence_mirror["evidence_required"] = ["validation_report"]
+        missing_evidence_mirror["worker_evidence_required"] = ["validation_report", "work_proof_marker"]
+        missing_evidence_mirror["acceptance_result_requirements"][0]["evidence_required"] = ["validation_report"]
+        missing_evidence_mirror["acceptance_result_requirements"][0]["worker_evidence_required"] = ["validation_report"]
+        try:
+            validate_runner_ready_task_fields(missing_evidence_mirror, "self-test")
+        except AssertionError as exc:
+            if ".evidence_required must mirror worker-owned worker_evidence_required defaults" not in str(exc):
+                raise
+        else:
+            fail("missing evidence_required mirror fixture did not fail closed")
+
+        missing_inherited_worker_mirror = json.loads(json.dumps(sample_task))
+        missing_inherited_worker_mirror["proof_scorecard_required"] = False
+        missing_inherited_worker_mirror["required_proof_level"] = "source_evidence"
+        missing_inherited_worker_mirror["validation_contract_inheritance"] = {
+            "evidence_required": ["validation_report", "work_proof_marker"],
+            "worker_evidence_required": ["validation_report"],
+            "lifecycle_evidence_required": ["scope_closure_report"],
+        }
+        try:
+            validate_runner_ready_task_fields(missing_inherited_worker_mirror, "self-test")
+        except AssertionError as exc:
+            if ".validation_contract_inheritance.worker_evidence_required must mirror" not in str(exc):
+                raise
+        else:
+            fail("missing inherited worker evidence mirror fixture did not fail closed")
+
+        missing_top_level_inherited_worker_mirror = json.loads(json.dumps(sample_task))
+        missing_top_level_inherited_worker_mirror["proof_scorecard_required"] = False
+        missing_top_level_inherited_worker_mirror["required_proof_level"] = "source_evidence"
+        missing_top_level_inherited_worker_mirror["evidence_required"] = ["validation_report"]
+        missing_top_level_inherited_worker_mirror["worker_evidence_required"] = ["validation_report"]
+        missing_top_level_inherited_worker_mirror["validation_contract_inheritance"] = {
+            "evidence_required": ["validation_report", "work_proof_marker"],
+            "worker_evidence_required": ["validation_report", "work_proof_marker"],
+            "lifecycle_evidence_required": ["scope_closure_report"],
+        }
+        try:
+            validate_runner_ready_task_fields(missing_top_level_inherited_worker_mirror, "self-test")
+        except AssertionError as exc:
+            if ".worker_evidence_required must mirror inherited worker-owned evidence defaults" not in str(exc):
+                raise
+        else:
+            fail("missing top-level inherited worker evidence mirror fixture did not fail closed")
+
+        missing_inherited_lifecycle_mirror = json.loads(json.dumps(sample_task))
+        missing_inherited_lifecycle_mirror["proof_scorecard_required"] = False
+        missing_inherited_lifecycle_mirror["required_proof_level"] = "source_evidence"
+        missing_inherited_lifecycle_mirror["validation_contract_inheritance"] = {
+            "evidence_required": ["validation_report"],
+            "worker_evidence_required": ["validation_report"],
+            "lifecycle_evidence_required": [
+                "scope_closure_report",
+                "pr_lifecycle_report",
+                "factoryd_run_once_report",
+            ],
+        }
+        missing_inherited_lifecycle_mirror["lifecycle_evidence_required"] = ["scope_closure_report"]
+        try:
+            validate_runner_ready_task_fields(missing_inherited_lifecycle_mirror, "self-test")
+        except AssertionError as exc:
+            if ".lifecycle_evidence_required must mirror lifecycle-owned evidence defaults" not in str(exc):
+                raise
+        else:
+            fail("missing inherited lifecycle evidence mirror fixture did not fail closed")
+
+        missing_nested_worker_mirror = json.loads(json.dumps(sample_task))
+        missing_nested_worker_mirror["proof_scorecard_required"] = False
+        missing_nested_worker_mirror["required_proof_level"] = "source_evidence"
+        missing_nested_worker_mirror["evidence_required"] = ["validation_report"]
+        missing_nested_worker_mirror["worker_evidence_required"] = ["validation_report"]
+        missing_nested_worker_mirror["acceptance_result_requirements"][0]["evidence_required"] = [
+            "validation_report",
+            "work_proof_marker",
+        ]
+        missing_nested_worker_mirror["acceptance_result_requirements"][0]["worker_evidence_required"] = [
+            "validation_report",
+        ]
+        try:
+            validate_runner_ready_task_fields(missing_nested_worker_mirror, "self-test")
+        except AssertionError as exc:
+            if ".acceptance_result_requirements[0].worker_evidence_required must mirror" not in str(exc):
+                raise
+        else:
+            fail("missing nested worker evidence mirror fixture did not fail closed")
+
+        missing_implied_scorecard = json.loads(json.dumps(sample_task))
+        missing_implied_scorecard["proof_scorecard_required"] = False
+        missing_implied_scorecard["required_proof_level"] = "workflow_behavior"
+        missing_implied_scorecard["evidence_required"] = ["validation_report"]
+        missing_implied_scorecard["worker_evidence_required"] = ["validation_report"]
+        for requirement in missing_implied_scorecard["acceptance_result_requirements"]:
+            requirement["evidence_required"] = ["validation_report"]
+            requirement["worker_evidence_required"] = ["validation_report"]
+        try:
+            validate_runner_ready_task_fields(missing_implied_scorecard, "self-test")
+        except AssertionError as exc:
+            if "requires a proof-of-behavior scorecard" not in str(exc):
+                raise
+        else:
+            fail("workflow proof level without scorecard fixture did not fail closed")
+
+        try:
+            validate_validation_contract_evidence_split(
+                {
+                    "evidence_required": "validation_report",
+                    "worker_evidence_required": ["validation_report"],
+                    "lifecycle_evidence_required": ["scope_closure_report"],
+                },
+                "self-test.validation-contract",
+            )
+        except AssertionError as exc:
+            if ".evidence_required must be a non-empty list" not in str(exc):
+                raise
+        else:
+            fail("validation contract non-list evidence_required fixture did not fail closed")
+
+        try:
+            validate_validation_contract_evidence_split(
+                {
+                    "evidence_required": ["work_proof_markerx"],
+                    "worker_evidence_required": ["work_proof_markerx"],
+                    "lifecycle_evidence_required": ["scope_closure_report"],
+                },
+                "self-test.validation-contract",
+            )
+        except AssertionError as exc:
+            if "unsupported evidence keys" not in str(exc) and "unsupported worker evidence keys" not in str(exc):
+                raise
+        else:
+            fail("validation contract unknown evidence key fixture did not fail closed")
 
         active_config_grant = {
             "task_id": "T7",
@@ -797,6 +1608,8 @@ def main():
     execution_plan = json.loads(execution_plan_path.read_text())
     context_brief = json.loads(context_brief_path.read_text())
     validation_contract = json.loads((root / repo["validation_contract"]).read_text())
+    validate_validation_contract_evidence_split(validation_contract, "validation-contract")
+    validate_validation_contract_evidence_split(execution_plan.get("validation_contract"), "execution-plan.validation_contract")
     ledger = json.loads((root / repo["acceptance_ledger"]).read_text())
     if ledger.get("artifact_type") != "acceptance_ledger":
         fail("acceptance ledger must use artifact_type acceptance_ledger")
@@ -928,20 +1741,7 @@ def main():
             if not task_slices.issubset(declared_slices):
                 fail(f"{task_id} references unknown delivery_slice_refs")
         allowed_paths = set(task.get("allowed_paths") or [])
-        normalized_allowed_paths = set()
-        for path in allowed_paths:
-            parts = []
-            for part in path.replace("\\", "/").split("/"):
-                if part in ("", "."):
-                    continue
-                if part == "..":
-                    if parts:
-                        parts.pop()
-                    else:
-                        parts.append(part)
-                    continue
-                parts.append(part)
-            normalized_allowed_paths.add("/".join(parts))
+        normalized_allowed_paths = {normalize_repo_path(path) for path in allowed_paths}
         control_allowed = sorted(
             path for path in normalized_allowed_paths
             if path == ".factory/artifacts"
@@ -951,6 +1751,7 @@ def main():
         )
         if control_allowed:
             fail(f"{task_id}.allowed_paths includes runtime-owned control artifact: {control_allowed}")
+        validate_lifecycle_path_ownership(task, task_id)
         if task.get("worker_type") != "codex_cli":
             fail(f"{task_id}.worker_type must be codex_cli")
         runtime = task.get("factoryd_runtime")
