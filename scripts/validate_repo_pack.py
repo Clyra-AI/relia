@@ -529,17 +529,18 @@ def validate_runner_ready_task_fields(task, task_id):
             f"move worker evidence to worker_evidence_required: {worker_in_lifecycle!r}"
         )
     evidence_required = task.get("evidence_required")
-    if isinstance(evidence_required, list):
-        unknown_evidence = non_worker_evidence_items(evidence_required)
-        if unknown_evidence:
-            fail(f"{task_id}.evidence_required contains unsupported worker evidence keys: {unknown_evidence!r}")
-        lifecycle_in_worker = lifecycle_evidence_items(evidence_required)
-        if lifecycle_in_worker:
-            fail(
-                f"{task_id}.evidence_required must only contain worker-owned evidence; "
-                f"move lifecycle evidence to lifecycle_evidence_required: {lifecycle_in_worker!r}"
-            )
-        require_worker_evidence_mirror(task_id, evidence_required, worker_evidence)
+    if not isinstance(evidence_required, list) or not any(str(item).strip() for item in evidence_required):
+        fail(f"{task_id}.evidence_required must be a non-empty list")
+    unknown_evidence = non_worker_evidence_items(evidence_required)
+    if unknown_evidence:
+        fail(f"{task_id}.evidence_required contains unsupported worker evidence keys: {unknown_evidence!r}")
+    lifecycle_in_worker = lifecycle_evidence_items(evidence_required)
+    if lifecycle_in_worker:
+        fail(
+            f"{task_id}.evidence_required must only contain worker-owned evidence; "
+            f"move lifecycle evidence to lifecycle_evidence_required: {lifecycle_in_worker!r}"
+        )
+    require_worker_evidence_mirror(task_id, evidence_required, worker_evidence)
     lifecycle_in_worker_subset = lifecycle_evidence_items(worker_evidence)
     if lifecycle_in_worker_subset:
         fail(
@@ -861,6 +862,16 @@ def self_test():
                 raise
         else:
             fail("missing runner-ready proof field fixture did not fail closed")
+
+        non_list_evidence_required = dict(sample_task)
+        non_list_evidence_required["evidence_required"] = "validation_report"
+        try:
+            validate_runner_ready_task_fields(non_list_evidence_required, "self-test")
+        except AssertionError as exc:
+            if ".evidence_required must be a non-empty list" not in str(exc):
+                raise
+        else:
+            fail("non-list evidence_required fixture did not fail closed")
 
         misplaced_inherited_evidence = json.loads(json.dumps(sample_task))
         misplaced_inherited_evidence["validation_contract_inheritance"] = {
