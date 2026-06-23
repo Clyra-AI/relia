@@ -663,7 +663,12 @@ func normalizeExperienceRecord(config yamlDocument, event map[string]any, index 
 	if commandErr != nil {
 		return experienceRecord{}, false, commandErr
 	}
-	flakeDiscount := floatField(event, 0, "flake_discount")
+	flakeDiscount := 0.0
+	if parsedFlakeDiscount, exists, commandErr := optionalFloatField(event, ref, "flake_discount", "flake_discount"); commandErr != nil {
+		return experienceRecord{}, false, commandErr
+	} else if exists {
+		flakeDiscount = parsedFlakeDiscount
+	}
 	if flakeDiscount < 0 || flakeDiscount > 1 {
 		return experienceRecord{}, false, artifactContractError("flake_discount must be between 0 and 1", ref)
 	}
@@ -769,10 +774,16 @@ func normalizeExperienceAction(event map[string]any, ref string) (experienceActi
 }
 
 func normalizeExperienceAttribution(config yamlDocument, event map[string]any, ref string) (experienceAttribution, bool, *CommandError) {
+	confidence := -1.0
+	if parsedConfidence, exists, commandErr := optionalFloatField(event, ref, "attribution confidence", "attribution_confidence", "attribution.confidence"); commandErr != nil {
+		return experienceAttribution{}, false, commandErr
+	} else if exists {
+		confidence = parsedConfidence
+	}
 	attribution := experienceAttribution{
 		ActorKind:  stringField(event, "actor_kind", "attribution.actor_kind"),
 		Method:     stringField(event, "attribution_method", "attribution.method"),
-		Confidence: floatField(event, -1, "attribution_confidence", "attribution.confidence"),
+		Confidence: confidence,
 	}
 	if attribution.ActorKind == "" {
 		switch {
@@ -1041,6 +1052,9 @@ func redactValue(value any, fieldPath []string, ref string) (any, *CommandError)
 		redacted := make(map[string]any, len(typed))
 		for key, child := range typed {
 			childPath := append(append([]string{}, fieldPath...), key)
+			if commandErr := validateRedactedMapKey(key, fieldPath, ref); commandErr != nil {
+				return nil, commandErr
+			}
 			if isSecretField(key) {
 				redacted[key] = "[REDACTED:secret]"
 				continue
@@ -1068,6 +1082,22 @@ func redactValue(value any, fieldPath []string, ref string) (any, *CommandError)
 	default:
 		return value, nil
 	}
+}
+
+func validateRedactedMapKey(key string, fieldPath []string, ref string) *CommandError {
+	keyPath := append(append([]string{}, fieldPath...), "<key>")
+	redacted, commandErr := redactStringValue(key, keyPath, ref)
+	if commandErr != nil {
+		return commandErr
+	}
+	if redacted != key {
+		pathRef := strings.Join(fieldPath, ".")
+		if pathRef == "" {
+			pathRef = "<root>"
+		}
+		return redactionSafetyError(fmt.Sprintf("secret-shaped object key at %s", pathRef), ref)
+	}
+	return nil
 }
 
 func redactStringValue(value string, fieldPath []string, ref string) (string, *CommandError) {
@@ -1304,25 +1334,52 @@ func intFromAny(value any) (int, bool) {
 func floatField(event map[string]any, fallback float64, paths ...string) float64 {
 	for _, path := range paths {
 		if value, ok := nestedField(event, path); ok {
-			switch typed := value.(type) {
-			case float64:
-				return typed
-			case int:
-				return float64(typed)
-			case json.Number:
-				converted, err := typed.Float64()
-				if err == nil {
-					return converted
-				}
-			case string:
-				converted, err := strconv.ParseFloat(strings.TrimSpace(typed), 64)
-				if err == nil {
-					return converted
-				}
+			if converted, ok := numericValue(value); ok {
+				return converted
 			}
 		}
 	}
 	return fallback
+}
+
+func optionalFloatField(event map[string]any, ref string, label string, paths ...string) (float64, bool, *CommandError) {
+	for _, path := range paths {
+		if value, ok := nestedField(event, path); ok {
+			converted, valid := numericValue(value)
+			if !valid {
+				return 0, true, artifactContractError(label+" must be numeric", ref)
+			}
+			return converted, true, nil
+		}
+	}
+	return 0, false, nil
+}
+
+func numericValue(value any) (float64, bool) {
+	switch typed := value.(type) {
+	case float64:
+		if math.IsNaN(typed) || math.IsInf(typed, 0) {
+			return 0, false
+		}
+		return typed, true
+	case int:
+		return float64(typed), true
+	case json.Number:
+		converted, err := typed.Float64()
+		if err == nil && !math.IsNaN(converted) && !math.IsInf(converted, 0) {
+			return converted, true
+		}
+	case string:
+		trimmed := strings.TrimSpace(typed)
+		if trimmed == "" {
+			return 0, false
+		}
+		converted, err := strconv.ParseFloat(trimmed, 64)
+		if err == nil && !math.IsNaN(converted) && !math.IsInf(converted, 0) {
+			return converted, true
+		}
+	}
+	return 0, false
 }
 
 func stringListField(event map[string]any, paths ...string) []string {
