@@ -502,8 +502,13 @@ def validate_runner_ready_task_fields(task, task_id):
                     f"factoryd-owned lifecycle evidence; move worker evidence to worker_evidence_required: "
                     f"{inherited_worker_in_lifecycle!r}"
                 )
-    if task.get("proof_scorecard_required") is True:
-        required_scorecard_key = "proof_of_behavior_scorecard"
+    required_scorecard_key = "proof_of_behavior_scorecard"
+    proof_level = str(task.get("required_proof_level", "")).strip()
+    scorecard_required = task.get("proof_scorecard_required") is True or proof_level in {
+        "workflow_behavior",
+        "user_visible_behavior",
+    }
+    if scorecard_required:
         normalized_worker = {
             str(item).strip().lower().replace("-", "_")
             for item in worker_evidence
@@ -588,7 +593,7 @@ def validate_runner_ready_task_fields(task, task_id):
                 f"{task_id}.acceptance_result_requirements[{index}].worker_evidence_required must only contain "
                 f"worker-owned evidence: {nested_lifecycle_in_worker_subset!r}"
             )
-        if task.get("proof_scorecard_required") is True:
+        if scorecard_required:
             normalized_nested_worker = {
                 str(item).strip().lower().replace("-", "_")
                 for item in nested_worker
@@ -705,8 +710,8 @@ def self_test():
         "artifact_budget_refs",
     ]:
         sample_task[key] = ["value"]
-    sample_task["evidence_required"] = ["validation_report"]
-    sample_task["worker_evidence_required"] = ["validation_report"]
+    sample_task["evidence_required"] = ["validation_report", "proof-of-behavior-scorecard"]
+    sample_task["worker_evidence_required"] = ["validation_report", "proof-of-behavior-scorecard"]
     sample_task["lifecycle_evidence_required"] = ["scope_closure_report"]
     sample_task["factoryd_runtime"] = {"worker_type": "codex_cli"}
     sample_task["lifecycle_gates"] = {"commit_push_required": True}
@@ -714,11 +719,12 @@ def self_test():
         {
             "acceptance_item_id": "value",
             "allowed_statuses": ["implemented", "partial", "missing", "blocked", "deferred_with_approval"],
-            "evidence_required": ["validation_report", "work_proof_marker"],
-            "worker_evidence_required": ["validation_report", "work_proof_marker"],
+            "evidence_required": ["validation_report", "work_proof_marker", "proof-of-behavior-scorecard"],
+            "worker_evidence_required": ["validation_report", "work_proof_marker", "proof-of-behavior-scorecard"],
             "lifecycle_evidence_required": ["scope_closure_report"],
         }
     ]
+    sample_task["proof_scorecard_required"] = True
     sample_task["required_proof_level"] = "workflow_behavior"
     sample_task["redaction_posture"] = {"classification": "internal", "customer_safe": False}
     validate_runner_ready_task_fields(sample_task, "self-test")
@@ -753,6 +759,22 @@ def self_test():
                 raise
         else:
             fail("misplaced inherited worker evidence fixture did not fail closed")
+
+        missing_implied_scorecard = json.loads(json.dumps(sample_task))
+        missing_implied_scorecard["proof_scorecard_required"] = False
+        missing_implied_scorecard["required_proof_level"] = "workflow_behavior"
+        missing_implied_scorecard["evidence_required"] = ["validation_report"]
+        missing_implied_scorecard["worker_evidence_required"] = ["validation_report"]
+        for requirement in missing_implied_scorecard["acceptance_result_requirements"]:
+            requirement["evidence_required"] = ["validation_report"]
+            requirement["worker_evidence_required"] = ["validation_report"]
+        try:
+            validate_runner_ready_task_fields(missing_implied_scorecard, "self-test")
+        except AssertionError as exc:
+            if "requires a proof-of-behavior scorecard" not in str(exc):
+                raise
+        else:
+            fail("workflow proof level without scorecard fixture did not fail closed")
 
         active_config_grant = {
             "task_id": "T7",
