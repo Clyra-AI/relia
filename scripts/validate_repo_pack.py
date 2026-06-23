@@ -194,6 +194,24 @@ def require_worker_evidence_mirror(label, evidence_required, worker_evidence):
     if missing_worker:
         fail(f"{label}.worker_evidence_required must mirror worker-owned evidence_required defaults: {missing_worker!r}")
 
+def require_worker_values_present(field_label, required_worker_values, actual_values):
+    required_defaults = {
+        normalized_evidence_key(item)
+        for item in worker_evidence_items(required_worker_values)
+    }
+    if not required_defaults:
+        return
+    if not isinstance(actual_values, list) or not actual_values:
+        fail(f"{field_label} must mirror inherited worker-owned evidence defaults: {sorted(required_defaults)!r}")
+    actual_keys = {
+        normalized_evidence_key(item)
+        for item in actual_values
+        if normalized_evidence_key(item)
+    }
+    missing_worker = sorted(required_defaults - actual_keys)
+    if missing_worker:
+        fail(f"{field_label} must mirror inherited worker-owned evidence defaults: {missing_worker!r}")
+
 def require_lifecycle_evidence_mirror(field_label, lifecycle_defaults, lifecycle_evidence):
     required_defaults = {
         normalized_evidence_key(item)
@@ -565,6 +583,16 @@ def validate_runner_ready_task_fields(task, task_id):
                     f"worker-owned evidence; move lifecycle evidence to lifecycle_evidence_required: "
                     f"{inherited_lifecycle_in_worker_subset!r}"
                 )
+            require_worker_values_present(
+                f"{task_id}.worker_evidence_required",
+                inherited_worker,
+                worker_evidence,
+            )
+            require_worker_values_present(
+                f"{task_id}.evidence_required",
+                inherited_worker,
+                evidence_required,
+            )
         inherited_lifecycle = inheritance.get("lifecycle_evidence_required")
         if isinstance(inherited_lifecycle, list):
             unknown_inherited_lifecycle = non_lifecycle_evidence_items(inherited_lifecycle)
@@ -876,6 +904,24 @@ def self_test():
                 raise
         else:
             fail("missing inherited worker evidence mirror fixture did not fail closed")
+
+        missing_top_level_inherited_worker_mirror = json.loads(json.dumps(sample_task))
+        missing_top_level_inherited_worker_mirror["proof_scorecard_required"] = False
+        missing_top_level_inherited_worker_mirror["required_proof_level"] = "source_evidence"
+        missing_top_level_inherited_worker_mirror["evidence_required"] = ["validation_report"]
+        missing_top_level_inherited_worker_mirror["worker_evidence_required"] = ["validation_report"]
+        missing_top_level_inherited_worker_mirror["validation_contract_inheritance"] = {
+            "evidence_required": ["validation_report", "work_proof_marker"],
+            "worker_evidence_required": ["validation_report", "work_proof_marker"],
+            "lifecycle_evidence_required": ["scope_closure_report"],
+        }
+        try:
+            validate_runner_ready_task_fields(missing_top_level_inherited_worker_mirror, "self-test")
+        except AssertionError as exc:
+            if ".worker_evidence_required must mirror inherited worker-owned evidence defaults" not in str(exc):
+                raise
+        else:
+            fail("missing top-level inherited worker evidence mirror fixture did not fail closed")
 
         missing_inherited_lifecycle_mirror = json.loads(json.dumps(sample_task))
         missing_inherited_lifecycle_mirror["proof_scorecard_required"] = False
