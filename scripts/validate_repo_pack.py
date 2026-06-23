@@ -194,6 +194,24 @@ def require_worker_evidence_mirror(label, evidence_required, worker_evidence):
     if missing_worker:
         fail(f"{label}.worker_evidence_required must mirror worker-owned evidence_required defaults: {missing_worker!r}")
 
+def require_lifecycle_evidence_mirror(field_label, lifecycle_defaults, lifecycle_evidence):
+    required_defaults = {
+        normalized_evidence_key(item)
+        for item in lifecycle_evidence_items(lifecycle_defaults)
+    }
+    if not required_defaults:
+        return
+    if not isinstance(lifecycle_evidence, list) or not lifecycle_evidence:
+        fail(f"{field_label} must mirror lifecycle-owned evidence defaults: {sorted(required_defaults)!r}")
+    lifecycle_keys = {
+        normalized_evidence_key(item)
+        for item in lifecycle_evidence
+        if normalized_evidence_key(item)
+    }
+    missing_lifecycle = sorted(required_defaults - lifecycle_keys)
+    if missing_lifecycle:
+        fail(f"{field_label} must mirror lifecycle-owned evidence defaults: {missing_lifecycle!r}")
+
 def validate_validation_contract_evidence_split(contract, label):
     if not isinstance(contract, dict):
         fail(f"{label} must be an object")
@@ -225,16 +243,7 @@ def validate_validation_contract_evidence_split(contract, label):
         fail(f"{label}.evidence_required contains unsupported evidence keys: {unknown_evidence!r}")
     require_worker_evidence_mirror(label, evidence_required, worker_evidence)
     lifecycle_defaults = lifecycle_evidence_items(evidence_required)
-    if lifecycle_defaults:
-        if not isinstance(lifecycle_evidence, list) or not lifecycle_evidence:
-            fail(f"{label}.lifecycle_evidence_required must mirror lifecycle-owned evidence_required defaults: {lifecycle_defaults!r}")
-        lifecycle_keys = {str(item).strip().lower().replace("-", "_") for item in lifecycle_evidence}
-        missing_lifecycle = [
-            item for item in lifecycle_defaults
-            if str(item).strip().lower().replace("-", "_") not in lifecycle_keys
-        ]
-        if missing_lifecycle:
-            fail(f"{label}.lifecycle_evidence_required must mirror lifecycle-owned evidence_required defaults: {missing_lifecycle!r}")
+    require_lifecycle_evidence_mirror(f"{label}.lifecycle_evidence_required", lifecycle_defaults, lifecycle_evidence)
 
 def missing_grant_value(value):
     if value is None or value == []:
@@ -571,6 +580,11 @@ def validate_runner_ready_task_fields(task, task_id):
                     f"factoryd-owned lifecycle evidence; move worker evidence to worker_evidence_required: "
                     f"{inherited_worker_in_lifecycle!r}"
                 )
+            require_lifecycle_evidence_mirror(
+                f"{task_id}.lifecycle_evidence_required",
+                inherited_lifecycle,
+                lifecycle_evidence,
+            )
     required_scorecard_key = "proof_of_behavior_scorecard"
     proof_level = str(task.get("required_proof_level", "")).strip()
     scorecard_required = task.get("proof_scorecard_required") is True or proof_level in {
@@ -862,6 +876,27 @@ def self_test():
                 raise
         else:
             fail("missing inherited worker evidence mirror fixture did not fail closed")
+
+        missing_inherited_lifecycle_mirror = json.loads(json.dumps(sample_task))
+        missing_inherited_lifecycle_mirror["proof_scorecard_required"] = False
+        missing_inherited_lifecycle_mirror["required_proof_level"] = "source_evidence"
+        missing_inherited_lifecycle_mirror["validation_contract_inheritance"] = {
+            "evidence_required": ["validation_report"],
+            "worker_evidence_required": ["validation_report"],
+            "lifecycle_evidence_required": [
+                "scope_closure_report",
+                "pr_lifecycle_report",
+                "factoryd_run_once_report",
+            ],
+        }
+        missing_inherited_lifecycle_mirror["lifecycle_evidence_required"] = ["scope_closure_report"]
+        try:
+            validate_runner_ready_task_fields(missing_inherited_lifecycle_mirror, "self-test")
+        except AssertionError as exc:
+            if ".lifecycle_evidence_required must mirror lifecycle-owned evidence defaults" not in str(exc):
+                raise
+        else:
+            fail("missing inherited lifecycle evidence mirror fixture did not fail closed")
 
         missing_nested_worker_mirror = json.loads(json.dumps(sample_task))
         missing_nested_worker_mirror["proof_scorecard_required"] = False
