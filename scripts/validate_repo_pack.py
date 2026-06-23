@@ -250,8 +250,8 @@ def validate_validation_contract_evidence_split(contract, label):
         worker_in_lifecycle = worker_evidence_items(lifecycle_evidence)
         if worker_in_lifecycle:
             fail(f"{label}.lifecycle_evidence_required must only contain factoryd-owned lifecycle evidence: {worker_in_lifecycle!r}")
-    if not isinstance(evidence_required, list):
-        return
+    if not isinstance(evidence_required, list) or not any(str(item).strip() for item in evidence_required):
+        fail(f"{label}.evidence_required must be a non-empty list")
     known_evidence_keys = WORKER_EVIDENCE_KEYS | LIFECYCLE_EVIDENCE_KEYS
     unknown_evidence = [
         item for item in evidence_required
@@ -990,6 +990,21 @@ def self_test():
                 raise
         else:
             fail("workflow proof level without scorecard fixture did not fail closed")
+
+        try:
+            validate_validation_contract_evidence_split(
+                {
+                    "evidence_required": "validation_report",
+                    "worker_evidence_required": ["validation_report"],
+                    "lifecycle_evidence_required": ["scope_closure_report"],
+                },
+                "self-test.validation-contract",
+            )
+        except AssertionError as exc:
+            if ".evidence_required must be a non-empty list" not in str(exc):
+                raise
+        else:
+            fail("validation contract non-list evidence_required fixture did not fail closed")
 
         try:
             validate_validation_contract_evidence_split(
