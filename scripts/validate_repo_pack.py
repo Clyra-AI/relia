@@ -26,6 +26,8 @@ RUNNER_READY_TASK_FIELDS = [
     "final_validation_commands",
     "acceptance_result_requirements",
     "evidence_required",
+    "worker_evidence_required",
+    "lifecycle_evidence_required",
     "stop_conditions",
     "worker_type",
     "factoryd_runtime",
@@ -56,6 +58,19 @@ REQUIRED_PROOF_LEVELS = {
     "source_evidence",
     "workflow_behavior",
     "user_visible_behavior",
+}
+LIFECYCLE_EVIDENCE_KEYS = {
+    "factoryd_run_once_report",
+    "post_merge_report",
+    "pr_lifecycle_report",
+    "scope_closure_map",
+    "scope_closure_report",
+    "ship_packet",
+}
+WORKER_EVIDENCE_KEYS = {
+    "proof_of_behavior_scorecard",
+    "validation_report",
+    "work_proof_marker",
 }
 
 REQUIRED = [
@@ -121,6 +136,24 @@ def duplicate_values(values):
             duplicates.append(value)
         seen.add(value)
     return duplicates
+
+def lifecycle_evidence_items(values):
+    if not isinstance(values, list):
+        return []
+    return [
+        item
+        for item in values
+        if str(item).strip().lower().replace("-", "_") in LIFECYCLE_EVIDENCE_KEYS
+    ]
+
+def worker_evidence_items(values):
+    if not isinstance(values, list):
+        return []
+    return [
+        item
+        for item in values
+        if str(item).strip().lower().replace("-", "_") in WORKER_EVIDENCE_KEYS
+    ]
 
 def missing_grant_value(value):
     if value is None or value == []:
@@ -369,6 +402,63 @@ def validate_runner_ready_task_fields(task, task_id):
     for key in RUNNER_READY_TASK_FIELDS:
         if key not in task or task[key] in (None, "", []):
             fail(f"{task_id} missing runner-ready field: {key}")
+    worker_evidence = task.get("worker_evidence_required")
+    if not isinstance(worker_evidence, list) or not any(str(item).strip() for item in worker_evidence):
+        fail(f"{task_id}.worker_evidence_required must be a non-empty list")
+    lifecycle_evidence = task.get("lifecycle_evidence_required")
+    if not isinstance(lifecycle_evidence, list) or not any(str(item).strip() for item in lifecycle_evidence):
+        fail(f"{task_id}.lifecycle_evidence_required must be a non-empty list")
+    worker_in_lifecycle = worker_evidence_items(lifecycle_evidence)
+    if worker_in_lifecycle:
+        fail(
+            f"{task_id}.lifecycle_evidence_required must only contain factoryd-owned lifecycle evidence; "
+            f"move worker evidence to worker_evidence_required: {worker_in_lifecycle!r}"
+        )
+    evidence_required = task.get("evidence_required")
+    if isinstance(evidence_required, list):
+        lifecycle_in_worker = lifecycle_evidence_items(evidence_required)
+        if lifecycle_in_worker:
+            fail(
+                f"{task_id}.evidence_required must only contain worker-owned evidence; "
+                f"move lifecycle evidence to lifecycle_evidence_required: {lifecycle_in_worker!r}"
+            )
+    lifecycle_in_worker_subset = lifecycle_evidence_items(worker_evidence)
+    if lifecycle_in_worker_subset:
+        fail(
+            f"{task_id}.worker_evidence_required must only contain worker-owned evidence; "
+            f"move lifecycle evidence to lifecycle_evidence_required: {lifecycle_in_worker_subset!r}"
+        )
+    for index, requirement in enumerate(task.get("acceptance_result_requirements") or []):
+        if not isinstance(requirement, dict):
+            fail(f"{task_id}.acceptance_result_requirements[{index}] must be an object")
+        requirement_evidence = requirement.get("evidence_required")
+        if not isinstance(requirement_evidence, list) or not any(str(item).strip() for item in requirement_evidence):
+            fail(f"{task_id}.acceptance_result_requirements[{index}].evidence_required must be a non-empty list")
+        nested_lifecycle_in_worker = lifecycle_evidence_items(requirement_evidence)
+        if nested_lifecycle_in_worker:
+            fail(
+                f"{task_id}.acceptance_result_requirements[{index}].evidence_required must only contain "
+                f"worker-owned evidence; move lifecycle evidence to lifecycle_evidence_required: "
+                f"{nested_lifecycle_in_worker!r}"
+            )
+        nested_worker = requirement.get("worker_evidence_required")
+        if not isinstance(nested_worker, list) or not any(str(item).strip() for item in nested_worker):
+            fail(f"{task_id}.acceptance_result_requirements[{index}].worker_evidence_required must be a non-empty list")
+        nested_lifecycle = requirement.get("lifecycle_evidence_required")
+        if not isinstance(nested_lifecycle, list) or not any(str(item).strip() for item in nested_lifecycle):
+            fail(f"{task_id}.acceptance_result_requirements[{index}].lifecycle_evidence_required must be a non-empty list")
+        nested_worker_in_lifecycle = worker_evidence_items(nested_lifecycle)
+        if nested_worker_in_lifecycle:
+            fail(
+                f"{task_id}.acceptance_result_requirements[{index}].lifecycle_evidence_required must only contain "
+                f"factoryd-owned lifecycle evidence: {nested_worker_in_lifecycle!r}"
+            )
+        nested_lifecycle_in_worker_subset = lifecycle_evidence_items(nested_worker)
+        if nested_lifecycle_in_worker_subset:
+            fail(
+                f"{task_id}.acceptance_result_requirements[{index}].worker_evidence_required must only contain "
+                f"worker-owned evidence: {nested_lifecycle_in_worker_subset!r}"
+            )
     if task.get("required_proof_level") not in REQUIRED_PROOF_LEVELS:
         fail(f"{task_id}.required_proof_level must be one of {sorted(REQUIRED_PROOF_LEVELS)}")
     if not isinstance(task.get("artifact_budget_refs"), list):
@@ -453,6 +543,8 @@ def self_test():
         "final_validation_commands",
         "acceptance_result_requirements",
         "evidence_required",
+        "worker_evidence_required",
+        "lifecycle_evidence_required",
         "stop_conditions",
         "required_worker_chain",
         "test_matrix_refs",
@@ -469,6 +561,15 @@ def self_test():
         sample_task[key] = ["value"]
     sample_task["factoryd_runtime"] = {"worker_type": "codex_cli"}
     sample_task["lifecycle_gates"] = {"commit_push_required": True}
+    sample_task["acceptance_result_requirements"] = [
+        {
+            "acceptance_item_id": "value",
+            "allowed_statuses": ["implemented", "partial", "missing", "blocked", "deferred_with_approval"],
+            "evidence_required": ["validation_report", "work_proof_marker"],
+            "worker_evidence_required": ["validation_report", "work_proof_marker"],
+            "lifecycle_evidence_required": ["scope_closure_report"],
+        }
+    ]
     sample_task["required_proof_level"] = "workflow_behavior"
     sample_task["redaction_posture"] = {"classification": "internal", "customer_safe": False}
     validate_runner_ready_task_fields(sample_task, "self-test")
