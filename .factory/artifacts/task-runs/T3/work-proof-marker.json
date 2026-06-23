@@ -1,0 +1,33 @@
+{
+  "artifact_type": "work_proof_marker",
+  "schema_version": "1.0",
+  "task_id": "T3",
+  "status": "implemented",
+  "implementation_performed": true,
+  "updated_at": "2026-06-23T15:12:52Z",
+  "changed_paths": [
+    ".factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json",
+    ".factory/artifacts/task-runs/T3/validation-report.json",
+    ".factory/artifacts/task-runs/T3/work-proof-marker.json",
+    "cmd/relia/main_test.go"
+  ],
+  "implementation_paths": [
+    "README.md",
+    "cmd/relia/main.go",
+    "cmd/relia/main_test.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/dev/dev_guides.md",
+    "relia.yaml",
+    "schemas/experience-record.schema.json"
+  ],
+  "evidence_refs": [
+    ".factory/artifacts/task-runs/T3/validation-report.json",
+    ".factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json",
+    "cmd/relia/main.go",
+    "cmd/relia/main_test.go",
+    "docs/dev/dev_guides.md",
+    "docs/architecture/architecture_guides.md",
+    "schemas/experience-record.schema.json"
+  ],
+  "summary": "Implemented and validated PRD-defined offline input ingestion, attribution inference, capture-time redaction, canonical experience persistence, and provenance enforcement. This run added focused regression coverage for memory rules that cite a PR but omit experience evidence."
+}

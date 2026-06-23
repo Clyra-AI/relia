@@ -1,0 +1,194 @@
+{
+  "artifact_type": "validation_report",
+  "schema_version": "1.0",
+  "task_id": "T3",
+  "status": "pass",
+  "updated_at": "2026-06-23T15:12:52Z",
+  "repo_ref": "716f0a21bf4f94acf428a30652ab4cb95c4526b4",
+  "commands_run": [
+    "make lint-fast",
+    "make test-fast",
+    "go test ./cmd/relia -run 'TestIngest|TestCheckRejectsRuleWithoutProvenance|TestCheckAcceptsDocumentedScopedConfigAndMemoryRuleListMaps' -count=1",
+    "gofmt -w cmd/relia/main_test.go",
+    "go test ./cmd/relia -run 'TestCheckRejectsRuleWithoutExperienceCitation|TestCheckRejectsRuleWithoutProvenance|TestIngest' -count=1",
+    "git diff --check",
+    "make prepush-full",
+    "python3 -m json.tool .factory/artifacts/task-runs/T3/work-proof-marker.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T3/validation-report.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json",
+    "python3 -c 'verify top-level non-blocking status fields'"
+  ],
+  "changed_paths": [
+    ".factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json",
+    ".factory/artifacts/task-runs/T3/validation-report.json",
+    ".factory/artifacts/task-runs/T3/work-proof-marker.json",
+    "cmd/relia/main_test.go"
+  ],
+  "baseline_evidence": [
+    {
+      "command": "make lint-fast",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "make test-fast",
+      "status": "pass",
+      "exit_code": 0
+    }
+  ],
+  "red_first_evidence": [
+    {
+      "command": "make test-fast",
+      "status": "pass",
+      "exit_code": 0,
+      "classification": "pre_existing_green",
+      "summary": "The task packet's red-first command passed before edits because the workspace already contained the T3 implementation and focused tests."
+    }
+  ],
+  "test_first_skipped_reason": {
+    "status": "skipped",
+    "reason": "A new failing red-first test could not be honestly produced without reverting existing T3 behavior. This run instead added a focused regression test for the FR10 missing-experience citation case and verified it passed against the existing implementation."
+  },
+  "green_evidence": [
+    {
+      "command": "go test ./cmd/relia -run 'TestIngest|TestCheckRejectsRuleWithoutProvenance|TestCheckAcceptsDocumentedScopedConfigAndMemoryRuleListMaps' -count=1",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "Existing focused ingest, redaction, provenance, and memory-rule contract tests passed."
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestCheckRejectsRuleWithoutExperienceCitation|TestCheckRejectsRuleWithoutProvenance|TestIngest' -count=1",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "Focused T3 regression coverage passed, including fail-closed validation for a memory rule with PR provenance but no experience citation."
+    },
+    {
+      "command": "git diff --check",
+      "status": "pass",
+      "exit_code": 0
+    }
+  ],
+  "final_validation_evidence": [
+    {
+      "command": "make prepush-full",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "Passed lint-fast, test-fast, test-coverage at 77.4% over cmd packages, and test-contracts."
+    }
+  ],
+  "evidence_validation": [
+    {
+      "command": "python3 -m json.tool .factory/artifacts/task-runs/T3/work-proof-marker.json",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "python3 -m json.tool .factory/artifacts/task-runs/T3/validation-report.json",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "python3 -m json.tool .factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "python3 -c 'verify top-level non-blocking status fields'",
+      "status": "pass",
+      "exit_code": 0,
+      "observed_statuses": {
+        ".factory/artifacts/task-runs/T3/work-proof-marker.json": "implemented",
+        ".factory/artifacts/task-runs/T3/validation-report.json": "pass",
+        ".factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json": "pass"
+      }
+    }
+  ],
+  "acceptance_results": [
+    {
+      "acceptance_item_id": "FR10-PROVENANCE-MANDATORY-RULES-001",
+      "status": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T3/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json",
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go"
+      ]
+    },
+    {
+      "acceptance_item_id": "NFR5-SECURITY-001",
+      "status": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T3/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json",
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        "relia.yaml"
+      ]
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-004",
+      "status": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T3/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json",
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        "docs/dev/dev_guides.md"
+      ]
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-005",
+      "status": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T3/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json",
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        "schemas/experience-record.schema.json"
+      ]
+    }
+  ],
+  "path_policy_result": {
+    "status": "pass",
+    "changed_paths": [
+      ".factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json",
+      ".factory/artifacts/task-runs/T3/validation-report.json",
+      ".factory/artifacts/task-runs/T3/work-proof-marker.json",
+      "cmd/relia/main_test.go"
+    ],
+    "forbidden_paths_changed": [],
+    "note": "The required make prepush-full command uses ignored coverage output under .factory/tmp/coverage.out; it is not present in the tracked worker diff."
+  },
+  "plan_drift_result": {
+    "status": "pass",
+    "notes": "Work stayed within T3 input ingestion, redaction, persistence, provenance, and proof scope."
+  },
+  "changelog_result": {
+    "status": "not_applicable",
+    "notes": "No user-facing behavior changed during this repair run; the existing T3 docs already describe ingest behavior."
+  },
+  "versioning_result": {
+    "status": "not_applicable",
+    "notes": "No version or migration change required for the added regression test and evidence."
+  },
+  "docs_sync_result": {
+    "status": "pass",
+    "notes": "README.md, docs/dev/dev_guides.md, and docs/architecture/architecture_guides.md already contain the T3 ingest, redaction, persistence, and trust-posture descriptions."
+  },
+  "scope_closure_result": {
+    "status": "not_authored_by_worker",
+    "notes": "scope_closure_report is Factoryd-produced evidence per the task packet."
+  },
+  "pr_lifecycle_result": {
+    "status": "not_authored_by_worker",
+    "notes": "pr_lifecycle_report is Factoryd-produced evidence per the task packet."
+  },
+  "factoryd_run_once_result": {
+    "status": "not_authored_by_worker",
+    "notes": "factoryd_run_once_report is Factoryd-produced evidence per the task packet."
+  },
+  "blockers": [],
+  "residual_risks": [
+    "This worker did not author Factoryd-produced lifecycle, scope-closure, or run-once evidence by task-packet rule."
+  ]
+}

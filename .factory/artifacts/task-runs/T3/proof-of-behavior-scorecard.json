@@ -1,0 +1,88 @@
+{
+  "artifact_type": "proof_of_behavior_scorecard",
+  "artifact_name": "proof-of-behavior-scorecard",
+  "schema_version": "1.0",
+  "task_id": "T3",
+  "status": "pass",
+  "proof_level": "workflow_behavior",
+  "scorecard": [
+    {
+      "check_id": "offline_input_shapes",
+      "status": "pass",
+      "behavior": "relia ingest --input accepts local JSON objects, JSON arrays, {\"events\": [...]} objects, and JSONL streams without network or credentials.",
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        "docs/dev/dev_guides.md"
+      ]
+    },
+    {
+      "check_id": "capture_time_redaction_fail_closed",
+      "status": "pass",
+      "behavior": "Input events are recursively redacted and entropy-scanned before experience shard writes; known token shapes are redacted and unclassified high-entropy values fail closed with exit 6 without creating a shard.",
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        "relia.yaml"
+      ]
+    },
+    {
+      "check_id": "provenance_required_for_experiences",
+      "status": "pass",
+      "behavior": "Persisted experience records require a positive PR number and at least one https://github.com/ provenance URL; missing or invalid provenance returns exit 9.",
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        "schemas/experience-record.schema.json"
+      ]
+    },
+    {
+      "check_id": "mandatory_rule_receipts",
+      "status": "pass",
+      "behavior": "relia check rejects memory rules that lack experience citations or PR provenance, so uncited rules cannot pass validation.",
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go"
+      ]
+    },
+    {
+      "check_id": "canonical_experience_persistence",
+      "status": "pass",
+      "behavior": "Normalized records follow schemas/experience-record.schema.json, default to org_eligible false and private share scope, and are idempotently upserted into monthly .relia/experiences/YYYY-MM.jsonl shards.",
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        "schemas/experience-record.schema.json",
+        "docs/architecture/architecture_guides.md"
+      ]
+    },
+    {
+      "check_id": "attribution_inference",
+      "status": "pass",
+      "behavior": "Agent attribution is captured from explicit event fields or inferred from configured PR labels, coauthor trailers, and bot logins; uncertain attribution is excluded by default.",
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        "relia.yaml"
+      ]
+    },
+    {
+      "check_id": "validation_gate",
+      "status": "pass",
+      "behavior": "make prepush-full passes with lint, fast tests, coverage, and contract validation after the T3 regression test and evidence updates.",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T3/validation-report.json"
+      ]
+    }
+  ],
+  "overall_result": {
+    "status": "pass",
+    "acceptance_item_ids": [
+      "FR10-PROVENANCE-MANDATORY-RULES-001",
+      "NFR5-SECURITY-001",
+      "MVP-IN-SCOPE-004",
+      "MVP-IN-SCOPE-005"
+    ],
+    "validation_command": "make prepush-full"
+  }
+}
