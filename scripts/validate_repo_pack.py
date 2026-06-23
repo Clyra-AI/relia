@@ -177,22 +177,25 @@ def normalized_evidence_key(value):
     return str(value).strip().lower().replace("-", "_")
 
 def require_worker_evidence_mirror(label, evidence_required, worker_evidence):
-    worker_defaults = {
+    evidence_defaults = {
         normalized_evidence_key(item)
         for item in worker_evidence_items(evidence_required)
     }
-    if not worker_defaults:
-        return
-    if not isinstance(worker_evidence, list) or not worker_evidence:
-        fail(f"{label}.worker_evidence_required must mirror worker-owned evidence_required defaults: {sorted(worker_defaults)!r}")
     worker_keys = {
         normalized_evidence_key(item)
-        for item in worker_evidence
+        for item in worker_evidence_items(worker_evidence)
         if normalized_evidence_key(item)
     }
-    missing_worker = sorted(worker_defaults - worker_keys)
+    if evidence_defaults and (not isinstance(worker_evidence, list) or not worker_evidence):
+        fail(f"{label}.worker_evidence_required must mirror worker-owned evidence_required defaults: {sorted(evidence_defaults)!r}")
+    if worker_keys and (not isinstance(evidence_required, list) or not evidence_required):
+        fail(f"{label}.evidence_required must mirror worker-owned worker_evidence_required defaults: {sorted(worker_keys)!r}")
+    missing_worker = sorted(evidence_defaults - worker_keys)
     if missing_worker:
         fail(f"{label}.worker_evidence_required must mirror worker-owned evidence_required defaults: {missing_worker!r}")
+    missing_evidence = sorted(worker_keys - evidence_defaults)
+    if missing_evidence:
+        fail(f"{label}.evidence_required must mirror worker-owned worker_evidence_required defaults: {missing_evidence!r}")
 
 def require_worker_values_present(field_label, required_worker_values, actual_values):
     required_defaults = {
@@ -247,6 +250,16 @@ def normalize_repo_path(path):
         normalized += "/"
     return normalized
 
+def path_matches_or_contains(path, root):
+    path = normalize_repo_path(path).rstrip("/")
+    root = normalize_repo_path(root).rstrip("/")
+    return bool(path) and (path == root or path.startswith(root + "/"))
+
+def path_is_ancestor_of(path, root):
+    path = normalize_repo_path(path).rstrip("/")
+    root = normalize_repo_path(root).rstrip("/")
+    return bool(path) and path != root and root.startswith(path + "/")
+
 def validate_lifecycle_path_ownership(task, task_id):
     lifecycle_keys = {
         normalized_evidence_key(item)
@@ -280,12 +293,15 @@ def validate_lifecycle_path_ownership(task, task_id):
 
     allowed_lifecycle_paths = sorted(
         path for path in allowed
-        if path == pr_lifecycle_root.rstrip("/")
-        or path.startswith(pr_lifecycle_root)
-        or path == pr_lifecycle_dir.rstrip("/")
-        or path.startswith(pr_lifecycle_dir)
-        or path == task_runs_root.rstrip("/")
-        or (path.startswith(task_runs_root) and not (path == task_run_dir.rstrip("/") or path.startswith(task_run_dir)))
+        if path_matches_or_contains(path, pr_lifecycle_root)
+        or path_is_ancestor_of(path, pr_lifecycle_root)
+        or path_matches_or_contains(path, pr_lifecycle_dir)
+        or path_is_ancestor_of(path, pr_lifecycle_dir)
+        or (
+            path_matches_or_contains(path, task_runs_root)
+            and not path_matches_or_contains(path, task_run_dir)
+        )
+        or path_is_ancestor_of(path, task_runs_root)
     )
     if allowed_lifecycle_paths:
         fail(
@@ -1006,6 +1022,18 @@ def self_test():
         else:
             fail("lifecycle root allowed path fixture did not fail closed")
 
+        lifecycle_ancestor_allowed_path = json.loads(json.dumps(lifecycle_allowed_path))
+        lifecycle_ancestor_allowed_path["allowed_paths"] = [
+            ".factory/",
+        ]
+        try:
+            validate_lifecycle_path_ownership(lifecycle_ancestor_allowed_path, "T1")
+        except AssertionError as exc:
+            if ".allowed_paths includes daemon-owned lifecycle evidence paths" not in str(exc):
+                raise
+        else:
+            fail("lifecycle ancestor allowed path fixture did not fail closed")
+
         task_runs_root_allowed_path = json.loads(json.dumps(lifecycle_allowed_path))
         task_runs_root_allowed_path["allowed_paths"] = [
             ".factory/artifacts/task-runs/",
@@ -1136,6 +1164,21 @@ def self_test():
                 raise
         else:
             fail("missing worker evidence mirror fixture did not fail closed")
+
+        missing_evidence_mirror = json.loads(json.dumps(sample_task))
+        missing_evidence_mirror["proof_scorecard_required"] = False
+        missing_evidence_mirror["required_proof_level"] = "source_evidence"
+        missing_evidence_mirror["evidence_required"] = ["validation_report"]
+        missing_evidence_mirror["worker_evidence_required"] = ["validation_report", "work_proof_marker"]
+        missing_evidence_mirror["acceptance_result_requirements"][0]["evidence_required"] = ["validation_report"]
+        missing_evidence_mirror["acceptance_result_requirements"][0]["worker_evidence_required"] = ["validation_report"]
+        try:
+            validate_runner_ready_task_fields(missing_evidence_mirror, "self-test")
+        except AssertionError as exc:
+            if ".evidence_required must mirror worker-owned worker_evidence_required defaults" not in str(exc):
+                raise
+        else:
+            fail("missing evidence_required mirror fixture did not fail closed")
 
         missing_inherited_worker_mirror = json.loads(json.dumps(sample_task))
         missing_inherited_worker_mirror["proof_scorecard_required"] = False
