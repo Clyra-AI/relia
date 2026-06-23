@@ -274,11 +274,15 @@ def validate_lifecycle_path_ownership(task, task_id):
     forbidden = {normalize_repo_path(path) for path in task.get("forbidden_paths") or []}
     work_item_id = str(task.get("work_item_id") or task_id).strip()
     task_run_dir = f".factory/artifacts/task-runs/{task_id}/"
+    pr_lifecycle_root = ".factory/artifacts/pr-lifecycle/"
     pr_lifecycle_dir = f".factory/artifacts/pr-lifecycle/{work_item_id}/"
 
     allowed_lifecycle_paths = sorted(
         path for path in allowed
-        if path == pr_lifecycle_dir.rstrip("/") or path.startswith(pr_lifecycle_dir)
+        if path == pr_lifecycle_root.rstrip("/")
+        or path.startswith(pr_lifecycle_root)
+        or path == pr_lifecycle_dir.rstrip("/")
+        or path.startswith(pr_lifecycle_dir)
     )
     if allowed_lifecycle_paths:
         fail(
@@ -979,6 +983,19 @@ def self_test():
                 raise
         else:
             fail("lifecycle allowed path fixture did not fail closed")
+
+        lifecycle_root_allowed_path = json.loads(json.dumps(lifecycle_allowed_path))
+        lifecycle_root_allowed_path["allowed_paths"] = [
+            ".factory/artifacts/task-runs/T1/",
+            ".factory/artifacts/pr-lifecycle/",
+        ]
+        try:
+            validate_lifecycle_path_ownership(lifecycle_root_allowed_path, "T1")
+        except AssertionError as exc:
+            if ".allowed_paths includes daemon-owned lifecycle evidence paths" not in str(exc):
+                raise
+        else:
+            fail("lifecycle root allowed path fixture did not fail closed")
 
         lifecycle_missing_forbidden = {
             "work_item_id": "relia-mvp-t1",
