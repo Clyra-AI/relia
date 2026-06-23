@@ -659,6 +659,43 @@ func TestIngestReportsCorruptShardAsProvenanceIntegrity(t *testing.T) {
 	}
 }
 
+func TestIngestRejectsFractionalPRNumbers(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	inputPath := filepath.Join(tempDir, "fixtures", "outcomes.json")
+	writeFileForTest(t, inputPath, `[
+  {
+    "repo": "acme/billing-service",
+    "recorded_at": "2026-05-06T12:00:00Z",
+    "pr": 142.9,
+    "commit": "abc142",
+    "paths": ["packages/billing/invoice.py"],
+    "actor_kind": "agent",
+    "attribution_method": "manual",
+    "outcome_kind": "ci_failure",
+    "terminal_state": "failed",
+    "signature_class": "test_failure",
+    "check_name": "pytest-billing",
+    "signature_key": "tests/test_invoice.py::test_total",
+    "extraction_confidence": "structured",
+    "provenance_urls": ["https://github.com/acme/billing-service/pull/142"]
+  }
+]`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+
+	if code != ExitProvenanceIntegrity {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "provenance_integrity_failed" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+	if _, err := os.Stat(filepath.Join(tempDir, ".relia", "experiences", "2026-05.jsonl")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("fractional PR experience should not be persisted: %v", err)
+	}
+}
+
 func TestIngestDoesNotPartiallyWriteShardsWhenLaterShardIsCorrupt(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)

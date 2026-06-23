@@ -748,8 +748,12 @@ func normalizeExperienceRepo(event map[string]any, ref string) (experienceRepo, 
 }
 
 func normalizeExperienceAction(event map[string]any, ref string) (experienceAction, *CommandError) {
+	pr, commandErr := requiredPositiveIntField(event, ref, "experience record PR number", "pr", "action.pr")
+	if commandErr != nil {
+		return experienceAction{}, commandErr
+	}
 	action := experienceAction{
-		PR:     intField(event, 0, "pr", "action.pr"),
+		PR:     pr,
 		Commit: stringField(event, "commit", "action.commit"),
 	}
 	if action.Commit == "" {
@@ -757,9 +761,6 @@ func normalizeExperienceAction(event map[string]any, ref string) (experienceActi
 		if len(commits) > 0 {
 			action.Commit = commits[0]
 		}
-	}
-	if action.PR < 1 {
-		return action, provenanceIntegrityError("experience record must include a PR number", ref)
 	}
 	if action.Commit == "" {
 		return action, artifactContractError("experience record must include commit", ref)
@@ -1254,25 +1255,50 @@ func stringField(event map[string]any, paths ...string) string {
 func intField(event map[string]any, fallback int, paths ...string) int {
 	for _, path := range paths {
 		if value, ok := nestedField(event, path); ok {
-			switch typed := value.(type) {
-			case float64:
-				return int(typed)
-			case int:
-				return typed
-			case json.Number:
-				converted, err := typed.Int64()
-				if err == nil {
-					return int(converted)
-				}
-			case string:
-				converted, err := strconv.Atoi(strings.TrimSpace(typed))
-				if err == nil {
-					return converted
-				}
+			if converted, ok := intFromAny(value); ok {
+				return converted
 			}
 		}
 	}
 	return fallback
+}
+
+func requiredPositiveIntField(event map[string]any, ref string, fieldDescription string, paths ...string) (int, *CommandError) {
+	for _, path := range paths {
+		value, ok := nestedField(event, path)
+		if !ok {
+			continue
+		}
+		converted, ok := intFromAny(value)
+		if !ok || converted < 1 {
+			return 0, provenanceIntegrityError(fieldDescription+" must be a positive integer", ref)
+		}
+		return converted, nil
+	}
+	return 0, provenanceIntegrityError(fieldDescription+" must be provided", ref)
+}
+
+func intFromAny(value any) (int, bool) {
+	switch typed := value.(type) {
+	case float64:
+		if math.IsNaN(typed) || math.IsInf(typed, 0) || typed != math.Trunc(typed) {
+			return 0, false
+		}
+		return int(typed), true
+	case int:
+		return typed, true
+	case json.Number:
+		converted, err := typed.Int64()
+		if err == nil {
+			return int(converted), true
+		}
+	case string:
+		converted, err := strconv.Atoi(strings.TrimSpace(typed))
+		if err == nil {
+			return converted, true
+		}
+	}
+	return 0, false
 }
 
 func floatField(event map[string]any, fallback float64, paths ...string) float64 {
