@@ -180,15 +180,28 @@ def validate_validation_contract_evidence_split(contract, label):
     worker_evidence = contract.get("worker_evidence_required")
     lifecycle_evidence = contract.get("lifecycle_evidence_required")
     if isinstance(worker_evidence, list):
+        unknown_worker = non_worker_evidence_items(worker_evidence)
+        if unknown_worker:
+            fail(f"{label}.worker_evidence_required contains unsupported worker evidence keys: {unknown_worker!r}")
         lifecycle_in_worker = lifecycle_evidence_items(worker_evidence)
         if lifecycle_in_worker:
             fail(f"{label}.worker_evidence_required must only contain worker-owned evidence: {lifecycle_in_worker!r}")
     if isinstance(lifecycle_evidence, list):
+        unknown_lifecycle = non_lifecycle_evidence_items(lifecycle_evidence)
+        if unknown_lifecycle:
+            fail(f"{label}.lifecycle_evidence_required contains unsupported lifecycle evidence keys: {unknown_lifecycle!r}")
         worker_in_lifecycle = worker_evidence_items(lifecycle_evidence)
         if worker_in_lifecycle:
             fail(f"{label}.lifecycle_evidence_required must only contain factoryd-owned lifecycle evidence: {worker_in_lifecycle!r}")
     if not isinstance(evidence_required, list):
         return
+    known_evidence_keys = WORKER_EVIDENCE_KEYS | LIFECYCLE_EVIDENCE_KEYS
+    unknown_evidence = [
+        item for item in evidence_required
+        if str(item).strip().lower().replace("-", "_") not in known_evidence_keys
+    ]
+    if unknown_evidence:
+        fail(f"{label}.evidence_required contains unsupported evidence keys: {unknown_evidence!r}")
     worker_defaults = worker_evidence_items(evidence_required)
     if worker_defaults:
         if not isinstance(worker_evidence, list) or not worker_evidence:
@@ -814,6 +827,21 @@ def self_test():
                 raise
         else:
             fail("workflow proof level without scorecard fixture did not fail closed")
+
+        try:
+            validate_validation_contract_evidence_split(
+                {
+                    "evidence_required": ["work_proof_markerx"],
+                    "worker_evidence_required": ["work_proof_markerx"],
+                    "lifecycle_evidence_required": ["scope_closure_report"],
+                },
+                "self-test.validation-contract",
+            )
+        except AssertionError as exc:
+            if "unsupported evidence keys" not in str(exc) and "unsupported worker evidence keys" not in str(exc):
+                raise
+        else:
+            fail("validation contract unknown evidence key fixture did not fail closed")
 
         active_config_grant = {
             "task_id": "T7",
