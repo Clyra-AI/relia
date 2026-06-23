@@ -230,6 +230,65 @@ def require_lifecycle_evidence_mirror(field_label, lifecycle_defaults, lifecycle
     if missing_lifecycle:
         fail(f"{field_label} must mirror lifecycle-owned evidence defaults: {missing_lifecycle!r}")
 
+def normalize_repo_path(path):
+    parts = []
+    for part in str(path).replace("\\", "/").split("/"):
+        if part in ("", "."):
+            continue
+        if part == "..":
+            if parts:
+                parts.pop()
+            else:
+                parts.append(part)
+            continue
+        parts.append(part)
+    normalized = "/".join(parts)
+    if str(path).endswith("/") and normalized:
+        normalized += "/"
+    return normalized
+
+def validate_lifecycle_path_ownership(task, task_id):
+    lifecycle_keys = {
+        normalized_evidence_key(item)
+        for item in task.get("lifecycle_evidence_required") or []
+        if normalized_evidence_key(item)
+    }
+    if not lifecycle_keys:
+        return
+    allowed = {normalize_repo_path(path) for path in task.get("allowed_paths") or []}
+    forbidden = {normalize_repo_path(path) for path in task.get("forbidden_paths") or []}
+    work_item_id = str(task.get("work_item_id") or task_id).strip()
+    task_run_dir = f".factory/artifacts/task-runs/{task_id}/"
+    pr_lifecycle_dir = f".factory/artifacts/pr-lifecycle/{work_item_id}/"
+
+    allowed_lifecycle_paths = sorted(
+        path for path in allowed
+        if path == pr_lifecycle_dir.rstrip("/") or path.startswith(pr_lifecycle_dir)
+    )
+    if allowed_lifecycle_paths:
+        fail(
+            f"{task_id}.allowed_paths includes daemon-owned lifecycle evidence paths: "
+            f"{allowed_lifecycle_paths}"
+        )
+
+    required_forbidden = []
+    if "pr_lifecycle_report" in lifecycle_keys or "ship_packet" in lifecycle_keys or "post_merge_report" in lifecycle_keys:
+        required_forbidden.append(pr_lifecycle_dir)
+    if "scope_closure_report" in lifecycle_keys:
+        required_forbidden.extend([
+            task_run_dir + "scope-closure-report.json",
+            task_run_dir + "scope-closure-map.json",
+        ])
+    if "factoryd_run_once_report" in lifecycle_keys:
+        required_forbidden.append(task_run_dir + "factoryd-run-once-report.json")
+
+    missing_forbidden = sorted(path for path in required_forbidden if path not in forbidden)
+    if missing_forbidden:
+        fail(
+            f"{task_id}.forbidden_paths must reserve daemon-owned lifecycle evidence paths: "
+            f"{missing_forbidden}"
+        )
+
 def validate_validation_contract_evidence_split(contract, label):
     if not isinstance(contract, dict):
         fail(f"{label} must be an object")
@@ -845,6 +904,24 @@ def self_test():
     sample_task["required_proof_level"] = "workflow_behavior"
     sample_task["redaction_posture"] = {"classification": "internal", "customer_safe": False}
     validate_runner_ready_task_fields(sample_task, "self-test")
+    validate_lifecycle_path_ownership(
+        {
+            "work_item_id": "relia-mvp-t1",
+            "allowed_paths": [".factory/artifacts/task-runs/T1/"],
+            "forbidden_paths": [
+                ".factory/artifacts/pr-lifecycle/relia-mvp-t1/",
+                ".factory/artifacts/task-runs/T1/scope-closure-report.json",
+                ".factory/artifacts/task-runs/T1/scope-closure-map.json",
+                ".factory/artifacts/task-runs/T1/factoryd-run-once-report.json",
+            ],
+            "lifecycle_evidence_required": [
+                "scope_closure_report",
+                "pr_lifecycle_report",
+                "factoryd_run_once_report",
+            ],
+        },
+        "T1",
+    )
 
     original_fail = fail
     original_config_grants = factoryd_config_capability_grants
@@ -862,6 +939,50 @@ def self_test():
                 raise
         else:
             fail("missing runner-ready proof field fixture did not fail closed")
+
+        lifecycle_allowed_path = {
+            "work_item_id": "relia-mvp-t1",
+            "allowed_paths": [
+                ".factory/artifacts/task-runs/T1/",
+                ".factory/artifacts/pr-lifecycle/relia-mvp-t1/",
+            ],
+            "forbidden_paths": [
+                ".factory/artifacts/pr-lifecycle/relia-mvp-t1/",
+                ".factory/artifacts/task-runs/T1/scope-closure-report.json",
+                ".factory/artifacts/task-runs/T1/scope-closure-map.json",
+                ".factory/artifacts/task-runs/T1/factoryd-run-once-report.json",
+            ],
+            "lifecycle_evidence_required": [
+                "scope_closure_report",
+                "pr_lifecycle_report",
+                "factoryd_run_once_report",
+            ],
+        }
+        try:
+            validate_lifecycle_path_ownership(lifecycle_allowed_path, "T1")
+        except AssertionError as exc:
+            if ".allowed_paths includes daemon-owned lifecycle evidence paths" not in str(exc):
+                raise
+        else:
+            fail("lifecycle allowed path fixture did not fail closed")
+
+        lifecycle_missing_forbidden = {
+            "work_item_id": "relia-mvp-t1",
+            "allowed_paths": [".factory/artifacts/task-runs/T1/"],
+            "forbidden_paths": [".factory/artifacts/pr-lifecycle/relia-mvp-t1/"],
+            "lifecycle_evidence_required": [
+                "scope_closure_report",
+                "pr_lifecycle_report",
+                "factoryd_run_once_report",
+            ],
+        }
+        try:
+            validate_lifecycle_path_ownership(lifecycle_missing_forbidden, "T1")
+        except AssertionError as exc:
+            if ".forbidden_paths must reserve daemon-owned lifecycle evidence paths" not in str(exc):
+                raise
+        else:
+            fail("missing lifecycle forbidden path fixture did not fail closed")
 
         non_list_evidence_required = dict(sample_task)
         non_list_evidence_required["evidence_required"] = "validation_report"
@@ -1461,20 +1582,7 @@ def main():
             if not task_slices.issubset(declared_slices):
                 fail(f"{task_id} references unknown delivery_slice_refs")
         allowed_paths = set(task.get("allowed_paths") or [])
-        normalized_allowed_paths = set()
-        for path in allowed_paths:
-            parts = []
-            for part in path.replace("\\", "/").split("/"):
-                if part in ("", "."):
-                    continue
-                if part == "..":
-                    if parts:
-                        parts.pop()
-                    else:
-                        parts.append(part)
-                    continue
-                parts.append(part)
-            normalized_allowed_paths.add("/".join(parts))
+        normalized_allowed_paths = {normalize_repo_path(path) for path in allowed_paths}
         control_allowed = sorted(
             path for path in normalized_allowed_paths
             if path == ".factory/artifacts"
@@ -1484,6 +1592,7 @@ def main():
         )
         if control_allowed:
             fail(f"{task_id}.allowed_paths includes runtime-owned control artifact: {control_allowed}")
+        validate_lifecycle_path_ownership(task, task_id)
         if task.get("worker_type") != "codex_cli":
             fail(f"{task_id}.worker_type must be codex_cli")
         runtime = task.get("factoryd_runtime")

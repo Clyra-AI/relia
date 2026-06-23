@@ -590,8 +590,7 @@
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T1/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t1/"
+        ".factory/artifacts/task-runs/T1/"
       ],
       "architecture_guidance_refs": [
         {
@@ -790,7 +789,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t1/",
+        ".factory/artifacts/task-runs/T1/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T1/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T1/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -1100,8 +1103,7 @@
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T2/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t2/"
+        ".factory/artifacts/task-runs/T2/"
       ],
       "architecture_guidance_refs": [
         {
@@ -1301,7 +1303,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t2/",
+        ".factory/artifacts/task-runs/T2/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T2/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T2/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -1620,8 +1626,7 @@
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T3/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t3/"
+        ".factory/artifacts/task-runs/T3/"
       ],
       "architecture_guidance_refs": [
         {
@@ -1822,7 +1827,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t3/",
+        ".factory/artifacts/task-runs/T3/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T3/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T3/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -2193,8 +2202,7 @@
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T4.1/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t4-1/"
+        ".factory/artifacts/task-runs/T4.1/"
       ],
       "architecture_guidance_refs": [
         {
@@ -2395,7 +2403,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t4-1/",
+        ".factory/artifacts/task-runs/T4.1/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T4.1/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T4.1/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -2696,8 +2708,7 @@
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T4.2/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t4-2/"
+        ".factory/artifacts/task-runs/T4.2/"
       ],
       "architecture_guidance_refs": [
         {
@@ -2898,7 +2909,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t4-2/",
+        ".factory/artifacts/task-runs/T4.2/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T4.2/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T4.2/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -3144,8 +3159,7 @@
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T4.3/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t4-3/"
+        ".factory/artifacts/task-runs/T4.3/"
       ],
       "architecture_guidance_refs": [
         {
@@ -3346,7 +3360,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t4-3/",
+        ".factory/artifacts/task-runs/T4.3/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T4.3/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T4.3/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -3891,8 +3909,7 @@
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T5/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t5/"
+        ".factory/artifacts/task-runs/T5/"
       ],
       "architecture_guidance_refs": [
         {
@@ -4093,7 +4110,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t5/",
+        ".factory/artifacts/task-runs/T5/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T5/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T5/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -4721,8 +4742,7 @@
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T6/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t6/"
+        ".factory/artifacts/task-runs/T6/"
       ],
       "architecture_guidance_refs": [
         {
@@ -4923,7 +4943,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t6/",
+        ".factory/artifacts/task-runs/T6/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T6/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T6/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -5561,8 +5585,7 @@
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T7/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t7/"
+        ".factory/artifacts/task-runs/T7/"
       ],
       "architecture_guidance_refs": [
         {
@@ -5787,7 +5810,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t7/",
+        ".factory/artifacts/task-runs/T7/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T7/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T7/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -6090,8 +6117,7 @@
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T8/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t8/"
+        ".factory/artifacts/task-runs/T8/"
       ],
       "architecture_guidance_refs": [
         {
@@ -6292,7 +6318,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t8/",
+        ".factory/artifacts/task-runs/T8/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T8/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T8/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -6739,8 +6769,7 @@
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T9/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t9/"
+        ".factory/artifacts/task-runs/T9/"
       ],
       "architecture_guidance_refs": [
         {
@@ -6957,7 +6986,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t9/",
+        ".factory/artifacts/task-runs/T9/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T9/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -7339,8 +7372,7 @@
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T10/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t10/"
+        ".factory/artifacts/task-runs/T10/"
       ],
       "architecture_guidance_refs": [
         {
@@ -7541,7 +7573,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t10/",
+        ".factory/artifacts/task-runs/T10/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T10/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T10/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -7794,8 +7830,7 @@
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T11/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t11/"
+        ".factory/artifacts/task-runs/T11/"
       ],
       "architecture_guidance_refs": [
         {
@@ -7996,7 +8031,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t11/",
+        ".factory/artifacts/task-runs/T11/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T11/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T11/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -8285,8 +8324,7 @@
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T12/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t12/"
+        ".factory/artifacts/task-runs/T12/"
       ],
       "architecture_guidance_refs": [
         {
@@ -8487,7 +8525,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t12/",
+        ".factory/artifacts/task-runs/T12/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T12/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T12/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -8808,8 +8850,7 @@
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T13/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t13/"
+        ".factory/artifacts/task-runs/T13/"
       ],
       "architecture_guidance_refs": [
         {
@@ -9010,7 +9051,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t13/",
+        ".factory/artifacts/task-runs/T13/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T13/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T13/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -9461,8 +9506,7 @@
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T14/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t14/"
+        ".factory/artifacts/task-runs/T14/"
       ],
       "architecture_guidance_refs": [
         {
@@ -9663,7 +9707,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t14/",
+        ".factory/artifacts/task-runs/T14/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T14/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T14/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -10275,8 +10323,7 @@
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T15/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t15/"
+        ".factory/artifacts/task-runs/T15/"
       ],
       "architecture_guidance_refs": [
         {
@@ -10481,7 +10528,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t15/",
+        ".factory/artifacts/task-runs/T15/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T15/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T15/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -11060,8 +11111,7 @@
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T16/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t16/"
+        ".factory/artifacts/task-runs/T16/"
       ],
       "architecture_guidance_refs": [
         {
@@ -11266,7 +11316,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t16/",
+        ".factory/artifacts/task-runs/T16/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T16/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T16/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -11586,7 +11640,6 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T17/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t17/",
         "docs/product/",
         "docs/dev/",
         ".factory/artifacts/customer-failure-intake/",
@@ -11791,7 +11844,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t17/",
+        ".factory/artifacts/task-runs/T17/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T17/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T17/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
@@ -12111,7 +12168,6 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T18/",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t18/",
         "docs/architecture/",
         "docs/dev/",
         ".factory/artifacts/lesson-records/",
@@ -12316,7 +12372,11 @@
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
         ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json"
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t18/",
+        ".factory/artifacts/task-runs/T18/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T18/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T18/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         "docs/product/prd.md",
