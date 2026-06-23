@@ -273,6 +273,7 @@ def validate_lifecycle_path_ownership(task, task_id):
     allowed = {normalize_repo_path(path) for path in task.get("allowed_paths") or []}
     forbidden = {normalize_repo_path(path) for path in task.get("forbidden_paths") or []}
     work_item_id = str(task.get("work_item_id") or task_id).strip()
+    task_runs_root = ".factory/artifacts/task-runs/"
     task_run_dir = f".factory/artifacts/task-runs/{task_id}/"
     pr_lifecycle_root = ".factory/artifacts/pr-lifecycle/"
     pr_lifecycle_dir = f".factory/artifacts/pr-lifecycle/{work_item_id}/"
@@ -283,6 +284,8 @@ def validate_lifecycle_path_ownership(task, task_id):
         or path.startswith(pr_lifecycle_root)
         or path == pr_lifecycle_dir.rstrip("/")
         or path.startswith(pr_lifecycle_dir)
+        or path == task_runs_root.rstrip("/")
+        or (path.startswith(task_runs_root) and not (path == task_run_dir.rstrip("/") or path.startswith(task_run_dir)))
     )
     if allowed_lifecycle_paths:
         fail(
@@ -1002,6 +1005,30 @@ def self_test():
                 raise
         else:
             fail("lifecycle root allowed path fixture did not fail closed")
+
+        task_runs_root_allowed_path = json.loads(json.dumps(lifecycle_allowed_path))
+        task_runs_root_allowed_path["allowed_paths"] = [
+            ".factory/artifacts/task-runs/",
+        ]
+        try:
+            validate_lifecycle_path_ownership(task_runs_root_allowed_path, "T1")
+        except AssertionError as exc:
+            if ".allowed_paths includes daemon-owned lifecycle evidence paths" not in str(exc):
+                raise
+        else:
+            fail("task-runs root allowed path fixture did not fail closed")
+
+        other_task_run_allowed_path = json.loads(json.dumps(lifecycle_allowed_path))
+        other_task_run_allowed_path["allowed_paths"] = [
+            ".factory/artifacts/task-runs/T2/",
+        ]
+        try:
+            validate_lifecycle_path_ownership(other_task_run_allowed_path, "T1")
+        except AssertionError as exc:
+            if ".allowed_paths includes daemon-owned lifecycle evidence paths" not in str(exc):
+                raise
+        else:
+            fail("other task-run allowed path fixture did not fail closed")
 
         lifecycle_missing_forbidden = {
             "work_item_id": "relia-mvp-t1",
