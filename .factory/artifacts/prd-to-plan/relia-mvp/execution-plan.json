@@ -1973,6 +1973,15 @@
       "path policy violation",
       "closure did not advance",
       "alignment drift detected"
+    ],
+    "worker_evidence_required": [
+      "work_proof_marker",
+      "validation_report"
+    ],
+    "lifecycle_evidence_required": [
+      "scope_closure_report",
+      "pr_lifecycle_report",
+      "factoryd_run_once_report"
     ]
   },
   "validation_requirements": [

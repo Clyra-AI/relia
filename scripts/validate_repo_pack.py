@@ -173,6 +173,45 @@ def non_worker_evidence_items(values):
         if str(item).strip().lower().replace("-", "_") not in WORKER_EVIDENCE_KEYS
     ]
 
+def validate_validation_contract_evidence_split(contract, label):
+    if not isinstance(contract, dict):
+        fail(f"{label} must be an object")
+    evidence_required = contract.get("evidence_required")
+    worker_evidence = contract.get("worker_evidence_required")
+    lifecycle_evidence = contract.get("lifecycle_evidence_required")
+    if isinstance(worker_evidence, list):
+        lifecycle_in_worker = lifecycle_evidence_items(worker_evidence)
+        if lifecycle_in_worker:
+            fail(f"{label}.worker_evidence_required must only contain worker-owned evidence: {lifecycle_in_worker!r}")
+    if isinstance(lifecycle_evidence, list):
+        worker_in_lifecycle = worker_evidence_items(lifecycle_evidence)
+        if worker_in_lifecycle:
+            fail(f"{label}.lifecycle_evidence_required must only contain factoryd-owned lifecycle evidence: {worker_in_lifecycle!r}")
+    if not isinstance(evidence_required, list):
+        return
+    worker_defaults = worker_evidence_items(evidence_required)
+    if worker_defaults:
+        if not isinstance(worker_evidence, list) or not worker_evidence:
+            fail(f"{label}.worker_evidence_required must mirror worker-owned evidence_required defaults: {worker_defaults!r}")
+        worker_keys = {str(item).strip().lower().replace("-", "_") for item in worker_evidence}
+        missing_worker = [
+            item for item in worker_defaults
+            if str(item).strip().lower().replace("-", "_") not in worker_keys
+        ]
+        if missing_worker:
+            fail(f"{label}.worker_evidence_required must mirror worker-owned evidence_required defaults: {missing_worker!r}")
+    lifecycle_defaults = lifecycle_evidence_items(evidence_required)
+    if lifecycle_defaults:
+        if not isinstance(lifecycle_evidence, list) or not lifecycle_evidence:
+            fail(f"{label}.lifecycle_evidence_required must mirror lifecycle-owned evidence_required defaults: {lifecycle_defaults!r}")
+        lifecycle_keys = {str(item).strip().lower().replace("-", "_") for item in lifecycle_evidence}
+        missing_lifecycle = [
+            item for item in lifecycle_defaults
+            if str(item).strip().lower().replace("-", "_") not in lifecycle_keys
+        ]
+        if missing_lifecycle:
+            fail(f"{label}.lifecycle_evidence_required must mirror lifecycle-owned evidence_required defaults: {missing_lifecycle!r}")
+
 def missing_grant_value(value):
     if value is None or value == []:
         return True
@@ -1083,6 +1122,8 @@ def main():
     execution_plan = json.loads(execution_plan_path.read_text())
     context_brief = json.loads(context_brief_path.read_text())
     validation_contract = json.loads((root / repo["validation_contract"]).read_text())
+    validate_validation_contract_evidence_split(validation_contract, "validation-contract")
+    validate_validation_contract_evidence_split(execution_plan.get("validation_contract"), "execution-plan.validation_contract")
     ledger = json.loads((root / repo["acceptance_ledger"]).read_text())
     if ledger.get("artifact_type") != "acceptance_ledger":
         fail("acceptance ledger must use artifact_type acceptance_ledger")
