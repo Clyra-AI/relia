@@ -173,6 +173,27 @@ def non_worker_evidence_items(values):
         if str(item).strip().lower().replace("-", "_") not in WORKER_EVIDENCE_KEYS
     ]
 
+def normalized_evidence_key(value):
+    return str(value).strip().lower().replace("-", "_")
+
+def require_worker_evidence_mirror(label, evidence_required, worker_evidence):
+    worker_defaults = {
+        normalized_evidence_key(item)
+        for item in worker_evidence_items(evidence_required)
+    }
+    if not worker_defaults:
+        return
+    if not isinstance(worker_evidence, list) or not worker_evidence:
+        fail(f"{label}.worker_evidence_required must mirror worker-owned evidence_required defaults: {sorted(worker_defaults)!r}")
+    worker_keys = {
+        normalized_evidence_key(item)
+        for item in worker_evidence
+        if normalized_evidence_key(item)
+    }
+    missing_worker = sorted(worker_defaults - worker_keys)
+    if missing_worker:
+        fail(f"{label}.worker_evidence_required must mirror worker-owned evidence_required defaults: {missing_worker!r}")
+
 def validate_validation_contract_evidence_split(contract, label):
     if not isinstance(contract, dict):
         fail(f"{label} must be an object")
@@ -202,17 +223,7 @@ def validate_validation_contract_evidence_split(contract, label):
     ]
     if unknown_evidence:
         fail(f"{label}.evidence_required contains unsupported evidence keys: {unknown_evidence!r}")
-    worker_defaults = worker_evidence_items(evidence_required)
-    if worker_defaults:
-        if not isinstance(worker_evidence, list) or not worker_evidence:
-            fail(f"{label}.worker_evidence_required must mirror worker-owned evidence_required defaults: {worker_defaults!r}")
-        worker_keys = {str(item).strip().lower().replace("-", "_") for item in worker_evidence}
-        missing_worker = [
-            item for item in worker_defaults
-            if str(item).strip().lower().replace("-", "_") not in worker_keys
-        ]
-        if missing_worker:
-            fail(f"{label}.worker_evidence_required must mirror worker-owned evidence_required defaults: {missing_worker!r}")
+    require_worker_evidence_mirror(label, evidence_required, worker_evidence)
     lifecycle_defaults = lifecycle_evidence_items(evidence_required)
     if lifecycle_defaults:
         if not isinstance(lifecycle_evidence, list) or not lifecycle_evidence:
@@ -501,6 +512,7 @@ def validate_runner_ready_task_fields(task, task_id):
                 f"{task_id}.evidence_required must only contain worker-owned evidence; "
                 f"move lifecycle evidence to lifecycle_evidence_required: {lifecycle_in_worker!r}"
             )
+        require_worker_evidence_mirror(task_id, evidence_required, worker_evidence)
     lifecycle_in_worker_subset = lifecycle_evidence_items(worker_evidence)
     if lifecycle_in_worker_subset:
         fail(
@@ -524,6 +536,11 @@ def validate_runner_ready_task_fields(task, task_id):
                     f"worker-owned evidence; move lifecycle evidence to lifecycle_evidence_required: "
                     f"{inherited_lifecycle_in_worker!r}"
                 )
+            require_worker_evidence_mirror(
+                f"{task_id}.validation_contract_inheritance",
+                inherited_evidence,
+                inheritance.get("worker_evidence_required"),
+            )
         inherited_worker = inheritance.get("worker_evidence_required")
         if isinstance(inherited_worker, list):
             unknown_inherited_worker = non_worker_evidence_items(inherited_worker)
@@ -645,6 +662,11 @@ def validate_runner_ready_task_fields(task, task_id):
                 f"{task_id}.acceptance_result_requirements[{index}].worker_evidence_required must only contain "
                 f"worker-owned evidence: {nested_lifecycle_in_worker_subset!r}"
             )
+        require_worker_evidence_mirror(
+            f"{task_id}.acceptance_result_requirements[{index}]",
+            requirement_evidence,
+            nested_worker,
+        )
         if scorecard_required:
             normalized_nested_worker = {
                 str(item).strip().lower().replace("-", "_")
@@ -811,6 +833,55 @@ def self_test():
                 raise
         else:
             fail("misplaced inherited worker evidence fixture did not fail closed")
+
+        missing_worker_mirror = json.loads(json.dumps(sample_task))
+        missing_worker_mirror["proof_scorecard_required"] = False
+        missing_worker_mirror["required_proof_level"] = "source_evidence"
+        missing_worker_mirror["evidence_required"] = ["validation_report", "work_proof_marker"]
+        missing_worker_mirror["worker_evidence_required"] = ["validation_report"]
+        try:
+            validate_runner_ready_task_fields(missing_worker_mirror, "self-test")
+        except AssertionError as exc:
+            if ".worker_evidence_required must mirror worker-owned evidence_required defaults" not in str(exc):
+                raise
+        else:
+            fail("missing worker evidence mirror fixture did not fail closed")
+
+        missing_inherited_worker_mirror = json.loads(json.dumps(sample_task))
+        missing_inherited_worker_mirror["proof_scorecard_required"] = False
+        missing_inherited_worker_mirror["required_proof_level"] = "source_evidence"
+        missing_inherited_worker_mirror["validation_contract_inheritance"] = {
+            "evidence_required": ["validation_report", "work_proof_marker"],
+            "worker_evidence_required": ["validation_report"],
+            "lifecycle_evidence_required": ["scope_closure_report"],
+        }
+        try:
+            validate_runner_ready_task_fields(missing_inherited_worker_mirror, "self-test")
+        except AssertionError as exc:
+            if ".validation_contract_inheritance.worker_evidence_required must mirror" not in str(exc):
+                raise
+        else:
+            fail("missing inherited worker evidence mirror fixture did not fail closed")
+
+        missing_nested_worker_mirror = json.loads(json.dumps(sample_task))
+        missing_nested_worker_mirror["proof_scorecard_required"] = False
+        missing_nested_worker_mirror["required_proof_level"] = "source_evidence"
+        missing_nested_worker_mirror["evidence_required"] = ["validation_report"]
+        missing_nested_worker_mirror["worker_evidence_required"] = ["validation_report"]
+        missing_nested_worker_mirror["acceptance_result_requirements"][0]["evidence_required"] = [
+            "validation_report",
+            "work_proof_marker",
+        ]
+        missing_nested_worker_mirror["acceptance_result_requirements"][0]["worker_evidence_required"] = [
+            "validation_report",
+        ]
+        try:
+            validate_runner_ready_task_fields(missing_nested_worker_mirror, "self-test")
+        except AssertionError as exc:
+            if ".acceptance_result_requirements[0].worker_evidence_required must mirror" not in str(exc):
+                raise
+        else:
+            fail("missing nested worker evidence mirror fixture did not fail closed")
 
         missing_implied_scorecard = json.loads(json.dumps(sample_task))
         missing_implied_scorecard["proof_scorecard_required"] = False
