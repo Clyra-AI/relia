@@ -627,6 +627,8 @@ def validate_runner_ready_task_fields(task, task_id):
     inheritance = task.get("validation_contract_inheritance")
     if isinstance(inheritance, dict):
         inherited_evidence = inheritance.get("evidence_required")
+        if "evidence_required" in inheritance and not isinstance(inherited_evidence, list):
+            fail(f"{task_id}.validation_contract_inheritance.evidence_required must be a list")
         if isinstance(inherited_evidence, list):
             unknown_inherited_evidence = non_worker_evidence_items(inherited_evidence)
             if unknown_inherited_evidence:
@@ -647,6 +649,8 @@ def validate_runner_ready_task_fields(task, task_id):
                 inheritance.get("worker_evidence_required"),
             )
         inherited_worker = inheritance.get("worker_evidence_required")
+        if "worker_evidence_required" in inheritance and not isinstance(inherited_worker, list):
+            fail(f"{task_id}.validation_contract_inheritance.worker_evidence_required must be a list")
         if isinstance(inherited_worker, list):
             unknown_inherited_worker = non_worker_evidence_items(inherited_worker)
             if unknown_inherited_worker:
@@ -672,6 +676,8 @@ def validate_runner_ready_task_fields(task, task_id):
                 evidence_required,
             )
         inherited_lifecycle = inheritance.get("lifecycle_evidence_required")
+        if "lifecycle_evidence_required" in inheritance and not isinstance(inherited_lifecycle, list):
+            fail(f"{task_id}.validation_contract_inheritance.lifecycle_evidence_required must be a list")
         if isinstance(inherited_lifecycle, list):
             unknown_inherited_lifecycle = non_lifecycle_evidence_items(inherited_lifecycle)
             if unknown_inherited_lifecycle:
@@ -1062,6 +1068,20 @@ def self_test():
                 raise
         else:
             fail("non-list evidence_required fixture did not fail closed")
+
+        non_list_inherited_evidence = json.loads(json.dumps(sample_task))
+        non_list_inherited_evidence["validation_contract_inheritance"] = {
+            "evidence_required": "validation_report",
+            "worker_evidence_required": ["validation_report"],
+            "lifecycle_evidence_required": ["scope_closure_report"],
+        }
+        try:
+            validate_runner_ready_task_fields(non_list_inherited_evidence, "self-test")
+        except AssertionError as exc:
+            if "validation_contract_inheritance.evidence_required must be a list" not in str(exc):
+                raise
+        else:
+            fail("non-list inherited evidence_required fixture did not fail closed")
 
         misplaced_inherited_evidence = json.loads(json.dumps(sample_task))
         misplaced_inherited_evidence["validation_contract_inheritance"] = {
