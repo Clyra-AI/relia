@@ -659,6 +659,78 @@ func TestIngestReportsCorruptShardAsProvenanceIntegrity(t *testing.T) {
 	}
 }
 
+func TestIngestDoesNotPartiallyWriteShardsWhenLaterShardIsCorrupt(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	januaryShard := filepath.Join(tempDir, ".relia", "experiences", "2026-01.jsonl")
+	originalJanuary := `{"experience_id":"existing_january"}
+`
+	writeFileForTest(t, januaryShard, originalJanuary)
+	februaryShard := filepath.Join(tempDir, ".relia", "experiences", "2026-02.jsonl")
+	writeFileForTest(t, februaryShard, "{not-json}\n")
+	inputPath := filepath.Join(tempDir, "fixtures", "outcomes.json")
+	writeFileForTest(t, inputPath, `[
+  {
+    "experience_id": "exp_0101",
+    "repo": "acme/billing-service",
+    "recorded_at": "2026-01-06T12:00:00Z",
+    "pr": 216,
+    "commit": "abc216",
+    "paths": ["packages/billing/invoice.py"],
+    "actor_kind": "agent",
+    "attribution_method": "manual",
+    "outcome_kind": "ci_failure",
+    "terminal_state": "failed",
+    "signature_class": "test_failure",
+    "check_name": "pytest-billing",
+    "signature_key": "tests/test_invoice.py::test_total",
+    "extraction_confidence": "structured",
+    "provenance_urls": ["https://github.com/acme/billing-service/pull/216"]
+  },
+  {
+    "experience_id": "exp_0201",
+    "repo": "acme/billing-service",
+    "recorded_at": "2026-02-06T12:00:00Z",
+    "pr": 217,
+    "commit": "abc217",
+    "paths": ["packages/billing/invoice.py"],
+    "actor_kind": "agent",
+    "attribution_method": "manual",
+    "outcome_kind": "ci_failure",
+    "terminal_state": "failed",
+    "signature_class": "test_failure",
+    "check_name": "pytest-billing",
+    "signature_key": "tests/test_invoice.py::test_total",
+    "extraction_confidence": "structured",
+    "provenance_urls": ["https://github.com/acme/billing-service/pull/217"]
+  }
+]`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+
+	if code != ExitProvenanceIntegrity {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "provenance_integrity_failed" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+	januaryContent, err := os.ReadFile(januaryShard)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(januaryContent) != originalJanuary {
+		t.Fatalf("january shard was partially updated:\n%s", januaryContent)
+	}
+	februaryContent, err := os.ReadFile(februaryShard)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(februaryContent) != "{not-json}\n" {
+		t.Fatalf("february shard changed unexpectedly:\n%s", februaryContent)
+	}
+}
+
 func TestModelsRejectsUnsupportedSubcommand(t *testing.T) {
 	stdout, stderr, code := runForTest(t, []string{"--json", "models"}, false)
 

@@ -935,23 +935,33 @@ func persistExperienceRecords(root string, records []experienceRecord) ([]string
 		shards = append(shards, shard)
 	}
 	sort.Strings(shards)
+	plans := make([]experienceShardWritePlan, 0, len(shards))
 	for _, shard := range shards {
-		if commandErr := upsertExperienceShard(filepath.Join(root, filepath.FromSlash(shard)), grouped[shard]); commandErr != nil {
+		plan, commandErr := prepareExperienceShardWrite(filepath.Join(root, filepath.FromSlash(shard)), grouped[shard])
+		if commandErr != nil {
+			return nil, commandErr
+		}
+		plans = append(plans, plan)
+	}
+	for _, plan := range plans {
+		if commandErr := writeExperienceShard(plan); commandErr != nil {
 			return nil, commandErr
 		}
 	}
 	return shards, nil
 }
 
-func upsertExperienceShard(path string, records []experienceRecord) *CommandError {
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
-		return internalError("could not create experience shard directory", err)
-	}
+type experienceShardWritePlan struct {
+	Path    string
+	Content []byte
+}
+
+func prepareExperienceShardWrite(path string, records []experienceRecord) (experienceShardWritePlan, *CommandError) {
 	order := []string{}
 	byID := map[string]json.RawMessage{}
 	content, err := os.ReadFile(path)
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
-		return internalError("could not read existing experience shard", err)
+		return experienceShardWritePlan{}, internalError("could not read existing experience shard", err)
 	}
 	for lineNumber, line := range strings.Split(strings.TrimSpace(string(content)), "\n") {
 		if strings.TrimSpace(line) == "" {
@@ -959,11 +969,11 @@ func upsertExperienceShard(path string, records []experienceRecord) *CommandErro
 		}
 		var existing map[string]any
 		if err := json.Unmarshal([]byte(line), &existing); err != nil {
-			return provenanceIntegrityError(fmt.Sprintf("existing experience shard line %d is not valid JSON", lineNumber+1), filepath.ToSlash(path))
+			return experienceShardWritePlan{}, provenanceIntegrityError(fmt.Sprintf("existing experience shard line %d is not valid JSON", lineNumber+1), filepath.ToSlash(path))
 		}
 		experienceID := stringFromAny(existing["experience_id"])
 		if experienceID == "" {
-			return provenanceIntegrityError(fmt.Sprintf("existing experience shard line %d missing experience_id", lineNumber+1), filepath.ToSlash(path))
+			return experienceShardWritePlan{}, provenanceIntegrityError(fmt.Sprintf("existing experience shard line %d missing experience_id", lineNumber+1), filepath.ToSlash(path))
 		}
 		if _, ok := byID[experienceID]; !ok {
 			order = append(order, experienceID)
@@ -973,7 +983,7 @@ func upsertExperienceShard(path string, records []experienceRecord) *CommandErro
 	for _, record := range records {
 		content, err := json.Marshal(record)
 		if err != nil {
-			return internalError("could not encode experience record", err)
+			return experienceShardWritePlan{}, internalError("could not encode experience record", err)
 		}
 		if _, ok := byID[record.ExperienceID]; !ok {
 			order = append(order, record.ExperienceID)
@@ -985,9 +995,38 @@ func upsertExperienceShard(path string, records []experienceRecord) *CommandErro
 		builder.Write(byID[experienceID])
 		builder.WriteByte('\n')
 	}
-	if err := os.WriteFile(path, []byte(builder.String()), 0o644); err != nil {
+	return experienceShardWritePlan{Path: path, Content: []byte(builder.String())}, nil
+}
+
+func writeExperienceShard(plan experienceShardWritePlan) *CommandError {
+	if err := os.MkdirAll(filepath.Dir(plan.Path), 0o755); err != nil {
+		return internalError("could not create experience shard directory", err)
+	}
+	tempFile, err := os.CreateTemp(filepath.Dir(plan.Path), "."+filepath.Base(plan.Path)+".tmp-*")
+	if err != nil {
+		return internalError("could not create temporary experience shard", err)
+	}
+	tempPath := tempFile.Name()
+	cleanup := true
+	defer func() {
+		if cleanup {
+			_ = os.Remove(tempPath)
+		}
+	}()
+	if _, err := tempFile.Write(plan.Content); err != nil {
+		_ = tempFile.Close()
+		return internalError("could not write temporary experience shard", err)
+	}
+	if err := tempFile.Close(); err != nil {
+		return internalError("could not close temporary experience shard", err)
+	}
+	if err := os.Chmod(tempPath, 0o644); err != nil {
+		return internalError("could not set temporary experience shard permissions", err)
+	}
+	if err := os.Rename(tempPath, plan.Path); err != nil {
 		return internalError("could not write experience shard", err)
 	}
+	cleanup = false
 	return nil
 }
 
