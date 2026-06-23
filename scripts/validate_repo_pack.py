@@ -470,6 +470,29 @@ def validate_runner_ready_task_fields(task, task_id):
                 f"{task_id} requires a proof-of-behavior scorecard but does not list "
                 "proof-of-behavior-scorecard in worker evidence"
             )
+        inheritance = task.get("validation_contract_inheritance")
+        if isinstance(inheritance, dict):
+            inherited_worker = inheritance.get("worker_evidence_required")
+            inherited_evidence = inheritance.get("evidence_required")
+            normalized_inherited_worker = {
+                str(item).strip().lower().replace("-", "_")
+                for item in inherited_worker or []
+            }
+            normalized_inherited_evidence = {
+                str(item).strip().lower().replace("-", "_")
+                for item in inherited_evidence or []
+            }
+            if (
+                isinstance(inherited_worker, list)
+                and required_scorecard_key not in normalized_inherited_worker
+            ) or (
+                isinstance(inherited_evidence, list)
+                and required_scorecard_key not in normalized_inherited_evidence
+            ):
+                fail(
+                    f"{task_id}.validation_contract_inheritance must preserve "
+                    "proof-of-behavior-scorecard worker evidence"
+                )
     for index, requirement in enumerate(task.get("acceptance_result_requirements") or []):
         if not isinstance(requirement, dict):
             fail(f"{task_id}.acceptance_result_requirements[{index}] must be an object")
@@ -636,6 +659,9 @@ def self_test():
         "artifact_budget_refs",
     ]:
         sample_task[key] = ["value"]
+    sample_task["evidence_required"] = ["validation_report"]
+    sample_task["worker_evidence_required"] = ["validation_report"]
+    sample_task["lifecycle_evidence_required"] = ["scope_closure_report"]
     sample_task["factoryd_runtime"] = {"worker_type": "codex_cli"}
     sample_task["lifecycle_gates"] = {"commit_push_required": True}
     sample_task["acceptance_result_requirements"] = [

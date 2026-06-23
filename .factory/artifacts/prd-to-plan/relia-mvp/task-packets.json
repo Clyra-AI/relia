@@ -1960,7 +1960,8 @@
         "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
         "evidence_required": [
           "work_proof_marker",
-          "validation_report"
+          "validation_report",
+          "proof-of-behavior-scorecard"
         ],
         "required_checks": [
           "make prepush-full"
@@ -1981,7 +1982,8 @@
         ],
         "worker_evidence_required": [
           "work_proof_marker",
-          "validation_report"
+          "validation_report",
+          "proof-of-behavior-scorecard"
         ],
         "lifecycle_evidence_required": [
           "scope_closure_report",
@@ -4247,7 +4249,8 @@
         "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
         "evidence_required": [
           "work_proof_marker",
-          "validation_report"
+          "validation_report",
+          "proof-of-behavior-scorecard"
         ],
         "required_checks": [
           "make prepush-full"
@@ -4268,7 +4271,8 @@
         ],
         "worker_evidence_required": [
           "work_proof_marker",
-          "validation_report"
+          "validation_report",
+          "proof-of-behavior-scorecard"
         ],
         "lifecycle_evidence_required": [
           "scope_closure_report",
@@ -5083,7 +5087,8 @@
         "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
         "evidence_required": [
           "work_proof_marker",
-          "validation_report"
+          "validation_report",
+          "proof-of-behavior-scorecard"
         ],
         "required_checks": [
           "make prepush-full"
@@ -5106,7 +5111,8 @@
         ],
         "worker_evidence_required": [
           "work_proof_marker",
-          "validation_report"
+          "validation_report",
+          "proof-of-behavior-scorecard"
         ],
         "lifecycle_evidence_required": [
           "scope_closure_report",
@@ -5971,7 +5977,8 @@
         "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
         "evidence_required": [
           "work_proof_marker",
-          "validation_report"
+          "validation_report",
+          "proof-of-behavior-scorecard"
         ],
         "required_checks": [
           "make prepush-full"
@@ -5998,7 +6005,8 @@
         ],
         "worker_evidence_required": [
           "work_proof_marker",
-          "validation_report"
+          "validation_report",
+          "proof-of-behavior-scorecard"
         ],
         "lifecycle_evidence_required": [
           "scope_closure_report",
@@ -6416,7 +6424,8 @@
         "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
         "evidence_required": [
           "work_proof_marker",
-          "validation_report"
+          "validation_report",
+          "proof-of-behavior-scorecard"
         ],
         "required_checks": [
           "make prepush-full"
@@ -6437,7 +6446,8 @@
         ],
         "worker_evidence_required": [
           "work_proof_marker",
-          "validation_report"
+          "validation_report",
+          "proof-of-behavior-scorecard"
         ],
         "lifecycle_evidence_required": [
           "scope_closure_report",
@@ -7118,7 +7128,8 @@
         "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
         "evidence_required": [
           "work_proof_marker",
-          "validation_report"
+          "validation_report",
+          "proof-of-behavior-scorecard"
         ],
         "required_checks": [
           "make prepush-full"
@@ -7140,7 +7151,8 @@
         ],
         "worker_evidence_required": [
           "work_proof_marker",
-          "validation_report"
+          "validation_report",
+          "proof-of-behavior-scorecard"
         ],
         "lifecycle_evidence_required": [
           "scope_closure_report",
@@ -7673,7 +7685,8 @@
         "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
         "evidence_required": [
           "work_proof_marker",
-          "validation_report"
+          "validation_report",
+          "proof-of-behavior-scorecard"
         ],
         "required_checks": [
           "make prepush-full"
@@ -7696,7 +7709,8 @@
         ],
         "worker_evidence_required": [
           "work_proof_marker",
-          "validation_report"
+          "validation_report",
+          "proof-of-behavior-scorecard"
         ],
         "lifecycle_evidence_required": [
           "scope_closure_report",
@@ -8114,7 +8128,8 @@
         "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
         "evidence_required": [
           "work_proof_marker",
-          "validation_report"
+          "validation_report",
+          "proof-of-behavior-scorecard"
         ],
         "required_checks": [
           "make prepush-full"
@@ -8135,7 +8150,8 @@
         ],
         "worker_evidence_required": [
           "work_proof_marker",
-          "validation_report"
+          "validation_report",
+          "proof-of-behavior-scorecard"
         ],
         "lifecycle_evidence_required": [
           "scope_closure_report",
@@ -8607,7 +8623,8 @@
         "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
         "evidence_required": [
           "work_proof_marker",
-          "validation_report"
+          "validation_report",
+          "proof-of-behavior-scorecard"
         ],
         "required_checks": [
           "make prepush-full"
@@ -8628,7 +8645,8 @@
         ],
         "worker_evidence_required": [
           "work_proof_marker",
-          "validation_report"
+          "validation_report",
+          "proof-of-behavior-scorecard"
         ],
         "lifecycle_evidence_required": [
           "scope_closure_report",
@@ -9130,7 +9148,8 @@
         "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
         "evidence_required": [
           "work_proof_marker",
-          "validation_report"
+          "validation_report",
+          "proof-of-behavior-scorecard"
         ],
         "required_checks": [
           "make prepush-full"
@@ -9151,7 +9170,8 @@
         ],
         "worker_evidence_required": [
           "work_proof_marker",
-          "validation_report"
+          "validation_report",
+          "proof-of-behavior-scorecard"
         ],
         "lifecycle_evidence_required": [
           "scope_closure_report",
@@ -9791,7 +9811,8 @@
         "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
         "evidence_required": [
           "work_proof_marker",
-          "validation_report"
+          "validation_report",
+          "proof-of-behavior-scorecard"
         ],
         "required_checks": [
           "make prepush-full"
@@ -9812,7 +9833,8 @@
         ],
         "worker_evidence_required": [
           "work_proof_marker",
-          "validation_report"
+          "validation_report",
+          "proof-of-behavior-scorecard"
         ],
         "lifecycle_evidence_required": [
           "scope_closure_report",
@@ -10623,7 +10645,8 @@
         "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
         "evidence_required": [
           "work_proof_marker",
-          "validation_report"
+          "validation_report",
+          "proof-of-behavior-scorecard"
         ],
         "required_checks": [
           "make prepush-full"
@@ -10645,7 +10668,8 @@
         ],
         "worker_evidence_required": [
           "work_proof_marker",
-          "validation_report"
+          "validation_report",
+          "proof-of-behavior-scorecard"
         ],
         "lifecycle_evidence_required": [
           "scope_closure_report",
@@ -11402,7 +11426,8 @@
         "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
         "evidence_required": [
           "work_proof_marker",
-          "validation_report"
+          "validation_report",
+          "proof-of-behavior-scorecard"
         ],
         "required_checks": [
           "make prepush-full"
@@ -11424,7 +11449,8 @@
         ],
         "worker_evidence_required": [
           "work_proof_marker",
-          "validation_report"
+          "validation_report",
+          "proof-of-behavior-scorecard"
         ],
         "lifecycle_evidence_required": [
           "scope_closure_report",
