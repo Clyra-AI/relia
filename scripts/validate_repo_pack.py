@@ -146,6 +146,15 @@ def lifecycle_evidence_items(values):
         if str(item).strip().lower().replace("-", "_") in LIFECYCLE_EVIDENCE_KEYS
     ]
 
+def non_lifecycle_evidence_items(values):
+    if not isinstance(values, list):
+        return []
+    return [
+        item
+        for item in values
+        if str(item).strip().lower().replace("-", "_") not in LIFECYCLE_EVIDENCE_KEYS
+    ]
+
 def worker_evidence_items(values):
     if not isinstance(values, list):
         return []
@@ -153,6 +162,15 @@ def worker_evidence_items(values):
         item
         for item in values
         if str(item).strip().lower().replace("-", "_") in WORKER_EVIDENCE_KEYS
+    ]
+
+def non_worker_evidence_items(values):
+    if not isinstance(values, list):
+        return []
+    return [
+        item
+        for item in values
+        if str(item).strip().lower().replace("-", "_") not in WORKER_EVIDENCE_KEYS
     ]
 
 def missing_grant_value(value):
@@ -405,9 +423,15 @@ def validate_runner_ready_task_fields(task, task_id):
     worker_evidence = task.get("worker_evidence_required")
     if not isinstance(worker_evidence, list) or not any(str(item).strip() for item in worker_evidence):
         fail(f"{task_id}.worker_evidence_required must be a non-empty list")
+    unknown_worker = non_worker_evidence_items(worker_evidence)
+    if unknown_worker:
+        fail(f"{task_id}.worker_evidence_required contains unsupported worker evidence keys: {unknown_worker!r}")
     lifecycle_evidence = task.get("lifecycle_evidence_required")
     if not isinstance(lifecycle_evidence, list) or not any(str(item).strip() for item in lifecycle_evidence):
         fail(f"{task_id}.lifecycle_evidence_required must be a non-empty list")
+    unknown_lifecycle = non_lifecycle_evidence_items(lifecycle_evidence)
+    if unknown_lifecycle:
+        fail(f"{task_id}.lifecycle_evidence_required contains unsupported lifecycle evidence keys: {unknown_lifecycle!r}")
     worker_in_lifecycle = worker_evidence_items(lifecycle_evidence)
     if worker_in_lifecycle:
         fail(
@@ -416,6 +440,9 @@ def validate_runner_ready_task_fields(task, task_id):
         )
     evidence_required = task.get("evidence_required")
     if isinstance(evidence_required, list):
+        unknown_evidence = non_worker_evidence_items(evidence_required)
+        if unknown_evidence:
+            fail(f"{task_id}.evidence_required contains unsupported worker evidence keys: {unknown_evidence!r}")
         lifecycle_in_worker = lifecycle_evidence_items(evidence_required)
         if lifecycle_in_worker:
             fail(
@@ -428,12 +455,33 @@ def validate_runner_ready_task_fields(task, task_id):
             f"{task_id}.worker_evidence_required must only contain worker-owned evidence; "
             f"move lifecycle evidence to lifecycle_evidence_required: {lifecycle_in_worker_subset!r}"
         )
+    if task.get("proof_scorecard_required") is True:
+        required_scorecard_key = "proof_of_behavior_scorecard"
+        normalized_worker = {
+            str(item).strip().lower().replace("-", "_")
+            for item in worker_evidence
+        }
+        normalized_evidence = {
+            str(item).strip().lower().replace("-", "_")
+            for item in evidence_required or []
+        }
+        if required_scorecard_key not in normalized_worker or required_scorecard_key not in normalized_evidence:
+            fail(
+                f"{task_id} requires a proof-of-behavior scorecard but does not list "
+                "proof-of-behavior-scorecard in worker evidence"
+            )
     for index, requirement in enumerate(task.get("acceptance_result_requirements") or []):
         if not isinstance(requirement, dict):
             fail(f"{task_id}.acceptance_result_requirements[{index}] must be an object")
         requirement_evidence = requirement.get("evidence_required")
         if not isinstance(requirement_evidence, list) or not any(str(item).strip() for item in requirement_evidence):
             fail(f"{task_id}.acceptance_result_requirements[{index}].evidence_required must be a non-empty list")
+        unknown_requirement_evidence = non_worker_evidence_items(requirement_evidence)
+        if unknown_requirement_evidence:
+            fail(
+                f"{task_id}.acceptance_result_requirements[{index}].evidence_required "
+                f"contains unsupported worker evidence keys: {unknown_requirement_evidence!r}"
+            )
         nested_lifecycle_in_worker = lifecycle_evidence_items(requirement_evidence)
         if nested_lifecycle_in_worker:
             fail(
@@ -444,9 +492,21 @@ def validate_runner_ready_task_fields(task, task_id):
         nested_worker = requirement.get("worker_evidence_required")
         if not isinstance(nested_worker, list) or not any(str(item).strip() for item in nested_worker):
             fail(f"{task_id}.acceptance_result_requirements[{index}].worker_evidence_required must be a non-empty list")
+        unknown_nested_worker = non_worker_evidence_items(nested_worker)
+        if unknown_nested_worker:
+            fail(
+                f"{task_id}.acceptance_result_requirements[{index}].worker_evidence_required "
+                f"contains unsupported worker evidence keys: {unknown_nested_worker!r}"
+            )
         nested_lifecycle = requirement.get("lifecycle_evidence_required")
         if not isinstance(nested_lifecycle, list) or not any(str(item).strip() for item in nested_lifecycle):
             fail(f"{task_id}.acceptance_result_requirements[{index}].lifecycle_evidence_required must be a non-empty list")
+        unknown_nested_lifecycle = non_lifecycle_evidence_items(nested_lifecycle)
+        if unknown_nested_lifecycle:
+            fail(
+                f"{task_id}.acceptance_result_requirements[{index}].lifecycle_evidence_required "
+                f"contains unsupported lifecycle evidence keys: {unknown_nested_lifecycle!r}"
+            )
         nested_worker_in_lifecycle = worker_evidence_items(nested_lifecycle)
         if nested_worker_in_lifecycle:
             fail(
@@ -459,6 +519,23 @@ def validate_runner_ready_task_fields(task, task_id):
                 f"{task_id}.acceptance_result_requirements[{index}].worker_evidence_required must only contain "
                 f"worker-owned evidence: {nested_lifecycle_in_worker_subset!r}"
             )
+        if task.get("proof_scorecard_required") is True:
+            normalized_nested_worker = {
+                str(item).strip().lower().replace("-", "_")
+                for item in nested_worker
+            }
+            normalized_nested_evidence = {
+                str(item).strip().lower().replace("-", "_")
+                for item in requirement_evidence
+            }
+            if (
+                required_scorecard_key not in normalized_nested_worker
+                or required_scorecard_key not in normalized_nested_evidence
+            ):
+                fail(
+                    f"{task_id}.acceptance_result_requirements[{index}] requires "
+                    "proof-of-behavior scorecard worker evidence"
+                )
     if task.get("required_proof_level") not in REQUIRED_PROOF_LEVELS:
         fail(f"{task_id}.required_proof_level must be one of {sorted(REQUIRED_PROOF_LEVELS)}")
     if not isinstance(task.get("artifact_budget_refs"), list):
