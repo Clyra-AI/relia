@@ -455,6 +455,53 @@ def validate_runner_ready_task_fields(task, task_id):
             f"{task_id}.worker_evidence_required must only contain worker-owned evidence; "
             f"move lifecycle evidence to lifecycle_evidence_required: {lifecycle_in_worker_subset!r}"
         )
+    inheritance = task.get("validation_contract_inheritance")
+    if isinstance(inheritance, dict):
+        inherited_evidence = inheritance.get("evidence_required")
+        if isinstance(inherited_evidence, list):
+            unknown_inherited_evidence = non_worker_evidence_items(inherited_evidence)
+            if unknown_inherited_evidence:
+                fail(
+                    f"{task_id}.validation_contract_inheritance.evidence_required "
+                    f"contains unsupported worker evidence keys: {unknown_inherited_evidence!r}"
+                )
+            inherited_lifecycle_in_worker = lifecycle_evidence_items(inherited_evidence)
+            if inherited_lifecycle_in_worker:
+                fail(
+                    f"{task_id}.validation_contract_inheritance.evidence_required must only contain "
+                    f"worker-owned evidence; move lifecycle evidence to lifecycle_evidence_required: "
+                    f"{inherited_lifecycle_in_worker!r}"
+                )
+        inherited_worker = inheritance.get("worker_evidence_required")
+        if isinstance(inherited_worker, list):
+            unknown_inherited_worker = non_worker_evidence_items(inherited_worker)
+            if unknown_inherited_worker:
+                fail(
+                    f"{task_id}.validation_contract_inheritance.worker_evidence_required "
+                    f"contains unsupported worker evidence keys: {unknown_inherited_worker!r}"
+                )
+            inherited_lifecycle_in_worker_subset = lifecycle_evidence_items(inherited_worker)
+            if inherited_lifecycle_in_worker_subset:
+                fail(
+                    f"{task_id}.validation_contract_inheritance.worker_evidence_required must only contain "
+                    f"worker-owned evidence; move lifecycle evidence to lifecycle_evidence_required: "
+                    f"{inherited_lifecycle_in_worker_subset!r}"
+                )
+        inherited_lifecycle = inheritance.get("lifecycle_evidence_required")
+        if isinstance(inherited_lifecycle, list):
+            unknown_inherited_lifecycle = non_lifecycle_evidence_items(inherited_lifecycle)
+            if unknown_inherited_lifecycle:
+                fail(
+                    f"{task_id}.validation_contract_inheritance.lifecycle_evidence_required "
+                    f"contains unsupported lifecycle evidence keys: {unknown_inherited_lifecycle!r}"
+                )
+            inherited_worker_in_lifecycle = worker_evidence_items(inherited_lifecycle)
+            if inherited_worker_in_lifecycle:
+                fail(
+                    f"{task_id}.validation_contract_inheritance.lifecycle_evidence_required must only contain "
+                    f"factoryd-owned lifecycle evidence; move worker evidence to worker_evidence_required: "
+                    f"{inherited_worker_in_lifecycle!r}"
+                )
     if task.get("proof_scorecard_required") is True:
         required_scorecard_key = "proof_of_behavior_scorecard"
         normalized_worker = {
@@ -470,7 +517,6 @@ def validate_runner_ready_task_fields(task, task_id):
                 f"{task_id} requires a proof-of-behavior scorecard but does not list "
                 "proof-of-behavior-scorecard in worker evidence"
             )
-        inheritance = task.get("validation_contract_inheritance")
         if isinstance(inheritance, dict):
             inherited_worker = inheritance.get("worker_evidence_required")
             inherited_evidence = inheritance.get("evidence_required")
@@ -693,6 +739,20 @@ def self_test():
                 raise
         else:
             fail("missing runner-ready proof field fixture did not fail closed")
+
+        misplaced_inherited_evidence = json.loads(json.dumps(sample_task))
+        misplaced_inherited_evidence["validation_contract_inheritance"] = {
+            "evidence_required": ["validation_report"],
+            "worker_evidence_required": ["scope_closure_report"],
+            "lifecycle_evidence_required": ["scope_closure_report"],
+        }
+        try:
+            validate_runner_ready_task_fields(misplaced_inherited_evidence, "self-test")
+        except AssertionError as exc:
+            if "validation_contract_inheritance.worker_evidence_required" not in str(exc):
+                raise
+        else:
+            fail("misplaced inherited worker evidence fixture did not fail closed")
 
         active_config_grant = {
             "task_id": "T7",

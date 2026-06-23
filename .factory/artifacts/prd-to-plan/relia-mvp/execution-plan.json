@@ -1913,6 +1913,8 @@
         "factoryd_runtime",
         "validation_commands",
         "evidence_required",
+        "worker_evidence_required",
+        "lifecycle_evidence_required",
         "stop_conditions",
         "required_proof_level",
         "engineering_policy_refs",
