@@ -1268,6 +1268,7 @@ func unsafeGitHubURLPathEntropyToken(value string) string {
 }
 
 func unsafeSlashBearingEntropyTokenInPath(path string) string {
+	rawSegments := strings.Split(strings.Trim(path, "/"), "/")
 	segments := unsafeGitHubPathTokenSegments(path)
 	if len(segments) == 0 {
 		return ""
@@ -1277,7 +1278,7 @@ func unsafeSlashBearingEntropyTokenInPath(path string) string {
 		for end := start; end < len(segments); end++ {
 			segment := strings.Trim(segments[end], "-_=+")
 			if segment == "" {
-				if !hasStrongEntropyPathFragment(candidateSegments) {
+				if githubOwnerRepoRouteBoundary(rawSegments, end) {
 					candidateSegments = candidateSegments[:0]
 				}
 				continue
@@ -1303,6 +1304,28 @@ func unsafeSlashBearingEntropyTokenInPath(path string) string {
 		}
 	}
 	return ""
+}
+
+func githubOwnerRepoRouteBoundary(rawSegments []string, index int) bool {
+	if index != 2 || len(rawSegments) <= index {
+		return false
+	}
+	route := strings.ToLower(strings.Trim(rawSegments[index], "-_=+"))
+	if !safeGitHubRouteSegment(route) {
+		return false
+	}
+	switch route {
+	case "commit", "commits":
+		return len(rawSegments) > index+1 && validGitCommitHash(rawSegments[index+1])
+	case "pull", "pulls", "issues":
+		return len(rawSegments) > index+1 && isDecimalString(rawSegments[index+1])
+	case "actions":
+		return len(rawSegments) > index+1 && strings.EqualFold(rawSegments[index+1], "runs")
+	case "checks", "suites", "workflow-runs", "tree", "blob", "compare":
+		return len(rawSegments) > index+1
+	default:
+		return false
+	}
 }
 
 func unsafeGitHubPathTokenSegments(path string) []string {

@@ -469,6 +469,14 @@ func TestIngestFailsClosedForSlashBearingProvenanceURLPathSecret(t *testing.T) {
 			url:  "https://github.com/acme/billing-service/actions/runs/z6MvN2p9QxR4sT8a/pull/K3vY7bL0cD5eF1gH",
 		},
 		{
+			name: "weak fragment split by route word",
+			url:  "https://github.com/qazwsxedcrfvtgby/commit/K3vY7bL0cD5eF1gH",
+		},
+		{
+			name: "invalid commit route payload split token",
+			url:  "https://github.com/acme/billing-service/commit/qazwsxedcrfvtgby/K3vY7bL0cD5eF1gH",
+		},
+		{
 			name: "decimal middle fragment",
 			url:  "https://github.com/acme/billing-service/actions/runs/z6MvN2p9QxR4sT8a/143/K3vY7bL0cD5eF1gH",
 		},
@@ -1007,12 +1015,29 @@ func TestIngestPreservesLargeIntegerPRNumbers(t *testing.T) {
 }
 
 func TestIngestPreservesCleanGitHubCommitProvenanceURL(t *testing.T) {
-	tempDir := setupContractRepo(t)
-	t.Chdir(tempDir)
-	inputPath := filepath.Join(tempDir, "fixtures", "outcomes.json")
-	writeFileForTest(t, inputPath, `[
+	for _, tc := range []struct {
+		name string
+		repo string
+		url  string
+	}{
+		{
+			name: "short owner repo",
+			repo: "Clyra-AI/relia",
+			url:  "https://github.com/Clyra-AI/relia/commit/de72faeb410006f9780c8cba1725674324d80156",
+		},
+		{
+			name: "long owner repo",
+			repo: "organizationname/billing-service",
+			url:  "https://github.com/organizationname/billing-service/commit/de72faeb410006f9780c8cba1725674324d80156",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			tempDir := setupContractRepo(t)
+			t.Chdir(tempDir)
+			inputPath := filepath.Join(tempDir, "fixtures", "outcomes.json")
+			writeFileForTest(t, inputPath, fmt.Sprintf(`[
   {
-    "repo": "Clyra-AI/relia",
+    "repo": %q,
     "recorded_at": "2026-05-06T12:00:00Z",
     "pr": 216,
     "commit": "de72faeb410006f9780c8cba1725674324d80156",
@@ -1025,21 +1050,23 @@ func TestIngestPreservesCleanGitHubCommitProvenanceURL(t *testing.T) {
     "check_name": "go-test",
     "signature_key": "cmd/relia/main_test.go::TestIngest",
     "extraction_confidence": "structured",
-    "provenance_urls": ["https://github.com/Clyra-AI/relia/commit/de72faeb410006f9780c8cba1725674324d80156"]
+    "provenance_urls": [%q]
   }
-]`)
+]`, tc.repo, tc.url))
 
-	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+			stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
 
-	if code != ExitSuccess {
-		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
-	}
-	content, err := os.ReadFile(filepath.Join(tempDir, ".relia", "experiences", "2026-05.jsonl"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !bytes.Contains(content, []byte(`"https://github.com/Clyra-AI/relia/commit/de72faeb410006f9780c8cba1725674324d80156"`)) {
-		t.Fatalf("clean commit provenance URL was not preserved:\n%s", content)
+			if code != ExitSuccess {
+				t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+			}
+			content, err := os.ReadFile(filepath.Join(tempDir, ".relia", "experiences", "2026-05.jsonl"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !bytes.Contains(content, []byte(tc.url)) {
+				t.Fatalf("clean commit provenance URL was not preserved:\n%s", content)
+			}
+		})
 	}
 }
 
