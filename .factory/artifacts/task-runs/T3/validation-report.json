@@ -1,0 +1,83 @@
+{
+  "artifact_type": "validation_report",
+  "schema_version": "1.0",
+  "task_id": "T3",
+  "status": "pass",
+  "generated_at": "2026-06-25T10:49:28Z",
+  "commands_run": [
+    "make test-fast",
+    "make test-fast",
+    "make prepush-full",
+    "python3 -m json.tool .factory/artifacts/task-runs/T3/work-proof-marker.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T3/validation-report.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json"
+  ],
+  "final_validation_evidence": [
+    {
+      "command": "make prepush-full",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": [
+        "lint-fast passed",
+        "test-fast passed",
+        "test-coverage passed at 77.4% against the 75.0% minimum",
+        "test-contracts passed"
+      ]
+    }
+  ],
+  "acceptance_results": [
+    {
+      "acceptance_item_id": "FR10-PROVENANCE-MANDATORY-RULES-001",
+      "status": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T3/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json",
+        "cmd/relia/main_test.go"
+      ],
+      "notes": "Rule validation continues to require experience citations and PR provenance before active rules can pass check."
+    },
+    {
+      "acceptance_item_id": "NFR5-SECURITY-001",
+      "status": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T3/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json",
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go"
+      ],
+      "notes": "Ingest redacts before persistence, fails closed on unsafe high-entropy values, and now avoids false positives only for clean GitHub provenance URLs."
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-004",
+      "status": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T3/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json",
+        "cmd/relia/main.go"
+      ],
+      "notes": "Offline ingest accepts local JSON, JSON arrays, events objects, and JSONL streams and normalizes events into canonical experience records."
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-005",
+      "status": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T3/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json",
+        "cmd/relia/main.go"
+      ],
+      "notes": "Canonical experience records are idempotently upserted into monthly local-only .relia/experiences shards with private share scope and org_eligible false."
+    }
+  ],
+  "path_policy_result": {
+    "status": "pass",
+    "allowed_changed_paths": [
+      "cmd/relia/main.go",
+      "cmd/relia/main_test.go",
+      ".factory/artifacts/task-runs/T3/work-proof-marker.json",
+      ".factory/artifacts/task-runs/T3/validation-report.json",
+      ".factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json"
+    ],
+    "forbidden_changed_paths": []
+  },
+  "notes": "An intermediate make test-fast run failed while adding the large-PR regression test because valid long GitHub provenance URLs were entropy-scanned as opaque tokens. The implementation was repaired before final validation; the final make test-fast and make prepush-full runs passed."
+}

@@ -1,0 +1,22 @@
+{
+  "artifact_type": "work_proof_marker",
+  "schema_version": "1.0",
+  "task_id": "T3",
+  "status": "implemented",
+  "generated_at": "2026-06-25T10:49:28Z",
+  "implementation_performed": true,
+  "changed_paths": [
+    "cmd/relia/main.go",
+    "cmd/relia/main_test.go",
+    ".factory/artifacts/task-runs/T3/work-proof-marker.json",
+    ".factory/artifacts/task-runs/T3/validation-report.json",
+    ".factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json"
+  ],
+  "summary": "Implemented and hardened offline ingestion parsing and redaction behavior for canonical experience persistence. JSON and JSONL ingest now preserve provenance-bearing integer fields through json.Number, clean GitHub provenance URLs are accepted without entropy false positives, and unsafe URL payloads still fail closed before shard writes.",
+  "evidence_refs": [
+    ".factory/artifacts/task-runs/T3/validation-report.json",
+    ".factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json",
+    "cmd/relia/main.go",
+    "cmd/relia/main_test.go"
+  ]
+}

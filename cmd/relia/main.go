@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"net/url"
 	"os"
 	"os/exec"
 	"path"
@@ -569,7 +570,7 @@ func parseIngestEvents(content []byte, ref string) ([]map[string]any, *CommandEr
 		return nil, artifactContractError("ingest input is empty", ref)
 	}
 	var decoded any
-	if err := json.Unmarshal([]byte(trimmed), &decoded); err == nil {
+	if err := decodeJSONUseNumber(trimmed, &decoded); err == nil {
 		return ingestEventsFromJSON(decoded, ref)
 	}
 	var events []map[string]any
@@ -579,7 +580,7 @@ func parseIngestEvents(content []byte, ref string) ([]map[string]any, *CommandEr
 			continue
 		}
 		var event map[string]any
-		if err := json.Unmarshal([]byte(line), &event); err != nil {
+		if err := decodeJSONUseNumber(line, &event); err != nil {
 			return nil, artifactContractError(fmt.Sprintf("ingest JSONL line %d is not a JSON object", lineNumber+1), ref)
 		}
 		events = append(events, event)
@@ -588,6 +589,22 @@ func parseIngestEvents(content []byte, ref string) ([]map[string]any, *CommandEr
 		return nil, artifactContractError("ingest input contains no events", ref)
 	}
 	return events, nil
+}
+
+func decodeJSONUseNumber(input string, target any) error {
+	decoder := json.NewDecoder(strings.NewReader(input))
+	decoder.UseNumber()
+	if err := decoder.Decode(target); err != nil {
+		return err
+	}
+	var trailing any
+	if err := decoder.Decode(&trailing); err != io.EOF {
+		if err == nil {
+			return fmt.Errorf("unexpected trailing JSON value")
+		}
+		return err
+	}
+	return nil
 }
 
 func ingestEventsFromJSON(value any, ref string) ([]map[string]any, *CommandError) {
@@ -1153,6 +1170,9 @@ func unsafeEntropyToken(value string, fieldPath []string) string {
 }
 
 func entropySafeFieldValue(fieldPath []string, value string) bool {
+	if isGitHubProvenanceURLField(fieldPath) {
+		return validSafeGitHubURL(value)
+	}
 	for _, part := range fieldPath {
 		normalized := strings.ToLower(part)
 		switch normalized {
@@ -1168,6 +1188,34 @@ func entropySafeFieldValue(fieldPath []string, value string) bool {
 		}
 	}
 	return false
+}
+
+func isGitHubProvenanceURLField(fieldPath []string) bool {
+	for index, part := range fieldPath {
+		normalized := strings.ToLower(part)
+		switch normalized {
+		case "pr_url", "check_run_url", "revert_url", "review_url", "provenance_urls":
+			return true
+		case "urls":
+			if index > 0 && strings.ToLower(fieldPath[index-1]) == "provenance" {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func validSafeGitHubURL(value string) bool {
+	parsed, err := url.Parse(strings.TrimSpace(value))
+	if err != nil {
+		return false
+	}
+	return parsed.Scheme == "https" &&
+		strings.EqualFold(parsed.Host, "github.com") &&
+		parsed.User == nil &&
+		parsed.RawQuery == "" &&
+		parsed.Fragment == "" &&
+		strings.Trim(parsed.Path, "/") != ""
 }
 
 func validGitCommitHash(value string) bool {
@@ -1314,13 +1362,13 @@ func intFromAny(value any) (int, bool) {
 		if math.IsNaN(typed) || math.IsInf(typed, 0) || typed != math.Trunc(typed) {
 			return 0, false
 		}
-		return int(typed), true
+		return int64ToInt(int64(typed))
 	case int:
 		return typed, true
 	case json.Number:
 		converted, err := typed.Int64()
 		if err == nil {
-			return int(converted), true
+			return int64ToInt(converted)
 		}
 	case string:
 		converted, err := strconv.Atoi(strings.TrimSpace(typed))
@@ -1329,6 +1377,15 @@ func intFromAny(value any) (int, bool) {
 		}
 	}
 	return 0, false
+}
+
+func int64ToInt(value int64) (int, bool) {
+	maxInt := int64(^uint(0) >> 1)
+	minInt := -maxInt - 1
+	if value < minInt || value > maxInt {
+		return 0, false
+	}
+	return int(value), true
 }
 
 func floatField(event map[string]any, fallback float64, paths ...string) float64 {

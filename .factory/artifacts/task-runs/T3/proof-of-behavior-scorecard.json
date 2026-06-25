@@ -1,0 +1,62 @@
+{
+  "artifact_type": "proof-of-behavior-scorecard",
+  "schema_version": "1.0",
+  "task_id": "T3",
+  "status": "pass",
+  "generated_at": "2026-06-25T10:49:28Z",
+  "proof_level": "workflow_behavior",
+  "behaviors": [
+    {
+      "behavior": "Offline ingest accepts local JSON objects, JSON arrays, events objects, and JSONL streams.",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go"
+      ]
+    },
+    {
+      "behavior": "Ingest recursively redacts known token shapes and secret-named fields before persistence.",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/main_test.go:TestIngestPersistsCanonicalExperienceWithRedactionAndProvenance",
+        "cmd/relia/main_test.go:TestIngestRedactsPluralSecretFieldsBeforePersistence"
+      ]
+    },
+    {
+      "behavior": "Unclassified high-entropy values fail closed with exit 6 before any experience shard is written.",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/main_test.go:TestIngestFailsClosedBeforePersistenceForUnrecognizedSecret",
+        "cmd/relia/main_test.go:TestIngestFailsClosedForUnsafeProvenanceURLQuery"
+      ]
+    },
+    {
+      "behavior": "Canonical experience records preserve PR attribution, provenance URLs, confidence labels, signatures, flake discount, private share scope, and org_eligible false.",
+      "status": "pass",
+      "evidence_refs": [
+        "schemas/experience-record.schema.json",
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go"
+      ]
+    },
+    {
+      "behavior": "Experience persistence is idempotent and monthly-sharded under .relia/experiences/YYYY-MM.jsonl.",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/main_test.go:TestIngestInfersAttributionAndUpsertsIdempotently",
+        "cmd/relia/main_test.go:TestIngestDoesNotPartiallyWriteShardsWhenLaterShardIsCorrupt"
+      ]
+    },
+    {
+      "behavior": "Provenance-bearing PR numbers are parsed as exact JSON numbers, while fractional PR numbers still fail before persistence.",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/main_test.go:TestIngestPreservesLargeIntegerPRNumbers",
+        "cmd/relia/main_test.go:TestIngestRejectsFractionalPRNumbers"
+      ]
+    }
+  ],
+  "validation_refs": [
+    ".factory/artifacts/task-runs/T3/validation-report.json"
+  ]
+}
