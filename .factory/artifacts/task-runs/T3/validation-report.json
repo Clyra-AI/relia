@@ -3,7 +3,7 @@
   "schema_version": "1.0",
   "task_id": "T3",
   "status": "pass",
-  "generated_at": "2026-06-25T16:06:04Z",
+  "generated_at": "2026-06-25T16:20:32Z",
   "commands_run": [
     "make lint-fast",
     "make test-fast",
@@ -17,6 +17,7 @@
     "python3 -m json.tool .factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json",
     "go test ./cmd/relia -run 'TestIngestFailsClosedForSlashBearingProvenanceURLPathSecret|TestIngestPreservesLargeIntegerPRNumbers|TestIngestPersistsCanonicalExperienceWithRedactionAndProvenance' -count=1",
     "go test ./cmd/relia -run 'TestIngestFailsClosedForSlashBearingProvenanceURLPathSecret|TestIngestPreservesCleanGitHubProvenanceURL|TestIngestFailsClosedForUnsafeProvenanceURLQuery|TestIngestPersistsCanonicalExperienceWithRedactionAndProvenance' -count=1",
+    "go test ./cmd/relia -run 'TestIngestFailsClosedForSlashBearingProvenanceURLPathSecret|TestIngestPreservesLargeIntegerPRNumbers|TestIngestPreservesCleanGitHubCommitProvenanceURL|TestIngestFailsClosedForUnsafeProvenanceURLQuery|TestIngestPersistsCanonicalExperienceWithRedactionAndProvenance' -count=1",
     "make prepush-full"
   ],
   "baseline_evidence": [
@@ -43,6 +44,12 @@
       "status": "review_reproduced",
       "exit_code": null,
       "evidence": "Current-head Codex P2 identified that a trailing or leading decimal fragment inside a slash-bearing GitHub provenance path could be discarded as a safe route id before candidate assembly."
+    },
+    {
+      "command": "Codex review on PR #30 commit 7f5ec84194d0c1f501947c733444eb8c2b472784",
+      "status": "review_reproduced",
+      "exit_code": null,
+      "evidence": "Current-head Codex P2 identified that skipped GitHub route segments could join owner/repo fragments with a legitimate commit SHA and falsely reject clean GitHub commit provenance URLs."
     }
   ],
   "green_evidence": [
@@ -50,7 +57,7 @@
       "command": "go test ./cmd/relia -run 'TestIngestFailsClosedForSlashBearingProvenanceURLPathSecret|TestIngestPreservesCleanGitHubProvenanceURL|TestIngestFailsClosedForUnsafeProvenanceURLQuery|TestIngestPersistsCanonicalExperienceWithRedactionAndProvenance' -count=1",
       "status": "pass",
       "exit_code": 0,
-      "evidence": "Focused ingest tests passed for clean provenance URLs and raw, encoded, short-path, short-middle, weak-leading, encoded weak-leading, route-like middle, decimal middle, trailing decimal, and leading decimal slash-bearing GitHub provenance URL path secrets."
+      "evidence": "Focused ingest tests passed for raw, encoded, short-path, short-middle, weak-leading, encoded weak-leading, route-like middle, decimal middle, trailing decimal, and leading decimal slash-bearing GitHub provenance URL path secrets, while preserving large PR-number URLs and clean GitHub commit provenance URLs."
     }
   ],
   "final_validation_evidence": [
@@ -61,7 +68,7 @@
       "evidence": [
         "lint-fast passed",
         "test-fast passed",
-        "test-coverage passed at 78.4% against the 75.0% minimum",
+        "test-coverage passed at 78.3% against the 75.0% minimum",
         "test-contracts passed"
       ]
     }
@@ -86,7 +93,7 @@
         "cmd/relia/main.go",
         "cmd/relia/main_test.go"
       ],
-      "notes": "Ingest now scans GitHub provenance URL paths for high-entropy payloads before permitting the safe URL-shape exemption, including raw, encoded, weak-leading, weak-middle, route-like middle, decimal middle, trailing decimal, and leading decimal slash-bearing token fragments."
+      "notes": "Ingest now scans GitHub provenance URL paths for high-entropy payloads before permitting the safe URL-shape exemption, including raw, encoded, weak-leading, weak-middle, route-like middle, decimal middle, trailing decimal, and leading decimal slash-bearing token fragments, while preserving clean GitHub commit provenance URLs."
     },
     {
       "acceptance_item_id": "MVP-IN-SCOPE-004",

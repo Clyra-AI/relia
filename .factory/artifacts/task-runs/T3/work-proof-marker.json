@@ -3,7 +3,7 @@
   "schema_version": "1.0",
   "task_id": "T3",
   "status": "implemented",
-  "generated_at": "2026-06-25T16:06:04Z",
+  "generated_at": "2026-06-25T16:20:32Z",
   "implementation_performed": true,
   "changed_paths": [
     "cmd/relia/main.go",
@@ -12,7 +12,7 @@
     ".factory/artifacts/task-runs/T3/validation-report.json",
     ".factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json"
   ],
-  "summary": "Repaired ingest redaction review feedback with a GitHub provenance URL path scanner that checks combined slash-bearing path fragments before the safe URL-shape exemption, including weak-leading, weak-middle, route-like middle, decimal middle, and leading/trailing decimal token payloads.",
+  "summary": "Repaired ingest redaction review feedback with a GitHub provenance URL path scanner that checks combined slash-bearing path fragments before the safe URL-shape exemption, preserves numeric token fragments, and treats GitHub route segments as boundaries for clean commit URLs.",
   "evidence_refs": [
     ".factory/artifacts/task-runs/T3/validation-report.json",
     ".factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json",

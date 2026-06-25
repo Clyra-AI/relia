@@ -1277,6 +1277,9 @@ func unsafeSlashBearingEntropyTokenInPath(path string) string {
 		for end := start; end < len(segments); end++ {
 			segment := strings.Trim(segments[end], "-_=+")
 			if segment == "" {
+				if !hasStrongEntropyPathFragment(candidateSegments) {
+					candidateSegments = candidateSegments[:0]
+				}
 				continue
 			}
 			if !entropyPathCandidateFragment(segment) {

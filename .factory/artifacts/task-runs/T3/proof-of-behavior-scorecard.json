@@ -3,7 +3,7 @@
   "schema_version": "1.0",
   "task_id": "T3",
   "status": "pass",
-  "generated_at": "2026-06-25T16:06:04Z",
+  "generated_at": "2026-06-25T16:20:32Z",
   "proof_level": "workflow_behavior",
   "behaviors": [
     {
@@ -50,11 +50,12 @@
       ]
     },
     {
-      "behavior": "Clean GitHub provenance URLs, including large PR-number paths, continue to ingest without false-positive redaction failure.",
+      "behavior": "Clean GitHub provenance URLs, including large PR-number paths and commit-SHA paths, continue to ingest without false-positive redaction failure.",
       "status": "pass",
       "evidence_refs": [
         "cmd/relia/main_test.go:TestIngestPersistsCanonicalExperienceWithRedactionAndProvenance",
-        "cmd/relia/main_test.go:TestIngestPreservesLargeIntegerPRNumbers"
+        "cmd/relia/main_test.go:TestIngestPreservesLargeIntegerPRNumbers",
+        "cmd/relia/main_test.go:TestIngestPreservesCleanGitHubCommitProvenanceURL"
       ]
     },
     {

@@ -1006,6 +1006,43 @@ func TestIngestPreservesLargeIntegerPRNumbers(t *testing.T) {
 	}
 }
 
+func TestIngestPreservesCleanGitHubCommitProvenanceURL(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	inputPath := filepath.Join(tempDir, "fixtures", "outcomes.json")
+	writeFileForTest(t, inputPath, `[
+  {
+    "repo": "Clyra-AI/relia",
+    "recorded_at": "2026-05-06T12:00:00Z",
+    "pr": 216,
+    "commit": "de72faeb410006f9780c8cba1725674324d80156",
+    "paths": ["cmd/relia/main.go"],
+    "actor_kind": "agent",
+    "attribution_method": "manual",
+    "outcome_kind": "ci_failure",
+    "terminal_state": "failed",
+    "signature_class": "test_failure",
+    "check_name": "go-test",
+    "signature_key": "cmd/relia/main_test.go::TestIngest",
+    "extraction_confidence": "structured",
+    "provenance_urls": ["https://github.com/Clyra-AI/relia/commit/de72faeb410006f9780c8cba1725674324d80156"]
+  }
+]`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	content, err := os.ReadFile(filepath.Join(tempDir, ".relia", "experiences", "2026-05.jsonl"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Contains(content, []byte(`"https://github.com/Clyra-AI/relia/commit/de72faeb410006f9780c8cba1725674324d80156"`)) {
+		t.Fatalf("clean commit provenance URL was not preserved:\n%s", content)
+	}
+}
+
 func TestIngestDoesNotPartiallyWriteShardsWhenLaterShardIsCorrupt(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
