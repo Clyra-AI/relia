@@ -1288,6 +1288,9 @@ func unsafeSlashBearingEntropyTokenInPath(path string) string {
 			if len(candidateWithoutSlash) < 32 {
 				continue
 			}
+			if !hasStrongEntropyPathFragment(candidateSegments) {
+				continue
+			}
 			if !hasMixedSecretAlphabet(candidateWithoutSlash) {
 				continue
 			}
@@ -1323,7 +1326,39 @@ func safeGitHubRouteSegment(segment string) bool {
 	case "actions", "runs", "pull", "pulls", "issues", "commit", "commits", "tree", "blob", "compare", "checks", "suites", "workflow-runs":
 		return true
 	}
-	return isDecimalString(normalized)
+	return false
+}
+
+func hasStrongEntropyPathFragment(segments []string) bool {
+	for _, segment := range segments {
+		segment = strings.Trim(segment, "-_=+")
+		if len(segment) < 12 || isDecimalString(segment) || safeGitHubRouteSegment(segment) {
+			continue
+		}
+		hasLetter := false
+		hasDigit := false
+		hasUpper := false
+		hasLower := false
+		for _, r := range segment {
+			switch {
+			case r >= 'a' && r <= 'z':
+				hasLetter = true
+				hasLower = true
+			case r >= 'A' && r <= 'Z':
+				hasLetter = true
+				hasUpper = true
+			case r >= '0' && r <= '9':
+				hasDigit = true
+			}
+		}
+		if hasLetter && hasDigit {
+			return true
+		}
+		if hasUpper && hasLower {
+			return true
+		}
+	}
+	return false
 }
 
 func isDecimalString(value string) bool {
