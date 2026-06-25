@@ -1279,7 +1279,9 @@ func unsafeSlashBearingEntropyTokenInPath(path string) string {
 			segment := strings.Trim(segments[end], "-_=+")
 			if segment == "" {
 				if githubOwnerRepoRouteBoundary(rawSegments, end) &&
-					(!suspiciousGitHubOwnerRepoTokenPrefix(candidateSegments) || githubOwnerRepoRouteBoundaryHasSafeTypedPayload(rawSegments, end)) {
+					(!suspiciousGitHubOwnerRepoTokenPrefix(candidateSegments) ||
+						githubOwnerRepoRouteBoundaryHasSafeTypedPayload(rawSegments, end) ||
+						githubOwnerRepoRouteBoundaryHasSafeUntypedPayload(rawSegments, end)) {
 					candidateSegments = candidateSegments[:0]
 				}
 				continue
@@ -1365,6 +1367,35 @@ func githubOwnerRepoRouteBoundaryHasSafeTypedPayload(rawSegments []string, index
 	default:
 		return false
 	}
+}
+
+func githubOwnerRepoRouteBoundaryHasSafeUntypedPayload(rawSegments []string, index int) bool {
+	if index != 2 || len(rawSegments) <= index {
+		return false
+	}
+	route := strings.ToLower(strings.Trim(rawSegments[index], "-_=+"))
+	switch route {
+	case "tree", "blob":
+		return githubUntypedRoutePayloadSafe(rawSegments[index+1:])
+	default:
+		return false
+	}
+}
+
+func githubUntypedRoutePayloadSafe(rawSegments []string) bool {
+	if len(rawSegments) == 0 {
+		return false
+	}
+	for _, rawSegment := range rawSegments {
+		segment := strings.Trim(rawSegment, "-_=+")
+		if segment == "" {
+			return false
+		}
+		if unsafeEntropyTokenInPath(segment) != "" {
+			return false
+		}
+	}
+	return unsafeSlashBearingEntropyTokenInPath(strings.Join(rawSegments, "/")) == ""
 }
 
 func unsafeGitHubPathTokenSegments(path string) []string {

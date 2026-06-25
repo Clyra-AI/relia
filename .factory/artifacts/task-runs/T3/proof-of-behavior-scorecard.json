@@ -3,21 +3,23 @@
   "schema_version": "1.0",
   "task_id": "T3",
   "status": "pass",
-  "generated_at": "2026-06-25T18:04:14Z",
+  "generated_at": "2026-06-25T18:20:50Z",
   "proof_level": "workflow_behavior",
   "behaviors": [
     {
       "behavior": "Offline ingest accepts a PRD-style check_run_url field using the top-level GitHub /runs/<id> shape.",
       "status": "pass",
       "evidence_refs": [
+        "cmd/relia/main.go",
         "cmd/relia/main_test.go:TestIngestPreservesTopLevelCheckRunURLField",
         ".factory/artifacts/task-runs/T3/validation-report.json"
       ]
     },
     {
-      "behavior": "Clean GitHub check-run provenance with a long mixed owner/repo name is not falsely rejected as a slash-bearing high-entropy secret.",
+      "behavior": "Clean GitHub check-run, tree, and blob provenance with a long mixed owner/repo name is not falsely rejected as a slash-bearing high-entropy secret.",
       "status": "pass",
       "evidence_refs": [
+        "cmd/relia/main.go",
         "cmd/relia/main_test.go:TestIngestPreservesTopLevelCheckRunURLField",
         "cmd/relia/main_test.go:TestIngestPreservesCleanGitHubProvenanceURL"
       ]
@@ -26,6 +28,7 @@
       "behavior": "The accepted check_run_url is normalized into experience provenance and persisted into the monthly local experience shard.",
       "status": "pass",
       "evidence_refs": [
+        "cmd/relia/main.go",
         "cmd/relia/main_test.go:TestIngestPreservesTopLevelCheckRunURLField",
         "schemas/experience-record.schema.json"
       ]

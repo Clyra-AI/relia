@@ -1057,6 +1057,16 @@ func TestIngestPreservesCleanGitHubProvenanceURL(t *testing.T) {
 			repo: "Acme2026/SuperBillingServiceXYZ",
 			url:  "https://github.com/Acme2026/SuperBillingServiceXYZ/runs/143",
 		},
+		{
+			name: "long mixed owner repo tree",
+			repo: "Acme2026/SuperBillingServiceXYZ",
+			url:  "https://github.com/Acme2026/SuperBillingServiceXYZ/tree/main",
+		},
+		{
+			name: "long mixed owner repo blob",
+			repo: "Acme2026/SuperBillingServiceXYZ",
+			url:  "https://github.com/Acme2026/SuperBillingServiceXYZ/blob/main/README.md",
+		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			tempDir := setupContractRepo(t)
