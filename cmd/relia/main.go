@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"net/url"
 	"os"
 	"os/exec"
 	"path"
@@ -569,7 +570,7 @@ func parseIngestEvents(content []byte, ref string) ([]map[string]any, *CommandEr
 		return nil, artifactContractError("ingest input is empty", ref)
 	}
 	var decoded any
-	if err := json.Unmarshal([]byte(trimmed), &decoded); err == nil {
+	if err := decodeJSONUseNumber(trimmed, &decoded); err == nil {
 		return ingestEventsFromJSON(decoded, ref)
 	}
 	var events []map[string]any
@@ -579,7 +580,7 @@ func parseIngestEvents(content []byte, ref string) ([]map[string]any, *CommandEr
 			continue
 		}
 		var event map[string]any
-		if err := json.Unmarshal([]byte(line), &event); err != nil {
+		if err := decodeJSONUseNumber(line, &event); err != nil {
 			return nil, artifactContractError(fmt.Sprintf("ingest JSONL line %d is not a JSON object", lineNumber+1), ref)
 		}
 		events = append(events, event)
@@ -588,6 +589,22 @@ func parseIngestEvents(content []byte, ref string) ([]map[string]any, *CommandEr
 		return nil, artifactContractError("ingest input contains no events", ref)
 	}
 	return events, nil
+}
+
+func decodeJSONUseNumber(input string, target any) error {
+	decoder := json.NewDecoder(strings.NewReader(input))
+	decoder.UseNumber()
+	if err := decoder.Decode(target); err != nil {
+		return err
+	}
+	var trailing any
+	if err := decoder.Decode(&trailing); err != io.EOF {
+		if err == nil {
+			return fmt.Errorf("unexpected trailing JSON value")
+		}
+		return err
+	}
+	return nil
 }
 
 func ingestEventsFromJSON(value any, ref string) ([]map[string]any, *CommandError) {
@@ -1131,11 +1148,37 @@ func isSecretField(key string) bool {
 }
 
 func unsafeEntropyToken(value string, fieldPath []string) string {
+	if isGitHubProvenanceURLField(fieldPath) {
+		if token := unsafeGitHubURLPathEntropyToken(value); token != "" {
+			return token
+		}
+		if validGitHubProvenanceURLShape(value) {
+			return ""
+		}
+	}
 	if entropySafeFieldValue(fieldPath, value) {
 		return ""
 	}
+	return unsafeEntropyTokenInString(value)
+}
+
+func unsafeEntropyTokenInString(value string) string {
+	return unsafeEntropyTokenInStringWithSlashPolicy(value, true)
+}
+
+func unsafeEntropyTokenInPath(value string) string {
+	return unsafeEntropyTokenInStringWithSlashPolicy(value, false)
+}
+
+func unsafeEntropyTokenInStringWithSlashPolicy(value string, allowSlash bool) string {
 	candidates := strings.FieldsFunc(value, func(r rune) bool {
-		return !((r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') || r == '+' || r == '/' || r == '_' || r == '-' || r == '=')
+		if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') || r == '+' || r == '_' || r == '-' || r == '=' {
+			return false
+		}
+		if allowSlash && r == '/' {
+			return false
+		}
+		return true
 	})
 	for _, candidate := range candidates {
 		candidate = strings.Trim(candidate, "-_=+/")
@@ -1168,6 +1211,260 @@ func entropySafeFieldValue(fieldPath []string, value string) bool {
 		}
 	}
 	return false
+}
+
+func isGitHubProvenanceURLField(fieldPath []string) bool {
+	for index, part := range fieldPath {
+		normalized := strings.ToLower(part)
+		switch normalized {
+		case "pr_url", "check_run_url", "revert_url", "review_url", "provenance_urls":
+			return true
+		case "urls":
+			if index > 0 && strings.ToLower(fieldPath[index-1]) == "provenance" {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func validGitHubProvenanceURLShape(value string) bool {
+	parsed, err := url.Parse(strings.TrimSpace(value))
+	if err != nil {
+		return false
+	}
+	return parsed.Scheme == "https" &&
+		strings.EqualFold(parsed.Host, "github.com") &&
+		parsed.User == nil &&
+		parsed.RawQuery == "" &&
+		parsed.Fragment == "" &&
+		strings.Trim(parsed.Path, "/") != ""
+}
+
+func unsafeGitHubURLPathEntropyToken(value string) string {
+	parsed, err := url.Parse(strings.TrimSpace(value))
+	if err != nil || parsed.Scheme != "https" || !strings.EqualFold(parsed.Host, "github.com") {
+		return ""
+	}
+	for _, path := range []string{parsed.EscapedPath(), parsed.Path} {
+		trimmed := strings.Trim(path, "/")
+		if token := unsafeEntropyTokenInPath(trimmed); token != "" {
+			return token
+		}
+		if token := unsafeSlashBearingEntropyTokenInPath(trimmed); token != "" {
+			return token
+		}
+	}
+	if unescaped, err := url.PathUnescape(parsed.EscapedPath()); err == nil {
+		trimmed := strings.Trim(unescaped, "/")
+		if token := unsafeEntropyTokenInPath(trimmed); token != "" {
+			return token
+		}
+		if token := unsafeSlashBearingEntropyTokenInPath(trimmed); token != "" {
+			return token
+		}
+	}
+	return ""
+}
+
+func unsafeSlashBearingEntropyTokenInPath(path string) string {
+	rawSegments := strings.Split(strings.Trim(path, "/"), "/")
+	segments := unsafeGitHubPathTokenSegments(path)
+	if len(segments) == 0 {
+		return ""
+	}
+	for start := 0; start < len(segments); start++ {
+		candidateSegments := make([]string, 0, len(segments)-start)
+		for end := start; end < len(segments); end++ {
+			segment := strings.Trim(segments[end], "-_=+")
+			if segment == "" {
+				if githubOwnerRepoRouteBoundary(rawSegments, end) &&
+					(!suspiciousGitHubOwnerRepoTokenPrefix(candidateSegments) ||
+						githubOwnerRepoRouteBoundaryHasSafeTypedPayload(rawSegments, end) ||
+						githubOwnerRepoRouteBoundaryHasSafeUntypedPayload(rawSegments, end)) {
+					candidateSegments = candidateSegments[:0]
+				}
+				continue
+			}
+			if !entropyPathCandidateFragment(segment) {
+				break
+			}
+			candidateSegments = append(candidateSegments, segment)
+			candidate := strings.Join(candidateSegments, "/")
+			candidateWithoutSlash := strings.ReplaceAll(candidate, "/", "")
+			if len(candidateSegments) < 2 {
+				continue
+			}
+			if len(candidateWithoutSlash) < 32 {
+				continue
+			}
+			if !hasMixedSecretAlphabet(candidateWithoutSlash) {
+				continue
+			}
+			if shannonEntropy(candidate) > 4.2 {
+				return candidate
+			}
+		}
+	}
+	return ""
+}
+
+func suspiciousGitHubOwnerRepoTokenPrefix(segments []string) bool {
+	if len(segments) < 2 {
+		return false
+	}
+	candidate := strings.Join(segments, "/")
+	candidateWithoutSlash := strings.ReplaceAll(candidate, "/", "")
+	if len(candidateWithoutSlash) < 16 {
+		return false
+	}
+	if !hasMixedSecretAlphabet(candidateWithoutSlash) {
+		return false
+	}
+	return shannonEntropy(candidate) > 3.2
+}
+
+func githubOwnerRepoRouteBoundary(rawSegments []string, index int) bool {
+	if index != 2 || len(rawSegments) <= index {
+		return false
+	}
+	route := strings.ToLower(strings.Trim(rawSegments[index], "-_=+"))
+	if !safeGitHubRouteSegment(route) {
+		return false
+	}
+	switch route {
+	case "commit", "commits":
+		return len(rawSegments) > index+1 && validGitCommitHash(rawSegments[index+1])
+	case "pull", "pulls", "issues":
+		return len(rawSegments) > index+1 && isDecimalString(rawSegments[index+1])
+	case "runs":
+		return len(rawSegments) > index+1 && isDecimalString(rawSegments[index+1])
+	case "actions":
+		return len(rawSegments) > index+1 && strings.EqualFold(rawSegments[index+1], "runs")
+	case "checks", "suites", "workflow-runs", "tree", "blob", "compare":
+		return len(rawSegments) > index+1
+	default:
+		return false
+	}
+}
+
+func githubOwnerRepoRouteBoundaryHasSafeTypedPayload(rawSegments []string, index int) bool {
+	if index != 2 || len(rawSegments) <= index {
+		return false
+	}
+	route := strings.ToLower(strings.Trim(rawSegments[index], "-_=+"))
+	switch route {
+	case "commit", "commits":
+		return len(rawSegments) > index+1 && validGitCommitHash(rawSegments[index+1])
+	case "pull", "pulls", "issues":
+		return len(rawSegments) > index+1 && isDecimalString(rawSegments[index+1])
+	case "runs":
+		return len(rawSegments) > index+1 && isDecimalString(rawSegments[index+1])
+	case "actions":
+		return len(rawSegments) > index+2 &&
+			strings.EqualFold(strings.Trim(rawSegments[index+1], "-_=+"), "runs") &&
+			isDecimalString(strings.Trim(rawSegments[index+2], "-_=+"))
+	default:
+		return false
+	}
+}
+
+func githubOwnerRepoRouteBoundaryHasSafeUntypedPayload(rawSegments []string, index int) bool {
+	if index != 2 || len(rawSegments) <= index {
+		return false
+	}
+	route := strings.ToLower(strings.Trim(rawSegments[index], "-_=+"))
+	switch route {
+	case "tree", "blob":
+		return githubUntypedRoutePayloadSafe(rawSegments[index+1:])
+	default:
+		return false
+	}
+}
+
+func githubUntypedRoutePayloadSafe(rawSegments []string) bool {
+	if len(rawSegments) == 0 {
+		return false
+	}
+	for _, rawSegment := range rawSegments {
+		segment := strings.Trim(rawSegment, "-_=+")
+		if segment == "" {
+			return false
+		}
+		if unsafeEntropyTokenInPath(segment) != "" {
+			return false
+		}
+	}
+	return unsafeSlashBearingEntropyTokenInPath(strings.Join(rawSegments, "/")) == ""
+}
+
+func unsafeGitHubPathTokenSegments(path string) []string {
+	rawSegments := strings.Split(strings.Trim(path, "/"), "/")
+	segments := make([]string, 0, len(rawSegments))
+	for index, rawSegment := range rawSegments {
+		segment := strings.Trim(rawSegment, "-_=+")
+		if segment == "" {
+			segments = append(segments, "")
+			continue
+		}
+		if structuralGitHubRouteSegment(rawSegments, index) {
+			segments = append(segments, "")
+			continue
+		}
+		segments = append(segments, segment)
+	}
+	return segments
+}
+
+func structuralGitHubRouteSegment(rawSegments []string, index int) bool {
+	if githubOwnerRepoRouteBoundary(rawSegments, index) {
+		return true
+	}
+	if index == 3 &&
+		len(rawSegments) > 3 &&
+		strings.EqualFold(strings.Trim(rawSegments[2], "-_=+"), "actions") &&
+		strings.EqualFold(strings.Trim(rawSegments[3], "-_=+"), "runs") {
+		return true
+	}
+	return false
+}
+
+func safeGitHubRouteSegment(segment string) bool {
+	normalized := strings.ToLower(segment)
+	switch normalized {
+	case "actions", "runs", "pull", "pulls", "issues", "commit", "commits", "tree", "blob", "compare", "checks", "suites", "workflow-runs":
+		return true
+	}
+	return false
+}
+
+func isDecimalString(value string) bool {
+	if value == "" {
+		return false
+	}
+	for _, r := range value {
+		if r < '0' || r > '9' {
+			return false
+		}
+	}
+	return true
+}
+
+func entropyPathCandidateFragment(segment string) bool {
+	if segment == "" {
+		return false
+	}
+	for _, r := range segment {
+		switch {
+		case r >= 'a' && r <= 'z':
+		case r >= 'A' && r <= 'Z':
+		case r >= '0' && r <= '9':
+		case r == '+', r == '_', r == '-', r == '=':
+		default:
+			return false
+		}
+	}
+	return true
 }
 
 func validGitCommitHash(value string) bool {
@@ -1314,13 +1611,13 @@ func intFromAny(value any) (int, bool) {
 		if math.IsNaN(typed) || math.IsInf(typed, 0) || typed != math.Trunc(typed) {
 			return 0, false
 		}
-		return int(typed), true
+		return int64ToInt(int64(typed))
 	case int:
 		return typed, true
 	case json.Number:
 		converted, err := typed.Int64()
 		if err == nil {
-			return int(converted), true
+			return int64ToInt(converted)
 		}
 	case string:
 		converted, err := strconv.Atoi(strings.TrimSpace(typed))
@@ -1329,6 +1626,15 @@ func intFromAny(value any) (int, bool) {
 		}
 	}
 	return 0, false
+}
+
+func int64ToInt(value int64) (int, bool) {
+	maxInt := int64(^uint(0) >> 1)
+	minInt := -maxInt - 1
+	if value < minInt || value > maxInt {
+		return 0, false
+	}
+	return int(value), true
 }
 
 func floatField(event map[string]any, fallback float64, paths ...string) float64 {

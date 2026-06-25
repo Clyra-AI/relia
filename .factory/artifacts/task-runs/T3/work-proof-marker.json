@@ -1,0 +1,22 @@
+{
+  "artifact_type": "work_proof_marker",
+  "schema_version": "1.0",
+  "task_id": "T3",
+  "status": "implemented",
+  "generated_at": "2026-06-25T18:20:50Z",
+  "implementation_performed": true,
+  "changed_paths": [
+    "cmd/relia/main.go",
+    "cmd/relia/main_test.go",
+    ".factory/artifacts/task-runs/T3/work-proof-marker.json",
+    ".factory/artifacts/task-runs/T3/validation-report.json",
+    ".factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json"
+  ],
+  "summary": "Repaired the Codex review concerns around GitHub provenance route boundaries by preserving clean top-level runs/<id>, tree/<branch>, and blob/<branch>/<path> URLs with long mixed owner/repo names while keeping existing fail-closed redaction coverage for high-entropy path payloads. Runtime scanner changes are included in cmd/relia/main.go and regression coverage is in cmd/relia/main_test.go.",
+  "evidence_refs": [
+    ".factory/artifacts/task-runs/T3/validation-report.json",
+    ".factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json",
+    "cmd/relia/main.go",
+    "cmd/relia/main_test.go"
+  ]
+}

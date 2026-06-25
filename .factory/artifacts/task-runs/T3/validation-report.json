@@ -1,0 +1,132 @@
+{
+  "artifact_type": "validation_report",
+  "schema_version": "1.0",
+  "task_id": "T3",
+  "status": "pass",
+  "generated_at": "2026-06-25T18:20:50Z",
+  "commands_run": [
+    "make lint-fast",
+    "make test-fast",
+    "gofmt -w cmd/relia/main_test.go",
+    "go test ./cmd/relia -run 'TestIngestPreservesCleanGitHubProvenanceURL|TestIngestPreservesTopLevelCheckRunURLField|TestIngestFailsClosedForSlashBearingProvenanceURLPathSecret' -count=1",
+    "make prepush-full",
+    "git diff --name-only",
+    "git ls-files --others --exclude-standard",
+    "python3 -m json.tool .factory/artifacts/task-runs/T3/work-proof-marker.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T3/validation-report.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json"
+  ],
+  "baseline_evidence": [
+    {
+      "command": "make lint-fast",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "make test-fast",
+      "status": "pass",
+      "exit_code": 0
+    }
+  ],
+  "test_first_skipped_reason": {
+    "status": "skipped_with_reason",
+      "reason": "This review-repair slice was continuing an existing T3 branch with multiple prior red/green cycles. The latest repair added targeted regression coverage for PRD-documented top-level runs/<id>, tree/<branch>, and blob/<branch>/<path> GitHub provenance URLs before running the full gate."
+  },
+  "green_evidence": [
+    {
+      "command": "go test ./cmd/relia -run 'TestIngestPreservesCleanGitHubProvenanceURL|TestIngestPreservesTopLevelCheckRunURLField|TestIngestFailsClosedForSlashBearingProvenanceURLPathSecret' -count=1",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "Local ingest events with check_run_url=https://github.com/Acme2026/SuperBillingServiceXYZ/runs/143, tree/main, and blob/main/README.md exit successfully and persist clean GitHub provenance while unsafe slash-bearing path secrets continue to fail closed."
+    }
+  ],
+  "final_validation_evidence": [
+    {
+      "command": "make prepush-full",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": [
+        "lint-fast passed",
+        "test-fast passed",
+        "test-coverage passed at 78.6% against the 75.0% minimum",
+        "test-contracts passed"
+      ]
+    }
+  ],
+  "acceptance_results": [
+    {
+      "acceptance_item_id": "FR10-PROVENANCE-MANDATORY-RULES-001",
+      "status": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T3/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json",
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go"
+      ],
+      "notes": "Top-level check-run, tree, and blob GitHub provenance remain available as persisted experience evidence, preserving the provenance chain required before rules can cite experiences and PRs."
+    },
+    {
+      "acceptance_item_id": "NFR5-SECURITY-001",
+      "status": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T3/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json",
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go"
+      ],
+      "notes": "The regression confirms the redaction scanner does not falsely classify clean top-level GitHub check-run, tree, or blob URLs with long mixed owner/repo names as unsafe slash-bearing secrets while retaining the existing fail-closed redaction tests."
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-004",
+      "status": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T3/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json",
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go"
+      ],
+      "notes": "Offline ingest accepts PRD-style GitHub provenance fields and normalized URL lists, normalizes them into experience provenance, and persists them after redaction checks."
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-005",
+      "status": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T3/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json",
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go"
+      ],
+      "notes": "The persisted record remains a canonical local experience shard entry under .relia/experiences/YYYY-MM.jsonl with normalized provenance URLs."
+    }
+  ],
+  "path_policy_result": {
+    "status": "pass",
+    "allowed_changed_paths": [
+      "cmd/relia/main.go",
+      "cmd/relia/main_test.go",
+      ".factory/artifacts/task-runs/T3/work-proof-marker.json",
+      ".factory/artifacts/task-runs/T3/validation-report.json",
+      ".factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json"
+    ],
+    "forbidden_changed_paths": [],
+    "untracked_nonignored_paths": []
+  },
+  "plan_drift_result": {
+    "status": "pass",
+    "notes": "Repair stayed inside the T3 ingest redaction and provenance scope and addressed the latest Codex review findings without changing network, credential, schema, or lifecycle posture."
+  },
+  "changelog_result": {
+    "status": "not_applicable",
+    "notes": "No new public behavior beyond the existing T3 ingest contract; this repair adds regression coverage for documented behavior."
+  },
+  "versioning_result": {
+    "status": "not_applicable",
+    "notes": "Pre-1.0 repair preserves existing command and schema contracts."
+  },
+  "docs_sync_result": {
+    "status": "not_applicable",
+    "notes": "The PRD already documents check_run_url with a top-level /runs/<id> URL and the dev/architecture guides already describe T3 ingest provenance and fail-closed redaction."
+  },
+  "blockers": [],
+  "residual_risks": []
+}

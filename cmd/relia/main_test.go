@@ -345,6 +345,201 @@ func TestIngestFailsClosedBeforePersistenceForSecretShapedMetadataKey(t *testing
 	}
 }
 
+func TestIngestFailsClosedForUnsafeProvenanceURLQuery(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	inputPath := filepath.Join(tempDir, "fixtures", "outcomes.json")
+	writeFileForTest(t, inputPath, `[
+  {
+    "experience_id": "exp_0143_url_secret",
+    "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},
+    "recorded_at": "2026-04-03T18:21:00Z",
+    "pr": 143,
+    "commit": "def5678",
+    "paths": ["packages/billing/invoice.py"],
+    "actor_kind": "agent",
+    "attribution_method": "manual",
+    "outcome_kind": "ci_failure",
+    "signature_class": "test_failure",
+    "check_name": "pytest-billing",
+    "signature_key": "tests/test_invoice.py::test_total",
+    "extraction_confidence": "structured",
+    "provenance_urls": ["https://github.com/acme/billing-service/pull/143?token=z6MvN2p9QxR4sT8aK3vY7bL0cD5eF1gH2jP9mQ4rS6tU"]
+  }
+]`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+
+	if code != ExitRedactionSafety {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "redaction_safety_failed" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+	if _, err := os.Stat(filepath.Join(tempDir, ".relia", "experiences", "2026-04.jsonl")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("experience shard should not be persisted on unsafe provenance URL: %v", err)
+	}
+}
+
+func TestIngestFailsClosedForUnsafeProvenanceURLPathSegment(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		url  string
+	}{
+		{
+			name: "actions run",
+			url:  "https://github.com/acme/billing-service/actions/runs/z6MvN2p9QxR4sT8aK3vY7bL0cD5eF1gH2jP9mQ4rS6tU",
+		},
+		{
+			name: "appended after pr",
+			url:  "https://github.com/acme/billing-service/pull/143/z6MvN2p9QxR4sT8aK3vY7bL0cD5eF1gH2jP9mQ4rS6tU",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			tempDir := setupContractRepo(t)
+			t.Chdir(tempDir)
+			inputPath := filepath.Join(tempDir, "fixtures", "outcomes.json")
+			writeFileForTest(t, inputPath, fmt.Sprintf(`[
+  {
+    "experience_id": "exp_0143_url_path_secret",
+    "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},
+    "recorded_at": "2026-04-03T18:21:00Z",
+    "pr": 143,
+    "commit": "def5678",
+    "paths": ["packages/billing/invoice.py"],
+    "actor_kind": "agent",
+    "attribution_method": "manual",
+    "outcome_kind": "ci_failure",
+    "signature_class": "test_failure",
+    "check_name": "pytest-billing",
+    "signature_key": "tests/test_invoice.py::test_total",
+    "extraction_confidence": "structured",
+    "provenance_urls": [%q]
+  }
+]`, tc.url))
+
+			stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+
+			if code != ExitRedactionSafety {
+				t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+			}
+			result := decodeResult(t, stdout)
+			if result.Errors[0].Type != "redaction_safety_failed" {
+				t.Fatalf("error type = %q", result.Errors[0].Type)
+			}
+			if _, err := os.Stat(filepath.Join(tempDir, ".relia", "experiences", "2026-04.jsonl")); !errors.Is(err, os.ErrNotExist) {
+				t.Fatalf("experience shard should not be persisted on unsafe provenance URL path: %v", err)
+			}
+		})
+	}
+}
+
+func TestIngestFailsClosedForSlashBearingProvenanceURLPathSecret(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		url  string
+	}{
+		{
+			name: "raw slash",
+			url:  "https://github.com/acme/billing-service/actions/runs/z6MvN2p9QxR4sT8a/K3vY7bL0cD5eF1gH2jP9mQ4rS6tU",
+		},
+		{
+			name: "encoded slash",
+			url:  "https://github.com/acme/billing-service/actions/runs/z6MvN2p9QxR4sT8a%2FK3vY7bL0cD5eF1gH2jP9mQ4rS6tU",
+		},
+		{
+			name: "short path",
+			url:  "https://github.com/z6MvN2p9QxR4sT8a/K3vY7bL0cD5eF1gH2jP9mQ4rS6tU",
+		},
+		{
+			name: "short middle fragment",
+			url:  "https://github.com/acme/billing-service/actions/runs/z6MvN2p9QxR4sT8a/abc/K3vY7bL0cD5eF1gH",
+		},
+		{
+			name: "weak leading fragment",
+			url:  "https://github.com/acme/billing-service/actions/runs/qazwsxedcrfvtgby/K3vY7bL0cD5eF1gH2jP9mQ",
+		},
+		{
+			name: "encoded weak leading fragment",
+			url:  "https://github.com/acme/billing-service/actions/runs/qazwsxedcrfvtgby%2FK3vY7bL0cD5eF1gH2jP9mQ",
+		},
+		{
+			name: "route like middle fragment",
+			url:  "https://github.com/acme/billing-service/actions/runs/z6MvN2p9QxR4sT8a/pull/K3vY7bL0cD5eF1gH",
+		},
+		{
+			name: "route word threshold fragment",
+			url:  "https://github.com/acme/billing-service/actions/runs/z6MvN2p9QxR4sT/pull/8aK3vY7bL0cD5e",
+		},
+		{
+			name: "weak fragment split by route word",
+			url:  "https://github.com/qazwsxedcrfvtgby/commit/K3vY7bL0cD5eF1gH",
+		},
+		{
+			name: "invalid commit route payload split token",
+			url:  "https://github.com/acme/billing-service/commit/qazwsxedcrfvtgby/K3vY7bL0cD5eF1gH",
+		},
+		{
+			name: "fully chunked short fragments",
+			url:  "https://github.com/acme/billing-service/actions/runs/z6MvN2p9/QxR4sT8a/K3vY7bL0/cD5eF1gH",
+		},
+		{
+			name: "owner repo fragments before route boundary",
+			url:  "https://github.com/z6MvN2p9QxR4sT8a/abc/actions/runs/K3vY7bL0cD5eF1gH",
+		},
+		{
+			name: "decimal middle fragment",
+			url:  "https://github.com/acme/billing-service/actions/runs/z6MvN2p9QxR4sT8a/143/K3vY7bL0cD5eF1gH",
+		},
+		{
+			name: "decimal trailing fragment",
+			url:  "https://github.com/acme/billing-service/actions/runs/QwErTyUiOpAsDfGhJkLzXcVb/1234567890",
+		},
+		{
+			name: "decimal leading fragment",
+			url:  "https://github.com/acme/billing-service/actions/runs/1234567890/QwErTyUiOpAsDfGhJkLzXcVb",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			tempDir := setupContractRepo(t)
+			t.Chdir(tempDir)
+			inputPath := filepath.Join(tempDir, "fixtures", "outcomes.json")
+			writeFileForTest(t, inputPath, fmt.Sprintf(`[
+  {
+    "experience_id": "exp_0143_url_path_slash_secret",
+    "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},
+    "recorded_at": "2026-04-03T18:21:00Z",
+    "pr": 143,
+    "commit": "def5678",
+    "paths": ["packages/billing/invoice.py"],
+    "actor_kind": "agent",
+    "attribution_method": "manual",
+    "outcome_kind": "ci_failure",
+    "signature_class": "test_failure",
+    "check_name": "pytest-billing",
+    "signature_key": "tests/test_invoice.py::test_total",
+    "extraction_confidence": "structured",
+    "provenance_urls": [%q]
+  }
+]`, tc.url))
+
+			stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+
+			if code != ExitRedactionSafety {
+				t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+			}
+			result := decodeResult(t, stdout)
+			if result.Errors[0].Type != "redaction_safety_failed" {
+				t.Fatalf("error type = %q", result.Errors[0].Type)
+			}
+			if _, err := os.Stat(filepath.Join(tempDir, ".relia", "experiences", "2026-04.jsonl")); !errors.Is(err, os.ErrNotExist) {
+				t.Fatalf("experience shard should not be persisted on slash-bearing provenance URL path secret: %v", err)
+			}
+		})
+	}
+}
+
 func TestIngestScansMalformedCommitBeforePersistence(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
@@ -791,6 +986,162 @@ func TestIngestRejectsFractionalPRNumbers(t *testing.T) {
 	}
 	if _, err := os.Stat(filepath.Join(tempDir, ".relia", "experiences", "2026-05.jsonl")); !errors.Is(err, os.ErrNotExist) {
 		t.Fatalf("fractional PR experience should not be persisted: %v", err)
+	}
+}
+
+func TestIngestPreservesLargeIntegerPRNumbers(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	inputPath := filepath.Join(tempDir, "fixtures", "outcomes.json")
+	writeFileForTest(t, inputPath, `[
+  {
+    "repo": "acme/billing-service",
+    "recorded_at": "2026-05-06T12:00:00Z",
+    "pr": 9007199254740993,
+    "commit": "abc142",
+    "paths": ["packages/billing/invoice.py"],
+    "actor_kind": "agent",
+    "attribution_method": "manual",
+    "outcome_kind": "ci_failure",
+    "terminal_state": "failed",
+    "signature_class": "test_failure",
+    "check_name": "pytest-billing",
+    "signature_key": "tests/test_invoice.py::test_total",
+    "extraction_confidence": "structured",
+    "provenance_urls": ["https://github.com/acme/billing-service/pull/9007199254740993"]
+  }
+]`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	content, err := os.ReadFile(filepath.Join(tempDir, ".relia", "experiences", "2026-05.jsonl"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Contains(content, []byte(`"pr":9007199254740993`)) {
+		t.Fatalf("large integer PR was not preserved exactly:\n%s", content)
+	}
+}
+
+func TestIngestPreservesCleanGitHubProvenanceURL(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		repo string
+		url  string
+	}{
+		{
+			name: "short owner repo",
+			repo: "Clyra-AI/relia",
+			url:  "https://github.com/Clyra-AI/relia/commit/de72faeb410006f9780c8cba1725674324d80156",
+		},
+		{
+			name: "long owner repo",
+			repo: "organizationname/billing-service",
+			url:  "https://github.com/organizationname/billing-service/commit/de72faeb410006f9780c8cba1725674324d80156",
+		},
+		{
+			name: "long mixed owner repo pull",
+			repo: "Acme2026/SuperBillingServiceXYZ",
+			url:  "https://github.com/Acme2026/SuperBillingServiceXYZ/pull/143",
+		},
+		{
+			name: "long mixed owner repo actions run",
+			repo: "Acme2026/SuperBillingServiceXYZ",
+			url:  "https://github.com/Acme2026/SuperBillingServiceXYZ/actions/runs/143",
+		},
+		{
+			name: "long mixed owner repo top level run",
+			repo: "Acme2026/SuperBillingServiceXYZ",
+			url:  "https://github.com/Acme2026/SuperBillingServiceXYZ/runs/143",
+		},
+		{
+			name: "long mixed owner repo tree",
+			repo: "Acme2026/SuperBillingServiceXYZ",
+			url:  "https://github.com/Acme2026/SuperBillingServiceXYZ/tree/main",
+		},
+		{
+			name: "long mixed owner repo blob",
+			repo: "Acme2026/SuperBillingServiceXYZ",
+			url:  "https://github.com/Acme2026/SuperBillingServiceXYZ/blob/main/README.md",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			tempDir := setupContractRepo(t)
+			t.Chdir(tempDir)
+			inputPath := filepath.Join(tempDir, "fixtures", "outcomes.json")
+			writeFileForTest(t, inputPath, fmt.Sprintf(`[
+  {
+    "repo": %q,
+    "recorded_at": "2026-05-06T12:00:00Z",
+    "pr": 216,
+    "commit": "de72faeb410006f9780c8cba1725674324d80156",
+    "paths": ["cmd/relia/main.go"],
+    "actor_kind": "agent",
+    "attribution_method": "manual",
+    "outcome_kind": "ci_failure",
+    "terminal_state": "failed",
+    "signature_class": "test_failure",
+    "check_name": "go-test",
+    "signature_key": "cmd/relia/main_test.go::TestIngest",
+    "extraction_confidence": "structured",
+    "provenance_urls": [%q]
+  }
+]`, tc.repo, tc.url))
+
+			stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+
+			if code != ExitSuccess {
+				t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+			}
+			content, err := os.ReadFile(filepath.Join(tempDir, ".relia", "experiences", "2026-05.jsonl"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !bytes.Contains(content, []byte(tc.url)) {
+				t.Fatalf("clean commit provenance URL was not preserved:\n%s", content)
+			}
+		})
+	}
+}
+
+func TestIngestPreservesTopLevelCheckRunURLField(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	inputPath := filepath.Join(tempDir, "fixtures", "outcomes.json")
+	checkRunURL := "https://github.com/Acme2026/SuperBillingServiceXYZ/runs/143"
+	writeFileForTest(t, inputPath, fmt.Sprintf(`[
+  {
+    "repo": "Acme2026/SuperBillingServiceXYZ",
+    "recorded_at": "2026-05-06T12:00:00Z",
+    "pr": 216,
+    "commit": "de72faeb410006f9780c8cba1725674324d80156",
+    "paths": ["cmd/relia/main.go"],
+    "actor_kind": "agent",
+    "attribution_method": "manual",
+    "outcome_kind": "ci_failure",
+    "terminal_state": "failed",
+    "signature_class": "test_failure",
+    "check_name": "go-test",
+    "signature_key": "cmd/relia/main_test.go::TestIngest",
+    "extraction_confidence": "structured",
+    "check_run_url": %q
+  }
+]`, checkRunURL))
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	content, err := os.ReadFile(filepath.Join(tempDir, ".relia", "experiences", "2026-05.jsonl"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Contains(content, []byte(checkRunURL)) {
+		t.Fatalf("clean check_run_url was not preserved:\n%s", content)
 	}
 }
 
