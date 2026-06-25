@@ -1268,29 +1268,18 @@ func unsafeGitHubURLPathEntropyToken(value string) string {
 }
 
 func unsafeSlashBearingEntropyTokenInPath(path string) string {
-	segments := strings.Split(strings.Trim(path, "/"), "/")
-	if len(segments) < 2 {
+	segments := unsafeGitHubPathTokenSegments(path)
+	if len(segments) == 0 {
 		return ""
 	}
 	for start := 0; start < len(segments); start++ {
 		candidateSegments := make([]string, 0, len(segments)-start)
-		strongFragments := 0
 		for end := start; end < len(segments); end++ {
 			segment := strings.Trim(segments[end], "-_=+")
-			strongFragment := entropyPathTokenFragment(segment)
-			if len(candidateSegments) == 0 && !strongFragment {
-				break
-			}
 			if !entropyPathCandidateFragment(segment) {
 				break
 			}
-			if strongFragment {
-				strongFragments++
-			}
 			candidateSegments = append(candidateSegments, segment)
-			if strongFragments < 2 {
-				continue
-			}
 			candidate := strings.Join(candidateSegments, "/")
 			candidateWithoutSlash := strings.ReplaceAll(candidate, "/", "")
 			if len(candidateWithoutSlash) < 32 {
@@ -1307,28 +1296,47 @@ func unsafeSlashBearingEntropyTokenInPath(path string) string {
 	return ""
 }
 
-func entropyPathCandidateFragment(segment string) bool {
-	if segment == "" {
+func unsafeGitHubPathTokenSegments(path string) []string {
+	rawSegments := strings.Split(strings.Trim(path, "/"), "/")
+	segments := make([]string, 0, len(rawSegments))
+	for _, rawSegment := range rawSegments {
+		segment := strings.Trim(rawSegment, "-_=+")
+		if segment == "" {
+			segments = append(segments, "")
+			continue
+		}
+		if safeGitHubRouteSegment(segment) {
+			segments = append(segments, "")
+			continue
+		}
+		segments = append(segments, segment)
+	}
+	return segments
+}
+
+func safeGitHubRouteSegment(segment string) bool {
+	normalized := strings.ToLower(segment)
+	switch normalized {
+	case "actions", "runs", "pull", "pulls", "issues", "commit", "commits", "tree", "blob", "compare", "checks", "suites", "workflow-runs":
+		return true
+	}
+	return isDecimalString(normalized)
+}
+
+func isDecimalString(value string) bool {
+	if value == "" {
 		return false
 	}
-	for _, r := range segment {
-		switch {
-		case r >= 'a' && r <= 'z':
-		case r >= 'A' && r <= 'Z':
-		case r >= '0' && r <= '9':
-		case r == '+', r == '_', r == '-', r == '=':
-		default:
+	for _, r := range value {
+		if r < '0' || r > '9' {
 			return false
 		}
 	}
 	return true
 }
 
-func entropyPathTokenFragment(segment string) bool {
-	if len(segment) < 4 {
-		return false
-	}
-	if !hasMixedSecretAlphabet(segment) {
+func entropyPathCandidateFragment(segment string) bool {
+	if segment == "" {
 		return false
 	}
 	for _, r := range segment {

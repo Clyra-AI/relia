@@ -3,7 +3,7 @@
   "schema_version": "1.0",
   "task_id": "T3",
   "status": "pass",
-  "generated_at": "2026-06-25T14:39:31Z",
+  "generated_at": "2026-06-25T15:03:17Z",
   "commands_run": [
     "make lint-fast",
     "make test-fast",
@@ -14,7 +14,8 @@
     "go test ./cmd/relia -run 'TestIngest(PersistsCanonicalExperienceWithRedactionAndProvenance|PreservesLargeIntegerPRNumbers|FailsClosedForSlashBearingProvenanceURLPathSecret)' -count=1",
     "python3 -m json.tool .factory/artifacts/task-runs/T3/work-proof-marker.json",
     "python3 -m json.tool .factory/artifacts/task-runs/T3/validation-report.json",
-    "python3 -m json.tool .factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json"
+    "python3 -m json.tool .factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json",
+    "go test ./cmd/relia -run 'TestIngestFailsClosedForSlashBearingProvenanceURLPathSecret|TestIngestPreservesLargeIntegerPRNumbers|TestIngestPersistsCanonicalExperienceWithRedactionAndProvenance' -count=1"
   ],
   "baseline_evidence": [
     {
@@ -30,24 +31,18 @@
   ],
   "red_evidence": [
     {
-      "command": "go test ./cmd/relia -run TestIngestFailsClosedForSlashBearingProvenanceURLPathSecret -count=1",
-      "status": "fail_expected",
-      "exit_code": 1,
-      "evidence": "After adding the short-middle-fragment provenance URL case, ingest returned exit 0 and persisted .relia/experiences/2026-04.jsonl instead of failing closed with exit 6."
+      "command": "Codex review on PR #30 commit 2d26b0dee34771016377350ef52982fe387479b8",
+      "status": "review_reproduced",
+      "exit_code": null,
+      "evidence": "Latest-head Codex P2 identified that a weak-leading slash-bearing GitHub provenance path such as qazwsxedcrfvtgby/K3vY7bL0cD5eF1gH2jP9mQ could bypass the prior fragment scanner before the URL-shape exemption."
     }
   ],
   "green_evidence": [
     {
-      "command": "go test ./cmd/relia -run TestIngestFailsClosedForSlashBearingProvenanceURLPathSecret -count=1",
+      "command": "go test ./cmd/relia -run 'TestIngestFailsClosedForSlashBearingProvenanceURLPathSecret|TestIngestPreservesLargeIntegerPRNumbers|TestIngestPersistsCanonicalExperienceWithRedactionAndProvenance' -count=1",
       "status": "pass",
       "exit_code": 0,
-      "evidence": "Focused ingest test passed for raw slash, percent-encoded slash, short path, and short-middle-fragment GitHub provenance URL path secrets."
-    },
-    {
-      "command": "go test ./cmd/relia -run 'TestIngest(PersistsCanonicalExperienceWithRedactionAndProvenance|PreservesLargeIntegerPRNumbers|FailsClosedForSlashBearingProvenanceURLPathSecret)' -count=1",
-      "status": "pass",
-      "exit_code": 0,
-      "evidence": "Focused sanity tests passed for clean provenance URL ingest, large PR-number paths, and the repaired slash-bearing secret rejection cases."
+      "evidence": "Focused ingest tests passed for clean provenance URLs, exact large PR numbers, and raw, encoded, short-path, short-middle, weak-leading, and encoded weak-leading slash-bearing GitHub provenance URL path secrets."
     }
   ],
   "final_validation_evidence": [
@@ -58,7 +53,7 @@
       "evidence": [
         "lint-fast passed",
         "test-fast passed",
-        "test-coverage passed at 77.9% against the 75.0% minimum",
+        "test-coverage passed at 78.1% against the 75.0% minimum",
         "test-contracts passed"
       ]
     }
@@ -83,7 +78,7 @@
         "cmd/relia/main.go",
         "cmd/relia/main_test.go"
       ],
-      "notes": "Ingest now scans GitHub provenance URL paths for high-entropy payloads before permitting the safe URL-shape exemption, including slash-bearing tokens with short middle fragments."
+      "notes": "Ingest now scans GitHub provenance URL paths for high-entropy payloads before permitting the safe URL-shape exemption, including raw, encoded, weak-leading, and weak-middle slash-bearing token fragments."
     },
     {
       "acceptance_item_id": "MVP-IN-SCOPE-004",
@@ -121,7 +116,7 @@
   },
   "plan_drift_result": {
     "status": "pass",
-    "notes": "Repair stayed inside the Codex review feedback for T3 ingest redaction and did not widen task scope."
+    "notes": "Repair stayed inside T3 ingest redaction and Codex review feedback; no task scope, plan, or lifecycle contract changed."
   },
   "changelog_result": {
     "status": "not_applicable",
