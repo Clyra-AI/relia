@@ -1097,6 +1097,44 @@ func TestIngestPreservesCleanGitHubProvenanceURL(t *testing.T) {
 	}
 }
 
+func TestIngestPreservesTopLevelCheckRunURLField(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	inputPath := filepath.Join(tempDir, "fixtures", "outcomes.json")
+	checkRunURL := "https://github.com/Acme2026/SuperBillingServiceXYZ/runs/143"
+	writeFileForTest(t, inputPath, fmt.Sprintf(`[
+  {
+    "repo": "Acme2026/SuperBillingServiceXYZ",
+    "recorded_at": "2026-05-06T12:00:00Z",
+    "pr": 216,
+    "commit": "de72faeb410006f9780c8cba1725674324d80156",
+    "paths": ["cmd/relia/main.go"],
+    "actor_kind": "agent",
+    "attribution_method": "manual",
+    "outcome_kind": "ci_failure",
+    "terminal_state": "failed",
+    "signature_class": "test_failure",
+    "check_name": "go-test",
+    "signature_key": "cmd/relia/main_test.go::TestIngest",
+    "extraction_confidence": "structured",
+    "check_run_url": %q
+  }
+]`, checkRunURL))
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	content, err := os.ReadFile(filepath.Join(tempDir, ".relia", "experiences", "2026-05.jsonl"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Contains(content, []byte(checkRunURL)) {
+		t.Fatalf("clean check_run_url was not preserved:\n%s", content)
+	}
+}
+
 func TestIngestDoesNotPartiallyWriteShardsWhenLaterShardIsCorrupt(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)

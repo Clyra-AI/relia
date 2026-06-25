@@ -3,76 +3,47 @@
   "schema_version": "1.0",
   "task_id": "T3",
   "status": "pass",
-  "generated_at": "2026-06-25T17:58:37Z",
+  "generated_at": "2026-06-25T18:04:14Z",
   "proof_level": "workflow_behavior",
   "behaviors": [
     {
-      "behavior": "Offline ingest accepts local JSON objects, JSON arrays, events objects, and JSONL streams.",
+      "behavior": "Offline ingest accepts a PRD-style check_run_url field using the top-level GitHub /runs/<id> shape.",
       "status": "pass",
       "evidence_refs": [
-        "cmd/relia/main.go",
-        "cmd/relia/main_test.go"
+        "cmd/relia/main_test.go:TestIngestPreservesTopLevelCheckRunURLField",
+        ".factory/artifacts/task-runs/T3/validation-report.json"
       ]
     },
     {
-      "behavior": "Ingest recursively redacts known token shapes and secret-named fields before persistence.",
+      "behavior": "Clean GitHub check-run provenance with a long mixed owner/repo name is not falsely rejected as a slash-bearing high-entropy secret.",
       "status": "pass",
       "evidence_refs": [
-        "cmd/relia/main_test.go:TestIngestPersistsCanonicalExperienceWithRedactionAndProvenance",
-        "cmd/relia/main_test.go:TestIngestRedactsPluralSecretFieldsBeforePersistence"
-      ]
-    },
-    {
-      "behavior": "Unclassified high-entropy values, including GitHub provenance URL query values and path payloads, fail closed with exit 6 before any experience shard is written.",
-      "status": "pass",
-      "evidence_refs": [
-        "cmd/relia/main_test.go:TestIngestFailsClosedBeforePersistenceForUnrecognizedSecret",
-        "cmd/relia/main_test.go:TestIngestFailsClosedForUnsafeProvenanceURLQuery",
-        "cmd/relia/main_test.go:TestIngestFailsClosedForUnsafeProvenanceURLPathSegment"
-      ]
-    },
-    {
-      "behavior": "GitHub provenance URL path entropy scanning runs before the URL-shape exemption, including tokens appended after normal PR paths.",
-      "status": "pass",
-      "evidence_refs": [
-        "cmd/relia/main.go:unsafeEntropyToken",
-        "cmd/relia/main.go:validGitHubProvenanceURLShape",
-        "cmd/relia/main_test.go:TestIngestFailsClosedForUnsafeProvenanceURLPathSegment"
-      ]
-    },
-    {
-      "behavior": "GitHub provenance URL paths containing raw slash-bearing, percent-encoded slash-bearing, short-path, weak-leading, weak-middle, route-like middle, route-word threshold, weak route-split, invalid commit route payload, fully chunked short-fragment, suspicious owner/repo route-boundary, decimal middle, trailing decimal, or leading decimal high-entropy token payloads fail closed before persistence.",
-      "status": "pass",
-      "evidence_refs": [
-        "cmd/relia/main.go:unsafeGitHubURLPathEntropyToken",
-        "cmd/relia/main.go:unsafeSlashBearingEntropyTokenInPath",
-        "cmd/relia/main_test.go:TestIngestFailsClosedForSlashBearingProvenanceURLPathSecret"
-      ]
-    },
-    {
-      "behavior": "Clean GitHub provenance URLs, including large PR-number paths and typed commit, pull, actions-run, and top-level check-run paths under short, long, and long mixed owner/repo names, continue to ingest without false-positive redaction failure.",
-      "status": "pass",
-      "evidence_refs": [
-        "cmd/relia/main_test.go:TestIngestPersistsCanonicalExperienceWithRedactionAndProvenance",
-        "cmd/relia/main_test.go:TestIngestPreservesLargeIntegerPRNumbers",
+        "cmd/relia/main_test.go:TestIngestPreservesTopLevelCheckRunURLField",
         "cmd/relia/main_test.go:TestIngestPreservesCleanGitHubProvenanceURL"
       ]
     },
     {
-      "behavior": "Canonical experience records preserve PR attribution, provenance URLs, confidence labels, signatures, flake discount, private share scope, and org_eligible false.",
+      "behavior": "The accepted check_run_url is normalized into experience provenance and persisted into the monthly local experience shard.",
       "status": "pass",
       "evidence_refs": [
-        "schemas/experience-record.schema.json",
-        "cmd/relia/main.go",
-        "cmd/relia/main_test.go"
+        "cmd/relia/main_test.go:TestIngestPreservesTopLevelCheckRunURLField",
+        "schemas/experience-record.schema.json"
       ]
     },
     {
-      "behavior": "Experience persistence is idempotent and monthly-sharded under .relia/experiences/YYYY-MM.jsonl.",
+      "behavior": "Existing fail-closed redaction coverage for unsafe provenance query values and high-entropy path payloads remains active.",
       "status": "pass",
       "evidence_refs": [
-        "cmd/relia/main_test.go:TestIngestInfersAttributionAndUpsertsIdempotently",
-        "cmd/relia/main_test.go:TestIngestDoesNotPartiallyWriteShardsWhenLaterShardIsCorrupt"
+        "cmd/relia/main_test.go:TestIngestFailsClosedForUnsafeProvenanceURLQuery",
+        "cmd/relia/main_test.go:TestIngestFailsClosedForUnsafeProvenanceURLPathSegment",
+        "cmd/relia/main_test.go:TestIngestFailsClosedForSlashBearingProvenanceURLPathSecret"
+      ]
+    },
+    {
+      "behavior": "Full local validation, including coverage and contract checks, passes after the repair.",
+      "status": "pass",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T3/validation-report.json"
       ]
     }
   ],
