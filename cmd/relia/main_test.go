@@ -452,6 +452,10 @@ func TestIngestFailsClosedForSlashBearingProvenanceURLPathSecret(t *testing.T) {
 			name: "short path",
 			url:  "https://github.com/z6MvN2p9QxR4sT8a/K3vY7bL0cD5eF1gH2jP9mQ4rS6tU",
 		},
+		{
+			name: "short middle fragment",
+			url:  "https://github.com/acme/billing-service/actions/runs/z6MvN2p9QxR4sT8a/abc/K3vY7bL0cD5eF1gH",
+		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			tempDir := setupContractRepo(t)

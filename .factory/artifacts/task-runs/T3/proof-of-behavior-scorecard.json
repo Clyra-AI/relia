@@ -3,7 +3,7 @@
   "schema_version": "1.0",
   "task_id": "T3",
   "status": "pass",
-  "generated_at": "2026-06-25T14:22:12Z",
+  "generated_at": "2026-06-25T14:36:48Z",
   "proof_level": "workflow_behavior",
   "behaviors": [
     {
@@ -41,7 +41,7 @@
       ]
     },
     {
-      "behavior": "GitHub provenance URL paths containing raw slash-bearing or percent-encoded slash-bearing high-entropy token fragments in any path position fail closed before persistence.",
+      "behavior": "GitHub provenance URL paths containing raw slash-bearing, percent-encoded slash-bearing, or short-middle-fragment high-entropy token payloads fail closed before persistence.",
       "status": "pass",
       "evidence_refs": [
         "cmd/relia/main.go:unsafeGitHubURLPathEntropyToken",

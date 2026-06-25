@@ -3,13 +3,15 @@
   "schema_version": "1.0",
   "task_id": "T3",
   "status": "pass",
-  "generated_at": "2026-06-25T14:22:12Z",
+  "generated_at": "2026-06-25T14:39:31Z",
   "commands_run": [
     "make lint-fast",
     "make test-fast",
+    "go test ./cmd/relia -run TestIngestFailsClosedForSlashBearingProvenanceURLPathSecret -count=1",
     "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
-    "go test ./cmd/relia -run 'TestIngest(FailsClosedForUnsafeProvenanceURLPathSegment|FailsClosedForSlashBearingProvenanceURLPathSecret|PreservesLargeIntegerPRNumbers|PersistsCanonicalExperienceWithRedactionAndProvenance)' -count=1",
+    "go test ./cmd/relia -run TestIngestFailsClosedForSlashBearingProvenanceURLPathSecret -count=1",
     "make prepush-full",
+    "go test ./cmd/relia -run 'TestIngest(PersistsCanonicalExperienceWithRedactionAndProvenance|PreservesLargeIntegerPRNumbers|FailsClosedForSlashBearingProvenanceURLPathSecret)' -count=1",
     "python3 -m json.tool .factory/artifacts/task-runs/T3/work-proof-marker.json",
     "python3 -m json.tool .factory/artifacts/task-runs/T3/validation-report.json",
     "python3 -m json.tool .factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json"
@@ -26,16 +28,26 @@
       "exit_code": 0
     }
   ],
-  "test_first_skipped_reason": {
-    "status": "skipped_with_reason",
-    "reason": "The repair branch already contained the previous red-first URL path scanner regression and fix in current HEAD. This run addressed the remaining Codex review feedback by tightening scanner ordering and adding the exact appended-path-token regression without reverting existing protection."
-  },
+  "red_evidence": [
+    {
+      "command": "go test ./cmd/relia -run TestIngestFailsClosedForSlashBearingProvenanceURLPathSecret -count=1",
+      "status": "fail_expected",
+      "exit_code": 1,
+      "evidence": "After adding the short-middle-fragment provenance URL case, ingest returned exit 0 and persisted .relia/experiences/2026-04.jsonl instead of failing closed with exit 6."
+    }
+  ],
   "green_evidence": [
     {
-      "command": "go test ./cmd/relia -run 'TestIngest(FailsClosedForUnsafeProvenanceURLPathSegment|FailsClosedForSlashBearingProvenanceURLPathSecret|PreservesLargeIntegerPRNumbers|PersistsCanonicalExperienceWithRedactionAndProvenance)' -count=1",
+      "command": "go test ./cmd/relia -run TestIngestFailsClosedForSlashBearingProvenanceURLPathSecret -count=1",
       "status": "pass",
       "exit_code": 0,
-      "evidence": "Focused ingest tests passed for high-entropy GitHub provenance URL path segments, raw and percent-encoded slash-bearing URL path tokens, clean canonical persistence, and large PR-number paths."
+      "evidence": "Focused ingest test passed for raw slash, percent-encoded slash, short path, and short-middle-fragment GitHub provenance URL path secrets."
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestIngest(PersistsCanonicalExperienceWithRedactionAndProvenance|PreservesLargeIntegerPRNumbers|FailsClosedForSlashBearingProvenanceURLPathSecret)' -count=1",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "Focused sanity tests passed for clean provenance URL ingest, large PR-number paths, and the repaired slash-bearing secret rejection cases."
     }
   ],
   "final_validation_evidence": [
@@ -46,7 +58,7 @@
       "evidence": [
         "lint-fast passed",
         "test-fast passed",
-        "test-coverage passed at 78.0% against the 75.0% minimum",
+        "test-coverage passed at 77.9% against the 75.0% minimum",
         "test-contracts passed"
       ]
     }
@@ -71,7 +83,7 @@
         "cmd/relia/main.go",
         "cmd/relia/main_test.go"
       ],
-      "notes": "Ingest now scans GitHub provenance URL paths for high-entropy payloads before permitting the safe URL-shape exemption, including tokens appended after normal PR paths."
+      "notes": "Ingest now scans GitHub provenance URL paths for high-entropy payloads before permitting the safe URL-shape exemption, including slash-bearing tokens with short middle fragments."
     },
     {
       "acceptance_item_id": "MVP-IN-SCOPE-004",

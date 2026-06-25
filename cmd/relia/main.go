@@ -1274,12 +1274,23 @@ func unsafeSlashBearingEntropyTokenInPath(path string) string {
 	}
 	for start := 0; start < len(segments); start++ {
 		candidateSegments := make([]string, 0, len(segments)-start)
+		strongFragments := 0
 		for end := start; end < len(segments); end++ {
 			segment := strings.Trim(segments[end], "-_=+")
-			if !entropyPathTokenFragment(segment) {
+			strongFragment := entropyPathTokenFragment(segment)
+			if len(candidateSegments) == 0 && !strongFragment {
 				break
 			}
+			if !entropyPathCandidateFragment(segment) {
+				break
+			}
+			if strongFragment {
+				strongFragments++
+			}
 			candidateSegments = append(candidateSegments, segment)
+			if strongFragments < 2 {
+				continue
+			}
 			candidate := strings.Join(candidateSegments, "/")
 			candidateWithoutSlash := strings.ReplaceAll(candidate, "/", "")
 			if len(candidateWithoutSlash) < 32 {
@@ -1294,6 +1305,23 @@ func unsafeSlashBearingEntropyTokenInPath(path string) string {
 		}
 	}
 	return ""
+}
+
+func entropyPathCandidateFragment(segment string) bool {
+	if segment == "" {
+		return false
+	}
+	for _, r := range segment {
+		switch {
+		case r >= 'a' && r <= 'z':
+		case r >= 'A' && r <= 'Z':
+		case r >= '0' && r <= '9':
+		case r == '+', r == '_', r == '-', r == '=':
+		default:
+			return false
+		}
+	}
+	return true
 }
 
 func entropyPathTokenFragment(segment string) bool {
