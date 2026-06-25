@@ -825,30 +825,44 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "FR10-PROVENANCE-MANDATORY-RULES-001",
-          "evidence_refs": [],
+          "evidence_refs": [
+            "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/validation-report.json",
+            "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/ship-packet.json",
+            "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "data-intake-and-persistence"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/validation-report.json",
+        "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/ship-packet.json",
+        "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "fr10-provenance-mandatory-rules",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T3"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence.",
         "Sprint 4 remapped this item to smaller task slices or bounded learning-loop follow-up evidence.",
         "Sprint 4 optional post-MVP learning tasks are excluded from MVP closure blockers."
       ],
-      "remaining_task_refs": [
-        "T3"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "Every rule must cite at least one experience and one PR. Uncited rules fail validation and never render.",
       "scope_item_id": "FR10-PROVENANCE-MANDATORY-RULES-001",
       "source_ref": "docs/product/prd.md#fr10-provenance-mandatory-rules",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T3"
       ]
@@ -1566,28 +1580,42 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "NFR5-SECURITY-001",
-          "evidence_refs": [],
+          "evidence_refs": [
+            "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/validation-report.json",
+            "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/ship-packet.json",
+            "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "data-intake-and-persistence"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/validation-report.json",
+        "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/ship-packet.json",
+        "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "nfr5-security",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T3"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T3"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "Redaction must happen before artifact persistence. If a value cannot be confidently redacted, Relia must fail closed (exit 6): mark the artifact unsafe to persist rather than write a possibly-unredacted secret. Silent persistence of an unrecognized secret is a trust bug, not an edge case.",
       "scope_item_id": "NFR5-SECURITY-001",
       "source_ref": "docs/product/prd.md#nfr5-security",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T3"
       ]
@@ -2094,28 +2122,42 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "MVP-IN-SCOPE-004",
-          "evidence_refs": [],
+          "evidence_refs": [
+            "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/validation-report.json",
+            "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/ship-packet.json",
+            "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "data-intake-and-persistence"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/validation-report.json",
+        "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/ship-packet.json",
+        "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "mvp-in-scope",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T3"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T3"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "capture-time redaction with entropy scanning",
       "scope_item_id": "MVP-IN-SCOPE-004",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T3"
       ]
@@ -2130,28 +2172,42 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "MVP-IN-SCOPE-005",
-          "evidence_refs": [],
+          "evidence_refs": [
+            "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/validation-report.json",
+            "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/ship-packet.json",
+            "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "data-intake-and-persistence"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/validation-report.json",
+        "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/ship-packet.json",
+        "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260625T104509.548460000Z-relia-T3/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "mvp-in-scope",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T3"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T3"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "canonical experience records (local-only reproducible cache by default; committed opt-in, redacted, capped)",
       "scope_item_id": "MVP-IN-SCOPE-005",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T3"
       ]
@@ -4985,7 +5041,7 @@
       ]
     }
   ],
-  "last_updated_at": "2026-06-22T17:19:36Z",
+  "last_updated_at": "2026-06-25T18:25:22Z",
   "schema_version": "0.1",
   "source_prd_ref": "docs/product/prd.md"
 }
