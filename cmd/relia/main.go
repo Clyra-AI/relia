@@ -1335,6 +1335,8 @@ func githubOwnerRepoRouteBoundary(rawSegments []string, index int) bool {
 		return len(rawSegments) > index+1 && validGitCommitHash(rawSegments[index+1])
 	case "pull", "pulls", "issues":
 		return len(rawSegments) > index+1 && isDecimalString(rawSegments[index+1])
+	case "runs":
+		return len(rawSegments) > index+1 && isDecimalString(rawSegments[index+1])
 	case "actions":
 		return len(rawSegments) > index+1 && strings.EqualFold(rawSegments[index+1], "runs")
 	case "checks", "suites", "workflow-runs", "tree", "blob", "compare":
@@ -1353,6 +1355,8 @@ func githubOwnerRepoRouteBoundaryHasSafeTypedPayload(rawSegments []string, index
 	case "commit", "commits":
 		return len(rawSegments) > index+1 && validGitCommitHash(rawSegments[index+1])
 	case "pull", "pulls", "issues":
+		return len(rawSegments) > index+1 && isDecimalString(rawSegments[index+1])
+	case "runs":
 		return len(rawSegments) > index+1 && isDecimalString(rawSegments[index+1])
 	case "actions":
 		return len(rawSegments) > index+2 &&

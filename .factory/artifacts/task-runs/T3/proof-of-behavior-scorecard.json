@@ -3,7 +3,7 @@
   "schema_version": "1.0",
   "task_id": "T3",
   "status": "pass",
-  "generated_at": "2026-06-25T17:37:28Z",
+  "generated_at": "2026-06-25T17:58:37Z",
   "proof_level": "workflow_behavior",
   "behaviors": [
     {
@@ -50,7 +50,7 @@
       ]
     },
     {
-      "behavior": "Clean GitHub provenance URLs, including large PR-number paths and typed commit, pull, and actions-run paths under short, long, and long mixed owner/repo names, continue to ingest without false-positive redaction failure.",
+      "behavior": "Clean GitHub provenance URLs, including large PR-number paths and typed commit, pull, actions-run, and top-level check-run paths under short, long, and long mixed owner/repo names, continue to ingest without false-positive redaction failure.",
       "status": "pass",
       "evidence_refs": [
         "cmd/relia/main_test.go:TestIngestPersistsCanonicalExperienceWithRedactionAndProvenance",

@@ -3,7 +3,7 @@
   "schema_version": "1.0",
   "task_id": "T3",
   "status": "pass",
-  "generated_at": "2026-06-25T17:37:28Z",
+  "generated_at": "2026-06-25T17:58:37Z",
   "commands_run": [
     "make lint-fast",
     "make test-fast",
@@ -27,6 +27,12 @@
     "go test ./cmd/relia -run 'TestIngestFailsClosedForSlashBearingProvenanceURLPathSecret|TestIngestPreservesCleanGitHubCommitProvenanceURL' -count=1",
     "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
     "go test ./cmd/relia -run 'TestIngestFailsClosedForSlashBearingProvenanceURLPathSecret|TestIngestPreservesCleanGitHubCommitProvenanceURL|TestIngestPreservesLargeIntegerPRNumbers' -count=1",
+    "python3 -m json.tool .factory/artifacts/task-runs/T3/work-proof-marker.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T3/validation-report.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json",
+    "make prepush-full",
+    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
+    "go test ./cmd/relia -run 'TestIngestFailsClosedForSlashBearingProvenanceURLPathSecret|TestIngestPreservesCleanGitHubProvenanceURL|TestIngestPreservesLargeIntegerPRNumbers' -count=1",
     "python3 -m json.tool .factory/artifacts/task-runs/T3/work-proof-marker.json",
     "python3 -m json.tool .factory/artifacts/task-runs/T3/validation-report.json",
     "python3 -m json.tool .factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json",
@@ -98,6 +104,12 @@
       "status": "review_reproduced",
       "exit_code": null,
       "evidence": "Latest-head Codex P2 identified that long mixed owner/repo names, such as Acme2026/SuperBillingServiceXYZ, still need to reset at typed safe GitHub route payloads like pull/143 so legitimate provenance URLs are not rejected as slash-bearing token candidates."
+    },
+    {
+      "command": "Codex review on PR #30 commit a1a02079ff85cce364f52015bef7f1b0a27f7436",
+      "status": "review_reproduced",
+      "exit_code": null,
+      "evidence": "Latest-head Codex P2 identified that PRD-documented top-level check-run URLs, such as https://github.com/Acme2026/SuperBillingServiceXYZ/runs/143, need to reset at the runs/<id> route boundary instead of joining long mixed owner/repo text into a slash-bearing token candidate."
     }
   ],
   "green_evidence": [
@@ -105,7 +117,7 @@
       "command": "go test ./cmd/relia -run 'TestIngestFailsClosedForSlashBearingProvenanceURLPathSecret|TestIngestPreservesCleanGitHubProvenanceURL|TestIngestPreservesLargeIntegerPRNumbers' -count=1",
       "status": "pass",
       "exit_code": 0,
-      "evidence": "Focused ingest tests passed for raw, encoded, short-path, short-middle, weak-leading, encoded weak-leading, route-like middle, route-word threshold, weak route-split, invalid commit route payload, fully chunked short-fragment, suspicious owner/repo route-boundary, decimal middle, trailing decimal, and leading decimal slash-bearing GitHub provenance URL path secrets, while preserving large PR-number URLs and clean GitHub commit, pull, and actions-run provenance URLs for short, long, and long mixed owner/repo names."
+      "evidence": "Focused ingest tests passed for raw, encoded, short-path, short-middle, weak-leading, encoded weak-leading, route-like middle, route-word threshold, weak route-split, invalid commit route payload, fully chunked short-fragment, suspicious owner/repo route-boundary, decimal middle, trailing decimal, and leading decimal slash-bearing GitHub provenance URL path secrets, while preserving large PR-number URLs and clean GitHub commit, pull, actions-run, and top-level check-run provenance URLs for short, long, and long mixed owner/repo names."
     }
   ],
   "final_validation_evidence": [
@@ -116,7 +128,7 @@
       "evidence": [
         "lint-fast passed",
         "test-fast passed",
-        "test-coverage passed at 78.4% against the 75.0% minimum",
+        "test-coverage passed at 78.5% against the 75.0% minimum",
         "test-contracts passed"
       ]
     }
@@ -141,7 +153,7 @@
         "cmd/relia/main.go",
         "cmd/relia/main_test.go"
       ],
-      "notes": "Ingest now scans GitHub provenance URL paths for high-entropy payloads before permitting the safe URL-shape exemption, including raw, encoded, weak-leading, weak-middle, route-like middle, route-word threshold, weak route-split, invalid commit route payload, fully chunked short-fragment, suspicious owner/repo route-boundary, decimal middle, trailing decimal, and leading decimal slash-bearing token fragments, while preserving clean GitHub commit, pull, and actions-run provenance URLs."
+      "notes": "Ingest now scans GitHub provenance URL paths for high-entropy payloads before permitting the safe URL-shape exemption, including raw, encoded, weak-leading, weak-middle, route-like middle, route-word threshold, weak route-split, invalid commit route payload, fully chunked short-fragment, suspicious owner/repo route-boundary, decimal middle, trailing decimal, and leading decimal slash-bearing token fragments, while preserving clean GitHub commit, pull, actions-run, and top-level check-run provenance URLs."
     },
     {
       "acceptance_item_id": "MVP-IN-SCOPE-004",
