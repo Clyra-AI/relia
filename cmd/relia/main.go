@@ -1278,7 +1278,8 @@ func unsafeSlashBearingEntropyTokenInPath(path string) string {
 		for end := start; end < len(segments); end++ {
 			segment := strings.Trim(segments[end], "-_=+")
 			if segment == "" {
-				if githubOwnerRepoRouteBoundary(rawSegments, end) && !suspiciousGitHubOwnerRepoTokenPrefix(candidateSegments) {
+				if githubOwnerRepoRouteBoundary(rawSegments, end) &&
+					(!suspiciousGitHubOwnerRepoTokenPrefix(candidateSegments) || githubOwnerRepoRouteBoundaryHasSafeTypedPayload(rawSegments, end)) {
 					candidateSegments = candidateSegments[:0]
 				}
 				continue
@@ -1338,6 +1339,25 @@ func githubOwnerRepoRouteBoundary(rawSegments []string, index int) bool {
 		return len(rawSegments) > index+1 && strings.EqualFold(rawSegments[index+1], "runs")
 	case "checks", "suites", "workflow-runs", "tree", "blob", "compare":
 		return len(rawSegments) > index+1
+	default:
+		return false
+	}
+}
+
+func githubOwnerRepoRouteBoundaryHasSafeTypedPayload(rawSegments []string, index int) bool {
+	if index != 2 || len(rawSegments) <= index {
+		return false
+	}
+	route := strings.ToLower(strings.Trim(rawSegments[index], "-_=+"))
+	switch route {
+	case "commit", "commits":
+		return len(rawSegments) > index+1 && validGitCommitHash(rawSegments[index+1])
+	case "pull", "pulls", "issues":
+		return len(rawSegments) > index+1 && isDecimalString(rawSegments[index+1])
+	case "actions":
+		return len(rawSegments) > index+2 &&
+			strings.EqualFold(strings.Trim(rawSegments[index+1], "-_=+"), "runs") &&
+			isDecimalString(strings.Trim(rawSegments[index+2], "-_=+"))
 	default:
 		return false
 	}

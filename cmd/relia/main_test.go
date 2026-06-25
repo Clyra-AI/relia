@@ -1026,7 +1026,7 @@ func TestIngestPreservesLargeIntegerPRNumbers(t *testing.T) {
 	}
 }
 
-func TestIngestPreservesCleanGitHubCommitProvenanceURL(t *testing.T) {
+func TestIngestPreservesCleanGitHubProvenanceURL(t *testing.T) {
 	for _, tc := range []struct {
 		name string
 		repo string
@@ -1041,6 +1041,16 @@ func TestIngestPreservesCleanGitHubCommitProvenanceURL(t *testing.T) {
 			name: "long owner repo",
 			repo: "organizationname/billing-service",
 			url:  "https://github.com/organizationname/billing-service/commit/de72faeb410006f9780c8cba1725674324d80156",
+		},
+		{
+			name: "long mixed owner repo pull",
+			repo: "Acme2026/SuperBillingServiceXYZ",
+			url:  "https://github.com/Acme2026/SuperBillingServiceXYZ/pull/143",
+		},
+		{
+			name: "long mixed owner repo actions run",
+			repo: "Acme2026/SuperBillingServiceXYZ",
+			url:  "https://github.com/Acme2026/SuperBillingServiceXYZ/actions/runs/143",
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
