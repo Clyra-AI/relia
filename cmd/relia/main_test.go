@@ -477,6 +477,10 @@ func TestIngestFailsClosedForSlashBearingProvenanceURLPathSecret(t *testing.T) {
 			url:  "https://github.com/acme/billing-service/commit/qazwsxedcrfvtgby/K3vY7bL0cD5eF1gH",
 		},
 		{
+			name: "fully chunked short fragments",
+			url:  "https://github.com/acme/billing-service/actions/runs/z6MvN2p9/QxR4sT8a/K3vY7bL0/cD5eF1gH",
+		},
+		{
 			name: "decimal middle fragment",
 			url:  "https://github.com/acme/billing-service/actions/runs/z6MvN2p9QxR4sT8a/143/K3vY7bL0cD5eF1gH",
 		},

@@ -3,7 +3,7 @@
   "schema_version": "1.0",
   "task_id": "T3",
   "status": "pass",
-  "generated_at": "2026-06-25T16:36:23Z",
+  "generated_at": "2026-06-25T16:55:22Z",
   "commands_run": [
     "make lint-fast",
     "make test-fast",
@@ -18,6 +18,8 @@
     "go test ./cmd/relia -run 'TestIngestFailsClosedForSlashBearingProvenanceURLPathSecret|TestIngestPreservesLargeIntegerPRNumbers|TestIngestPersistsCanonicalExperienceWithRedactionAndProvenance' -count=1",
     "go test ./cmd/relia -run 'TestIngestFailsClosedForSlashBearingProvenanceURLPathSecret|TestIngestPreservesCleanGitHubProvenanceURL|TestIngestFailsClosedForUnsafeProvenanceURLQuery|TestIngestPersistsCanonicalExperienceWithRedactionAndProvenance' -count=1",
     "go test ./cmd/relia -run 'TestIngestFailsClosedForSlashBearingProvenanceURLPathSecret|TestIngestPreservesLargeIntegerPRNumbers|TestIngestPreservesCleanGitHubCommitProvenanceURL|TestIngestFailsClosedForUnsafeProvenanceURLQuery|TestIngestPersistsCanonicalExperienceWithRedactionAndProvenance' -count=1",
+    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
+    "go test ./cmd/relia -run 'TestIngestFailsClosedForSlashBearingProvenanceURLPathSecret|TestIngestPreservesCleanGitHubCommitProvenanceURL|TestIngestFailsClosedForUnsafeProvenanceURLPathSegment|TestIngestPreservesLargeIntegerPRNumbers' -count=1",
     "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
     "go test ./cmd/relia -run 'TestIngestFailsClosedForSlashBearingProvenanceURLPathSecret|TestIngestPreservesCleanGitHubCommitProvenanceURL|TestIngestFailsClosedForUnsafeProvenanceURLPathSegment|TestIngestPreservesLargeIntegerPRNumbers' -count=1",
     "make prepush-full"
@@ -58,6 +60,12 @@
       "status": "review_reproduced",
       "exit_code": null,
       "evidence": "Latest-head Codex P2 identified that a weak token fragment split from a strong token fragment by a route word, such as qazwsxedcrfvtgby/commit/K3vY7bL0cD5eF1gH, could be cleared before combined slash-bearing token analysis."
+    },
+    {
+      "command": "Codex review on PR #30 commit 8e2d7a56576d87b714d354ed4eac65da73490d9f",
+      "status": "review_reproduced",
+      "exit_code": null,
+      "evidence": "Latest-head Codex P2 identified that slash-bearing URL path tokens split into all-short chunks, such as z6MvN2p9/QxR4sT8a/K3vY7bL0/cD5eF1gH, could miss the scanner because no individual fragment was considered strong."
     }
   ],
   "green_evidence": [
@@ -65,7 +73,7 @@
       "command": "go test ./cmd/relia -run 'TestIngestFailsClosedForSlashBearingProvenanceURLPathSecret|TestIngestPreservesCleanGitHubCommitProvenanceURL|TestIngestFailsClosedForUnsafeProvenanceURLPathSegment|TestIngestPreservesLargeIntegerPRNumbers' -count=1",
       "status": "pass",
       "exit_code": 0,
-      "evidence": "Focused ingest tests passed for raw, encoded, short-path, short-middle, weak-leading, encoded weak-leading, route-like middle, weak route-split, invalid commit route payload, decimal middle, trailing decimal, and leading decimal slash-bearing GitHub provenance URL path secrets, while preserving large PR-number URLs and clean GitHub commit provenance URLs for short and long owner/repo names."
+      "evidence": "Focused ingest tests passed for raw, encoded, short-path, short-middle, weak-leading, encoded weak-leading, route-like middle, weak route-split, invalid commit route payload, fully chunked short-fragment, decimal middle, trailing decimal, and leading decimal slash-bearing GitHub provenance URL path secrets, while preserving large PR-number URLs and clean GitHub commit provenance URLs for short and long owner/repo names."
     }
   ],
   "final_validation_evidence": [
@@ -101,7 +109,7 @@
         "cmd/relia/main.go",
         "cmd/relia/main_test.go"
       ],
-      "notes": "Ingest now scans GitHub provenance URL paths for high-entropy payloads before permitting the safe URL-shape exemption, including raw, encoded, weak-leading, weak-middle, route-like middle, weak route-split, invalid commit route payload, decimal middle, trailing decimal, and leading decimal slash-bearing token fragments, while preserving clean GitHub commit provenance URLs."
+      "notes": "Ingest now scans GitHub provenance URL paths for high-entropy payloads before permitting the safe URL-shape exemption, including raw, encoded, weak-leading, weak-middle, route-like middle, weak route-split, invalid commit route payload, fully chunked short-fragment, decimal middle, trailing decimal, and leading decimal slash-bearing token fragments, while preserving clean GitHub commit provenance URLs."
     },
     {
       "acceptance_item_id": "MVP-IN-SCOPE-004",
