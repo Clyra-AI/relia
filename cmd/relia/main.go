@@ -1148,11 +1148,34 @@ func isSecretField(key string) bool {
 }
 
 func unsafeEntropyToken(value string, fieldPath []string) string {
+	if isGitHubProvenanceURLField(fieldPath) {
+		if token := unsafeGitHubURLPathEntropyToken(value); token != "" {
+			return token
+		}
+	}
 	if entropySafeFieldValue(fieldPath, value) {
 		return ""
 	}
+	return unsafeEntropyTokenInString(value)
+}
+
+func unsafeEntropyTokenInString(value string) string {
+	return unsafeEntropyTokenInStringWithSlashPolicy(value, true)
+}
+
+func unsafeEntropyTokenInPath(value string) string {
+	return unsafeEntropyTokenInStringWithSlashPolicy(value, false)
+}
+
+func unsafeEntropyTokenInStringWithSlashPolicy(value string, allowSlash bool) string {
 	candidates := strings.FieldsFunc(value, func(r rune) bool {
-		return !((r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') || r == '+' || r == '/' || r == '_' || r == '-' || r == '=')
+		if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') || r == '+' || r == '_' || r == '-' || r == '=' {
+			return false
+		}
+		if allowSlash && r == '/' {
+			return false
+		}
+		return true
 	})
 	for _, candidate := range candidates {
 		candidate = strings.Trim(candidate, "-_=+/")
@@ -1215,7 +1238,26 @@ func validSafeGitHubURL(value string) bool {
 		parsed.User == nil &&
 		parsed.RawQuery == "" &&
 		parsed.Fragment == "" &&
-		strings.Trim(parsed.Path, "/") != ""
+		strings.Trim(parsed.Path, "/") != "" &&
+		unsafeGitHubURLPathEntropyToken(value) == ""
+}
+
+func unsafeGitHubURLPathEntropyToken(value string) string {
+	parsed, err := url.Parse(strings.TrimSpace(value))
+	if err != nil || parsed.Scheme != "https" || !strings.EqualFold(parsed.Host, "github.com") {
+		return ""
+	}
+	for _, path := range []string{parsed.EscapedPath(), parsed.Path} {
+		if token := unsafeEntropyTokenInPath(strings.Trim(path, "/")); token != "" {
+			return token
+		}
+	}
+	if unescaped, err := url.PathUnescape(parsed.EscapedPath()); err == nil {
+		if token := unsafeEntropyTokenInPath(strings.Trim(unescaped, "/")); token != "" {
+			return token
+		}
+	}
+	return ""
 }
 
 func validGitCommitHash(value string) bool {

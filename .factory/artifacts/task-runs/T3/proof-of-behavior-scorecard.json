@@ -3,7 +3,7 @@
   "schema_version": "1.0",
   "task_id": "T3",
   "status": "pass",
-  "generated_at": "2026-06-25T10:49:28Z",
+  "generated_at": "2026-06-25T11:41:30Z",
   "proof_level": "workflow_behavior",
   "behaviors": [
     {
@@ -23,11 +23,12 @@
       ]
     },
     {
-      "behavior": "Unclassified high-entropy values fail closed with exit 6 before any experience shard is written.",
+      "behavior": "Unclassified high-entropy values, including GitHub provenance URL path segments, fail closed with exit 6 before any experience shard is written.",
       "status": "pass",
       "evidence_refs": [
         "cmd/relia/main_test.go:TestIngestFailsClosedBeforePersistenceForUnrecognizedSecret",
-        "cmd/relia/main_test.go:TestIngestFailsClosedForUnsafeProvenanceURLQuery"
+        "cmd/relia/main_test.go:TestIngestFailsClosedForUnsafeProvenanceURLQuery",
+        "cmd/relia/main_test.go:TestIngestFailsClosedForUnsafeProvenanceURLPathSegment"
       ]
     },
     {

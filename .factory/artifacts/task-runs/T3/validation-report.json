@@ -3,14 +3,65 @@
   "schema_version": "1.0",
   "task_id": "T3",
   "status": "pass",
-  "generated_at": "2026-06-25T10:49:28Z",
+  "generated_at": "2026-06-25T11:41:30Z",
   "commands_run": [
+    "make lint-fast",
     "make test-fast",
+    "go test ./cmd/relia -run TestIngestFailsClosedForUnsafeProvenanceURLPathSegment -count=1",
+    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
+    "go test ./cmd/relia -run TestIngestFailsClosedForUnsafeProvenanceURLPathSegment -count=1",
     "make test-fast",
+    "make lint-fast",
+    "go test ./cmd/relia -run 'TestIngestFailsClosedForUnsafeProvenanceURLPathSegment|TestIngestPreservesLargeIntegerPRNumbers' -count=1",
+    "make test-fast",
+    "make lint-fast",
     "make prepush-full",
     "python3 -m json.tool .factory/artifacts/task-runs/T3/work-proof-marker.json",
     "python3 -m json.tool .factory/artifacts/task-runs/T3/validation-report.json",
     "python3 -m json.tool .factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json"
+  ],
+  "baseline_evidence": [
+    {
+      "command": "make lint-fast",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "make test-fast",
+      "status": "pass",
+      "exit_code": 0
+    }
+  ],
+  "red_evidence": [
+    {
+      "command": "go test ./cmd/relia -run TestIngestFailsClosedForUnsafeProvenanceURLPathSegment -count=1",
+      "status": "red_expected",
+      "exit_code": 1,
+      "evidence": "The new regression reproduced the review finding: an unsafe high-entropy GitHub URL path segment was persisted successfully before the repair."
+    }
+  ],
+  "green_evidence": [
+    {
+      "command": "go test ./cmd/relia -run TestIngestFailsClosedForUnsafeProvenanceURLPathSegment -count=1",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestIngestFailsClosedForUnsafeProvenanceURLPathSegment|TestIngestPreservesLargeIntegerPRNumbers' -count=1",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "The path-segment fail-closed regression and the existing large-PR provenance URL regression both passed after splitting GitHub path scanning by path segment."
+    },
+    {
+      "command": "make test-fast",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "make lint-fast",
+      "status": "pass",
+      "exit_code": 0
+    }
   ],
   "final_validation_evidence": [
     {
@@ -20,7 +71,7 @@
       "evidence": [
         "lint-fast passed",
         "test-fast passed",
-        "test-coverage passed at 77.4% against the 75.0% minimum",
+        "test-coverage passed at 77.6% against the 75.0% minimum",
         "test-contracts passed"
       ]
     }
@@ -45,7 +96,7 @@
         "cmd/relia/main.go",
         "cmd/relia/main_test.go"
       ],
-      "notes": "Ingest redacts before persistence, fails closed on unsafe high-entropy values, and now avoids false positives only for clean GitHub provenance URLs."
+      "notes": "Ingest redacts before persistence, fails closed on unsafe high-entropy values in payloads and GitHub provenance URL path segments, and still avoids false positives for clean GitHub provenance URLs."
     },
     {
       "acceptance_item_id": "MVP-IN-SCOPE-004",
@@ -79,5 +130,5 @@
     ],
     "forbidden_changed_paths": []
   },
-  "notes": "An intermediate make test-fast run failed while adding the large-PR regression test because valid long GitHub provenance URLs were entropy-scanned as opaque tokens. The implementation was repaired before final validation; the final make test-fast and make prepush-full runs passed."
+  "notes": "Repair addressed Codex review feedback for high-entropy GitHub URL path segments. Red-first evidence failed before the sanitizer change. An intermediate make test-fast run then exposed a false positive where clean long GitHub provenance paths were scanned as one opaque token; the implementation was tightened to scan GitHub paths by segment while preserving generic slash-aware token scanning. Final make test-fast, make lint-fast, and make prepush-full runs passed."
 }
