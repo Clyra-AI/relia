@@ -469,6 +469,10 @@ func TestIngestFailsClosedForSlashBearingProvenanceURLPathSecret(t *testing.T) {
 			url:  "https://github.com/acme/billing-service/actions/runs/z6MvN2p9QxR4sT8a/pull/K3vY7bL0cD5eF1gH",
 		},
 		{
+			name: "route word threshold fragment",
+			url:  "https://github.com/acme/billing-service/actions/runs/z6MvN2p9QxR4sT/pull/8aK3vY7bL0cD5e",
+		},
+		{
 			name: "weak fragment split by route word",
 			url:  "https://github.com/qazwsxedcrfvtgby/commit/K3vY7bL0cD5eF1gH",
 		},

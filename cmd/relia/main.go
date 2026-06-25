@@ -1346,19 +1346,32 @@ func githubOwnerRepoRouteBoundary(rawSegments []string, index int) bool {
 func unsafeGitHubPathTokenSegments(path string) []string {
 	rawSegments := strings.Split(strings.Trim(path, "/"), "/")
 	segments := make([]string, 0, len(rawSegments))
-	for _, rawSegment := range rawSegments {
+	for index, rawSegment := range rawSegments {
 		segment := strings.Trim(rawSegment, "-_=+")
 		if segment == "" {
 			segments = append(segments, "")
 			continue
 		}
-		if safeGitHubRouteSegment(segment) {
+		if structuralGitHubRouteSegment(rawSegments, index) {
 			segments = append(segments, "")
 			continue
 		}
 		segments = append(segments, segment)
 	}
 	return segments
+}
+
+func structuralGitHubRouteSegment(rawSegments []string, index int) bool {
+	if githubOwnerRepoRouteBoundary(rawSegments, index) {
+		return true
+	}
+	if index == 3 &&
+		len(rawSegments) > 3 &&
+		strings.EqualFold(strings.Trim(rawSegments[2], "-_=+"), "actions") &&
+		strings.EqualFold(strings.Trim(rawSegments[3], "-_=+"), "runs") {
+		return true
+	}
+	return false
 }
 
 func safeGitHubRouteSegment(segment string) bool {
