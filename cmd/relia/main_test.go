@@ -383,10 +383,24 @@ func TestIngestFailsClosedForUnsafeProvenanceURLQuery(t *testing.T) {
 }
 
 func TestIngestFailsClosedForUnsafeProvenanceURLPathSegment(t *testing.T) {
-	tempDir := setupContractRepo(t)
-	t.Chdir(tempDir)
-	inputPath := filepath.Join(tempDir, "fixtures", "outcomes.json")
-	writeFileForTest(t, inputPath, `[
+	for _, tc := range []struct {
+		name string
+		url  string
+	}{
+		{
+			name: "actions run",
+			url:  "https://github.com/acme/billing-service/actions/runs/z6MvN2p9QxR4sT8aK3vY7bL0cD5eF1gH2jP9mQ4rS6tU",
+		},
+		{
+			name: "appended after pr",
+			url:  "https://github.com/acme/billing-service/pull/143/z6MvN2p9QxR4sT8aK3vY7bL0cD5eF1gH2jP9mQ4rS6tU",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			tempDir := setupContractRepo(t)
+			t.Chdir(tempDir)
+			inputPath := filepath.Join(tempDir, "fixtures", "outcomes.json")
+			writeFileForTest(t, inputPath, fmt.Sprintf(`[
   {
     "experience_id": "exp_0143_url_path_secret",
     "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},
@@ -401,21 +415,23 @@ func TestIngestFailsClosedForUnsafeProvenanceURLPathSegment(t *testing.T) {
     "check_name": "pytest-billing",
     "signature_key": "tests/test_invoice.py::test_total",
     "extraction_confidence": "structured",
-    "provenance_urls": ["https://github.com/acme/billing-service/actions/runs/z6MvN2p9QxR4sT8aK3vY7bL0cD5eF1gH2jP9mQ4rS6tU"]
+    "provenance_urls": [%q]
   }
-]`)
+]`, tc.url))
 
-	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+			stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
 
-	if code != ExitRedactionSafety {
-		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
-	}
-	result := decodeResult(t, stdout)
-	if result.Errors[0].Type != "redaction_safety_failed" {
-		t.Fatalf("error type = %q", result.Errors[0].Type)
-	}
-	if _, err := os.Stat(filepath.Join(tempDir, ".relia", "experiences", "2026-04.jsonl")); !errors.Is(err, os.ErrNotExist) {
-		t.Fatalf("experience shard should not be persisted on unsafe provenance URL path: %v", err)
+			if code != ExitRedactionSafety {
+				t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+			}
+			result := decodeResult(t, stdout)
+			if result.Errors[0].Type != "redaction_safety_failed" {
+				t.Fatalf("error type = %q", result.Errors[0].Type)
+			}
+			if _, err := os.Stat(filepath.Join(tempDir, ".relia", "experiences", "2026-04.jsonl")); !errors.Is(err, os.ErrNotExist) {
+				t.Fatalf("experience shard should not be persisted on unsafe provenance URL path: %v", err)
+			}
+		})
 	}
 }
 

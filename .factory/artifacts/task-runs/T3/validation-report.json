@@ -3,11 +3,10 @@
   "schema_version": "1.0",
   "task_id": "T3",
   "status": "pass",
-  "generated_at": "2026-06-25T14:15:48Z",
+  "generated_at": "2026-06-25T14:22:12Z",
   "commands_run": [
     "make lint-fast",
     "make test-fast",
-    "go test ./cmd/relia -run TestIngestFailsClosedForSlashBearingProvenanceURLPathSecret -count=1",
     "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
     "go test ./cmd/relia -run 'TestIngest(FailsClosedForUnsafeProvenanceURLPathSegment|FailsClosedForSlashBearingProvenanceURLPathSecret|PreservesLargeIntegerPRNumbers|PersistsCanonicalExperienceWithRedactionAndProvenance)' -count=1",
     "make prepush-full",
@@ -27,20 +26,16 @@
       "exit_code": 0
     }
   ],
-  "red_evidence": [
-    {
-      "command": "go test ./cmd/relia -run TestIngestFailsClosedForSlashBearingProvenanceURLPathSecret -count=1",
-      "status": "red_expected",
-      "exit_code": 1,
-      "evidence": "The new regression reproduced the review finding: raw slash-bearing, short-path slash-bearing, and percent-encoded slash-bearing high-entropy GitHub URL path tokens were accepted and persisted before the repair."
-    }
-  ],
+  "test_first_skipped_reason": {
+    "status": "skipped_with_reason",
+    "reason": "The repair branch already contained the previous red-first URL path scanner regression and fix in current HEAD. This run addressed the remaining Codex review feedback by tightening scanner ordering and adding the exact appended-path-token regression without reverting existing protection."
+  },
   "green_evidence": [
     {
       "command": "go test ./cmd/relia -run 'TestIngest(FailsClosedForUnsafeProvenanceURLPathSegment|FailsClosedForSlashBearingProvenanceURLPathSecret|PreservesLargeIntegerPRNumbers|PersistsCanonicalExperienceWithRedactionAndProvenance)' -count=1",
       "status": "pass",
       "exit_code": 0,
-      "evidence": "The slash-bearing URL token regression, including the short-path variant, existing single path-segment token regression, clean canonical persistence case, and large PR-number provenance URL case all passed after the scanner repair."
+      "evidence": "Focused ingest tests passed for high-entropy GitHub provenance URL path segments, raw and percent-encoded slash-bearing URL path tokens, clean canonical persistence, and large PR-number paths."
     }
   ],
   "final_validation_evidence": [
@@ -76,7 +71,7 @@
         "cmd/relia/main.go",
         "cmd/relia/main_test.go"
       ],
-      "notes": "Ingest now fails closed with exit 6 before persistence when GitHub provenance URL paths contain raw slash-bearing or percent-encoded slash-bearing high-entropy token fragments in any path position."
+      "notes": "Ingest now scans GitHub provenance URL paths for high-entropy payloads before permitting the safe URL-shape exemption, including tokens appended after normal PR paths."
     },
     {
       "acceptance_item_id": "MVP-IN-SCOPE-004",

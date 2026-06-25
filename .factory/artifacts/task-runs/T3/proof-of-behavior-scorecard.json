@@ -3,7 +3,7 @@
   "schema_version": "1.0",
   "task_id": "T3",
   "status": "pass",
-  "generated_at": "2026-06-25T14:15:48Z",
+  "generated_at": "2026-06-25T14:22:12Z",
   "proof_level": "workflow_behavior",
   "behaviors": [
     {
@@ -28,6 +28,15 @@
       "evidence_refs": [
         "cmd/relia/main_test.go:TestIngestFailsClosedBeforePersistenceForUnrecognizedSecret",
         "cmd/relia/main_test.go:TestIngestFailsClosedForUnsafeProvenanceURLQuery",
+        "cmd/relia/main_test.go:TestIngestFailsClosedForUnsafeProvenanceURLPathSegment"
+      ]
+    },
+    {
+      "behavior": "GitHub provenance URL path entropy scanning runs before the URL-shape exemption, including tokens appended after normal PR paths.",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/main.go:unsafeEntropyToken",
+        "cmd/relia/main.go:validGitHubProvenanceURLShape",
         "cmd/relia/main_test.go:TestIngestFailsClosedForUnsafeProvenanceURLPathSegment"
       ]
     },

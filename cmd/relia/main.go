@@ -1152,6 +1152,9 @@ func unsafeEntropyToken(value string, fieldPath []string) string {
 		if token := unsafeGitHubURLPathEntropyToken(value); token != "" {
 			return token
 		}
+		if validGitHubProvenanceURLShape(value) {
+			return ""
+		}
 	}
 	if entropySafeFieldValue(fieldPath, value) {
 		return ""
@@ -1193,9 +1196,6 @@ func unsafeEntropyTokenInStringWithSlashPolicy(value string, allowSlash bool) st
 }
 
 func entropySafeFieldValue(fieldPath []string, value string) bool {
-	if isGitHubProvenanceURLField(fieldPath) {
-		return validSafeGitHubURL(value)
-	}
 	for _, part := range fieldPath {
 		normalized := strings.ToLower(part)
 		switch normalized {
@@ -1228,7 +1228,7 @@ func isGitHubProvenanceURLField(fieldPath []string) bool {
 	return false
 }
 
-func validSafeGitHubURL(value string) bool {
+func validGitHubProvenanceURLShape(value string) bool {
 	parsed, err := url.Parse(strings.TrimSpace(value))
 	if err != nil {
 		return false
@@ -1238,8 +1238,7 @@ func validSafeGitHubURL(value string) bool {
 		parsed.User == nil &&
 		parsed.RawQuery == "" &&
 		parsed.Fragment == "" &&
-		strings.Trim(parsed.Path, "/") != "" &&
-		unsafeGitHubURLPathEntropyToken(value) == ""
+		strings.Trim(parsed.Path, "/") != ""
 }
 
 func unsafeGitHubURLPathEntropyToken(value string) string {
