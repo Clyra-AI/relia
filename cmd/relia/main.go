@@ -1248,16 +1248,73 @@ func unsafeGitHubURLPathEntropyToken(value string) string {
 		return ""
 	}
 	for _, path := range []string{parsed.EscapedPath(), parsed.Path} {
-		if token := unsafeEntropyTokenInPath(strings.Trim(path, "/")); token != "" {
+		trimmed := strings.Trim(path, "/")
+		if token := unsafeEntropyTokenInPath(trimmed); token != "" {
+			return token
+		}
+		if token := unsafeSlashBearingEntropyTokenInPath(trimmed); token != "" {
 			return token
 		}
 	}
 	if unescaped, err := url.PathUnescape(parsed.EscapedPath()); err == nil {
-		if token := unsafeEntropyTokenInPath(strings.Trim(unescaped, "/")); token != "" {
+		trimmed := strings.Trim(unescaped, "/")
+		if token := unsafeEntropyTokenInPath(trimmed); token != "" {
+			return token
+		}
+		if token := unsafeSlashBearingEntropyTokenInPath(trimmed); token != "" {
 			return token
 		}
 	}
 	return ""
+}
+
+func unsafeSlashBearingEntropyTokenInPath(path string) string {
+	segments := strings.Split(strings.Trim(path, "/"), "/")
+	if len(segments) < 2 {
+		return ""
+	}
+	for start := 0; start < len(segments); start++ {
+		candidateSegments := make([]string, 0, len(segments)-start)
+		for end := start; end < len(segments); end++ {
+			segment := strings.Trim(segments[end], "-_=+")
+			if !entropyPathTokenFragment(segment) {
+				break
+			}
+			candidateSegments = append(candidateSegments, segment)
+			candidate := strings.Join(candidateSegments, "/")
+			candidateWithoutSlash := strings.ReplaceAll(candidate, "/", "")
+			if len(candidateWithoutSlash) < 32 {
+				continue
+			}
+			if !hasMixedSecretAlphabet(candidateWithoutSlash) {
+				continue
+			}
+			if shannonEntropy(candidate) > 4.2 {
+				return candidate
+			}
+		}
+	}
+	return ""
+}
+
+func entropyPathTokenFragment(segment string) bool {
+	if len(segment) < 4 {
+		return false
+	}
+	if !hasMixedSecretAlphabet(segment) {
+		return false
+	}
+	for _, r := range segment {
+		switch {
+		case r >= 'a' && r <= 'z':
+		case r >= 'A' && r <= 'Z':
+		case r >= '0' && r <= '9':
+		case r == '+', r == '_', r == '-', r == '=':
+		default:
+			return false
+		}
+	}
+	return true
 }
 
 func validGitCommitHash(value string) bool {

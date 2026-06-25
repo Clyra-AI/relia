@@ -3,18 +3,13 @@
   "schema_version": "1.0",
   "task_id": "T3",
   "status": "pass",
-  "generated_at": "2026-06-25T11:41:30Z",
+  "generated_at": "2026-06-25T14:15:48Z",
   "commands_run": [
     "make lint-fast",
     "make test-fast",
-    "go test ./cmd/relia -run TestIngestFailsClosedForUnsafeProvenanceURLPathSegment -count=1",
+    "go test ./cmd/relia -run TestIngestFailsClosedForSlashBearingProvenanceURLPathSecret -count=1",
     "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
-    "go test ./cmd/relia -run TestIngestFailsClosedForUnsafeProvenanceURLPathSegment -count=1",
-    "make test-fast",
-    "make lint-fast",
-    "go test ./cmd/relia -run 'TestIngestFailsClosedForUnsafeProvenanceURLPathSegment|TestIngestPreservesLargeIntegerPRNumbers' -count=1",
-    "make test-fast",
-    "make lint-fast",
+    "go test ./cmd/relia -run 'TestIngest(FailsClosedForUnsafeProvenanceURLPathSegment|FailsClosedForSlashBearingProvenanceURLPathSecret|PreservesLargeIntegerPRNumbers|PersistsCanonicalExperienceWithRedactionAndProvenance)' -count=1",
     "make prepush-full",
     "python3 -m json.tool .factory/artifacts/task-runs/T3/work-proof-marker.json",
     "python3 -m json.tool .factory/artifacts/task-runs/T3/validation-report.json",
@@ -34,33 +29,18 @@
   ],
   "red_evidence": [
     {
-      "command": "go test ./cmd/relia -run TestIngestFailsClosedForUnsafeProvenanceURLPathSegment -count=1",
+      "command": "go test ./cmd/relia -run TestIngestFailsClosedForSlashBearingProvenanceURLPathSecret -count=1",
       "status": "red_expected",
       "exit_code": 1,
-      "evidence": "The new regression reproduced the review finding: an unsafe high-entropy GitHub URL path segment was persisted successfully before the repair."
+      "evidence": "The new regression reproduced the review finding: raw slash-bearing, short-path slash-bearing, and percent-encoded slash-bearing high-entropy GitHub URL path tokens were accepted and persisted before the repair."
     }
   ],
   "green_evidence": [
     {
-      "command": "go test ./cmd/relia -run TestIngestFailsClosedForUnsafeProvenanceURLPathSegment -count=1",
-      "status": "pass",
-      "exit_code": 0
-    },
-    {
-      "command": "go test ./cmd/relia -run 'TestIngestFailsClosedForUnsafeProvenanceURLPathSegment|TestIngestPreservesLargeIntegerPRNumbers' -count=1",
+      "command": "go test ./cmd/relia -run 'TestIngest(FailsClosedForUnsafeProvenanceURLPathSegment|FailsClosedForSlashBearingProvenanceURLPathSecret|PreservesLargeIntegerPRNumbers|PersistsCanonicalExperienceWithRedactionAndProvenance)' -count=1",
       "status": "pass",
       "exit_code": 0,
-      "evidence": "The path-segment fail-closed regression and the existing large-PR provenance URL regression both passed after splitting GitHub path scanning by path segment."
-    },
-    {
-      "command": "make test-fast",
-      "status": "pass",
-      "exit_code": 0
-    },
-    {
-      "command": "make lint-fast",
-      "status": "pass",
-      "exit_code": 0
+      "evidence": "The slash-bearing URL token regression, including the short-path variant, existing single path-segment token regression, clean canonical persistence case, and large PR-number provenance URL case all passed after the scanner repair."
     }
   ],
   "final_validation_evidence": [
@@ -71,7 +51,7 @@
       "evidence": [
         "lint-fast passed",
         "test-fast passed",
-        "test-coverage passed at 77.6% against the 75.0% minimum",
+        "test-coverage passed at 78.0% against the 75.0% minimum",
         "test-contracts passed"
       ]
     }
@@ -85,7 +65,7 @@
         ".factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json",
         "cmd/relia/main_test.go"
       ],
-      "notes": "Rule validation continues to require experience citations and PR provenance before active rules can pass check."
+      "notes": "Rule validation remains tied to experience citations and PR provenance; this repair preserves provenance safety before records can become rule evidence."
     },
     {
       "acceptance_item_id": "NFR5-SECURITY-001",
@@ -96,7 +76,7 @@
         "cmd/relia/main.go",
         "cmd/relia/main_test.go"
       ],
-      "notes": "Ingest redacts before persistence, fails closed on unsafe high-entropy values in payloads and GitHub provenance URL path segments, and still avoids false positives for clean GitHub provenance URLs."
+      "notes": "Ingest now fails closed with exit 6 before persistence when GitHub provenance URL paths contain raw slash-bearing or percent-encoded slash-bearing high-entropy token fragments in any path position."
     },
     {
       "acceptance_item_id": "MVP-IN-SCOPE-004",
@@ -104,9 +84,10 @@
       "evidence_refs": [
         ".factory/artifacts/task-runs/T3/work-proof-marker.json",
         ".factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json",
-        "cmd/relia/main.go"
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go"
       ],
-      "notes": "Offline ingest accepts local JSON, JSON arrays, events objects, and JSONL streams and normalizes events into canonical experience records."
+      "notes": "Offline ingest continues to accept local JSON, JSON arrays, events objects, and JSONL streams and normalize events into canonical experience records after redaction."
     },
     {
       "acceptance_item_id": "MVP-IN-SCOPE-005",
@@ -114,9 +95,10 @@
       "evidence_refs": [
         ".factory/artifacts/task-runs/T3/work-proof-marker.json",
         ".factory/artifacts/task-runs/T3/proof-of-behavior-scorecard.json",
-        "cmd/relia/main.go"
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go"
       ],
-      "notes": "Canonical experience records are idempotently upserted into monthly local-only .relia/experiences shards with private share scope and org_eligible false."
+      "notes": "Canonical experience records remain idempotently upserted into monthly local-only .relia/experiences shards with private share scope and org_eligible false."
     }
   ],
   "path_policy_result": {
@@ -130,5 +112,22 @@
     ],
     "forbidden_changed_paths": []
   },
-  "notes": "Repair addressed Codex review feedback for high-entropy GitHub URL path segments. Red-first evidence failed before the sanitizer change. An intermediate make test-fast run then exposed a false positive where clean long GitHub provenance paths were scanned as one opaque token; the implementation was tightened to scan GitHub paths by segment while preserving generic slash-aware token scanning. Final make test-fast, make lint-fast, and make prepush-full runs passed."
+  "plan_drift_result": {
+    "status": "pass",
+    "notes": "Repair stayed inside the Codex review feedback for T3 ingest redaction and did not widen task scope."
+  },
+  "changelog_result": {
+    "status": "not_applicable",
+    "notes": "Repair did not add a new public feature beyond the existing T3 ingest behavior already documented."
+  },
+  "versioning_result": {
+    "status": "not_applicable",
+    "notes": "Pre-1.0 repair preserves the existing command and schema contracts."
+  },
+  "docs_sync_result": {
+    "status": "not_applicable",
+    "notes": "README and dev/architecture guides already describe fail-closed capture-time redaction with entropy scanning; no doc contract changed."
+  },
+  "blockers": [],
+  "residual_risks": []
 }

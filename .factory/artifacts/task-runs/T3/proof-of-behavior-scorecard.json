@@ -3,7 +3,7 @@
   "schema_version": "1.0",
   "task_id": "T3",
   "status": "pass",
-  "generated_at": "2026-06-25T11:41:30Z",
+  "generated_at": "2026-06-25T14:15:48Z",
   "proof_level": "workflow_behavior",
   "behaviors": [
     {
@@ -23,12 +23,28 @@
       ]
     },
     {
-      "behavior": "Unclassified high-entropy values, including GitHub provenance URL path segments, fail closed with exit 6 before any experience shard is written.",
+      "behavior": "Unclassified high-entropy values, including GitHub provenance URL query values and path payloads, fail closed with exit 6 before any experience shard is written.",
       "status": "pass",
       "evidence_refs": [
         "cmd/relia/main_test.go:TestIngestFailsClosedBeforePersistenceForUnrecognizedSecret",
         "cmd/relia/main_test.go:TestIngestFailsClosedForUnsafeProvenanceURLQuery",
         "cmd/relia/main_test.go:TestIngestFailsClosedForUnsafeProvenanceURLPathSegment"
+      ]
+    },
+    {
+      "behavior": "GitHub provenance URL paths containing raw slash-bearing or percent-encoded slash-bearing high-entropy token fragments in any path position fail closed before persistence.",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/main.go:unsafeGitHubURLPathEntropyToken",
+        "cmd/relia/main_test.go:TestIngestFailsClosedForSlashBearingProvenanceURLPathSecret"
+      ]
+    },
+    {
+      "behavior": "Clean GitHub provenance URLs, including large PR-number paths, continue to ingest without false-positive redaction failure.",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/main_test.go:TestIngestPersistsCanonicalExperienceWithRedactionAndProvenance",
+        "cmd/relia/main_test.go:TestIngestPreservesLargeIntegerPRNumbers"
       ]
     },
     {
@@ -46,14 +62,6 @@
       "evidence_refs": [
         "cmd/relia/main_test.go:TestIngestInfersAttributionAndUpsertsIdempotently",
         "cmd/relia/main_test.go:TestIngestDoesNotPartiallyWriteShardsWhenLaterShardIsCorrupt"
-      ]
-    },
-    {
-      "behavior": "Provenance-bearing PR numbers are parsed as exact JSON numbers, while fractional PR numbers still fail before persistence.",
-      "status": "pass",
-      "evidence_refs": [
-        "cmd/relia/main_test.go:TestIngestPreservesLargeIntegerPRNumbers",
-        "cmd/relia/main_test.go:TestIngestRejectsFractionalPRNumbers"
       ]
     }
   ],

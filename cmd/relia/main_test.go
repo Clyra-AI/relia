@@ -419,6 +419,63 @@ func TestIngestFailsClosedForUnsafeProvenanceURLPathSegment(t *testing.T) {
 	}
 }
 
+func TestIngestFailsClosedForSlashBearingProvenanceURLPathSecret(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		url  string
+	}{
+		{
+			name: "raw slash",
+			url:  "https://github.com/acme/billing-service/actions/runs/z6MvN2p9QxR4sT8a/K3vY7bL0cD5eF1gH2jP9mQ4rS6tU",
+		},
+		{
+			name: "encoded slash",
+			url:  "https://github.com/acme/billing-service/actions/runs/z6MvN2p9QxR4sT8a%2FK3vY7bL0cD5eF1gH2jP9mQ4rS6tU",
+		},
+		{
+			name: "short path",
+			url:  "https://github.com/z6MvN2p9QxR4sT8a/K3vY7bL0cD5eF1gH2jP9mQ4rS6tU",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			tempDir := setupContractRepo(t)
+			t.Chdir(tempDir)
+			inputPath := filepath.Join(tempDir, "fixtures", "outcomes.json")
+			writeFileForTest(t, inputPath, fmt.Sprintf(`[
+  {
+    "experience_id": "exp_0143_url_path_slash_secret",
+    "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},
+    "recorded_at": "2026-04-03T18:21:00Z",
+    "pr": 143,
+    "commit": "def5678",
+    "paths": ["packages/billing/invoice.py"],
+    "actor_kind": "agent",
+    "attribution_method": "manual",
+    "outcome_kind": "ci_failure",
+    "signature_class": "test_failure",
+    "check_name": "pytest-billing",
+    "signature_key": "tests/test_invoice.py::test_total",
+    "extraction_confidence": "structured",
+    "provenance_urls": [%q]
+  }
+]`, tc.url))
+
+			stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+
+			if code != ExitRedactionSafety {
+				t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+			}
+			result := decodeResult(t, stdout)
+			if result.Errors[0].Type != "redaction_safety_failed" {
+				t.Fatalf("error type = %q", result.Errors[0].Type)
+			}
+			if _, err := os.Stat(filepath.Join(tempDir, ".relia", "experiences", "2026-04.jsonl")); !errors.Is(err, os.ErrNotExist) {
+				t.Fatalf("experience shard should not be persisted on slash-bearing provenance URL path secret: %v", err)
+			}
+		})
+	}
+}
+
 func TestIngestScansMalformedCommitBeforePersistence(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
