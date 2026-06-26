@@ -208,7 +208,8 @@
         "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-011",
         "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-012",
         "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-013",
-        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-014"
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-014",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-001"
       ],
       "name": "Distillation, Calibration, And Confidence Part 2",
       "public_release_boundary": false,
@@ -216,7 +217,8 @@
       "slice_id": "distillation-calibration-and-confidence-part-2",
       "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T7",
       "task_refs": [
-        "T7"
+        "T7",
+        "T7.1"
       ]
     },
     {
@@ -3378,17 +3380,19 @@
         }
       ],
       "delivery_slice_refs": [
-        "outcome-fixture-corpus"
+        "outcome-fixture-corpus",
+        "distillation-calibration-and-confidence-part-2"
       ],
       "evidence_refs": [],
       "group_id": "distill-review-memory-page-acceptance-tests",
       "implemented_task_refs": [],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence.",
-        "Sprint 4 remapped this item to smaller task slices or bounded learning-loop follow-up evidence."
+        "Sprint 4 remapped this item to smaller task slices or bounded learning-loop follow-up evidence.",
+        "T4.2 provides static fixture evidence only; command-level `relia distill` closure remains with T7.1."
       ],
       "remaining_task_refs": [
-        "T4.2"
+        "T7.1"
       ],
       "requires_human_approval": false,
       "scope_item": "relia distill` drafts an `avoid` rule from the planted recurrence cluster with correct citations.",
@@ -3396,7 +3400,8 @@
       "source_ref": "docs/product/prd.md#distill-review-memory-page-acceptance-tests",
       "status": "partial",
       "task_refs": [
-        "T4.2"
+        "T4.2",
+        "T7.1"
       ]
     },
     {
@@ -3553,29 +3558,43 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-006",
-          "evidence_refs": [],
+          "evidence_refs": [
+            "factoryd://runs/20260626T140907.224593000Z-relia-T4.2/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260626T140907.224593000Z-relia-T4.2/lifecycle/validation-report.json",
+            "factoryd://runs/20260626T140907.224593000Z-relia-T4.2/lifecycle/ship-packet.json",
+            "factoryd://runs/20260626T140907.224593000Z-relia-T4.2/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260626T140907.224593000Z-relia-T4.2/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260626T140907.224593000Z-relia-T4.2/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "outcome-fixture-corpus"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260626T140907.224593000Z-relia-T4.2/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260626T140907.224593000Z-relia-T4.2/lifecycle/validation-report.json",
+        "factoryd://runs/20260626T140907.224593000Z-relia-T4.2/lifecycle/ship-packet.json",
+        "factoryd://runs/20260626T140907.224593000Z-relia-T4.2/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260626T140907.224593000Z-relia-T4.2/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260626T140907.224593000Z-relia-T4.2/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "distill-review-memory-page-acceptance-tests",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T4.2"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence.",
         "Sprint 4 remapped this item to smaller task slices or bounded learning-loop follow-up evidence."
       ],
-      "remaining_task_refs": [
-        "T4.2"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "The planted contradiction moves its rule to `contradicted` and out of serving.",
       "scope_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-006",
       "source_ref": "docs/product/prd.md#distill-review-memory-page-acceptance-tests",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T4.2"
       ]
@@ -3590,29 +3609,43 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-007",
-          "evidence_refs": [],
+          "evidence_refs": [
+            "factoryd://runs/20260626T140907.224593000Z-relia-T4.2/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260626T140907.224593000Z-relia-T4.2/lifecycle/validation-report.json",
+            "factoryd://runs/20260626T140907.224593000Z-relia-T4.2/lifecycle/ship-packet.json",
+            "factoryd://runs/20260626T140907.224593000Z-relia-T4.2/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260626T140907.224593000Z-relia-T4.2/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260626T140907.224593000Z-relia-T4.2/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "outcome-fixture-corpus"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260626T140907.224593000Z-relia-T4.2/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260626T140907.224593000Z-relia-T4.2/lifecycle/validation-report.json",
+        "factoryd://runs/20260626T140907.224593000Z-relia-T4.2/lifecycle/ship-packet.json",
+        "factoryd://runs/20260626T140907.224593000Z-relia-T4.2/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260626T140907.224593000Z-relia-T4.2/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260626T140907.224593000Z-relia-T4.2/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "distill-review-memory-page-acceptance-tests",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T4.2"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence.",
         "Sprint 4 remapped this item to smaller task slices or bounded learning-loop follow-up evidence."
       ],
-      "remaining_task_refs": [
-        "T4.2"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "The planted path deletion moves its rule to `stale` and out of serving.",
       "scope_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-007",
       "source_ref": "docs/product/prd.md#distill-review-memory-page-acceptance-tests",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T4.2"
       ]
@@ -5125,7 +5158,7 @@
       ]
     }
   ],
-  "last_updated_at": "2026-06-26T13:51:12Z",
+  "last_updated_at": "2026-06-26T15:24:53Z",
   "schema_version": "0.1",
   "source_prd_ref": "docs/product/prd.md"
 }

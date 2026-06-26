@@ -197,6 +197,7 @@
         "MVP-IN-SCOPE-012",
         "MVP-IN-SCOPE-013",
         "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-004",
+        "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-001",
         "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-002",
         "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-003",
         "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-004",
@@ -214,7 +215,8 @@
       "slice_id": "distillation-calibration-and-confidence-part-2",
       "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T7",
       "task_refs": [
-        "T7"
+        "T7",
+        "T7.1"
       ]
     },
     {
@@ -823,7 +825,7 @@
       ],
       "closure_status": "partial",
       "criteria": [
-        "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence \u2014 never from the drafting model."
+        "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence — never from the drafting model."
       ],
       "group_id": "fr11-calibrated-confidence",
       "item_mappings": [
@@ -2115,16 +2117,16 @@
       ],
       "task_refs": [
         "T2",
-        "T10",
-        "T6",
         "T3",
-        "T5",
-        "T7",
-        "T11",
-        "T14",
-        "T13",
-        "T9",
         "T4.1",
+        "T5",
+        "T6",
+        "T7",
+        "T9",
+        "T10",
+        "T11",
+        "T13",
+        "T14",
         "T15"
       ],
       "title": "MVP In Scope"
@@ -2311,10 +2313,10 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T13",
+        "T4.1",
         "T5",
         "T7",
-        "T4.1",
+        "T13",
         "T15"
       ],
       "title": "Ingest, Attribute, Backtest Acceptance Tests"
@@ -2358,11 +2360,13 @@
         {
           "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-001",
           "delivery_slice_refs": [
-            "outcome-fixture-corpus"
+            "outcome-fixture-corpus",
+            "distillation-calibration-and-confidence-part-2"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T4.2"
+            "T4.2",
+            "T7.1"
           ]
         },
         {
@@ -2508,6 +2512,7 @@
       "task_refs": [
         "T4.2",
         "T7",
+        "T7.1",
         "T9",
         "T16"
       ],
@@ -2650,11 +2655,11 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T14",
-        "T12",
-        "T13",
         "T4.3",
         "T9",
+        "T12",
+        "T13",
+        "T14",
         "T15"
       ],
       "title": "Serve And Advise Acceptance Tests"
@@ -2950,8 +2955,8 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T16",
-        "T4.1"
+        "T4.1",
+        "T16"
       ],
       "title": "Demo Acceptance"
     },
