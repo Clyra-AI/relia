@@ -858,6 +858,9 @@ func buildRiskAssessment(root string, inputRef string, content []byte, touchedPa
 		if !assessmentRuleMatchesTouchedPath(root, rule, touchedPaths) {
 			continue
 		}
+		if strings.TrimSpace(rule.ID) == "" {
+			return riskAssessment{}, provenanceIntegrityError("matched active memory rule id must be non-empty for assessment", rule.Path)
+		}
 		if len(rule.Citations) == 0 {
 			return riskAssessment{}, provenanceIntegrityError("matched active memory rule must include citation URLs for assessment", rule.Path)
 		}
