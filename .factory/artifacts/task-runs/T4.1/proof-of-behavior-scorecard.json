@@ -1,0 +1,86 @@
+{
+  "artifact_type": "proof-of-behavior-scorecard",
+  "schema_version": "1.0",
+  "task_id": "T4.1",
+  "status": "pass",
+  "generated_at": "2026-06-26T12:30:58Z",
+  "proof_level": "workflow_behavior",
+  "behaviors": [
+    {
+      "behavior": "Seeded demo repo and bundled static reports exist without real customer data.",
+      "status": "pass",
+      "evidence_refs": [
+        "examples/demo/seeded-repo/prs.json",
+        "examples/demo/seeded-repo/outcomes.jsonl",
+        "examples/reports/backtest-demo.json",
+        "examples/reports/backtest-demo.html",
+        "examples/reports/memory-page-demo.md",
+        "cmd/relia/demo_fixtures_test.go:TestDemoArtifactsAreCustomerSafeAndDoNotContainSeededSecrets"
+      ]
+    },
+    {
+      "behavior": "The planted flaky test is discounted and drafts no rule.",
+      "status": "pass",
+      "evidence_refs": [
+        "examples/demo/flake-discount-fixtures.json",
+        "examples/reports/backtest-demo.json",
+        "cmd/relia/demo_fixtures_test.go:TestDemoFixtureCorpusReproducesBacktestReport"
+      ]
+    },
+    {
+      "behavior": "Seeded secrets never appear in demo artifacts.",
+      "status": "pass",
+      "evidence_refs": [
+        "examples/demo/redaction-fixtures/expected-redacted-artifacts.json",
+        "cmd/relia/demo_fixtures_test.go:TestDemoArtifactsAreCustomerSafeAndDoNotContainSeededSecrets"
+      ]
+    },
+    {
+      "behavior": "Attribution precision is at least 95% on a labeled sample, with uncertain cases excluded rather than guessed.",
+      "status": "pass",
+      "evidence_refs": [
+        "examples/demo/attribution-precision-sample.json",
+        "cmd/relia/demo_fixtures_test.go:TestDemoAttributionPrecisionSampleExcludesUncertain"
+      ],
+      "metrics": {
+        "precision": 1.0,
+        "precision_threshold": 0.95,
+        "evaluated_cases": 14,
+        "excluded_uncertain": 3
+      }
+    },
+    {
+      "behavior": "Every demo number and citation in the fixture reports is reproducible from the seeded repo.",
+      "status": "pass",
+      "evidence_refs": [
+        "examples/demo/seeded-repo/prs.json",
+        "examples/demo/seeded-repo/outcomes.jsonl",
+        "examples/reports/backtest-demo.json",
+        "examples/reports/backtest-demo.html",
+        "examples/reports/memory-page-demo.md",
+        "cmd/relia/demo_fixtures_test.go:TestDemoFixtureCorpusReproducesBacktestReport"
+      ],
+      "metrics": {
+        "headline_err_percent": "27.3%",
+        "confirmed_recurrences": 3,
+        "agent_failure_denominator": 11,
+        "flake_discounted_count": 1,
+        "attribution_uncertain_count": 3
+      }
+    },
+    {
+      "behavior": "Required local validation passes after fixture implementation.",
+      "status": "pass",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T4.1/validation-report.json"
+      ],
+      "metrics": {
+        "coverage_percent": 78.6,
+        "coverage_minimum": 75.0
+      }
+    }
+  ],
+  "validation_refs": [
+    ".factory/artifacts/task-runs/T4.1/validation-report.json"
+  ]
+}

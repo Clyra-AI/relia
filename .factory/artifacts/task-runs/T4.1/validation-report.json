@@ -1,0 +1,239 @@
+{
+  "artifact_type": "validation_report",
+  "schema_version": "1.0",
+  "task_id": "T4.1",
+  "status": "pass",
+  "generated_at": "2026-06-26T12:30:58Z",
+  "commands_run": [
+    "make lint-fast",
+    "make test-fast",
+    "make test-contracts",
+    "gofmt -w cmd/relia/demo_fixtures_test.go",
+    "python3 -m json.tool examples/demo/seeded-repo/prs.json",
+    "python3 -m json.tool examples/demo/attribution-precision-sample.json",
+    "python3 -m json.tool examples/demo/flake-discount-fixtures.json",
+    "python3 -m json.tool examples/demo/redaction-fixtures/expected-redacted-artifacts.json",
+    "python3 -m json.tool examples/reports/backtest-demo.json",
+    "make test-coverage",
+    "make prepush-full",
+    "git status --short",
+    "git diff --name-only",
+    "git ls-files --others --exclude-standard",
+    "python3 -m json.tool .factory/artifacts/task-runs/T4.1/work-proof-marker.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T4.1/validation-report.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T4.1/proof-of-behavior-scorecard.json"
+  ],
+  "baseline_evidence": [
+    {
+      "command": "make lint-fast",
+      "status": "pass",
+      "exit_code": 0,
+      "phase": "pre_edit"
+    },
+    {
+      "command": "make test-fast",
+      "status": "pass",
+      "exit_code": 0,
+      "phase": "pre_edit"
+    }
+  ],
+  "red_evidence": [
+    {
+      "command": "make test-contracts",
+      "status": "pass",
+      "exit_code": 0,
+      "phase": "pre_edit_red_first_command",
+      "notes": "The original contract lane passed before the T4.1 fixture contracts were added."
+    },
+    {
+      "command": "make test-contracts",
+      "status": "fail_expected",
+      "exit_code": 2,
+      "phase": "after_fixture_contracts_before_fixture_implementation",
+      "notes": "The new TestDemo* contract tests failed because the seeded PR index, outcome corpus, attribution sample, and redaction fixture files were not present yet."
+    }
+  ],
+  "green_evidence": [
+    {
+      "command": "make test-contracts",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "Repo-pack validation passed and TestDemo* recomputed fixture report numbers, resolved citations, verified flake discount behavior, checked attribution precision, and scanned demo artifacts for seeded secret leakage."
+    },
+    {
+      "command": "make test-fast",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "make lint-fast",
+      "status": "pass",
+      "exit_code": 0
+    }
+  ],
+  "final_validation_evidence": [
+    {
+      "command": "make test-coverage",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": [
+        "go test ./cmd/... passed",
+        "coverage: 78.6% of statements",
+        "coverage minimum: 75.0%"
+      ]
+    },
+    {
+      "command": "make prepush-full",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": [
+        "lint-fast passed",
+        "test-fast passed",
+        "test-coverage passed at 78.6% against the 75.0% minimum",
+        "test-contracts passed, including TestDemo* fixture contracts"
+      ]
+    },
+    {
+      "command": "python3 -m json.tool .factory/artifacts/task-runs/T4.1/work-proof-marker.json",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "python3 -m json.tool .factory/artifacts/task-runs/T4.1/validation-report.json",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "python3 -m json.tool .factory/artifacts/task-runs/T4.1/proof-of-behavior-scorecard.json",
+      "status": "pass",
+      "exit_code": 0
+    }
+  ],
+  "acceptance_results": [
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-022",
+      "status": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T4.1/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T4.1/proof-of-behavior-scorecard.json",
+        "examples/demo/seeded-repo/prs.json",
+        "examples/demo/seeded-repo/outcomes.jsonl",
+        "examples/reports/backtest-demo.json"
+      ],
+      "notes": "The seeded demo PR index, outcome corpus, and bundled static reports are present and customer-safe."
+    },
+    {
+      "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-008",
+      "status": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T4.1/proof-of-behavior-scorecard.json",
+        "examples/demo/redaction-fixtures/expected-redacted-artifacts.json",
+        "cmd/relia/demo_fixtures_test.go:TestDemoArtifactsAreCustomerSafeAndDoNotContainSeededSecrets"
+      ],
+      "notes": "Demo artifacts store redacted expectations only and the TestDemo secret scan checks the demo corpus and reports for standard token shapes and machine-local paths."
+    },
+    {
+      "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-009",
+      "status": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T4.1/proof-of-behavior-scorecard.json",
+        "examples/demo/attribution-precision-sample.json",
+        "cmd/relia/demo_fixtures_test.go:TestDemoAttributionPrecisionSampleExcludesUncertain"
+      ],
+      "notes": "The labeled attribution sample records 14 evaluated correct predictions, 3 excluded uncertain cases, and precision 1.0 against the 0.95 threshold."
+    },
+    {
+      "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-011",
+      "status": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T4.1/proof-of-behavior-scorecard.json",
+        "examples/demo/seeded-repo/outcomes.jsonl",
+        "examples/reports/backtest-demo.json",
+        "cmd/relia/demo_fixtures_test.go:TestDemoFixtureCorpusReproducesBacktestReport"
+      ],
+      "notes": "The report headline is recomputed as 3 confirmed recurrences across 11 eligible agent-attributed failures, yielding 27.3%, with the flake-discounted and uncertain cases excluded from the headline."
+    },
+    {
+      "acceptance_item_id": "DEMO-ACCEPTANCE-002",
+      "status": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T4.1/proof-of-behavior-scorecard.json",
+        "examples/reports/backtest-demo.html",
+        "examples/reports/memory-page-demo.md",
+        "README.md"
+      ],
+      "notes": "Bundled static backtest and memory-page reports exist for the offline demo path."
+    },
+    {
+      "acceptance_item_id": "DEMO-ACCEPTANCE-004",
+      "status": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T4.1/proof-of-behavior-scorecard.json",
+        "examples/demo/seeded-repo/prs.json",
+        "examples/reports/backtest-demo.json",
+        "cmd/relia/demo_fixtures_test.go:TestDemoFixtureCorpusReproducesBacktestReport"
+      ],
+      "notes": "Every PR URL shown by the JSON, HTML, and Markdown demo reports resolves to a seeded PR in examples/demo/seeded-repo/prs.json."
+    }
+  ],
+  "path_policy_result": {
+    "status": "pass",
+    "allowed_changed_paths": [
+      "Makefile",
+      "README.md",
+      "cmd/relia/demo_fixtures_test.go",
+      "docs/architecture/architecture_guides.md",
+      "docs/dev/dev_guides.md",
+      "examples/demo/attribution-precision-sample.json",
+      "examples/demo/flake-discount-fixtures.json",
+      "examples/demo/redaction-fixtures/expected-redacted-artifacts.json",
+      "examples/demo/seeded-repo/README.md",
+      "examples/demo/seeded-repo/outcomes.jsonl",
+      "examples/demo/seeded-repo/prs.json",
+      "examples/reports/backtest-demo.html",
+      "examples/reports/backtest-demo.json",
+      "examples/reports/memory-page-demo.md",
+      ".factory/artifacts/task-runs/T4.1/work-proof-marker.json",
+      ".factory/artifacts/task-runs/T4.1/validation-report.json",
+      ".factory/artifacts/task-runs/T4.1/proof-of-behavior-scorecard.json"
+    ],
+    "forbidden_changed_paths": [],
+    "untracked_nonignored_paths": [
+      "cmd/relia/demo_fixtures_test.go",
+      "examples/demo/attribution-precision-sample.json",
+      "examples/demo/flake-discount-fixtures.json",
+      "examples/demo/redaction-fixtures/expected-redacted-artifacts.json",
+      "examples/demo/seeded-repo/README.md",
+      "examples/demo/seeded-repo/outcomes.jsonl",
+      "examples/demo/seeded-repo/prs.json",
+      "examples/reports/backtest-demo.html",
+      "examples/reports/backtest-demo.json",
+      "examples/reports/memory-page-demo.md",
+      ".factory/artifacts/task-runs/T4.1/work-proof-marker.json",
+      ".factory/artifacts/task-runs/T4.1/validation-report.json",
+      ".factory/artifacts/task-runs/T4.1/proof-of-behavior-scorecard.json"
+    ]
+  },
+  "plan_drift_result": {
+    "status": "pass",
+    "notes": "Implementation stayed inside the T4.1 fixture corpus, report baseline, tests, docs-sync, and worker-evidence scope. No runtime, credential, network, schema, CI, release, or lifecycle posture changed."
+  },
+  "changelog_result": {
+    "status": "applied_as_docs",
+    "notes": "No CHANGELOG file exists in the allowed repo surface; the T4.1 user-facing fixture/report addition is documented in README.md and docs/dev/dev_guides.md."
+  },
+  "versioning_result": {
+    "status": "not_applicable",
+    "notes": "Pre-1.0 fixture and static report baselines do not change CLI exit codes, schemas, migration behavior, or distribution packaging."
+  },
+  "docs_sync_result": {
+    "status": "pass",
+    "notes": "README.md, docs/dev/dev_guides.md, and docs/architecture/architecture_guides.md now name the demo fixture paths, contract coverage, state owner, feedback source, blast radius, and rollback posture."
+  },
+  "lifecycle_evidence_note": {
+    "status": "not_worker_owned",
+    "notes": "scope_closure_report, pr_lifecycle_report, and factoryd_run_once_report are lifecycle-owned and were not authored by this task-executor worker."
+  },
+  "blockers": [],
+  "residual_risks": []
+}

@@ -1,0 +1,20 @@
+{
+  "object_type": "relia.demo_flake_discount_fixtures",
+  "schema_version": "1.0",
+  "cases": [
+    {
+      "case_id": "flake-0219-external-retry",
+      "pr": 219,
+      "experience_id": "exp_0219",
+      "signature_id": "sig_external_retry_flake",
+      "flake_discount": 1.0,
+      "discount_reason": "same check failure appears across unrelated notification-client diffs and does not share the billing or API recurrence signatures",
+      "expected_rule_draft": false,
+      "citation": "https://github.com/Clyra-AI/relia-demo-seed/pull/219"
+    }
+  ],
+  "metadata": {
+    "customer_safe": true,
+    "redaction_status": "customer_safe"
+  }
+}

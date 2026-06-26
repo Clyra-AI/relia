@@ -81,6 +81,26 @@ smallest fixture set needed for its acceptance items and must keep fixture
 provenance, expected outcomes, and negative cases close to the tests that use
 them.
 
+T4.1 fixture ownership:
+
+- Seeded PR index: `examples/demo/seeded-repo/prs.json`.
+- Seeded outcome stream: `examples/demo/seeded-repo/outcomes.jsonl`.
+- Attribution precision sample:
+  `examples/demo/attribution-precision-sample.json`.
+- Flake-discount fixture: `examples/demo/flake-discount-fixtures.json`.
+- Redaction fixture:
+  `examples/demo/redaction-fixtures/expected-redacted-artifacts.json`.
+- Static report baselines: `examples/reports/backtest-demo.json`,
+  `examples/reports/backtest-demo.html`, and
+  `examples/reports/memory-page-demo.md`.
+
+The contract lane runs `TestDemo*` fixture contracts in `cmd/relia` after the
+repo-pack validator. Those tests recompute the demo ERR headline from the
+seeded outcome stream, resolve every report citation through the seeded PR
+index, verify the planted flaky test is discounted and drafts no rule, enforce
+attribution precision with uncertain cases excluded, and scan demo artifacts for
+standard secret token shapes.
+
 ## Customer Failure Intake
 
 Customer-derived failures may improve Relia only through a bounded,

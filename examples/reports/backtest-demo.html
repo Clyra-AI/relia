@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Relia Backtest Demo</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; line-height: 1.45; color: #1f2933; }
+    main { max-width: 920px; }
+    table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+    th, td { border: 1px solid #cbd5df; padding: 0.5rem; text-align: left; }
+    th { background: #eef2f6; }
+    code { background: #eef2f6; padding: 0.1rem 0.25rem; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Relia backtest demo</h1>
+  <p><strong>27.3%</strong> headline ERR: 3 confirmed recurrences across 11 agent-attributed failures.</p>
+  <p>The fixture corpus also contains 1 flake-discounted failure and 3 uncertain attribution cases excluded from the headline.</p>
+
+  <h2>Confirmed recurrences</h2>
+  <table>
+    <thead>
+      <tr><th>Current</th><th>Prior</th><th>Signature</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a href="https://github.com/Clyra-AI/relia-demo-seed/pull/187">PR #187</a></td>
+        <td><a href="https://github.com/Clyra-AI/relia-demo-seed/pull/142">PR #142</a></td>
+        <td><code>sig_time_freeze</code></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/Clyra-AI/relia-demo-seed/pull/203">PR #203</a></td>
+        <td><a href="https://github.com/Clyra-AI/relia-demo-seed/pull/187">PR #187</a></td>
+        <td><code>sig_time_freeze</code></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/Clyra-AI/relia-demo-seed/pull/258">PR #258</a></td>
+        <td><a href="https://github.com/Clyra-AI/relia-demo-seed/pull/244">PR #244</a></td>
+        <td><code>sig_schema_snapshot_blind_regen</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Discounted flake</h2>
+  <p><a href="https://github.com/Clyra-AI/relia-demo-seed/pull/219">PR #219</a> is 1 flake-discounted failure with <code>drafts_rule=false</code>.</p>
+
+  <h2>Memory candidates</h2>
+  <ul>
+    <li><code>avoid-mocking-datetime-directly</code>: evidence PRs <a href="https://github.com/Clyra-AI/relia-demo-seed/pull/142">#142</a>, <a href="https://github.com/Clyra-AI/relia-demo-seed/pull/187">#187</a>, <a href="https://github.com/Clyra-AI/relia-demo-seed/pull/203">#203</a>; held fix <a href="https://github.com/Clyra-AI/relia-demo-seed/pull/210">#210</a>.</li>
+    <li><code>avoid-blind-schema-snapshot-regeneration</code>: evidence PRs <a href="https://github.com/Clyra-AI/relia-demo-seed/pull/244">#244</a>, <a href="https://github.com/Clyra-AI/relia-demo-seed/pull/258">#258</a>.</li>
+  </ul>
+</main>
+</body>
+</html>

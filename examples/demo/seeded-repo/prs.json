@@ -1,0 +1,136 @@
+{
+  "object_type": "relia.demo_seeded_pr_index",
+  "schema_version": "1.0",
+  "repo": {
+    "provider": "github",
+    "owner": "Clyra-AI",
+    "name": "relia-demo-seed"
+  },
+  "prs": [
+    {
+      "number": 142,
+      "url": "https://github.com/Clyra-AI/relia-demo-seed/pull/142",
+      "title": "Add billing timezone rollover tests",
+      "actor_kind": "agent",
+      "outcome": "ci_failure"
+    },
+    {
+      "number": 160,
+      "url": "https://github.com/Clyra-AI/relia-demo-seed/pull/160",
+      "title": "Round invoice tax totals",
+      "actor_kind": "agent",
+      "outcome": "ci_failure"
+    },
+    {
+      "number": 172,
+      "url": "https://github.com/Clyra-AI/relia-demo-seed/pull/172",
+      "title": "Refactor cache key hashing",
+      "actor_kind": "agent",
+      "outcome": "ci_failure"
+    },
+    {
+      "number": 187,
+      "url": "https://github.com/Clyra-AI/relia-demo-seed/pull/187",
+      "title": "Retry billing rollover fix",
+      "actor_kind": "agent",
+      "outcome": "ci_failure"
+    },
+    {
+      "number": 195,
+      "url": "https://github.com/Clyra-AI/relia-demo-seed/pull/195",
+      "title": "Reorder invoice migration",
+      "actor_kind": "agent",
+      "outcome": "ci_failure"
+    },
+    {
+      "number": 203,
+      "url": "https://github.com/Clyra-AI/relia-demo-seed/pull/203",
+      "title": "Patch rollover regression in invoices",
+      "actor_kind": "agent",
+      "outcome": "ci_failure"
+    },
+    {
+      "number": 210,
+      "url": "https://github.com/Clyra-AI/relia-demo-seed/pull/210",
+      "title": "Use freeze_time fixture for rollover coverage",
+      "actor_kind": "agent",
+      "outcome": "fix_held"
+    },
+    {
+      "number": 219,
+      "url": "https://github.com/Clyra-AI/relia-demo-seed/pull/219",
+      "title": "Retry external API test after transient timeout",
+      "actor_kind": "agent",
+      "outcome": "ci_failure_flake_discounted"
+    },
+    {
+      "number": 228,
+      "url": "https://github.com/Clyra-AI/relia-demo-seed/pull/228",
+      "title": "Harden API timeout mapping",
+      "actor_kind": "agent",
+      "outcome": "ci_failure"
+    },
+    {
+      "number": 231,
+      "url": "https://github.com/Clyra-AI/relia-demo-seed/pull/231",
+      "title": "Localize invoice date labels",
+      "actor_kind": "agent",
+      "outcome": "ci_failure"
+    },
+    {
+      "number": 233,
+      "url": "https://github.com/Clyra-AI/relia-demo-seed/pull/233",
+      "title": "Manual hotfix with ambiguous trailer",
+      "actor_kind": "uncertain",
+      "outcome": "excluded"
+    },
+    {
+      "number": 236,
+      "url": "https://github.com/Clyra-AI/relia-demo-seed/pull/236",
+      "title": "Maintainer cleanup for fixture naming",
+      "actor_kind": "human",
+      "outcome": "merged_clean"
+    },
+    {
+      "number": 244,
+      "url": "https://github.com/Clyra-AI/relia-demo-seed/pull/244",
+      "title": "Regenerate API schema snapshots",
+      "actor_kind": "agent",
+      "outcome": "ci_failure"
+    },
+    {
+      "number": 252,
+      "url": "https://github.com/Clyra-AI/relia-demo-seed/pull/252",
+      "title": "Unknown author updates billing docs",
+      "actor_kind": "uncertain",
+      "outcome": "excluded"
+    },
+    {
+      "number": 258,
+      "url": "https://github.com/Clyra-AI/relia-demo-seed/pull/258",
+      "title": "Regenerate schema snapshots after route change",
+      "actor_kind": "agent",
+      "outcome": "ci_failure"
+    },
+    {
+      "number": 264,
+      "url": "https://github.com/Clyra-AI/relia-demo-seed/pull/264",
+      "title": "Handle checkout rate limits",
+      "actor_kind": "agent",
+      "outcome": "ci_failure"
+    },
+    {
+      "number": 271,
+      "url": "https://github.com/Clyra-AI/relia-demo-seed/pull/271",
+      "title": "Ambiguous coauthor formatting in invoice tests",
+      "actor_kind": "uncertain",
+      "outcome": "excluded"
+    }
+  ],
+  "metadata": {
+    "customer_safe": true,
+    "synthetic": true,
+    "network_required": false,
+    "redaction_status": "customer_safe"
+  }
+}
