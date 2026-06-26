@@ -56,12 +56,13 @@
         "examples/demo/attribution-precision-sample.json",
         "cmd/relia/demo_fixtures_test.go:TestDemoAttributionPrecisionSampleExcludesUncertain"
       ],
-      "metrics": {
-        "precision": 1.0,
-        "precision_threshold": 0.95,
-        "evaluated_cases": 14,
-        "excluded_uncertain": 3
-      }
+            "metrics": {
+                "precision": 1.0,
+                "precision_threshold": 0.95,
+                "evaluated_cases": 14,
+                "excluded_uncertain": 3,
+                "uncertain_cases_visible_in_report": 3
+            }
     },
     {
       "behavior": "Every demo number and citation in the fixture reports is reproducible from the seeded repo.",

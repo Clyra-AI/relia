@@ -72,6 +72,7 @@ type demoBacktestReport struct {
 	} `json:"summary"`
 	ConfirmedRecurrences []demoRecurrencePair `json:"confirmed_recurrences"`
 	FlakeDiscounts       []demoFlakeDiscount  `json:"flake_discounts"`
+	AttributionUncertain []demoUncertainCase  `json:"attribution_uncertain"`
 	RuleCandidates       []demoRuleCandidate  `json:"rule_candidates"`
 	Citations            []demoCitation       `json:"citations"`
 	RedactionStatus      string               `json:"redaction_status"`
@@ -92,6 +93,16 @@ type demoFlakeDiscount struct {
 	FlakeDiscount float64 `json:"flake_discount"`
 	DraftsRule    bool    `json:"drafts_rule"`
 	SupportingPRs []int   `json:"supporting_prs"`
+}
+
+type demoUncertainCase struct {
+	PR                    int     `json:"pr"`
+	ExperienceID          string  `json:"experience_id"`
+	OutcomeKind           string  `json:"outcome_kind"`
+	AttributionMethod     string  `json:"attribution_method"`
+	AttributionConfidence float64 `json:"attribution_confidence"`
+	ExcludedFromERR       bool    `json:"excluded_from_err"`
+	Reason                string  `json:"reason"`
 }
 
 type demoRuleCandidate struct {
@@ -190,6 +201,7 @@ func TestDemoFixtureCorpusReproducesBacktestReport(t *testing.T) {
 		t.Fatalf("headline_err_percent = %q, want %q", report.Summary.HeadlineERRPercent, wantPercent)
 	}
 	assertDemoPairsMatch(t, report.ConfirmedRecurrences, pairs)
+	assertUncertainAttributionVisible(t, outcomes, report, prURLs)
 	assertDemoReportCitationsResolve(t, report, prURLs)
 	assertFlakeDiscountDraftsNoRule(t, report)
 	assertFlakeDiscountFixturesBackedByRepeatedSeededFailures(t, root, outcomes, report, prURLs)
@@ -477,12 +489,43 @@ func assertDemoReportCitationsResolve(t *testing.T, report demoBacktestReport, p
 			requirePR(supportingPR, "flake discount support")
 		}
 	}
+	for _, uncertain := range report.AttributionUncertain {
+		requirePR(uncertain.PR, "uncertain attribution")
+	}
 	for _, rule := range report.RuleCandidates {
 		for _, pr := range rule.EvidencePRs {
 			requirePR(pr, "rule evidence")
 		}
 		if rule.HeldFixPR != 0 {
 			requirePR(rule.HeldFixPR, "rule held fix")
+		}
+	}
+}
+
+func assertUncertainAttributionVisible(t *testing.T, outcomes []demoOutcomeFixture, report demoBacktestReport, prURLs map[int]string) {
+	t.Helper()
+	wantByExperience := map[string]demoOutcomeFixture{}
+	for _, outcome := range outcomes {
+		if outcome.ActorKind == "uncertain" {
+			wantByExperience[outcome.ExperienceID] = outcome
+		}
+	}
+	if len(report.AttributionUncertain) != len(wantByExperience) {
+		t.Fatalf("attribution_uncertain entries = %d, want %d", len(report.AttributionUncertain), len(wantByExperience))
+	}
+	for _, item := range report.AttributionUncertain {
+		outcome, ok := wantByExperience[item.ExperienceID]
+		if !ok {
+			t.Fatalf("attribution_uncertain references unknown or non-uncertain experience %s", item.ExperienceID)
+		}
+		if item.PR != outcome.PR || prURLs[item.PR] == "" {
+			t.Fatalf("attribution_uncertain %s PR = %d, want seeded PR %d", item.ExperienceID, item.PR, outcome.PR)
+		}
+		if item.OutcomeKind != outcome.OutcomeKind || item.AttributionMethod != "uncertain" || item.AttributionConfidence != 0 || !item.ExcludedFromERR {
+			t.Fatalf("attribution_uncertain %s does not preserve fail-closed attribution details: %#v", item.ExperienceID, item)
+		}
+		if strings.TrimSpace(item.Reason) == "" {
+			t.Fatalf("attribution_uncertain %s missing reason", item.ExperienceID)
 		}
 	}
 }

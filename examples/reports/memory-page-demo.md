@@ -2,7 +2,8 @@
 
 Backtest baseline: **21.4%** headline ERR from 3 confirmed recurrences across
 14 agent-attributed failures. The seeded corpus also records 3 flake-discounted
-failures and 3 uncertain attribution cases excluded from the headline.
+failures and 3 uncertain attribution cases excluded from the headline: PRs
+#233, #252, and #271.
 
 ## Candidate: avoid-mocking-datetime-directly
 

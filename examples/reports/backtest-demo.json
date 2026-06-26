@@ -82,6 +82,35 @@
       "reason": "Discounted as flaky because the failure repeats across unrelated retry/logging diffs and has no confirmed recurrence pair."
     }
   ],
+  "attribution_uncertain": [
+    {
+      "pr": 233,
+      "experience_id": "exp_0233",
+      "outcome_kind": "ci_failure",
+      "attribution_method": "uncertain",
+      "attribution_confidence": 0.0,
+      "excluded_from_err": true,
+      "reason": "Excluded from headline ERR because attribution was ambiguous and the default policy is uncertain: exclude."
+    },
+    {
+      "pr": 252,
+      "experience_id": "exp_0252",
+      "outcome_kind": "merged_clean",
+      "attribution_method": "uncertain",
+      "attribution_confidence": 0.0,
+      "excluded_from_err": true,
+      "reason": "Excluded from headline ERR and precision scoring because attribution was ambiguous and the default policy is uncertain: exclude."
+    },
+    {
+      "pr": 271,
+      "experience_id": "exp_0271",
+      "outcome_kind": "ci_failure",
+      "attribution_method": "uncertain",
+      "attribution_confidence": 0.0,
+      "excluded_from_err": true,
+      "reason": "Excluded from headline ERR because attribution was ambiguous and the default policy is uncertain: exclude."
+    }
+  ],
   "rule_candidates": [
     {
       "rule_id": "avoid-mocking-datetime-directly",

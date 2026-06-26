@@ -54,11 +54,11 @@
     }
   ],
   "green_evidence": [
-    {
-      "command": "go test ./cmd/relia -count=1 -run TestDemoFixtureCorpusReproducesBacktestReport",
-      "status": "pass",
-      "exit_code": 0,
-      "evidence": "The focused demo contract passed after the seeded outcome stream, PR index, flake fixture, report support PRs, and static report baselines were updated."
+        {
+            "command": "go test ./cmd/relia -count=1 -run TestDemoFixtureCorpusReproducesBacktestReport",
+            "status": "pass",
+            "exit_code": 0,
+            "evidence": "The focused demo contract passed after the seeded outcome stream, PR index, flake fixture, uncertain attribution report rows, report support PRs, and static report baselines were updated."
     },
     {
       "command": "python3 -m json.tool examples/demo/seeded-repo/prs.json",
@@ -220,10 +220,29 @@
       "notes": "Every PR URL shown by the JSON, HTML, and Markdown demo reports resolves to a seeded PR in examples/demo/seeded-repo/prs.json, including the new flake support citations for PR #214 and PR #216."
     }
   ],
-  "path_policy_result": {
-    "status": "pass",
-    "notes": "Review repair 4 confirmed this list against git diff --name-only main...HEAD.",
-    "allowed_changed_paths": [
+    "path_policy_result": {
+        "status": "pass",
+        "notes": "Review repair 4 confirmed this list against git diff --name-only main...HEAD.",
+        "changed_paths": [
+            ".factory/artifacts/task-runs/T4.1/proof-of-behavior-scorecard.json",
+            ".factory/artifacts/task-runs/T4.1/validation-report.json",
+            ".factory/artifacts/task-runs/T4.1/work-proof-marker.json",
+            "Makefile",
+            "README.md",
+            "cmd/relia/demo_fixtures_test.go",
+            "docs/architecture/architecture_guides.md",
+            "docs/dev/dev_guides.md",
+            "examples/demo/attribution-precision-sample.json",
+            "examples/demo/flake-discount-fixtures.json",
+            "examples/demo/redaction-fixtures/expected-redacted-artifacts.json",
+            "examples/demo/seeded-repo/README.md",
+            "examples/demo/seeded-repo/outcomes.jsonl",
+            "examples/demo/seeded-repo/prs.json",
+            "examples/reports/backtest-demo.html",
+            "examples/reports/backtest-demo.json",
+            "examples/reports/memory-page-demo.md"
+        ],
+        "allowed_changed_paths": [
       ".factory/artifacts/task-runs/T4.1/proof-of-behavior-scorecard.json",
       ".factory/artifacts/task-runs/T4.1/validation-report.json",
       ".factory/artifacts/task-runs/T4.1/work-proof-marker.json",
