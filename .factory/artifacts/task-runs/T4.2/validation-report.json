@@ -1,0 +1,176 @@
+{
+  "acceptance_results": [
+    {
+      "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-001",
+      "evidence_refs": [
+        "examples/demo/distill-review-lifecycle-fixtures.json",
+        "cmd/relia/demo_fixtures_test.go",
+        ".factory/artifacts/task-runs/T4.2/proof-of-behavior-scorecard.json",
+        ".factory/artifacts/task-runs/T4.2/work-proof-marker.json"
+      ],
+      "notes": "The planted recurrence fixture still drafts avoid-mocking-datetime-directly as an avoid candidate from exp_0142, exp_0187, and exp_0203 with PR citations 142, 187, and 203.",
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-006",
+      "evidence_refs": [
+        "examples/demo/distill-review-lifecycle-fixtures.json",
+        "examples/reports/memory-page-demo.md",
+        "cmd/relia/demo_fixtures_test.go",
+        ".factory/artifacts/task-runs/T4.2/proof-of-behavior-scorecard.json",
+        ".factory/artifacts/task-runs/T4.2/work-proof-marker.json"
+      ],
+      "notes": "The planted contradiction remains contradicted and out of serving; the memory page now keeps avoid-blind-schema-snapshot-regeneration only under Lifecycle Outcomes and the test rejects a matching Candidate heading.",
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-007",
+      "evidence_refs": [
+        "examples/demo/distill-review-lifecycle-fixtures.json",
+        "examples/reports/memory-page-demo.md",
+        "cmd/relia/demo_fixtures_test.go",
+        ".factory/artifacts/task-runs/T4.2/proof-of-behavior-scorecard.json",
+        ".factory/artifacts/task-runs/T4.2/work-proof-marker.json"
+      ],
+      "notes": "The planted path deletion remains stale and out of serving; the memory page now keeps avoid-mocking-datetime-directly only under Lifecycle Outcomes and the test rejects a matching Candidate heading.",
+      "status": "implemented"
+    }
+  ],
+  "artifact_type": "validation_report",
+  "baseline_evidence": [
+    {
+      "command": "make lint-fast",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "make test-fast",
+      "exit_code": 0,
+      "status": "pass"
+    }
+  ],
+  "blockers": [],
+  "changed_paths": [
+    ".factory/artifacts/task-runs/T4.2/proof-of-behavior-scorecard.json",
+    ".factory/artifacts/task-runs/T4.2/validation-report.json",
+    ".factory/artifacts/task-runs/T4.2/work-proof-marker.json",
+    "README.md",
+    "cmd/relia/demo_fixtures_test.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/dev/dev_guides.md",
+    "examples/demo/distill-review-lifecycle-fixtures.json",
+    "examples/demo/seeded-repo/README.md",
+    "examples/demo/seeded-repo/outcomes.jsonl",
+    "examples/demo/seeded-repo/prs.json",
+    "examples/reports/backtest-demo.json",
+    "examples/reports/backtest-demo.html",
+    "examples/reports/memory-page-demo.md"
+  ],
+  "changelog_result": {
+    "notes": "No changelog artifact exists in the allowed path set; this repair changed a demo artifact and contract test only.",
+    "status": "not_applicable"
+  },
+  "commands_run": [
+    "make lint-fast",
+    "make test-fast",
+    "make test-contracts",
+    "go test ./cmd/... -count=1 -run TestDemoDistillReviewLifecycleFixtures",
+    "go test ./cmd/... -count=1 -run TestDemoDistillReviewLifecycleFixtures",
+    "make test-coverage",
+    "make prepush-full",
+    "python3 -m json.tool .factory/artifacts/task-runs/T4.2/work-proof-marker.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T4.2/validation-report.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T4.2/proof-of-behavior-scorecard.json"
+  ],
+  "docs_sync_result": {
+    "notes": "The affected user-visible demo report was synchronized with the lifecycle serving contract.",
+    "status": "pass",
+    "updated_paths": [
+      "examples/reports/memory-page-demo.md"
+    ]
+  },
+  "final_validation_evidence": [
+    {
+      "command": "make test-coverage",
+      "coverage_minimum_percent": 75,
+      "coverage_total_percent": 78.6,
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "make prepush-full",
+      "exit_code": 0,
+      "status": "pass"
+    }
+  ],
+  "focused_validation_evidence": [
+    {
+      "command": "go test ./cmd/... -count=1 -run TestDemoDistillReviewLifecycleFixtures",
+      "exit_code": 0,
+      "status": "pass"
+    }
+  ],
+  "migration_result": {
+    "notes": "No migration required for a static demo artifact rendering repair.",
+    "status": "not_applicable"
+  },
+  "path_policy_result": {
+    "changed_paths": [
+      ".factory/artifacts/task-runs/T4.2/proof-of-behavior-scorecard.json",
+      ".factory/artifacts/task-runs/T4.2/validation-report.json",
+      ".factory/artifacts/task-runs/T4.2/work-proof-marker.json",
+      "README.md",
+      "cmd/relia/demo_fixtures_test.go",
+      "docs/architecture/architecture_guides.md",
+      "docs/dev/dev_guides.md",
+      "examples/demo/distill-review-lifecycle-fixtures.json",
+      "examples/demo/seeded-repo/README.md",
+      "examples/demo/seeded-repo/outcomes.jsonl",
+      "examples/demo/seeded-repo/prs.json",
+      "examples/reports/backtest-demo.json",
+      "examples/reports/backtest-demo.html",
+      "examples/reports/memory-page-demo.md"
+    ],
+    "evidence_command": "git diff --name-only origin/main...HEAD",
+    "forbidden_paths_changed": [],
+    "required_validation_temp_paths": [
+      ".factory/tmp/coverage.out"
+    ],
+    "status": "pass"
+  },
+  "plan_drift_result": {
+    "notes": "Repair stayed within the Codex review finding and original T4.2 acceptance item IDs.",
+    "status": "pass"
+  },
+  "red_evidence": [
+    {
+      "classification": "pre_existing_green",
+      "command": "make test-contracts",
+      "exit_code": 0,
+      "notes": "The existing contract lane passed before the review repair, so the repair added a narrower regression assertion first.",
+      "status": "pass"
+    },
+    {
+      "classification": "red_after_regression_assertion_before_artifact_repair",
+      "command": "go test ./cmd/... -count=1 -run TestDemoDistillReviewLifecycleFixtures",
+      "exit_code": 1,
+      "failure_snippet": "memory page renders non-serving lifecycle rule avoid-blind-schema-snapshot-regeneration as a candidate",
+      "status": "expected_fail"
+    }
+  ],
+  "repair_task_id": "20260626T140907.224593000Z-relia-T4.2-repair-3",
+  "residual_risks": [
+    "The runtime distill and review commands remain placeholder commands in this repo slice; this repair only adjusts the committed lifecycle fixture report and its contract check."
+  ],
+  "schema_version": "1.0",
+  "scope_closure_worker_result": {
+    "notes": "Factoryd-owned scope closure, PR lifecycle, and run-once reports were not authored by this worker.",
+    "status": "worker_evidence_ready"
+  },
+  "status": "pass",
+  "task_id": "T4.2",
+  "versioning_result": {
+    "notes": "No public schema, CLI output contract, or migration surface was changed.",
+    "status": "not_applicable"
+  }
+}

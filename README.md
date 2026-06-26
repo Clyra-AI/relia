@@ -53,14 +53,18 @@ static reports live under `examples/reports/`:
   `examples/demo/flake-discount-fixtures.json`, and
   `examples/demo/redaction-fixtures/expected-redacted-artifacts.json` cover the
   attribution, flake-discount, and redaction honesty checks.
+- `examples/demo/distill-review-lifecycle-fixtures.json` covers the planted
+  recurrence draft, contradiction, and stale-path lifecycle outcomes with
+  repo-relative evidence refs.
 - `examples/reports/backtest-demo.json`,
   `examples/reports/backtest-demo.html`, and
   `examples/reports/memory-page-demo.md` are customer-safe static baselines.
 
 `make test-contracts` verifies that the report numbers and PR citations are
 reproducible from the seeded corpus, that the planted flake drafts no rule, that
-uncertain attribution is excluded from precision, and that demo artifacts do not
-store seeded secrets.
+uncertain attribution is excluded from precision, that distill/review lifecycle
+fixtures keep contradicted and stale rules out of serving, and that demo
+artifacts do not store seeded secrets.
 
 The config in `relia.yaml` is local-only by default: code, diffs, logs, and
 experience records are not sent anywhere; share scope is `private`; redaction

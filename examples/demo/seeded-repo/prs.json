@@ -139,6 +139,27 @@
       "title": "Ambiguous coauthor formatting in invoice tests",
       "actor_kind": "uncertain",
       "outcome": "excluded"
+    },
+    {
+      "number": 282,
+      "url": "https://github.com/Clyra-AI/relia-demo-seed/pull/282",
+      "title": "Regenerate schema snapshots with required error assertions",
+      "actor_kind": "agent",
+      "outcome": "merged_clean"
+    },
+    {
+      "number": 286,
+      "url": "https://github.com/Clyra-AI/relia-demo-seed/pull/286",
+      "title": "Refresh schema snapshots after documented API error change",
+      "actor_kind": "agent",
+      "outcome": "merged_clean"
+    },
+    {
+      "number": 293,
+      "url": "https://github.com/Clyra-AI/relia-demo-seed/pull/293",
+      "title": "Remove legacy billing rollover clock-mock tests",
+      "actor_kind": "agent",
+      "outcome": "merged_clean"
     }
   ],
   "metadata": {

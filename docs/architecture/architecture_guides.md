@@ -63,6 +63,17 @@ attribution remains excluded. Rollback is deletion of the T4.1 fixture files
 and the corresponding `TestDemo*` contract hook, which would also remove the
 bundled demo baseline required by the PRD.
 
+T4.2 adds committed, synthetic distill/review lifecycle fixture expectations in
+`examples/demo/distill-review-lifecycle-fixtures.json`. The state owner remains
+the fixture corpus plus the `cmd/relia` demo contract tests. Feedback sources
+are `make test-contracts`, `make test-coverage`, and `make prepush-full`. The
+fixture records recurrence draft, contradicted, and stale outcomes with
+repo-relative evidence refs, seeded PR citations, and a compiled serving
+snapshot that excludes non-active rules. Rollback is deletion of the lifecycle
+fixture, the synthetic lifecycle PR/outcome rows, and the corresponding
+`TestDemoDistillReviewLifecycleFixtures` hook, which would remove acceptance
+coverage for planted contradiction and stale-path behavior.
+
 ## Systems Thinking Map
 
 - State lives in repo-local config, generated artifacts, source files, and Factory evidence.

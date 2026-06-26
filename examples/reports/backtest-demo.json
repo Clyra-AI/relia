@@ -16,10 +16,10 @@
   ],
   "window": {
     "start": "2026-01-01T00:00:00Z",
-    "end": "2026-04-30T23:59:59Z"
+    "end": "2026-05-31T23:59:59Z"
   },
   "summary": {
-    "seeded_prs": 19,
+    "seeded_prs": 22,
     "agent_failure_denominator": 14,
     "confirmed_recurrence_count": 3,
     "possible_recurrence_count": 0,
@@ -111,21 +111,21 @@
       "reason": "Excluded from headline ERR because attribution was ambiguous and the default policy is uncertain: exclude."
     }
   ],
-  "rule_candidates": [
+  "rule_candidates": [],
+  "rule_lifecycle_outcomes": [
     {
       "rule_id": "avoid-mocking-datetime-directly",
-      "kind": "avoid",
+      "status": "stale",
       "signature_id": "sig_time_freeze",
-      "evidence_prs": [142, 187, 203],
-      "held_fix_pr": 210,
-      "confidence": 0.82
+      "evidence_prs": [142, 187, 203, 293],
+      "no_longer_served": true
     },
     {
       "rule_id": "avoid-blind-schema-snapshot-regeneration",
-      "kind": "avoid",
+      "status": "contradicted",
       "signature_id": "sig_schema_snapshot_blind_regen",
-      "evidence_prs": [244, 258],
-      "confidence": 0.6
+      "evidence_prs": [244, 258, 282, 286],
+      "no_longer_served": true
     }
   ],
   "citations": [
@@ -137,7 +137,10 @@
     {"pr":216,"url":"https://github.com/Clyra-AI/relia-demo-seed/pull/216"},
     {"pr":219,"url":"https://github.com/Clyra-AI/relia-demo-seed/pull/219"},
     {"pr":244,"url":"https://github.com/Clyra-AI/relia-demo-seed/pull/244"},
-    {"pr":258,"url":"https://github.com/Clyra-AI/relia-demo-seed/pull/258"}
+    {"pr":258,"url":"https://github.com/Clyra-AI/relia-demo-seed/pull/258"},
+    {"pr":282,"url":"https://github.com/Clyra-AI/relia-demo-seed/pull/282"},
+    {"pr":286,"url":"https://github.com/Clyra-AI/relia-demo-seed/pull/286"},
+    {"pr":293,"url":"https://github.com/Clyra-AI/relia-demo-seed/pull/293"}
   ],
   "redaction_status": "customer_safe",
   "redaction_examples": [

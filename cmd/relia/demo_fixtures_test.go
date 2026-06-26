@@ -70,12 +70,13 @@ type demoBacktestReport struct {
 		FlakeDiscountedCount      int     `json:"flake_discounted_count"`
 		AttributionUncertainCount int     `json:"attribution_uncertain_count"`
 	} `json:"summary"`
-	ConfirmedRecurrences []demoRecurrencePair `json:"confirmed_recurrences"`
-	FlakeDiscounts       []demoFlakeDiscount  `json:"flake_discounts"`
-	AttributionUncertain []demoUncertainCase  `json:"attribution_uncertain"`
-	RuleCandidates       []demoRuleCandidate  `json:"rule_candidates"`
-	Citations            []demoCitation       `json:"citations"`
-	RedactionStatus      string               `json:"redaction_status"`
+	ConfirmedRecurrences  []demoRecurrencePair       `json:"confirmed_recurrences"`
+	FlakeDiscounts        []demoFlakeDiscount        `json:"flake_discounts"`
+	AttributionUncertain  []demoUncertainCase        `json:"attribution_uncertain"`
+	RuleCandidates        []demoRuleCandidate        `json:"rule_candidates"`
+	RuleLifecycleOutcomes []demoRuleLifecycleOutcome `json:"rule_lifecycle_outcomes"`
+	Citations             []demoCitation             `json:"citations"`
+	RedactionStatus       string                     `json:"redaction_status"`
 }
 
 type demoRecurrencePair struct {
@@ -111,6 +112,14 @@ type demoRuleCandidate struct {
 	SignatureID string `json:"signature_id"`
 	EvidencePRs []int  `json:"evidence_prs"`
 	HeldFixPR   int    `json:"held_fix_pr,omitempty"`
+}
+
+type demoRuleLifecycleOutcome struct {
+	RuleID         string `json:"rule_id"`
+	Status         string `json:"status"`
+	SignatureID    string `json:"signature_id"`
+	EvidencePRs    []int  `json:"evidence_prs"`
+	NoLongerServed bool   `json:"no_longer_served"`
 }
 
 type demoCitation struct {
@@ -168,6 +177,87 @@ type demoRedactionFixtures struct {
 		ExpectedArtifactValue string   `json:"expected_artifact_value"`
 		ArtifactPathsChecked  []string `json:"artifact_paths_checked"`
 	} `json:"cases"`
+}
+
+type demoLifecycleFixtures struct {
+	ObjectType      string                 `json:"object_type"`
+	SchemaVersion   string                 `json:"schema_version"`
+	SourceArtifacts []string               `json:"source_artifacts"`
+	RedactionStatus string                 `json:"redaction_status"`
+	Cases           []demoLifecycleCase    `json:"cases"`
+	ServingSnapshot demoCompiledContext    `json:"serving_snapshot"`
+	Metadata        map[string]interface{} `json:"metadata"`
+}
+
+type demoLifecycleCase struct {
+	CaseID               string                  `json:"case_id"`
+	Command              string                  `json:"command"`
+	LifecycleOutcome     string                  `json:"lifecycle_outcome"`
+	ExpectedStatus       string                  `json:"expected_status"`
+	ServingEligible      bool                    `json:"serving_eligible"`
+	TriggerExperienceIDs []string                `json:"trigger_experience_ids"`
+	EvidenceRefs         []string                `json:"evidence_refs"`
+	Citations            []demoLifecycleCitation `json:"citations"`
+	Rule                 demoLifecycleRule       `json:"rule"`
+}
+
+type demoLifecycleCitation struct {
+	PR           int    `json:"pr"`
+	URL          string `json:"url"`
+	ExperienceID string `json:"experience_id"`
+	Role         string `json:"role"`
+}
+
+type demoLifecycleRule struct {
+	ObjectType    string                    `json:"object_type"`
+	SchemaVersion string                    `json:"schema_version"`
+	ID            string                    `json:"id"`
+	Kind          string                    `json:"kind"`
+	Status        string                    `json:"status"`
+	Statement     string                    `json:"statement"`
+	Scope         demoLifecycleRuleScope    `json:"scope"`
+	Confidence    float64                   `json:"confidence"`
+	Evidence      demoLifecycleRuleEvidence `json:"evidence"`
+	Provenance    []demoLifecycleProvenance `json:"provenance"`
+	Review        demoLifecycleRuleReview   `json:"review"`
+	Metadata      map[string]interface{}    `json:"metadata"`
+}
+
+type demoLifecycleRuleScope struct {
+	Paths   []string `json:"paths"`
+	Signals []string `json:"signals"`
+}
+
+type demoLifecycleRuleEvidence struct {
+	Count          int      `json:"count"`
+	Contradictions int      `json:"contradictions"`
+	Experiences    []string `json:"experiences"`
+}
+
+type demoLifecycleProvenance struct {
+	PR      int    `json:"pr"`
+	Outcome string `json:"outcome"`
+	URL     string `json:"url"`
+}
+
+type demoLifecycleRuleReview struct {
+	Label           string `json:"label"`
+	StatementOrigin string `json:"statement_origin"`
+}
+
+type demoCompiledContext struct {
+	ObjectType    string                    `json:"object_type"`
+	SchemaVersion string                    `json:"schema_version"`
+	ContextID     string                    `json:"context_id"`
+	Target        string                    `json:"target"`
+	Rules         []demoCompiledContextRule `json:"rules"`
+	Metadata      map[string]interface{}    `json:"metadata"`
+}
+
+type demoCompiledContextRule struct {
+	RuleID        string `json:"rule_id"`
+	Status        string `json:"status"`
+	CitationCount int    `json:"citation_count"`
 }
 
 func TestDemoFixtureCorpusReproducesBacktestReport(t *testing.T) {
@@ -256,6 +346,60 @@ func TestDemoAttributionPrecisionSampleExcludesUncertain(t *testing.T) {
 	if sample.Metrics.Precision < sample.Metrics.PrecisionThreshold || sample.Metrics.PrecisionThreshold < 0.95 {
 		t.Fatalf("precision %.3f below required threshold %.3f", sample.Metrics.Precision, sample.Metrics.PrecisionThreshold)
 	}
+}
+
+func TestDemoDistillReviewLifecycleFixtures(t *testing.T) {
+	root := findRepoRootForTest(t)
+	prURLs := demoPRURLs(t, readDemoPRIndex(t, root))
+	outcomesByExperience := demoOutcomesByExperience(readDemoOutcomes(t, root))
+	fixtures := readDemoLifecycleFixtures(t, root)
+
+	assertLifecycleFixturePathsAreRepoRelative(t, root, fixtures.SourceArtifacts)
+	assertCompiledContextSchemaShape(t, fixtures.ServingSnapshot)
+	servingRuleIDs := map[string]bool{}
+	for _, rule := range fixtures.ServingSnapshot.Rules {
+		servingRuleIDs[rule.RuleID] = true
+	}
+
+	wantCaseIDs := map[string]bool{
+		"planted-recurrence-drafts-avoid-rule":            false,
+		"planted-contradiction-moves-rule-out-of-serving": false,
+		"planted-path-deletion-moves-rule-out-of-serving": false,
+	}
+	for _, fixtureCase := range fixtures.Cases {
+		if _, ok := wantCaseIDs[fixtureCase.CaseID]; !ok {
+			t.Fatalf("unexpected lifecycle fixture case %s", fixtureCase.CaseID)
+		}
+		wantCaseIDs[fixtureCase.CaseID] = true
+		assertLifecycleFixturePathsAreRepoRelative(t, root, fixtureCase.EvidenceRefs)
+		assertLifecycleRuleSchemaShape(t, fixtureCase.Rule)
+		assertLifecycleCitationsResolve(t, fixtureCase, prURLs, outcomesByExperience)
+		if fixtureCase.ExpectedStatus != fixtureCase.Rule.Status {
+			t.Fatalf("%s expected_status = %q, rule status = %q", fixtureCase.CaseID, fixtureCase.ExpectedStatus, fixtureCase.Rule.Status)
+		}
+		if !fixtureCase.ServingEligible && servingRuleIDs[fixtureCase.Rule.ID] {
+			t.Fatalf("%s rule %s is not serving-eligible but appears in serving snapshot", fixtureCase.CaseID, fixtureCase.Rule.ID)
+		}
+		servingEligible, ok := fixtureCase.Rule.Metadata["serving_eligible"].(bool)
+		if !ok || servingEligible != fixtureCase.ServingEligible {
+			t.Fatalf("%s metadata serving_eligible = %#v, want %v", fixtureCase.CaseID, fixtureCase.Rule.Metadata["serving_eligible"], fixtureCase.ServingEligible)
+		}
+
+		switch fixtureCase.CaseID {
+		case "planted-recurrence-drafts-avoid-rule":
+			assertLifecycleRecurrenceDraft(t, fixtureCase, outcomesByExperience)
+		case "planted-contradiction-moves-rule-out-of-serving":
+			assertLifecycleContradictedRule(t, fixtureCase, outcomesByExperience)
+		case "planted-path-deletion-moves-rule-out-of-serving":
+			assertLifecycleStaleRule(t, fixtureCase, outcomesByExperience)
+		}
+	}
+	for caseID, seen := range wantCaseIDs {
+		if !seen {
+			t.Fatalf("missing lifecycle fixture case %s", caseID)
+		}
+	}
+	assertLifecycleOutcomesVisibleOnMemoryPage(t, root, fixtures, prURLs)
 }
 
 func TestDemoArtifactsAreCustomerSafeAndDoNotContainSeededSecrets(t *testing.T) {
@@ -415,6 +559,34 @@ func readDemoRedactionFixtures(t *testing.T, root string) demoRedactionFixtures 
 	return fixtures
 }
 
+func readDemoLifecycleFixtures(t *testing.T, root string) demoLifecycleFixtures {
+	t.Helper()
+	path := filepath.Join(root, "examples", "demo", "distill-review-lifecycle-fixtures.json")
+	content, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var fixtures demoLifecycleFixtures
+	decoder := json.NewDecoder(strings.NewReader(string(content)))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&fixtures); err != nil {
+		t.Fatalf("decode %s: %v", path, err)
+	}
+	if fixtures.ObjectType != "relia.demo_distill_review_lifecycle_fixtures" {
+		t.Fatalf("unexpected lifecycle fixture object_type %q", fixtures.ObjectType)
+	}
+	if fixtures.SchemaVersion != commandSchemaVersion {
+		t.Fatalf("lifecycle fixture schema_version = %q", fixtures.SchemaVersion)
+	}
+	if fixtures.RedactionStatus != "customer_safe" {
+		t.Fatalf("lifecycle fixture redaction_status = %q", fixtures.RedactionStatus)
+	}
+	if customerSafe, ok := fixtures.Metadata["customer_safe"].(bool); !ok || !customerSafe {
+		t.Fatalf("lifecycle fixture metadata.customer_safe = %#v", fixtures.Metadata["customer_safe"])
+	}
+	return fixtures
+}
+
 func readJSONFileForTest(t *testing.T, path string, target interface{}) {
 	t.Helper()
 	content, err := os.ReadFile(path)
@@ -439,6 +611,14 @@ func demoPRURLs(t *testing.T, index demoPRIndex) map[int]string {
 		urls[pr.Number] = pr.URL
 	}
 	return urls
+}
+
+func demoOutcomesByExperience(outcomes []demoOutcomeFixture) map[string]demoOutcomeFixture {
+	byExperience := map[string]demoOutcomeFixture{}
+	for _, outcome := range outcomes {
+		byExperience[outcome.ExperienceID] = outcome
+	}
+	return byExperience
 }
 
 func computeDemoStats(t *testing.T, outcomes []demoOutcomeFixture) (demoComputedStats, []demoRecurrencePair) {
@@ -539,6 +719,330 @@ func assertDemoReportCitationsResolve(t *testing.T, report demoBacktestReport, p
 			requirePR(rule.HeldFixPR, "rule held fix")
 		}
 	}
+	for _, outcome := range report.RuleLifecycleOutcomes {
+		for _, pr := range outcome.EvidencePRs {
+			requirePR(pr, "rule lifecycle outcome evidence")
+		}
+	}
+}
+
+func assertLifecycleFixturePathsAreRepoRelative(t *testing.T, root string, refs []string) {
+	t.Helper()
+	if len(refs) == 0 {
+		t.Fatal("lifecycle fixture does not cite repo-relative evidence refs")
+	}
+	for _, ref := range refs {
+		assertRepoRelativeFixturePath(t, ref)
+		if _, err := os.Stat(filepath.Join(root, filepath.FromSlash(ref))); err != nil {
+			t.Fatalf("lifecycle fixture evidence ref %s is not readable: %v", ref, err)
+		}
+	}
+}
+
+func assertRepoRelativeFixturePath(t *testing.T, ref string) {
+	t.Helper()
+	clean := filepath.ToSlash(filepath.Clean(filepath.FromSlash(ref)))
+	if strings.TrimSpace(ref) == "" || filepath.IsAbs(ref) || clean == "." || clean == ".." || strings.HasPrefix(clean, "../") || strings.Contains(clean, "/../") {
+		t.Fatalf("fixture path is not repo-relative: %q", ref)
+	}
+	if strings.Contains(ref, "\\") {
+		t.Fatalf("fixture path must use slash-separated repo refs: %q", ref)
+	}
+}
+
+func assertCompiledContextSchemaShape(t *testing.T, snapshot demoCompiledContext) {
+	t.Helper()
+	if snapshot.ObjectType != "relia.compiled_context" {
+		t.Fatalf("serving snapshot object_type = %q", snapshot.ObjectType)
+	}
+	if snapshot.SchemaVersion != commandSchemaVersion {
+		t.Fatalf("serving snapshot schema_version = %q", snapshot.SchemaVersion)
+	}
+	if strings.TrimSpace(snapshot.ContextID) == "" {
+		t.Fatal("serving snapshot missing context_id")
+	}
+	if snapshot.Target != "AGENTS.md" && snapshot.Target != "CLAUDE.md" {
+		t.Fatalf("serving snapshot target = %q", snapshot.Target)
+	}
+	for _, rule := range snapshot.Rules {
+		if strings.TrimSpace(rule.RuleID) == "" {
+			t.Fatal("serving snapshot rule missing rule_id")
+		}
+		if rule.Status != "active" {
+			t.Fatalf("serving snapshot rule %s status = %q, want active", rule.RuleID, rule.Status)
+		}
+		if rule.CitationCount < 1 {
+			t.Fatalf("serving snapshot rule %s citation_count = %d", rule.RuleID, rule.CitationCount)
+		}
+	}
+}
+
+func assertLifecycleRuleSchemaShape(t *testing.T, rule demoLifecycleRule) {
+	t.Helper()
+	if rule.ObjectType != "relia.memory_rule" {
+		t.Fatalf("lifecycle rule %s object_type = %q", rule.ID, rule.ObjectType)
+	}
+	if rule.SchemaVersion != commandSchemaVersion {
+		t.Fatalf("lifecycle rule %s schema_version = %q", rule.ID, rule.SchemaVersion)
+	}
+	if strings.TrimSpace(rule.ID) == "" || strings.TrimSpace(rule.Statement) == "" {
+		t.Fatalf("lifecycle rule has empty id or statement: %#v", rule)
+	}
+	if rule.Kind != "avoid" && rule.Kind != "playbook" {
+		t.Fatalf("lifecycle rule %s kind = %q", rule.ID, rule.Kind)
+	}
+	switch rule.Status {
+	case "candidate", "active", "stale", "contradicted", "retired":
+	default:
+		t.Fatalf("lifecycle rule %s status = %q", rule.ID, rule.Status)
+	}
+	if rule.Confidence < 0 || rule.Confidence > 1 {
+		t.Fatalf("lifecycle rule %s confidence = %.3f", rule.ID, rule.Confidence)
+	}
+	if len(rule.Scope.Paths) == 0 && len(rule.Scope.Signals) == 0 {
+		t.Fatalf("lifecycle rule %s has no concrete scope", rule.ID)
+	}
+	for _, ref := range rule.Scope.Paths {
+		assertRepoRelativeFixturePath(t, ref)
+	}
+	if rule.Evidence.Count != len(rule.Evidence.Experiences) || rule.Evidence.Count < 1 {
+		t.Fatalf("lifecycle rule %s evidence count = %d, experiences = %#v", rule.ID, rule.Evidence.Count, rule.Evidence.Experiences)
+	}
+	if rule.Evidence.Contradictions < 0 {
+		t.Fatalf("lifecycle rule %s has negative contradictions", rule.ID)
+	}
+	if len(rule.Provenance) != rule.Evidence.Count {
+		t.Fatalf("lifecycle rule %s provenance entries = %d, evidence count = %d", rule.ID, len(rule.Provenance), rule.Evidence.Count)
+	}
+	switch rule.Review.Label {
+	case "accepted", "suggested", "needs_user_input":
+	default:
+		t.Fatalf("lifecycle rule %s review.label = %q", rule.ID, rule.Review.Label)
+	}
+	if rule.Status == "active" && rule.Review.Label != "accepted" {
+		t.Fatalf("active lifecycle rule %s review.label = %q", rule.ID, rule.Review.Label)
+	}
+	switch rule.Review.StatementOrigin {
+	case "llm_drafted", "cluster_summary", "human_authored":
+	default:
+		t.Fatalf("lifecycle rule %s review.statement_origin = %q", rule.ID, rule.Review.StatementOrigin)
+	}
+}
+
+func assertLifecycleCitationsResolve(t *testing.T, fixtureCase demoLifecycleCase, prURLs map[int]string, outcomesByExperience map[string]demoOutcomeFixture) {
+	t.Helper()
+	citationsByPR := map[int]demoLifecycleCitation{}
+	for _, citation := range fixtureCase.Citations {
+		if prURLs[citation.PR] != citation.URL {
+			t.Fatalf("%s citation for PR #%d resolves to %q, want %q", fixtureCase.CaseID, citation.PR, citation.URL, prURLs[citation.PR])
+		}
+		if strings.TrimSpace(citation.Role) == "" {
+			t.Fatalf("%s citation for PR #%d missing role", fixtureCase.CaseID, citation.PR)
+		}
+		outcome, ok := outcomesByExperience[citation.ExperienceID]
+		if !ok {
+			t.Fatalf("%s citation references unknown experience %s", fixtureCase.CaseID, citation.ExperienceID)
+		}
+		if outcome.PR != citation.PR {
+			t.Fatalf("%s citation %s PR = %d, want %d", fixtureCase.CaseID, citation.ExperienceID, citation.PR, outcome.PR)
+		}
+		citationsByPR[citation.PR] = citation
+	}
+	for _, provenance := range fixtureCase.Rule.Provenance {
+		citation, ok := citationsByPR[provenance.PR]
+		if !ok {
+			t.Fatalf("%s provenance PR #%d has no citation", fixtureCase.CaseID, provenance.PR)
+		}
+		if provenance.URL != citation.URL || prURLs[provenance.PR] != provenance.URL {
+			t.Fatalf("%s provenance for PR #%d has unresolved URL %q", fixtureCase.CaseID, provenance.PR, provenance.URL)
+		}
+		outcome := outcomesByExperience[citation.ExperienceID]
+		if outcome.OutcomeKind != provenance.Outcome {
+			t.Fatalf("%s provenance PR #%d outcome = %q, want outcome stream kind %q", fixtureCase.CaseID, provenance.PR, provenance.Outcome, outcome.OutcomeKind)
+		}
+	}
+	for _, experienceID := range fixtureCase.TriggerExperienceIDs {
+		if _, ok := outcomesByExperience[experienceID]; !ok {
+			t.Fatalf("%s trigger references unknown experience %s", fixtureCase.CaseID, experienceID)
+		}
+	}
+}
+
+func assertLifecycleRecurrenceDraft(t *testing.T, fixtureCase demoLifecycleCase, outcomesByExperience map[string]demoOutcomeFixture) {
+	t.Helper()
+	if fixtureCase.LifecycleOutcome != "drafted" || fixtureCase.Rule.Kind != "avoid" || fixtureCase.Rule.Status != "candidate" {
+		t.Fatalf("recurrence fixture has wrong lifecycle shape: %#v", fixtureCase)
+	}
+	if fixtureCase.Rule.Review.Label != "suggested" || fixtureCase.Rule.Review.StatementOrigin != "cluster_summary" {
+		t.Fatalf("recurrence fixture review = %#v", fixtureCase.Rule.Review)
+	}
+	signatureIDs := map[string]bool{}
+	for _, experienceID := range fixtureCase.Rule.Evidence.Experiences {
+		outcome := outcomesByExperience[experienceID]
+		if outcome.ActorKind != "agent" || outcome.OutcomeKind != "ci_failure" || outcome.FlakeDiscount != 0 {
+			t.Fatalf("recurrence evidence %s is not an undiscounted agent failure: %#v", experienceID, outcome)
+		}
+		signatureIDs[outcome.SignatureID] = true
+	}
+	if len(signatureIDs) != 1 || !signatureIDs["sig_time_freeze"] {
+		t.Fatalf("recurrence evidence does not form the planted sig_time_freeze cluster: %#v", signatureIDs)
+	}
+	if fixtureCase.Rule.Evidence.Count < 3 {
+		t.Fatalf("recurrence evidence count = %d, want at least 3", fixtureCase.Rule.Evidence.Count)
+	}
+}
+
+func assertLifecycleContradictedRule(t *testing.T, fixtureCase demoLifecycleCase, outcomesByExperience map[string]demoOutcomeFixture) {
+	t.Helper()
+	if fixtureCase.LifecycleOutcome != "contradicted" || fixtureCase.Rule.Status != "contradicted" {
+		t.Fatalf("contradiction fixture has wrong lifecycle shape: %#v", fixtureCase)
+	}
+	if fixtureCase.Rule.Evidence.Contradictions < 2 {
+		t.Fatalf("contradiction fixture contradictions = %d, want at least 2", fixtureCase.Rule.Evidence.Contradictions)
+	}
+	var cleanContradictions int
+	for _, citation := range fixtureCase.Citations {
+		outcome := outcomesByExperience[citation.ExperienceID]
+		if citation.Role == "contradiction" {
+			if outcome.OutcomeKind != "merged_clean" || outcome.SignatureID != "sig_schema_snapshot_blind_regen" {
+				t.Fatalf("contradiction citation is not a clean merge of the planted signature: %#v", outcome)
+			}
+			cleanContradictions++
+		}
+	}
+	if cleanContradictions < 2 {
+		t.Fatalf("contradiction fixture has %d clean contradiction citations, want at least 2", cleanContradictions)
+	}
+}
+
+func assertLifecycleStaleRule(t *testing.T, fixtureCase demoLifecycleCase, outcomesByExperience map[string]demoOutcomeFixture) {
+	t.Helper()
+	if fixtureCase.LifecycleOutcome != "stale" || fixtureCase.Rule.Status != "stale" {
+		t.Fatalf("stale fixture has wrong lifecycle shape: %#v", fixtureCase)
+	}
+	stalePath, ok := fixtureCase.Rule.Metadata["stale_path"].(string)
+	if !ok || strings.TrimSpace(stalePath) == "" {
+		t.Fatalf("stale fixture missing metadata.stale_path: %#v", fixtureCase.Rule.Metadata)
+	}
+	assertRepoRelativeFixturePath(t, stalePath)
+	if !containsStringValue(fixtureCase.Rule.Scope.Paths, stalePath) {
+		t.Fatalf("stale fixture stale_path %q not present in rule scope %#v", stalePath, fixtureCase.Rule.Scope.Paths)
+	}
+	deletionPR, ok := fixtureCase.Rule.Metadata["deletion_pr"].(float64)
+	if !ok || int(deletionPR) != 293 {
+		t.Fatalf("stale fixture deletion_pr = %#v, want 293", fixtureCase.Rule.Metadata["deletion_pr"])
+	}
+	var foundDeletionCitation bool
+	originalScopePaths := map[string]bool{}
+	for _, citation := range fixtureCase.Citations {
+		outcome := outcomesByExperience[citation.ExperienceID]
+		switch citation.Role {
+		case "original_failure":
+			for _, path := range outcome.Paths {
+				originalScopePaths[path] = true
+			}
+		case "scope_deleted":
+			if citation.PR != 293 || outcome.OutcomeKind != "merged_clean" || outcome.SignatureID != "sig_time_freeze" {
+				t.Fatalf("stale deletion citation has wrong outcome: %#v", outcome)
+			}
+			for _, scopedPath := range fixtureCase.Rule.Scope.Paths {
+				if !containsStringValue(outcome.Paths, scopedPath) {
+					t.Fatalf("stale deletion citation %s does not delete scoped path %q; deletion paths = %#v", citation.ExperienceID, scopedPath, outcome.Paths)
+				}
+			}
+			foundDeletionCitation = true
+		default:
+			continue
+		}
+	}
+	if !foundDeletionCitation {
+		t.Fatal("stale fixture missing scope_deleted citation")
+	}
+	for _, scopedPath := range fixtureCase.Rule.Scope.Paths {
+		if !originalScopePaths[scopedPath] {
+			t.Fatalf("stale fixture scope path %q is not backed by original failure evidence %#v", scopedPath, originalScopePaths)
+		}
+	}
+	if len(fixtureCase.Rule.Scope.Paths) != len(originalScopePaths) {
+		t.Fatalf("stale fixture scope %#v narrowed or expanded original evidence scope %#v", fixtureCase.Rule.Scope.Paths, originalScopePaths)
+	}
+}
+
+func assertLifecycleOutcomesVisibleOnMemoryPage(t *testing.T, root string, fixtures demoLifecycleFixtures, prURLs map[int]string) {
+	t.Helper()
+	var backtestReport demoBacktestReport
+	readJSONFileForTest(t, filepath.Join(root, "examples", "reports", "backtest-demo.json"), &backtestReport)
+	reportPaths := []string{
+		filepath.Join("examples", "reports", "memory-page-demo.md"),
+		filepath.Join("examples", "reports", "backtest-demo.html"),
+	}
+	for _, reportPath := range reportPaths {
+		contentBytes, err := os.ReadFile(filepath.Join(root, reportPath))
+		if err != nil {
+			t.Fatal(err)
+		}
+		content := string(contentBytes)
+		for _, fixtureCase := range fixtures.Cases {
+			switch fixtureCase.Rule.Status {
+			case "contradicted", "stale":
+			default:
+				continue
+			}
+			if !strings.Contains(content, fixtureCase.Rule.ID) {
+				t.Fatalf("%s missing lifecycle rule %s", reportPath, fixtureCase.Rule.ID)
+			}
+			if !strings.Contains(content, "No longer served.") {
+				t.Fatalf("%s does not mark lifecycle outcomes as out of serving", reportPath)
+			}
+			candidateHeading := fmt.Sprintf("## Candidate: %s", fixtureCase.Rule.ID)
+			if strings.Contains(content, candidateHeading) {
+				t.Fatalf("%s renders non-serving lifecycle rule %s as a candidate", reportPath, fixtureCase.Rule.ID)
+			}
+			htmlCandidate := fmt.Sprintf("<h2>Memory candidates</h2>")
+			if strings.Contains(content, htmlCandidate) && strings.Contains(content, fixtureCase.Rule.ID) {
+				t.Fatalf("%s renders non-serving lifecycle rule %s in Memory candidates", reportPath, fixtureCase.Rule.ID)
+			}
+			assertBacktestReportLifecycleOutcome(t, backtestReport, fixtureCase)
+			for _, citation := range fixtureCase.Citations {
+				if !strings.Contains(content, prURLs[citation.PR]) {
+					t.Fatalf("%s missing lifecycle citation %s for %s", reportPath, prURLs[citation.PR], fixtureCase.CaseID)
+				}
+			}
+		}
+	}
+}
+
+func assertBacktestReportLifecycleOutcome(t *testing.T, report demoBacktestReport, fixtureCase demoLifecycleCase) {
+	t.Helper()
+	for _, candidate := range report.RuleCandidates {
+		if candidate.RuleID == fixtureCase.Rule.ID {
+			t.Fatalf("backtest JSON renders non-serving lifecycle rule %s as active candidate", fixtureCase.Rule.ID)
+		}
+	}
+	for _, outcome := range report.RuleLifecycleOutcomes {
+		if outcome.RuleID != fixtureCase.Rule.ID {
+			continue
+		}
+		if outcome.Status != fixtureCase.Rule.Status || !outcome.NoLongerServed {
+			t.Fatalf("backtest JSON lifecycle outcome for %s = %#v, want status %s and no_longer_served", fixtureCase.Rule.ID, outcome, fixtureCase.Rule.Status)
+		}
+		for _, citation := range fixtureCase.Citations {
+			if !containsIntValue(outcome.EvidencePRs, citation.PR) {
+				t.Fatalf("backtest JSON lifecycle outcome %s missing citation PR #%d", fixtureCase.Rule.ID, citation.PR)
+			}
+		}
+		return
+	}
+	t.Fatalf("backtest JSON missing lifecycle outcome for %s", fixtureCase.Rule.ID)
+}
+
+func containsIntValue(values []int, want int) bool {
+	for _, value := range values {
+		if value == want {
+			return true
+		}
+	}
+	return false
 }
 
 func assertUncertainAttributionVisible(t *testing.T, outcomes []demoOutcomeFixture, report demoBacktestReport, prURLs map[int]string) {
