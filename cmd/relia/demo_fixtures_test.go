@@ -955,6 +955,10 @@ func assertLifecycleOutcomesVisibleOnMemoryPage(t *testing.T, root string, fixtu
 		if !strings.Contains(content, "No longer served.") {
 			t.Fatal("memory page does not mark lifecycle outcomes as out of serving")
 		}
+		candidateHeading := fmt.Sprintf("## Candidate: %s", fixtureCase.Rule.ID)
+		if strings.Contains(content, candidateHeading) {
+			t.Fatalf("memory page renders non-serving lifecycle rule %s as a candidate", fixtureCase.Rule.ID)
+		}
 		for _, citation := range fixtureCase.Citations {
 			if !strings.Contains(content, prURLs[citation.PR]) {
 				t.Fatalf("memory page missing lifecycle citation %s for %s", prURLs[citation.PR], fixtureCase.CaseID)

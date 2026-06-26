@@ -4,6 +4,7 @@
   "schema_version": "1.0",
   "task_id": "T4.2",
   "status": "pass",
+  "repair_task_id": "20260626T140907.224593000Z-relia-T4.2-repair",
   "required_proof_level": "workflow_behavior",
   "redaction_posture": {
     "classification": "customer_safe",
@@ -55,7 +56,8 @@
           282,
           286
         ],
-        "serving_snapshot_contains_rule": false
+        "serving_snapshot_contains_rule": false,
+        "memory_page_candidate_heading_contains_rule": false
       }
     },
     {
@@ -74,8 +76,17 @@
         "serving_eligible": false,
         "stale_path": "tests/billing/test_invoice_time.py",
         "deletion_pr": 293,
-        "serving_snapshot_contains_rule": false
+        "serving_snapshot_contains_rule": false,
+        "memory_page_candidate_heading_contains_rule": false
       }
+    }
+  ],
+  "red_repair_evidence": [
+    {
+      "command": "go test ./cmd/... -count=1 -run TestDemoDistillReviewLifecycleFixtures",
+      "status": "expected_fail",
+      "exit_code": 1,
+      "failure_snippet": "memory page renders non-serving lifecycle rule avoid-blind-schema-snapshot-regeneration as a candidate"
     }
   ],
   "command_evidence": [

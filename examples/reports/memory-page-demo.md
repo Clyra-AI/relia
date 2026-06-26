@@ -5,26 +5,11 @@ Backtest baseline: **21.4%** headline ERR from 3 confirmed recurrences across
 failures and 3 uncertain attribution cases excluded from the headline: PRs
 #233, #252, and #271.
 
-## Candidate: avoid-mocking-datetime-directly
+## Serving Snapshot
 
-Do not mock the billing clock directly in rollover tests. Use the freeze-time
-fixture that held in [PR #210](https://github.com/Clyra-AI/relia-demo-seed/pull/210).
-
-Evidence:
-
-- [PR #142](https://github.com/Clyra-AI/relia-demo-seed/pull/142)
-- [PR #187](https://github.com/Clyra-AI/relia-demo-seed/pull/187)
-- [PR #203](https://github.com/Clyra-AI/relia-demo-seed/pull/203)
-
-## Candidate: avoid-blind-schema-snapshot-regeneration
-
-Do not regenerate API schema snapshots without checking required error-shape
-assertions.
-
-Evidence:
-
-- [PR #244](https://github.com/Clyra-AI/relia-demo-seed/pull/244)
-- [PR #258](https://github.com/Clyra-AI/relia-demo-seed/pull/258)
+No rules are served by this lifecycle fixture. The seeded recurrence draft and
+the later contradiction and stale-path transitions are preserved below with
+citations instead of being rendered as actionable recommendations.
 
 ## Lifecycle Outcomes
 

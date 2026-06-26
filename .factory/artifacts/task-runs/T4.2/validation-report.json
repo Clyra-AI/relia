@@ -3,14 +3,13 @@
   "schema_version": "1.0",
   "task_id": "T4.2",
   "status": "pass",
+  "repair_task_id": "20260626T140907.224593000Z-relia-T4.2-repair",
   "commands_run": [
     "make lint-fast",
     "make test-fast",
     "make test-contracts",
     "go test ./cmd/... -count=1 -run TestDemoDistillReviewLifecycleFixtures",
-    "python3 -m json.tool examples/demo/distill-review-lifecycle-fixtures.json >/dev/null",
-    "python3 -m json.tool examples/demo/seeded-repo/prs.json >/dev/null",
-    "python3 -m json.tool examples/reports/backtest-demo.json >/dev/null",
+    "go test ./cmd/... -count=1 -run TestDemoDistillReviewLifecycleFixtures",
     "make test-coverage",
     "make prepush-full",
     "python3 -m json.tool .factory/artifacts/task-runs/T4.2/work-proof-marker.json",
@@ -34,38 +33,20 @@
       "command": "make test-contracts",
       "status": "pass",
       "exit_code": 0,
-      "classification": "green_pre_existing"
+      "classification": "pre_existing_green",
+      "notes": "The existing contract lane passed before the review repair, so the repair added a narrower regression assertion first."
+    },
+    {
+      "command": "go test ./cmd/... -count=1 -run TestDemoDistillReviewLifecycleFixtures",
+      "status": "expected_fail",
+      "exit_code": 1,
+      "classification": "red_after_regression_assertion_before_artifact_repair",
+      "failure_snippet": "memory page renders non-serving lifecycle rule avoid-blind-schema-snapshot-regeneration as a candidate"
     }
   ],
-  "test_first_skipped_reason": {
-    "status": "not_applicable",
-    "reason": "The pre-edit contract lane already passed. This bounded task added new lifecycle fixture cases and assertions rather than repairing an existing failing contract.",
-    "pre_edit_command": "make test-contracts",
-    "pre_edit_exit_code": 0
-  },
   "focused_validation_evidence": [
     {
       "command": "go test ./cmd/... -count=1 -run TestDemoDistillReviewLifecycleFixtures",
-      "status": "pass",
-      "exit_code": 0
-    },
-    {
-      "command": "make test-contracts",
-      "status": "pass",
-      "exit_code": 0
-    },
-    {
-      "command": "python3 -m json.tool examples/demo/distill-review-lifecycle-fixtures.json >/dev/null",
-      "status": "pass",
-      "exit_code": 0
-    },
-    {
-      "command": "python3 -m json.tool examples/demo/seeded-repo/prs.json >/dev/null",
-      "status": "pass",
-      "exit_code": 0
-    },
-    {
-      "command": "python3 -m json.tool examples/reports/backtest-demo.json >/dev/null",
       "status": "pass",
       "exit_code": 0
     }
@@ -94,7 +75,7 @@
         ".factory/artifacts/task-runs/T4.2/proof-of-behavior-scorecard.json",
         ".factory/artifacts/task-runs/T4.2/work-proof-marker.json"
       ],
-      "notes": "Fixture case planted-recurrence-drafts-avoid-rule drafts an avoid candidate from exp_0142, exp_0187, and exp_0203 with PR citations 142, 187, and 203."
+      "notes": "The planted recurrence fixture still drafts avoid-mocking-datetime-directly as an avoid candidate from exp_0142, exp_0187, and exp_0203 with PR citations 142, 187, and 203."
     },
     {
       "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-006",
@@ -106,7 +87,7 @@
         ".factory/artifacts/task-runs/T4.2/proof-of-behavior-scorecard.json",
         ".factory/artifacts/task-runs/T4.2/work-proof-marker.json"
       ],
-      "notes": "Fixture case planted-contradiction-moves-rule-out-of-serving marks avoid-blind-schema-snapshot-regeneration contradicted and asserts it is absent from the compiled serving snapshot."
+      "notes": "The planted contradiction remains contradicted and out of serving; the memory page now keeps avoid-blind-schema-snapshot-regeneration only under Lifecycle Outcomes and the test rejects a matching Candidate heading."
     },
     {
       "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-007",
@@ -118,35 +99,30 @@
         ".factory/artifacts/task-runs/T4.2/proof-of-behavior-scorecard.json",
         ".factory/artifacts/task-runs/T4.2/work-proof-marker.json"
       ],
-      "notes": "Fixture case planted-path-deletion-moves-rule-out-of-serving marks avoid-mocking-datetime-directly stale after PR 293 and asserts it is absent from the compiled serving snapshot."
+      "notes": "The planted path deletion remains stale and out of serving; the memory page now keeps avoid-mocking-datetime-directly only under Lifecycle Outcomes and the test rejects a matching Candidate heading."
     }
   ],
   "path_policy_result": {
     "status": "pass",
     "changed_paths": [
-      "README.md",
       "cmd/relia/demo_fixtures_test.go",
-      "docs/architecture/architecture_guides.md",
-      "docs/dev/dev_guides.md",
-      "examples/demo/distill-review-lifecycle-fixtures.json",
-      "examples/demo/seeded-repo/README.md",
-      "examples/demo/seeded-repo/outcomes.jsonl",
-      "examples/demo/seeded-repo/prs.json",
-      "examples/reports/backtest-demo.json",
       "examples/reports/memory-page-demo.md",
       ".factory/artifacts/task-runs/T4.2/work-proof-marker.json",
       ".factory/artifacts/task-runs/T4.2/validation-report.json",
       ".factory/artifacts/task-runs/T4.2/proof-of-behavior-scorecard.json"
     ],
-    "forbidden_paths_changed": []
+    "forbidden_paths_changed": [],
+    "required_validation_temp_paths": [
+      ".factory/tmp/coverage.out"
+    ]
   },
   "plan_drift_result": {
     "status": "pass",
-    "notes": "Implementation stayed within T4.2 fixture cases and acceptance item IDs."
+    "notes": "Repair stayed within the Codex review finding and original T4.2 acceptance item IDs."
   },
   "changelog_result": {
     "status": "not_applicable",
-    "notes": "No repo changelog artifact exists in the allowed path set; docs were synchronized instead of inventing a new release artifact."
+    "notes": "No changelog artifact exists in the allowed path set; this repair changed a demo artifact and contract test only."
   },
   "versioning_result": {
     "status": "not_applicable",
@@ -154,24 +130,21 @@
   },
   "migration_result": {
     "status": "not_applicable",
-    "notes": "No migration required for synthetic demo fixture additions."
+    "notes": "No migration required for a static demo artifact rendering repair."
   },
   "docs_sync_result": {
     "status": "pass",
     "updated_paths": [
-      "README.md",
-      "docs/dev/dev_guides.md",
-      "docs/architecture/architecture_guides.md",
-      "examples/demo/seeded-repo/README.md",
       "examples/reports/memory-page-demo.md"
-    ]
+    ],
+    "notes": "The affected user-visible demo report was synchronized with the lifecycle serving contract."
   },
   "scope_closure_worker_result": {
     "status": "worker_evidence_ready",
     "notes": "Factoryd-owned scope closure, PR lifecycle, and run-once reports were not authored by this worker."
   },
   "residual_risks": [
-    "The runtime distill and review commands remain placeholder commands in this repo slice; this task implements the requested lifecycle fixture cases and contract checks only."
+    "The runtime distill and review commands remain placeholder commands in this repo slice; this repair only adjusts the committed lifecycle fixture report and its contract check."
   ],
   "blockers": []
 }
