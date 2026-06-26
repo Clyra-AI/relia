@@ -677,7 +677,8 @@ func parseAssessArgs(args []string) (assessOptions, *CommandError) {
 func parseUnifiedDiffTouchedPaths(content []byte, ref string) ([]string, *CommandError) {
 	touched := map[string]bool{}
 	inFileHeader := false
-	for _, line := range strings.Split(string(content), "\n") {
+	lines := strings.Split(string(content), "\n")
+	for index, line := range lines {
 		line = strings.TrimRight(line, "\r")
 		switch {
 		case strings.HasPrefix(line, "diff --git "):
@@ -685,10 +686,11 @@ func parseUnifiedDiffTouchedPaths(content []byte, ref string) ([]string, *Comman
 			for _, path := range diffGitHeaderPaths(line) {
 				addDiffPath(touched, path)
 			}
+		case strings.HasPrefix(line, "--- ") && (inFileHeader || plainUnifiedFileHeader(lines, index)):
+			inFileHeader = true
+			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "--- ")))
 		case inFileHeader && strings.HasPrefix(line, "+++ "):
 			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "+++ ")))
-		case inFileHeader && strings.HasPrefix(line, "--- "):
-			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "--- ")))
 		case inFileHeader && strings.HasPrefix(line, "rename from "):
 			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "rename from ")))
 		case inFileHeader && strings.HasPrefix(line, "rename to "):
@@ -706,6 +708,14 @@ func parseUnifiedDiffTouchedPaths(content []byte, ref string) ([]string, *Comman
 		return nil, artifactContractError("assess input diff contains no repo-relative paths", ref)
 	}
 	return paths, nil
+}
+
+func plainUnifiedFileHeader(lines []string, index int) bool {
+	if index+2 >= len(lines) {
+		return false
+	}
+	return strings.HasPrefix(strings.TrimRight(lines[index+1], "\r"), "+++ ") &&
+		strings.HasPrefix(strings.TrimRight(lines[index+2], "\r"), "@@")
 }
 
 func diffGitHeaderPaths(line string) []string {
@@ -944,6 +954,8 @@ func normalizeAssessmentScopePath(root string, raw string) (string, bool, bool) 
 	if !directoryScope && !hasGlobMagic(scopePath) {
 		if info, err := os.Stat(filepath.Join(root, filepath.FromSlash(scopePath))); err == nil && info.IsDir() {
 			directoryScope = true
+		} else if historicalDirectoryScope(root, scopePath) {
+			directoryScope = true
 		}
 	}
 	return scopePath, directoryScope, true
@@ -954,6 +966,21 @@ func directoryScopeMatches(scopePath string, touchedPath string, directoryScope 
 		return false
 	}
 	return touchedPath == scopePath || strings.HasPrefix(touchedPath, scopePath+"/")
+}
+
+func historicalDirectoryScope(root string, scopePath string) bool {
+	output, err := exec.Command("git", "-C", root, "log", "--all", "--name-only", "--format=", "--", scopePath).Output()
+	if err != nil {
+		return false
+	}
+	prefix := strings.TrimSuffix(scopePath, "/") + "/"
+	for _, line := range strings.Split(string(output), "\n") {
+		clean, ok := cleanRepoPath(line)
+		if ok && strings.HasPrefix(filepath.ToSlash(clean), prefix) {
+			return true
+		}
+	}
+	return false
 }
 
 func readReliaConfig(root string) (yamlDocument, *CommandError) {

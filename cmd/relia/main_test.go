@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -1535,6 +1536,67 @@ metadata: {}
 	}
 }
 
+func TestDemoAssessMatchesHistoricalDirectoryScopeWithoutTrailingSlash(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "packages", "billing", "invoice.py"), `def rollover_day():
+    return "2026-01-01"
+`)
+	runGitForTest(t, tempDir, "init")
+	runGitForTest(t, tempDir, "config", "user.email", "relia-test@example.com")
+	runGitForTest(t, tempDir, "config", "user.name", "Relia Test")
+	runGitForTest(t, tempDir, "add", "packages/billing/invoice.py")
+	runGitForTest(t, tempDir, "commit", "-m", "add historical billing package")
+	if err := os.RemoveAll(filepath.Join(tempDir, "packages", "billing")); err != nil {
+		t.Fatal(err)
+	}
+	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "billing-time.yaml"), `object_type: relia.memory_rule
+schema_version: "1.0"
+id: billing-time-fixture
+kind: avoid
+status: active
+statement: Use the billing clock fixture instead of direct UTC calls.
+scope:
+  paths:
+    - packages/billing
+confidence: 0.86
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_0142
+provenance:
+  - pr: 142
+    outcome: ci_failure
+    url: https://github.com/acme/billing-service/pull/142
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`)
+	writeFileForTest(t, filepath.Join(tempDir, "change.diff"), `diff --git a/packages/billing/invoice.py b/packages/billing/invoice.py
+--- a/packages/billing/invoice.py
++++ b/packages/billing/invoice.py
+@@ -1,2 +1,3 @@
+ def rollover_day():
+-    return "2026-01-01"
++    return datetime.utcnow().strftime("%Y-%m-%d")
+`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "assess", "--input", "change.diff"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	assessment := decodeAssessmentFromResult(t, decodeResult(t, stdout))
+	if assessment.RiskLevel != "match_high" {
+		t.Fatalf("risk_level = %q, want match_high", assessment.RiskLevel)
+	}
+	if fmt.Sprint(assessment.Matches) != fmt.Sprint([]demoAssessmentExpectedRule{{RuleID: "billing-time-fixture", Confidence: 0.86}}) {
+		t.Fatalf("matches = %#v", assessment.Matches)
+	}
+}
+
 func TestAssessFormatJSONOverridesInteractiveOutput(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
@@ -1790,6 +1852,21 @@ func TestParseUnifiedDiffTouchedPathsKeepsUnquotedSpaces(t *testing.T) {
 		t.Fatalf("parse diff: %v", commandErr)
 	}
 	if fmt.Sprint(paths) != fmt.Sprint([]string{"docs/api guide.md"}) {
+		t.Fatalf("paths = %#v", paths)
+	}
+}
+
+func TestParseUnifiedDiffTouchedPathsSupportsPlainUnifiedDiff(t *testing.T) {
+	paths, commandErr := parseUnifiedDiffTouchedPaths([]byte(`--- packages/billing/invoice.py
++++ packages/billing/invoice.py
+@@ -1 +1 @@
+-old
++new
+`), "plain.diff")
+	if commandErr != nil {
+		t.Fatalf("parse diff: %v", commandErr)
+	}
+	if fmt.Sprint(paths) != fmt.Sprint([]string{"packages/billing/invoice.py"}) {
 		t.Fatalf("paths = %#v", paths)
 	}
 }
@@ -2732,6 +2809,16 @@ func writeFileForTest(t *testing.T, path string, content string) {
 	}
 	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func runGitForTest(t *testing.T, dir string, args ...string) {
+	t.Helper()
+
+	cmd := exec.Command("git", append([]string{"-C", dir}, args...)...)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("git %v failed: %v\n%s", args, err, output)
 	}
 }
 
