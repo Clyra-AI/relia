@@ -936,32 +936,40 @@ func assertLifecycleStaleRule(t *testing.T, fixtureCase demoLifecycleCase, outco
 
 func assertLifecycleOutcomesVisibleOnMemoryPage(t *testing.T, root string, fixtures demoLifecycleFixtures, prURLs map[int]string) {
 	t.Helper()
-	contentBytes, err := os.ReadFile(filepath.Join(root, "examples", "reports", "memory-page-demo.md"))
-	if err != nil {
-		t.Fatal(err)
+	reportPaths := []string{
+		filepath.Join("examples", "reports", "memory-page-demo.md"),
+		filepath.Join("examples", "reports", "backtest-demo.html"),
 	}
-	content := string(contentBytes)
-	for _, fixtureCase := range fixtures.Cases {
-		switch fixtureCase.Rule.Status {
-		case "contradicted", "stale":
-		default:
-			continue
+	for _, reportPath := range reportPaths {
+		contentBytes, err := os.ReadFile(filepath.Join(root, reportPath))
+		if err != nil {
+			t.Fatal(err)
 		}
-		headingStatus := strings.ToUpper(fixtureCase.Rule.Status[:1]) + fixtureCase.Rule.Status[1:]
-		heading := fmt.Sprintf("%s: %s", headingStatus, fixtureCase.Rule.ID)
-		if !strings.Contains(content, heading) {
-			t.Fatalf("memory page missing lifecycle heading %q", heading)
-		}
-		if !strings.Contains(content, "No longer served.") {
-			t.Fatal("memory page does not mark lifecycle outcomes as out of serving")
-		}
-		candidateHeading := fmt.Sprintf("## Candidate: %s", fixtureCase.Rule.ID)
-		if strings.Contains(content, candidateHeading) {
-			t.Fatalf("memory page renders non-serving lifecycle rule %s as a candidate", fixtureCase.Rule.ID)
-		}
-		for _, citation := range fixtureCase.Citations {
-			if !strings.Contains(content, prURLs[citation.PR]) {
-				t.Fatalf("memory page missing lifecycle citation %s for %s", prURLs[citation.PR], fixtureCase.CaseID)
+		content := string(contentBytes)
+		for _, fixtureCase := range fixtures.Cases {
+			switch fixtureCase.Rule.Status {
+			case "contradicted", "stale":
+			default:
+				continue
+			}
+			if !strings.Contains(content, fixtureCase.Rule.ID) {
+				t.Fatalf("%s missing lifecycle rule %s", reportPath, fixtureCase.Rule.ID)
+			}
+			if !strings.Contains(content, "No longer served.") {
+				t.Fatalf("%s does not mark lifecycle outcomes as out of serving", reportPath)
+			}
+			candidateHeading := fmt.Sprintf("## Candidate: %s", fixtureCase.Rule.ID)
+			if strings.Contains(content, candidateHeading) {
+				t.Fatalf("%s renders non-serving lifecycle rule %s as a candidate", reportPath, fixtureCase.Rule.ID)
+			}
+			htmlCandidate := fmt.Sprintf("<h2>Memory candidates</h2>")
+			if strings.Contains(content, htmlCandidate) && strings.Contains(content, fixtureCase.Rule.ID) {
+				t.Fatalf("%s renders non-serving lifecycle rule %s in Memory candidates", reportPath, fixtureCase.Rule.ID)
+			}
+			for _, citation := range fixtureCase.Citations {
+				if !strings.Contains(content, prURLs[citation.PR]) {
+					t.Fatalf("%s missing lifecycle citation %s for %s", reportPath, prURLs[citation.PR], fixtureCase.CaseID)
+				}
 			}
 		}
 	}

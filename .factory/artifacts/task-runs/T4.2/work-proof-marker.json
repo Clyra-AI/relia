@@ -18,6 +18,7 @@
     "examples/demo/seeded-repo/outcomes.jsonl",
     "examples/demo/seeded-repo/prs.json",
     "examples/reports/backtest-demo.json",
+    "examples/reports/backtest-demo.html",
     "examples/reports/memory-page-demo.md"
   ],
   "evidence_refs": [
