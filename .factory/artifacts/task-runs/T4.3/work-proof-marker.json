@@ -16,6 +16,7 @@
     "examples/demo/assessment-fixtures/assessment-fixtures.json",
     "examples/demo/assessment-fixtures/planted-pattern.diff",
     "examples/demo/assessment-fixtures/seeded-repo/packages/billing/invoice.py",
+    "examples/demo/assessment-fixtures/seeded-repo/packages/search/query.py",
     "examples/demo/assessment-fixtures/unknown-path.diff",
     "memory/rules/demo-assessment-active-rule.yaml"
   ],
@@ -26,12 +27,11 @@
   "implementation_performed": true,
   "objective": "Build assessment fixture coverage for planted-pattern and unknown-path diffs without bundling unrelated corpus work.",
   "repair_summary": [
-    "Preserved trailing-slash directory rule scopes as prefix matches during relia assess.",
-    "Deferred assessment citation URL enforcement until an active rule actually matches a touched path.",
-    "Kept matched active rules fail-closed when they lack citation URLs.",
-    "Added contract-lane tests for directory-scope matching, unrelated uncited rules, and matched uncited rule rejection."
+    "Honored assess --format json as a machine-readable output request even when stdout is interactive.",
+    "Treated active rule scope paths that name existing directories without trailing slashes as directory-prefix scopes.",
+    "Tightened assessment fixture validation so input diffs parse to declared touched paths and those touched paths are backed by committed synthetic fixture files."
   ],
-  "repair_task_id": "20260626T200025.692043000Z-relia-T4.3-repair-2",
+  "repair_task_id": "20260626T200025.692043000Z-relia-T4.3-repair-4",
   "schema_version": "1.0",
   "status": "implemented",
   "task_id": "T4.3"

@@ -115,6 +115,7 @@ type CommandResult struct {
 	RedactionStatus string         `json:"redaction_status"`
 	Metadata        map[string]any `json:"metadata"`
 	Data            map[string]any `json:"data,omitempty"`
+	MachineReadable bool           `json:"-"`
 }
 
 type Finding struct {
@@ -174,8 +175,9 @@ type ingestOptions struct {
 }
 
 type assessOptions struct {
-	InputPath string
-	Format    string
+	InputPath      string
+	Format         string
+	FormatExplicit bool
 }
 
 type riskAssessment struct {
@@ -577,44 +579,50 @@ func parseIngestArgs(args []string) (ingestOptions, *CommandError) {
 
 func assessResult(args []string, start time.Time) CommandResult {
 	options, commandErr := parseAssessArgs(args)
+	withFormat := func(result CommandResult) CommandResult {
+		if options.FormatExplicit && options.Format == "json" {
+			result.MachineReadable = true
+		}
+		return result
+	}
 	if commandErr != nil {
-		return errorResult("assess", "assess", commandErr, start)
+		return withFormat(errorResult("assess", "assess", commandErr, start))
 	}
 	wd, err := os.Getwd()
 	if err != nil {
-		return errorResult("assess", "assess", internalError("could not inspect working directory", err), start)
+		return withFormat(errorResult("assess", "assess", internalError("could not inspect working directory", err), start))
 	}
 	root, ok := findRepoRoot(wd)
 	if !ok {
-		return errorResult("assess", "assess", configError("could not locate repository root from current directory"), start)
+		return withFormat(errorResult("assess", "assess", configError("could not locate repository root from current directory"), start))
 	}
 	warnings, commandErr := validateReliaConfig(root)
 	if commandErr != nil {
-		return errorResult("assess", "assess", commandErr, start)
+		return withFormat(errorResult("assess", "assess", commandErr, start))
 	}
 	if commandErr := validateMemoryRuleArtifacts(root); commandErr != nil {
-		return errorResult("assess", "assess", commandErr, start)
+		return withFormat(errorResult("assess", "assess", commandErr, start))
 	}
 
 	inputPath := resolveInputPath(root, options.InputPath)
 	inputContent, err := os.ReadFile(inputPath)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			return errorResult("assess", "assess", artifactContractError("assess input diff is missing", displayPath(root, inputPath)), start)
+			return withFormat(errorResult("assess", "assess", artifactContractError("assess input diff is missing", displayPath(root, inputPath)), start))
 		}
-		return errorResult("assess", "assess", internalError("could not read assess input", err), start)
+		return withFormat(errorResult("assess", "assess", internalError("could not read assess input", err), start))
 	}
 	touchedPaths, commandErr := parseUnifiedDiffTouchedPaths(inputContent, displayPath(root, inputPath))
 	if commandErr != nil {
-		return errorResult("assess", "assess", commandErr, start)
+		return withFormat(errorResult("assess", "assess", commandErr, start))
 	}
 	rules, commandErr := loadAssessmentRules(root)
 	if commandErr != nil {
-		return errorResult("assess", "assess", commandErr, start)
+		return withFormat(errorResult("assess", "assess", commandErr, start))
 	}
-	assessment, commandErr := buildRiskAssessment(displayPath(root, inputPath), inputContent, touchedPaths, rules)
+	assessment, commandErr := buildRiskAssessment(root, displayPath(root, inputPath), inputContent, touchedPaths, rules)
 	if commandErr != nil {
-		return errorResult("assess", "assess", commandErr, start)
+		return withFormat(errorResult("assess", "assess", commandErr, start))
 	}
 
 	result := passResult("assess", "assess", "assessed local diff against active memory rules", start, map[string]any{
@@ -635,7 +643,7 @@ func assessResult(args []string, start time.Time) CommandResult {
 		result.Artifacts = append(result.Artifacts, ArtifactRef{Kind: "memory_rule", Path: rule.Path})
 		result.EvidenceRefs = append(result.EvidenceRefs, rule.Path)
 	}
-	return result
+	return withFormat(result)
 }
 
 func parseAssessArgs(args []string) (assessOptions, *CommandError) {
@@ -650,6 +658,7 @@ func parseAssessArgs(args []string) (assessOptions, *CommandError) {
 			options.InputPath = args[index+1]
 			index++
 		case "--format":
+			options.FormatExplicit = true
 			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
 				return options, usageError("assess requires a value after --format")
 			}
@@ -781,11 +790,11 @@ func assessmentRuleCitations(document yamlDocument) []string {
 	return uniqueStrings(citations)
 }
 
-func buildRiskAssessment(inputRef string, content []byte, touchedPaths []string, rules []assessmentRule) (riskAssessment, *CommandError) {
+func buildRiskAssessment(root string, inputRef string, content []byte, touchedPaths []string, rules []assessmentRule) (riskAssessment, *CommandError) {
 	matches := []riskAssessmentMatch{}
 	citations := []string{}
 	for _, rule := range rules {
-		if !assessmentRuleMatchesTouchedPath(rule, touchedPaths) {
+		if !assessmentRuleMatchesTouchedPath(root, rule, touchedPaths) {
 			continue
 		}
 		if len(rule.Citations) == 0 {
@@ -832,9 +841,9 @@ func buildRiskAssessment(inputRef string, content []byte, touchedPaths []string,
 	}, nil
 }
 
-func assessmentRuleMatchesTouchedPath(rule assessmentRule, touchedPaths []string) bool {
+func assessmentRuleMatchesTouchedPath(root string, rule assessmentRule, touchedPaths []string) bool {
 	for _, rawScopePath := range rule.ScopePaths {
-		scopePath, directoryScope, ok := normalizeAssessmentScopePath(rawScopePath)
+		scopePath, directoryScope, ok := normalizeAssessmentScopePath(root, rawScopePath)
 		if !ok {
 			continue
 		}
@@ -848,7 +857,7 @@ func assessmentRuleMatchesTouchedPath(rule assessmentRule, touchedPaths []string
 	return false
 }
 
-func normalizeAssessmentScopePath(raw string) (string, bool, bool) {
+func normalizeAssessmentScopePath(root string, raw string) (string, bool, bool) {
 	trimmed := strings.TrimSpace(raw)
 	if trimmed == "" {
 		return "", false, false
@@ -859,7 +868,13 @@ func normalizeAssessmentScopePath(raw string) (string, bool, bool) {
 	if !ok {
 		return "", false, false
 	}
-	return filepath.ToSlash(clean), directoryScope, true
+	scopePath := filepath.ToSlash(clean)
+	if !directoryScope && !hasGlobMagic(scopePath) {
+		if info, err := os.Stat(filepath.Join(root, filepath.FromSlash(scopePath))); err == nil && info.IsDir() {
+			directoryScope = true
+		}
+	}
+	return scopePath, directoryScope, true
 }
 
 func directoryScopeMatches(scopePath string, touchedPath string, directoryScope bool) bool {
@@ -2378,7 +2393,7 @@ func internalError(message string, err error) *CommandError {
 }
 
 func renderAndExit(stdout io.Writer, stderr io.Writer, result CommandResult, flags globalFlags, stdoutIsTTY bool) int {
-	machineReadable := flags.json || flags.quiet || flags.compact || !stdoutIsTTY
+	machineReadable := flags.json || flags.quiet || flags.compact || result.MachineReadable || !stdoutIsTTY
 	var err error
 	if machineReadable {
 		err = writeJSON(stdout, result, flags.compact || flags.quiet)

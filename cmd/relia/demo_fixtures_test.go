@@ -453,6 +453,7 @@ func TestDemoAssessmentFixturesDriveAssessCommand(t *testing.T) {
 		}
 		wantCaseIDs[fixtureCase.CaseID] = true
 		assertAssessmentFixturePathsAreRepoRelative(t, root, append([]string{fixtureCase.InputDiff}, fixtureCase.EvidenceRefs...))
+		assertAssessmentDiffFixtureMatchesDeclaredPaths(t, root, fixtureCase)
 		assertAssessmentCitationsResolve(t, fixtureCase, prURLs)
 		assertAssessmentCommandMatchesFixture(t, fixtureCase)
 	}
@@ -840,6 +841,29 @@ func assertAssessmentFixturePathsAreRepoRelative(t *testing.T, root string, refs
 		assertRepoRelativeFixturePath(t, ref)
 		if _, err := os.Stat(filepath.Join(root, filepath.FromSlash(ref))); err != nil {
 			t.Fatalf("assessment fixture evidence ref %s is not readable: %v", ref, err)
+		}
+	}
+}
+
+func assertAssessmentDiffFixtureMatchesDeclaredPaths(t *testing.T, root string, fixtureCase demoAssessmentCase) {
+	t.Helper()
+	assertRepoRelativeFixturePath(t, fixtureCase.InputDiff)
+	diffPath := filepath.Join(root, filepath.FromSlash(fixtureCase.InputDiff))
+	content, err := os.ReadFile(diffPath)
+	if err != nil {
+		t.Fatalf("%s input_diff %s is not readable: %v", fixtureCase.CaseID, fixtureCase.InputDiff, err)
+	}
+	parsed, commandErr := parseUnifiedDiffTouchedPaths(content, fixtureCase.InputDiff)
+	if commandErr != nil {
+		t.Fatalf("%s input_diff did not parse as a repo-relative diff: %v", fixtureCase.CaseID, commandErr)
+	}
+	if fmt.Sprint(parsed) != fmt.Sprint(fixtureCase.ExpectedTouchedPaths) {
+		t.Fatalf("%s parsed touched_paths = %#v, want declared expected_touched_paths %#v", fixtureCase.CaseID, parsed, fixtureCase.ExpectedTouchedPaths)
+	}
+	for _, touchedPath := range fixtureCase.ExpectedTouchedPaths {
+		assertRepoRelativeFixturePath(t, touchedPath)
+		if _, err := os.Stat(filepath.Join(root, filepath.FromSlash(touchedPath))); err != nil {
+			t.Fatalf("%s expected touched path %s is not backed by a fixture file: %v", fixtureCase.CaseID, touchedPath, err)
 		}
 	}
 }

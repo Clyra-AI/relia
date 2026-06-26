@@ -15,7 +15,7 @@
           "description": "relia assess returns no_coverage on unknown paths",
           "evidence_refs": [
             "examples/demo/assessment-fixtures/unknown-path.diff",
-            "cmd/relia/main_test.go"
+            "examples/demo/assessment-fixtures/seeded-repo/packages/search/query.py"
           ],
           "status": "implemented"
         },
@@ -62,28 +62,32 @@
     "examples/demo/assessment-fixtures/assessment-fixtures.json",
     "examples/demo/assessment-fixtures/planted-pattern.diff",
     "examples/demo/assessment-fixtures/seeded-repo/packages/billing/invoice.py",
+    "examples/demo/assessment-fixtures/seeded-repo/packages/search/query.py",
     "examples/demo/assessment-fixtures/unknown-path.diff",
     "memory/rules/demo-assessment-active-rule.yaml"
   ],
   "changelog_result": {
-    "notes": "No changelog file exists in the allowed repo paths; the repair did not alter runtime pins, schemas, or distribution posture.",
+    "notes": "No changelog file exists in the allowed repo paths; this review repair did not change runtime pins, schemas, or distribution posture.",
     "status": "pass"
   },
   "commands_run": [
     "make lint-fast",
     "make test-fast",
     "make test-contracts",
-    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
-    "GOCACHE=/tmp/relia-go-build go run ./cmd/relia --json assess --input examples/demo/assessment-fixtures/planted-pattern.diff --format json",
-    "GOCACHE=/tmp/relia-go-build go run ./cmd/relia --json assess --input examples/demo/assessment-fixtures/unknown-path.diff --format json",
+    "go test ./cmd/relia -count=1 -run TestAssessFormatJSONOverridesInteractiveOutput",
+    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go cmd/relia/demo_fixtures_test.go",
+    "make test-contracts",
+    "go test ./cmd/relia -count=1 -run TestAssessFormatJSONOverridesInteractiveOutput",
     "make test-coverage",
     "make prepush-full",
+    "GOCACHE=/tmp/relia-go-build go run ./cmd/relia --json assess --input examples/demo/assessment-fixtures/planted-pattern.diff --format json",
+    "GOCACHE=/tmp/relia-go-build go run ./cmd/relia --json assess --input examples/demo/assessment-fixtures/unknown-path.diff --format json",
     "python3 -m json.tool .factory/artifacts/task-runs/T4.3/work-proof-marker.json",
     "python3 -m json.tool .factory/artifacts/task-runs/T4.3/validation-report.json",
     "python3 -m json.tool .factory/artifacts/task-runs/T4.3/proof-of-behavior-scorecard.json"
   ],
   "docs_sync_result": {
-    "notes": "Existing T4.3 docs already describe match_high, no_coverage, active local rules, citations, and repo-relative deterministic fixtures; no docs update was required for the review repair.",
+    "notes": "Existing T4.3 docs already describe JSON assess output, match_high/no_coverage behavior, repo-relative deterministic fixtures, and active local rules.",
     "status": "pass"
   },
   "evidence_artifact_validation": [
@@ -108,7 +112,7 @@
       "command": "make test-coverage",
       "exit_code": 0,
       "observed": {
-        "coverage_percent": 78.8,
+        "coverage_percent": 79.2,
         "minimum_percent": 75
       },
       "status": "pass"
@@ -122,6 +126,11 @@
   "green_evidence": [
     {
       "command": "make test-contracts",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -count=1 -run TestAssessFormatJSONOverridesInteractiveOutput",
       "exit_code": 0,
       "status": "pass"
     },
@@ -166,16 +175,17 @@
       "examples/demo/assessment-fixtures/assessment-fixtures.json",
       "examples/demo/assessment-fixtures/planted-pattern.diff",
       "examples/demo/assessment-fixtures/seeded-repo/packages/billing/invoice.py",
+      "examples/demo/assessment-fixtures/seeded-repo/packages/search/query.py",
       "examples/demo/assessment-fixtures/unknown-path.diff",
       "memory/rules/demo-assessment-active-rule.yaml"
     ],
     "changed_paths_checked": true,
     "forbidden_paths_changed": [],
-    "notes": "All tracked changes are within the task allowed paths. Required coverage commands generated no tracked .factory/tmp diff.",
+    "notes": "All tracked worker changes are inside allowed paths. Required coverage commands generated no tracked .factory/tmp diff.",
     "status": "pass"
   },
   "plan_drift_result": {
-    "notes": "Repair stayed bounded to T4.3 assessment fixture behavior and Codex review findings for directory scopes and unrelated uncited rules.",
+    "notes": "Repair stayed bounded to T4.3 assessment fixture behavior and the actionable Codex review findings.",
     "status": "pass"
   },
   "red_evidence": [
@@ -183,19 +193,27 @@
       "command": "make test-contracts",
       "exit_code": 2,
       "observed_failures": [
-        "TestDemoAssessMatchesDirectoryScopedActiveRule returned no_coverage before the directory-scope repair.",
-        "TestDemoAssessIgnoresUnrelatedRuleWithoutCitationURLs exited 9 before citation enforcement was moved to matched rules."
+        "TestDemoAssessmentFixturesDriveAssessCommand failed because examples/demo/assessment-fixtures/seeded-repo/packages/search/query.py was missing.",
+        "TestDemoAssessMatchesExistingDirectoryScopeWithoutTrailingSlash returned no_coverage before existing slashless directory scopes were treated as prefixes."
+      ],
+      "status": "expected_red"
+    },
+    {
+      "command": "go test ./cmd/relia -count=1 -run TestAssessFormatJSONOverridesInteractiveOutput",
+      "exit_code": 1,
+      "observed_failures": [
+        "assess --format json rendered the human summary on interactive stdout before the repair."
       ],
       "status": "expected_red"
     }
   ],
-  "repair_task_id": "20260626T200025.692043000Z-relia-T4.3-repair-2",
-  "residual_risks": [
-    {
-      "description": "Initial direct go run attempts without GOCACHE used the user-level Go build cache and were denied by the sandbox; the same commands passed with GOCACHE=/tmp/relia-go-build, matching the Makefile validation posture.",
-      "status": "recorded"
-    }
-  ],
+  "redaction_posture": {
+    "classification": "customer_safe",
+    "notes": "Added fixture content is synthetic and repo-relative.",
+    "status": "pass"
+  },
+  "repair_task_id": "20260626T200025.692043000Z-relia-T4.3-repair-4",
+  "residual_risks": [],
   "schema_version": "1.0",
   "status": "pass",
   "task_id": "T4.3",

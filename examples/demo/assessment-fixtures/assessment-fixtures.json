@@ -5,6 +5,7 @@
     "examples/demo/assessment-fixtures/planted-pattern.diff",
     "examples/demo/assessment-fixtures/unknown-path.diff",
     "examples/demo/assessment-fixtures/seeded-repo/packages/billing/invoice.py",
+    "examples/demo/assessment-fixtures/seeded-repo/packages/search/query.py",
     "memory/rules/demo-assessment-active-rule.yaml",
     "schemas/risk-assessment.schema.json"
   ],
