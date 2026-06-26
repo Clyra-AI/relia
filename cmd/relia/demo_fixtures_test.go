@@ -70,12 +70,13 @@ type demoBacktestReport struct {
 		FlakeDiscountedCount      int     `json:"flake_discounted_count"`
 		AttributionUncertainCount int     `json:"attribution_uncertain_count"`
 	} `json:"summary"`
-	ConfirmedRecurrences []demoRecurrencePair `json:"confirmed_recurrences"`
-	FlakeDiscounts       []demoFlakeDiscount  `json:"flake_discounts"`
-	AttributionUncertain []demoUncertainCase  `json:"attribution_uncertain"`
-	RuleCandidates       []demoRuleCandidate  `json:"rule_candidates"`
-	Citations            []demoCitation       `json:"citations"`
-	RedactionStatus      string               `json:"redaction_status"`
+	ConfirmedRecurrences  []demoRecurrencePair       `json:"confirmed_recurrences"`
+	FlakeDiscounts        []demoFlakeDiscount        `json:"flake_discounts"`
+	AttributionUncertain  []demoUncertainCase        `json:"attribution_uncertain"`
+	RuleCandidates        []demoRuleCandidate        `json:"rule_candidates"`
+	RuleLifecycleOutcomes []demoRuleLifecycleOutcome `json:"rule_lifecycle_outcomes"`
+	Citations             []demoCitation             `json:"citations"`
+	RedactionStatus       string                     `json:"redaction_status"`
 }
 
 type demoRecurrencePair struct {
@@ -111,6 +112,14 @@ type demoRuleCandidate struct {
 	SignatureID string `json:"signature_id"`
 	EvidencePRs []int  `json:"evidence_prs"`
 	HeldFixPR   int    `json:"held_fix_pr,omitempty"`
+}
+
+type demoRuleLifecycleOutcome struct {
+	RuleID         string `json:"rule_id"`
+	Status         string `json:"status"`
+	SignatureID    string `json:"signature_id"`
+	EvidencePRs    []int  `json:"evidence_prs"`
+	NoLongerServed bool   `json:"no_longer_served"`
 }
 
 type demoCitation struct {
@@ -710,6 +719,11 @@ func assertDemoReportCitationsResolve(t *testing.T, report demoBacktestReport, p
 			requirePR(rule.HeldFixPR, "rule held fix")
 		}
 	}
+	for _, outcome := range report.RuleLifecycleOutcomes {
+		for _, pr := range outcome.EvidencePRs {
+			requirePR(pr, "rule lifecycle outcome evidence")
+		}
+	}
 }
 
 func assertLifecycleFixturePathsAreRepoRelative(t *testing.T, root string, refs []string) {
@@ -936,6 +950,8 @@ func assertLifecycleStaleRule(t *testing.T, fixtureCase demoLifecycleCase, outco
 
 func assertLifecycleOutcomesVisibleOnMemoryPage(t *testing.T, root string, fixtures demoLifecycleFixtures, prURLs map[int]string) {
 	t.Helper()
+	var backtestReport demoBacktestReport
+	readJSONFileForTest(t, filepath.Join(root, "examples", "reports", "backtest-demo.json"), &backtestReport)
 	reportPaths := []string{
 		filepath.Join("examples", "reports", "memory-page-demo.md"),
 		filepath.Join("examples", "reports", "backtest-demo.html"),
@@ -966,6 +982,7 @@ func assertLifecycleOutcomesVisibleOnMemoryPage(t *testing.T, root string, fixtu
 			if strings.Contains(content, htmlCandidate) && strings.Contains(content, fixtureCase.Rule.ID) {
 				t.Fatalf("%s renders non-serving lifecycle rule %s in Memory candidates", reportPath, fixtureCase.Rule.ID)
 			}
+			assertBacktestReportLifecycleOutcome(t, backtestReport, fixtureCase)
 			for _, citation := range fixtureCase.Citations {
 				if !strings.Contains(content, prURLs[citation.PR]) {
 					t.Fatalf("%s missing lifecycle citation %s for %s", reportPath, prURLs[citation.PR], fixtureCase.CaseID)
@@ -973,6 +990,39 @@ func assertLifecycleOutcomesVisibleOnMemoryPage(t *testing.T, root string, fixtu
 			}
 		}
 	}
+}
+
+func assertBacktestReportLifecycleOutcome(t *testing.T, report demoBacktestReport, fixtureCase demoLifecycleCase) {
+	t.Helper()
+	for _, candidate := range report.RuleCandidates {
+		if candidate.RuleID == fixtureCase.Rule.ID {
+			t.Fatalf("backtest JSON renders non-serving lifecycle rule %s as active candidate", fixtureCase.Rule.ID)
+		}
+	}
+	for _, outcome := range report.RuleLifecycleOutcomes {
+		if outcome.RuleID != fixtureCase.Rule.ID {
+			continue
+		}
+		if outcome.Status != fixtureCase.Rule.Status || !outcome.NoLongerServed {
+			t.Fatalf("backtest JSON lifecycle outcome for %s = %#v, want status %s and no_longer_served", fixtureCase.Rule.ID, outcome, fixtureCase.Rule.Status)
+		}
+		for _, citation := range fixtureCase.Citations {
+			if !containsIntValue(outcome.EvidencePRs, citation.PR) {
+				t.Fatalf("backtest JSON lifecycle outcome %s missing citation PR #%d", fixtureCase.Rule.ID, citation.PR)
+			}
+		}
+		return
+	}
+	t.Fatalf("backtest JSON missing lifecycle outcome for %s", fixtureCase.Rule.ID)
+}
+
+func containsIntValue(values []int, want int) bool {
+	for _, value := range values {
+		if value == want {
+			return true
+		}
+	}
+	return false
 }
 
 func assertUncertainAttributionVisible(t *testing.T, outcomes []demoOutcomeFixture, report demoBacktestReport, prURLs map[int]string) {
