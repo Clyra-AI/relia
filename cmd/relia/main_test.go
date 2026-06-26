@@ -1665,6 +1665,69 @@ metadata: {}
 	}
 }
 
+func TestDemoAssessMatchesPureRenameSourcePath(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "billing-time.yaml"), `object_type: relia.memory_rule
+schema_version: "1.0"
+id: billing-time-fixture
+kind: avoid
+status: active
+statement: Keep billing invoice changes inside the governed workflow.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.86
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_0142
+provenance:
+  - pr: 142
+    outcome: ci_failure
+    url: https://github.com/acme/billing-service/pull/142
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`)
+	writeFileForTest(t, filepath.Join(tempDir, "rename.diff"), `diff --git a/packages/billing/invoice.py b/packages/archive/invoice.py
+similarity index 100%
+rename from packages/billing/invoice.py
+rename to packages/archive/invoice.py
+`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "assess", "--input", "rename.diff"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	assessment := decodeAssessmentFromResult(t, decodeResult(t, stdout))
+	if assessment.RiskLevel != "match_high" {
+		t.Fatalf("risk_level = %q, want match_high", assessment.RiskLevel)
+	}
+	if fmt.Sprint(assessment.Matches) != fmt.Sprint([]demoAssessmentExpectedRule{{RuleID: "billing-time-fixture", Confidence: 0.86}}) {
+		t.Fatalf("matches = %#v", assessment.Matches)
+	}
+}
+
+func TestParseUnifiedDiffTouchedPathsKeepsQuotedSpaces(t *testing.T) {
+	paths, commandErr := parseUnifiedDiffTouchedPaths([]byte(`diff --git "a/docs/api guide.md" "b/docs/api guide.md"
+--- "a/docs/api guide.md"
++++ "b/docs/api guide.md"
+@@ -1 +1 @@
+-old
++new
+`), "quoted.diff")
+	if commandErr != nil {
+		t.Fatalf("parse diff: %v", commandErr)
+	}
+	if fmt.Sprint(paths) != fmt.Sprint([]string{"docs/api guide.md"}) {
+		t.Fatalf("paths = %#v", paths)
+	}
+}
+
 func TestDemoAssessRejectsMatchedRuleWithoutCitationURLs(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)

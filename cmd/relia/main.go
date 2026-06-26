@@ -685,14 +685,17 @@ func parseUnifiedDiffTouchedPaths(content []byte, ref string) ([]string, *Comman
 		switch {
 		case strings.HasPrefix(line, "diff --git "):
 			inFileHeader = true
-			fields := strings.Fields(strings.TrimPrefix(line, "diff --git "))
-			if len(fields) >= 2 {
-				addDiffPath(touched, fields[1])
+			for _, path := range diffGitHeaderPaths(line) {
+				addDiffPath(touched, path)
 			}
 		case inFileHeader && strings.HasPrefix(line, "+++ "):
 			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "+++ ")))
 		case inFileHeader && strings.HasPrefix(line, "--- "):
 			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "--- ")))
+		case inFileHeader && strings.HasPrefix(line, "rename from "):
+			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "rename from ")))
+		case inFileHeader && strings.HasPrefix(line, "rename to "):
+			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "rename to ")))
 		case strings.HasPrefix(line, "@@"):
 			inFileHeader = false
 		}
@@ -708,9 +711,61 @@ func parseUnifiedDiffTouchedPaths(content []byte, ref string) ([]string, *Comman
 	return paths, nil
 }
 
+func diffGitHeaderPaths(line string) []string {
+	rest := strings.TrimSpace(strings.TrimPrefix(line, "diff --git "))
+	var paths []string
+	for len(rest) > 0 && len(paths) < 2 {
+		var path string
+		var ok bool
+		path, rest, ok = nextDiffHeaderPath(rest)
+		if !ok {
+			break
+		}
+		paths = append(paths, path)
+	}
+	return paths
+}
+
+func nextDiffHeaderPath(input string) (string, string, bool) {
+	input = strings.TrimSpace(input)
+	if input == "" {
+		return "", "", false
+	}
+	if strings.HasPrefix(input, "\"") {
+		escaped := false
+		for index := 1; index < len(input); index++ {
+			char := input[index]
+			if escaped {
+				escaped = false
+				continue
+			}
+			if char == '\\' {
+				escaped = true
+				continue
+			}
+			if char == '"' {
+				token := input[:index+1]
+				if unquoted, err := strconv.Unquote(token); err == nil {
+					return unquoted, input[index+1:], true
+				}
+				return strings.Trim(token, "\""), input[index+1:], true
+			}
+		}
+	}
+	if index := strings.IndexAny(input, "\t "); index >= 0 {
+		return input[:index], input[index+1:], true
+	}
+	return input, "", true
+}
+
 func addDiffPath(touched map[string]bool, raw string) {
 	pathPart := strings.TrimSpace(raw)
-	if index := strings.IndexAny(pathPart, "\t "); index >= 0 {
+	if strings.HasPrefix(pathPart, "\"") {
+		if unquoted, err := strconv.Unquote(pathPart); err == nil {
+			pathPart = unquoted
+		}
+	}
+	if index := strings.Index(pathPart, "\t"); index >= 0 {
 		pathPart = pathPart[:index]
 	}
 	if pathPart == "" || pathPart == "/dev/null" {
