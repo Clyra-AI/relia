@@ -3,7 +3,7 @@
   "schema_version": "1.0",
   "task_id": "T4.1",
   "status": "pass",
-  "generated_at": "2026-06-26T12:43:46Z",
+  "generated_at": "2026-06-26T12:54:59Z",
   "commands_run": [
     "git status --short",
     "make lint-fast",
@@ -17,6 +17,7 @@
     "make test-coverage",
     "make prepush-full",
     "git diff --name-only",
+    "git diff --name-only main...HEAD",
     "git ls-files --others --exclude-standard",
     "python3 -m json.tool .factory/artifacts/task-runs/T4.1/work-proof-marker.json",
     "python3 -m json.tool .factory/artifacts/task-runs/T4.1/validation-report.json",
@@ -139,13 +140,25 @@
       "status": "implemented",
       "evidence_refs": [
         ".factory/artifacts/task-runs/T4.1/proof-of-behavior-scorecard.json",
+        "examples/demo/seeded-repo/outcomes.jsonl",
+        "examples/demo/flake-discount-fixtures.json",
+        "examples/reports/backtest-demo.json",
+        "cmd/relia/demo_fixtures_test.go:TestDemoFixtureCorpusReproducesBacktestReport"
+      ],
+      "notes": "The planted flaky test is discounted with support from PR #214 and PR #216 and drafts no rule."
+    },
+    {
+      "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-009",
+      "status": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T4.1/proof-of-behavior-scorecard.json",
         "examples/demo/redaction-fixtures/expected-redacted-artifacts.json",
         "cmd/relia/demo_fixtures_test.go:TestDemoArtifactsAreCustomerSafeAndDoNotContainSeededSecrets"
       ],
       "notes": "Demo artifacts store redacted expectations only and the TestDemo secret scan checks the demo corpus and reports for standard token shapes and machine-local paths."
     },
     {
-      "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-009",
+      "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-011",
       "status": "implemented",
       "evidence_refs": [
         ".factory/artifacts/task-runs/T4.1/proof-of-behavior-scorecard.json",
@@ -153,18 +166,6 @@
         "cmd/relia/demo_fixtures_test.go:TestDemoAttributionPrecisionSampleExcludesUncertain"
       ],
       "notes": "The labeled attribution sample records 14 evaluated correct predictions, 3 excluded uncertain cases, and precision 1.0 against the 0.95 threshold."
-    },
-    {
-      "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-011",
-      "status": "implemented",
-      "evidence_refs": [
-        ".factory/artifacts/task-runs/T4.1/proof-of-behavior-scorecard.json",
-        "examples/demo/seeded-repo/outcomes.jsonl",
-        "examples/demo/flake-discount-fixtures.json",
-        "examples/reports/backtest-demo.json",
-        "cmd/relia/demo_fixtures_test.go:TestDemoFixtureCorpusReproducesBacktestReport"
-      ],
-      "notes": "The report headline is recomputed as 3 confirmed recurrences across 11 eligible agent-attributed failures, yielding 27.3%; the planted flake is discounted with support from PR #214 and PR #216 and drafts no rule."
     },
     {
       "acceptance_item_id": "DEMO-ACCEPTANCE-002",
@@ -192,16 +193,23 @@
   "path_policy_result": {
     "status": "pass",
     "allowed_changed_paths": [
+      ".factory/artifacts/task-runs/T4.1/proof-of-behavior-scorecard.json",
+      ".factory/artifacts/task-runs/T4.1/validation-report.json",
+      ".factory/artifacts/task-runs/T4.1/work-proof-marker.json",
+      "Makefile",
+      "README.md",
       "cmd/relia/demo_fixtures_test.go",
+      "docs/architecture/architecture_guides.md",
+      "docs/dev/dev_guides.md",
+      "examples/demo/attribution-precision-sample.json",
       "examples/demo/flake-discount-fixtures.json",
+      "examples/demo/redaction-fixtures/expected-redacted-artifacts.json",
+      "examples/demo/seeded-repo/README.md",
       "examples/demo/seeded-repo/outcomes.jsonl",
       "examples/demo/seeded-repo/prs.json",
       "examples/reports/backtest-demo.html",
       "examples/reports/backtest-demo.json",
-      "examples/reports/memory-page-demo.md",
-      ".factory/artifacts/task-runs/T4.1/work-proof-marker.json",
-      ".factory/artifacts/task-runs/T4.1/validation-report.json",
-      ".factory/artifacts/task-runs/T4.1/proof-of-behavior-scorecard.json"
+      "examples/reports/memory-page-demo.md"
     ],
     "forbidden_changed_paths": [],
     "untracked_nonignored_paths": [],
@@ -211,11 +219,11 @@
   },
   "plan_drift_result": {
     "status": "pass",
-    "notes": "Repair stayed inside the T4.1 fixture corpus, report baseline, tests, and worker-evidence scope. No runtime, credential, network, schema, CI, release, or lifecycle posture changed."
+    "notes": "Repair stayed inside the T4.1 fixture corpus, report baseline, tests, docs, Makefile validation target, and worker-evidence scope. No runtime, credential, network, schema, CI, release, or lifecycle posture changed."
   },
   "changelog_result": {
     "status": "not_applicable_for_repair",
-    "notes": "No changelog surface was changed for this Codex review repair; the existing T4.1 docs continue to describe the fixture paths and contract coverage."
+    "notes": "No changelog surface was changed for this Codex review repair; the existing T4.1 docs and Makefile target continue to describe the fixture paths and contract coverage."
   },
   "versioning_result": {
     "status": "not_applicable",

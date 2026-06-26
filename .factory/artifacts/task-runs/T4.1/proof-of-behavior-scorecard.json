@@ -3,7 +3,7 @@
   "schema_version": "1.0",
   "task_id": "T4.1",
   "status": "pass",
-  "generated_at": "2026-06-26T12:43:46Z",
+  "generated_at": "2026-06-26T12:54:59Z",
   "proof_level": "workflow_behavior",
   "behaviors": [
     {
@@ -108,5 +108,8 @@
   ],
   "validation_refs": [
     ".factory/artifacts/task-runs/T4.1/validation-report.json"
+  ],
+  "repair_notes": [
+    "Review repair 3 refreshed this worker-owned scorecard timestamp after reconciling acceptance IDs and full changed-path evidence."
   ]
 }
