@@ -3,7 +3,7 @@
   "schema_version": "1.0",
   "task_id": "T4.1",
   "status": "implemented",
-  "generated_at": "2026-06-26T12:54:59Z",
+  "generated_at": "2026-06-26T12:59:03Z",
   "implementation_performed": true,
   "changed_paths": [
     ".factory/artifacts/task-runs/T4.1/proof-of-behavior-scorecard.json",
@@ -30,7 +30,8 @@
     "Updated the flake-discount fixture and backtest report to cite PR #214 and PR #216 as support for PR #219.",
     "Updated HTML and Markdown static report baselines to show 3 flake-discounted failures and to keep rule candidates visually/textually distinct from active memory.",
     "Extended the demo fixture contract test to fail when a flake-discounted report claim lacks repeated seeded support.",
-    "Review repair 3 updated the worker evidence changed_paths list to match git diff --name-only main...HEAD."
+    "Review repair 3 updated the worker evidence changed_paths list to match git diff --name-only main...HEAD.",
+    "Review repair 4 confirmed the complete changed_paths inventory against git diff --name-only main...HEAD after rerunning make test-coverage and make prepush-full."
   ],
   "evidence_refs": [
     ".factory/artifacts/task-runs/T4.1/validation-report.json",

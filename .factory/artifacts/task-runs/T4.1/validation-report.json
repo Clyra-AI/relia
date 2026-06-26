@@ -3,7 +3,7 @@
   "schema_version": "1.0",
   "task_id": "T4.1",
   "status": "pass",
-  "generated_at": "2026-06-26T12:54:59Z",
+  "generated_at": "2026-06-26T12:59:03Z",
   "commands_run": [
     "git status --short",
     "make lint-fast",
@@ -74,6 +74,36 @@
       "command": "python3 -m json.tool examples/reports/backtest-demo.json",
       "status": "pass",
       "exit_code": 0
+    }
+  ],
+  "review_repair_results": [
+    {
+      "repair_task_id": "20260626T121927.156625000Z-relia-T4.1-repair-4",
+      "status": "pass",
+      "findings_repaired": [
+        {
+          "finding": "Correct swapped acceptance IDs",
+          "status": "pass",
+          "evidence": "Acceptance results map INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-008 to flake discount, 009 to seeded-secret redaction, and 011 to attribution precision, matching the acceptance ledger source_text."
+        },
+        {
+          "finding": "List all changed paths in worker evidence",
+          "status": "pass",
+          "evidence": "work-proof-marker.json changed_paths and validation-report.json path_policy_result.allowed_changed_paths match git diff --name-only main...HEAD."
+        }
+      ],
+      "validation_commands": [
+        {
+          "command": "make test-coverage",
+          "status": "pass",
+          "exit_code": 0
+        },
+        {
+          "command": "make prepush-full",
+          "status": "pass",
+          "exit_code": 0
+        }
+      ]
     }
   ],
   "non_final_validation_attempts": [
@@ -192,6 +222,7 @@
   ],
   "path_policy_result": {
     "status": "pass",
+    "notes": "Review repair 4 confirmed this list against git diff --name-only main...HEAD.",
     "allowed_changed_paths": [
       ".factory/artifacts/task-runs/T4.1/proof-of-behavior-scorecard.json",
       ".factory/artifacts/task-runs/T4.1/validation-report.json",
