@@ -1,7 +1,7 @@
 # Relia Demo Memory Page
 
-Backtest baseline: **27.3%** headline ERR from 3 confirmed recurrences across
-11 agent-attributed failures. The seeded corpus also records 3 flake-discounted
+Backtest baseline: **21.4%** headline ERR from 3 confirmed recurrences across
+14 agent-attributed failures. The seeded corpus also records 3 flake-discounted
 failures and 3 uncertain attribution cases excluded from the headline.
 
 ## Candidate: avoid-mocking-datetime-directly
@@ -27,8 +27,8 @@ Evidence:
 
 ## Discounted
 
-[PR #219](https://github.com/Clyra-AI/relia-demo-seed/pull/219) is marked as
-flake-discounted with support from
-[PR #214](https://github.com/Clyra-AI/relia-demo-seed/pull/214) and
-[PR #216](https://github.com/Clyra-AI/relia-demo-seed/pull/216). The planted
-flake does not draft a rule.
+[PR #214](https://github.com/Clyra-AI/relia-demo-seed/pull/214),
+[PR #216](https://github.com/Clyra-AI/relia-demo-seed/pull/216), and
+[PR #219](https://github.com/Clyra-AI/relia-demo-seed/pull/219) are marked as
+flake-discounted repeated notification retry failures. The planted flakes do not
+draft rules.

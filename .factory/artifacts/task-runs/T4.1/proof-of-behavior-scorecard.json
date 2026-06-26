@@ -75,9 +75,9 @@
         "cmd/relia/demo_fixtures_test.go:TestDemoFixtureCorpusReproducesBacktestReport"
       ],
       "metrics": {
-        "headline_err_percent": "27.3%",
+        "headline_err_percent": "21.4%",
         "confirmed_recurrences": 3,
-        "agent_failure_denominator": 11,
+        "agent_failure_denominator": 14,
         "flake_discounted_count": 3,
         "attribution_uncertain_count": 3
       }

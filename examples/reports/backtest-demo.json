@@ -20,11 +20,11 @@
   },
   "summary": {
     "seeded_prs": 19,
-    "agent_failure_denominator": 11,
+    "agent_failure_denominator": 14,
     "confirmed_recurrence_count": 3,
     "possible_recurrence_count": 0,
-    "headline_err": 0.2727,
-    "headline_err_percent": "27.3%",
+    "headline_err": 0.2143,
+    "headline_err_percent": "21.4%",
     "flake_discounted_count": 3,
     "attribution_uncertain_count": 3,
     "attribution_precision": 1.0
@@ -54,6 +54,24 @@
   ],
   "possible_recurrences": [],
   "flake_discounts": [
+    {
+      "pr": 214,
+      "experience_id": "exp_0214",
+      "signature_id": "sig_external_retry_flake",
+      "flake_discount": 1.0,
+      "drafts_rule": false,
+      "supporting_prs": [216, 219],
+      "reason": "Discounted as flaky because the failure repeats across unrelated retry/logging diffs and has no confirmed recurrence pair."
+    },
+    {
+      "pr": 216,
+      "experience_id": "exp_0216",
+      "signature_id": "sig_external_retry_flake",
+      "flake_discount": 1.0,
+      "drafts_rule": false,
+      "supporting_prs": [214, 219],
+      "reason": "Discounted as flaky because the failure repeats across unrelated retry/logging diffs and has no confirmed recurrence pair."
+    },
     {
       "pr": 219,
       "experience_id": "exp_0219",

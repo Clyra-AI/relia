@@ -3,6 +3,28 @@
   "schema_version": "1.0",
   "cases": [
     {
+      "case_id": "flake-0214-external-retry",
+      "pr": 214,
+      "experience_id": "exp_0214",
+      "signature_id": "sig_external_retry_flake",
+      "flake_discount": 1.0,
+      "discount_reason": "same check failure appears across unrelated retry/logging diffs and does not share the billing or API recurrence signatures",
+      "supporting_experience_ids": ["exp_0216", "exp_0219"],
+      "expected_rule_draft": false,
+      "citation": "https://github.com/Clyra-AI/relia-demo-seed/pull/214"
+    },
+    {
+      "case_id": "flake-0216-external-retry",
+      "pr": 216,
+      "experience_id": "exp_0216",
+      "signature_id": "sig_external_retry_flake",
+      "flake_discount": 1.0,
+      "discount_reason": "same check failure appears across unrelated retry/logging diffs and does not share the billing or API recurrence signatures",
+      "supporting_experience_ids": ["exp_0214", "exp_0219"],
+      "expected_rule_draft": false,
+      "citation": "https://github.com/Clyra-AI/relia-demo-seed/pull/216"
+    },
+    {
       "case_id": "flake-0219-external-retry",
       "pr": 219,
       "experience_id": "exp_0219",

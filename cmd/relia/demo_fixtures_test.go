@@ -417,14 +417,14 @@ func computeDemoStats(t *testing.T, outcomes []demoOutcomeFixture) (demoComputed
 		if outcome.OutcomeKind != "ci_failure" {
 			continue
 		}
-		if outcome.FlakeDiscount > 0 {
-			stats.flakeDiscountedCount++
-			continue
-		}
 		if outcome.ActorKind != "agent" {
 			continue
 		}
 		stats.agentFailureDenominator++
+		if outcome.FlakeDiscount > 0 {
+			stats.flakeDiscountedCount++
+			continue
+		}
 		if outcome.SignatureID == "" {
 			t.Fatalf("agent failure %s missing signature_id", outcome.ExperienceID)
 		}
