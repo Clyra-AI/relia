@@ -1613,6 +1613,58 @@ metadata: {}
 	}
 }
 
+func TestDemoAssessIgnoresHunkBodyDiffMarkersAsPaths(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "billing-time.yaml"), `object_type: relia.memory_rule
+schema_version: "1.0"
+id: billing-time-fixture
+kind: avoid
+status: active
+statement: Use the billing clock fixture instead of direct UTC calls.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.86
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_0142
+provenance:
+  - pr: 142
+    outcome: ci_failure
+    url: https://github.com/acme/billing-service/pull/142
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`)
+	writeFileForTest(t, filepath.Join(tempDir, "unknown.diff"), `diff --git a/packages/search/query.py b/packages/search/query.py
+--- a/packages/search/query.py
++++ b/packages/search/query.py
+@@ -1,2 +1,4 @@
+ def normalize_query(value):
+-    return value.strip().lower()
+++ packages/billing/invoice.py
++    normalized = value.strip().lower()
++    return " ".join(normalized.split())
+`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "assess", "--input", "unknown.diff"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	assessment := decodeAssessmentFromResult(t, decodeResult(t, stdout))
+	if assessment.RiskLevel != "no_coverage" {
+		t.Fatalf("risk_level = %q, want no_coverage", assessment.RiskLevel)
+	}
+	if len(assessment.Matches) != 0 || len(assessment.Citations) != 0 {
+		t.Fatalf("assessment used hunk body marker as path: matches=%#v citations=%#v", assessment.Matches, assessment.Citations)
+	}
+}
+
 func TestDemoAssessRejectsMatchedRuleWithoutCitationURLs(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)

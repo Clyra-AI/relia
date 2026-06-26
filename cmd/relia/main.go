@@ -679,18 +679,22 @@ func parseAssessArgs(args []string) (assessOptions, *CommandError) {
 
 func parseUnifiedDiffTouchedPaths(content []byte, ref string) ([]string, *CommandError) {
 	touched := map[string]bool{}
+	inFileHeader := false
 	for _, line := range strings.Split(string(content), "\n") {
 		line = strings.TrimRight(line, "\r")
 		switch {
 		case strings.HasPrefix(line, "diff --git "):
+			inFileHeader = true
 			fields := strings.Fields(strings.TrimPrefix(line, "diff --git "))
 			if len(fields) >= 2 {
 				addDiffPath(touched, fields[1])
 			}
-		case strings.HasPrefix(line, "+++ "):
+		case inFileHeader && strings.HasPrefix(line, "+++ "):
 			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "+++ ")))
-		case strings.HasPrefix(line, "--- "):
+		case inFileHeader && strings.HasPrefix(line, "--- "):
 			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "--- ")))
+		case strings.HasPrefix(line, "@@"):
+			inFileHeader = false
 		}
 	}
 	paths := make([]string, 0, len(touched))
