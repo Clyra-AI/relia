@@ -33,3 +33,8 @@ Evidence:
 [PR #219](https://github.com/Clyra-AI/relia-demo-seed/pull/219) are marked as
 flake-discounted repeated notification retry failures. The planted flakes do not
 draft rules.
+
+## Redaction Proof
+
+Seeded secret fixtures appear only as `[REDACTED:token]` and
+`[REDACTED:secret]` in demo artifacts.

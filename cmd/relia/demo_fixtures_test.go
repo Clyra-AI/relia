@@ -163,9 +163,10 @@ type demoRedactionFixtures struct {
 	ObjectType    string `json:"object_type"`
 	SchemaVersion string `json:"schema_version"`
 	Cases         []struct {
-		CaseID                string `json:"case_id"`
-		StoresRawSecret       bool   `json:"stores_raw_secret"`
-		ExpectedArtifactValue string `json:"expected_artifact_value"`
+		CaseID                string   `json:"case_id"`
+		StoresRawSecret       bool     `json:"stores_raw_secret"`
+		ExpectedArtifactValue string   `json:"expected_artifact_value"`
+		ArtifactPathsChecked  []string `json:"artifact_paths_checked"`
 	} `json:"cases"`
 }
 
@@ -267,6 +268,19 @@ func TestDemoArtifactsAreCustomerSafeAndDoNotContainSeededSecrets(t *testing.T) 
 		if !strings.HasPrefix(testCase.ExpectedArtifactValue, "[REDACTED:") {
 			t.Fatalf("redaction fixture %s expected artifact value is not redacted: %q", testCase.CaseID, testCase.ExpectedArtifactValue)
 		}
+		assertDemoRedactionFixtureExercisesPipeline(t, testCase.CaseID, testCase.ExpectedArtifactValue)
+		if len(testCase.ArtifactPathsChecked) == 0 {
+			t.Fatalf("redaction fixture %s does not list artifact paths checked", testCase.CaseID)
+		}
+		for _, relPath := range testCase.ArtifactPathsChecked {
+			content, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(relPath)))
+			if err != nil {
+				t.Fatalf("read redaction artifact %s: %v", relPath, err)
+			}
+			if !strings.Contains(string(content), testCase.ExpectedArtifactValue) {
+				t.Fatalf("redaction fixture %s expected %s in %s", testCase.CaseID, testCase.ExpectedArtifactValue, relPath)
+			}
+		}
 	}
 	scanRoots := []string{
 		filepath.Join(root, "examples", "demo"),
@@ -290,6 +304,31 @@ func TestDemoArtifactsAreCustomerSafeAndDoNotContainSeededSecrets(t *testing.T) 
 		if err != nil {
 			t.Fatal(err)
 		}
+	}
+}
+
+func assertDemoRedactionFixtureExercisesPipeline(t *testing.T, caseID string, expectedArtifactValue string) {
+	t.Helper()
+	const syntheticToken = "ghp_1234567890abcdef1234567890abcdef123456"
+	rawEvent := map[string]any{
+		"message": "demo failure log Bearer " + syntheticToken,
+		"metadata": map[string]any{
+			"client_secret": "demo-client-secret",
+		},
+	}
+	redacted, commandErr := redactForPersistence(rawEvent, "demo-redaction-fixture:"+caseID)
+	if commandErr != nil {
+		t.Fatalf("redaction fixture %s failed redaction pipeline: %v", caseID, commandErr)
+	}
+	encoded, err := json.Marshal(redacted)
+	if err != nil {
+		t.Fatalf("encode redacted fixture %s: %v", caseID, err)
+	}
+	if strings.Contains(string(encoded), syntheticToken) || strings.Contains(string(encoded), "demo-client-secret") {
+		t.Fatalf("redaction fixture %s preserved raw secret material: %s", caseID, encoded)
+	}
+	if !strings.Contains(string(encoded), expectedArtifactValue) {
+		t.Fatalf("redaction fixture %s did not produce expected placeholder %s: %s", caseID, expectedArtifactValue, encoded)
 	}
 }
 

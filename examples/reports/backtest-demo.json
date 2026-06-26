@@ -140,6 +140,18 @@
     {"pr":258,"url":"https://github.com/Clyra-AI/relia-demo-seed/pull/258"}
   ],
   "redaction_status": "customer_safe",
+  "redaction_examples": [
+    {
+      "case_id": "standard-token-shaped-log",
+      "artifact_value": "[REDACTED:token]",
+      "raw_secret_persisted": false
+    },
+    {
+      "case_id": "secret-named-metadata-field",
+      "artifact_value": "[REDACTED:secret]",
+      "raw_secret_persisted": false
+    }
+  ],
   "metadata": {
     "customer_safe": true,
     "network_required": false,
