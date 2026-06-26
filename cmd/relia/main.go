@@ -710,6 +710,11 @@ func parseUnifiedDiffTouchedPaths(content []byte, ref string) ([]string, *Comman
 
 func diffGitHeaderPaths(line string) []string {
 	rest := strings.TrimSpace(strings.TrimPrefix(line, "diff --git "))
+	if strings.HasPrefix(rest, "a/") {
+		if index := strings.Index(rest, " b/"); index > 0 {
+			return []string{rest[:index], rest[index+1:]}
+		}
+	}
 	var paths []string
 	for len(rest) > 0 && len(paths) < 2 {
 		var path string
@@ -855,6 +860,9 @@ func buildRiskAssessment(root string, inputRef string, content []byte, touchedPa
 		}
 		if len(rule.Citations) == 0 {
 			return riskAssessment{}, provenanceIntegrityError("matched active memory rule must include citation URLs for assessment", rule.Path)
+		}
+		if math.IsNaN(rule.Confidence) || math.IsInf(rule.Confidence, 0) || rule.Confidence < 0 || rule.Confidence > 1 {
+			return riskAssessment{}, provenanceIntegrityError("matched active memory rule confidence must be between 0 and 1 for assessment", rule.Path)
 		}
 		for _, citation := range rule.Citations {
 			if !validGitHubProvenanceURLShape(citation) {
