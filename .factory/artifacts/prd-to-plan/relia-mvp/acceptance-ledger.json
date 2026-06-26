@@ -32,7 +32,7 @@
         "T8"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/9/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/10/validation_commands"
       ]
     },
     {
@@ -55,7 +55,7 @@
         "T9"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/10/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/11/validation_commands"
       ]
     },
     {
@@ -80,7 +80,7 @@
         "T10"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/11/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/12/validation_commands"
       ]
     },
     {
@@ -126,7 +126,7 @@
         "T14"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/15/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/16/validation_commands"
       ]
     },
     {
@@ -149,7 +149,7 @@
         "T15"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/16/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/17/validation_commands"
       ]
     },
     {
@@ -218,7 +218,7 @@
         "T10"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/11/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/12/validation_commands"
       ]
     },
     {
@@ -393,7 +393,7 @@
         "T14"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/15/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/16/validation_commands"
       ]
     },
     {
@@ -416,7 +416,7 @@
         "T13"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/14/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/15/validation_commands"
       ]
     },
     {
@@ -439,7 +439,7 @@
         "T15"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/16/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/17/validation_commands"
       ]
     },
     {
@@ -462,7 +462,7 @@
         "T14"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/15/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/16/validation_commands"
       ]
     },
     {
@@ -487,7 +487,7 @@
         "T9"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/10/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/11/validation_commands"
       ]
     },
     {
@@ -568,7 +568,7 @@
         "T9"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/10/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/11/validation_commands"
       ]
     },
     {
@@ -594,7 +594,7 @@
         "T9"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/10/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/11/validation_commands"
       ]
     },
     {
@@ -617,7 +617,7 @@
         "T9"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/10/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/11/validation_commands"
       ]
     },
     {
@@ -640,7 +640,7 @@
         "T15"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/16/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/17/validation_commands"
       ]
     },
     {
@@ -787,7 +787,7 @@
         "T10"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/11/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/12/validation_commands"
       ]
     },
     {
@@ -861,7 +861,7 @@
         "T9"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/10/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/11/validation_commands"
       ]
     },
     {
@@ -962,7 +962,7 @@
         "T14"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/15/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/16/validation_commands"
       ]
     },
     {
@@ -985,7 +985,7 @@
         "T14"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/15/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/16/validation_commands"
       ]
     },
     {
@@ -1042,7 +1042,7 @@
         "T10"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/11/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/12/validation_commands"
       ]
     },
     {
@@ -1322,7 +1322,7 @@
         "T10"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/11/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/12/validation_commands"
       ]
     },
     {
@@ -1345,7 +1345,7 @@
         "T11"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/12/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/13/validation_commands"
       ]
     },
     {
@@ -1368,7 +1368,7 @@
         "T14"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/15/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/16/validation_commands"
       ]
     },
     {
@@ -1391,7 +1391,7 @@
         "T13"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/14/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/15/validation_commands"
       ]
     },
     {
@@ -1414,7 +1414,7 @@
         "T14"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/15/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/16/validation_commands"
       ]
     },
     {
@@ -1439,7 +1439,7 @@
         "T9"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/10/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/11/validation_commands"
       ]
     },
     {
@@ -1540,7 +1540,7 @@
         "T15"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/16/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/17/validation_commands"
       ]
     },
     {
@@ -1563,7 +1563,7 @@
         "T15"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/16/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/17/validation_commands"
       ]
     },
     {
@@ -1609,7 +1609,7 @@
         "T13"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/14/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/15/validation_commands"
       ]
     },
     {
@@ -1816,7 +1816,7 @@
         "T15"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/16/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/17/validation_commands"
       ]
     },
     {
@@ -1825,7 +1825,8 @@
         "mvp"
       ],
       "delivery_slice_refs": [
-        "outcome-fixture-corpus"
+        "outcome-fixture-corpus",
+        "distillation-calibration-and-confidence-part-2"
       ],
       "evidence_mode": "automated",
       "group_id": "distill-review-memory-page-acceptance-tests",
@@ -1836,10 +1837,12 @@
       "source_text": "relia distill` drafts an `avoid` rule from the planted recurrence cluster with correct citations.",
       "status": "planned",
       "task_refs": [
-        "T4.2"
+        "T4.2",
+        "T7.1"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/4/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/4/validation_commands",
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/9/validation_commands"
       ]
     },
     {
@@ -2048,7 +2051,7 @@
         "T9"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/10/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/11/validation_commands"
       ]
     },
     {
@@ -2122,7 +2125,7 @@
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/8/validation_commands",
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/17/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/18/validation_commands"
       ]
     },
     {
@@ -2168,7 +2171,7 @@
         "T14"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/15/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/16/validation_commands"
       ]
     },
     {
@@ -2191,7 +2194,7 @@
         "T12"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/13/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/14/validation_commands"
       ]
     },
     {
@@ -2214,7 +2217,7 @@
         "T13"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/14/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/15/validation_commands"
       ]
     },
     {
@@ -2262,7 +2265,7 @@
         "T9"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/10/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/11/validation_commands"
       ]
     },
     {
@@ -2285,7 +2288,7 @@
         "T14"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/15/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/16/validation_commands"
       ]
     },
     {
@@ -2308,7 +2311,7 @@
         "T12"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/13/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/14/validation_commands"
       ]
     },
     {
@@ -2331,7 +2334,7 @@
         "T12"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/13/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/14/validation_commands"
       ]
     },
     {
@@ -2354,7 +2357,7 @@
         "T15"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/16/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/17/validation_commands"
       ]
     },
     {
@@ -2377,7 +2380,7 @@
         "T15"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/16/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/17/validation_commands"
       ]
     },
     {
@@ -2400,7 +2403,7 @@
         "T15"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/16/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/17/validation_commands"
       ]
     },
     {
@@ -2423,7 +2426,7 @@
         "T15"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/16/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/17/validation_commands"
       ]
     },
     {
@@ -2446,7 +2449,7 @@
         "T15"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/16/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/17/validation_commands"
       ]
     },
     {
@@ -2469,7 +2472,7 @@
         "T15"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/16/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/17/validation_commands"
       ]
     },
     {
@@ -2492,7 +2495,7 @@
         "T15"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/16/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/17/validation_commands"
       ]
     },
     {
@@ -2517,7 +2520,7 @@
         "T15"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/16/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/17/validation_commands"
       ]
     },
     {
@@ -2540,7 +2543,7 @@
         "T15"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/16/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/17/validation_commands"
       ]
     },
     {
@@ -2563,7 +2566,7 @@
         "T16"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/17/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/18/validation_commands"
       ]
     },
     {
@@ -2586,7 +2589,7 @@
         "T16"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/17/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/18/validation_commands"
       ]
     },
     {
@@ -2609,7 +2612,7 @@
         "T16"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/17/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/18/validation_commands"
       ]
     },
     {
@@ -2632,7 +2635,7 @@
         "T16"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/17/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/18/validation_commands"
       ]
     },
     {
@@ -2655,7 +2658,7 @@
         "T16"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/17/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/18/validation_commands"
       ]
     },
     {
@@ -2678,7 +2681,7 @@
         "T16"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/17/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/18/validation_commands"
       ]
     },
     {
@@ -2701,7 +2704,7 @@
         "T16"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/17/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/18/validation_commands"
       ]
     },
     {
@@ -2724,7 +2727,7 @@
         "T16"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/17/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/18/validation_commands"
       ]
     },
     {
@@ -2747,7 +2750,7 @@
         "T16"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/17/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/18/validation_commands"
       ]
     },
     {
@@ -2770,7 +2773,7 @@
         "T16"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/17/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/18/validation_commands"
       ]
     },
     {
@@ -2816,7 +2819,7 @@
         "T16"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/17/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/18/validation_commands"
       ]
     },
     {
@@ -2862,7 +2865,7 @@
         "T16"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/17/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/18/validation_commands"
       ]
     },
     {
