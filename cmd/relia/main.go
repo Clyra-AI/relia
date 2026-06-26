@@ -100,6 +100,8 @@ var knownSecretPatterns = []*regexp.Regexp{
 	regexp.MustCompile(`(?i)\bBearer\s+[A-Za-z0-9._~+/=-]{20,}\b`),
 }
 
+var unifiedHunkHeaderPattern = regexp.MustCompile(`^@@ -\d+(?:,(\d+))? \+\d+(?:,(\d+))? @@`)
+
 type CommandResult struct {
 	ObjectType      string         `json:"object_type"`
 	SchemaVersion   string         `json:"schema_version"`
@@ -678,9 +680,15 @@ func parseUnifiedDiffTouchedPaths(content []byte, ref string) ([]string, *Comman
 	touched := map[string]bool{}
 	inFileHeader := false
 	gitFileHeader := false
+	hunkOldRemaining := 0
+	hunkNewRemaining := 0
 	lines := strings.Split(string(content), "\n")
 	for index, line := range lines {
 		line = strings.TrimRight(line, "\r")
+		if hunkOldRemaining > 0 || hunkNewRemaining > 0 {
+			hunkOldRemaining, hunkNewRemaining = consumeUnifiedHunkLine(line, hunkOldRemaining, hunkNewRemaining)
+			continue
+		}
 		switch {
 		case strings.HasPrefix(line, "diff --git "):
 			inFileHeader = true
@@ -703,6 +711,7 @@ func parseUnifiedDiffTouchedPaths(content []byte, ref string) ([]string, *Comman
 		case strings.HasPrefix(line, "@@"):
 			inFileHeader = false
 			gitFileHeader = false
+			hunkOldRemaining, hunkNewRemaining = parseUnifiedHunkCounts(line)
 		}
 	}
 	paths := make([]string, 0, len(touched))
@@ -720,11 +729,50 @@ func plainUnifiedFileHeader(lines []string, index int) bool {
 	if index+2 >= len(lines) {
 		return false
 	}
-	if index > 0 && strings.TrimSpace(lines[index-1]) != "" {
-		return false
-	}
 	return strings.HasPrefix(strings.TrimRight(lines[index+1], "\r"), "+++ ") &&
 		strings.HasPrefix(strings.TrimRight(lines[index+2], "\r"), "@@")
+}
+
+func parseUnifiedHunkCounts(line string) (int, int) {
+	matches := unifiedHunkHeaderPattern.FindStringSubmatch(line)
+	if len(matches) == 0 {
+		return 0, 0
+	}
+	oldCount := 1
+	newCount := 1
+	if matches[1] != "" {
+		if parsed, err := strconv.Atoi(matches[1]); err == nil {
+			oldCount = parsed
+		}
+	}
+	if matches[2] != "" {
+		if parsed, err := strconv.Atoi(matches[2]); err == nil {
+			newCount = parsed
+		}
+	}
+	return oldCount, newCount
+}
+
+func consumeUnifiedHunkLine(line string, oldRemaining int, newRemaining int) (int, int) {
+	if line == "" {
+		return oldRemaining, newRemaining
+	}
+	switch line[0] {
+	case ' ':
+		oldRemaining--
+		newRemaining--
+	case '-':
+		oldRemaining--
+	case '+':
+		newRemaining--
+	}
+	if oldRemaining < 0 {
+		oldRemaining = 0
+	}
+	if newRemaining < 0 {
+		newRemaining = 0
+	}
+	return oldRemaining, newRemaining
 }
 
 func diffGitHeaderPaths(line string) []string {

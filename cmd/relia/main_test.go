@@ -1921,6 +1921,26 @@ func TestParseUnifiedDiffTouchedPathsSkipsAmbiguousGitHeaderSeparator(t *testing
 	}
 }
 
+func TestParseUnifiedDiffTouchedPathsRecognizesSubsequentPlainFileHeaders(t *testing.T) {
+	paths, commandErr := parseUnifiedDiffTouchedPaths([]byte(`--- packages/search/query.py
++++ packages/search/query.py
+@@ -1 +1 @@
+-old
++new
+--- packages/billing/invoice.py
++++ packages/billing/invoice.py
+@@ -1 +1 @@
+-old
++new
+`), "multi-file-plain.diff")
+	if commandErr != nil {
+		t.Fatalf("parse diff: %v", commandErr)
+	}
+	if fmt.Sprint(paths) != fmt.Sprint([]string{"packages/billing/invoice.py", "packages/search/query.py"}) {
+		t.Fatalf("paths = %#v", paths)
+	}
+}
+
 func TestDemoAssessRejectsMatchedRuleWithInvalidCitationURL(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
