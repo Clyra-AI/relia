@@ -582,7 +582,7 @@ func parseIngestArgs(args []string) (ingestOptions, *CommandError) {
 func assessResult(args []string, start time.Time) CommandResult {
 	options, commandErr := parseAssessArgs(args)
 	withFormat := func(result CommandResult) CommandResult {
-		if options.FormatExplicit && options.Format == "json" {
+		if options.Format == "json" {
 			result.MachineReadable = true
 		}
 		return result

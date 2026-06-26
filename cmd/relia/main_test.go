@@ -1625,6 +1625,31 @@ func TestAssessFormatJSONOverridesInteractiveOutput(t *testing.T) {
 	}
 }
 
+func TestAssessDefaultFormatShowsAssessmentInInteractiveOutput(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "unknown.diff"), `diff --git a/packages/search/query.py b/packages/search/query.py
+--- a/packages/search/query.py
++++ b/packages/search/query.py
+@@ -1,2 +1,3 @@
+ def normalize_query(value):
+-    return value.strip().lower()
++    normalized = value.strip().lower()
++    return " ".join(normalized.split())
+`)
+
+	stdout, stderr, code := runForTest(t, []string{"assess", "--input", "unknown.diff"}, true)
+
+	if code != ExitSuccess {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	assessment := decodeAssessmentFromResult(t, result)
+	if assessment.RiskLevel != "no_coverage" {
+		t.Fatalf("risk_level = %q, want no_coverage", assessment.RiskLevel)
+	}
+}
+
 func TestDemoAssessIgnoresUnrelatedRuleWithoutCitationURLs(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
