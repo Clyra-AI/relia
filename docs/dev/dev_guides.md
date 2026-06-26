@@ -94,12 +94,22 @@ T4.1 fixture ownership:
   `examples/reports/backtest-demo.html`, and
   `examples/reports/memory-page-demo.md`.
 
+T4.2 fixture ownership:
+
+- Distill/review lifecycle expectations:
+  `examples/demo/distill-review-lifecycle-fixtures.json`.
+- Lifecycle citation anchors remain in
+  `examples/demo/seeded-repo/prs.json`.
+- Lifecycle outcomes that should not change the demo ERR denominator remain in
+  `examples/demo/seeded-repo/outcomes.jsonl` as clean merges.
+
 The contract lane runs `TestDemo*` fixture contracts in `cmd/relia` after the
 repo-pack validator. Those tests recompute the demo ERR headline from the
 seeded outcome stream, resolve every report citation through the seeded PR
 index, verify the planted flaky test is discounted and drafts no rule, enforce
-attribution precision with uncertain cases excluded, and scan demo artifacts for
-standard secret token shapes.
+attribution precision with uncertain cases excluded, validate distill/review
+lifecycle fixtures for recurrence draft, contradicted, and stale serving
+outcomes, and scan demo artifacts for standard secret token shapes.
 
 ## Customer Failure Intake
 

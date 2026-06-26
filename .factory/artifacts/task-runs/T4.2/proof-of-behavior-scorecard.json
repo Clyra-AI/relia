@@ -1,0 +1,110 @@
+{
+  "artifact_type": "proof-of-behavior-scorecard",
+  "artifact_key": "proof_of_behavior_scorecard",
+  "schema_version": "1.0",
+  "task_id": "T4.2",
+  "status": "pass",
+  "required_proof_level": "workflow_behavior",
+  "redaction_posture": {
+    "classification": "customer_safe",
+    "status": "pass",
+    "notes": "Lifecycle fixture content uses synthetic seeded PRs, repo-relative refs, GitHub demo URLs, and no live credentials, endpoints, customer data, or machine-local paths."
+  },
+  "behavior_results": [
+    {
+      "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-001",
+      "behavior": "Planted recurrence drafts an avoid rule with correct citations.",
+      "status": "pass",
+      "fixture_case_id": "planted-recurrence-drafts-avoid-rule",
+      "evidence_refs": [
+        "examples/demo/distill-review-lifecycle-fixtures.json",
+        "cmd/relia/demo_fixtures_test.go"
+      ],
+      "observed": {
+        "rule_id": "avoid-mocking-datetime-directly",
+        "kind": "avoid",
+        "status": "candidate",
+        "review_label": "suggested",
+        "evidence_experiences": [
+          "exp_0142",
+          "exp_0187",
+          "exp_0203"
+        ],
+        "citation_prs": [
+          142,
+          187,
+          203
+        ]
+      }
+    },
+    {
+      "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-006",
+      "behavior": "Planted contradiction moves its rule to contradicted and out of serving.",
+      "status": "pass",
+      "fixture_case_id": "planted-contradiction-moves-rule-out-of-serving",
+      "evidence_refs": [
+        "examples/demo/distill-review-lifecycle-fixtures.json",
+        "examples/reports/memory-page-demo.md",
+        "cmd/relia/demo_fixtures_test.go"
+      ],
+      "observed": {
+        "rule_id": "avoid-blind-schema-snapshot-regeneration",
+        "status": "contradicted",
+        "serving_eligible": false,
+        "contradiction_prs": [
+          282,
+          286
+        ],
+        "serving_snapshot_contains_rule": false
+      }
+    },
+    {
+      "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-007",
+      "behavior": "Planted path deletion moves its rule to stale and out of serving.",
+      "status": "pass",
+      "fixture_case_id": "planted-path-deletion-moves-rule-out-of-serving",
+      "evidence_refs": [
+        "examples/demo/distill-review-lifecycle-fixtures.json",
+        "examples/reports/memory-page-demo.md",
+        "cmd/relia/demo_fixtures_test.go"
+      ],
+      "observed": {
+        "rule_id": "avoid-mocking-datetime-directly",
+        "status": "stale",
+        "serving_eligible": false,
+        "stale_path": "tests/billing/test_invoice_time.py",
+        "deletion_pr": 293,
+        "serving_snapshot_contains_rule": false
+      }
+    }
+  ],
+  "command_evidence": [
+    {
+      "command": "go test ./cmd/... -count=1 -run TestDemoDistillReviewLifecycleFixtures",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "make test-contracts",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "make test-coverage",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "make prepush-full",
+      "status": "pass",
+      "exit_code": 0
+    }
+  ],
+  "evidence_refs": [
+    ".factory/artifacts/task-runs/T4.2/work-proof-marker.json",
+    ".factory/artifacts/task-runs/T4.2/validation-report.json",
+    "examples/demo/distill-review-lifecycle-fixtures.json",
+    "examples/reports/memory-page-demo.md",
+    "cmd/relia/demo_fixtures_test.go"
+  ]
+}

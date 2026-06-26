@@ -1,0 +1,57 @@
+{
+  "artifact_type": "work_proof_marker",
+  "schema_version": "1.0",
+  "task_id": "T4.2",
+  "status": "implemented",
+  "implementation_performed": true,
+  "summary": "Built distill/review lifecycle fixture cases for planted recurrence, contradiction, and stale-path outcomes with repo-relative citations and serving exclusion checks.",
+  "runner_ready_contract_result": {
+    "status": "pass",
+    "checked_fields": [
+      "task_id",
+      "objective",
+      "risk_class",
+      "allowed_paths",
+      "forbidden_paths",
+      "validation_commands",
+      "baseline_commands",
+      "red_first_commands",
+      "final_validation_commands",
+      "required_worker_chain",
+      "lifecycle_gates",
+      "evidence_required",
+      "worker_evidence_required",
+      "lifecycle_evidence_required",
+      "scope_exclusions",
+      "stop_conditions",
+      "runtime_pins",
+      "acceptance_result_requirements"
+    ]
+  },
+  "changed_paths": [
+    "README.md",
+    "cmd/relia/demo_fixtures_test.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/dev/dev_guides.md",
+    "examples/demo/distill-review-lifecycle-fixtures.json",
+    "examples/demo/seeded-repo/README.md",
+    "examples/demo/seeded-repo/outcomes.jsonl",
+    "examples/demo/seeded-repo/prs.json",
+    "examples/reports/backtest-demo.json",
+    "examples/reports/memory-page-demo.md",
+    ".factory/artifacts/task-runs/T4.2/work-proof-marker.json",
+    ".factory/artifacts/task-runs/T4.2/validation-report.json",
+    ".factory/artifacts/task-runs/T4.2/proof-of-behavior-scorecard.json"
+  ],
+  "acceptance_item_ids": [
+    "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-001",
+    "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-006",
+    "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-007"
+  ],
+  "evidence_refs": [
+    ".factory/artifacts/task-runs/T4.2/validation-report.json",
+    ".factory/artifacts/task-runs/T4.2/proof-of-behavior-scorecard.json",
+    "examples/demo/distill-review-lifecycle-fixtures.json",
+    "cmd/relia/demo_fixtures_test.go"
+  ]
+}
