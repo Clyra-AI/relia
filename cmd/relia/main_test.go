@@ -1871,6 +1871,21 @@ func TestParseUnifiedDiffTouchedPathsSupportsPlainUnifiedDiff(t *testing.T) {
 	}
 }
 
+func TestParseUnifiedDiffTouchedPathsPreservesPlainDiffLiteralAPrefix(t *testing.T) {
+	paths, commandErr := parseUnifiedDiffTouchedPaths([]byte(`--- a/foo.py
++++ a/foo.py
+@@ -1 +1 @@
+-old
++new
+`), "plain-a-prefix.diff")
+	if commandErr != nil {
+		t.Fatalf("parse diff: %v", commandErr)
+	}
+	if fmt.Sprint(paths) != fmt.Sprint([]string{"a/foo.py"}) {
+		t.Fatalf("paths = %#v", paths)
+	}
+}
+
 func TestDemoAssessRejectsMatchedRuleWithInvalidCitationURL(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)

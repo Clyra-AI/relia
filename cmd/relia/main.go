@@ -677,26 +677,32 @@ func parseAssessArgs(args []string) (assessOptions, *CommandError) {
 func parseUnifiedDiffTouchedPaths(content []byte, ref string) ([]string, *CommandError) {
 	touched := map[string]bool{}
 	inFileHeader := false
+	gitFileHeader := false
 	lines := strings.Split(string(content), "\n")
 	for index, line := range lines {
 		line = strings.TrimRight(line, "\r")
 		switch {
 		case strings.HasPrefix(line, "diff --git "):
 			inFileHeader = true
+			gitFileHeader = true
 			for _, path := range diffGitHeaderPaths(line) {
-				addDiffPath(touched, path)
+				addDiffPath(touched, path, true)
 			}
-		case strings.HasPrefix(line, "--- ") && (inFileHeader || plainUnifiedFileHeader(lines, index)):
+		case inFileHeader && strings.HasPrefix(line, "--- "):
+			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "--- ")), gitFileHeader)
+		case strings.HasPrefix(line, "--- ") && plainUnifiedFileHeader(lines, index):
 			inFileHeader = true
-			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "--- ")))
+			gitFileHeader = false
+			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "--- ")), false)
 		case inFileHeader && strings.HasPrefix(line, "+++ "):
-			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "+++ ")))
+			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "+++ ")), gitFileHeader)
 		case inFileHeader && strings.HasPrefix(line, "rename from "):
-			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "rename from ")))
+			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "rename from ")), true)
 		case inFileHeader && strings.HasPrefix(line, "rename to "):
-			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "rename to ")))
+			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "rename to ")), true)
 		case strings.HasPrefix(line, "@@"):
 			inFileHeader = false
+			gitFileHeader = false
 		}
 	}
 	paths := make([]string, 0, len(touched))
@@ -770,7 +776,7 @@ func nextDiffHeaderPath(input string) (string, string, bool) {
 	return input, "", true
 }
 
-func addDiffPath(touched map[string]bool, raw string) {
+func addDiffPath(touched map[string]bool, raw string, stripGitPrefix bool) {
 	pathPart := strings.TrimSpace(raw)
 	if strings.HasPrefix(pathPart, "\"") {
 		if unquoted, err := strconv.Unquote(pathPart); err == nil {
@@ -783,7 +789,7 @@ func addDiffPath(touched map[string]bool, raw string) {
 	if pathPart == "" || pathPart == "/dev/null" {
 		return
 	}
-	if strings.HasPrefix(pathPart, "a/") || strings.HasPrefix(pathPart, "b/") {
+	if stripGitPrefix && (strings.HasPrefix(pathPart, "a/") || strings.HasPrefix(pathPart, "b/")) {
 		pathPart = pathPart[2:]
 	}
 	if clean, ok := cleanRepoPath(pathPart); ok {
