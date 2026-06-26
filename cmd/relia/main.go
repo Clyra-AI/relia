@@ -720,6 +720,9 @@ func plainUnifiedFileHeader(lines []string, index int) bool {
 	if index+2 >= len(lines) {
 		return false
 	}
+	if index > 0 && strings.TrimSpace(lines[index-1]) != "" {
+		return false
+	}
 	return strings.HasPrefix(strings.TrimRight(lines[index+1], "\r"), "+++ ") &&
 		strings.HasPrefix(strings.TrimRight(lines[index+2], "\r"), "@@")
 }
@@ -727,9 +730,10 @@ func plainUnifiedFileHeader(lines []string, index int) bool {
 func diffGitHeaderPaths(line string) []string {
 	rest := strings.TrimSpace(strings.TrimPrefix(line, "diff --git "))
 	if strings.HasPrefix(rest, "a/") {
-		if index := strings.Index(rest, " b/"); index > 0 {
+		if index := strings.Index(rest, " b/"); index > 0 && strings.LastIndex(rest, " b/") == index {
 			return []string{rest[:index], rest[index+1:]}
 		}
+		return nil
 	}
 	var paths []string
 	for len(rest) > 0 && len(paths) < 2 {

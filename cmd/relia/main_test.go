@@ -1886,6 +1886,41 @@ func TestParseUnifiedDiffTouchedPathsPreservesPlainDiffLiteralAPrefix(t *testing
 	}
 }
 
+func TestParseUnifiedDiffTouchedPathsIgnoresPlainHeaderLookalikesInsideHunks(t *testing.T) {
+	paths, commandErr := parseUnifiedDiffTouchedPaths([]byte(`diff --git a/packages/search/query.py b/packages/search/query.py
+--- a/packages/search/query.py
++++ b/packages/search/query.py
+@@ -1,4 +1,5 @@
+ def normalize_query(value):
+--- packages/billing/invoice.py
++++ packages/billing/invoice.py
+@@ -8,2 +9,3 @@
+     return value.strip().lower()
+`), "hunk-lookalike.diff")
+	if commandErr != nil {
+		t.Fatalf("parse diff: %v", commandErr)
+	}
+	if fmt.Sprint(paths) != fmt.Sprint([]string{"packages/search/query.py"}) {
+		t.Fatalf("paths = %#v", paths)
+	}
+}
+
+func TestParseUnifiedDiffTouchedPathsSkipsAmbiguousGitHeaderSeparator(t *testing.T) {
+	paths, commandErr := parseUnifiedDiffTouchedPaths([]byte(`diff --git a/foo b/bar.txt b/foo b/bar.txt
+--- a/foo b/bar.txt
++++ b/foo b/bar.txt
+@@ -1 +1 @@
+-old
++new
+`), "ambiguous-git-header.diff")
+	if commandErr != nil {
+		t.Fatalf("parse diff: %v", commandErr)
+	}
+	if fmt.Sprint(paths) != fmt.Sprint([]string{"foo b/bar.txt"}) {
+		t.Fatalf("paths = %#v", paths)
+	}
+}
+
 func TestDemoAssessRejectsMatchedRuleWithInvalidCitationURL(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
