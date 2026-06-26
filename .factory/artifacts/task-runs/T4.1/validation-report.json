@@ -3,20 +3,19 @@
   "schema_version": "1.0",
   "task_id": "T4.1",
   "status": "pass",
-  "generated_at": "2026-06-26T12:30:58Z",
+  "generated_at": "2026-06-26T12:43:46Z",
   "commands_run": [
+    "git status --short",
     "make lint-fast",
     "make test-fast",
     "make test-contracts",
+    "go test ./cmd/relia -count=1 -run TestDemoFixtureCorpusReproducesBacktestReport",
     "gofmt -w cmd/relia/demo_fixtures_test.go",
     "python3 -m json.tool examples/demo/seeded-repo/prs.json",
-    "python3 -m json.tool examples/demo/attribution-precision-sample.json",
     "python3 -m json.tool examples/demo/flake-discount-fixtures.json",
-    "python3 -m json.tool examples/demo/redaction-fixtures/expected-redacted-artifacts.json",
     "python3 -m json.tool examples/reports/backtest-demo.json",
     "make test-coverage",
     "make prepush-full",
-    "git status --short",
     "git diff --name-only",
     "git ls-files --others --exclude-standard",
     "python3 -m json.tool .factory/artifacts/task-runs/T4.1/work-proof-marker.json",
@@ -35,40 +34,53 @@
       "status": "pass",
       "exit_code": 0,
       "phase": "pre_edit"
-    }
-  ],
-  "red_evidence": [
+    },
     {
       "command": "make test-contracts",
       "status": "pass",
       "exit_code": 0,
       "phase": "pre_edit_red_first_command",
-      "notes": "The original contract lane passed before the T4.1 fixture contracts were added."
-    },
+      "notes": "The existing contract lane passed before the repair-specific flake-support assertion was added."
+    }
+  ],
+  "red_evidence": [
     {
-      "command": "make test-contracts",
+      "command": "go test ./cmd/relia -count=1 -run TestDemoFixtureCorpusReproducesBacktestReport",
       "status": "fail_expected",
-      "exit_code": 2,
-      "phase": "after_fixture_contracts_before_fixture_implementation",
-      "notes": "The new TestDemo* contract tests failed because the seeded PR index, outcome corpus, attribution sample, and redaction fixture files were not present yet."
+      "exit_code": 1,
+      "phase": "after_repair_contract_before_fixture_update",
+      "notes": "The stricter demo fixture contract failed because flake-0219-external-retry had 0 supporting experiences and needed at least 2."
     }
   ],
   "green_evidence": [
     {
-      "command": "make test-contracts",
+      "command": "go test ./cmd/relia -count=1 -run TestDemoFixtureCorpusReproducesBacktestReport",
       "status": "pass",
       "exit_code": 0,
-      "evidence": "Repo-pack validation passed and TestDemo* recomputed fixture report numbers, resolved citations, verified flake discount behavior, checked attribution precision, and scanned demo artifacts for seeded secret leakage."
+      "evidence": "The focused demo contract passed after the seeded outcome stream, PR index, flake fixture, report support PRs, and static report baselines were updated."
     },
     {
-      "command": "make test-fast",
+      "command": "python3 -m json.tool examples/demo/seeded-repo/prs.json",
       "status": "pass",
       "exit_code": 0
     },
     {
-      "command": "make lint-fast",
+      "command": "python3 -m json.tool examples/demo/flake-discount-fixtures.json",
       "status": "pass",
       "exit_code": 0
+    },
+    {
+      "command": "python3 -m json.tool examples/reports/backtest-demo.json",
+      "status": "pass",
+      "exit_code": 0
+    }
+  ],
+  "non_final_validation_attempts": [
+    {
+      "command": "make prepush-full",
+      "status": "superseded_by_sequential_pass",
+      "exit_code": 2,
+      "notes": "This attempt was started concurrently with make test-coverage; both commands write .factory/tmp/coverage.out, so the coverage parser read a partial file. The final sequential make prepush-full run passed."
     }
   ],
   "final_validation_evidence": [
@@ -120,7 +132,7 @@
         "examples/demo/seeded-repo/outcomes.jsonl",
         "examples/reports/backtest-demo.json"
       ],
-      "notes": "The seeded demo PR index, outcome corpus, and bundled static reports are present and customer-safe."
+      "notes": "The seeded demo PR index now has 19 synthetic PRs, the outcome stream has 19 synthetic outcomes, and bundled static reports remain customer-safe."
     },
     {
       "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-008",
@@ -148,10 +160,11 @@
       "evidence_refs": [
         ".factory/artifacts/task-runs/T4.1/proof-of-behavior-scorecard.json",
         "examples/demo/seeded-repo/outcomes.jsonl",
+        "examples/demo/flake-discount-fixtures.json",
         "examples/reports/backtest-demo.json",
         "cmd/relia/demo_fixtures_test.go:TestDemoFixtureCorpusReproducesBacktestReport"
       ],
-      "notes": "The report headline is recomputed as 3 confirmed recurrences across 11 eligible agent-attributed failures, yielding 27.3%, with the flake-discounted and uncertain cases excluded from the headline."
+      "notes": "The report headline is recomputed as 3 confirmed recurrences across 11 eligible agent-attributed failures, yielding 27.3%; the planted flake is discounted with support from PR #214 and PR #216 and drafts no rule."
     },
     {
       "acceptance_item_id": "DEMO-ACCEPTANCE-002",
@@ -162,7 +175,7 @@
         "examples/reports/memory-page-demo.md",
         "README.md"
       ],
-      "notes": "Bundled static backtest and memory-page reports exist for the offline demo path."
+      "notes": "Bundled static backtest and memory-page reports exist for the offline demo path, and the memory page labels unreviewed rules as candidates rather than active memory."
     },
     {
       "acceptance_item_id": "DEMO-ACCEPTANCE-004",
@@ -173,21 +186,14 @@
         "examples/reports/backtest-demo.json",
         "cmd/relia/demo_fixtures_test.go:TestDemoFixtureCorpusReproducesBacktestReport"
       ],
-      "notes": "Every PR URL shown by the JSON, HTML, and Markdown demo reports resolves to a seeded PR in examples/demo/seeded-repo/prs.json."
+      "notes": "Every PR URL shown by the JSON, HTML, and Markdown demo reports resolves to a seeded PR in examples/demo/seeded-repo/prs.json, including the new flake support citations for PR #214 and PR #216."
     }
   ],
   "path_policy_result": {
     "status": "pass",
     "allowed_changed_paths": [
-      "Makefile",
-      "README.md",
       "cmd/relia/demo_fixtures_test.go",
-      "docs/architecture/architecture_guides.md",
-      "docs/dev/dev_guides.md",
-      "examples/demo/attribution-precision-sample.json",
       "examples/demo/flake-discount-fixtures.json",
-      "examples/demo/redaction-fixtures/expected-redacted-artifacts.json",
-      "examples/demo/seeded-repo/README.md",
       "examples/demo/seeded-repo/outcomes.jsonl",
       "examples/demo/seeded-repo/prs.json",
       "examples/reports/backtest-demo.html",
@@ -198,29 +204,18 @@
       ".factory/artifacts/task-runs/T4.1/proof-of-behavior-scorecard.json"
     ],
     "forbidden_changed_paths": [],
-    "untracked_nonignored_paths": [
-      "cmd/relia/demo_fixtures_test.go",
-      "examples/demo/attribution-precision-sample.json",
-      "examples/demo/flake-discount-fixtures.json",
-      "examples/demo/redaction-fixtures/expected-redacted-artifacts.json",
-      "examples/demo/seeded-repo/README.md",
-      "examples/demo/seeded-repo/outcomes.jsonl",
-      "examples/demo/seeded-repo/prs.json",
-      "examples/reports/backtest-demo.html",
-      "examples/reports/backtest-demo.json",
-      "examples/reports/memory-page-demo.md",
-      ".factory/artifacts/task-runs/T4.1/work-proof-marker.json",
-      ".factory/artifacts/task-runs/T4.1/validation-report.json",
-      ".factory/artifacts/task-runs/T4.1/proof-of-behavior-scorecard.json"
+    "untracked_nonignored_paths": [],
+    "ignored_validation_outputs": [
+      ".factory/tmp/coverage.out"
     ]
   },
   "plan_drift_result": {
     "status": "pass",
-    "notes": "Implementation stayed inside the T4.1 fixture corpus, report baseline, tests, docs-sync, and worker-evidence scope. No runtime, credential, network, schema, CI, release, or lifecycle posture changed."
+    "notes": "Repair stayed inside the T4.1 fixture corpus, report baseline, tests, and worker-evidence scope. No runtime, credential, network, schema, CI, release, or lifecycle posture changed."
   },
   "changelog_result": {
-    "status": "applied_as_docs",
-    "notes": "No CHANGELOG file exists in the allowed repo surface; the T4.1 user-facing fixture/report addition is documented in README.md and docs/dev/dev_guides.md."
+    "status": "not_applicable_for_repair",
+    "notes": "No changelog surface was changed for this Codex review repair; the existing T4.1 docs continue to describe the fixture paths and contract coverage."
   },
   "versioning_result": {
     "status": "not_applicable",
@@ -228,7 +223,7 @@
   },
   "docs_sync_result": {
     "status": "pass",
-    "notes": "README.md, docs/dev/dev_guides.md, and docs/architecture/architecture_guides.md now name the demo fixture paths, contract coverage, state owner, feedback source, blast radius, and rollback posture."
+    "notes": "README.md and the dev/architecture guides remain accurate for fixture paths and validation behavior; this repair only adjusted seeded data, report baselines, and tests."
   },
   "lifecycle_evidence_note": {
     "status": "not_worker_owned",

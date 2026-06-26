@@ -57,6 +57,20 @@
       "outcome": "fix_held"
     },
     {
+      "number": 214,
+      "url": "https://github.com/Clyra-AI/relia-demo-seed/pull/214",
+      "title": "Adjust notification retry logging",
+      "actor_kind": "agent",
+      "outcome": "ci_failure_flake_discounted"
+    },
+    {
+      "number": 216,
+      "url": "https://github.com/Clyra-AI/relia-demo-seed/pull/216",
+      "title": "Tune retry queue backoff jitter",
+      "actor_kind": "agent",
+      "outcome": "ci_failure_flake_discounted"
+    },
+    {
       "number": 219,
       "url": "https://github.com/Clyra-AI/relia-demo-seed/pull/219",
       "title": "Retry external API test after transient timeout",

@@ -3,18 +3,11 @@
   "schema_version": "1.0",
   "task_id": "T4.1",
   "status": "implemented",
-  "generated_at": "2026-06-26T12:30:58Z",
+  "generated_at": "2026-06-26T12:43:46Z",
   "implementation_performed": true,
   "changed_paths": [
-    "Makefile",
-    "README.md",
     "cmd/relia/demo_fixtures_test.go",
-    "docs/architecture/architecture_guides.md",
-    "docs/dev/dev_guides.md",
-    "examples/demo/attribution-precision-sample.json",
     "examples/demo/flake-discount-fixtures.json",
-    "examples/demo/redaction-fixtures/expected-redacted-artifacts.json",
-    "examples/demo/seeded-repo/README.md",
     "examples/demo/seeded-repo/outcomes.jsonl",
     "examples/demo/seeded-repo/prs.json",
     "examples/reports/backtest-demo.html",
@@ -24,13 +17,21 @@
     ".factory/artifacts/task-runs/T4.1/validation-report.json",
     ".factory/artifacts/task-runs/T4.1/proof-of-behavior-scorecard.json"
   ],
-  "summary": "Built the T4.1 customer-safe seeded demo corpus, flake-discount fixture, redaction fixture, attribution precision sample, bundled static report baselines, and contract tests that recompute report numbers and resolve report citations from the seeded repo.",
+  "summary": "Repaired the T4.1 demo fixture contract so the planted flake discount is backed by repeated seeded failures and the memory page labels unreviewed rules as candidates, not active memory.",
+  "repair_notes": [
+    "Added seeded PRs and outcomes for PR #214 and PR #216 as supporting flake-discounted failures with the same notification retry check and distinct changed path sets.",
+    "Updated the flake-discount fixture and backtest report to cite PR #214 and PR #216 as support for PR #219.",
+    "Updated HTML and Markdown static report baselines to show 3 flake-discounted failures and to keep rule candidates visually/textually distinct from active memory.",
+    "Extended the demo fixture contract test to fail when a flake-discounted report claim lacks repeated seeded support."
+  ],
   "evidence_refs": [
     ".factory/artifacts/task-runs/T4.1/validation-report.json",
     ".factory/artifacts/task-runs/T4.1/proof-of-behavior-scorecard.json",
     "cmd/relia/demo_fixtures_test.go",
-    "examples/demo/seeded-repo/prs.json",
+    "examples/demo/flake-discount-fixtures.json",
     "examples/demo/seeded-repo/outcomes.jsonl",
-    "examples/reports/backtest-demo.json"
+    "examples/demo/seeded-repo/prs.json",
+    "examples/reports/backtest-demo.json",
+    "examples/reports/memory-page-demo.md"
   ]
 }

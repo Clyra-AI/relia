@@ -37,11 +37,13 @@ type demoOutcomeFixture struct {
 	ExperienceID          string   `json:"experience_id"`
 	RecordedAt            string   `json:"recorded_at"`
 	PR                    int      `json:"pr"`
+	Paths                 []string `json:"paths"`
 	ActorKind             string   `json:"actor_kind"`
 	AttributionMethod     string   `json:"attribution_method"`
 	AttributionConfidence float64  `json:"attribution_confidence"`
 	OutcomeKind           string   `json:"outcome_kind"`
 	SignatureID           string   `json:"signature_id"`
+	CheckName             string   `json:"check_name"`
 	SignatureKey          string   `json:"signature_key"`
 	ExtractionConfidence  string   `json:"extraction_confidence"`
 	FlakeDiscount         float64  `json:"flake_discount"`
@@ -85,9 +87,11 @@ type demoRecurrencePair struct {
 
 type demoFlakeDiscount struct {
 	PR            int     `json:"pr"`
+	ExperienceID  string  `json:"experience_id"`
 	SignatureID   string  `json:"signature_id"`
 	FlakeDiscount float64 `json:"flake_discount"`
 	DraftsRule    bool    `json:"drafts_rule"`
+	SupportingPRs []int   `json:"supporting_prs"`
 }
 
 type demoRuleCandidate struct {
@@ -125,6 +129,23 @@ type demoAttributionCase struct {
 	PredictedMethod     string  `json:"predicted_method"`
 	Confidence          float64 `json:"confidence"`
 	IncludedInPrecision bool    `json:"included_in_precision"`
+}
+
+type demoFlakeDiscountFixtures struct {
+	ObjectType    string                         `json:"object_type"`
+	SchemaVersion string                         `json:"schema_version"`
+	Cases         []demoFlakeDiscountFixtureCase `json:"cases"`
+}
+
+type demoFlakeDiscountFixtureCase struct {
+	CaseID                  string   `json:"case_id"`
+	PR                      int      `json:"pr"`
+	ExperienceID            string   `json:"experience_id"`
+	SignatureID             string   `json:"signature_id"`
+	FlakeDiscount           float64  `json:"flake_discount"`
+	ExpectedRuleDraft       bool     `json:"expected_rule_draft"`
+	Citation                string   `json:"citation"`
+	SupportingExperienceIDs []string `json:"supporting_experience_ids"`
 }
 
 type demoRedactionFixtures struct {
@@ -171,6 +192,7 @@ func TestDemoFixtureCorpusReproducesBacktestReport(t *testing.T) {
 	assertDemoPairsMatch(t, report.ConfirmedRecurrences, pairs)
 	assertDemoReportCitationsResolve(t, report, prURLs)
 	assertFlakeDiscountDraftsNoRule(t, report)
+	assertFlakeDiscountFixturesBackedByRepeatedSeededFailures(t, root, outcomes, report, prURLs)
 	assertDemoStaticReportTextMatchesJSON(t, root, report, prURLs)
 }
 
@@ -322,6 +344,16 @@ func readDemoAttributionSample(t *testing.T, root string) demoAttributionSample 
 	return sample
 }
 
+func readDemoFlakeDiscountFixtures(t *testing.T, root string) demoFlakeDiscountFixtures {
+	t.Helper()
+	var fixtures demoFlakeDiscountFixtures
+	readJSONFileForTest(t, filepath.Join(root, "examples", "demo", "flake-discount-fixtures.json"), &fixtures)
+	if fixtures.ObjectType != "relia.demo_flake_discount_fixtures" {
+		t.Fatalf("unexpected flake discount fixture object_type %q", fixtures.ObjectType)
+	}
+	return fixtures
+}
+
 func readDemoRedactionFixtures(t *testing.T, root string) demoRedactionFixtures {
 	t.Helper()
 	var fixtures demoRedactionFixtures
@@ -441,6 +473,9 @@ func assertDemoReportCitationsResolve(t *testing.T, report demoBacktestReport, p
 	}
 	for _, flake := range report.FlakeDiscounts {
 		requirePR(flake.PR, "flake discount")
+		for _, supportingPR := range flake.SupportingPRs {
+			requirePR(supportingPR, "flake discount support")
+		}
 	}
 	for _, rule := range report.RuleCandidates {
 		for _, pr := range rule.EvidencePRs {
@@ -469,6 +504,83 @@ func assertFlakeDiscountDraftsNoRule(t *testing.T, report demoBacktestReport) {
 			t.Fatalf("flake-discounted signature %s produced rule %s", rule.SignatureID, rule.RuleID)
 		}
 	}
+}
+
+func assertFlakeDiscountFixturesBackedByRepeatedSeededFailures(t *testing.T, root string, outcomes []demoOutcomeFixture, report demoBacktestReport, prURLs map[int]string) {
+	t.Helper()
+	fixtures := readDemoFlakeDiscountFixtures(t, root)
+	casesByPR := map[int]demoFlakeDiscountFixtureCase{}
+	for _, fixtureCase := range fixtures.Cases {
+		if fixtureCase.ExpectedRuleDraft {
+			t.Fatalf("flake fixture %s expects a rule draft", fixtureCase.CaseID)
+		}
+		if prURLs[fixtureCase.PR] != fixtureCase.Citation {
+			t.Fatalf("flake fixture %s citation = %q, want %q", fixtureCase.CaseID, fixtureCase.Citation, prURLs[fixtureCase.PR])
+		}
+		if len(fixtureCase.SupportingExperienceIDs) < 2 {
+			t.Fatalf("flake fixture %s has %d supporting experiences, want at least 2", fixtureCase.CaseID, len(fixtureCase.SupportingExperienceIDs))
+		}
+		casesByPR[fixtureCase.PR] = fixtureCase
+	}
+
+	outcomesByExperience := map[string]demoOutcomeFixture{}
+	for _, outcome := range outcomes {
+		outcomesByExperience[outcome.ExperienceID] = outcome
+	}
+	for _, flake := range report.FlakeDiscounts {
+		fixtureCase, ok := casesByPR[flake.PR]
+		if !ok {
+			t.Fatalf("report flake discount for PR #%d has no flake-discount fixture case", flake.PR)
+		}
+		if len(flake.SupportingPRs) < 2 {
+			t.Fatalf("report flake discount for PR #%d has %d supporting PRs, want at least 2", flake.PR, len(flake.SupportingPRs))
+		}
+		primary, ok := outcomesByExperience[fixtureCase.ExperienceID]
+		if !ok {
+			t.Fatalf("flake fixture %s references unknown experience %s", fixtureCase.CaseID, fixtureCase.ExperienceID)
+		}
+		if primary.PR != fixtureCase.PR || primary.SignatureID != fixtureCase.SignatureID {
+			t.Fatalf("flake fixture %s does not match primary outcome: %#v", fixtureCase.CaseID, primary)
+		}
+		if primary.FlakeDiscount != fixtureCase.FlakeDiscount || primary.FlakeDiscount <= 0 {
+			t.Fatalf("flake fixture %s discount = %.3f, primary outcome discount = %.3f", fixtureCase.CaseID, fixtureCase.FlakeDiscount, primary.FlakeDiscount)
+		}
+		supportingPRs := map[int]bool{}
+		for _, supportingPR := range flake.SupportingPRs {
+			supportingPRs[supportingPR] = true
+		}
+		occurrences := []demoOutcomeFixture{primary}
+		pathFingerprints := map[string]bool{demoPathFingerprint(primary.Paths): true}
+		for _, supportID := range fixtureCase.SupportingExperienceIDs {
+			support, ok := outcomesByExperience[supportID]
+			if !ok {
+				t.Fatalf("flake fixture %s references unknown support experience %s", fixtureCase.CaseID, supportID)
+			}
+			if !supportingPRs[support.PR] {
+				t.Fatalf("flake fixture %s support PR #%d is missing from report support PRs", fixtureCase.CaseID, support.PR)
+			}
+			if support.SignatureID != primary.SignatureID || support.CheckName != primary.CheckName || support.SignatureKey != primary.SignatureKey {
+				t.Fatalf("flake fixture %s support %s is not the same failing check/signature as primary %s", fixtureCase.CaseID, support.ExperienceID, primary.ExperienceID)
+			}
+			if support.FlakeDiscount <= 0 {
+				t.Fatalf("flake fixture %s support %s is not flake-discounted", fixtureCase.CaseID, support.ExperienceID)
+			}
+			occurrences = append(occurrences, support)
+			pathFingerprints[demoPathFingerprint(support.Paths)] = true
+		}
+		if len(occurrences) < 3 {
+			t.Fatalf("flake fixture %s has %d repeated failures, want at least 3", fixtureCase.CaseID, len(occurrences))
+		}
+		if len(pathFingerprints) < 3 {
+			t.Fatalf("flake fixture %s does not span unrelated changed paths: %#v", fixtureCase.CaseID, occurrences)
+		}
+	}
+}
+
+func demoPathFingerprint(paths []string) string {
+	copied := append([]string(nil), paths...)
+	sort.Strings(copied)
+	return strings.Join(copied, "\x00")
 }
 
 func assertDemoStaticReportTextMatchesJSON(t *testing.T, root string, report demoBacktestReport, prURLs map[int]string) {

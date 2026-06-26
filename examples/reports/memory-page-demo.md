@@ -1,10 +1,10 @@
 # Relia Demo Memory Page
 
 Backtest baseline: **27.3%** headline ERR from 3 confirmed recurrences across
-11 agent-attributed failures. The seeded corpus also records 1 flake-discounted
-failure and 3 uncertain attribution cases excluded from the headline.
+11 agent-attributed failures. The seeded corpus also records 3 flake-discounted
+failures and 3 uncertain attribution cases excluded from the headline.
 
-## Active Candidate: avoid-mocking-datetime-directly
+## Candidate: avoid-mocking-datetime-directly
 
 Do not mock the billing clock directly in rollover tests. Use the freeze-time
 fixture that held in [PR #210](https://github.com/Clyra-AI/relia-demo-seed/pull/210).
@@ -28,4 +28,7 @@ Evidence:
 ## Discounted
 
 [PR #219](https://github.com/Clyra-AI/relia-demo-seed/pull/219) is marked as
-flake-discounted and does not draft a rule.
+flake-discounted with support from
+[PR #214](https://github.com/Clyra-AI/relia-demo-seed/pull/214) and
+[PR #216](https://github.com/Clyra-AI/relia-demo-seed/pull/216). The planted
+flake does not draft a rule.

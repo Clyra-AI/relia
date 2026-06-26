@@ -8,7 +8,8 @@
       "experience_id": "exp_0219",
       "signature_id": "sig_external_retry_flake",
       "flake_discount": 1.0,
-      "discount_reason": "same check failure appears across unrelated notification-client diffs and does not share the billing or API recurrence signatures",
+      "discount_reason": "same check failure appears across unrelated retry/logging diffs and does not share the billing or API recurrence signatures",
+      "supporting_experience_ids": ["exp_0214", "exp_0216"],
       "expected_rule_draft": false,
       "citation": "https://github.com/Clyra-AI/relia-demo-seed/pull/219"
     }

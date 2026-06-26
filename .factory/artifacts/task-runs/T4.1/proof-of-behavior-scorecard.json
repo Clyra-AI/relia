@@ -3,7 +3,7 @@
   "schema_version": "1.0",
   "task_id": "T4.1",
   "status": "pass",
-  "generated_at": "2026-06-26T12:30:58Z",
+  "generated_at": "2026-06-26T12:43:46Z",
   "proof_level": "workflow_behavior",
   "behaviors": [
     {
@@ -16,16 +16,30 @@
         "examples/reports/backtest-demo.html",
         "examples/reports/memory-page-demo.md",
         "cmd/relia/demo_fixtures_test.go:TestDemoArtifactsAreCustomerSafeAndDoNotContainSeededSecrets"
-      ]
+      ],
+      "metrics": {
+        "seeded_prs": 19,
+        "seeded_outcomes": 19
+      }
     },
     {
       "behavior": "The planted flaky test is discounted and drafts no rule.",
       "status": "pass",
       "evidence_refs": [
         "examples/demo/flake-discount-fixtures.json",
+        "examples/demo/seeded-repo/outcomes.jsonl",
         "examples/reports/backtest-demo.json",
         "cmd/relia/demo_fixtures_test.go:TestDemoFixtureCorpusReproducesBacktestReport"
-      ]
+      ],
+      "metrics": {
+        "planted_flake_pr": 219,
+        "supporting_prs": [
+          214,
+          216
+        ],
+        "flake_discounted_count": 3,
+        "drafts_rule": false
+      }
     },
     {
       "behavior": "Seeded secrets never appear in demo artifacts.",
@@ -64,12 +78,24 @@
         "headline_err_percent": "27.3%",
         "confirmed_recurrences": 3,
         "agent_failure_denominator": 11,
-        "flake_discounted_count": 1,
+        "flake_discounted_count": 3,
         "attribution_uncertain_count": 3
       }
     },
     {
-      "behavior": "Required local validation passes after fixture implementation.",
+      "behavior": "Candidate memory remains distinct from active memory in the bundled memory page.",
+      "status": "pass",
+      "evidence_refs": [
+        "examples/reports/memory-page-demo.md",
+        "examples/reports/backtest-demo.json"
+      ],
+      "metrics": {
+        "active_memory_entries_rendered": 0,
+        "rule_candidates_rendered": 2
+      }
+    },
+    {
+      "behavior": "Required local validation passes after repair.",
       "status": "pass",
       "evidence_refs": [
         ".factory/artifacts/task-runs/T4.1/validation-report.json"
