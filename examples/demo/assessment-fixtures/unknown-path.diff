@@ -1,0 +1,9 @@
+diff --git a/examples/demo/assessment-fixtures/seeded-repo/packages/search/query.py b/examples/demo/assessment-fixtures/seeded-repo/packages/search/query.py
+index 1c7c2a1..4d17b8a 100644
+--- a/examples/demo/assessment-fixtures/seeded-repo/packages/search/query.py
++++ b/examples/demo/assessment-fixtures/seeded-repo/packages/search/query.py
+@@ -1,3 +1,4 @@
+ def normalize_query(value):
+-    return value.strip().lower()
++    normalized = value.strip().lower()
++    return " ".join(normalized.split())

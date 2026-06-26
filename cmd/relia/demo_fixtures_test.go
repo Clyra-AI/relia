@@ -260,6 +260,41 @@ type demoCompiledContextRule struct {
 	CitationCount int    `json:"citation_count"`
 }
 
+type demoAssessmentFixtures struct {
+	ObjectType      string                 `json:"object_type"`
+	SchemaVersion   string                 `json:"schema_version"`
+	SourceArtifacts []string               `json:"source_artifacts"`
+	RedactionStatus string                 `json:"redaction_status"`
+	Cases           []demoAssessmentCase   `json:"cases"`
+	Metadata        map[string]interface{} `json:"metadata"`
+}
+
+type demoAssessmentCase struct {
+	CaseID               string                       `json:"case_id"`
+	Command              string                       `json:"command"`
+	InputDiff            string                       `json:"input_diff"`
+	ExpectedRiskLevel    string                       `json:"expected_risk_level"`
+	ExpectedTouchedPaths []string                     `json:"expected_touched_paths"`
+	ExpectedMatches      []demoAssessmentExpectedRule `json:"expected_matches"`
+	ExpectedCitations    []string                     `json:"expected_citations"`
+	EvidenceRefs         []string                     `json:"evidence_refs"`
+}
+
+type demoAssessmentExpectedRule struct {
+	RuleID     string  `json:"rule_id"`
+	Confidence float64 `json:"confidence"`
+}
+
+type demoRiskAssessment struct {
+	ObjectType    string                       `json:"object_type"`
+	SchemaVersion string                       `json:"schema_version"`
+	AssessmentID  string                       `json:"assessment_id"`
+	RiskLevel     string                       `json:"risk_level"`
+	Matches       []demoAssessmentExpectedRule `json:"matches"`
+	Citations     []string                     `json:"citations"`
+	Metadata      map[string]interface{}       `json:"metadata"`
+}
+
 func TestDemoFixtureCorpusReproducesBacktestReport(t *testing.T) {
 	root := findRepoRootForTest(t)
 	prIndex := readDemoPRIndex(t, root)
@@ -400,6 +435,32 @@ func TestDemoDistillReviewLifecycleFixtures(t *testing.T) {
 		}
 	}
 	assertLifecycleOutcomesVisibleOnMemoryPage(t, root, fixtures, prURLs)
+}
+
+func TestDemoAssessmentFixturesDriveAssessCommand(t *testing.T) {
+	root := findRepoRootForTest(t)
+	prURLs := demoPRURLs(t, readDemoPRIndex(t, root))
+	fixtures := readDemoAssessmentFixtures(t, root)
+
+	assertAssessmentFixturePathsAreRepoRelative(t, root, fixtures.SourceArtifacts)
+	wantCaseIDs := map[string]bool{
+		"planted-pattern-match-high": false,
+		"unknown-path-no-coverage":   false,
+	}
+	for _, fixtureCase := range fixtures.Cases {
+		if _, ok := wantCaseIDs[fixtureCase.CaseID]; !ok {
+			t.Fatalf("unexpected assessment fixture case %s", fixtureCase.CaseID)
+		}
+		wantCaseIDs[fixtureCase.CaseID] = true
+		assertAssessmentFixturePathsAreRepoRelative(t, root, append([]string{fixtureCase.InputDiff}, fixtureCase.EvidenceRefs...))
+		assertAssessmentCitationsResolve(t, fixtureCase, prURLs)
+		assertAssessmentCommandMatchesFixture(t, fixtureCase)
+	}
+	for caseID, seen := range wantCaseIDs {
+		if !seen {
+			t.Fatalf("missing assessment fixture case %s", caseID)
+		}
+	}
 }
 
 func TestDemoArtifactsAreCustomerSafeAndDoNotContainSeededSecrets(t *testing.T) {
@@ -587,6 +648,37 @@ func readDemoLifecycleFixtures(t *testing.T, root string) demoLifecycleFixtures 
 	return fixtures
 }
 
+func readDemoAssessmentFixtures(t *testing.T, root string) demoAssessmentFixtures {
+	t.Helper()
+	path := filepath.Join(root, "examples", "demo", "assessment-fixtures", "assessment-fixtures.json")
+	content, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var fixtures demoAssessmentFixtures
+	decoder := json.NewDecoder(strings.NewReader(string(content)))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&fixtures); err != nil {
+		t.Fatalf("decode %s: %v", path, err)
+	}
+	if fixtures.ObjectType != "relia.demo_assessment_fixtures" {
+		t.Fatalf("unexpected assessment fixture object_type %q", fixtures.ObjectType)
+	}
+	if fixtures.SchemaVersion != commandSchemaVersion {
+		t.Fatalf("assessment fixture schema_version = %q", fixtures.SchemaVersion)
+	}
+	if fixtures.RedactionStatus != "customer_safe" {
+		t.Fatalf("assessment fixture redaction_status = %q", fixtures.RedactionStatus)
+	}
+	if customerSafe, ok := fixtures.Metadata["customer_safe"].(bool); !ok || !customerSafe {
+		t.Fatalf("assessment fixture metadata.customer_safe = %#v", fixtures.Metadata["customer_safe"])
+	}
+	if repoRelative, ok := fixtures.Metadata["repo_relative_paths_only"].(bool); !ok || !repoRelative {
+		t.Fatalf("assessment fixture metadata.repo_relative_paths_only = %#v", fixtures.Metadata["repo_relative_paths_only"])
+	}
+	return fixtures
+}
+
 func readJSONFileForTest(t *testing.T, path string, target interface{}) {
 	t.Helper()
 	content, err := os.ReadFile(path)
@@ -739,6 +831,19 @@ func assertLifecycleFixturePathsAreRepoRelative(t *testing.T, root string, refs 
 	}
 }
 
+func assertAssessmentFixturePathsAreRepoRelative(t *testing.T, root string, refs []string) {
+	t.Helper()
+	if len(refs) == 0 {
+		t.Fatal("assessment fixture does not cite repo-relative evidence refs")
+	}
+	for _, ref := range refs {
+		assertRepoRelativeFixturePath(t, ref)
+		if _, err := os.Stat(filepath.Join(root, filepath.FromSlash(ref))); err != nil {
+			t.Fatalf("assessment fixture evidence ref %s is not readable: %v", ref, err)
+		}
+	}
+}
+
 func assertRepoRelativeFixturePath(t *testing.T, ref string) {
 	t.Helper()
 	clean := filepath.ToSlash(filepath.Clean(filepath.FromSlash(ref)))
@@ -865,6 +970,95 @@ func assertLifecycleCitationsResolve(t *testing.T, fixtureCase demoLifecycleCase
 		if _, ok := outcomesByExperience[experienceID]; !ok {
 			t.Fatalf("%s trigger references unknown experience %s", fixtureCase.CaseID, experienceID)
 		}
+	}
+}
+
+func assertAssessmentCitationsResolve(t *testing.T, fixtureCase demoAssessmentCase, prURLs map[int]string) {
+	t.Helper()
+	if fixtureCase.ExpectedRiskLevel == "match_high" && len(fixtureCase.ExpectedCitations) == 0 {
+		t.Fatalf("%s expected match_high without citations", fixtureCase.CaseID)
+	}
+	for _, citation := range fixtureCase.ExpectedCitations {
+		found := false
+		for _, url := range prURLs {
+			if citation == url {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Fatalf("%s citation %q does not resolve through seeded PR index", fixtureCase.CaseID, citation)
+		}
+	}
+}
+
+func assertAssessmentCommandMatchesFixture(t *testing.T, fixtureCase demoAssessmentCase) {
+	t.Helper()
+	stdout, stderr, code := runForTest(t, []string{"--json", "assess", "--input", fixtureCase.InputDiff}, false)
+	if code != ExitSuccess {
+		t.Fatalf("%s exit code = %d, stderr = %q, stdout = %q", fixtureCase.CaseID, code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Command != "assess" || result.Status != "pass" {
+		t.Fatalf("%s command result = %#v", fixtureCase.CaseID, result)
+	}
+	assessment := decodeAssessmentFromResult(t, result)
+	assertAssessmentMatchesExpected(t, fixtureCase, assessment)
+
+	repeatedStdout, repeatedStderr, repeatedCode := runForTest(t, []string{"--json", "assess", "--input", fixtureCase.InputDiff}, false)
+	if repeatedCode != ExitSuccess {
+		t.Fatalf("%s repeated exit code = %d, stderr = %q, stdout = %q", fixtureCase.CaseID, repeatedCode, repeatedStderr, repeatedStdout)
+	}
+	repeatedAssessment := decodeAssessmentFromResult(t, decodeResult(t, repeatedStdout))
+	if assessment.AssessmentID != repeatedAssessment.AssessmentID {
+		t.Fatalf("%s assessment_id changed across repeated runs: %q then %q", fixtureCase.CaseID, assessment.AssessmentID, repeatedAssessment.AssessmentID)
+	}
+}
+
+func decodeAssessmentFromResult(t *testing.T, result CommandResult) demoRiskAssessment {
+	t.Helper()
+	encoded, err := json.Marshal(result.Data["assessment"])
+	if err != nil {
+		t.Fatalf("encode nested assessment: %v", err)
+	}
+	var assessment demoRiskAssessment
+	if err := json.Unmarshal(encoded, &assessment); err != nil {
+		t.Fatalf("decode nested assessment from %s: %v", encoded, err)
+	}
+	if assessment.ObjectType != "relia.risk_assessment" {
+		t.Fatalf("assessment object_type = %q", assessment.ObjectType)
+	}
+	if assessment.SchemaVersion != commandSchemaVersion {
+		t.Fatalf("assessment schema_version = %q", assessment.SchemaVersion)
+	}
+	if strings.TrimSpace(assessment.AssessmentID) == "" {
+		t.Fatal("assessment missing assessment_id")
+	}
+	return assessment
+}
+
+func assertAssessmentMatchesExpected(t *testing.T, fixtureCase demoAssessmentCase, assessment demoRiskAssessment) {
+	t.Helper()
+	if assessment.RiskLevel != fixtureCase.ExpectedRiskLevel {
+		t.Fatalf("%s risk_level = %q, want %q", fixtureCase.CaseID, assessment.RiskLevel, fixtureCase.ExpectedRiskLevel)
+	}
+	if fmt.Sprint(assessment.Matches) != fmt.Sprint(fixtureCase.ExpectedMatches) {
+		t.Fatalf("%s matches = %#v, want %#v", fixtureCase.CaseID, assessment.Matches, fixtureCase.ExpectedMatches)
+	}
+	if fmt.Sprint(assessment.Citations) != fmt.Sprint(fixtureCase.ExpectedCitations) {
+		t.Fatalf("%s citations = %#v, want %#v", fixtureCase.CaseID, assessment.Citations, fixtureCase.ExpectedCitations)
+	}
+	inputPath, _ := assessment.Metadata["input_path"].(string)
+	if inputPath != fixtureCase.InputDiff {
+		t.Fatalf("%s assessment input_path = %q, want %q", fixtureCase.CaseID, inputPath, fixtureCase.InputDiff)
+	}
+	touched := stringsFromInterfaceSlice(t, assessment.Metadata["touched_paths"])
+	if fmt.Sprint(touched) != fmt.Sprint(fixtureCase.ExpectedTouchedPaths) {
+		t.Fatalf("%s touched_paths = %#v, want %#v", fixtureCase.CaseID, touched, fixtureCase.ExpectedTouchedPaths)
+	}
+	repoRelative, ok := assessment.Metadata["repo_relative_paths_only"].(bool)
+	if !ok || !repoRelative {
+		t.Fatalf("%s metadata.repo_relative_paths_only = %#v", fixtureCase.CaseID, assessment.Metadata["repo_relative_paths_only"])
 	}
 }
 
@@ -1043,6 +1237,23 @@ func containsIntValue(values []int, want int) bool {
 		}
 	}
 	return false
+}
+
+func stringsFromInterfaceSlice(t *testing.T, value interface{}) []string {
+	t.Helper()
+	items, ok := value.([]interface{})
+	if !ok {
+		t.Fatalf("value is not a JSON string array: %#v", value)
+	}
+	result := make([]string, 0, len(items))
+	for _, item := range items {
+		text, ok := item.(string)
+		if !ok {
+			t.Fatalf("array item is not a string: %#v", item)
+		}
+		result = append(result, text)
+	}
+	return result
 }
 
 func assertUncertainAttributionVisible(t *testing.T, outcomes []demoOutcomeFixture, report demoBacktestReport, prURLs map[int]string) {

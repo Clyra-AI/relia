@@ -173,6 +173,34 @@ type ingestOptions struct {
 	InputPath string
 }
 
+type assessOptions struct {
+	InputPath string
+	Format    string
+}
+
+type riskAssessment struct {
+	ObjectType    string                `json:"object_type"`
+	SchemaVersion string                `json:"schema_version"`
+	AssessmentID  string                `json:"assessment_id"`
+	RiskLevel     string                `json:"risk_level"`
+	Matches       []riskAssessmentMatch `json:"matches"`
+	Citations     []string              `json:"citations"`
+	Metadata      map[string]any        `json:"metadata"`
+}
+
+type riskAssessmentMatch struct {
+	RuleID     string  `json:"rule_id"`
+	Confidence float64 `json:"confidence"`
+}
+
+type assessmentRule struct {
+	ID         string
+	Path       string
+	Confidence float64
+	ScopePaths []string
+	Citations  []string
+}
+
 type experienceRecord struct {
 	ObjectType      string                `json:"object_type"`
 	SchemaVersion   string                `json:"schema_version"`
@@ -309,12 +337,14 @@ func dispatch(parsed parsedArgs, start time.Time) CommandResult {
 		return checkResult(parsed.commandArgs, start)
 	case "ingest":
 		return ingestResult(parsed.commandArgs, start)
+	case "assess":
+		return assessResult(parsed.commandArgs, start)
 	case "models":
 		if len(parsed.commandArgs) == 1 && parsed.commandArgs[0] == "pull" {
 			return notImplementedResult("models pull", start)
 		}
 		return errorResult("models", "models", usageError("expected subcommand: pull"), start)
-	case "backtest", "distill", "review", "memory", "compile", "serve", "assess", "demo", "share":
+	case "backtest", "distill", "review", "memory", "compile", "serve", "demo", "share":
 		return notImplementedResult(command, start)
 	default:
 		return errorResult(command, command, usageError(fmt.Sprintf("unknown command %q", command)), start)
@@ -543,6 +573,273 @@ func parseIngestArgs(args []string) (ingestOptions, *CommandError) {
 		return options, usageError("ingest requires --input <json-or-jsonl> in offline mode")
 	}
 	return options, nil
+}
+
+func assessResult(args []string, start time.Time) CommandResult {
+	options, commandErr := parseAssessArgs(args)
+	if commandErr != nil {
+		return errorResult("assess", "assess", commandErr, start)
+	}
+	wd, err := os.Getwd()
+	if err != nil {
+		return errorResult("assess", "assess", internalError("could not inspect working directory", err), start)
+	}
+	root, ok := findRepoRoot(wd)
+	if !ok {
+		return errorResult("assess", "assess", configError("could not locate repository root from current directory"), start)
+	}
+	warnings, commandErr := validateReliaConfig(root)
+	if commandErr != nil {
+		return errorResult("assess", "assess", commandErr, start)
+	}
+	if commandErr := validateMemoryRuleArtifacts(root); commandErr != nil {
+		return errorResult("assess", "assess", commandErr, start)
+	}
+
+	inputPath := resolveInputPath(root, options.InputPath)
+	inputContent, err := os.ReadFile(inputPath)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return errorResult("assess", "assess", artifactContractError("assess input diff is missing", displayPath(root, inputPath)), start)
+		}
+		return errorResult("assess", "assess", internalError("could not read assess input", err), start)
+	}
+	touchedPaths, commandErr := parseUnifiedDiffTouchedPaths(inputContent, displayPath(root, inputPath))
+	if commandErr != nil {
+		return errorResult("assess", "assess", commandErr, start)
+	}
+	rules, commandErr := loadAssessmentRules(root)
+	if commandErr != nil {
+		return errorResult("assess", "assess", commandErr, start)
+	}
+	assessment := buildRiskAssessment(displayPath(root, inputPath), inputContent, touchedPaths, rules)
+
+	result := passResult("assess", "assess", "assessed local diff against active memory rules", start, map[string]any{
+		"input_path":         displayPath(root, inputPath),
+		"format":             options.Format,
+		"touched_paths":      touchedPaths,
+		"active_rule_count":  len(rules),
+		"matched_rule_count": len(assessment.Matches),
+		"assessment":         assessment,
+	})
+	result.Warnings = append(result.Warnings, warnings...)
+	result.EvidenceRefs = append(result.EvidenceRefs,
+		"schemas/risk-assessment.schema.json",
+		displayPath(root, inputPath),
+	)
+	result.Artifacts = append(result.Artifacts, ArtifactRef{Kind: "input_diff", Path: displayPath(root, inputPath)})
+	for _, rule := range rules {
+		result.Artifacts = append(result.Artifacts, ArtifactRef{Kind: "memory_rule", Path: rule.Path})
+		result.EvidenceRefs = append(result.EvidenceRefs, rule.Path)
+	}
+	return result
+}
+
+func parseAssessArgs(args []string) (assessOptions, *CommandError) {
+	options := assessOptions{Format: "json"}
+	for index := 0; index < len(args); index++ {
+		arg := args[index]
+		switch arg {
+		case "--input", "--diff", "-i":
+			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
+				return options, usageError("assess requires a path after " + arg)
+			}
+			options.InputPath = args[index+1]
+			index++
+		case "--format":
+			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
+				return options, usageError("assess requires a value after --format")
+			}
+			options.Format = args[index+1]
+			index++
+		default:
+			return options, usageError(fmt.Sprintf("unknown assess argument %q", arg))
+		}
+	}
+	if strings.TrimSpace(options.InputPath) == "" {
+		return options, usageError("assess requires --input <diff> in offline mode")
+	}
+	if options.Format != "json" {
+		return options, usageError("assess only supports --format json in this task slice")
+	}
+	return options, nil
+}
+
+func parseUnifiedDiffTouchedPaths(content []byte, ref string) ([]string, *CommandError) {
+	touched := map[string]bool{}
+	for _, line := range strings.Split(string(content), "\n") {
+		line = strings.TrimRight(line, "\r")
+		switch {
+		case strings.HasPrefix(line, "diff --git "):
+			fields := strings.Fields(strings.TrimPrefix(line, "diff --git "))
+			if len(fields) >= 2 {
+				addDiffPath(touched, fields[1])
+			}
+		case strings.HasPrefix(line, "+++ "):
+			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "+++ ")))
+		case strings.HasPrefix(line, "--- "):
+			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "--- ")))
+		}
+	}
+	paths := make([]string, 0, len(touched))
+	for touchedPath := range touched {
+		paths = append(paths, touchedPath)
+	}
+	sort.Strings(paths)
+	if len(paths) == 0 {
+		return nil, artifactContractError("assess input diff contains no repo-relative paths", ref)
+	}
+	return paths, nil
+}
+
+func addDiffPath(touched map[string]bool, raw string) {
+	pathPart := strings.TrimSpace(raw)
+	if index := strings.IndexAny(pathPart, "\t "); index >= 0 {
+		pathPart = pathPart[:index]
+	}
+	if pathPart == "" || pathPart == "/dev/null" {
+		return
+	}
+	if strings.HasPrefix(pathPart, "a/") || strings.HasPrefix(pathPart, "b/") {
+		pathPart = pathPart[2:]
+	}
+	if clean, ok := cleanRepoPath(pathPart); ok {
+		touched[filepath.ToSlash(clean)] = true
+	}
+}
+
+func loadAssessmentRules(root string) ([]assessmentRule, *CommandError) {
+	patterns := []string{
+		filepath.Join(root, "memory", "rules", "*.yaml"),
+		filepath.Join(root, "memory", "rules", "*.yml"),
+	}
+	var paths []string
+	for _, pattern := range patterns {
+		matches, err := filepath.Glob(pattern)
+		if err != nil {
+			return nil, internalError("could not inspect memory rule artifacts", err)
+		}
+		paths = append(paths, matches...)
+	}
+	sort.Strings(paths)
+
+	var rules []assessmentRule
+	for _, rulePath := range paths {
+		rule, active, commandErr := readAssessmentRule(root, rulePath)
+		if commandErr != nil {
+			return nil, commandErr
+		}
+		if active {
+			rules = append(rules, rule)
+		}
+	}
+	return rules, nil
+}
+
+func readAssessmentRule(root string, rulePath string) (assessmentRule, bool, *CommandError) {
+	content, err := os.ReadFile(rulePath)
+	if err != nil {
+		return assessmentRule{}, false, internalError("could not read memory rule artifact", err)
+	}
+	rel, err := filepath.Rel(root, rulePath)
+	if err != nil {
+		rel = rulePath
+	}
+	rel = filepath.ToSlash(rel)
+	document, parseErr := parseYAMLDocument(string(content))
+	if parseErr != nil {
+		return assessmentRule{}, false, artifactContractError(parseErr.Error(), rel)
+	}
+	if document.Scalars["status"].Value != "active" {
+		return assessmentRule{}, false, nil
+	}
+	confidence, err := strconv.ParseFloat(document.Scalars["confidence"].Value, 64)
+	if err != nil {
+		return assessmentRule{}, false, artifactContractError("memory rule confidence must be numeric", rel)
+	}
+	citations := assessmentRuleCitations(document)
+	if len(citations) == 0 {
+		return assessmentRule{}, false, provenanceIntegrityError("active memory rule must include citation URLs for assessment", rel)
+	}
+	return assessmentRule{
+		ID:         document.Scalars["id"].Value,
+		Path:       rel,
+		Confidence: confidence,
+		ScopePaths: yamlListValues(document, "scope.paths"),
+		Citations:  citations,
+	}, true, nil
+}
+
+func assessmentRuleCitations(document yamlDocument) []string {
+	var citations []string
+	for _, provenance := range document.ListMaps["provenance"] {
+		url, ok := provenance["url"]
+		if !ok || strings.TrimSpace(url.Value) == "" {
+			continue
+		}
+		citations = append(citations, url.Value)
+	}
+	return uniqueStrings(citations)
+}
+
+func buildRiskAssessment(inputRef string, content []byte, touchedPaths []string, rules []assessmentRule) riskAssessment {
+	matches := []riskAssessmentMatch{}
+	citations := []string{}
+	for _, rule := range rules {
+		if !assessmentRuleMatchesTouchedPath(rule, touchedPaths) {
+			continue
+		}
+		matches = append(matches, riskAssessmentMatch{
+			RuleID:     rule.ID,
+			Confidence: rule.Confidence,
+		})
+		citations = append(citations, rule.Citations...)
+	}
+	sort.Slice(matches, func(i, j int) bool {
+		if matches[i].Confidence == matches[j].Confidence {
+			return matches[i].RuleID < matches[j].RuleID
+		}
+		return matches[i].Confidence > matches[j].Confidence
+	})
+	citations = uniqueStrings(citations)
+	if citations == nil {
+		citations = []string{}
+	}
+	riskLevel := "no_coverage"
+	for _, match := range matches {
+		if match.Confidence >= 0.75 {
+			riskLevel = "match_high"
+			break
+		}
+		riskLevel = "match_medium"
+	}
+	return riskAssessment{
+		ObjectType:    "relia.risk_assessment",
+		SchemaVersion: commandSchemaVersion,
+		AssessmentID:  "assess_" + shortHash(inputRef+"|"+sha256String(string(content))+"|"+strings.Join(touchedPaths, "\x00")),
+		RiskLevel:     riskLevel,
+		Matches:       matches,
+		Citations:     citations,
+		Metadata: map[string]any{
+			"input_path":               inputRef,
+			"diff_fingerprint":         sha256String(string(content)),
+			"touched_paths":            touchedPaths,
+			"repo_relative_paths_only": true,
+			"redaction_status":         "customer_safe",
+		},
+	}
+}
+
+func assessmentRuleMatchesTouchedPath(rule assessmentRule, touchedPaths []string) bool {
+	for _, scopePath := range rule.ScopePaths {
+		scopePath = filepath.ToSlash(filepath.Clean(filepath.FromSlash(scopePath)))
+		for _, touchedPath := range touchedPaths {
+			if scopePatternMatches(scopePath, touchedPath) || scopePath == touchedPath {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func readReliaConfig(root string) (yamlDocument, *CommandError) {

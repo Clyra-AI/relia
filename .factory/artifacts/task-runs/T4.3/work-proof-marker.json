@@ -1,0 +1,36 @@
+{
+  "acceptance_item_ids": [
+    "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-004"
+  ],
+  "artifact_type": "work_proof_marker",
+  "changed_paths": [
+    ".factory/artifacts/task-runs/T4.3/proof-of-behavior-scorecard.json",
+    ".factory/artifacts/task-runs/T4.3/validation-report.json",
+    ".factory/artifacts/task-runs/T4.3/work-proof-marker.json",
+    "README.md",
+    "cmd/relia/demo_fixtures_test.go",
+    "cmd/relia/main.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/dev/dev_guides.md",
+    "examples/demo/assessment-fixtures/assessment-fixtures.json",
+    "examples/demo/assessment-fixtures/planted-pattern.diff",
+    "examples/demo/assessment-fixtures/seeded-repo/packages/billing/invoice.py",
+    "examples/demo/assessment-fixtures/unknown-path.diff",
+    "memory/rules/demo-assessment-active-rule.yaml"
+  ],
+  "evidence_refs": [
+    ".factory/artifacts/task-runs/T4.3/validation-report.json",
+    ".factory/artifacts/task-runs/T4.3/proof-of-behavior-scorecard.json"
+  ],
+  "implementation_performed": true,
+  "objective": "Build assessment fixture coverage for planted-pattern and unknown-path diffs without bundling unrelated corpus work.",
+  "schema_version": "1.0",
+  "status": "implemented",
+  "summary": [
+    "Implemented bounded offline relia assess support for local unified diffs using active local memory rules.",
+    "Added two customer-safe assessment fixture diffs and one active synthetic memory rule with seeded PR citations.",
+    "Added TestDemoAssessmentFixturesDriveAssessCommand coverage for match_high, no_coverage, repo-relative refs, citation resolution, and deterministic assessment IDs.",
+    "Updated README, developer guide, and architecture guide for T4.3 fixture ownership and command behavior."
+  ],
+  "task_id": "T4.3"
+}

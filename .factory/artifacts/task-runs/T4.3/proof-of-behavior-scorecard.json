@@ -1,0 +1,72 @@
+{
+  "artifact_type": "proof-of-behavior-scorecard",
+  "schema_version": "1.0",
+  "task_id": "T4.3",
+  "status": "pass",
+  "required_proof_level": "workflow_behavior",
+  "scorecard": [
+    {
+      "behavior": "Planted-pattern assessment returns match_high with citations",
+      "status": "pass",
+      "evidence": {
+        "command": "go run ./cmd/relia --json assess --input examples/demo/assessment-fixtures/planted-pattern.diff --format json",
+        "risk_level": "match_high",
+        "matched_rule_id": "avoid-direct-datetime-in-assessment-fixture",
+        "citation_count": 3,
+        "evidence_refs": [
+          "examples/demo/assessment-fixtures/planted-pattern.diff",
+          "memory/rules/demo-assessment-active-rule.yaml",
+          "examples/demo/seeded-repo/prs.json"
+        ]
+      }
+    },
+    {
+      "behavior": "Unknown-path assessment returns no_coverage",
+      "status": "pass",
+      "evidence": {
+        "command": "go run ./cmd/relia --json assess --input examples/demo/assessment-fixtures/unknown-path.diff --format json",
+        "risk_level": "no_coverage",
+        "matched_rule_count": 0,
+        "citation_count": 0,
+        "evidence_refs": [
+          "examples/demo/assessment-fixtures/unknown-path.diff",
+          "memory/rules/demo-assessment-active-rule.yaml"
+        ]
+      }
+    },
+    {
+      "behavior": "Assessment fixture evidence remains deterministic and repo-relative",
+      "status": "pass",
+      "evidence": {
+        "test": "TestDemoAssessmentFixturesDriveAssessCommand",
+        "determinism_check": "Runs each fixture command twice and compares assessment_id stability.",
+        "repo_relative_check": "Validates fixture source_artifacts, input_diff, evidence_refs, and assessment metadata paths are repo-relative.",
+        "evidence_refs": [
+          "cmd/relia/demo_fixtures_test.go",
+          "examples/demo/assessment-fixtures/assessment-fixtures.json"
+        ]
+      }
+    },
+    {
+      "behavior": "Coverage and full local gates pass",
+      "status": "pass",
+      "evidence": {
+        "coverage_percent": 78.7,
+        "coverage_minimum_percent": 75,
+        "commands": [
+          "make test-coverage",
+          "make prepush-full"
+        ]
+      }
+    }
+  ],
+  "redaction_posture": {
+    "status": "pass",
+    "classification": "customer_safe",
+    "notes": "Fixtures are synthetic, repo-relative, and use seeded public-safe PR URLs only."
+  },
+  "evidence_refs": [
+    ".factory/artifacts/task-runs/T4.3/work-proof-marker.json",
+    ".factory/artifacts/task-runs/T4.3/validation-report.json"
+  ]
+}

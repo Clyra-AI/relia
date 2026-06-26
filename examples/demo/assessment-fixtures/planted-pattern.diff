@@ -1,0 +1,11 @@
+diff --git a/examples/demo/assessment-fixtures/seeded-repo/packages/billing/invoice.py b/examples/demo/assessment-fixtures/seeded-repo/packages/billing/invoice.py
+index 2f1a1a0..7b5f3de 100644
+--- a/examples/demo/assessment-fixtures/seeded-repo/packages/billing/invoice.py
++++ b/examples/demo/assessment-fixtures/seeded-repo/packages/billing/invoice.py
+@@ -1,4 +1,5 @@
+ from datetime import datetime
+ 
+ def rollover_day():
+-    return "2026-01-01"
++    clock = datetime.utcnow()
++    return clock.strftime("%Y-%m-%d")

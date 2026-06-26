@@ -1,0 +1,184 @@
+{
+  "acceptance_results": [
+    {
+      "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-004",
+      "checks": [
+        {
+          "description": "relia assess returns match_high with citations on a planted-pattern diff",
+          "status": "implemented"
+        },
+        {
+          "description": "relia assess returns no_coverage on unknown paths",
+          "status": "implemented"
+        },
+        {
+          "description": "Assessment fixture evidence remains deterministic and repo-relative",
+          "status": "implemented"
+        }
+      ],
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T4.3/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T4.3/proof-of-behavior-scorecard.json",
+        "cmd/relia/demo_fixtures_test.go",
+        "examples/demo/assessment-fixtures/assessment-fixtures.json",
+        "memory/rules/demo-assessment-active-rule.yaml"
+      ],
+      "status": "implemented"
+    }
+  ],
+  "artifact_type": "validation_report",
+  "baseline_evidence": [
+    {
+      "command": "make lint-fast",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "make test-fast",
+      "exit_code": 0,
+      "status": "pass"
+    }
+  ],
+  "blockers": [],
+  "changed_paths": [
+    ".factory/artifacts/task-runs/T4.3/proof-of-behavior-scorecard.json",
+    ".factory/artifacts/task-runs/T4.3/validation-report.json",
+    ".factory/artifacts/task-runs/T4.3/work-proof-marker.json",
+    "README.md",
+    "cmd/relia/demo_fixtures_test.go",
+    "cmd/relia/main.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/dev/dev_guides.md",
+    "examples/demo/assessment-fixtures/assessment-fixtures.json",
+    "examples/demo/assessment-fixtures/planted-pattern.diff",
+    "examples/demo/assessment-fixtures/seeded-repo/packages/billing/invoice.py",
+    "examples/demo/assessment-fixtures/unknown-path.diff",
+    "memory/rules/demo-assessment-active-rule.yaml"
+  ],
+  "changelog_result": {
+    "notes": "No CHANGELOG file is present in allowed paths; docs-sync refs were updated in README.md, docs/dev/dev_guides.md, and docs/architecture/architecture_guides.md.",
+    "status": "pass"
+  },
+  "commands_run": [
+    "make lint-fast",
+    "make test-fast",
+    "make test-contracts",
+    "go test ./cmd/... -count=1 -run 'TestDemo'",
+    "go run ./cmd/relia --json assess --input examples/demo/assessment-fixtures/planted-pattern.diff --format json",
+    "go run ./cmd/relia --json assess --input examples/demo/assessment-fixtures/unknown-path.diff --format json",
+    "go test ./cmd/... -count=1 -run 'TestDemoAssessmentFixturesDriveAssessCommand'",
+    "make test-coverage",
+    "make prepush-full",
+    "python3 -m json.tool .factory/artifacts/task-runs/T4.3/work-proof-marker.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T4.3/validation-report.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T4.3/proof-of-behavior-scorecard.json"
+  ],
+  "docs_sync_result": {
+    "status": "pass",
+    "updated_refs": [
+      "README.md",
+      "docs/dev/dev_guides.md",
+      "docs/architecture/architecture_guides.md"
+    ]
+  },
+  "evidence_artifact_validation": [
+    {
+      "command": "python3 -m json.tool .factory/artifacts/task-runs/T4.3/work-proof-marker.json",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "python3 -m json.tool .factory/artifacts/task-runs/T4.3/validation-report.json",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "python3 -m json.tool .factory/artifacts/task-runs/T4.3/proof-of-behavior-scorecard.json",
+      "exit_code": 0,
+      "status": "pass"
+    }
+  ],
+  "final_validation_evidence": [
+    {
+      "command": "make test-coverage",
+      "exit_code": 0,
+      "observed": {
+        "coverage_percent": 78.7,
+        "minimum_percent": 75
+      },
+      "status": "pass"
+    },
+    {
+      "command": "make prepush-full",
+      "exit_code": 0,
+      "status": "pass"
+    }
+  ],
+  "green_evidence": [
+    {
+      "command": "go test ./cmd/... -count=1 -run 'TestDemo'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/... -count=1 -run 'TestDemoAssessmentFixturesDriveAssessCommand'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go run ./cmd/relia --json assess --input examples/demo/assessment-fixtures/planted-pattern.diff --format json",
+      "exit_code": 0,
+      "observed": {
+        "citation_count": 3,
+        "matched_rule_count": 1,
+        "risk_level": "match_high"
+      },
+      "status": "pass"
+    },
+    {
+      "command": "go run ./cmd/relia --json assess --input examples/demo/assessment-fixtures/unknown-path.diff --format json",
+      "exit_code": 0,
+      "observed": {
+        "citation_count": 0,
+        "matched_rule_count": 0,
+        "risk_level": "no_coverage"
+      },
+      "status": "pass"
+    }
+  ],
+  "lifecycle_evidence_note": {
+    "details": "scope_closure_report, pr_lifecycle_report, and factoryd_run_once_report are lifecycle-worker artifacts and were not authored in this worker diff.",
+    "status": "not_worker_owned"
+  },
+  "path_policy_result": {
+    "changed_paths_checked": true,
+    "forbidden_paths_changed": [],
+    "notes": "All changed paths are within the task allowed paths. Required coverage commands generated no tracked .factory/tmp diff.",
+    "status": "pass"
+  },
+  "plan_drift_result": {
+    "notes": "Implementation remained bounded to T4.3 assessment fixture coverage and the minimum local assess behavior needed by the fixture.",
+    "status": "pass"
+  },
+  "red_evidence": [
+    {
+      "command": "make test-contracts",
+      "exit_code": 0,
+      "note": "Pre-change red-first command was already green; the task added missing T4.3 fixture assertions rather than widening scope.",
+      "status": "pass"
+    }
+  ],
+  "residual_risks": [],
+  "schema_version": "1.0",
+  "status": "pass",
+  "task_id": "T4.3",
+  "test_first_skipped_reason": {
+    "details": "The required red-first command passed before implementation because no T4.3 assessment fixture test existed yet. Focused fixture coverage was added in TestDemoAssessmentFixturesDriveAssessCommand.",
+    "reason_code": "pre_existing_contract_lane_green",
+    "status": "recorded"
+  },
+  "versioning_result": {
+    "notes": "Pre-1.0 behavior slice; no runtime pin, module path, schema version, or distribution target changed.",
+    "status": "pass"
+  }
+}

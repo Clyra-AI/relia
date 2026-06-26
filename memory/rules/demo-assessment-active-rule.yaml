@@ -1,0 +1,38 @@
+object_type: relia.memory_rule
+schema_version: "1.0"
+id: avoid-direct-datetime-in-assessment-fixture
+kind: avoid
+status: active
+statement: Use the billing time-control fixture instead of reading datetime.utcnow directly in rollover logic.
+scope:
+  paths:
+    - examples/demo/assessment-fixtures/seeded-repo/packages/billing/invoice.py
+  signals:
+    - pytest-billing
+confidence: 0.86
+evidence:
+  count: 3
+  contradictions: 0
+  experiences:
+    - exp_0142
+    - exp_0187
+    - exp_0203
+provenance:
+  - pr: 142
+    outcome: ci_failure
+    url: https://github.com/Clyra-AI/relia-demo-seed/pull/142
+  - pr: 187
+    outcome: ci_failure
+    url: https://github.com/Clyra-AI/relia-demo-seed/pull/187
+  - pr: 203
+    outcome: ci_failure
+    url: https://github.com/Clyra-AI/relia-demo-seed/pull/203
+review:
+  label: accepted
+  statement_origin: cluster_summary
+metadata:
+  customer_safe: true
+  source_fixture: examples/demo/assessment-fixtures/assessment-fixtures.json
+  citation_policy: seeded-pr-index
+  redaction_status: customer_safe
+  serving_eligible: true
