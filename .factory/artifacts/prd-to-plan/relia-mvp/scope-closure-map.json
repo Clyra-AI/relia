@@ -2809,29 +2809,43 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "MVP-IN-SCOPE-022",
-          "evidence_refs": [],
+          "evidence_refs": [
+            "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/validation-report.json",
+            "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/ship-packet.json",
+            "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "outcome-fixture-corpus"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/validation-report.json",
+        "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/ship-packet.json",
+        "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "mvp-in-scope",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T4.1"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence.",
         "Sprint 4 remapped this item to smaller task slices or bounded learning-loop follow-up evidence."
       ],
-      "remaining_task_refs": [
-        "T4.1"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "seeded demo repo and bundled static reports",
       "scope_item_id": "MVP-IN-SCOPE-022",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T4.1"
       ]
@@ -3220,29 +3234,43 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-008",
-          "evidence_refs": [],
+          "evidence_refs": [
+            "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/validation-report.json",
+            "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/ship-packet.json",
+            "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "outcome-fixture-corpus"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/validation-report.json",
+        "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/ship-packet.json",
+        "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "ingest-attribute-backtest-acceptance-tests",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T4.1"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence.",
         "Sprint 4 remapped this item to smaller task slices or bounded learning-loop follow-up evidence."
       ],
-      "remaining_task_refs": [
-        "T4.1"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "The planted flaky test is discounted and drafts no rule.",
       "scope_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-008",
       "source_ref": "docs/product/prd.md#ingest-attribute-backtest-acceptance-tests",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T4.1"
       ]
@@ -3257,29 +3285,43 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-009",
-          "evidence_refs": [],
+          "evidence_refs": [
+            "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/validation-report.json",
+            "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/ship-packet.json",
+            "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "outcome-fixture-corpus"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/validation-report.json",
+        "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/ship-packet.json",
+        "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "ingest-attribute-backtest-acceptance-tests",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T4.1"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence.",
         "Sprint 4 remapped this item to smaller task slices or bounded learning-loop follow-up evidence."
       ],
-      "remaining_task_refs": [
-        "T4.1"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "Seeded secrets never appear in any artifact.",
       "scope_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-009",
       "source_ref": "docs/product/prd.md#ingest-attribute-backtest-acceptance-tests",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T4.1"
       ]
@@ -4814,29 +4856,43 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "DEMO-ACCEPTANCE-002",
-          "evidence_refs": [],
+          "evidence_refs": [
+            "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/validation-report.json",
+            "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/ship-packet.json",
+            "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "outcome-fixture-corpus"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/validation-report.json",
+        "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/ship-packet.json",
+        "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "demo-acceptance",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T4.1"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence.",
         "Sprint 4 remapped this item to smaller task slices or bounded learning-loop follow-up evidence."
       ],
-      "remaining_task_refs": [
-        "T4.1"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "Every number shown live is reproducible from the seeded repo.",
       "scope_item_id": "DEMO-ACCEPTANCE-002",
       "source_ref": "docs/product/prd.md#demo-acceptance",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T4.1"
       ]
@@ -4887,29 +4943,43 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "DEMO-ACCEPTANCE-004",
-          "evidence_refs": [],
+          "evidence_refs": [
+            "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/validation-report.json",
+            "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/ship-packet.json",
+            "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "outcome-fixture-corpus"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/validation-report.json",
+        "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/ship-packet.json",
+        "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "demo-acceptance",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T4.1"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence.",
         "Sprint 4 remapped this item to smaller task slices or bounded learning-loop follow-up evidence."
       ],
-      "remaining_task_refs": [
-        "T4.1"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "Every citation shown in the demo resolves to a real PR in the seeded repo.",
       "scope_item_id": "DEMO-ACCEPTANCE-004",
       "source_ref": "docs/product/prd.md#demo-acceptance",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T4.1"
       ]
@@ -4960,30 +5030,44 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-011",
-          "evidence_refs": [],
+          "evidence_refs": [
+            "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/validation-report.json",
+            "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/ship-packet.json",
+            "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "outcome-fixture-corpus"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/validation-report.json",
+        "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/ship-packet.json",
+        "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260626T121927.156625000Z-relia-T4.1/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "ingest-attribute-backtest-acceptance-tests",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T4.1"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence.",
         "Attribution precision must be measured on the labeled sample before ingest/backtest closure can be claimed.",
         "Sprint 4 remapped this item to smaller task slices or bounded learning-loop follow-up evidence."
       ],
-      "remaining_task_refs": [
-        "T4.1"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "Attribution precision is at least 95% on a labeled sample; uncertain cases are excluded, not guessed.",
       "scope_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-011",
       "source_ref": "docs/product/prd.md#ingest-attribute-backtest-acceptance-tests",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T4.1"
       ]
@@ -5041,7 +5125,7 @@
       ]
     }
   ],
-  "last_updated_at": "2026-06-25T18:25:22Z",
+  "last_updated_at": "2026-06-26T13:51:12Z",
   "schema_version": "0.1",
   "source_prd_ref": "docs/product/prd.md"
 }
