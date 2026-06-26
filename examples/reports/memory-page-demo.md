@@ -25,8 +25,9 @@ Evidence:
 
 ### Stale: avoid-mocking-datetime-directly
 
-No longer served. The scoped test path `tests/billing/test_invoice_time.py` was
-removed in [PR #293](https://github.com/Clyra-AI/relia-demo-seed/pull/293).
+No longer served. The scoped billing invoice path `packages/billing/invoice.py`
+and test path `tests/billing/test_invoice_time.py` were removed in
+[PR #293](https://github.com/Clyra-AI/relia-demo-seed/pull/293).
 
 Evidence:
 

@@ -933,18 +933,38 @@ func assertLifecycleStaleRule(t *testing.T, fixtureCase demoLifecycleCase, outco
 		t.Fatalf("stale fixture deletion_pr = %#v, want 293", fixtureCase.Rule.Metadata["deletion_pr"])
 	}
 	var foundDeletionCitation bool
+	originalScopePaths := map[string]bool{}
 	for _, citation := range fixtureCase.Citations {
-		if citation.Role != "scope_deleted" {
+		outcome := outcomesByExperience[citation.ExperienceID]
+		switch citation.Role {
+		case "original_failure":
+			for _, path := range outcome.Paths {
+				originalScopePaths[path] = true
+			}
+		case "scope_deleted":
+			if citation.PR != 293 || outcome.OutcomeKind != "merged_clean" || outcome.SignatureID != "sig_time_freeze" {
+				t.Fatalf("stale deletion citation has wrong outcome: %#v", outcome)
+			}
+			for _, scopedPath := range fixtureCase.Rule.Scope.Paths {
+				if !containsStringValue(outcome.Paths, scopedPath) {
+					t.Fatalf("stale deletion citation %s does not delete scoped path %q; deletion paths = %#v", citation.ExperienceID, scopedPath, outcome.Paths)
+				}
+			}
+			foundDeletionCitation = true
+		default:
 			continue
 		}
-		outcome := outcomesByExperience[citation.ExperienceID]
-		if citation.PR != 293 || outcome.OutcomeKind != "merged_clean" || outcome.SignatureID != "sig_time_freeze" {
-			t.Fatalf("stale deletion citation has wrong outcome: %#v", outcome)
-		}
-		foundDeletionCitation = true
 	}
 	if !foundDeletionCitation {
 		t.Fatal("stale fixture missing scope_deleted citation")
+	}
+	for _, scopedPath := range fixtureCase.Rule.Scope.Paths {
+		if !originalScopePaths[scopedPath] {
+			t.Fatalf("stale fixture scope path %q is not backed by original failure evidence %#v", scopedPath, originalScopePaths)
+		}
+	}
+	if len(fixtureCase.Rule.Scope.Paths) != len(originalScopePaths) {
+		t.Fatalf("stale fixture scope %#v narrowed or expanded original evidence scope %#v", fixtureCase.Rule.Scope.Paths, originalScopePaths)
 	}
 }
 
