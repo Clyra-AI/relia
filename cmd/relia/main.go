@@ -600,9 +600,6 @@ func assessResult(args []string, start time.Time) CommandResult {
 	if commandErr != nil {
 		return withFormat(errorResult("assess", "assess", commandErr, start))
 	}
-	if commandErr := validateMemoryRuleArtifacts(root); commandErr != nil {
-		return withFormat(errorResult("assess", "assess", commandErr, start))
-	}
 
 	inputPath := resolveInputPath(root, options.InputPath)
 	inputContent, err := os.ReadFile(inputPath)
@@ -858,6 +855,11 @@ func buildRiskAssessment(root string, inputRef string, content []byte, touchedPa
 		}
 		if len(rule.Citations) == 0 {
 			return riskAssessment{}, provenanceIntegrityError("matched active memory rule must include citation URLs for assessment", rule.Path)
+		}
+		for _, citation := range rule.Citations {
+			if !validGitHubProvenanceURLShape(citation) {
+				return riskAssessment{}, provenanceIntegrityError("matched active memory rule citation URL must be an https://github.com/ URL", rule.Path)
+			}
 		}
 		matches = append(matches, riskAssessmentMatch{
 			RuleID:     rule.ID,

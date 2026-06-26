@@ -1613,6 +1613,56 @@ metadata: {}
 	}
 }
 
+func TestDemoAssessIgnoresInactiveStaleRuleWithRemovedPath(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "stale-billing.yaml"), `object_type: relia.memory_rule
+schema_version: "1.0"
+id: stale-billing-fixture
+kind: avoid
+status: stale
+statement: Historical billing rule for a removed module.
+scope:
+  paths:
+    - packages/removed-billing/
+confidence: 0.86
+evidence:
+  count: 1
+  contradictions: 1
+  experiences:
+    - exp_0142
+provenance:
+  - pr: 142
+    outcome: ci_failure
+review:
+  label: suggested
+  statement_origin: human_authored
+metadata: {}
+`)
+	writeFileForTest(t, filepath.Join(tempDir, "unknown.diff"), `diff --git a/packages/search/query.py b/packages/search/query.py
+--- a/packages/search/query.py
++++ b/packages/search/query.py
+@@ -1,2 +1,3 @@
+ def normalize_query(value):
+-    return value.strip().lower()
++    normalized = value.strip().lower()
++    return " ".join(normalized.split())
+`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "assess", "--input", "unknown.diff"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	assessment := decodeAssessmentFromResult(t, decodeResult(t, stdout))
+	if assessment.RiskLevel != "no_coverage" {
+		t.Fatalf("risk_level = %q, want no_coverage", assessment.RiskLevel)
+	}
+	if len(assessment.Matches) != 0 || len(assessment.Citations) != 0 {
+		t.Fatalf("assessment served inactive stale rule: matches=%#v citations=%#v", assessment.Matches, assessment.Citations)
+	}
+}
+
 func TestDemoAssessIgnoresHunkBodyDiffMarkersAsPaths(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
@@ -1725,6 +1775,56 @@ func TestParseUnifiedDiffTouchedPathsKeepsQuotedSpaces(t *testing.T) {
 	}
 	if fmt.Sprint(paths) != fmt.Sprint([]string{"docs/api guide.md"}) {
 		t.Fatalf("paths = %#v", paths)
+	}
+}
+
+func TestDemoAssessRejectsMatchedRuleWithInvalidCitationURL(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "billing-time.yaml"), `object_type: relia.memory_rule
+schema_version: "1.0"
+id: billing-time-fixture
+kind: avoid
+status: active
+statement: Use the billing clock fixture instead of direct UTC calls.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.86
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_0142
+provenance:
+  - pr: 142
+    outcome: ci_failure
+    url: not-a-url
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`)
+	writeFileForTest(t, filepath.Join(tempDir, "change.diff"), `diff --git a/packages/billing/invoice.py b/packages/billing/invoice.py
+--- a/packages/billing/invoice.py
++++ b/packages/billing/invoice.py
+@@ -1,2 +1,3 @@
+ def rollover_day():
+-    return "2026-01-01"
++    return datetime.utcnow().strftime("%Y-%m-%d")
+`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "assess", "--input", "change.diff"}, false)
+
+	if code != ExitProvenanceIntegrity {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "provenance_integrity_failed" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+	if !strings.Contains(result.Errors[0].Message, "citation URL") {
+		t.Fatalf("error message = %q", result.Errors[0].Message)
 	}
 }
 
