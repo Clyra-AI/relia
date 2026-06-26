@@ -1,13 +1,35 @@
 {
+  "acceptance_item_ids": [
+    "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-001",
+    "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-006",
+    "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-007"
+  ],
   "artifact_type": "work_proof_marker",
-  "schema_version": "1.0",
-  "task_id": "T4.2",
-  "status": "implemented",
+  "changed_paths": [
+    ".factory/artifacts/task-runs/T4.2/proof-of-behavior-scorecard.json",
+    ".factory/artifacts/task-runs/T4.2/validation-report.json",
+    ".factory/artifacts/task-runs/T4.2/work-proof-marker.json",
+    "README.md",
+    "cmd/relia/demo_fixtures_test.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/dev/dev_guides.md",
+    "examples/demo/distill-review-lifecycle-fixtures.json",
+    "examples/demo/seeded-repo/README.md",
+    "examples/demo/seeded-repo/outcomes.jsonl",
+    "examples/demo/seeded-repo/prs.json",
+    "examples/reports/backtest-demo.json",
+    "examples/reports/memory-page-demo.md"
+  ],
+  "evidence_refs": [
+    ".factory/artifacts/task-runs/T4.2/validation-report.json",
+    ".factory/artifacts/task-runs/T4.2/proof-of-behavior-scorecard.json",
+    "examples/demo/distill-review-lifecycle-fixtures.json",
+    "examples/reports/memory-page-demo.md",
+    "cmd/relia/demo_fixtures_test.go"
+  ],
   "implementation_performed": true,
-  "summary": "Repaired the T4.2 lifecycle demo so contradicted and stale rules remain visible only as lifecycle outcomes, not candidate recommendations, and added a contract assertion for that rendering rule.",
-  "repair_task_id": "20260626T140907.224593000Z-relia-T4.2-repair",
+  "repair_task_id": "20260626T140907.224593000Z-relia-T4.2-repair-3",
   "runner_ready_contract_result": {
-    "status": "pass",
     "checked_fields": [
       "task_id",
       "objective",
@@ -27,25 +49,11 @@
       "stop_conditions",
       "runtime_pins",
       "acceptance_result_requirements"
-    ]
+    ],
+    "status": "pass"
   },
-  "changed_paths": [
-    "cmd/relia/demo_fixtures_test.go",
-    "examples/reports/memory-page-demo.md",
-    ".factory/artifacts/task-runs/T4.2/work-proof-marker.json",
-    ".factory/artifacts/task-runs/T4.2/validation-report.json",
-    ".factory/artifacts/task-runs/T4.2/proof-of-behavior-scorecard.json"
-  ],
-  "acceptance_item_ids": [
-    "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-001",
-    "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-006",
-    "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-007"
-  ],
-  "evidence_refs": [
-    ".factory/artifacts/task-runs/T4.2/validation-report.json",
-    ".factory/artifacts/task-runs/T4.2/proof-of-behavior-scorecard.json",
-    "examples/demo/distill-review-lifecycle-fixtures.json",
-    "examples/reports/memory-page-demo.md",
-    "cmd/relia/demo_fixtures_test.go"
-  ]
+  "schema_version": "1.0",
+  "status": "implemented",
+  "summary": "Repaired the T4.2 lifecycle demo so contradicted and stale rules remain visible only as lifecycle outcomes, not candidate recommendations, and corrected worker evidence to list every path changed by the branch.",
+  "task_id": "T4.2"
 }

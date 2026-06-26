@@ -4,7 +4,7 @@
   "schema_version": "1.0",
   "task_id": "T4.2",
   "status": "pass",
-  "repair_task_id": "20260626T140907.224593000Z-relia-T4.2-repair",
+  "repair_task_id": "20260626T140907.224593000Z-relia-T4.2-repair-3",
   "required_proof_level": "workflow_behavior",
   "redaction_posture": {
     "classification": "customer_safe",
