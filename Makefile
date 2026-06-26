@@ -29,5 +29,6 @@ test-coverage:
 
 test-contracts:
 	python3 scripts/validate_repo_pack.py
+	$(GO) test ./cmd/... -count=1 -run 'TestDemo'
 
 prepush-full: lint-fast test-fast test-coverage test-contracts

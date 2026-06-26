@@ -1,0 +1,117 @@
+{
+  "artifact_type": "proof-of-behavior-scorecard",
+  "schema_version": "1.0",
+  "task_id": "T4.1",
+  "status": "pass",
+  "generated_at": "2026-06-26T12:59:03Z",
+  "proof_level": "workflow_behavior",
+  "behaviors": [
+    {
+      "behavior": "Seeded demo repo and bundled static reports exist without real customer data.",
+      "status": "pass",
+      "evidence_refs": [
+        "examples/demo/seeded-repo/prs.json",
+        "examples/demo/seeded-repo/outcomes.jsonl",
+        "examples/reports/backtest-demo.json",
+        "examples/reports/backtest-demo.html",
+        "examples/reports/memory-page-demo.md",
+        "cmd/relia/demo_fixtures_test.go:TestDemoArtifactsAreCustomerSafeAndDoNotContainSeededSecrets"
+      ],
+      "metrics": {
+        "seeded_prs": 19,
+        "seeded_outcomes": 19
+      }
+    },
+    {
+      "behavior": "The planted flaky test is discounted and drafts no rule.",
+      "status": "pass",
+      "evidence_refs": [
+        "examples/demo/flake-discount-fixtures.json",
+        "examples/demo/seeded-repo/outcomes.jsonl",
+        "examples/reports/backtest-demo.json",
+        "cmd/relia/demo_fixtures_test.go:TestDemoFixtureCorpusReproducesBacktestReport"
+      ],
+      "metrics": {
+        "planted_flake_pr": 219,
+        "supporting_prs": [
+          214,
+          216
+        ],
+        "flake_discounted_count": 3,
+        "drafts_rule": false
+      }
+    },
+    {
+      "behavior": "Seeded secrets never appear in demo artifacts.",
+      "status": "pass",
+      "evidence_refs": [
+        "examples/demo/redaction-fixtures/expected-redacted-artifacts.json",
+        "cmd/relia/demo_fixtures_test.go:TestDemoArtifactsAreCustomerSafeAndDoNotContainSeededSecrets"
+      ]
+    },
+    {
+      "behavior": "Attribution precision is at least 95% on a labeled sample, with uncertain cases excluded rather than guessed.",
+      "status": "pass",
+      "evidence_refs": [
+        "examples/demo/attribution-precision-sample.json",
+        "cmd/relia/demo_fixtures_test.go:TestDemoAttributionPrecisionSampleExcludesUncertain"
+      ],
+            "metrics": {
+                "precision": 1.0,
+                "precision_threshold": 0.95,
+                "evaluated_cases": 14,
+                "excluded_uncertain": 3,
+                "uncertain_cases_visible_in_report": 3
+            }
+    },
+    {
+      "behavior": "Every demo number and citation in the fixture reports is reproducible from the seeded repo.",
+      "status": "pass",
+      "evidence_refs": [
+        "examples/demo/seeded-repo/prs.json",
+        "examples/demo/seeded-repo/outcomes.jsonl",
+        "examples/reports/backtest-demo.json",
+        "examples/reports/backtest-demo.html",
+        "examples/reports/memory-page-demo.md",
+        "cmd/relia/demo_fixtures_test.go:TestDemoFixtureCorpusReproducesBacktestReport"
+      ],
+      "metrics": {
+        "headline_err_percent": "21.4%",
+        "confirmed_recurrences": 3,
+        "agent_failure_denominator": 14,
+        "flake_discounted_count": 3,
+        "attribution_uncertain_count": 3
+      }
+    },
+    {
+      "behavior": "Candidate memory remains distinct from active memory in the bundled memory page.",
+      "status": "pass",
+      "evidence_refs": [
+        "examples/reports/memory-page-demo.md",
+        "examples/reports/backtest-demo.json"
+      ],
+      "metrics": {
+        "active_memory_entries_rendered": 0,
+        "rule_candidates_rendered": 2
+      }
+    },
+    {
+      "behavior": "Required local validation passes after repair.",
+      "status": "pass",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T4.1/validation-report.json"
+      ],
+      "metrics": {
+        "coverage_percent": 78.6,
+        "coverage_minimum": 75.0
+      }
+    }
+  ],
+  "validation_refs": [
+    ".factory/artifacts/task-runs/T4.1/validation-report.json"
+  ],
+  "repair_notes": [
+    "Review repair 3 refreshed this worker-owned scorecard timestamp after reconciling acceptance IDs and full changed-path evidence.",
+    "Review repair 4 reran make test-coverage and make prepush-full, then refreshed worker-owned evidence while preserving the ledger-correct acceptance ID mapping."
+  ]
+}

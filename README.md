@@ -40,6 +40,28 @@ The command result schema is `schemas/command-result.schema.json`. Stable
 exit-code examples for codes `0` through `9` are in
 `examples/command-results/exit-code-examples.json`.
 
+## Demo Fixtures
+
+The offline demo fixture corpus lives under `examples/demo/` and the bundled
+static reports live under `examples/reports/`:
+
+- `examples/demo/seeded-repo/prs.json` is the synthetic PR index used to resolve
+  every demo citation without network access.
+- `examples/demo/seeded-repo/outcomes.jsonl` is the seeded outcome stream used
+  to reproduce the backtest headline.
+- `examples/demo/attribution-precision-sample.json`,
+  `examples/demo/flake-discount-fixtures.json`, and
+  `examples/demo/redaction-fixtures/expected-redacted-artifacts.json` cover the
+  attribution, flake-discount, and redaction honesty checks.
+- `examples/reports/backtest-demo.json`,
+  `examples/reports/backtest-demo.html`, and
+  `examples/reports/memory-page-demo.md` are customer-safe static baselines.
+
+`make test-contracts` verifies that the report numbers and PR citations are
+reproducible from the seeded corpus, that the planted flake drafts no rule, that
+uncertain attribution is excluded from precision, and that demo artifacts do not
+store seeded secrets.
+
 The config in `relia.yaml` is local-only by default: code, diffs, logs, and
 experience records are not sent anywhere; share scope is `private`; redaction
 uses entropy scanning and fails closed. `distill.embeddings: signature` is the

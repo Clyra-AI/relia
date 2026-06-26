@@ -50,6 +50,19 @@ deletion of generated `.relia/experiences` shards followed by a repeat
 `relia ingest --input <path>` run, because the source of truth remains the
 input event stream or future GitHub history.
 
+T4.1 adds a committed, synthetic demo fixture boundary under `examples/demo/`
+with customer-safe static baselines under `examples/reports/`. The state owner
+is the fixture corpus plus the `cmd/relia` demo contract tests. Feedback sources
+are `make test-contracts`, `make test-coverage`, and `make prepush-full`.
+Deleting or editing `examples/demo/seeded-repo/prs.json`,
+`examples/demo/seeded-repo/outcomes.jsonl`, or the report baselines changes the
+first-session demo numbers and must preserve reproducibility: every summary
+number is derived from the outcome stream, every citation resolves through the
+seeded PR index, flake-discounted evidence does not draft a rule, and uncertain
+attribution remains excluded. Rollback is deletion of the T4.1 fixture files
+and the corresponding `TestDemo*` contract hook, which would also remove the
+bundled demo baseline required by the PRD.
+
 ## Systems Thinking Map
 
 - State lives in repo-local config, generated artifacts, source files, and Factory evidence.

@@ -1,0 +1,160 @@
+{
+  "object_type": "relia.demo_backtest_report",
+  "schema_version": "1.0",
+  "report_id": "backtest-demo",
+  "source_repo": {
+    "provider": "github",
+    "owner": "Clyra-AI",
+    "name": "relia-demo-seed"
+  },
+  "source_artifacts": [
+    "examples/demo/seeded-repo/prs.json",
+    "examples/demo/seeded-repo/outcomes.jsonl",
+    "examples/demo/attribution-precision-sample.json",
+    "examples/demo/flake-discount-fixtures.json",
+    "examples/demo/redaction-fixtures/expected-redacted-artifacts.json"
+  ],
+  "window": {
+    "start": "2026-01-01T00:00:00Z",
+    "end": "2026-04-30T23:59:59Z"
+  },
+  "summary": {
+    "seeded_prs": 19,
+    "agent_failure_denominator": 14,
+    "confirmed_recurrence_count": 3,
+    "possible_recurrence_count": 0,
+    "headline_err": 0.2143,
+    "headline_err_percent": "21.4%",
+    "flake_discounted_count": 3,
+    "attribution_uncertain_count": 3,
+    "attribution_precision": 1.0
+  },
+  "confirmed_recurrences": [
+    {
+      "current_experience_id": "exp_0187",
+      "prior_experience_id": "exp_0142",
+      "current_pr": 187,
+      "prior_pr": 142,
+      "confidence": "confirmed"
+    },
+    {
+      "current_experience_id": "exp_0203",
+      "prior_experience_id": "exp_0187",
+      "current_pr": 203,
+      "prior_pr": 187,
+      "confidence": "confirmed"
+    },
+    {
+      "current_experience_id": "exp_0258",
+      "prior_experience_id": "exp_0244",
+      "current_pr": 258,
+      "prior_pr": 244,
+      "confidence": "confirmed"
+    }
+  ],
+  "possible_recurrences": [],
+  "flake_discounts": [
+    {
+      "pr": 214,
+      "experience_id": "exp_0214",
+      "signature_id": "sig_external_retry_flake",
+      "flake_discount": 1.0,
+      "drafts_rule": false,
+      "supporting_prs": [216, 219],
+      "reason": "Discounted as flaky because the failure repeats across unrelated retry/logging diffs and has no confirmed recurrence pair."
+    },
+    {
+      "pr": 216,
+      "experience_id": "exp_0216",
+      "signature_id": "sig_external_retry_flake",
+      "flake_discount": 1.0,
+      "drafts_rule": false,
+      "supporting_prs": [214, 219],
+      "reason": "Discounted as flaky because the failure repeats across unrelated retry/logging diffs and has no confirmed recurrence pair."
+    },
+    {
+      "pr": 219,
+      "experience_id": "exp_0219",
+      "signature_id": "sig_external_retry_flake",
+      "flake_discount": 1.0,
+      "drafts_rule": false,
+      "supporting_prs": [214, 216],
+      "reason": "Discounted as flaky because the failure repeats across unrelated retry/logging diffs and has no confirmed recurrence pair."
+    }
+  ],
+  "attribution_uncertain": [
+    {
+      "pr": 233,
+      "experience_id": "exp_0233",
+      "outcome_kind": "ci_failure",
+      "attribution_method": "uncertain",
+      "attribution_confidence": 0.0,
+      "excluded_from_err": true,
+      "reason": "Excluded from headline ERR because attribution was ambiguous and the default policy is uncertain: exclude."
+    },
+    {
+      "pr": 252,
+      "experience_id": "exp_0252",
+      "outcome_kind": "merged_clean",
+      "attribution_method": "uncertain",
+      "attribution_confidence": 0.0,
+      "excluded_from_err": true,
+      "reason": "Excluded from headline ERR and precision scoring because attribution was ambiguous and the default policy is uncertain: exclude."
+    },
+    {
+      "pr": 271,
+      "experience_id": "exp_0271",
+      "outcome_kind": "ci_failure",
+      "attribution_method": "uncertain",
+      "attribution_confidence": 0.0,
+      "excluded_from_err": true,
+      "reason": "Excluded from headline ERR because attribution was ambiguous and the default policy is uncertain: exclude."
+    }
+  ],
+  "rule_candidates": [
+    {
+      "rule_id": "avoid-mocking-datetime-directly",
+      "kind": "avoid",
+      "signature_id": "sig_time_freeze",
+      "evidence_prs": [142, 187, 203],
+      "held_fix_pr": 210,
+      "confidence": 0.82
+    },
+    {
+      "rule_id": "avoid-blind-schema-snapshot-regeneration",
+      "kind": "avoid",
+      "signature_id": "sig_schema_snapshot_blind_regen",
+      "evidence_prs": [244, 258],
+      "confidence": 0.6
+    }
+  ],
+  "citations": [
+    {"pr":142,"url":"https://github.com/Clyra-AI/relia-demo-seed/pull/142"},
+    {"pr":187,"url":"https://github.com/Clyra-AI/relia-demo-seed/pull/187"},
+    {"pr":203,"url":"https://github.com/Clyra-AI/relia-demo-seed/pull/203"},
+    {"pr":210,"url":"https://github.com/Clyra-AI/relia-demo-seed/pull/210"},
+    {"pr":214,"url":"https://github.com/Clyra-AI/relia-demo-seed/pull/214"},
+    {"pr":216,"url":"https://github.com/Clyra-AI/relia-demo-seed/pull/216"},
+    {"pr":219,"url":"https://github.com/Clyra-AI/relia-demo-seed/pull/219"},
+    {"pr":244,"url":"https://github.com/Clyra-AI/relia-demo-seed/pull/244"},
+    {"pr":258,"url":"https://github.com/Clyra-AI/relia-demo-seed/pull/258"}
+  ],
+  "redaction_status": "customer_safe",
+  "redaction_examples": [
+    {
+      "case_id": "standard-token-shaped-log",
+      "artifact_value": "[REDACTED:token]",
+      "raw_secret_persisted": false
+    },
+    {
+      "case_id": "secret-named-metadata-field",
+      "artifact_value": "[REDACTED:secret]",
+      "raw_secret_persisted": false
+    }
+  ],
+  "metadata": {
+    "customer_safe": true,
+    "network_required": false,
+    "reproducibility": "All summary numbers are derived from examples/demo/seeded-repo/outcomes.jsonl and all PR citations resolve through examples/demo/seeded-repo/prs.json."
+  }
+}

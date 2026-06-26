@@ -1,0 +1,41 @@
+{
+  "object_type": "relia.demo_attribution_precision_sample",
+  "schema_version": "1.0",
+  "repo": {
+    "provider": "github",
+    "owner": "Clyra-AI",
+    "name": "relia-demo-seed"
+  },
+  "metrics": {
+    "labeled_cases": 17,
+    "evaluated_cases": 14,
+    "correct_predictions": 14,
+    "excluded_uncertain": 3,
+    "precision": 1.0,
+    "precision_threshold": 0.95
+  },
+  "cases": [
+    {"case_id":"attr-0142","pr":142,"labeled_actor_kind":"agent","predicted_actor_kind":"agent","predicted_method":"pr_label","confidence":0.99,"included_in_precision":true},
+    {"case_id":"attr-0160","pr":160,"labeled_actor_kind":"agent","predicted_actor_kind":"agent","predicted_method":"bot_login","confidence":0.99,"included_in_precision":true},
+    {"case_id":"attr-0172","pr":172,"labeled_actor_kind":"agent","predicted_actor_kind":"agent","predicted_method":"coauthor_trailer","confidence":0.97,"included_in_precision":true},
+    {"case_id":"attr-0187","pr":187,"labeled_actor_kind":"agent","predicted_actor_kind":"agent","predicted_method":"pr_label","confidence":0.99,"included_in_precision":true},
+    {"case_id":"attr-0195","pr":195,"labeled_actor_kind":"agent","predicted_actor_kind":"agent","predicted_method":"bot_login","confidence":0.99,"included_in_precision":true},
+    {"case_id":"attr-0203","pr":203,"labeled_actor_kind":"agent","predicted_actor_kind":"agent","predicted_method":"pr_label","confidence":0.99,"included_in_precision":true},
+    {"case_id":"attr-0210","pr":210,"labeled_actor_kind":"agent","predicted_actor_kind":"agent","predicted_method":"pr_label","confidence":0.99,"included_in_precision":true},
+    {"case_id":"attr-0219","pr":219,"labeled_actor_kind":"agent","predicted_actor_kind":"agent","predicted_method":"coauthor_trailer","confidence":0.97,"included_in_precision":true},
+    {"case_id":"attr-0228","pr":228,"labeled_actor_kind":"agent","predicted_actor_kind":"agent","predicted_method":"bot_login","confidence":0.99,"included_in_precision":true},
+    {"case_id":"attr-0231","pr":231,"labeled_actor_kind":"agent","predicted_actor_kind":"agent","predicted_method":"pr_label","confidence":0.99,"included_in_precision":true},
+    {"case_id":"attr-0233","pr":233,"labeled_actor_kind":"uncertain","predicted_actor_kind":"uncertain","predicted_method":"uncertain","confidence":0.0,"included_in_precision":false},
+    {"case_id":"attr-0236","pr":236,"labeled_actor_kind":"human","predicted_actor_kind":"human","predicted_method":"manual","confidence":1.0,"included_in_precision":true},
+    {"case_id":"attr-0244","pr":244,"labeled_actor_kind":"agent","predicted_actor_kind":"agent","predicted_method":"bot_login","confidence":0.99,"included_in_precision":true},
+    {"case_id":"attr-0252","pr":252,"labeled_actor_kind":"uncertain","predicted_actor_kind":"uncertain","predicted_method":"uncertain","confidence":0.0,"included_in_precision":false},
+    {"case_id":"attr-0258","pr":258,"labeled_actor_kind":"agent","predicted_actor_kind":"agent","predicted_method":"bot_login","confidence":0.99,"included_in_precision":true},
+    {"case_id":"attr-0264","pr":264,"labeled_actor_kind":"agent","predicted_actor_kind":"agent","predicted_method":"pr_label","confidence":0.99,"included_in_precision":true},
+    {"case_id":"attr-0271","pr":271,"labeled_actor_kind":"uncertain","predicted_actor_kind":"uncertain","predicted_method":"uncertain","confidence":0.0,"included_in_precision":false}
+  ],
+  "metadata": {
+    "customer_safe": true,
+    "uncertain_policy": "exclude",
+    "redaction_status": "customer_safe"
+  }
+}
