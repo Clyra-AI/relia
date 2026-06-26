@@ -612,7 +612,10 @@ func assessResult(args []string, start time.Time) CommandResult {
 	if commandErr != nil {
 		return errorResult("assess", "assess", commandErr, start)
 	}
-	assessment := buildRiskAssessment(displayPath(root, inputPath), inputContent, touchedPaths, rules)
+	assessment, commandErr := buildRiskAssessment(displayPath(root, inputPath), inputContent, touchedPaths, rules)
+	if commandErr != nil {
+		return errorResult("assess", "assess", commandErr, start)
+	}
 
 	result := passResult("assess", "assess", "assessed local diff against active memory rules", start, map[string]any{
 		"input_path":         displayPath(root, inputPath),
@@ -757,16 +760,12 @@ func readAssessmentRule(root string, rulePath string) (assessmentRule, bool, *Co
 	if err != nil {
 		return assessmentRule{}, false, artifactContractError("memory rule confidence must be numeric", rel)
 	}
-	citations := assessmentRuleCitations(document)
-	if len(citations) == 0 {
-		return assessmentRule{}, false, provenanceIntegrityError("active memory rule must include citation URLs for assessment", rel)
-	}
 	return assessmentRule{
 		ID:         document.Scalars["id"].Value,
 		Path:       rel,
 		Confidence: confidence,
 		ScopePaths: yamlListValues(document, "scope.paths"),
-		Citations:  citations,
+		Citations:  assessmentRuleCitations(document),
 	}, true, nil
 }
 
@@ -782,12 +781,15 @@ func assessmentRuleCitations(document yamlDocument) []string {
 	return uniqueStrings(citations)
 }
 
-func buildRiskAssessment(inputRef string, content []byte, touchedPaths []string, rules []assessmentRule) riskAssessment {
+func buildRiskAssessment(inputRef string, content []byte, touchedPaths []string, rules []assessmentRule) (riskAssessment, *CommandError) {
 	matches := []riskAssessmentMatch{}
 	citations := []string{}
 	for _, rule := range rules {
 		if !assessmentRuleMatchesTouchedPath(rule, touchedPaths) {
 			continue
+		}
+		if len(rule.Citations) == 0 {
+			return riskAssessment{}, provenanceIntegrityError("matched active memory rule must include citation URLs for assessment", rule.Path)
 		}
 		matches = append(matches, riskAssessmentMatch{
 			RuleID:     rule.ID,
@@ -827,19 +829,44 @@ func buildRiskAssessment(inputRef string, content []byte, touchedPaths []string,
 			"repo_relative_paths_only": true,
 			"redaction_status":         "customer_safe",
 		},
-	}
+	}, nil
 }
 
 func assessmentRuleMatchesTouchedPath(rule assessmentRule, touchedPaths []string) bool {
-	for _, scopePath := range rule.ScopePaths {
-		scopePath = filepath.ToSlash(filepath.Clean(filepath.FromSlash(scopePath)))
+	for _, rawScopePath := range rule.ScopePaths {
+		scopePath, directoryScope, ok := normalizeAssessmentScopePath(rawScopePath)
+		if !ok {
+			continue
+		}
 		for _, touchedPath := range touchedPaths {
-			if scopePatternMatches(scopePath, touchedPath) || scopePath == touchedPath {
+			touchedPath = filepath.ToSlash(filepath.Clean(filepath.FromSlash(touchedPath)))
+			if scopePatternMatches(scopePath, touchedPath) || scopePath == touchedPath || directoryScopeMatches(scopePath, touchedPath, directoryScope) {
 				return true
 			}
 		}
 	}
 	return false
+}
+
+func normalizeAssessmentScopePath(raw string) (string, bool, bool) {
+	trimmed := strings.TrimSpace(raw)
+	if trimmed == "" {
+		return "", false, false
+	}
+	slashPath := filepath.ToSlash(trimmed)
+	directoryScope := strings.HasSuffix(slashPath, "/") && !hasGlobMagic(slashPath)
+	clean, ok := cleanRepoPath(slashPath)
+	if !ok {
+		return "", false, false
+	}
+	return filepath.ToSlash(clean), directoryScope, true
+}
+
+func directoryScopeMatches(scopePath string, touchedPath string, directoryScope bool) bool {
+	if !directoryScope {
+		return false
+	}
+	return touchedPath == scopePath || strings.HasPrefix(touchedPath, scopePath+"/")
 }
 
 func readReliaConfig(root string) (yamlDocument, *CommandError) {

@@ -5,23 +5,32 @@
       "checks": [
         {
           "description": "relia assess returns match_high with citations on a planted-pattern diff",
+          "evidence_refs": [
+            "examples/demo/assessment-fixtures/planted-pattern.diff",
+            "memory/rules/demo-assessment-active-rule.yaml"
+          ],
           "status": "implemented"
         },
         {
           "description": "relia assess returns no_coverage on unknown paths",
+          "evidence_refs": [
+            "examples/demo/assessment-fixtures/unknown-path.diff",
+            "cmd/relia/main_test.go"
+          ],
           "status": "implemented"
         },
         {
           "description": "Assessment fixture evidence remains deterministic and repo-relative",
+          "evidence_refs": [
+            "cmd/relia/demo_fixtures_test.go",
+            "examples/demo/assessment-fixtures/assessment-fixtures.json"
+          ],
           "status": "implemented"
         }
       ],
       "evidence_refs": [
         ".factory/artifacts/task-runs/T4.3/work-proof-marker.json",
-        ".factory/artifacts/task-runs/T4.3/proof-of-behavior-scorecard.json",
-        "cmd/relia/demo_fixtures_test.go",
-        "examples/demo/assessment-fixtures/assessment-fixtures.json",
-        "memory/rules/demo-assessment-active-rule.yaml"
+        ".factory/artifacts/task-runs/T4.3/proof-of-behavior-scorecard.json"
       ],
       "status": "implemented"
     }
@@ -47,6 +56,7 @@
     "README.md",
     "cmd/relia/demo_fixtures_test.go",
     "cmd/relia/main.go",
+    "cmd/relia/main_test.go",
     "docs/architecture/architecture_guides.md",
     "docs/dev/dev_guides.md",
     "examples/demo/assessment-fixtures/assessment-fixtures.json",
@@ -56,17 +66,16 @@
     "memory/rules/demo-assessment-active-rule.yaml"
   ],
   "changelog_result": {
-    "notes": "No CHANGELOG file is present in allowed paths; docs-sync refs were updated in README.md, docs/dev/dev_guides.md, and docs/architecture/architecture_guides.md.",
+    "notes": "No changelog file exists in the allowed repo paths; the repair did not alter runtime pins, schemas, or distribution posture.",
     "status": "pass"
   },
   "commands_run": [
     "make lint-fast",
     "make test-fast",
     "make test-contracts",
-    "go test ./cmd/... -count=1 -run 'TestDemo'",
-    "go run ./cmd/relia --json assess --input examples/demo/assessment-fixtures/planted-pattern.diff --format json",
-    "go run ./cmd/relia --json assess --input examples/demo/assessment-fixtures/unknown-path.diff --format json",
-    "go test ./cmd/... -count=1 -run 'TestDemoAssessmentFixturesDriveAssessCommand'",
+    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
+    "GOCACHE=/tmp/relia-go-build go run ./cmd/relia --json assess --input examples/demo/assessment-fixtures/planted-pattern.diff --format json",
+    "GOCACHE=/tmp/relia-go-build go run ./cmd/relia --json assess --input examples/demo/assessment-fixtures/unknown-path.diff --format json",
     "make test-coverage",
     "make prepush-full",
     "python3 -m json.tool .factory/artifacts/task-runs/T4.3/work-proof-marker.json",
@@ -74,12 +83,8 @@
     "python3 -m json.tool .factory/artifacts/task-runs/T4.3/proof-of-behavior-scorecard.json"
   ],
   "docs_sync_result": {
-    "status": "pass",
-    "updated_refs": [
-      "README.md",
-      "docs/dev/dev_guides.md",
-      "docs/architecture/architecture_guides.md"
-    ]
+    "notes": "Existing T4.3 docs already describe match_high, no_coverage, active local rules, citations, and repo-relative deterministic fixtures; no docs update was required for the review repair.",
+    "status": "pass"
   },
   "evidence_artifact_validation": [
     {
@@ -103,7 +108,7 @@
       "command": "make test-coverage",
       "exit_code": 0,
       "observed": {
-        "coverage_percent": 78.7,
+        "coverage_percent": 78.8,
         "minimum_percent": 75
       },
       "status": "pass"
@@ -116,19 +121,15 @@
   ],
   "green_evidence": [
     {
-      "command": "go test ./cmd/... -count=1 -run 'TestDemo'",
+      "command": "make test-contracts",
       "exit_code": 0,
       "status": "pass"
     },
     {
-      "command": "go test ./cmd/... -count=1 -run 'TestDemoAssessmentFixturesDriveAssessCommand'",
-      "exit_code": 0,
-      "status": "pass"
-    },
-    {
-      "command": "go run ./cmd/relia --json assess --input examples/demo/assessment-fixtures/planted-pattern.diff --format json",
+      "command": "GOCACHE=/tmp/relia-go-build go run ./cmd/relia --json assess --input examples/demo/assessment-fixtures/planted-pattern.diff --format json",
       "exit_code": 0,
       "observed": {
+        "assessment_id": "assess_332bb42b3cf4",
         "citation_count": 3,
         "matched_rule_count": 1,
         "risk_level": "match_high"
@@ -136,9 +137,10 @@
       "status": "pass"
     },
     {
-      "command": "go run ./cmd/relia --json assess --input examples/demo/assessment-fixtures/unknown-path.diff --format json",
+      "command": "GOCACHE=/tmp/relia-go-build go run ./cmd/relia --json assess --input examples/demo/assessment-fixtures/unknown-path.diff --format json",
       "exit_code": 0,
       "observed": {
+        "assessment_id": "assess_4eed565ef566",
         "citation_count": 0,
         "matched_rule_count": 0,
         "risk_level": "no_coverage"
@@ -151,34 +153,54 @@
     "status": "not_worker_owned"
   },
   "path_policy_result": {
+    "changed_paths": [
+      ".factory/artifacts/task-runs/T4.3/proof-of-behavior-scorecard.json",
+      ".factory/artifacts/task-runs/T4.3/validation-report.json",
+      ".factory/artifacts/task-runs/T4.3/work-proof-marker.json",
+      "README.md",
+      "cmd/relia/demo_fixtures_test.go",
+      "cmd/relia/main.go",
+      "cmd/relia/main_test.go",
+      "docs/architecture/architecture_guides.md",
+      "docs/dev/dev_guides.md",
+      "examples/demo/assessment-fixtures/assessment-fixtures.json",
+      "examples/demo/assessment-fixtures/planted-pattern.diff",
+      "examples/demo/assessment-fixtures/seeded-repo/packages/billing/invoice.py",
+      "examples/demo/assessment-fixtures/unknown-path.diff",
+      "memory/rules/demo-assessment-active-rule.yaml"
+    ],
     "changed_paths_checked": true,
     "forbidden_paths_changed": [],
-    "notes": "All changed paths are within the task allowed paths. Required coverage commands generated no tracked .factory/tmp diff.",
+    "notes": "All tracked changes are within the task allowed paths. Required coverage commands generated no tracked .factory/tmp diff.",
     "status": "pass"
   },
   "plan_drift_result": {
-    "notes": "Implementation remained bounded to T4.3 assessment fixture coverage and the minimum local assess behavior needed by the fixture.",
+    "notes": "Repair stayed bounded to T4.3 assessment fixture behavior and Codex review findings for directory scopes and unrelated uncited rules.",
     "status": "pass"
   },
   "red_evidence": [
     {
       "command": "make test-contracts",
-      "exit_code": 0,
-      "note": "Pre-change red-first command was already green; the task added missing T4.3 fixture assertions rather than widening scope.",
-      "status": "pass"
+      "exit_code": 2,
+      "observed_failures": [
+        "TestDemoAssessMatchesDirectoryScopedActiveRule returned no_coverage before the directory-scope repair.",
+        "TestDemoAssessIgnoresUnrelatedRuleWithoutCitationURLs exited 9 before citation enforcement was moved to matched rules."
+      ],
+      "status": "expected_red"
     }
   ],
-  "residual_risks": [],
+  "repair_task_id": "20260626T200025.692043000Z-relia-T4.3-repair-2",
+  "residual_risks": [
+    {
+      "description": "Initial direct go run attempts without GOCACHE used the user-level Go build cache and were denied by the sandbox; the same commands passed with GOCACHE=/tmp/relia-go-build, matching the Makefile validation posture.",
+      "status": "recorded"
+    }
+  ],
   "schema_version": "1.0",
   "status": "pass",
   "task_id": "T4.3",
-  "test_first_skipped_reason": {
-    "details": "The required red-first command passed before implementation because no T4.3 assessment fixture test existed yet. Focused fixture coverage was added in TestDemoAssessmentFixturesDriveAssessCommand.",
-    "reason_code": "pre_existing_contract_lane_green",
-    "status": "recorded"
-  },
   "versioning_result": {
-    "notes": "Pre-1.0 behavior slice; no runtime pin, module path, schema version, or distribution target changed.",
+    "notes": "Pre-1.0 behavior repair; no schema version, module path, runtime pin, or distribution target changed.",
     "status": "pass"
   }
 }

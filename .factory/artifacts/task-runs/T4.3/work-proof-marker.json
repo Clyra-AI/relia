@@ -10,6 +10,7 @@
     "README.md",
     "cmd/relia/demo_fixtures_test.go",
     "cmd/relia/main.go",
+    "cmd/relia/main_test.go",
     "docs/architecture/architecture_guides.md",
     "docs/dev/dev_guides.md",
     "examples/demo/assessment-fixtures/assessment-fixtures.json",
@@ -24,13 +25,14 @@
   ],
   "implementation_performed": true,
   "objective": "Build assessment fixture coverage for planted-pattern and unknown-path diffs without bundling unrelated corpus work.",
+  "repair_summary": [
+    "Preserved trailing-slash directory rule scopes as prefix matches during relia assess.",
+    "Deferred assessment citation URL enforcement until an active rule actually matches a touched path.",
+    "Kept matched active rules fail-closed when they lack citation URLs.",
+    "Added contract-lane tests for directory-scope matching, unrelated uncited rules, and matched uncited rule rejection."
+  ],
+  "repair_task_id": "20260626T200025.692043000Z-relia-T4.3-repair-2",
   "schema_version": "1.0",
   "status": "implemented",
-  "summary": [
-    "Implemented bounded offline relia assess support for local unified diffs using active local memory rules.",
-    "Added two customer-safe assessment fixture diffs and one active synthetic memory rule with seeded PR citations.",
-    "Added TestDemoAssessmentFixturesDriveAssessCommand coverage for match_high, no_coverage, repo-relative refs, citation resolution, and deterministic assessment IDs.",
-    "Updated README, developer guide, and architecture guide for T4.3 fixture ownership and command behavior."
-  ],
   "task_id": "T4.3"
 }

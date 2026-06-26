@@ -3,16 +3,18 @@
   "schema_version": "1.0",
   "task_id": "T4.3",
   "status": "pass",
+  "repair_task_id": "20260626T200025.692043000Z-relia-T4.3-repair-2",
   "required_proof_level": "workflow_behavior",
   "scorecard": [
     {
       "behavior": "Planted-pattern assessment returns match_high with citations",
       "status": "pass",
       "evidence": {
-        "command": "go run ./cmd/relia --json assess --input examples/demo/assessment-fixtures/planted-pattern.diff --format json",
+        "command": "GOCACHE=/tmp/relia-go-build go run ./cmd/relia --json assess --input examples/demo/assessment-fixtures/planted-pattern.diff --format json",
         "risk_level": "match_high",
         "matched_rule_id": "avoid-direct-datetime-in-assessment-fixture",
         "citation_count": 3,
+        "assessment_id": "assess_332bb42b3cf4",
         "evidence_refs": [
           "examples/demo/assessment-fixtures/planted-pattern.diff",
           "memory/rules/demo-assessment-active-rule.yaml",
@@ -24,13 +26,53 @@
       "behavior": "Unknown-path assessment returns no_coverage",
       "status": "pass",
       "evidence": {
-        "command": "go run ./cmd/relia --json assess --input examples/demo/assessment-fixtures/unknown-path.diff --format json",
+        "command": "GOCACHE=/tmp/relia-go-build go run ./cmd/relia --json assess --input examples/demo/assessment-fixtures/unknown-path.diff --format json",
         "risk_level": "no_coverage",
         "matched_rule_count": 0,
         "citation_count": 0,
+        "assessment_id": "assess_4eed565ef566",
         "evidence_refs": [
           "examples/demo/assessment-fixtures/unknown-path.diff",
           "memory/rules/demo-assessment-active-rule.yaml"
+        ]
+      }
+    },
+    {
+      "behavior": "Directory-scoped active rules match touched files below the scoped directory",
+      "status": "pass",
+      "evidence": {
+        "test": "TestDemoAssessMatchesDirectoryScopedActiveRule",
+        "red_first": "make test-contracts failed before implementation with risk_level no_coverage.",
+        "green": "make test-contracts passed after preserving trailing-slash directory scopes as prefixes.",
+        "evidence_refs": [
+          "cmd/relia/main.go",
+          "cmd/relia/main_test.go"
+        ]
+      }
+    },
+    {
+      "behavior": "Unrelated uncited active rules do not fail unknown-path assessment",
+      "status": "pass",
+      "evidence": {
+        "test": "TestDemoAssessIgnoresUnrelatedRuleWithoutCitationURLs",
+        "red_first": "make test-contracts failed before implementation with provenance_integrity_failed on an unrelated rule.",
+        "green": "make test-contracts passed after requiring citation URLs only for matched rules.",
+        "evidence_refs": [
+          "cmd/relia/main.go",
+          "cmd/relia/main_test.go"
+        ]
+      }
+    },
+    {
+      "behavior": "Matched active rules without citation URLs still fail closed",
+      "status": "pass",
+      "evidence": {
+        "test": "TestDemoAssessRejectsMatchedRuleWithoutCitationURLs",
+        "expected_exit_code": 9,
+        "expected_error_type": "provenance_integrity_failed",
+        "evidence_refs": [
+          "cmd/relia/main.go",
+          "cmd/relia/main_test.go"
         ]
       }
     },
@@ -51,7 +93,7 @@
       "behavior": "Coverage and full local gates pass",
       "status": "pass",
       "evidence": {
-        "coverage_percent": 78.7,
+        "coverage_percent": 78.8,
         "coverage_minimum_percent": 75,
         "commands": [
           "make test-coverage",
