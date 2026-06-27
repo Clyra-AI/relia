@@ -1111,6 +1111,14 @@ func validateActiveAssessmentRuleIdentity(root string, document yamlDocument, re
 	if err != nil || count < 1 {
 		return artifactContractError("memory rule evidence.count must be at least 1", configRefWithPath(rel, evidenceCount))
 	}
+	contradictionsScalar, ok := document.Scalars["evidence.contradictions"]
+	if !ok {
+		return artifactContractError("memory rule missing required key evidence.contradictions", rel)
+	}
+	contradictions, err := strconv.Atoi(contradictionsScalar.Value)
+	if err != nil || contradictions < 0 {
+		return artifactContractError("memory rule evidence.contradictions must be at least 0", configRefWithPath(rel, contradictionsScalar))
+	}
 	provenanceEntries := document.Lists["provenance"]
 	if len(provenanceEntries) == 0 {
 		return artifactContractError("memory rule must include at least one provenance entry", rel)
