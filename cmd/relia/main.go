@@ -812,7 +812,7 @@ func diffGitHeaderPaths(line string) []string {
 		return nil
 	}
 	if !strings.HasPrefix(rest, "\"") {
-		return nil
+		return identicalNoPrefixDiffHeaderPaths(rest)
 	}
 	var paths []string
 	for len(rest) > 0 && len(paths) < 2 {
@@ -825,6 +825,18 @@ func diffGitHeaderPaths(line string) []string {
 		paths = append(paths, path)
 	}
 	return paths
+}
+
+func identicalNoPrefixDiffHeaderPaths(rest string) []string {
+	fields := strings.Fields(rest)
+	for split := 1; split < len(fields); split++ {
+		left := strings.Join(fields[:split], " ")
+		right := strings.Join(fields[split:], " ")
+		if left != "" && left == right {
+			return []string{left, right}
+		}
+	}
+	return nil
 }
 
 func nextDiffHeaderPath(input string) (string, string, bool) {

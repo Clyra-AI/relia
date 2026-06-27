@@ -2387,6 +2387,32 @@ func TestParseUnifiedDiffTouchedPathsPreservesNoPrefixGitLiteralAPrefix(t *testi
 	}
 }
 
+func TestParseUnifiedDiffTouchedPathsSupportsNoPrefixModeOnlyHeader(t *testing.T) {
+	paths, commandErr := parseUnifiedDiffTouchedPaths([]byte(`diff --git foo.py foo.py
+old mode 100644
+new mode 100755
+`), "mode-only-no-prefix.diff")
+	if commandErr != nil {
+		t.Fatalf("parse diff: %v", commandErr)
+	}
+	if fmt.Sprint(paths) != fmt.Sprint([]string{"foo.py"}) {
+		t.Fatalf("paths = %#v", paths)
+	}
+}
+
+func TestParseUnifiedDiffTouchedPathsSupportsNoPrefixModeOnlyHeaderWithSpaces(t *testing.T) {
+	paths, commandErr := parseUnifiedDiffTouchedPaths([]byte(`diff --git foo bar.txt foo bar.txt
+old mode 100644
+new mode 100755
+`), "mode-only-no-prefix-spaces.diff")
+	if commandErr != nil {
+		t.Fatalf("parse diff: %v", commandErr)
+	}
+	if fmt.Sprint(paths) != fmt.Sprint([]string{"foo bar.txt"}) {
+		t.Fatalf("paths = %#v", paths)
+	}
+}
+
 func TestParseUnifiedDiffTouchedPathsIgnoresPlainHeaderLookalikesInsideHunks(t *testing.T) {
 	paths, commandErr := parseUnifiedDiffTouchedPaths([]byte(`diff --git a/packages/search/query.py b/packages/search/query.py
 --- a/packages/search/query.py
