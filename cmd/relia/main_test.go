@@ -1519,8 +1519,19 @@ func TestBacktestExplicitEnabledGateEvaluatesThreshold(t *testing.T) {
   enabled: false`, `gate:
   enabled: true
   max_error_recurrence_rate: 0.0`)
+	baselinePath := filepath.Join(tempDir, ".relia", "baselines", "error-recurrence-baseline.json")
+	originalBaseline := `{
+  "object_type": "relia.err_baseline",
+  "schema_version": "1.0",
+  "headline_err": 0.01,
+  "metadata": {
+    "source_artifact_digest": "sha256:accepted"
+  }
+}
+`
+	writeFileForTest(t, baselinePath, originalBaseline)
 
-	stdout, stderr, code = runForTest(t, []string{"--json", "backtest", "--window", "180d"}, false)
+	stdout, stderr, code = runForTest(t, []string{"--json", "backtest", "--window", "180d", "--save-baseline"}, false)
 	if code != ExitGate {
 		t.Fatalf("backtest exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
 	}
@@ -1538,6 +1549,13 @@ func TestBacktestExplicitEnabledGateEvaluatesThreshold(t *testing.T) {
 	}
 	if !bytes.Contains(gateJSON, []byte(`"threshold":0`)) {
 		t.Fatalf("gate JSON = %s, want zero threshold preserved", gateJSON)
+	}
+	baselineContent, err := os.ReadFile(baselinePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(baselineContent) != originalBaseline {
+		t.Fatalf("baseline was overwritten by failing gate:\n%s", baselineContent)
 	}
 }
 

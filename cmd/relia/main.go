@@ -762,7 +762,7 @@ func backtestResult(args []string, start time.Time) CommandResult {
 	if commandErr != nil {
 		return withFormat(errorResult("backtest", "backtest", commandErr, start))
 	}
-	if options.SaveBaseline {
+	if options.SaveBaseline && report.Gate.Status != "fail" {
 		if commandErr := saveBacktestBaseline(root, report, options.BaselinePath); commandErr != nil {
 			return withFormat(errorResult("backtest", "backtest", commandErr, start))
 		}
