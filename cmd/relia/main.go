@@ -1369,7 +1369,7 @@ func buildBacktestFlakeDiscount(record backtestExperience, records []backtestExp
 		if candidate.Record.ExperienceID == record.Record.ExperienceID {
 			continue
 		}
-		if candidate.Record.Outcome.Signature.SignatureID != record.Record.Outcome.Signature.SignatureID {
+		if !recordsShareRecurrenceSignature(candidate.Record, record.Record) {
 			continue
 		}
 		if candidate.Record.Attribution.ActorKind != "agent" || !isFailureOutcome(candidate.Record.Outcome.Kind) {
@@ -1608,17 +1608,79 @@ func writeBacktestReports(root string, report recurrenceReport, reportDir string
 	encoded = append(encoded, '\n')
 	jsonPath := filepath.Join(root, filepath.FromSlash(jsonRel))
 	htmlPath := filepath.Join(root, filepath.FromSlash(htmlRel))
-	if err := os.WriteFile(jsonPath, encoded, 0o644); err != nil {
-		return "", "", internalError("could not write JSON recurrence report", err)
-	}
-	if err := os.WriteFile(htmlPath, []byte(renderBacktestHTML(report)), 0o644); err != nil {
-		commandErr := internalError("could not write HTML recurrence report", err)
-		if cleanupErr := os.Remove(jsonPath); cleanupErr != nil && !os.IsNotExist(cleanupErr) {
-			commandErr.Message = commandErr.Message + "; additionally could not remove partial JSON recurrence report: " + cleanupErr.Error()
-		}
+	if commandErr := ensureReplaceableBacktestReportPath(jsonPath, "JSON"); commandErr != nil {
 		return "", "", commandErr
 	}
+	if commandErr := ensureReplaceableBacktestReportPath(htmlPath, "HTML"); commandErr != nil {
+		return "", "", commandErr
+	}
+	jsonTempPath, commandErr := writeBacktestReportTemp(reportDirPath, jsonPath, encoded, "JSON")
+	if commandErr != nil {
+		return "", "", commandErr
+	}
+	defer func() {
+		if jsonTempPath != "" {
+			_ = os.Remove(jsonTempPath)
+		}
+	}()
+	htmlTempPath, commandErr := writeBacktestReportTemp(reportDirPath, htmlPath, []byte(renderBacktestHTML(report)), "HTML")
+	if commandErr != nil {
+		return "", "", commandErr
+	}
+	defer func() {
+		if htmlTempPath != "" {
+			_ = os.Remove(htmlTempPath)
+		}
+	}()
+	if err := os.Rename(htmlTempPath, htmlPath); err != nil {
+		return "", "", internalError("could not write HTML recurrence report", err)
+	}
+	htmlTempPath = ""
+	if err := os.Rename(jsonTempPath, jsonPath); err != nil {
+		return "", "", internalError("could not write JSON recurrence report", err)
+	}
+	jsonTempPath = ""
 	return jsonRel, htmlRel, nil
+}
+
+func ensureReplaceableBacktestReportPath(path string, format string) *CommandError {
+	info, err := os.Stat(path)
+	if err == nil {
+		if info.IsDir() {
+			return internalError("could not write "+format+" recurrence report", fmt.Errorf("%s is a directory", path))
+		}
+		return nil
+	}
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	return internalError("could not write "+format+" recurrence report", err)
+}
+
+func writeBacktestReportTemp(dir string, finalPath string, content []byte, format string) (string, *CommandError) {
+	tempFile, err := os.CreateTemp(dir, "."+filepath.Base(finalPath)+".tmp-*")
+	if err != nil {
+		return "", internalError("could not write "+format+" recurrence report", err)
+	}
+	tempPath := tempFile.Name()
+	cleanup := true
+	defer func() {
+		if cleanup {
+			_ = os.Remove(tempPath)
+		}
+	}()
+	if _, err := tempFile.Write(content); err != nil {
+		_ = tempFile.Close()
+		return "", internalError("could not write "+format+" recurrence report", err)
+	}
+	if err := tempFile.Close(); err != nil {
+		return "", internalError("could not write "+format+" recurrence report", err)
+	}
+	if err := os.Chmod(tempPath, 0o644); err != nil {
+		return "", internalError("could not write "+format+" recurrence report", err)
+	}
+	cleanup = false
+	return tempPath, nil
 }
 
 type backtestBaselineSnapshot struct {
