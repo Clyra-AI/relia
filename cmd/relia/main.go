@@ -716,13 +716,13 @@ func parseUnifiedDiffTouchedPaths(content []byte, ref string) ([]string, *Comman
 		case inFileHeader && strings.HasPrefix(line, "+++ "):
 			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "+++ ")), gitFileHeader)
 		case inFileHeader && strings.HasPrefix(line, "rename from "):
-			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "rename from ")), false)
+			addDiffMetadataPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "rename from ")))
 		case inFileHeader && strings.HasPrefix(line, "rename to "):
-			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "rename to ")), false)
+			addDiffMetadataPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "rename to ")))
 		case inFileHeader && strings.HasPrefix(line, "copy from "):
-			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "copy from ")), false)
+			addDiffMetadataPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "copy from ")))
 		case inFileHeader && strings.HasPrefix(line, "copy to "):
-			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "copy to ")), false)
+			addDiffMetadataPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "copy to ")))
 		case strings.HasPrefix(line, "@@"):
 			inFileHeader = false
 			gitFileHeader = false
@@ -943,6 +943,21 @@ func addDiffPath(touched map[string]bool, raw string, stripGitPrefix bool) {
 	}
 }
 
+func addDiffMetadataPath(touched map[string]bool, raw string) {
+	addDiffPath(touched, raw, false)
+	raw = strings.TrimSpace(raw)
+	if strings.HasPrefix(raw, "a/") || strings.HasPrefix(raw, "b/") {
+		removeDiffPath(touched, raw[2:])
+	}
+}
+
+func removeDiffPath(touched map[string]bool, raw string) {
+	pathPart := strings.TrimSpace(raw)
+	if clean, ok := cleanRepoPath(pathPart); ok {
+		delete(touched, filepath.ToSlash(clean))
+	}
+}
+
 func loadAssessmentRules(root string) ([]assessmentRule, *CommandError) {
 	patterns := []string{
 		filepath.Join(root, "memory", "rules", "*.yaml"),
@@ -1046,7 +1061,15 @@ func validateActiveAssessmentRuleIdentity(document yamlDocument, rel string) *Co
 	if err != nil || count < 1 {
 		return artifactContractError("memory rule evidence.count must be at least 1", configRefWithPath(rel, evidenceCount))
 	}
-	for _, provenance := range document.ListMaps["provenance"] {
+	provenanceEntries := document.Lists["provenance"]
+	if len(provenanceEntries) == 0 {
+		return artifactContractError("memory rule must include at least one provenance entry", rel)
+	}
+	provenanceMaps := document.ListMaps["provenance"]
+	if len(provenanceMaps) != len(provenanceEntries) {
+		return artifactContractError("memory rule provenance entries must include pr and outcome", rel)
+	}
+	for _, provenance := range provenanceMaps {
 		pr, ok := provenance["pr"]
 		if !ok {
 			return artifactContractError("memory rule provenance entry missing pr", rel)
