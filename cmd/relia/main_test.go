@@ -1575,7 +1575,7 @@ func TestBacktestRemovesJSONReportWhenHTMLWriteFails(t *testing.T) {
 	}
 }
 
-func TestBacktestPreservesBaselineWhenSaveFails(t *testing.T) {
+func TestBacktestFailsClosedWhenBaselinePathIsDirectory(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
 	inputPath := filepath.Join(tempDir, "fixtures", "outcomes.jsonl")
@@ -1589,22 +1589,9 @@ func TestBacktestPreservesBaselineWhenSaveFails(t *testing.T) {
 		t.Fatalf("ingest exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
 	}
 	baselinePath := filepath.Join(tempDir, ".relia", "baselines", "error-recurrence-baseline.json")
-	originalBaseline := `{
-  "object_type": "relia.err_baseline",
-  "schema_version": "1.0",
-  "headline_err": 0.01,
-  "metadata": {
-    "source_artifact_digest": "sha256:accepted"
-  }
-}
-`
-	writeFileForTest(t, baselinePath, originalBaseline)
-	if err := os.Chmod(baselinePath, 0o400); err != nil {
+	if err := os.MkdirAll(baselinePath, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	defer func() {
-		_ = os.Chmod(baselinePath, 0o600)
-	}()
 
 	stdout, stderr, code = runForTest(t, []string{"--json", "backtest", "--window", "180d", "--save-baseline"}, false)
 
@@ -1615,12 +1602,9 @@ func TestBacktestPreservesBaselineWhenSaveFails(t *testing.T) {
 	if len(result.Errors) != 1 || !strings.Contains(result.Errors[0].Message, "ERR baseline") {
 		t.Fatalf("errors = %#v", result.Errors)
 	}
-	baselineContent, err := os.ReadFile(baselinePath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if string(baselineContent) != originalBaseline {
-		t.Fatalf("baseline was changed after save failure:\n%s", baselineContent)
+	info, err := os.Stat(baselinePath)
+	if err != nil || !info.IsDir() {
+		t.Fatalf("baseline path = info:%#v err:%v, want directory left intact", info, err)
 	}
 }
 
