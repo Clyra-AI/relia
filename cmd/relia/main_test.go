@@ -1256,8 +1256,8 @@ func TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline(t *te
 	if report.ObjectType != "relia.recurrence_report" || report.SchemaVersion != commandSchemaVersion {
 		t.Fatalf("report contract = %#v", report)
 	}
-	if report.Summary.AgentFailureDenominator != 3 {
-		t.Fatalf("denominator = %d, want 3 with flake-discounted rows excluded", report.Summary.AgentFailureDenominator)
+	if report.Summary.AgentFailureDenominator != 6 {
+		t.Fatalf("denominator = %d, want 6 total agent-attributed failures including flake-discounted rows", report.Summary.AgentFailureDenominator)
 	}
 	if report.Summary.ConfirmedRecurrenceCount != 1 || len(report.ConfirmedRecurrences) != 1 {
 		t.Fatalf("confirmed recurrences = %#v", report.ConfirmedRecurrences)
@@ -1265,8 +1265,8 @@ func TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline(t *te
 	if report.Summary.PossibleRecurrenceCount != 1 || len(report.PossibleRecurrences) != 1 {
 		t.Fatalf("possible recurrences = %#v", report.PossibleRecurrences)
 	}
-	if report.HeadlineERR != 0.3333 {
-		t.Fatalf("headline_err = %.4f, want possible and flake-discounted rows excluded from 1/3 headline", report.HeadlineERR)
+	if report.HeadlineERR != 0.1667 {
+		t.Fatalf("headline_err = %.4f, want confirmed-only numerator over 6 agent-attributed failures", report.HeadlineERR)
 	}
 	if report.ConfirmedRecurrences[0].PriorExperienceID != "exp_0001" || report.ConfirmedRecurrences[0].CurrentExperienceID != "exp_0002" {
 		t.Fatalf("confirmed pair = %#v", report.ConfirmedRecurrences[0])
@@ -1400,6 +1400,37 @@ func TestBacktestBaselineJSONPreservesZeroMetrics(t *testing.T) {
 	}
 	if bytes.Contains(missingJSON, []byte("headline_err")) || bytes.Contains(missingJSON, []byte("delta")) {
 		t.Fatalf("missing baseline JSON = %s, want omitted comparison metrics", missingJSON)
+	}
+}
+
+func TestBacktestReportSerializesEmptyCollectionsAsArrays(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	inputPath := filepath.Join(tempDir, "fixtures", "outcomes.jsonl")
+	writeFileForTest(t, inputPath, `{"experience_id":"exp_0001","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-01T10:00:00Z","pr":101,"commit":"abc001","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_time_freeze","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/101"]}`+"\n")
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+	if code != ExitSuccess {
+		t.Fatalf("ingest exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	stdout, stderr, code = runForTest(t, []string{"--json", "backtest", "--window", "180d"}, false)
+	if code != ExitSuccess {
+		t.Fatalf("backtest exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	reportData, ok := result.Data["report"].(map[string]any)
+	if !ok {
+		t.Fatalf("report data = %#v, want object", result.Data["report"])
+	}
+	for _, field := range []string{"confirmed_recurrences", "possible_recurrences", "flake_discounts", "attribution_uncertain"} {
+		values, ok := reportData[field].([]any)
+		if !ok || len(values) != 0 {
+			t.Fatalf("report[%s] = %#v, want empty JSON array", field, reportData[field])
+		}
+	}
+	report := decodeBacktestReportFromResult(t, result)
+	if report.Summary.AgentFailureDenominator != 1 || report.HeadlineERR != 0 {
+		t.Fatalf("report summary = %#v headline=%.4f, want one denominator and zero ERR", report.Summary, report.HeadlineERR)
 	}
 }
 

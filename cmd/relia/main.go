@@ -1002,10 +1002,10 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 	}
 	flakeHeuristics := autoFlakeDiscountedExperiences(windowRecords)
 	priorBySignature := map[string][]backtestExperience{}
-	var confirmed []recurrencePair
-	var possible []recurrencePair
-	var flakes []backtestFlakeDiscount
-	var uncertain []backtestUncertain
+	confirmed := []recurrencePair{}
+	possible := []recurrencePair{}
+	flakes := []backtestFlakeDiscount{}
+	uncertain := []backtestUncertain{}
 	citationMap := map[int]backtestCitation{}
 	summary := recurrenceSummary{
 		ExperienceCount:       len(records),
@@ -1036,13 +1036,13 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 			summary.HumanFailureExcludedCount++
 			continue
 		}
+		summary.AgentFailureDenominator++
 		if isBacktestFlakeDiscounted(current, flakeHeuristics) {
 			summary.FlakeDiscountedCount++
 			flakes = append(flakes, buildBacktestFlakeDiscount(current, windowRecords, flakeHeuristics))
 			addBacktestCitation(citationMap, current)
 			continue
 		}
-		summary.AgentFailureDenominator++
 		signatureID := record.Outcome.Signature.SignatureID
 		if priors := priorBySignature[signatureID]; len(priors) > 0 {
 			prior, confidence := selectRecurrencePrior(priors, current)
@@ -1096,15 +1096,16 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 		Gate:                 gate,
 		Citations:            citations,
 		Metadata: map[string]any{
-			"window_days":                   windowDays,
-			"source_artifact_digest":        sourceDigest,
-			"possible_excluded_from_err":    true,
-			"flake_discount_excluded":       true,
-			"deterministic_window_anchor":   "latest_recorded_at_in_source_artifacts",
-			"network_required":              false,
-			"redaction_status":              "customer_safe",
-			"repo_relative_paths_only":      true,
-			"baseline_gate_enabled_default": false,
+			"window_days":                            windowDays,
+			"source_artifact_digest":                 sourceDigest,
+			"possible_excluded_from_err":             true,
+			"flake_discount_excluded_from_numerator": true,
+			"flake_discount_retained_in_denominator": true,
+			"deterministic_window_anchor":            "latest_recorded_at_in_source_artifacts",
+			"network_required":                       false,
+			"redaction_status":                       "customer_safe",
+			"repo_relative_paths_only":               true,
+			"baseline_gate_enabled_default":          false,
 		},
 	}
 	report.ReportID = "backtest_" + shortHash(strings.Join([]string{
