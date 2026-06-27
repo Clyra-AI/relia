@@ -988,6 +988,11 @@ func validateBacktestExperience(record experienceRecord, ref string) (time.Time,
 	if len(record.Context.Paths) == 0 {
 		return time.Time{}, artifactContractError("backtest experience context.paths must include at least one path", ref)
 	}
+	for _, path := range record.Context.Paths {
+		if _, ok := cleanRepoPath(path); !ok {
+			return time.Time{}, artifactContractError("backtest experience context.paths entries must be repo-relative", ref)
+		}
+	}
 	if record.FlakeDiscount < 0 || record.FlakeDiscount > 1 || math.IsNaN(record.FlakeDiscount) || math.IsInf(record.FlakeDiscount, 0) {
 		return time.Time{}, artifactContractError("backtest experience flake_discount must be between 0 and 1", ref)
 	}
@@ -995,8 +1000,8 @@ func validateBacktestExperience(record experienceRecord, ref string) (time.Time,
 		return time.Time{}, provenanceIntegrityError("backtest experience must include provenance URLs", ref)
 	}
 	for _, value := range record.Provenance.URLs {
-		if !strings.HasPrefix(value, "https://github.com/") {
-			return time.Time{}, provenanceIntegrityError("backtest experience provenance URL must be an https://github.com/ URL", ref)
+		if !validGitHubProvenanceURLShape(value) {
+			return time.Time{}, provenanceIntegrityError("backtest experience provenance URL must be a canonical https://github.com/ URL", ref)
 		}
 	}
 	return recordedAt.UTC(), nil
