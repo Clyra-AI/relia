@@ -6,69 +6,52 @@
   ],
   "redaction_posture": {
     "classification": "customer_safe",
-    "notes": "Assessment fixtures are synthetic, repo-relative, and use seeded public-safe PR URLs only.",
+    "notes": "Assessment fixtures are synthetic and repo-relative; this repair added no new fixture data.",
     "status": "pass"
   },
-  "repair_task_id": "20260626T200025.692043000Z-relia-T4.3-repair-4",
+  "repair_task_id": "20260626T200025.692043000Z-relia-T4.3-repair-33",
   "required_proof_level": "workflow_behavior",
   "schema_version": "1.0",
   "scorecard": [
     {
+      "behavior": "Playbook assessment validates only citations that can be served",
+      "evidence": {
+        "code_ref": "cmd/relia/main.go",
+        "command": "go test ./cmd/relia -count=1 -run 'TestDemoAssess(IgnoresUnservedPlaybookFailureCitationShape|RejectsActiveRuleWithMissingProvenancePR)$'",
+        "test": "TestDemoAssessIgnoresUnservedPlaybookFailureCitationShape"
+      },
+      "status": "pass"
+    },
+    {
+      "behavior": "Active memory rule validation rejects provenance rows without pr before assessment serving",
+      "evidence": {
+        "code_ref": "cmd/relia/main.go",
+        "command": "go test ./cmd/relia -count=1 -run 'TestDemoAssess(IgnoresUnservedPlaybookFailureCitationShape|RejectsActiveRuleWithMissingProvenancePR)$'",
+        "test": "TestDemoAssessRejectsActiveRuleWithMissingProvenancePR"
+      },
+      "status": "pass"
+    },
+    {
       "behavior": "Planted-pattern assessment returns match_high with citations",
       "evidence": {
-        "assessment_id": "assess_332bb42b3cf4",
-        "citation_count": 3,
-        "command": "GOCACHE=/tmp/relia-go-build go run ./cmd/relia --json assess --input examples/demo/assessment-fixtures/planted-pattern.diff --format json",
         "evidence_refs": [
           "examples/demo/assessment-fixtures/planted-pattern.diff",
           "memory/rules/demo-assessment-active-rule.yaml",
           "examples/demo/seeded-repo/prs.json"
         ],
-        "matched_rule_id": "avoid-direct-datetime-in-assessment-fixture",
-        "risk_level": "match_high"
-      },
-      "status": "pass"
-    },
-    {
-      "behavior": "Unknown-path assessment returns no_coverage against a committed synthetic touched file",
-      "evidence": {
-        "assessment_id": "assess_4eed565ef566",
-        "citation_count": 0,
-        "command": "GOCACHE=/tmp/relia-go-build go run ./cmd/relia --json assess --input examples/demo/assessment-fixtures/unknown-path.diff --format json",
-        "evidence_refs": [
-          "examples/demo/assessment-fixtures/unknown-path.diff",
-          "examples/demo/assessment-fixtures/seeded-repo/packages/search/query.py",
-          "memory/rules/demo-assessment-active-rule.yaml"
-        ],
-        "matched_rule_count": 0,
-        "risk_level": "no_coverage"
-      },
-      "status": "pass"
-    },
-    {
-      "behavior": "Assessment fixture metadata is deterministic and repo-relative",
-      "evidence": {
-        "green": "make test-contracts passed after the fixture helper parsed each input_diff and statted declared touched paths.",
-        "red_first": "make test-contracts failed when unknown-path-no-coverage referenced a missing query.py fixture.",
         "test": "TestDemoAssessmentFixturesDriveAssessCommand"
       },
       "status": "pass"
     },
     {
-      "behavior": "Existing slashless directory scopes are treated as directory prefixes",
+      "behavior": "Unknown-path assessment returns no_coverage",
       "evidence": {
-        "green": "make test-contracts passed after normalizeAssessmentScopePath checked existing directories.",
-        "red_first": "TestDemoAssessMatchesExistingDirectoryScopeWithoutTrailingSlash returned no_coverage before the repair.",
-        "test": "TestDemoAssessMatchesExistingDirectoryScopeWithoutTrailingSlash"
-      },
-      "status": "pass"
-    },
-    {
-      "behavior": "assess --format json returns the JSON envelope in interactive mode",
-      "evidence": {
-        "green": "go test ./cmd/relia -count=1 -run TestAssessFormatJSONOverridesInteractiveOutput passed after assess --format json set the non-serialized machine-readable render signal.",
-        "red_first": "The same test failed before the repair because interactive output was rendered as a human summary.",
-        "test": "TestAssessFormatJSONOverridesInteractiveOutput"
+        "evidence_refs": [
+          "examples/demo/assessment-fixtures/unknown-path.diff",
+          "examples/demo/assessment-fixtures/seeded-repo/packages/search/query.py",
+          "memory/rules/demo-assessment-active-rule.yaml"
+        ],
+        "test": "TestDemoAssessmentFixturesDriveAssessCommand"
       },
       "status": "pass"
     },
@@ -80,7 +63,7 @@
           "make prepush-full"
         ],
         "coverage_minimum_percent": 75,
-        "coverage_percent": 79.2
+        "coverage_percent": 80.7
       },
       "status": "pass"
     }

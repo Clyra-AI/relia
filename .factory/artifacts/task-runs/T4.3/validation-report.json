@@ -7,7 +7,8 @@
           "description": "relia assess returns match_high with citations on a planted-pattern diff",
           "evidence_refs": [
             "examples/demo/assessment-fixtures/planted-pattern.diff",
-            "memory/rules/demo-assessment-active-rule.yaml"
+            "memory/rules/demo-assessment-active-rule.yaml",
+            "cmd/relia/demo_fixtures_test.go"
           ],
           "status": "implemented"
         },
@@ -15,15 +16,24 @@
           "description": "relia assess returns no_coverage on unknown paths",
           "evidence_refs": [
             "examples/demo/assessment-fixtures/unknown-path.diff",
-            "examples/demo/assessment-fixtures/seeded-repo/packages/search/query.py"
+            "examples/demo/assessment-fixtures/seeded-repo/packages/search/query.py",
+            "cmd/relia/demo_fixtures_test.go"
           ],
           "status": "implemented"
         },
         {
           "description": "Assessment fixture evidence remains deterministic and repo-relative",
           "evidence_refs": [
-            "cmd/relia/demo_fixtures_test.go",
-            "examples/demo/assessment-fixtures/assessment-fixtures.json"
+            "examples/demo/assessment-fixtures/assessment-fixtures.json",
+            "cmd/relia/demo_fixtures_test.go"
+          ],
+          "status": "implemented"
+        },
+        {
+          "description": "Assess validates only served playbook citations while active rule artifact validation requires pr on every provenance row",
+          "evidence_refs": [
+            "cmd/relia/main.go",
+            "cmd/relia/main_test.go"
           ],
           "status": "implemented"
         }
@@ -67,27 +77,23 @@
     "memory/rules/demo-assessment-active-rule.yaml"
   ],
   "changelog_result": {
-    "notes": "No changelog file exists in the allowed repo paths; this review repair did not change runtime pins, schemas, or distribution posture.",
+    "notes": "This repair clarified the internal assessment validation boundary without changing public output, schemas, runtime pins, or distribution posture.",
     "status": "pass"
   },
   "commands_run": [
     "make lint-fast",
     "make test-fast",
     "make test-contracts",
-    "go test ./cmd/relia -count=1 -run TestAssessFormatJSONOverridesInteractiveOutput",
-    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go cmd/relia/demo_fixtures_test.go",
-    "make test-contracts",
-    "go test ./cmd/relia -count=1 -run TestAssessFormatJSONOverridesInteractiveOutput",
+    "gofmt -w cmd/relia/main.go",
+    "go test ./cmd/relia -count=1 -run 'TestDemoAssess(IgnoresUnservedPlaybookFailureCitationShape|RejectsActiveRuleWithMissingProvenancePR)$'",
     "make test-coverage",
     "make prepush-full",
-    "GOCACHE=/tmp/relia-go-build go run ./cmd/relia --json assess --input examples/demo/assessment-fixtures/planted-pattern.diff --format json",
-    "GOCACHE=/tmp/relia-go-build go run ./cmd/relia --json assess --input examples/demo/assessment-fixtures/unknown-path.diff --format json",
     "python3 -m json.tool .factory/artifacts/task-runs/T4.3/work-proof-marker.json",
     "python3 -m json.tool .factory/artifacts/task-runs/T4.3/validation-report.json",
     "python3 -m json.tool .factory/artifacts/task-runs/T4.3/proof-of-behavior-scorecard.json"
   ],
   "docs_sync_result": {
-    "notes": "Existing T4.3 docs already describe JSON assess output, match_high/no_coverage behavior, repo-relative deterministic fixtures, and active local rules.",
+    "notes": "Existing T4.3 docs already describe JSON assess output, match_high/no_coverage behavior, repo-relative deterministic fixtures, and active local rules. The repair changed internal validation structure only.",
     "status": "pass"
   },
   "evidence_artifact_validation": [
@@ -112,7 +118,7 @@
       "command": "make test-coverage",
       "exit_code": 0,
       "observed": {
-        "coverage_percent": 79.2,
+        "coverage_percent": 80.7,
         "minimum_percent": 75
       },
       "status": "pass"
@@ -125,34 +131,13 @@
   ],
   "green_evidence": [
     {
-      "command": "make test-contracts",
-      "exit_code": 0,
-      "status": "pass"
-    },
-    {
-      "command": "go test ./cmd/relia -count=1 -run TestAssessFormatJSONOverridesInteractiveOutput",
-      "exit_code": 0,
-      "status": "pass"
-    },
-    {
-      "command": "GOCACHE=/tmp/relia-go-build go run ./cmd/relia --json assess --input examples/demo/assessment-fixtures/planted-pattern.diff --format json",
+      "command": "go test ./cmd/relia -count=1 -run 'TestDemoAssess(IgnoresUnservedPlaybookFailureCitationShape|RejectsActiveRuleWithMissingProvenancePR)$'",
       "exit_code": 0,
       "observed": {
-        "assessment_id": "assess_332bb42b3cf4",
-        "citation_count": 3,
-        "matched_rule_count": 1,
-        "risk_level": "match_high"
-      },
-      "status": "pass"
-    },
-    {
-      "command": "GOCACHE=/tmp/relia-go-build go run ./cmd/relia --json assess --input examples/demo/assessment-fixtures/unknown-path.diff --format json",
-      "exit_code": 0,
-      "observed": {
-        "assessment_id": "assess_4eed565ef566",
-        "citation_count": 0,
-        "matched_rule_count": 0,
-        "risk_level": "no_coverage"
+        "review_repair_contracts": [
+          "TestDemoAssessIgnoresUnservedPlaybookFailureCitationShape",
+          "TestDemoAssessRejectsActiveRuleWithMissingProvenancePR"
+        ]
       },
       "status": "pass"
     }
@@ -185,38 +170,31 @@
     "status": "pass"
   },
   "plan_drift_result": {
-    "notes": "Repair stayed bounded to T4.3 assessment fixture behavior and the actionable Codex review findings.",
+    "notes": "Repair stayed bounded to T4.3 assessment fixture behavior and actionable Codex review findings.",
     "status": "pass"
   },
-  "red_evidence": [
+  "red_first_evidence": [
     {
       "command": "make test-contracts",
-      "exit_code": 2,
-      "observed_failures": [
-        "TestDemoAssessmentFixturesDriveAssessCommand failed because examples/demo/assessment-fixtures/seeded-repo/packages/search/query.py was missing.",
-        "TestDemoAssessMatchesExistingDirectoryScopeWithoutTrailingSlash returned no_coverage before existing slashless directory scopes were treated as prefixes."
-      ],
-      "status": "expected_red"
-    },
-    {
-      "command": "go test ./cmd/relia -count=1 -run TestAssessFormatJSONOverridesInteractiveOutput",
-      "exit_code": 1,
-      "observed_failures": [
-        "assess --format json rendered the human summary on interactive stdout before the repair."
-      ],
-      "status": "expected_red"
+      "exit_code": 0,
+      "notes": "The required red-first command passed before edits; the actionable review issue was an already-covered contract boundary that needed implementation clarity, not a new failing fixture.",
+      "status": "pre_existing_green"
     }
   ],
   "redaction_posture": {
     "classification": "customer_safe",
-    "notes": "Added fixture content is synthetic and repo-relative.",
+    "notes": "No customer data, credentials, endpoints, or machine-local paths were added.",
     "status": "pass"
   },
-  "repair_task_id": "20260626T200025.692043000Z-relia-T4.3-repair-4",
+  "repair_task_id": "20260626T200025.692043000Z-relia-T4.3-repair-33",
   "residual_risks": [],
   "schema_version": "1.0",
   "status": "pass",
   "task_id": "T4.3",
+  "test_first_skipped_reason": {
+    "reason": "The focused review regressions already existed at current head and passed before implementation; adding a new failing test would require reverting existing reviewed behavior. The repair made the served-only validation boundary explicit and reran those focused contracts.",
+    "status": "recorded"
+  },
   "versioning_result": {
     "notes": "Pre-1.0 behavior repair; no schema version, module path, runtime pin, or distribution target changed.",
     "status": "pass"

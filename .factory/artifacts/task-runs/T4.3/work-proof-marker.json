@@ -27,11 +27,11 @@
   "implementation_performed": true,
   "objective": "Build assessment fixture coverage for planted-pattern and unknown-path diffs without bundling unrelated corpus work.",
   "repair_summary": [
-    "Honored assess --format json as a machine-readable output request even when stdout is interactive.",
-    "Treated active rule scope paths that name existing directories without trailing slashes as directory-prefix scopes.",
-    "Tightened assessment fixture validation so input diffs parse to declared touched paths and those touched paths are backed by committed synthetic fixture files."
+    "Separated served assessment citation validation into validateServedAssessmentRuleCitations so playbook assessment validates only citations it can emit.",
+    "Confirmed active memory rule identity validation still requires a pr on every provenance entry before assessment serving.",
+    "Preserved T4.3 planted-pattern match_high and unknown-path no_coverage fixture behavior."
   ],
-  "repair_task_id": "20260626T200025.692043000Z-relia-T4.3-repair-4",
+  "repair_task_id": "20260626T200025.692043000Z-relia-T4.3-repair-33",
   "schema_version": "1.0",
   "status": "implemented",
   "task_id": "T4.3"

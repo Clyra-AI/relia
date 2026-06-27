@@ -1107,14 +1107,8 @@ func buildRiskAssessment(root string, inputRef string, content []byte, touchedPa
 		if math.IsNaN(rule.Confidence) || math.IsInf(rule.Confidence, 0) || rule.Confidence < 0 || rule.Confidence > 1 {
 			return riskAssessment{}, provenanceIntegrityError("matched active memory rule confidence must be between 0 and 1 for assessment", rule.Path)
 		}
-		for _, citation := range servedCitationRefs {
-			prNumber, ok := gitHubPullRequestURLNumber(citation.URL)
-			if !ok {
-				return riskAssessment{}, provenanceIntegrityError("matched active memory rule citation URL must be an https://github.com/<owner>/<repo>/pull/<number> URL", rule.Path)
-			}
-			if citation.PR <= 0 || prNumber != citation.PR {
-				return riskAssessment{}, provenanceIntegrityError("matched active memory rule citation URL pull number must match provenance pr", rule.Path)
-			}
+		if commandErr := validateServedAssessmentRuleCitations(rule, servedCitationRefs); commandErr != nil {
+			return riskAssessment{}, commandErr
 		}
 		matches = append(matches, riskAssessmentMatch{
 			RuleID:     rule.ID,
@@ -1160,6 +1154,19 @@ func buildRiskAssessment(root string, inputRef string, content []byte, touchedPa
 			"redaction_status":         "customer_safe",
 		},
 	}, nil
+}
+
+func validateServedAssessmentRuleCitations(rule assessmentRule, servedCitationRefs []assessmentRuleCitation) *CommandError {
+	for _, citation := range servedCitationRefs {
+		prNumber, ok := gitHubPullRequestURLNumber(citation.URL)
+		if !ok {
+			return provenanceIntegrityError("matched active memory rule citation URL must be an https://github.com/<owner>/<repo>/pull/<number> URL", rule.Path)
+		}
+		if citation.PR <= 0 || prNumber != citation.PR {
+			return provenanceIntegrityError("matched active memory rule citation URL pull number must match provenance pr", rule.Path)
+		}
+	}
+	return nil
 }
 
 func servedAssessmentRuleCitationURLs(rule assessmentRule) []string {
