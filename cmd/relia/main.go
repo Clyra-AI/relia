@@ -1061,14 +1061,14 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 			summary.NonFailureOutcomeCount++
 			continue
 		}
-		signatureKey := recurrenceSignatureKey(record)
+		signatureKeys := recurrenceSignatureKeys(record)
 		if record.Attribution.ActorKind != "agent" {
 			summary.HumanFailureExcludedCount++
 			if record.FlakeDiscount > 0 {
 				addBacktestCitation(citationMap, current)
 				continue
 			}
-			priorBySignature[signatureKey] = append(priorBySignature[signatureKey], current)
+			appendRecurrencePrior(priorBySignature, signatureKeys, current)
 			continue
 		}
 		summary.AgentFailureDenominator++
@@ -1078,10 +1078,10 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 			addBacktestCitation(citationMap, current)
 			continue
 		}
-		if priors := priorBySignature[signatureKey]; len(priors) > 0 {
+		if priors := recurrencePriorCandidates(priorBySignature, signatureKeys); len(priors) > 0 {
 			prior, confidence, ok := selectRecurrencePrior(priors, current)
 			if !ok {
-				priorBySignature[signatureKey] = append(priorBySignature[signatureKey], current)
+				appendRecurrencePrior(priorBySignature, signatureKeys, current)
 				continue
 			}
 			pair := buildRecurrencePair(prior, current)
@@ -1097,7 +1097,7 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 			addBacktestCitation(citationMap, prior)
 			addBacktestCitation(citationMap, current)
 		}
-		priorBySignature[signatureKey] = append(priorBySignature[signatureKey], current)
+		appendRecurrencePrior(priorBySignature, signatureKeys, current)
 	}
 	sortRecurrencePairs(confirmed)
 	sortRecurrencePairs(possible)
@@ -1170,18 +1170,66 @@ func reliableSignatureExtraction(value string) bool {
 	return value == "structured" || value == "log_parsed_high"
 }
 
-func recurrenceSignatureKey(record experienceRecord) string {
+func recurrenceSignatureKeys(record experienceRecord) []string {
 	signatureMetadata, _ := record.Metadata["signature"].(map[string]any)
 	signatureClass := strings.TrimSpace(stringFromAny(signatureMetadata["class"]))
 	signatureKey := strings.TrimSpace(stringFromAny(signatureMetadata["key"]))
 	messageFingerprint := strings.TrimSpace(stringFromAny(signatureMetadata["message_fingerprint"]))
-	if messageFingerprint != "" {
-		return strings.Join([]string{"message", signatureClass, messageFingerprint}, "\x00")
-	}
+	keys := []string{}
 	if signatureClass != "" && signatureKey != "" {
-		return strings.Join([]string{"class_key", signatureClass, signatureKey}, "\x00")
+		keys = append(keys, strings.Join([]string{"class_key", signatureClass, signatureKey}, "\x00"))
 	}
-	return strings.Join([]string{"id", record.Outcome.Signature.SignatureID}, "\x00")
+	if messageFingerprint != "" {
+		keys = append(keys, strings.Join([]string{"message", signatureClass, messageFingerprint}, "\x00"))
+	}
+	if len(keys) == 0 {
+		keys = append(keys, strings.Join([]string{"id", record.Outcome.Signature.SignatureID}, "\x00"))
+	}
+	return keys
+}
+
+func appendRecurrencePrior(priorBySignature map[string][]backtestExperience, keys []string, current backtestExperience) {
+	for _, key := range keys {
+		priorBySignature[key] = append(priorBySignature[key], current)
+	}
+}
+
+func recurrencePriorCandidates(priorBySignature map[string][]backtestExperience, keys []string) []backtestExperience {
+	seen := map[string]bool{}
+	priors := []backtestExperience{}
+	for _, key := range keys {
+		for _, prior := range priorBySignature[key] {
+			experienceID := prior.Record.ExperienceID
+			if experienceID == "" {
+				experienceID = sourceLineRef(prior)
+			}
+			if seen[experienceID] {
+				continue
+			}
+			seen[experienceID] = true
+			priors = append(priors, prior)
+		}
+	}
+	sort.Slice(priors, func(i, j int) bool {
+		if priors[i].RecordedAt.Equal(priors[j].RecordedAt) {
+			return priors[i].Record.ExperienceID < priors[j].Record.ExperienceID
+		}
+		return priors[i].RecordedAt.Before(priors[j].RecordedAt)
+	})
+	return priors
+}
+
+func recordsShareRecurrenceSignature(left experienceRecord, right experienceRecord) bool {
+	rightKeys := map[string]bool{}
+	for _, key := range recurrenceSignatureKeys(right) {
+		rightKeys[key] = true
+	}
+	for _, key := range recurrenceSignatureKeys(left) {
+		if rightKeys[key] {
+			return true
+		}
+	}
+	return false
 }
 
 func confirmedRecurrence(prior backtestExperience, current backtestExperience) bool {
@@ -1189,7 +1237,7 @@ func confirmedRecurrence(prior backtestExperience, current backtestExperience) b
 		return false
 	}
 	if prior.Record.Outcome.Signature.SignatureID == "" ||
-		recurrenceSignatureKey(prior.Record) != recurrenceSignatureKey(current.Record) {
+		!recordsShareRecurrenceSignature(prior.Record, current.Record) {
 		return false
 	}
 	if !reliableSignatureExtraction(prior.Record.Outcome.Signature.ExtractionConfidence) ||

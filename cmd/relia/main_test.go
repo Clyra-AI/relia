@@ -1924,6 +1924,33 @@ func TestBacktestGroupsEquivalentCanonicalSignatureFields(t *testing.T) {
 	}
 }
 
+func TestBacktestGroupsClassKeyEvenWithDifferentMessageFingerprints(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	inputPath := filepath.Join(tempDir, "fixtures", "outcomes.jsonl")
+	writeFileForTest(t, inputPath, strings.Join([]string{
+		`{"experience_id":"exp_0001","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-01T10:00:00Z","pr":101,"commit":"abc001","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","message":"expected 2026-01-01 but got 2025-12-31","provenance_urls":["https://github.com/acme/billing-service/pull/101"]}`,
+		`{"experience_id":"exp_0002","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-10T10:00:00Z","pr":102,"commit":"abc002","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","message":"expected 2026-01-10 but got 2026-01-09","provenance_urls":["https://github.com/acme/billing-service/pull/102"]}`,
+	}, "\n")+"\n")
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+	if code != ExitSuccess {
+		t.Fatalf("ingest exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	stdout, stderr, code = runForTest(t, []string{"--json", "backtest", "--window", "180d"}, false)
+	if code != ExitSuccess {
+		t.Fatalf("backtest exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	report := decodeBacktestReportFromResult(t, decodeResult(t, stdout))
+	if report.Summary.ConfirmedRecurrenceCount != 1 || report.HeadlineERR != 0.5 {
+		t.Fatalf("confirmed=%d headline=%.4f, report=%#v", report.Summary.ConfirmedRecurrenceCount, report.HeadlineERR, report)
+	}
+	confirmed := report.ConfirmedRecurrences[0]
+	if confirmed.PriorExperienceID != "exp_0001" || confirmed.CurrentExperienceID != "exp_0002" {
+		t.Fatalf("confirmed pair = %#v, want class/key recurrence despite different message fingerprints", confirmed)
+	}
+}
+
 func TestBacktestGroupsEquivalentMessageFingerprint(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
