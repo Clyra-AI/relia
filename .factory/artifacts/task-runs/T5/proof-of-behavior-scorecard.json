@@ -1,0 +1,62 @@
+{
+  "artifact_type": "proof-of-behavior-scorecard",
+  "schema_version": "1.0",
+  "task_id": "T5",
+  "status": "pass",
+  "generated_at": "2026-06-27T12:46:42Z",
+  "repair_task_id": "20260627T121729.072098000Z-relia-T5-repair",
+  "proof_level": "user_visible_behavior",
+  "behavior_checks": [
+    {
+      "behavior": "Backtest keeps all earlier records per signature and pairs a current failure with an earlier confirmed recurrence when the immediately previous same-signature record is only possible.",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go::TestBacktestPairsCurrentWithAnyEarlierConfirmedRecurrence"
+      ]
+    },
+    {
+      "behavior": "Possible recurrence pairs remain reported separately and excluded from the headline ERR.",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/main_test.go::TestBacktestPairsCurrentWithAnyEarlierConfirmedRecurrence"
+      ]
+    },
+    {
+      "behavior": "An explicitly enabled recurrence gate with a configured max_error_recurrence_rate is evaluated by backtest and returns recurrence_gate_failed with exit 5 when tripped.",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go::TestBacktestExplicitEnabledGateEvaluatesThreshold"
+      ]
+    },
+    {
+      "behavior": "Invalid enabled gate configuration remains fail-closed with a line-specific relia.yaml reference.",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/main.go"
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "command": "make test-fast",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "make prepush-full",
+      "status": "pass",
+      "exit_code": 0
+    }
+  ],
+  "redaction_posture": {
+    "status": "internal",
+    "customer_safe": false,
+    "notes": "Task-run evidence remains internal and contains only synthetic test references and repo-relative paths."
+  },
+  "evidence_refs": [
+    ".factory/artifacts/task-runs/T5/work-proof-marker.json",
+    ".factory/artifacts/task-runs/T5/validation-report.json"
+  ]
+}

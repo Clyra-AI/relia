@@ -212,6 +212,25 @@ T4.3 adds bounded offline assessment:
   `match_medium` based on confidence and include rule citations. Unknown paths
   return `no_coverage`.
 
+T5 adds deterministic offline recurrence backtesting:
+
+- `relia backtest --window 180d` reads local `.relia/experiences/*.jsonl`
+  shards and writes `.relia/reports/<report-id>.json` plus matching HTML.
+- The window anchor is the latest `recorded_at` value in the source artifacts,
+  so repeated runs over the same shards and window produce the same report ID.
+- Confirmed recurrence pairs require an exact reliable signature and path
+  overlap. Possible recurrence pairs are reported separately and excluded from
+  headline ERR.
+- Explicit `flake_discount` values and the basic unrelated-diff flake heuristic
+  are reported as flake discounts and excluded from the ERR numerator.
+- `.relia/baselines/error-recurrence-baseline.json` is compared when present;
+  baselines with a different source artifact digest are labeled `stale`.
+- The recurrence gate is implemented through `gate.enabled` and
+  `gate.max_error_recurrence_rate`, but `gate.enabled: false` remains the
+  default advisory-only posture.
+- `relia check` fails closed when attribution config has zero agent matchers,
+  with a concrete `relia.yaml:<line>` reference.
+
 ## Structured Data, Proof, Budgets, And Redaction
 
 - PR, check-run, experience, memory, MCP, assessment, report, and config data

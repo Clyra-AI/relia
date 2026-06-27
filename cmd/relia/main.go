@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"html"
 	"io"
 	"math"
 	"net/url"
@@ -176,6 +177,14 @@ type ingestOptions struct {
 	InputPath string
 }
 
+type backtestOptions struct {
+	Window       string
+	Format       string
+	BaselinePath string
+	ReportDir    string
+	SaveBaseline bool
+}
+
 type assessOptions struct {
 	InputPath      string
 	Format         string
@@ -267,6 +276,132 @@ type experienceProvenance struct {
 	URLs []string `json:"urls"`
 }
 
+type backtestExperience struct {
+	Record     experienceRecord
+	RecordedAt time.Time
+	SourcePath string
+	SourceLine int
+}
+
+type recurrenceReport struct {
+	ObjectType           string                  `json:"object_type"`
+	SchemaVersion        string                  `json:"schema_version"`
+	ReportID             string                  `json:"report_id"`
+	SourceArtifacts      []string                `json:"source_artifacts"`
+	Window               recurrenceWindow        `json:"window"`
+	Summary              recurrenceSummary       `json:"summary"`
+	HeadlineERR          float64                 `json:"headline_err"`
+	ConfirmedRecurrences []recurrencePair        `json:"confirmed_recurrences"`
+	PossibleRecurrences  []recurrencePair        `json:"possible_recurrences"`
+	FlakeDiscounts       []backtestFlakeDiscount `json:"flake_discounts"`
+	AttributionUncertain []backtestUncertain     `json:"attribution_uncertain"`
+	Baseline             baselineComparison      `json:"baseline"`
+	Gate                 backtestGateResult      `json:"gate"`
+	Citations            []backtestCitation      `json:"citations"`
+	Metadata             map[string]any          `json:"metadata"`
+}
+
+type recurrenceWindow struct {
+	Start string `json:"start"`
+	End   string `json:"end"`
+}
+
+type recurrenceSummary struct {
+	ExperienceCount           int     `json:"experience_count"`
+	WindowExperienceCount     int     `json:"window_experience_count"`
+	AgentFailureDenominator   int     `json:"agent_failure_denominator"`
+	ConfirmedRecurrenceCount  int     `json:"confirmed_recurrence_count"`
+	PossibleRecurrenceCount   int     `json:"possible_recurrence_count"`
+	HeadlineERR               float64 `json:"headline_err"`
+	HeadlineERRPercent        string  `json:"headline_err_percent"`
+	FlakeDiscountedCount      int     `json:"flake_discounted_count"`
+	AttributionUncertainCount int     `json:"attribution_uncertain_count"`
+	HumanFailureExcludedCount int     `json:"human_failure_excluded_count"`
+	NonFailureOutcomeCount    int     `json:"non_failure_outcome_count"`
+}
+
+type recurrencePair struct {
+	CurrentExperienceID string   `json:"current_experience_id"`
+	PriorExperienceID   string   `json:"prior_experience_id"`
+	CurrentPR           int      `json:"current_pr"`
+	PriorPR             int      `json:"prior_pr"`
+	CurrentURL          string   `json:"current_url"`
+	PriorURL            string   `json:"prior_url"`
+	SignatureID         string   `json:"signature_id"`
+	Confidence          string   `json:"confidence"`
+	Reason              string   `json:"reason"`
+	Refs                []string `json:"refs"`
+}
+
+type backtestFlakeDiscount struct {
+	ExperienceID    string   `json:"experience_id"`
+	PR              int      `json:"pr"`
+	SignatureID     string   `json:"signature_id"`
+	FlakeDiscount   float64  `json:"flake_discount"`
+	SupportingPRs   []int    `json:"supporting_prs"`
+	SupportingRefs  []string `json:"supporting_refs"`
+	Reason          string   `json:"reason"`
+	ExcludedFromERR bool     `json:"excluded_from_err"`
+}
+
+type backtestUncertain struct {
+	ExperienceID          string  `json:"experience_id"`
+	PR                    int     `json:"pr"`
+	OutcomeKind           string  `json:"outcome_kind"`
+	AttributionMethod     string  `json:"attribution_method"`
+	AttributionConfidence float64 `json:"attribution_confidence"`
+	ExcludedFromERR       bool    `json:"excluded_from_err"`
+	Ref                   string  `json:"ref"`
+	Reason                string  `json:"reason"`
+}
+
+type baselineComparison struct {
+	Status      string  `json:"status"`
+	Path        string  `json:"path"`
+	HeadlineERR float64 `json:"headline_err,omitempty"`
+	Delta       float64 `json:"delta,omitempty"`
+	Stale       bool    `json:"stale"`
+	Reason      string  `json:"reason"`
+}
+
+func (comparison baselineComparison) MarshalJSON() ([]byte, error) {
+	type baselineComparisonJSON struct {
+		Status      string   `json:"status"`
+		Path        string   `json:"path"`
+		HeadlineERR *float64 `json:"headline_err,omitempty"`
+		Delta       *float64 `json:"delta,omitempty"`
+		Stale       bool     `json:"stale"`
+		Reason      string   `json:"reason"`
+	}
+	payload := baselineComparisonJSON{
+		Status: comparison.Status,
+		Path:   comparison.Path,
+		Stale:  comparison.Stale,
+		Reason: comparison.Reason,
+	}
+	if comparison.Status != "missing" {
+		headlineERR := comparison.HeadlineERR
+		delta := comparison.Delta
+		payload.HeadlineERR = &headlineERR
+		payload.Delta = &delta
+	}
+	return json.Marshal(payload)
+}
+
+type backtestGateResult struct {
+	Enabled   bool     `json:"enabled"`
+	Status    string   `json:"status"`
+	Threshold *float64 `json:"threshold,omitempty"`
+	Reason    string   `json:"reason"`
+	Ref       string   `json:"ref"`
+}
+
+type backtestCitation struct {
+	PR           int    `json:"pr"`
+	URL          string `json:"url"`
+	ExperienceID string `json:"experience_id"`
+}
+
 func main() {
 	os.Exit(run(os.Args[1:], os.Stdout, os.Stderr, stdoutIsTerminal(os.Stdout)))
 }
@@ -348,6 +483,8 @@ func dispatch(parsed parsedArgs, start time.Time) CommandResult {
 		return checkResult(parsed.commandArgs, start)
 	case "ingest":
 		return ingestResult(parsed.commandArgs, start)
+	case "backtest":
+		return backtestResult(parsed.commandArgs, start)
 	case "assess":
 		return assessResult(parsed.commandArgs, start)
 	case "models":
@@ -355,7 +492,7 @@ func dispatch(parsed parsedArgs, start time.Time) CommandResult {
 			return notImplementedResult("models pull", start)
 		}
 		return errorResult("models", "models", usageError("expected subcommand: pull"), start)
-	case "backtest", "distill", "review", "memory", "compile", "serve", "demo", "share":
+	case "distill", "review", "memory", "compile", "serve", "demo", "share":
 		return notImplementedResult(command, start)
 	default:
 		return errorResult(command, command, usageError(fmt.Sprintf("unknown command %q", command)), start)
@@ -584,6 +721,1100 @@ func parseIngestArgs(args []string) (ingestOptions, *CommandError) {
 		return options, usageError("ingest requires --input <json-or-jsonl> in offline mode")
 	}
 	return options, nil
+}
+
+func backtestResult(args []string, start time.Time) CommandResult {
+	options, commandErr := parseBacktestArgs(args)
+	withFormat := func(result CommandResult) CommandResult {
+		if options.Format == "json" {
+			result.MachineReadable = true
+		}
+		return result
+	}
+	if commandErr != nil {
+		return withFormat(errorResult("backtest", "backtest", commandErr, start))
+	}
+	wd, err := os.Getwd()
+	if err != nil {
+		return withFormat(errorResult("backtest", "backtest", internalError("could not inspect working directory", err), start))
+	}
+	root, ok := findRepoRoot(wd)
+	if !ok {
+		return withFormat(errorResult("backtest", "backtest", configError("could not locate repository root from current directory"), start))
+	}
+	warnings, commandErr := validateReliaConfig(root)
+	if commandErr != nil {
+		return withFormat(errorResult("backtest", "backtest", commandErr, start))
+	}
+	config, commandErr := readReliaConfig(root)
+	if commandErr != nil {
+		return withFormat(errorResult("backtest", "backtest", commandErr, start))
+	}
+	records, sourceArtifacts, sourceDigest, commandErr := loadBacktestExperiences(root)
+	if commandErr != nil {
+		return withFormat(errorResult("backtest", "backtest", commandErr, start))
+	}
+	windowDays, commandErr := parseBacktestWindowDays(options.Window)
+	if commandErr != nil {
+		return withFormat(errorResult("backtest", "backtest", commandErr, start))
+	}
+	report, commandErr := buildRecurrenceReport(root, config, records, sourceArtifacts, sourceDigest, options, windowDays)
+	if commandErr != nil {
+		return withFormat(errorResult("backtest", "backtest", commandErr, start))
+	}
+	var baselineSnapshot backtestBaselineSnapshot
+	baselineSaved := false
+	if options.SaveBaseline && report.Gate.Status != "fail" {
+		baselineSnapshot, commandErr = snapshotBacktestBaseline(root, options.BaselinePath)
+		if commandErr != nil {
+			return withFormat(errorResult("backtest", "backtest", commandErr, start))
+		}
+		if commandErr := saveBacktestBaseline(root, report, options.BaselinePath); commandErr != nil {
+			if rollbackErr := restoreBacktestBaseline(baselineSnapshot); rollbackErr != nil {
+				commandErr.Message = commandErr.Message + "; additionally could not roll back ERR baseline: " + rollbackErr.Message
+			}
+			return withFormat(errorResult("backtest", "backtest", commandErr, start))
+		}
+		baselineSaved = true
+		report.Baseline, commandErr = savedBacktestBaselineComparison(options.BaselinePath, report.HeadlineERR)
+		if commandErr != nil {
+			return withFormat(errorResult("backtest", "backtest", commandErr, start))
+		}
+	}
+	jsonReportPath, htmlReportPath, commandErr := writeBacktestReports(root, report, options.ReportDir)
+	if commandErr != nil {
+		if baselineSaved {
+			if rollbackErr := restoreBacktestBaseline(baselineSnapshot); rollbackErr != nil {
+				commandErr.Message = commandErr.Message + "; additionally could not roll back ERR baseline: " + rollbackErr.Message
+			}
+		}
+		return withFormat(errorResult("backtest", "backtest", commandErr, start))
+	}
+
+	result := passResult("backtest", "backtest", "computed conservative recurrence backtest", start, map[string]any{
+		"window":                 report.Window,
+		"headline_err":           report.HeadlineERR,
+		"headline_err_percent":   report.Summary.HeadlineERRPercent,
+		"confirmed_recurrences":  report.Summary.ConfirmedRecurrenceCount,
+		"possible_recurrences":   report.Summary.PossibleRecurrenceCount,
+		"flake_discounted_count": report.Summary.FlakeDiscountedCount,
+		"baseline":               report.Baseline,
+		"gate":                   report.Gate,
+		"report":                 report,
+		"json_report_path":       jsonReportPath,
+		"html_report_path":       htmlReportPath,
+	})
+	result.Warnings = append(result.Warnings, warnings...)
+	result.EvidenceRefs = append(result.EvidenceRefs,
+		"schemas/recurrence-report.schema.json",
+		"docs/product/prd.md#ingest-attribute-backtest-report",
+	)
+	for _, artifact := range sourceArtifacts {
+		result.EvidenceRefs = append(result.EvidenceRefs, artifact)
+		result.Artifacts = append(result.Artifacts, ArtifactRef{Kind: "experience_shard", Path: artifact})
+	}
+	result.Artifacts = append(result.Artifacts,
+		ArtifactRef{Kind: "recurrence_report_json", Path: jsonReportPath},
+		ArtifactRef{Kind: "recurrence_report_html", Path: htmlReportPath},
+	)
+	result.RedactionStatus = "applied"
+	if report.Gate.Status == "fail" {
+		result.Status = "error"
+		result.ExitCode = ExitGate
+		result.Errors = append(result.Errors, CommandError{
+			Type:        "recurrence_gate_failed",
+			Message:     fmt.Sprintf("headline ERR %.4f exceeds configured gate %.4f", report.HeadlineERR, backtestGateThresholdValue(report.Gate)),
+			ExitCode:    ExitGate,
+			Remediation: "Leave gate.enabled false for advisory-only MVP behavior or raise the explicit threshold after reviewing the recurrence report.",
+			Ref:         report.Gate.Ref,
+		})
+	}
+	return withFormat(result)
+}
+
+func parseBacktestArgs(args []string) (backtestOptions, *CommandError) {
+	options := backtestOptions{
+		Window:       "180d",
+		Format:       "json",
+		BaselinePath: ".relia/baselines/error-recurrence-baseline.json",
+		ReportDir:    ".relia/reports",
+	}
+	for index := 0; index < len(args); index++ {
+		arg := args[index]
+		switch arg {
+		case "--window":
+			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
+				return options, usageError("backtest requires a value after --window")
+			}
+			options.Window = args[index+1]
+			index++
+		case "--format":
+			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
+				return options, usageError("backtest requires a value after --format")
+			}
+			options.Format = args[index+1]
+			index++
+		case "--baseline":
+			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
+				return options, usageError("backtest requires a repo-relative path after --baseline")
+			}
+			options.BaselinePath = args[index+1]
+			index++
+		case "--report-dir":
+			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
+				return options, usageError("backtest requires a repo-relative path after --report-dir")
+			}
+			options.ReportDir = args[index+1]
+			index++
+		case "--save-baseline":
+			options.SaveBaseline = true
+		default:
+			return options, usageError(fmt.Sprintf("unknown backtest argument %q", arg))
+		}
+	}
+	if options.Format != "json" {
+		return options, usageError("backtest only supports --format json in this task slice")
+	}
+	if _, commandErr := parseBacktestWindowDays(options.Window); commandErr != nil {
+		return options, commandErr
+	}
+	if _, ok := cleanRepoPath(options.BaselinePath); !ok {
+		return options, usageError("backtest --baseline must be a repo-relative path")
+	}
+	if _, ok := cleanRepoPath(options.ReportDir); !ok {
+		return options, usageError("backtest --report-dir must be a repo-relative path")
+	}
+	return options, nil
+}
+
+func parseBacktestWindowDays(value string) (int, *CommandError) {
+	trimmed := strings.TrimSpace(strings.ToLower(value))
+	if !strings.HasSuffix(trimmed, "d") {
+		return 0, usageError("backtest --window must use a day duration such as 180d")
+	}
+	days, err := strconv.Atoi(strings.TrimSuffix(trimmed, "d"))
+	if err != nil || days <= 0 {
+		return 0, usageError("backtest --window must be a positive day duration such as 180d")
+	}
+	return days, nil
+}
+
+func loadBacktestExperiences(root string) ([]backtestExperience, []string, string, *CommandError) {
+	pattern := filepath.Join(root, ".relia", "experiences", "*.jsonl")
+	paths, err := filepath.Glob(pattern)
+	if err != nil {
+		return nil, nil, "", internalError("could not inspect experience shards", err)
+	}
+	sort.Strings(paths)
+	if len(paths) == 0 {
+		return nil, nil, "", artifactContractError("backtest found no experience shards under .relia/experiences", ".relia/experiences")
+	}
+
+	var records []backtestExperience
+	sourceArtifacts := make([]string, 0, len(paths))
+	digestParts := make([]string, 0, len(paths))
+	for _, path := range paths {
+		rel := displayPath(root, path)
+		content, err := os.ReadFile(path)
+		if err != nil {
+			return nil, nil, "", internalError("could not read experience shard "+rel, err)
+		}
+		sourceArtifacts = append(sourceArtifacts, rel)
+		digestParts = append(digestParts, rel+"\x00"+sha256String(string(content)))
+		for lineNumber, line := range strings.Split(string(content), "\n") {
+			if strings.TrimSpace(line) == "" {
+				continue
+			}
+			var record experienceRecord
+			if err := decodeJSONUseNumber(line, &record); err != nil {
+				return nil, nil, "", artifactContractError(fmt.Sprintf("experience shard line %d is not valid JSON", lineNumber+1), fmt.Sprintf("%s:%d", rel, lineNumber+1))
+			}
+			recordedAt, commandErr := validateBacktestExperience(record, fmt.Sprintf("%s:%d", rel, lineNumber+1))
+			if commandErr != nil {
+				return nil, nil, "", commandErr
+			}
+			records = append(records, backtestExperience{
+				Record:     record,
+				RecordedAt: recordedAt,
+				SourcePath: rel,
+				SourceLine: lineNumber + 1,
+			})
+		}
+	}
+	if len(records) == 0 {
+		return nil, nil, "", artifactContractError("backtest found no experience records in .relia/experiences", ".relia/experiences")
+	}
+	sort.Strings(digestParts)
+	return records, sourceArtifacts, sha256String(strings.Join(digestParts, "\x00")), nil
+}
+
+func validateBacktestExperience(record experienceRecord, ref string) (time.Time, *CommandError) {
+	if record.ObjectType != "relia.experience_record" {
+		return time.Time{}, artifactContractError("backtest experience object_type must be relia.experience_record", ref)
+	}
+	if record.SchemaVersion != commandSchemaVersion {
+		return time.Time{}, artifactContractError("backtest experience schema_version must be "+commandSchemaVersion, ref)
+	}
+	if record.ShareScope != "private" {
+		return time.Time{}, redactionSafetyError("backtest experience share_scope must be private", ref)
+	}
+	if record.RedactionStatus != "applied" {
+		return time.Time{}, redactionSafetyError("backtest experience redaction_status must be applied", ref)
+	}
+	if strings.TrimSpace(record.ExperienceID) == "" {
+		return time.Time{}, artifactContractError("backtest experience missing experience_id", ref)
+	}
+	recordedAt, err := time.Parse(time.RFC3339, record.RecordedAt)
+	if err != nil {
+		return time.Time{}, artifactContractError("backtest experience recorded_at must be RFC3339", ref)
+	}
+	if record.Repo.Provider != "github" || record.Repo.Owner == "" || record.Repo.Name == "" {
+		return time.Time{}, artifactContractError("backtest experience repo must include github owner and name", ref)
+	}
+	if record.Action.PR < 1 {
+		return time.Time{}, provenanceIntegrityError("backtest experience action.pr must be a positive integer", ref)
+	}
+	if !validOutcomeKind(record.Outcome.Kind) || !validTerminalState(record.Outcome.TerminalState) {
+		return time.Time{}, artifactContractError("backtest experience outcome is invalid", ref)
+	}
+	if strings.TrimSpace(record.Outcome.Signature.SignatureID) == "" {
+		return time.Time{}, artifactContractError("backtest experience outcome.signature.signature_id must be provided", ref)
+	}
+	if !validExtractionConfidence(record.Outcome.Signature.ExtractionConfidence) {
+		return time.Time{}, artifactContractError("backtest experience signature extraction_confidence is invalid", ref)
+	}
+	switch record.Attribution.ActorKind {
+	case "agent", "human", "uncertain":
+	default:
+		return time.Time{}, artifactContractError("backtest experience attribution actor_kind must be agent, human, or uncertain", ref)
+	}
+	if len(record.Context.Paths) == 0 {
+		return time.Time{}, artifactContractError("backtest experience context.paths must include at least one path", ref)
+	}
+	for _, path := range record.Context.Paths {
+		if _, ok := cleanRepoPath(path); !ok {
+			return time.Time{}, artifactContractError("backtest experience context.paths entries must be repo-relative", ref)
+		}
+	}
+	if record.FlakeDiscount < 0 || record.FlakeDiscount > 1 || math.IsNaN(record.FlakeDiscount) || math.IsInf(record.FlakeDiscount, 0) {
+		return time.Time{}, artifactContractError("backtest experience flake_discount must be between 0 and 1", ref)
+	}
+	if len(record.Provenance.URLs) == 0 {
+		return time.Time{}, provenanceIntegrityError("backtest experience must include provenance URLs", ref)
+	}
+	for _, value := range record.Provenance.URLs {
+		if !validGitHubProvenanceURLShape(value) {
+			return time.Time{}, provenanceIntegrityError("backtest experience provenance URL must be a canonical https://github.com/ URL", ref)
+		}
+		if !gitHubProvenanceURLRepoMatchesExperience(value, record) {
+			return time.Time{}, provenanceIntegrityError("backtest experience provenance URL repo must match experience repo", ref)
+		}
+		if number, ok := gitHubPullRequestURLPathNumber(value); ok && number != record.Action.PR {
+			return time.Time{}, provenanceIntegrityError("backtest experience pull request provenance URL must match action.pr", ref)
+		}
+	}
+	return recordedAt.UTC(), nil
+}
+
+func buildRecurrenceReport(root string, config yamlDocument, records []backtestExperience, sourceArtifacts []string, sourceDigest string, options backtestOptions, windowDays int) (recurrenceReport, *CommandError) {
+	sort.Slice(records, func(i, j int) bool {
+		if records[i].RecordedAt.Equal(records[j].RecordedAt) {
+			return records[i].Record.ExperienceID < records[j].Record.ExperienceID
+		}
+		return records[i].RecordedAt.Before(records[j].RecordedAt)
+	})
+	windowEnd := records[len(records)-1].RecordedAt.UTC()
+	windowStart := windowEnd.AddDate(0, 0, -windowDays)
+	windowRecords := make([]backtestExperience, 0, len(records))
+	for _, record := range records {
+		if record.RecordedAt.Before(windowStart) || record.RecordedAt.After(windowEnd) {
+			continue
+		}
+		windowRecords = append(windowRecords, record)
+	}
+	flakeHeuristics := autoFlakeDiscountedExperiences(windowRecords)
+	priorBySignature := map[string][]backtestExperience{}
+	confirmed := []recurrencePair{}
+	possible := []recurrencePair{}
+	flakes := []backtestFlakeDiscount{}
+	uncertain := []backtestUncertain{}
+	citationMap := map[int]backtestCitation{}
+	summary := recurrenceSummary{
+		ExperienceCount:       len(records),
+		WindowExperienceCount: len(windowRecords),
+	}
+	for _, current := range windowRecords {
+		record := current.Record
+		if record.Attribution.ActorKind == "uncertain" {
+			summary.AttributionUncertainCount++
+			uncertain = append(uncertain, backtestUncertain{
+				ExperienceID:          record.ExperienceID,
+				PR:                    record.Action.PR,
+				OutcomeKind:           record.Outcome.Kind,
+				AttributionMethod:     record.Attribution.Method,
+				AttributionConfidence: record.Attribution.Confidence,
+				ExcludedFromERR:       true,
+				Ref:                   sourceLineRef(current),
+				Reason:                "Excluded from headline ERR because attribution was ambiguous and the default policy is uncertain: exclude.",
+			})
+			addBacktestCitation(citationMap, current)
+			continue
+		}
+		if !isFailureOutcome(record.Outcome.Kind) {
+			summary.NonFailureOutcomeCount++
+			continue
+		}
+		signatureKeys := recurrenceSignatureKeys(record)
+		if record.Attribution.ActorKind != "agent" {
+			summary.HumanFailureExcludedCount++
+			if record.FlakeDiscount > 0 {
+				addBacktestCitation(citationMap, current)
+				continue
+			}
+			appendRecurrencePrior(priorBySignature, signatureKeys, current)
+			continue
+		}
+		summary.AgentFailureDenominator++
+		if isBacktestFlakeDiscounted(current, flakeHeuristics) {
+			summary.FlakeDiscountedCount++
+			flakes = append(flakes, buildBacktestFlakeDiscount(current, windowRecords, flakeHeuristics))
+			addBacktestCitation(citationMap, current)
+			continue
+		}
+		if priors := recurrencePriorCandidates(priorBySignature, signatureKeys); len(priors) > 0 {
+			prior, confidence, ok := selectRecurrencePrior(priors, current)
+			if !ok {
+				appendRecurrencePrior(priorBySignature, signatureKeys, current)
+				continue
+			}
+			pair := buildRecurrencePair(prior, current)
+			if confidence == "confirmed" {
+				pair.Confidence = "confirmed"
+				pair.Reason = "Exact reliable signature repeated with overlapping paths."
+				confirmed = append(confirmed, pair)
+			} else {
+				pair.Confidence = "possible"
+				pair.Reason = "Exact signature repeated, but extraction confidence or path overlap was insufficient; excluded from the headline ERR."
+				possible = append(possible, pair)
+			}
+			addBacktestCitation(citationMap, prior)
+			addBacktestCitation(citationMap, current)
+		}
+		appendRecurrencePrior(priorBySignature, signatureKeys, current)
+	}
+	sortRecurrencePairs(confirmed)
+	sortRecurrencePairs(possible)
+	sortBacktestFlakes(flakes)
+	sortBacktestUncertain(uncertain)
+	citations := backtestCitations(citationMap)
+	summary.ConfirmedRecurrenceCount = len(confirmed)
+	summary.PossibleRecurrenceCount = len(possible)
+	if summary.AgentFailureDenominator > 0 {
+		summary.HeadlineERR = roundFloat(float64(summary.ConfirmedRecurrenceCount)/float64(summary.AgentFailureDenominator), 4)
+	}
+	summary.HeadlineERRPercent = fmt.Sprintf("%.1f%%", summary.HeadlineERR*100)
+	window := recurrenceWindow{
+		Start: windowStart.Format(time.RFC3339),
+		End:   windowEnd.Format(time.RFC3339),
+	}
+	baseline, commandErr := compareBacktestBaseline(root, options.BaselinePath, summary.HeadlineERR, sourceDigest, window)
+	if commandErr != nil {
+		return recurrenceReport{}, commandErr
+	}
+	gate := backtestGate(config, summary.HeadlineERR)
+	report := recurrenceReport{
+		ObjectType:           "relia.recurrence_report",
+		SchemaVersion:        commandSchemaVersion,
+		SourceArtifacts:      append([]string(nil), sourceArtifacts...),
+		Window:               window,
+		Summary:              summary,
+		HeadlineERR:          summary.HeadlineERR,
+		ConfirmedRecurrences: confirmed,
+		PossibleRecurrences:  possible,
+		FlakeDiscounts:       flakes,
+		AttributionUncertain: uncertain,
+		Baseline:             baseline,
+		Gate:                 gate,
+		Citations:            citations,
+		Metadata: map[string]any{
+			"window_days":                            windowDays,
+			"source_artifact_digest":                 sourceDigest,
+			"possible_excluded_from_err":             true,
+			"flake_discount_excluded_from_numerator": true,
+			"flake_discount_retained_in_denominator": true,
+			"deterministic_window_anchor":            "latest_recorded_at_in_source_artifacts",
+			"network_required":                       false,
+			"redaction_status":                       "customer_safe",
+			"repo_relative_paths_only":               true,
+			"baseline_gate_enabled_default":          false,
+		},
+	}
+	report.ReportID = "backtest_" + shortHash(strings.Join([]string{
+		report.Window.Start,
+		report.Window.End,
+		sourceDigest,
+		strconv.Itoa(summary.AgentFailureDenominator),
+		strconv.Itoa(summary.ConfirmedRecurrenceCount),
+		strconv.Itoa(summary.PossibleRecurrenceCount),
+	}, "\x00"))
+	return report, nil
+}
+
+func isFailureOutcome(kind string) bool {
+	switch kind {
+	case "ci_failure", "revert", "review_correction":
+		return true
+	default:
+		return false
+	}
+}
+
+func reliableSignatureExtraction(value string) bool {
+	return value == "structured" || value == "log_parsed_high"
+}
+
+func recurrenceSignatureKeys(record experienceRecord) []string {
+	signatureMetadata, _ := record.Metadata["signature"].(map[string]any)
+	signatureClass := strings.TrimSpace(stringFromAny(signatureMetadata["class"]))
+	signatureKey := strings.TrimSpace(stringFromAny(signatureMetadata["key"]))
+	messageFingerprint := strings.TrimSpace(stringFromAny(signatureMetadata["message_fingerprint"]))
+	keys := []string{}
+	if signatureClass != "" && signatureKey != "" {
+		keys = append(keys, strings.Join([]string{"class_key", signatureClass, signatureKey}, "\x00"))
+	}
+	if messageFingerprint != "" {
+		keys = append(keys, strings.Join([]string{"message", messageFingerprint}, "\x00"))
+	}
+	if len(keys) == 0 {
+		keys = append(keys, strings.Join([]string{"id", record.Outcome.Signature.SignatureID}, "\x00"))
+	}
+	return keys
+}
+
+func appendRecurrencePrior(priorBySignature map[string][]backtestExperience, keys []string, current backtestExperience) {
+	for _, key := range keys {
+		priorBySignature[key] = append(priorBySignature[key], current)
+	}
+}
+
+func recurrencePriorCandidates(priorBySignature map[string][]backtestExperience, keys []string) []backtestExperience {
+	seen := map[string]bool{}
+	priors := []backtestExperience{}
+	for _, key := range keys {
+		for _, prior := range priorBySignature[key] {
+			experienceID := prior.Record.ExperienceID
+			if experienceID == "" {
+				experienceID = sourceLineRef(prior)
+			}
+			if seen[experienceID] {
+				continue
+			}
+			seen[experienceID] = true
+			priors = append(priors, prior)
+		}
+	}
+	sort.Slice(priors, func(i, j int) bool {
+		if priors[i].RecordedAt.Equal(priors[j].RecordedAt) {
+			return priors[i].Record.ExperienceID < priors[j].Record.ExperienceID
+		}
+		return priors[i].RecordedAt.Before(priors[j].RecordedAt)
+	})
+	return priors
+}
+
+func recordsShareRecurrenceSignature(left experienceRecord, right experienceRecord) bool {
+	rightKeys := map[string]bool{}
+	for _, key := range recurrenceSignatureKeys(right) {
+		rightKeys[key] = true
+	}
+	for _, key := range recurrenceSignatureKeys(left) {
+		if rightKeys[key] {
+			return true
+		}
+	}
+	return false
+}
+
+func confirmedRecurrence(prior backtestExperience, current backtestExperience) bool {
+	if prior.Record.Action.PR == current.Record.Action.PR {
+		return false
+	}
+	if prior.Record.Outcome.Signature.SignatureID == "" ||
+		!recordsShareRecurrenceSignature(prior.Record, current.Record) {
+		return false
+	}
+	if !reliableSignatureExtraction(prior.Record.Outcome.Signature.ExtractionConfidence) ||
+		!reliableSignatureExtraction(current.Record.Outcome.Signature.ExtractionConfidence) {
+		return false
+	}
+	return pathSetsOverlap(prior.Record.Context.Paths, current.Record.Context.Paths)
+}
+
+func selectRecurrencePrior(priors []backtestExperience, current backtestExperience) (backtestExperience, string, bool) {
+	for index := len(priors) - 1; index >= 0; index-- {
+		if priors[index].Record.Action.PR == current.Record.Action.PR {
+			continue
+		}
+		if confirmedRecurrence(priors[index], current) {
+			return priors[index], "confirmed", true
+		}
+	}
+	for index := len(priors) - 1; index >= 0; index-- {
+		if priors[index].Record.Action.PR != current.Record.Action.PR {
+			return priors[index], "possible", true
+		}
+	}
+	return backtestExperience{}, "", false
+}
+
+func pathSetsOverlap(left []string, right []string) bool {
+	leftSet := map[string]bool{}
+	for _, value := range left {
+		if clean, ok := cleanRepoPath(value); ok {
+			leftSet[filepath.ToSlash(clean)] = true
+		}
+	}
+	for _, value := range right {
+		if clean, ok := cleanRepoPath(value); ok && leftSet[filepath.ToSlash(clean)] {
+			return true
+		}
+	}
+	return false
+}
+
+func buildRecurrencePair(prior backtestExperience, current backtestExperience) recurrencePair {
+	return recurrencePair{
+		CurrentExperienceID: current.Record.ExperienceID,
+		PriorExperienceID:   prior.Record.ExperienceID,
+		CurrentPR:           current.Record.Action.PR,
+		PriorPR:             prior.Record.Action.PR,
+		CurrentURL:          primaryProvenanceURL(current.Record),
+		PriorURL:            primaryProvenanceURL(prior.Record),
+		SignatureID:         current.Record.Outcome.Signature.SignatureID,
+		Refs:                []string{sourceLineRef(prior), sourceLineRef(current)},
+	}
+}
+
+func autoFlakeDiscountedExperiences(records []backtestExperience) map[string]string {
+	bySignature := map[string][]backtestExperience{}
+	for _, record := range records {
+		if record.Record.Attribution.ActorKind != "agent" || !isFailureOutcome(record.Record.Outcome.Kind) {
+			continue
+		}
+		for _, key := range recurrenceSignatureKeys(record.Record) {
+			bySignature[key] = append(bySignature[key], record)
+		}
+	}
+	discounted := map[string]string{}
+	for _, group := range bySignature {
+		if len(group) < 3 || !groupHasUnrelatedNonTestDiffs(group) {
+			continue
+		}
+		reason := "Discounted as flaky because the same failure signature appears at least three times across unrelated non-test diff paths."
+		for _, record := range group {
+			if record.Record.FlakeDiscount == 0 && discounted[record.Record.ExperienceID] == "" {
+				discounted[record.Record.ExperienceID] = reason
+			}
+		}
+	}
+	return discounted
+}
+
+func groupHasUnrelatedNonTestDiffs(group []backtestExperience) bool {
+	seen := map[string]bool{}
+	for _, record := range group {
+		paths := nonTestPaths(record.Record.Context.Paths)
+		if len(paths) == 0 {
+			paths = normalizedRepoPaths(record.Record.Context.Paths)
+		}
+		for _, path := range paths {
+			if seen[path] {
+				return false
+			}
+			seen[path] = true
+		}
+	}
+	return len(seen) >= len(group)
+}
+
+func nonTestPaths(paths []string) []string {
+	var result []string
+	for _, clean := range normalizedRepoPaths(paths) {
+		base := path.Base(clean)
+		if strings.HasPrefix(clean, "tests/") || strings.Contains(clean, "/tests/") || strings.HasPrefix(base, "test_") || strings.HasSuffix(base, "_test.go") {
+			continue
+		}
+		result = append(result, clean)
+	}
+	return result
+}
+
+func normalizedRepoPaths(paths []string) []string {
+	var result []string
+	for _, value := range paths {
+		if clean, ok := cleanRepoPath(value); ok {
+			result = append(result, filepath.ToSlash(clean))
+		}
+	}
+	result = uniqueStrings(result)
+	sort.Strings(result)
+	return result
+}
+
+func isBacktestFlakeDiscounted(record backtestExperience, heuristics map[string]string) bool {
+	return record.Record.FlakeDiscount > 0 || heuristics[record.Record.ExperienceID] != ""
+}
+
+func buildBacktestFlakeDiscount(record backtestExperience, records []backtestExperience, heuristics map[string]string) backtestFlakeDiscount {
+	supportingPRs := []int{}
+	supportingRefs := []string{}
+	for _, candidate := range records {
+		if candidate.Record.ExperienceID == record.Record.ExperienceID {
+			continue
+		}
+		if !recordsShareRecurrenceSignature(candidate.Record, record.Record) {
+			continue
+		}
+		if candidate.Record.Attribution.ActorKind != "agent" || !isFailureOutcome(candidate.Record.Outcome.Kind) {
+			continue
+		}
+		supportingPRs = append(supportingPRs, candidate.Record.Action.PR)
+		supportingRefs = append(supportingRefs, sourceLineRef(candidate))
+	}
+	sort.Ints(supportingPRs)
+	supportingRefs = uniqueStrings(supportingRefs)
+	reason := heuristics[record.Record.ExperienceID]
+	flakeDiscount := record.Record.FlakeDiscount
+	if reason == "" {
+		reason = "Discounted as flaky because the experience record carries an explicit flake_discount."
+	}
+	if flakeDiscount == 0 {
+		flakeDiscount = 1
+	}
+	return backtestFlakeDiscount{
+		ExperienceID:    record.Record.ExperienceID,
+		PR:              record.Record.Action.PR,
+		SignatureID:     record.Record.Outcome.Signature.SignatureID,
+		FlakeDiscount:   roundFloat(flakeDiscount, 4),
+		SupportingPRs:   supportingPRs,
+		SupportingRefs:  supportingRefs,
+		Reason:          reason,
+		ExcludedFromERR: true,
+	}
+}
+
+func addBacktestCitation(citations map[int]backtestCitation, record backtestExperience) {
+	url := primaryProvenanceURL(record.Record)
+	if url == "" {
+		return
+	}
+	citations[record.Record.Action.PR] = backtestCitation{
+		PR:           record.Record.Action.PR,
+		URL:          url,
+		ExperienceID: record.Record.ExperienceID,
+	}
+}
+
+func primaryProvenanceURL(record experienceRecord) string {
+	for _, value := range record.Provenance.URLs {
+		if gitHubPullRequestURLMatchesExperience(value, record) {
+			return value
+		}
+	}
+	if derived := gitHubPullRequestURLForExperience(record); derived != "" {
+		return derived
+	}
+	if len(record.Provenance.URLs) > 0 {
+		return record.Provenance.URLs[0]
+	}
+	return ""
+}
+
+func sourceLineRef(record backtestExperience) string {
+	return fmt.Sprintf("%s:%d", record.SourcePath, record.SourceLine)
+}
+
+func sortRecurrencePairs(pairs []recurrencePair) {
+	sort.Slice(pairs, func(i, j int) bool {
+		if pairs[i].CurrentPR == pairs[j].CurrentPR {
+			return pairs[i].CurrentExperienceID < pairs[j].CurrentExperienceID
+		}
+		return pairs[i].CurrentPR < pairs[j].CurrentPR
+	})
+}
+
+func sortBacktestFlakes(flakes []backtestFlakeDiscount) {
+	sort.Slice(flakes, func(i, j int) bool {
+		if flakes[i].PR == flakes[j].PR {
+			return flakes[i].ExperienceID < flakes[j].ExperienceID
+		}
+		return flakes[i].PR < flakes[j].PR
+	})
+}
+
+func sortBacktestUncertain(uncertain []backtestUncertain) {
+	sort.Slice(uncertain, func(i, j int) bool {
+		if uncertain[i].PR == uncertain[j].PR {
+			return uncertain[i].ExperienceID < uncertain[j].ExperienceID
+		}
+		return uncertain[i].PR < uncertain[j].PR
+	})
+}
+
+func backtestCitations(citationMap map[int]backtestCitation) []backtestCitation {
+	citations := make([]backtestCitation, 0, len(citationMap))
+	for _, citation := range citationMap {
+		citations = append(citations, citation)
+	}
+	sort.Slice(citations, func(i, j int) bool {
+		return citations[i].PR < citations[j].PR
+	})
+	return citations
+}
+
+func roundFloat(value float64, places int) float64 {
+	if places < 0 {
+		return value
+	}
+	factor := math.Pow10(places)
+	return math.Round(value*factor) / factor
+}
+
+func compareBacktestBaseline(root string, baselinePath string, headlineERR float64, sourceDigest string, window recurrenceWindow) (baselineComparison, *CommandError) {
+	clean, ok := cleanRepoPath(baselinePath)
+	if !ok {
+		return baselineComparison{}, usageError("backtest baseline path must be repo-relative")
+	}
+	rel := filepath.ToSlash(clean)
+	content, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(rel)))
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return baselineComparison{
+				Status: "missing",
+				Path:   rel,
+				Stale:  false,
+				Reason: "No saved ERR baseline exists yet; use --save-baseline after reviewing the report to create one.",
+			}, nil
+		}
+		return baselineComparison{}, internalError("could not read ERR baseline", err)
+	}
+	var payload map[string]any
+	if err := decodeJSONUseNumber(string(content), &payload); err != nil {
+		return baselineComparison{}, artifactContractError("ERR baseline is not valid JSON", rel)
+	}
+	baselineERR, ok := numericValue(payload["headline_err"])
+	if !ok {
+		if summary, summaryOK := payload["summary"].(map[string]any); summaryOK {
+			if summaryERR, headlineOK := numericValue(summary["headline_err"]); headlineOK {
+				baselineERR = summaryERR
+				ok = true
+			}
+		}
+	}
+	if !ok || baselineERR < 0 || baselineERR > 1 {
+		return baselineComparison{}, artifactContractError("ERR baseline missing numeric headline_err", rel)
+	}
+	baselineDigest := ""
+	if metadata, ok := payload["metadata"].(map[string]any); ok {
+		baselineDigest = stringFromAny(metadata["source_artifact_digest"])
+	}
+	status := "current"
+	reason := "Saved baseline was computed from the same source artifact digest."
+	stale := false
+	if baselineDigest == "" || baselineDigest != sourceDigest {
+		status = "stale"
+		stale = true
+		reason = "Saved baseline source artifact digest differs from the current backtest inputs."
+	} else if !baselineWindowMatches(payload, window) {
+		status = "stale"
+		stale = true
+		reason = "Saved baseline window differs from the current backtest window."
+	}
+	return baselineComparison{
+		Status:      status,
+		Path:        rel,
+		HeadlineERR: roundFloat(baselineERR, 4),
+		Delta:       roundFloat(headlineERR-baselineERR, 4),
+		Stale:       stale,
+		Reason:      reason,
+	}, nil
+}
+
+func baselineWindowMatches(payload map[string]any, window recurrenceWindow) bool {
+	baselineWindow, ok := payload["window"].(map[string]any)
+	if !ok {
+		return false
+	}
+	return stringFromAny(baselineWindow["start"]) == window.Start &&
+		stringFromAny(baselineWindow["end"]) == window.End
+}
+
+func backtestGate(config yamlDocument, headlineERR float64) backtestGateResult {
+	enabled := false
+	ref := defaultConfigFile
+	if scalar, ok := config.Scalars["gate.enabled"]; ok {
+		enabled = scalar.Value == "true"
+		ref = configRef(scalar)
+	}
+	if !enabled {
+		return backtestGateResult{
+			Enabled: false,
+			Status:  "off",
+			Reason:  "Recurrence gate is available but disabled by default for advisory-only MVP behavior.",
+			Ref:     ref,
+		}
+	}
+	threshold := 1.0
+	if scalar, ok := config.Scalars["gate.max_error_recurrence_rate"]; ok {
+		if parsed, err := strconv.ParseFloat(scalar.Value, 64); err == nil && parsed >= 0 && parsed <= 1 {
+			threshold = parsed
+			ref = configRef(scalar)
+		}
+	}
+	status := "pass"
+	reason := "Headline ERR is within the configured recurrence gate."
+	if headlineERR > threshold {
+		status = "fail"
+		reason = "Headline ERR exceeds the configured recurrence gate."
+	}
+	return backtestGateResult{
+		Enabled:   true,
+		Status:    status,
+		Threshold: &threshold,
+		Reason:    reason,
+		Ref:       ref,
+	}
+}
+
+func backtestGateThresholdValue(gate backtestGateResult) float64 {
+	if gate.Threshold == nil {
+		return 0
+	}
+	return *gate.Threshold
+}
+
+func writeBacktestReports(root string, report recurrenceReport, reportDir string) (string, string, *CommandError) {
+	cleanReportDir, ok := cleanRepoPath(reportDir)
+	if !ok {
+		return "", "", usageError("backtest report directory must be repo-relative")
+	}
+	reportDirPath := filepath.Join(root, filepath.FromSlash(filepath.ToSlash(cleanReportDir)))
+	if err := os.MkdirAll(reportDirPath, 0o755); err != nil {
+		return "", "", internalError("could not create backtest report directory", err)
+	}
+	jsonRel := filepath.ToSlash(filepath.Join(filepath.ToSlash(cleanReportDir), report.ReportID+".json"))
+	htmlRel := filepath.ToSlash(filepath.Join(filepath.ToSlash(cleanReportDir), report.ReportID+".html"))
+	encoded, err := json.MarshalIndent(report, "", "  ")
+	if err != nil {
+		return "", "", internalError("could not encode recurrence report", err)
+	}
+	encoded = append(encoded, '\n')
+	jsonPath := filepath.Join(root, filepath.FromSlash(jsonRel))
+	htmlPath := filepath.Join(root, filepath.FromSlash(htmlRel))
+	if commandErr := ensureReplaceableBacktestReportPath(jsonPath, "JSON"); commandErr != nil {
+		return "", "", commandErr
+	}
+	if commandErr := ensureReplaceableBacktestReportPath(htmlPath, "HTML"); commandErr != nil {
+		return "", "", commandErr
+	}
+	jsonTempPath, commandErr := writeBacktestReportTemp(reportDirPath, jsonPath, encoded, "JSON")
+	if commandErr != nil {
+		return "", "", commandErr
+	}
+	defer func() {
+		if jsonTempPath != "" {
+			_ = os.Remove(jsonTempPath)
+		}
+	}()
+	htmlTempPath, commandErr := writeBacktestReportTemp(reportDirPath, htmlPath, []byte(renderBacktestHTML(report)), "HTML")
+	if commandErr != nil {
+		return "", "", commandErr
+	}
+	defer func() {
+		if htmlTempPath != "" {
+			_ = os.Remove(htmlTempPath)
+		}
+	}()
+	if err := os.Rename(htmlTempPath, htmlPath); err != nil {
+		return "", "", internalError("could not write HTML recurrence report", err)
+	}
+	htmlTempPath = ""
+	if err := os.Rename(jsonTempPath, jsonPath); err != nil {
+		return "", "", internalError("could not write JSON recurrence report", err)
+	}
+	jsonTempPath = ""
+	return jsonRel, htmlRel, nil
+}
+
+func ensureReplaceableBacktestReportPath(path string, format string) *CommandError {
+	info, err := os.Stat(path)
+	if err == nil {
+		if info.IsDir() {
+			return internalError("could not write "+format+" recurrence report", fmt.Errorf("%s is a directory", path))
+		}
+		return nil
+	}
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	return internalError("could not write "+format+" recurrence report", err)
+}
+
+func writeBacktestReportTemp(dir string, finalPath string, content []byte, format string) (string, *CommandError) {
+	tempFile, err := os.CreateTemp(dir, "."+filepath.Base(finalPath)+".tmp-*")
+	if err != nil {
+		return "", internalError("could not write "+format+" recurrence report", err)
+	}
+	tempPath := tempFile.Name()
+	cleanup := true
+	defer func() {
+		if cleanup {
+			_ = os.Remove(tempPath)
+		}
+	}()
+	if _, err := tempFile.Write(content); err != nil {
+		_ = tempFile.Close()
+		return "", internalError("could not write "+format+" recurrence report", err)
+	}
+	if err := tempFile.Close(); err != nil {
+		return "", internalError("could not write "+format+" recurrence report", err)
+	}
+	if err := os.Chmod(tempPath, 0o644); err != nil {
+		return "", internalError("could not write "+format+" recurrence report", err)
+	}
+	cleanup = false
+	return tempPath, nil
+}
+
+type backtestBaselineSnapshot struct {
+	Path    string
+	Content []byte
+	Exists  bool
+}
+
+func snapshotBacktestBaseline(root string, baselinePath string) (backtestBaselineSnapshot, *CommandError) {
+	clean, ok := cleanRepoPath(baselinePath)
+	if !ok {
+		return backtestBaselineSnapshot{}, usageError("backtest baseline path must be repo-relative")
+	}
+	path := filepath.Join(root, filepath.FromSlash(filepath.ToSlash(clean)))
+	content, err := os.ReadFile(path)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return backtestBaselineSnapshot{Path: path, Exists: false}, nil
+		}
+		return backtestBaselineSnapshot{}, internalError("could not snapshot ERR baseline", err)
+	}
+	return backtestBaselineSnapshot{Path: path, Content: append([]byte(nil), content...), Exists: true}, nil
+}
+
+func restoreBacktestBaseline(snapshot backtestBaselineSnapshot) *CommandError {
+	if snapshot.Path == "" {
+		return nil
+	}
+	if snapshot.Exists {
+		if err := os.MkdirAll(filepath.Dir(snapshot.Path), 0o755); err != nil {
+			return internalError("could not restore ERR baseline directory", err)
+		}
+		if err := os.WriteFile(snapshot.Path, snapshot.Content, 0o644); err != nil {
+			return internalError("could not restore ERR baseline", err)
+		}
+		return nil
+	}
+	if err := os.Remove(snapshot.Path); err != nil && !errors.Is(err, os.ErrNotExist) {
+		return internalError("could not remove rolled back ERR baseline", err)
+	}
+	return nil
+}
+
+func renderBacktestHTML(report recurrenceReport) string {
+	var builder strings.Builder
+	builder.WriteString("<!doctype html>\n<html><head><meta charset=\"utf-8\"><title>Relia Backtest ")
+	builder.WriteString(html.EscapeString(report.ReportID))
+	builder.WriteString("</title></head><body>\n")
+	builder.WriteString("<h1>Relia Backtest</h1>\n")
+	builder.WriteString(fmt.Sprintf("<p>Headline ERR: <strong>%s</strong> (%d confirmed / %d agent failures)</p>\n",
+		html.EscapeString(report.Summary.HeadlineERRPercent),
+		report.Summary.ConfirmedRecurrenceCount,
+		report.Summary.AgentFailureDenominator))
+	builder.WriteString("<h2>Confirmed Recurrences</h2>\n<ul>\n")
+	for _, pair := range report.ConfirmedRecurrences {
+		builder.WriteString("<li>")
+		builder.WriteString(html.EscapeString(fmt.Sprintf("PR #%d repeats PR #%d (%s)", pair.CurrentPR, pair.PriorPR, pair.SignatureID)))
+		if pair.CurrentURL != "" {
+			builder.WriteString(" <a href=\"")
+			builder.WriteString(html.EscapeString(pair.CurrentURL))
+			builder.WriteString("\">current</a>")
+		}
+		if pair.PriorURL != "" {
+			builder.WriteString(" <a href=\"")
+			builder.WriteString(html.EscapeString(pair.PriorURL))
+			builder.WriteString("\">prior</a>")
+		}
+		builder.WriteString("</li>\n")
+	}
+	builder.WriteString("</ul>\n<h2>Possible Recurrences</h2>\n<ul>\n")
+	for _, pair := range report.PossibleRecurrences {
+		builder.WriteString("<li>")
+		builder.WriteString(html.EscapeString(fmt.Sprintf("PR #%d possibly repeats PR #%d (%s); excluded from headline ERR", pair.CurrentPR, pair.PriorPR, pair.SignatureID)))
+		builder.WriteString("</li>\n")
+	}
+	builder.WriteString("</ul>\n<h2>Flake Discounts</h2>\n<ul>\n")
+	for _, flake := range report.FlakeDiscounts {
+		builder.WriteString("<li>")
+		builder.WriteString(html.EscapeString(fmt.Sprintf("PR #%d %s: %s", flake.PR, flake.SignatureID, flake.Reason)))
+		builder.WriteString("</li>\n")
+	}
+	builder.WriteString("</ul>\n</body></html>\n")
+	return builder.String()
+}
+
+func saveBacktestBaseline(root string, report recurrenceReport, baselinePath string) *CommandError {
+	clean, ok := cleanRepoPath(baselinePath)
+	if !ok {
+		return usageError("backtest baseline path must be repo-relative")
+	}
+	rel := filepath.ToSlash(clean)
+	payload := map[string]any{
+		"object_type":      "relia.err_baseline",
+		"schema_version":   commandSchemaVersion,
+		"baseline_id":      "baseline_" + shortHash(report.ReportID),
+		"report_id":        report.ReportID,
+		"headline_err":     report.HeadlineERR,
+		"window":           report.Window,
+		"source_artifacts": report.SourceArtifacts,
+		"metadata": map[string]any{
+			"source_artifact_digest": report.Metadata["source_artifact_digest"],
+			"created_by":             "relia backtest --save-baseline",
+		},
+	}
+	encoded, err := json.MarshalIndent(payload, "", "  ")
+	if err != nil {
+		return internalError("could not encode ERR baseline", err)
+	}
+	path := filepath.Join(root, filepath.FromSlash(rel))
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return internalError("could not create ERR baseline directory", err)
+	}
+	if err := os.WriteFile(path, append(encoded, '\n'), 0o644); err != nil {
+		return internalError("could not write ERR baseline", err)
+	}
+	return nil
+}
+
+func savedBacktestBaselineComparison(baselinePath string, headlineERR float64) (baselineComparison, *CommandError) {
+	clean, ok := cleanRepoPath(baselinePath)
+	if !ok {
+		return baselineComparison{}, usageError("backtest baseline path must be repo-relative")
+	}
+	return baselineComparison{
+		Status:      "saved",
+		Path:        filepath.ToSlash(clean),
+		HeadlineERR: roundFloat(headlineERR, 4),
+		Delta:       0,
+		Stale:       false,
+		Reason:      "Saved current headline ERR as the comparison baseline.",
+	}, nil
 }
 
 func assessResult(args []string, start time.Time) CommandResult {
@@ -1760,8 +2991,8 @@ func normalizeExperienceProvenance(event map[string]any, ref string) (experience
 		return experienceProvenance{}, provenanceIntegrityError("experience record must include at least one provenance URL", ref)
 	}
 	for _, value := range urls {
-		if !strings.HasPrefix(value, "https://github.com/") {
-			return experienceProvenance{}, provenanceIntegrityError("experience provenance URL must be an https://github.com/ URL", ref)
+		if !validGitHubProvenanceURLShape(value) {
+			return experienceProvenance{}, provenanceIntegrityError("experience provenance URL must be a canonical https://github.com/ URL", ref)
 		}
 	}
 	return experienceProvenance{URLs: urls}, nil
@@ -2062,6 +3293,37 @@ func validGitHubProvenanceURLShape(value string) bool {
 		strings.Trim(parsed.Path, "/") != ""
 }
 
+func gitHubProvenanceURLRepoMatchesExperience(value string, record experienceRecord) bool {
+	parsed, err := url.Parse(strings.TrimSpace(value))
+	if err != nil {
+		return false
+	}
+	parts := strings.Split(strings.Trim(parsed.Path, "/"), "/")
+	return len(parts) >= 2 &&
+		strings.EqualFold(parts[0], record.Repo.Owner) &&
+		strings.EqualFold(parts[1], record.Repo.Name)
+}
+
+func gitHubPullRequestURLPathNumber(value string) (int, bool) {
+	parsed, err := url.Parse(strings.TrimSpace(value))
+	if err != nil {
+		return 0, false
+	}
+	if parsed.Scheme != "https" ||
+		!strings.EqualFold(parsed.Host, "github.com") ||
+		parsed.User != nil ||
+		parsed.RawQuery != "" ||
+		parsed.Fragment != "" {
+		return 0, false
+	}
+	parts := strings.Split(strings.Trim(parsed.Path, "/"), "/")
+	if len(parts) < 4 || parts[2] != "pull" {
+		return 0, false
+	}
+	number, err := strconv.Atoi(parts[3])
+	return number, err == nil && number > 0
+}
+
 func gitHubPullRequestURLNumber(value string) (int, bool) {
 	parsed, err := url.Parse(strings.TrimSpace(value))
 	if err != nil {
@@ -2083,6 +3345,38 @@ func gitHubPullRequestURLNumber(value string) (int, bool) {
 	}
 	number, err := strconv.Atoi(parts[3])
 	return number, err == nil && number > 0
+}
+
+func gitHubPullRequestURLMatchesExperience(value string, record experienceRecord) bool {
+	parsed, err := url.Parse(strings.TrimSpace(value))
+	if err != nil {
+		return false
+	}
+	if parsed.Scheme != "https" ||
+		!strings.EqualFold(parsed.Host, "github.com") ||
+		parsed.User != nil ||
+		parsed.RawQuery != "" ||
+		parsed.Fragment != "" {
+		return false
+	}
+	parts := strings.Split(strings.Trim(parsed.Path, "/"), "/")
+	if len(parts) != 4 || parts[2] != "pull" {
+		return false
+	}
+	number, err := strconv.Atoi(parts[3])
+	return err == nil &&
+		number == record.Action.PR &&
+		strings.EqualFold(parts[0], record.Repo.Owner) &&
+		strings.EqualFold(parts[1], record.Repo.Name)
+}
+
+func gitHubPullRequestURLForExperience(record experienceRecord) string {
+	owner := strings.Trim(strings.TrimSpace(record.Repo.Owner), "/")
+	name := strings.Trim(strings.TrimSpace(record.Repo.Name), "/")
+	if owner == "" || name == "" || record.Action.PR < 1 {
+		return ""
+	}
+	return fmt.Sprintf("https://github.com/%s/%s/pull/%d", owner, name, record.Action.PR)
 }
 
 func unsafeGitHubURLPathEntropyToken(value string) string {
@@ -2835,6 +4129,12 @@ func configError(message string) *CommandError {
 	}
 }
 
+func configErrorAt(message string, ref string) *CommandError {
+	commandErr := configError(message)
+	commandErr.Ref = ref
+	return commandErr
+}
+
 func validationError(message string, missing []string) *CommandError {
 	return &CommandError{
 		Type:        "operating_pack_validation_failed",
@@ -3028,7 +4328,6 @@ func validateReliaConfig(root string) ([]Finding, *CommandError) {
 		"redaction.standard_token_shapes": "true",
 		"models.local_manifest":           ".relia/models/manifest.json",
 		"serve.advisory_only":             "true",
-		"gate.enabled":                    "false",
 	}
 	for key, want := range requiredExact {
 		scalar, ok := document.Scalars[key]
@@ -3045,6 +4344,38 @@ func validateReliaConfig(root string) ([]Finding, *CommandError) {
 				return nil, configError(fmt.Sprintf("%s must be %s", key, want))
 			}
 		}
+	}
+
+	var warnings []Finding
+	gateEnabled, ok := document.Scalars["gate.enabled"]
+	if !ok {
+		return nil, configError("relia.yaml missing required key gate.enabled")
+	}
+	switch gateEnabled.Value {
+	case "false":
+		if gateLimit, ok := document.Scalars["gate.max_error_recurrence_rate"]; ok {
+			warnings = append(warnings, Finding{
+				Type:    "unenforced_gate_setting",
+				Message: "gate.max_error_recurrence_rate is configured while gate.enabled is false",
+				Ref:     configRef(gateLimit),
+			})
+		}
+	case "true":
+		gateLimit, ok := document.Scalars["gate.max_error_recurrence_rate"]
+		if !ok {
+			return nil, configErrorAt("gate.max_error_recurrence_rate is required when gate.enabled is true", configRef(gateEnabled))
+		}
+		parsed, err := strconv.ParseFloat(gateLimit.Value, 64)
+		if err != nil || math.IsNaN(parsed) || math.IsInf(parsed, 0) || parsed < 0 || parsed > 1 {
+			return nil, configErrorAt("gate.max_error_recurrence_rate must be a number between 0 and 1 when gate.enabled is true", configRef(gateLimit))
+		}
+		warnings = append(warnings, Finding{
+			Type:    "recurrence_gate_enabled",
+			Message: "gate.enabled is true; relia backtest exits 5 when headline ERR exceeds the configured threshold",
+			Ref:     configRef(gateEnabled),
+		})
+	default:
+		return nil, configErrorAt("gate.enabled must be true or false", configRef(gateEnabled))
 	}
 
 	embeddings, ok := document.Scalars["distill.embeddings"]
@@ -3068,7 +4399,6 @@ func validateReliaConfig(root string) ([]Finding, *CommandError) {
 	if !ok {
 		return nil, configError("relia.yaml missing required key distill.provider")
 	}
-	var warnings []Finding
 	switch provider.Value {
 	case "none":
 	case "openai_compatible", "anthropic":
@@ -3096,13 +4426,10 @@ func validateReliaConfig(root string) ([]Finding, *CommandError) {
 	default:
 		return nil, configError("distill.review_required must be true or false")
 	}
-
-	if gateLimit, ok := document.Scalars["gate.max_error_recurrence_rate"]; ok {
-		warnings = append(warnings, Finding{
-			Type:    "unenforced_gate_setting",
-			Message: "gate.max_error_recurrence_rate is configured while gate.enabled is false",
-			Ref:     configRef(gateLimit),
-		})
+	if len(yamlListValuesWithMapFields(document, "attribution.agent_authors", "login")) == 0 &&
+		len(yamlListValues(document, "attribution.coauthor_trailers")) == 0 &&
+		len(yamlListValues(document, "attribution.pr_labels")) == 0 {
+		return nil, artifactContractError("attribution config has zero agent matchers; configure at least one agent_authors login, coauthor_trailer, or pr_label", yamlPathRef(document, "attribution"))
 	}
 	return warnings, nil
 }
@@ -3684,6 +5011,31 @@ func configRefWithPath(path string, scalar yamlScalar) string {
 		return path
 	}
 	return fmt.Sprintf("%s:%d", path, scalar.Line)
+}
+
+func yamlPathRef(document yamlDocument, path string) string {
+	if scalar, ok := document.Scalars[path]; ok {
+		return configRef(scalar)
+	}
+	if scalar, ok := document.Containers[path]; ok {
+		return configRef(scalar)
+	}
+	if scalars := document.Lists[path]; len(scalars) > 0 {
+		return configRef(scalars[0])
+	}
+	prefix := path + "."
+	bestLine := 0
+	for _, collection := range []map[string]yamlScalar{document.Scalars, document.Containers} {
+		for key, scalar := range collection {
+			if strings.HasPrefix(key, prefix) && (bestLine == 0 || scalar.Line < bestLine) {
+				bestLine = scalar.Line
+			}
+		}
+	}
+	if bestLine > 0 {
+		return configRef(yamlScalar{Line: bestLine})
+	}
+	return defaultConfigFile
 }
 
 func defaultConfigYAML() string {

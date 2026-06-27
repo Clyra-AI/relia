@@ -1,0 +1,223 @@
+{
+  "acceptance_results": [
+    {
+      "acceptance_item_id": "FR8-CONSERVATIVE-RECURRENCE-PAIRING-001",
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go::TestBacktestPairsCurrentWithAnyEarlierConfirmedRecurrence",
+        ".factory/artifacts/task-runs/T5/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "FR21-FORWARD-ERR-TRACKING-001",
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go::TestBacktestExplicitEnabledGateEvaluatesThreshold"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "NFR3-DETERMINISTIC-BACKTEST-001",
+      "evidence_refs": [
+        "cmd/relia/main_test.go::TestBacktestPairsCurrentWithAnyEarlierConfirmedRecurrence",
+        "cmd/relia/main_test.go::TestBacktestRepeatedRunsUseStableReportIDAndArtifacts"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "NFR9-DEBUGGABLE-ERRORS-001",
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go::TestBacktestExplicitEnabledGateEvaluatesThreshold"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-007",
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-008",
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-009",
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go::TestBacktestExplicitEnabledGateEvaluatesThreshold"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-020",
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-002",
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-003",
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-005",
+      "evidence_refs": [
+        "cmd/relia/main_test.go::TestBacktestRepeatedRunsUseStableReportIDAndArtifacts"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-006",
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go::TestBacktestPairsCurrentWithAnyEarlierConfirmedRecurrence"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-007",
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go::TestBacktestPairsCurrentWithAnyEarlierConfirmedRecurrence"
+      ],
+      "status": "implemented"
+    }
+  ],
+  "artifact_type": "validation_report",
+  "baseline_evidence": [
+    {
+      "command": "make lint-fast",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "make test-fast",
+      "exit_code": 0,
+      "status": "pass"
+    }
+  ],
+  "blockers": [],
+  "changed_paths": [
+    ".factory/artifacts/task-runs/T5/proof-of-behavior-scorecard.json",
+    ".factory/artifacts/task-runs/T5/validation-report.json",
+    ".factory/artifacts/task-runs/T5/work-proof-marker.json",
+    "README.md",
+    "cmd/relia/main.go",
+    "cmd/relia/main_test.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/dev/dev_guides.md",
+    "schemas/recurrence-report.schema.json"
+  ],
+  "changelog_result": {
+    "notes": "No standalone changelog file exists in the task path set; this repair did not add a new public command surface beyond the already documented T5 gate behavior.",
+    "status": "pass"
+  },
+  "commands_run": [
+    "make lint-fast",
+    "make test-fast",
+    "make test-fast",
+    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
+    "make test-fast",
+    "make prepush-full",
+    "python3 -m json.tool .factory/artifacts/task-runs/T5/work-proof-marker.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T5/validation-report.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T5/proof-of-behavior-scorecard.json"
+  ],
+  "docs_sync_result": {
+    "notes": "Existing README, dev guide, and PRD text already state that the recurrence gate is available but off by default; no doc text changed in this repair.",
+    "status": "pass"
+  },
+  "final_validation_evidence": [
+    {
+      "command": "make prepush-full",
+      "coverage": "80.0% statements; minimum 75.0%",
+      "exit_code": 0,
+      "status": "pass"
+    }
+  ],
+  "generated_at": "2026-06-27T12:46:42Z",
+  "green_evidence": [
+    {
+      "command": "make test-fast",
+      "exit_code": 0,
+      "status": "pass"
+    }
+  ],
+  "ignored_validation_outputs": {
+    "notes": "Generated by the required make prepush-full coverage lane and ignored by git; not included in worker-owned changed_paths.",
+    "paths": [
+      ".factory/tmp/coverage.out"
+    ],
+    "status": "not_in_worker_diff"
+  },
+  "lifecycle_evidence_note": {
+    "refs": [
+      "scope_closure_report",
+      "pr_lifecycle_report",
+      "factoryd_run_once_report"
+    ],
+    "status": "not_worker_owned"
+  },
+  "path_policy_result": {
+    "changed_paths": [
+      ".factory/artifacts/task-runs/T5/proof-of-behavior-scorecard.json",
+      ".factory/artifacts/task-runs/T5/validation-report.json",
+      ".factory/artifacts/task-runs/T5/work-proof-marker.json",
+      "README.md",
+      "cmd/relia/main.go",
+      "cmd/relia/main_test.go",
+      "docs/architecture/architecture_guides.md",
+      "docs/dev/dev_guides.md",
+      "schemas/recurrence-report.schema.json"
+    ],
+    "forbidden_paths_changed": [],
+    "status": "pass"
+  },
+  "plan_drift_result": {
+    "notes": "Repair stayed within the T5 recurrence pairing and recurrence gate behavior surface identified by Codex review.",
+    "status": "pass"
+  },
+  "red_evidence": [
+    {
+      "command": "make test-fast",
+      "exit_code": 2,
+      "failing_tests": [
+        "TestBacktestPairsCurrentWithAnyEarlierConfirmedRecurrence",
+        "TestBacktestExplicitEnabledGateEvaluatesThreshold"
+      ],
+      "note": "Regression tests failed before implementation: recurrence pairing reported confirmed=0 possible=2, and enabled gate config exited 2 before backtest gate evaluation.",
+      "status": "expected_fail"
+    }
+  ],
+  "repair_task_id": "20260627T121729.072098000Z-relia-T5-repair",
+  "residual_risks": [],
+  "schema_version": "1.0",
+  "status": "pass",
+  "task_id": "T5",
+  "versioning_result": {
+    "notes": "No schema, migration, or version pin change was required for this repair.",
+    "status": "pass"
+  }
+}

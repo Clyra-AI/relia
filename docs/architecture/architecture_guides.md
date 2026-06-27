@@ -87,6 +87,22 @@ the bounded `assess` command slice, and the corresponding
 `TestDemoAssessmentFixturesDriveAssessCommand` hook, which would remove
 acceptance coverage for assessment behavior.
 
+T5 adds the local `relia backtest` command surface and the recurrence report
+contract in `schemas/recurrence-report.schema.json`. The state owner is
+`cmd/relia` plus local generated artifacts under `.relia/experiences`,
+`.relia/reports`, and `.relia/baselines`. Feedback sources are unit tests,
+schema contract validation, `make test-contracts`, `make test-coverage`, and
+Factory task-run evidence. The command is offline and deterministic: it uses
+the latest local experience timestamp as the window anchor, computes confirmed
+and possible recurrence pairs, excludes possible pairs and discounted flakes
+from headline ERR, compares any saved baseline by source artifact digest, and
+keeps the recurrence gate disabled by default. The blast radius is limited to
+local command output, generated report files, baseline comparison, attribution
+config validation, and the recurrence-report schema. Rollback is removal of the
+`backtest` command implementation, T5 tests, docs, and schema expansion; local
+`.relia/reports` and `.relia/baselines` files can be deleted because experience
+shards remain the source of truth.
+
 ## Systems Thinking Map
 
 - State lives in repo-local config, generated artifacts, source files, and Factory evidence.
