@@ -957,6 +957,17 @@ func validateActiveAssessmentRuleIdentity(document yamlDocument, rel string) *Co
 	if reviewLabel.Value != "accepted" {
 		return artifactContractError("active memory rule review.label must be accepted", configRefWithPath(rel, reviewLabel))
 	}
+	if len(document.Lists["evidence.experiences"]) == 0 {
+		return artifactContractError("memory rule must cite at least one experience", rel)
+	}
+	evidenceCount, ok := document.Scalars["evidence.count"]
+	if !ok {
+		return artifactContractError("memory rule missing required key evidence.count", rel)
+	}
+	count, err := strconv.Atoi(evidenceCount.Value)
+	if err != nil || count < 1 {
+		return artifactContractError("memory rule evidence.count must be at least 1", configRefWithPath(rel, evidenceCount))
+	}
 	return nil
 }
 
@@ -1125,8 +1136,9 @@ func normalizeAssessmentScopePath(root string, raw string) (string, bool, bool) 
 	}
 	scopePath := filepath.ToSlash(clean)
 	if !directoryScope && !hasGlobMagic(scopePath) {
-		if info, err := os.Stat(filepath.Join(root, filepath.FromSlash(scopePath))); err == nil && info.IsDir() {
-			directoryScope = true
+		info, err := os.Stat(filepath.Join(root, filepath.FromSlash(scopePath)))
+		if err == nil {
+			directoryScope = info.IsDir()
 		} else if historicalDirectoryScope(root, scopePath) {
 			directoryScope = true
 		}

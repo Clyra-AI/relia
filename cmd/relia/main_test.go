@@ -1993,6 +1993,99 @@ metadata: {}
 	}
 }
 
+func TestDemoAssessRejectsActiveRuleWithoutEvidenceExperiences(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "billing-time.yaml"), `object_type: relia.memory_rule
+schema_version: "1.0"
+id: billing-time-fixture
+kind: avoid
+status: active
+statement: Use the billing clock fixture instead of direct UTC calls.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.86
+evidence:
+  count: 1
+  contradictions: 0
+  experiences: []
+provenance:
+  - pr: 142
+    outcome: ci_failure
+    url: https://github.com/acme/billing-service/pull/142
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`)
+	writeFileForTest(t, filepath.Join(tempDir, "change.diff"), `diff --git a/packages/billing/invoice.py b/packages/billing/invoice.py
+--- a/packages/billing/invoice.py
++++ b/packages/billing/invoice.py
+@@ -1,2 +1,3 @@
+ def rollover_day():
+-    return "2026-01-01"
++    return datetime.utcnow().strftime("%Y-%m-%d")
+`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "assess", "--input", "change.diff"}, false)
+
+	if code != ExitValidation {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if !strings.Contains(result.Errors[0].Message, "at least one experience") {
+		t.Fatalf("error message = %q", result.Errors[0].Message)
+	}
+}
+
+func TestDemoAssessRejectsActiveRuleWithZeroEvidenceCount(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "billing-time.yaml"), `object_type: relia.memory_rule
+schema_version: "1.0"
+id: billing-time-fixture
+kind: avoid
+status: active
+statement: Use the billing clock fixture instead of direct UTC calls.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.86
+evidence:
+  count: 0
+  contradictions: 0
+  experiences:
+    - exp_0142
+provenance:
+  - pr: 142
+    outcome: ci_failure
+    url: https://github.com/acme/billing-service/pull/142
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`)
+	writeFileForTest(t, filepath.Join(tempDir, "change.diff"), `diff --git a/packages/billing/invoice.py b/packages/billing/invoice.py
+--- a/packages/billing/invoice.py
++++ b/packages/billing/invoice.py
+@@ -1,2 +1,3 @@
+ def rollover_day():
+-    return "2026-01-01"
++    return datetime.utcnow().strftime("%Y-%m-%d")
+`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "assess", "--input", "change.diff"}, false)
+
+	if code != ExitValidation {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if !strings.Contains(result.Errors[0].Message, "evidence.count must be at least 1") {
+		t.Fatalf("error message = %q", result.Errors[0].Message)
+	}
+}
+
 func TestDemoAssessIgnoresHunkBodyDiffMarkersAsPaths(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
@@ -2236,6 +2329,35 @@ rename to a/bar.py
 	}
 	if fmt.Sprint(paths) != fmt.Sprint([]string{"a/bar.py", "a/foo.py"}) {
 		t.Fatalf("paths = %#v", paths)
+	}
+}
+
+func TestNormalizeAssessmentScopePathDoesNotScanHistoryForExistingFile(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	writeFileForTest(t, filepath.Join(tempDir, "packages", "billing", "invoice.py"), "def rollover_day(): pass\n")
+	binDir := filepath.Join(tempDir, "bin")
+	marker := filepath.Join(tempDir, "git-called")
+	writeFileForTest(t, filepath.Join(binDir, "git"), "#!/bin/sh\necho called > "+marker+"\nexit 0\n")
+	if err := os.Chmod(filepath.Join(binDir, "git"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", binDir+string(os.PathListSeparator)+os.Getenv("PATH"))
+
+	scopePath, directoryScope, ok := normalizeAssessmentScopePath(tempDir, "packages/billing/invoice.py")
+
+	if !ok {
+		t.Fatalf("scope path was rejected")
+	}
+	if scopePath != "packages/billing/invoice.py" {
+		t.Fatalf("scope path = %q", scopePath)
+	}
+	if directoryScope {
+		t.Fatalf("regular file scope was treated as directory scope")
+	}
+	if _, err := os.Stat(marker); err == nil {
+		t.Fatalf("historical git scan ran for an existing regular file")
+	} else if !os.IsNotExist(err) {
+		t.Fatal(err)
 	}
 }
 
