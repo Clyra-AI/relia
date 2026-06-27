@@ -699,10 +699,10 @@ func parseUnifiedDiffTouchedPaths(content []byte, ref string) ([]string, *Comman
 		switch {
 		case strings.HasPrefix(line, "diff --git "):
 			inFileHeader = true
-			headerPaths := diffGitHeaderPaths(line)
-			gitFileHeader = len(headerPaths) > 0
+			headerPaths, stripGitHeaderPrefix := diffGitHeaderPaths(line)
+			gitFileHeader = stripGitHeaderPrefix
 			for _, path := range headerPaths {
-				addDiffPath(touched, path, true)
+				addDiffPath(touched, path, stripGitHeaderPrefix)
 			}
 		case inFileHeader && strings.HasPrefix(line, "--- "):
 			if !gitFileHeader {
@@ -803,16 +803,19 @@ func consumeUnifiedHunkLine(line string, oldRemaining int, newRemaining int) (in
 	return oldRemaining, newRemaining
 }
 
-func diffGitHeaderPaths(line string) []string {
+func diffGitHeaderPaths(line string) ([]string, bool) {
 	rest := strings.TrimSpace(strings.TrimPrefix(line, "diff --git "))
 	if strings.HasPrefix(rest, "a/") {
 		if index := strings.Index(rest, " b/"); index > 0 && strings.LastIndex(rest, " b/") == index {
-			return []string{rest[:index], rest[index+1:]}
+			return []string{rest[:index], rest[index+1:]}, true
 		}
-		return nil
+		if paths := identicalNoPrefixDiffHeaderPaths(rest); len(paths) > 0 {
+			return paths, false
+		}
+		return nil, false
 	}
 	if !strings.HasPrefix(rest, "\"") {
-		return identicalNoPrefixDiffHeaderPaths(rest)
+		return identicalNoPrefixDiffHeaderPaths(rest), false
 	}
 	var paths []string
 	for len(rest) > 0 && len(paths) < 2 {
@@ -824,7 +827,10 @@ func diffGitHeaderPaths(line string) []string {
 		}
 		paths = append(paths, path)
 	}
-	return paths
+	if len(paths) == 2 && quotedOrRawPathHasPrefix(paths[0], "a/") && quotedOrRawPathHasPrefix(paths[1], "b/") {
+		return paths, true
+	}
+	return paths, false
 }
 
 func identicalNoPrefixDiffHeaderPaths(rest string) []string {
@@ -837,6 +843,16 @@ func identicalNoPrefixDiffHeaderPaths(rest string) []string {
 		}
 	}
 	return nil
+}
+
+func quotedOrRawPathHasPrefix(path string, prefix string) bool {
+	path = strings.TrimSpace(path)
+	if strings.HasPrefix(path, "\"") {
+		if unquoted, err := strconv.Unquote(path); err == nil {
+			path = unquoted
+		}
+	}
+	return strings.HasPrefix(path, prefix)
 }
 
 func nextDiffHeaderPath(input string) (string, string, bool) {
@@ -999,6 +1015,14 @@ func validateActiveAssessmentRuleIdentity(document yamlDocument, rel string) *Co
 		return artifactContractError("memory rule evidence.count must be at least 1", configRefWithPath(rel, evidenceCount))
 	}
 	for _, provenance := range document.ListMaps["provenance"] {
+		pr, ok := provenance["pr"]
+		if !ok {
+			return artifactContractError("memory rule provenance entry missing pr", rel)
+		}
+		prNumber, err := strconv.Atoi(pr.Value)
+		if err != nil || prNumber < 1 {
+			return artifactContractError("memory rule provenance pr must be at least 1", configRefWithPath(rel, pr))
+		}
 		outcome, ok := provenance["outcome"]
 		if !ok {
 			return artifactContractError("memory rule provenance entry missing outcome", rel)
