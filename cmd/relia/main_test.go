@@ -1997,6 +1997,52 @@ metadata: {}
 	}
 }
 
+func TestDemoAssessRejectsActiveRuleWithoutStatement(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "billing-time.yaml"), `object_type: relia.memory_rule
+schema_version: "1.0"
+id: billing-time-fixture
+kind: avoid
+status: active
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.86
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_0142
+provenance:
+  - pr: 142
+    outcome: ci_failure
+    url: https://github.com/acme/billing-service/pull/142
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`)
+	writeFileForTest(t, filepath.Join(tempDir, "change.diff"), `diff --git a/packages/billing/invoice.py b/packages/billing/invoice.py
+--- a/packages/billing/invoice.py
++++ b/packages/billing/invoice.py
+@@ -1,2 +1,3 @@
+ def rollover_day():
+-    return "2026-01-01"
++    return datetime.utcnow().strftime("%Y-%m-%d")
+`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "assess", "--input", "change.diff"}, false)
+
+	if code != ExitValidation {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if !strings.Contains(result.Errors[0].Message, "missing required key statement") {
+		t.Fatalf("error message = %q", result.Errors[0].Message)
+	}
+}
+
 func TestDemoAssessRejectsActiveNonMemoryRuleArtifact(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
@@ -2484,6 +2530,20 @@ rename to b/foo.py
 		t.Fatalf("parse diff: %v", commandErr)
 	}
 	if fmt.Sprint(paths) != fmt.Sprint([]string{"a/foo.py", "b/foo.py"}) {
+		t.Fatalf("paths = %#v", paths)
+	}
+}
+
+func TestParseUnifiedDiffTouchedPathsPreservesRootSourceWhenRenameTargetStartsWithAPrefix(t *testing.T) {
+	paths, commandErr := parseUnifiedDiffTouchedPaths([]byte(`diff --git a/foo.py b/a/foo.py
+similarity index 100%
+rename from foo.py
+rename to a/foo.py
+`), "rename-root-to-a-prefix.diff")
+	if commandErr != nil {
+		t.Fatalf("parse diff: %v", commandErr)
+	}
+	if fmt.Sprint(paths) != fmt.Sprint([]string{"a/foo.py", "foo.py"}) {
 		t.Fatalf("paths = %#v", paths)
 	}
 }

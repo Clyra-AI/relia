@@ -688,6 +688,7 @@ func parseUnifiedDiffTouchedPaths(content []byte, ref string) ([]string, *Comman
 	inFileHeader := false
 	gitFileHeader := false
 	currentHeaderAdded := map[string]bool{}
+	currentMetadataPaths := []string{}
 	hunkOldRemaining := 0
 	hunkNewRemaining := 0
 	lines := strings.Split(string(content), "\n")
@@ -699,8 +700,10 @@ func parseUnifiedDiffTouchedPaths(content []byte, ref string) ([]string, *Comman
 		}
 		switch {
 		case strings.HasPrefix(line, "diff --git "):
+			reconcileSyntheticHeaderPaths(touched, currentHeaderAdded, currentMetadataPaths)
 			inFileHeader = true
 			currentHeaderAdded = map[string]bool{}
+			currentMetadataPaths = nil
 			headerPaths, stripGitHeaderPrefix := diffGitHeaderPaths(line)
 			gitFileHeader = stripGitHeaderPrefix
 			for _, path := range headerPaths {
@@ -724,19 +727,22 @@ func parseUnifiedDiffTouchedPaths(content []byte, ref string) ([]string, *Comman
 		case inFileHeader && strings.HasPrefix(line, "+++ "):
 			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "+++ ")), gitFileHeader)
 		case inFileHeader && strings.HasPrefix(line, "rename from "):
-			addDiffMetadataPath(touched, currentHeaderAdded, strings.TrimSpace(strings.TrimPrefix(line, "rename from ")))
+			currentMetadataPaths = append(currentMetadataPaths, addDiffMetadataPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "rename from "))))
 		case inFileHeader && strings.HasPrefix(line, "rename to "):
-			addDiffMetadataPath(touched, currentHeaderAdded, strings.TrimSpace(strings.TrimPrefix(line, "rename to ")))
+			currentMetadataPaths = append(currentMetadataPaths, addDiffMetadataPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "rename to "))))
 		case inFileHeader && strings.HasPrefix(line, "copy from "):
-			addDiffMetadataPath(touched, currentHeaderAdded, strings.TrimSpace(strings.TrimPrefix(line, "copy from ")))
+			currentMetadataPaths = append(currentMetadataPaths, addDiffMetadataPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "copy from "))))
 		case inFileHeader && strings.HasPrefix(line, "copy to "):
-			addDiffMetadataPath(touched, currentHeaderAdded, strings.TrimSpace(strings.TrimPrefix(line, "copy to ")))
+			currentMetadataPaths = append(currentMetadataPaths, addDiffMetadataPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "copy to "))))
 		case strings.HasPrefix(line, "@@"):
+			reconcileSyntheticHeaderPaths(touched, currentHeaderAdded, currentMetadataPaths)
 			inFileHeader = false
 			gitFileHeader = false
+			currentMetadataPaths = nil
 			hunkOldRemaining, hunkNewRemaining = parseUnifiedHunkCounts(line)
 		}
 	}
+	reconcileSyntheticHeaderPaths(touched, currentHeaderAdded, currentMetadataPaths)
 	paths := make([]string, 0, len(touched))
 	for touchedPath := range touched {
 		paths = append(paths, touchedPath)
@@ -958,18 +964,34 @@ func normalizedDiffPath(raw string, stripGitPrefix bool) (string, bool) {
 	return "", false
 }
 
-func addDiffMetadataPath(touched map[string]bool, currentHeaderAdded map[string]bool, raw string) {
+func addDiffMetadataPath(touched map[string]bool, raw string) string {
 	addDiffPath(touched, raw, false)
-	raw = strings.TrimSpace(raw)
-	if strings.HasPrefix(raw, "a/") || strings.HasPrefix(raw, "b/") {
-		removeDiffPathIfHeaderAdded(touched, currentHeaderAdded, raw[2:])
+	return raw
+}
+
+func reconcileSyntheticHeaderPaths(touched map[string]bool, currentHeaderAdded map[string]bool, metadataPaths []string) {
+	for leftIndex, left := range metadataPaths {
+		for _, right := range metadataPaths[leftIndex+1:] {
+			if stripped, ok := matchingSyntheticMetadataPath(left, right); ok && currentHeaderAdded[stripped] {
+				delete(touched, stripped)
+			}
+		}
 	}
 }
 
-func removeDiffPathIfHeaderAdded(touched map[string]bool, currentHeaderAdded map[string]bool, raw string) {
-	if cleanPath, ok := normalizedDiffPath(raw, false); ok && currentHeaderAdded[cleanPath] {
-		delete(touched, cleanPath)
+func matchingSyntheticMetadataPath(left string, right string) (string, bool) {
+	leftPath, leftOK := normalizedDiffPath(left, false)
+	rightPath, rightOK := normalizedDiffPath(right, false)
+	if !leftOK || !rightOK {
+		return "", false
 	}
+	if strings.HasPrefix(leftPath, "a/") && strings.HasPrefix(rightPath, "b/") && strings.TrimPrefix(leftPath, "a/") == strings.TrimPrefix(rightPath, "b/") {
+		return strings.TrimPrefix(leftPath, "a/"), true
+	}
+	if strings.HasPrefix(leftPath, "b/") && strings.HasPrefix(rightPath, "a/") && strings.TrimPrefix(leftPath, "b/") == strings.TrimPrefix(rightPath, "a/") {
+		return strings.TrimPrefix(leftPath, "b/"), true
+	}
+	return "", false
 }
 
 func loadAssessmentRules(root string) ([]assessmentRule, *CommandError) {
@@ -1035,6 +1057,12 @@ func readAssessmentRule(root string, rulePath string) (assessmentRule, bool, *Co
 }
 
 func validateActiveAssessmentRuleIdentity(root string, document yamlDocument, rel string) *CommandError {
+	required := []string{"object_type", "schema_version", "id", "kind", "status", "statement", "scope", "confidence", "evidence", "provenance", "review", "metadata"}
+	for _, key := range required {
+		if !hasYAMLPath(document, key) {
+			return artifactContractError("memory rule missing required key "+key, rel)
+		}
+	}
 	if document.Scalars["object_type"].Value != "relia.memory_rule" {
 		return artifactContractError("memory rule object_type must be relia.memory_rule", configRefWithPath(rel, document.Scalars["object_type"]))
 	}
