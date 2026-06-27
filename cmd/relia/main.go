@@ -1099,14 +1099,15 @@ func buildRiskAssessment(root string, inputRef string, content []byte, touchedPa
 		if strings.TrimSpace(rule.ID) == "" {
 			return riskAssessment{}, provenanceIntegrityError("matched active memory rule id must be non-empty for assessment", rule.Path)
 		}
-		servedCitations := servedAssessmentRuleCitationURLs(rule)
+		servedCitationRefs := servedAssessmentRuleCitations(rule)
+		servedCitations := assessmentRuleCitationURLs(servedCitationRefs)
 		if len(servedCitations) == 0 {
 			return riskAssessment{}, provenanceIntegrityError("matched active memory rule must include citation URLs for assessment", rule.Path)
 		}
 		if math.IsNaN(rule.Confidence) || math.IsInf(rule.Confidence, 0) || rule.Confidence < 0 || rule.Confidence > 1 {
 			return riskAssessment{}, provenanceIntegrityError("matched active memory rule confidence must be between 0 and 1 for assessment", rule.Path)
 		}
-		for _, citation := range rule.Citations {
+		for _, citation := range servedCitationRefs {
 			prNumber, ok := gitHubPullRequestURLNumber(citation.URL)
 			if !ok {
 				return riskAssessment{}, provenanceIntegrityError("matched active memory rule citation URL must be an https://github.com/<owner>/<repo>/pull/<number> URL", rule.Path)
@@ -1162,11 +1163,23 @@ func buildRiskAssessment(root string, inputRef string, content []byte, touchedPa
 }
 
 func servedAssessmentRuleCitationURLs(rule assessmentRule) []string {
-	var citations []string
+	return assessmentRuleCitationURLs(servedAssessmentRuleCitations(rule))
+}
+
+func servedAssessmentRuleCitations(rule assessmentRule) []assessmentRuleCitation {
+	var refs []assessmentRuleCitation
 	for _, citation := range rule.Citations {
 		if rule.Kind == "playbook" && citation.Outcome != "fix_held" && citation.Outcome != "merged_clean" {
 			continue
 		}
+		refs = append(refs, citation)
+	}
+	return uniqueAssessmentRuleCitations(refs)
+}
+
+func assessmentRuleCitationURLs(refs []assessmentRuleCitation) []string {
+	var citations []string
+	for _, citation := range refs {
 		citations = append(citations, citation.URL)
 	}
 	return uniqueStrings(citations)

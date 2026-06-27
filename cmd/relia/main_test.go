@@ -1536,6 +1536,60 @@ metadata: {}
 	}
 }
 
+func TestDemoAssessIgnoresUnservedPlaybookFailureCitationShape(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "billing-playbook.yaml"), `object_type: relia.memory_rule
+schema_version: "1.0"
+id: billing-playbook-fixture
+kind: playbook
+status: active
+statement: Billing clock changes are covered when they use the approved fixture.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.91
+evidence:
+  count: 2
+  contradictions: 0
+  experiences:
+    - exp_0142
+    - exp_0143
+provenance:
+  - pr: 142
+    outcome: merged_clean
+    url: https://github.com/acme/billing-service/pull/142
+  - pr: 143
+    outcome: ci_failure
+    url: https://example.com/not-a-pull-request
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`)
+	writeFileForTest(t, filepath.Join(tempDir, "change.diff"), `diff --git a/packages/billing/invoice.py b/packages/billing/invoice.py
+--- a/packages/billing/invoice.py
++++ b/packages/billing/invoice.py
+@@ -1,2 +1,3 @@
+ def rollover_day():
+-    return "2026-01-01"
++    return billing_clock().strftime("%Y-%m-%d")
+`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "assess", "--input", "change.diff"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	assessment := decodeAssessmentFromResult(t, decodeResult(t, stdout))
+	if assessment.RiskLevel != "covered_clean" {
+		t.Fatalf("risk_level = %q, want covered_clean", assessment.RiskLevel)
+	}
+	if fmt.Sprint(assessment.Citations) != fmt.Sprint([]string{"https://github.com/acme/billing-service/pull/142"}) {
+		t.Fatalf("citations = %#v", assessment.Citations)
+	}
+}
+
 func TestDemoAssessRejectsPlaybookRuleWithoutPositiveEvidence(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
