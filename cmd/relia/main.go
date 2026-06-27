@@ -999,10 +999,17 @@ func validateBacktestExperience(record experienceRecord, ref string) (time.Time,
 	if len(record.Provenance.URLs) == 0 {
 		return time.Time{}, provenanceIntegrityError("backtest experience must include provenance URLs", ref)
 	}
+	matchingPRURL := false
 	for _, value := range record.Provenance.URLs {
 		if !validGitHubProvenanceURLShape(value) {
 			return time.Time{}, provenanceIntegrityError("backtest experience provenance URL must be a canonical https://github.com/ URL", ref)
 		}
+		if gitHubPullRequestURLMatchesExperience(value, record) {
+			matchingPRURL = true
+		}
+	}
+	if !matchingPRURL {
+		return time.Time{}, provenanceIntegrityError("backtest experience provenance URLs must include the action.pr pull request URL", ref)
 	}
 	return recordedAt.UTC(), nil
 }
@@ -1327,7 +1334,7 @@ func addBacktestCitation(citations map[int]backtestCitation, record backtestExpe
 
 func primaryProvenanceURL(record experienceRecord) string {
 	for _, value := range record.Provenance.URLs {
-		if prNumber, ok := gitHubPullRequestURLNumber(value); ok && prNumber == record.Action.PR {
+		if gitHubPullRequestURLMatchesExperience(value, record) {
 			return value
 		}
 	}
@@ -3153,6 +3160,29 @@ func gitHubPullRequestURLNumber(value string) (int, bool) {
 	}
 	number, err := strconv.Atoi(parts[3])
 	return number, err == nil && number > 0
+}
+
+func gitHubPullRequestURLMatchesExperience(value string, record experienceRecord) bool {
+	parsed, err := url.Parse(strings.TrimSpace(value))
+	if err != nil {
+		return false
+	}
+	if parsed.Scheme != "https" ||
+		!strings.EqualFold(parsed.Host, "github.com") ||
+		parsed.User != nil ||
+		parsed.RawQuery != "" ||
+		parsed.Fragment != "" {
+		return false
+	}
+	parts := strings.Split(strings.Trim(parsed.Path, "/"), "/")
+	if len(parts) != 4 || parts[2] != "pull" {
+		return false
+	}
+	number, err := strconv.Atoi(parts[3])
+	return err == nil &&
+		number == record.Action.PR &&
+		strings.EqualFold(parts[0], record.Repo.Owner) &&
+		strings.EqualFold(parts[1], record.Repo.Name)
 }
 
 func unsafeGitHubURLPathEntropyToken(value string) string {
