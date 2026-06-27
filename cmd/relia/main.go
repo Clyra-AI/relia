@@ -941,6 +941,9 @@ func validateActiveAssessmentRuleIdentity(document yamlDocument, rel string) *Co
 	if kind != "avoid" && kind != "playbook" {
 		return artifactContractError("memory rule kind must be avoid or playbook", configRefWithPath(rel, document.Scalars["kind"]))
 	}
+	if kind == "playbook" && !assessmentRuleHasPositivePlaybookEvidence(document) {
+		return artifactContractError("playbook memory rule must cite at least one fix_held or merged_clean provenance outcome", rel)
+	}
 	reviewLabel, ok := document.Scalars["review.label"]
 	if !ok {
 		return artifactContractError("memory rule missing required key review.label", rel)
@@ -949,6 +952,19 @@ func validateActiveAssessmentRuleIdentity(document yamlDocument, rel string) *Co
 		return artifactContractError("active memory rule review.label must be accepted", configRefWithPath(rel, reviewLabel))
 	}
 	return nil
+}
+
+func assessmentRuleHasPositivePlaybookEvidence(document yamlDocument) bool {
+	for _, provenance := range document.ListMaps["provenance"] {
+		outcome, ok := provenance["outcome"]
+		if !ok {
+			continue
+		}
+		if outcome.Value == "fix_held" || outcome.Value == "merged_clean" {
+			return true
+		}
+	}
+	return false
 }
 
 func assessmentRuleCitations(document yamlDocument) []string {
