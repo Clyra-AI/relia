@@ -74,6 +74,19 @@ fixture, the synthetic lifecycle PR/outcome rows, and the corresponding
 `TestDemoDistillReviewLifecycleFixtures` hook, which would remove acceptance
 coverage for planted contradiction and stale-path behavior.
 
+T4.3 adds committed, synthetic assessment fixtures under
+`examples/demo/assessment-fixtures/` plus one active demo memory rule in
+`memory/rules/demo-assessment-active-rule.yaml`. The state owner remains the
+fixture corpus, the local `relia assess` command surface in `cmd/relia`, and
+the `cmd/relia` demo contract tests. Feedback sources are
+`make test-contracts`, `make test-coverage`, and `make prepush-full`. The
+fixture records one planted-pattern diff that must return `match_high` with
+seeded PR citations and one unknown-path diff that must return `no_coverage`.
+Rollback is deletion of the assessment fixture directory, the demo memory rule,
+the bounded `assess` command slice, and the corresponding
+`TestDemoAssessmentFixturesDriveAssessCommand` hook, which would remove
+acceptance coverage for assessment behavior.
+
 ## Systems Thinking Map
 
 - State lives in repo-local config, generated artifacts, source files, and Factory evidence.

@@ -1,0 +1,73 @@
+{
+  "artifact_type": "proof-of-behavior-scorecard",
+  "evidence_refs": [
+    ".factory/artifacts/task-runs/T4.3/work-proof-marker.json",
+    ".factory/artifacts/task-runs/T4.3/validation-report.json"
+  ],
+  "redaction_posture": {
+    "classification": "customer_safe",
+    "notes": "Assessment fixtures are synthetic and repo-relative; this repair added no new fixture data.",
+    "status": "pass"
+  },
+  "repair_task_id": "20260626T200025.692043000Z-relia-T4.3-repair-33",
+  "required_proof_level": "workflow_behavior",
+  "schema_version": "1.0",
+  "scorecard": [
+    {
+      "behavior": "Playbook assessment validates only citations that can be served",
+      "evidence": {
+        "code_ref": "cmd/relia/main.go",
+        "command": "go test ./cmd/relia -count=1 -run 'TestDemoAssess(IgnoresUnservedPlaybookFailureCitationShape|RejectsActiveRuleWithMissingProvenancePR)$'",
+        "test": "TestDemoAssessIgnoresUnservedPlaybookFailureCitationShape"
+      },
+      "status": "pass"
+    },
+    {
+      "behavior": "Active memory rule validation rejects provenance rows without pr before assessment serving",
+      "evidence": {
+        "code_ref": "cmd/relia/main.go",
+        "command": "go test ./cmd/relia -count=1 -run 'TestDemoAssess(IgnoresUnservedPlaybookFailureCitationShape|RejectsActiveRuleWithMissingProvenancePR)$'",
+        "test": "TestDemoAssessRejectsActiveRuleWithMissingProvenancePR"
+      },
+      "status": "pass"
+    },
+    {
+      "behavior": "Planted-pattern assessment returns match_high with citations",
+      "evidence": {
+        "evidence_refs": [
+          "examples/demo/assessment-fixtures/planted-pattern.diff",
+          "memory/rules/demo-assessment-active-rule.yaml",
+          "examples/demo/seeded-repo/prs.json"
+        ],
+        "test": "TestDemoAssessmentFixturesDriveAssessCommand"
+      },
+      "status": "pass"
+    },
+    {
+      "behavior": "Unknown-path assessment returns no_coverage",
+      "evidence": {
+        "evidence_refs": [
+          "examples/demo/assessment-fixtures/unknown-path.diff",
+          "examples/demo/assessment-fixtures/seeded-repo/packages/search/query.py",
+          "memory/rules/demo-assessment-active-rule.yaml"
+        ],
+        "test": "TestDemoAssessmentFixturesDriveAssessCommand"
+      },
+      "status": "pass"
+    },
+    {
+      "behavior": "Coverage and full local gates pass",
+      "evidence": {
+        "commands": [
+          "make test-coverage",
+          "make prepush-full"
+        ],
+        "coverage_minimum_percent": 75,
+        "coverage_percent": 80.7
+      },
+      "status": "pass"
+    }
+  ],
+  "status": "pass",
+  "task_id": "T4.3"
+}

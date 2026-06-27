@@ -1,0 +1,202 @@
+{
+  "acceptance_results": [
+    {
+      "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-004",
+      "checks": [
+        {
+          "description": "relia assess returns match_high with citations on a planted-pattern diff",
+          "evidence_refs": [
+            "examples/demo/assessment-fixtures/planted-pattern.diff",
+            "memory/rules/demo-assessment-active-rule.yaml",
+            "cmd/relia/demo_fixtures_test.go"
+          ],
+          "status": "implemented"
+        },
+        {
+          "description": "relia assess returns no_coverage on unknown paths",
+          "evidence_refs": [
+            "examples/demo/assessment-fixtures/unknown-path.diff",
+            "examples/demo/assessment-fixtures/seeded-repo/packages/search/query.py",
+            "cmd/relia/demo_fixtures_test.go"
+          ],
+          "status": "implemented"
+        },
+        {
+          "description": "Assessment fixture evidence remains deterministic and repo-relative",
+          "evidence_refs": [
+            "examples/demo/assessment-fixtures/assessment-fixtures.json",
+            "cmd/relia/demo_fixtures_test.go"
+          ],
+          "status": "implemented"
+        },
+        {
+          "description": "Assess validates only served playbook citations while active rule artifact validation requires pr on every provenance row",
+          "evidence_refs": [
+            "cmd/relia/main.go",
+            "cmd/relia/main_test.go"
+          ],
+          "status": "implemented"
+        }
+      ],
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T4.3/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T4.3/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    }
+  ],
+  "artifact_type": "validation_report",
+  "baseline_evidence": [
+    {
+      "command": "make lint-fast",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "make test-fast",
+      "exit_code": 0,
+      "status": "pass"
+    }
+  ],
+  "blockers": [],
+  "changed_paths": [
+    ".factory/artifacts/task-runs/T4.3/proof-of-behavior-scorecard.json",
+    ".factory/artifacts/task-runs/T4.3/validation-report.json",
+    ".factory/artifacts/task-runs/T4.3/work-proof-marker.json",
+    "README.md",
+    "cmd/relia/demo_fixtures_test.go",
+    "cmd/relia/main.go",
+    "cmd/relia/main_test.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/dev/dev_guides.md",
+    "examples/demo/assessment-fixtures/assessment-fixtures.json",
+    "examples/demo/assessment-fixtures/planted-pattern.diff",
+    "examples/demo/assessment-fixtures/seeded-repo/packages/billing/invoice.py",
+    "examples/demo/assessment-fixtures/seeded-repo/packages/search/query.py",
+    "examples/demo/assessment-fixtures/unknown-path.diff",
+    "memory/rules/demo-assessment-active-rule.yaml"
+  ],
+  "changelog_result": {
+    "notes": "This repair clarified the internal assessment validation boundary without changing public output, schemas, runtime pins, or distribution posture.",
+    "status": "pass"
+  },
+  "commands_run": [
+    "make lint-fast",
+    "make test-fast",
+    "make test-contracts",
+    "gofmt -w cmd/relia/main.go",
+    "go test ./cmd/relia -count=1 -run 'TestDemoAssess(IgnoresUnservedPlaybookFailureCitationShape|RejectsActiveRuleWithMissingProvenancePR)$'",
+    "make test-coverage",
+    "make prepush-full",
+    "python3 -m json.tool .factory/artifacts/task-runs/T4.3/work-proof-marker.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T4.3/validation-report.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T4.3/proof-of-behavior-scorecard.json"
+  ],
+  "docs_sync_result": {
+    "notes": "Existing T4.3 docs already describe JSON assess output, match_high/no_coverage behavior, repo-relative deterministic fixtures, and active local rules. The repair changed internal validation structure only.",
+    "status": "pass"
+  },
+  "evidence_artifact_validation": [
+    {
+      "command": "python3 -m json.tool .factory/artifacts/task-runs/T4.3/work-proof-marker.json",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "python3 -m json.tool .factory/artifacts/task-runs/T4.3/validation-report.json",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "python3 -m json.tool .factory/artifacts/task-runs/T4.3/proof-of-behavior-scorecard.json",
+      "exit_code": 0,
+      "status": "pass"
+    }
+  ],
+  "final_validation_evidence": [
+    {
+      "command": "make test-coverage",
+      "exit_code": 0,
+      "observed": {
+        "coverage_percent": 80.7,
+        "minimum_percent": 75
+      },
+      "status": "pass"
+    },
+    {
+      "command": "make prepush-full",
+      "exit_code": 0,
+      "status": "pass"
+    }
+  ],
+  "green_evidence": [
+    {
+      "command": "go test ./cmd/relia -count=1 -run 'TestDemoAssess(IgnoresUnservedPlaybookFailureCitationShape|RejectsActiveRuleWithMissingProvenancePR)$'",
+      "exit_code": 0,
+      "observed": {
+        "review_repair_contracts": [
+          "TestDemoAssessIgnoresUnservedPlaybookFailureCitationShape",
+          "TestDemoAssessRejectsActiveRuleWithMissingProvenancePR"
+        ]
+      },
+      "status": "pass"
+    }
+  ],
+  "lifecycle_evidence_note": {
+    "details": "scope_closure_report, pr_lifecycle_report, and factoryd_run_once_report are lifecycle-worker artifacts and were not authored in this worker diff.",
+    "status": "not_worker_owned"
+  },
+  "path_policy_result": {
+    "changed_paths": [
+      ".factory/artifacts/task-runs/T4.3/proof-of-behavior-scorecard.json",
+      ".factory/artifacts/task-runs/T4.3/validation-report.json",
+      ".factory/artifacts/task-runs/T4.3/work-proof-marker.json",
+      "README.md",
+      "cmd/relia/demo_fixtures_test.go",
+      "cmd/relia/main.go",
+      "cmd/relia/main_test.go",
+      "docs/architecture/architecture_guides.md",
+      "docs/dev/dev_guides.md",
+      "examples/demo/assessment-fixtures/assessment-fixtures.json",
+      "examples/demo/assessment-fixtures/planted-pattern.diff",
+      "examples/demo/assessment-fixtures/seeded-repo/packages/billing/invoice.py",
+      "examples/demo/assessment-fixtures/seeded-repo/packages/search/query.py",
+      "examples/demo/assessment-fixtures/unknown-path.diff",
+      "memory/rules/demo-assessment-active-rule.yaml"
+    ],
+    "changed_paths_checked": true,
+    "forbidden_paths_changed": [],
+    "notes": "All tracked worker changes are inside allowed paths. Required coverage commands generated no tracked .factory/tmp diff.",
+    "status": "pass"
+  },
+  "plan_drift_result": {
+    "notes": "Repair stayed bounded to T4.3 assessment fixture behavior and actionable Codex review findings.",
+    "status": "pass"
+  },
+  "red_first_evidence": [
+    {
+      "command": "make test-contracts",
+      "exit_code": 0,
+      "notes": "The required red-first command passed before edits; the actionable review issue was an already-covered contract boundary that needed implementation clarity, not a new failing fixture.",
+      "status": "pre_existing_green"
+    }
+  ],
+  "redaction_posture": {
+    "classification": "customer_safe",
+    "notes": "No customer data, credentials, endpoints, or machine-local paths were added.",
+    "status": "pass"
+  },
+  "repair_task_id": "20260626T200025.692043000Z-relia-T4.3-repair-33",
+  "residual_risks": [],
+  "schema_version": "1.0",
+  "status": "pass",
+  "task_id": "T4.3",
+  "test_first_skipped_reason": {
+    "reason": "The focused review regressions already existed at current head and passed before implementation; adding a new failing test would require reverting existing reviewed behavior. The repair made the served-only validation boundary explicit and reran those focused contracts.",
+    "status": "recorded"
+  },
+  "versioning_result": {
+    "notes": "Pre-1.0 behavior repair; no schema version, module path, runtime pin, or distribution target changed.",
+    "status": "pass"
+  }
+}

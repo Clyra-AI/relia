@@ -103,13 +103,24 @@ T4.2 fixture ownership:
 - Lifecycle outcomes that should not change the demo ERR denominator remain in
   `examples/demo/seeded-repo/outcomes.jsonl` as clean merges.
 
+T4.3 fixture ownership:
+
+- Assessment fixture expectations:
+  `examples/demo/assessment-fixtures/assessment-fixtures.json`.
+- Assessment planted-pattern and unknown-path diffs:
+  `examples/demo/assessment-fixtures/planted-pattern.diff` and
+  `examples/demo/assessment-fixtures/unknown-path.diff`.
+- Assessment active memory rule:
+  `memory/rules/demo-assessment-active-rule.yaml`.
+
 The contract lane runs `TestDemo*` fixture contracts in `cmd/relia` after the
 repo-pack validator. Those tests recompute the demo ERR headline from the
 seeded outcome stream, resolve every report citation through the seeded PR
 index, verify the planted flaky test is discounted and drafts no rule, enforce
 attribution precision with uncertain cases excluded, validate distill/review
 lifecycle fixtures for recurrence draft, contradicted, and stale serving
-outcomes, and scan demo artifacts for standard secret token shapes.
+outcomes, run `relia assess` against the planted-pattern and unknown-path
+diff fixtures, and scan demo artifacts for standard secret token shapes.
 
 ## Customer Failure Intake
 
@@ -190,6 +201,16 @@ T3 adds offline ingestion:
 - `attribution.uncertain: exclude` remains the default; uncertain events are
   skipped instead of persisted, while explicit human and agent outcomes can both
   become rule evidence.
+
+T4.3 adds bounded offline assessment:
+
+- `relia assess --input <diff>` accepts a local unified diff and returns a
+  `relia.risk_assessment` payload inside the command-result envelope.
+- Active local `memory/rules/*.yaml` rules are the only rule source in this
+  slice; candidate, stale, contradicted, and retired rules are not served.
+- Touched paths that overlap active rule scope return `match_high` or
+  `match_medium` based on confidence and include rule citations. Unknown paths
+  return `no_coverage`.
 
 ## Structured Data, Proof, Budgets, And Redaction
 

@@ -1,0 +1,65 @@
+{
+  "object_type": "relia.demo_assessment_fixtures",
+  "schema_version": "1.0",
+  "source_artifacts": [
+    "examples/demo/assessment-fixtures/planted-pattern.diff",
+    "examples/demo/assessment-fixtures/unknown-path.diff",
+    "examples/demo/assessment-fixtures/seeded-repo/packages/billing/invoice.py",
+    "examples/demo/assessment-fixtures/seeded-repo/packages/search/query.py",
+    "memory/rules/demo-assessment-active-rule.yaml",
+    "schemas/risk-assessment.schema.json"
+  ],
+  "redaction_status": "customer_safe",
+  "cases": [
+    {
+      "case_id": "planted-pattern-match-high",
+      "command": "relia assess --input examples/demo/assessment-fixtures/planted-pattern.diff --format json",
+      "input_diff": "examples/demo/assessment-fixtures/planted-pattern.diff",
+      "expected_risk_level": "match_high",
+      "expected_touched_paths": [
+        "examples/demo/assessment-fixtures/seeded-repo/packages/billing/invoice.py"
+      ],
+      "expected_matches": [
+        {
+          "rule_id": "avoid-direct-datetime-in-assessment-fixture",
+          "confidence": 0.86
+        }
+      ],
+      "expected_citations": [
+        "https://github.com/Clyra-AI/relia-demo-seed/pull/142",
+        "https://github.com/Clyra-AI/relia-demo-seed/pull/187",
+        "https://github.com/Clyra-AI/relia-demo-seed/pull/203"
+      ],
+      "evidence_refs": [
+        "memory/rules/demo-assessment-active-rule.yaml",
+        "examples/demo/seeded-repo/prs.json"
+      ]
+    },
+    {
+      "case_id": "unknown-path-no-coverage",
+      "command": "relia assess --input examples/demo/assessment-fixtures/unknown-path.diff --format json",
+      "input_diff": "examples/demo/assessment-fixtures/unknown-path.diff",
+      "expected_risk_level": "no_coverage",
+      "expected_touched_paths": [
+        "examples/demo/assessment-fixtures/seeded-repo/packages/search/query.py"
+      ],
+      "expected_matches": [],
+      "expected_citations": [],
+      "evidence_refs": [
+        "memory/rules/demo-assessment-active-rule.yaml",
+        "examples/demo/seeded-repo/prs.json"
+      ]
+    }
+  ],
+  "metadata": {
+    "customer_safe": true,
+    "synthetic": true,
+    "network_required": false,
+    "redaction_status": "customer_safe",
+    "repo_relative_paths_only": true,
+    "schema_refs": [
+      "schemas/risk-assessment.schema.json",
+      "schemas/memory-rule.schema.json"
+    ]
+  }
+}

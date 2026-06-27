@@ -100,6 +100,8 @@ var knownSecretPatterns = []*regexp.Regexp{
 	regexp.MustCompile(`(?i)\bBearer\s+[A-Za-z0-9._~+/=-]{20,}\b`),
 }
 
+var unifiedHunkHeaderPattern = regexp.MustCompile(`^@@ -\d+(?:,(\d+))? \+\d+(?:,(\d+))? @@`)
+
 type CommandResult struct {
 	ObjectType      string         `json:"object_type"`
 	SchemaVersion   string         `json:"schema_version"`
@@ -115,6 +117,7 @@ type CommandResult struct {
 	RedactionStatus string         `json:"redaction_status"`
 	Metadata        map[string]any `json:"metadata"`
 	Data            map[string]any `json:"data,omitempty"`
+	MachineReadable bool           `json:"-"`
 }
 
 type Finding struct {
@@ -171,6 +174,42 @@ type parsedArgs struct {
 
 type ingestOptions struct {
 	InputPath string
+}
+
+type assessOptions struct {
+	InputPath      string
+	Format         string
+	FormatExplicit bool
+}
+
+type riskAssessment struct {
+	ObjectType    string                `json:"object_type"`
+	SchemaVersion string                `json:"schema_version"`
+	AssessmentID  string                `json:"assessment_id"`
+	RiskLevel     string                `json:"risk_level"`
+	Matches       []riskAssessmentMatch `json:"matches"`
+	Citations     []string              `json:"citations"`
+	Metadata      map[string]any        `json:"metadata"`
+}
+
+type riskAssessmentMatch struct {
+	RuleID     string  `json:"rule_id"`
+	Confidence float64 `json:"confidence"`
+}
+
+type assessmentRule struct {
+	ID         string
+	Kind       string
+	Path       string
+	Confidence float64
+	ScopePaths []string
+	Citations  []assessmentRuleCitation
+}
+
+type assessmentRuleCitation struct {
+	URL     string
+	PR      int
+	Outcome string
 }
 
 type experienceRecord struct {
@@ -309,12 +348,14 @@ func dispatch(parsed parsedArgs, start time.Time) CommandResult {
 		return checkResult(parsed.commandArgs, start)
 	case "ingest":
 		return ingestResult(parsed.commandArgs, start)
+	case "assess":
+		return assessResult(parsed.commandArgs, start)
 	case "models":
 		if len(parsed.commandArgs) == 1 && parsed.commandArgs[0] == "pull" {
 			return notImplementedResult("models pull", start)
 		}
 		return errorResult("models", "models", usageError("expected subcommand: pull"), start)
-	case "backtest", "distill", "review", "memory", "compile", "serve", "assess", "demo", "share":
+	case "backtest", "distill", "review", "memory", "compile", "serve", "demo", "share":
 		return notImplementedResult(command, start)
 	default:
 		return errorResult(command, command, usageError(fmt.Sprintf("unknown command %q", command)), start)
@@ -543,6 +584,786 @@ func parseIngestArgs(args []string) (ingestOptions, *CommandError) {
 		return options, usageError("ingest requires --input <json-or-jsonl> in offline mode")
 	}
 	return options, nil
+}
+
+func assessResult(args []string, start time.Time) CommandResult {
+	options, commandErr := parseAssessArgs(args)
+	withFormat := func(result CommandResult) CommandResult {
+		if options.Format == "json" {
+			result.MachineReadable = true
+		}
+		return result
+	}
+	if commandErr != nil {
+		return withFormat(errorResult("assess", "assess", commandErr, start))
+	}
+	wd, err := os.Getwd()
+	if err != nil {
+		return withFormat(errorResult("assess", "assess", internalError("could not inspect working directory", err), start))
+	}
+	root, ok := findRepoRoot(wd)
+	if !ok {
+		return withFormat(errorResult("assess", "assess", configError("could not locate repository root from current directory"), start))
+	}
+	warnings, commandErr := validateReliaConfig(root)
+	if commandErr != nil {
+		return withFormat(errorResult("assess", "assess", commandErr, start))
+	}
+
+	inputPath := resolveInputPath(root, options.InputPath)
+	inputContent, err := os.ReadFile(inputPath)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return withFormat(errorResult("assess", "assess", artifactContractError("assess input diff is missing", displayPath(root, inputPath)), start))
+		}
+		return withFormat(errorResult("assess", "assess", internalError("could not read assess input", err), start))
+	}
+	touchedPaths, commandErr := parseUnifiedDiffTouchedPaths(inputContent, displayPath(root, inputPath))
+	if commandErr != nil {
+		return withFormat(errorResult("assess", "assess", commandErr, start))
+	}
+	rules, commandErr := loadAssessmentRules(root)
+	if commandErr != nil {
+		return withFormat(errorResult("assess", "assess", commandErr, start))
+	}
+	assessment, commandErr := buildRiskAssessment(root, displayPath(root, inputPath), inputContent, touchedPaths, rules)
+	if commandErr != nil {
+		return withFormat(errorResult("assess", "assess", commandErr, start))
+	}
+
+	result := passResult("assess", "assess", "assessed local diff against active memory rules", start, map[string]any{
+		"input_path":         displayPath(root, inputPath),
+		"format":             options.Format,
+		"touched_paths":      touchedPaths,
+		"active_rule_count":  len(rules),
+		"matched_rule_count": len(assessment.Matches),
+		"assessment":         assessment,
+	})
+	result.Warnings = append(result.Warnings, warnings...)
+	result.EvidenceRefs = append(result.EvidenceRefs,
+		"schemas/risk-assessment.schema.json",
+		displayPath(root, inputPath),
+	)
+	result.Artifacts = append(result.Artifacts, ArtifactRef{Kind: "input_diff", Path: displayPath(root, inputPath)})
+	for _, rule := range rules {
+		result.Artifacts = append(result.Artifacts, ArtifactRef{Kind: "memory_rule", Path: rule.Path})
+		result.EvidenceRefs = append(result.EvidenceRefs, rule.Path)
+	}
+	return withFormat(result)
+}
+
+func parseAssessArgs(args []string) (assessOptions, *CommandError) {
+	options := assessOptions{Format: "json"}
+	for index := 0; index < len(args); index++ {
+		arg := args[index]
+		switch arg {
+		case "--input", "--diff", "-i":
+			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
+				return options, usageError("assess requires a path after " + arg)
+			}
+			options.InputPath = args[index+1]
+			index++
+		case "--format":
+			options.FormatExplicit = true
+			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
+				return options, usageError("assess requires a value after --format")
+			}
+			options.Format = args[index+1]
+			index++
+		default:
+			return options, usageError(fmt.Sprintf("unknown assess argument %q", arg))
+		}
+	}
+	if strings.TrimSpace(options.InputPath) == "" {
+		return options, usageError("assess requires --input <diff> in offline mode")
+	}
+	if options.Format != "json" {
+		return options, usageError("assess only supports --format json in this task slice")
+	}
+	return options, nil
+}
+
+func parseUnifiedDiffTouchedPaths(content []byte, ref string) ([]string, *CommandError) {
+	touched := map[string]bool{}
+	inFileHeader := false
+	gitFileHeader := false
+	currentHeaderAdded := map[string]bool{}
+	currentMetadataPaths := []string{}
+	hunkOldRemaining := 0
+	hunkNewRemaining := 0
+	lines := strings.Split(string(content), "\n")
+	for index, line := range lines {
+		line = strings.TrimRight(line, "\r")
+		if hunkOldRemaining > 0 || hunkNewRemaining > 0 {
+			hunkOldRemaining, hunkNewRemaining = consumeUnifiedHunkLine(line, hunkOldRemaining, hunkNewRemaining)
+			continue
+		}
+		switch {
+		case strings.HasPrefix(line, "diff --git "):
+			reconcileSyntheticHeaderPaths(touched, currentHeaderAdded, currentMetadataPaths)
+			inFileHeader = true
+			currentHeaderAdded = map[string]bool{}
+			currentMetadataPaths = nil
+			headerPaths, stripGitHeaderPrefix := diffGitHeaderPaths(line)
+			gitFileHeader = stripGitHeaderPrefix
+			for _, path := range headerPaths {
+				if cleanPath, ok := normalizedDiffPath(path, stripGitHeaderPrefix); ok {
+					_, existed := touched[cleanPath]
+					touched[cleanPath] = true
+					if _, tracked := currentHeaderAdded[cleanPath]; !tracked {
+						currentHeaderAdded[cleanPath] = !existed
+					}
+				}
+			}
+		case inFileHeader && strings.HasPrefix(line, "--- "):
+			if !gitFileHeader {
+				gitFileHeader = gitStyleUnifiedFileHeader(lines, index)
+			}
+			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "--- ")), gitFileHeader)
+		case strings.HasPrefix(line, "--- ") && plainUnifiedFileHeader(lines, index):
+			inFileHeader = true
+			gitFileHeader = false
+			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "--- ")), false)
+		case inFileHeader && strings.HasPrefix(line, "+++ "):
+			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "+++ ")), gitFileHeader)
+		case inFileHeader && strings.HasPrefix(line, "rename from "):
+			currentMetadataPaths = append(currentMetadataPaths, addDiffMetadataPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "rename from "))))
+		case inFileHeader && strings.HasPrefix(line, "rename to "):
+			currentMetadataPaths = append(currentMetadataPaths, addDiffMetadataPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "rename to "))))
+		case inFileHeader && strings.HasPrefix(line, "copy from "):
+			currentMetadataPaths = append(currentMetadataPaths, addDiffMetadataPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "copy from "))))
+		case inFileHeader && strings.HasPrefix(line, "copy to "):
+			currentMetadataPaths = append(currentMetadataPaths, addDiffMetadataPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "copy to "))))
+		case strings.HasPrefix(line, "@@"):
+			reconcileSyntheticHeaderPaths(touched, currentHeaderAdded, currentMetadataPaths)
+			inFileHeader = false
+			gitFileHeader = false
+			currentMetadataPaths = nil
+			hunkOldRemaining, hunkNewRemaining = parseUnifiedHunkCounts(line)
+		}
+	}
+	reconcileSyntheticHeaderPaths(touched, currentHeaderAdded, currentMetadataPaths)
+	paths := make([]string, 0, len(touched))
+	for touchedPath := range touched {
+		paths = append(paths, touchedPath)
+	}
+	sort.Strings(paths)
+	if len(paths) == 0 {
+		return nil, artifactContractError("assess input diff contains no repo-relative paths", ref)
+	}
+	return paths, nil
+}
+
+func plainUnifiedFileHeader(lines []string, index int) bool {
+	if index+2 >= len(lines) {
+		return false
+	}
+	return strings.HasPrefix(strings.TrimRight(lines[index+1], "\r"), "+++ ") &&
+		strings.HasPrefix(strings.TrimRight(lines[index+2], "\r"), "@@")
+}
+
+func gitStyleUnifiedFileHeader(lines []string, index int) bool {
+	if index+1 >= len(lines) {
+		return false
+	}
+	oldPath := strings.TrimSpace(strings.TrimPrefix(strings.TrimRight(lines[index], "\r"), "--- "))
+	newLine := strings.TrimRight(lines[index+1], "\r")
+	if !strings.HasPrefix(newLine, "+++ ") {
+		return false
+	}
+	newPath := strings.TrimSpace(strings.TrimPrefix(newLine, "+++ "))
+	return strings.HasPrefix(oldPath, "a/") && strings.HasPrefix(newPath, "b/")
+}
+
+func parseUnifiedHunkCounts(line string) (int, int) {
+	matches := unifiedHunkHeaderPattern.FindStringSubmatch(line)
+	if len(matches) == 0 {
+		return 0, 0
+	}
+	oldCount := 1
+	newCount := 1
+	if matches[1] != "" {
+		if parsed, err := strconv.Atoi(matches[1]); err == nil {
+			oldCount = parsed
+		}
+	}
+	if matches[2] != "" {
+		if parsed, err := strconv.Atoi(matches[2]); err == nil {
+			newCount = parsed
+		}
+	}
+	return oldCount, newCount
+}
+
+func consumeUnifiedHunkLine(line string, oldRemaining int, newRemaining int) (int, int) {
+	if line == "" {
+		return oldRemaining, newRemaining
+	}
+	switch line[0] {
+	case ' ':
+		oldRemaining--
+		newRemaining--
+	case '-':
+		oldRemaining--
+	case '+':
+		newRemaining--
+	}
+	if oldRemaining < 0 {
+		oldRemaining = 0
+	}
+	if newRemaining < 0 {
+		newRemaining = 0
+	}
+	return oldRemaining, newRemaining
+}
+
+func diffGitHeaderPaths(line string) ([]string, bool) {
+	rest := strings.TrimSpace(strings.TrimPrefix(line, "diff --git "))
+	if strings.HasPrefix(rest, "a/") {
+		if paths := prefixedGitDiffHeaderPaths(rest); len(paths) > 0 {
+			return paths, true
+		}
+		if paths := identicalNoPrefixDiffHeaderPaths(rest); len(paths) > 0 {
+			return paths, false
+		}
+		return nil, false
+	}
+	if !strings.HasPrefix(rest, "\"") {
+		return identicalNoPrefixDiffHeaderPaths(rest), false
+	}
+	var paths []string
+	for len(rest) > 0 && len(paths) < 2 {
+		var path string
+		var ok bool
+		path, rest, ok = nextDiffHeaderPath(rest)
+		if !ok {
+			break
+		}
+		paths = append(paths, path)
+	}
+	if len(paths) == 2 && quotedOrRawPathHasPrefix(paths[0], "a/") && quotedOrRawPathHasPrefix(paths[1], "b/") {
+		return paths, true
+	}
+	return paths, false
+}
+
+func prefixedGitDiffHeaderPaths(rest string) []string {
+	type candidate struct {
+		left  string
+		right string
+	}
+	var candidates []candidate
+	searchStart := 0
+	for {
+		index := strings.Index(rest[searchStart:], " b/")
+		if index < 0 {
+			break
+		}
+		split := searchStart + index
+		left := rest[:split]
+		right := rest[split+1:]
+		if strings.HasPrefix(left, "a/") && strings.HasPrefix(right, "b/") {
+			if strings.TrimPrefix(left, "a/") == strings.TrimPrefix(right, "b/") {
+				return []string{left, right}
+			}
+			candidates = append(candidates, candidate{left: left, right: right})
+		}
+		searchStart = split + len(" b/")
+		if searchStart >= len(rest) {
+			break
+		}
+	}
+	if len(candidates) == 1 {
+		return []string{candidates[0].left, candidates[0].right}
+	}
+	return nil
+}
+
+func identicalNoPrefixDiffHeaderPaths(rest string) []string {
+	fields := strings.Fields(rest)
+	for split := 1; split < len(fields); split++ {
+		left := strings.Join(fields[:split], " ")
+		right := strings.Join(fields[split:], " ")
+		if left != "" && left == right {
+			return []string{left, right}
+		}
+	}
+	return nil
+}
+
+func quotedOrRawPathHasPrefix(path string, prefix string) bool {
+	path = strings.TrimSpace(path)
+	if strings.HasPrefix(path, "\"") {
+		if unquoted, err := strconv.Unquote(path); err == nil {
+			path = unquoted
+		}
+	}
+	return strings.HasPrefix(path, prefix)
+}
+
+func nextDiffHeaderPath(input string) (string, string, bool) {
+	input = strings.TrimSpace(input)
+	if input == "" {
+		return "", "", false
+	}
+	if strings.HasPrefix(input, "\"") {
+		escaped := false
+		for index := 1; index < len(input); index++ {
+			char := input[index]
+			if escaped {
+				escaped = false
+				continue
+			}
+			if char == '\\' {
+				escaped = true
+				continue
+			}
+			if char == '"' {
+				token := input[:index+1]
+				if _, err := strconv.Unquote(token); err == nil {
+					return token, input[index+1:], true
+				}
+				return strings.Trim(token, "\""), input[index+1:], true
+			}
+		}
+	}
+	if index := strings.IndexAny(input, "\t "); index >= 0 {
+		return input[:index], input[index+1:], true
+	}
+	return input, "", true
+}
+
+func addDiffPath(touched map[string]bool, raw string, stripGitPrefix bool) {
+	if cleanPath, ok := normalizedDiffPath(raw, stripGitPrefix); ok {
+		touched[cleanPath] = true
+	}
+}
+
+func normalizedDiffPath(raw string, stripGitPrefix bool) (string, bool) {
+	pathPart := strings.TrimSpace(raw)
+	quoted := strings.HasPrefix(pathPart, "\"")
+	if quoted {
+		if unquoted, err := strconv.Unquote(pathPart); err == nil {
+			pathPart = unquoted
+		}
+	}
+	if !quoted {
+		if index := strings.Index(pathPart, "\t"); index >= 0 {
+			pathPart = pathPart[:index]
+		}
+	}
+	if pathPart == "" || pathPart == "/dev/null" {
+		return "", false
+	}
+	if stripGitPrefix && (strings.HasPrefix(pathPart, "a/") || strings.HasPrefix(pathPart, "b/")) {
+		pathPart = pathPart[2:]
+	}
+	if clean, ok := cleanRepoPath(pathPart); ok {
+		return filepath.ToSlash(clean), true
+	}
+	return "", false
+}
+
+func addDiffMetadataPath(touched map[string]bool, raw string) string {
+	addDiffPath(touched, raw, false)
+	return raw
+}
+
+func reconcileSyntheticHeaderPaths(touched map[string]bool, currentHeaderAdded map[string]bool, metadataPaths []string) {
+	for leftIndex, left := range metadataPaths {
+		for _, right := range metadataPaths[leftIndex+1:] {
+			if stripped, ok := matchingSyntheticMetadataPath(left, right); ok && currentHeaderAdded[stripped] {
+				delete(touched, stripped)
+			}
+		}
+	}
+}
+
+func matchingSyntheticMetadataPath(left string, right string) (string, bool) {
+	leftPath, leftOK := normalizedDiffPath(left, false)
+	rightPath, rightOK := normalizedDiffPath(right, false)
+	if !leftOK || !rightOK {
+		return "", false
+	}
+	if strings.HasPrefix(leftPath, "a/") && strings.HasPrefix(rightPath, "b/") && strings.TrimPrefix(leftPath, "a/") == strings.TrimPrefix(rightPath, "b/") {
+		return strings.TrimPrefix(leftPath, "a/"), true
+	}
+	if strings.HasPrefix(leftPath, "b/") && strings.HasPrefix(rightPath, "a/") && strings.TrimPrefix(leftPath, "b/") == strings.TrimPrefix(rightPath, "a/") {
+		return strings.TrimPrefix(leftPath, "b/"), true
+	}
+	return "", false
+}
+
+func loadAssessmentRules(root string) ([]assessmentRule, *CommandError) {
+	patterns := []string{
+		filepath.Join(root, "memory", "rules", "*.yaml"),
+		filepath.Join(root, "memory", "rules", "*.yml"),
+	}
+	var paths []string
+	for _, pattern := range patterns {
+		matches, err := filepath.Glob(pattern)
+		if err != nil {
+			return nil, internalError("could not inspect memory rule artifacts", err)
+		}
+		paths = append(paths, matches...)
+	}
+	sort.Strings(paths)
+
+	var rules []assessmentRule
+	for _, rulePath := range paths {
+		rule, active, commandErr := readAssessmentRule(root, rulePath)
+		if commandErr != nil {
+			return nil, commandErr
+		}
+		if active {
+			rules = append(rules, rule)
+		}
+	}
+	return rules, nil
+}
+
+func readAssessmentRule(root string, rulePath string) (assessmentRule, bool, *CommandError) {
+	content, err := os.ReadFile(rulePath)
+	if err != nil {
+		return assessmentRule{}, false, internalError("could not read memory rule artifact", err)
+	}
+	rel, err := filepath.Rel(root, rulePath)
+	if err != nil {
+		rel = rulePath
+	}
+	rel = filepath.ToSlash(rel)
+	document, parseErr := parseYAMLDocument(string(content))
+	if parseErr != nil {
+		return assessmentRule{}, false, artifactContractError(parseErr.Error(), rel)
+	}
+	if document.Scalars["status"].Value != "active" {
+		return assessmentRule{}, false, nil
+	}
+	if commandErr := validateActiveAssessmentRuleIdentity(root, document, rel); commandErr != nil {
+		return assessmentRule{}, false, commandErr
+	}
+	confidence, err := strconv.ParseFloat(document.Scalars["confidence"].Value, 64)
+	if err != nil {
+		return assessmentRule{}, false, artifactContractError("memory rule confidence must be numeric", rel)
+	}
+	return assessmentRule{
+		ID:         document.Scalars["id"].Value,
+		Kind:       document.Scalars["kind"].Value,
+		Path:       rel,
+		Confidence: confidence,
+		ScopePaths: yamlListValues(document, "scope.paths"),
+		Citations:  assessmentRuleCitations(document),
+	}, true, nil
+}
+
+func validateActiveAssessmentRuleIdentity(root string, document yamlDocument, rel string) *CommandError {
+	required := []string{"object_type", "schema_version", "id", "kind", "status", "statement", "scope", "confidence", "evidence", "provenance", "review", "metadata"}
+	for _, key := range required {
+		if !hasYAMLPath(document, key) {
+			return artifactContractError("memory rule missing required key "+key, rel)
+		}
+	}
+	if document.Scalars["object_type"].Value != "relia.memory_rule" {
+		return artifactContractError("memory rule object_type must be relia.memory_rule", configRefWithPath(rel, document.Scalars["object_type"]))
+	}
+	if document.Scalars["schema_version"].Value != commandSchemaVersion {
+		return artifactContractError("memory rule schema_version must be "+commandSchemaVersion, rel)
+	}
+	kind := document.Scalars["kind"].Value
+	if kind != "avoid" && kind != "playbook" {
+		return artifactContractError("memory rule kind must be avoid or playbook", configRefWithPath(rel, document.Scalars["kind"]))
+	}
+	if kind == "playbook" && !assessmentRuleHasPositivePlaybookEvidence(document) {
+		return artifactContractError("playbook memory rule must cite at least one fix_held or merged_clean provenance outcome", rel)
+	}
+	if len(document.Lists["scope.paths"]) == 0 && len(document.Lists["scope.signals"]) == 0 {
+		return artifactContractError("memory rule must declare at least one scope path or signal", rel)
+	}
+	for _, scopePath := range document.Lists["scope.paths"] {
+		if !repoPathExists(root, scopePath.Value) {
+			return artifactContractError("memory rule scope path does not exist in the repo", configRefWithPath(rel, scopePath))
+		}
+	}
+	reviewLabel, ok := document.Scalars["review.label"]
+	if !ok {
+		return artifactContractError("memory rule missing required key review.label", rel)
+	}
+	if reviewLabel.Value != "accepted" {
+		return artifactContractError("active memory rule review.label must be accepted", configRefWithPath(rel, reviewLabel))
+	}
+	statementOrigin, ok := document.Scalars["review.statement_origin"]
+	if !ok {
+		return artifactContractError("memory rule missing required key review.statement_origin", rel)
+	}
+	switch statementOrigin.Value {
+	case "llm_drafted", "cluster_summary", "human_authored":
+	default:
+		return artifactContractError("memory rule review.statement_origin is invalid", configRefWithPath(rel, statementOrigin))
+	}
+	if len(document.Lists["evidence.experiences"]) == 0 {
+		return artifactContractError("memory rule must cite at least one experience", rel)
+	}
+	evidenceCount, ok := document.Scalars["evidence.count"]
+	if !ok {
+		return artifactContractError("memory rule missing required key evidence.count", rel)
+	}
+	count, err := strconv.Atoi(evidenceCount.Value)
+	if err != nil || count < 1 {
+		return artifactContractError("memory rule evidence.count must be at least 1", configRefWithPath(rel, evidenceCount))
+	}
+	contradictionsScalar, ok := document.Scalars["evidence.contradictions"]
+	if !ok {
+		return artifactContractError("memory rule missing required key evidence.contradictions", rel)
+	}
+	contradictions, err := strconv.Atoi(contradictionsScalar.Value)
+	if err != nil || contradictions < 0 {
+		return artifactContractError("memory rule evidence.contradictions must be at least 0", configRefWithPath(rel, contradictionsScalar))
+	}
+	provenanceEntries := document.Lists["provenance"]
+	if len(provenanceEntries) == 0 {
+		return artifactContractError("memory rule must include at least one provenance entry", rel)
+	}
+	provenanceMaps := document.ListMaps["provenance"]
+	if len(provenanceMaps) != len(provenanceEntries) {
+		return artifactContractError("memory rule provenance entries must include pr and outcome", rel)
+	}
+	for _, provenance := range provenanceMaps {
+		pr, ok := provenance["pr"]
+		if !ok {
+			return artifactContractError("memory rule provenance entry missing pr", rel)
+		}
+		prNumber, err := strconv.Atoi(pr.Value)
+		if err != nil || prNumber < 1 {
+			return artifactContractError("memory rule provenance pr must be at least 1", configRefWithPath(rel, pr))
+		}
+		outcome, ok := provenance["outcome"]
+		if !ok {
+			return artifactContractError("memory rule provenance entry missing outcome", rel)
+		}
+		switch outcome.Value {
+		case "ci_failure", "revert", "review_correction", "fix_held", "merged_clean":
+		default:
+			return artifactContractError("memory rule provenance outcome is invalid", configRefWithPath(rel, outcome))
+		}
+	}
+	return nil
+}
+
+func assessmentRuleHasPositivePlaybookEvidence(document yamlDocument) bool {
+	for _, provenance := range document.ListMaps["provenance"] {
+		outcome, ok := provenance["outcome"]
+		if !ok {
+			continue
+		}
+		if outcome.Value == "fix_held" || outcome.Value == "merged_clean" {
+			return true
+		}
+	}
+	return false
+}
+
+func assessmentRuleCitations(document yamlDocument) []assessmentRuleCitation {
+	var citations []assessmentRuleCitation
+	for _, provenance := range document.ListMaps["provenance"] {
+		url, ok := provenance["url"]
+		if !ok || strings.TrimSpace(url.Value) == "" {
+			continue
+		}
+		prNumber := 0
+		if pr, ok := provenance["pr"]; ok {
+			prNumber, _ = strconv.Atoi(pr.Value)
+		}
+		outcome := ""
+		if value, ok := provenance["outcome"]; ok {
+			outcome = value.Value
+		}
+		citations = append(citations, assessmentRuleCitation{
+			URL:     url.Value,
+			PR:      prNumber,
+			Outcome: outcome,
+		})
+	}
+	return uniqueAssessmentRuleCitations(citations)
+}
+
+func uniqueAssessmentRuleCitations(citations []assessmentRuleCitation) []assessmentRuleCitation {
+	seen := map[string]bool{}
+	var unique []assessmentRuleCitation
+	for _, citation := range citations {
+		key := fmt.Sprintf("%s\x00%d\x00%s", citation.URL, citation.PR, citation.Outcome)
+		if seen[key] {
+			continue
+		}
+		seen[key] = true
+		unique = append(unique, citation)
+	}
+	return unique
+}
+
+func buildRiskAssessment(root string, inputRef string, content []byte, touchedPaths []string, rules []assessmentRule) (riskAssessment, *CommandError) {
+	matches := []riskAssessmentMatch{}
+	citations := []string{}
+	highestAvoidConfidence := -1.0
+	hasPlaybookCoverage := false
+	for _, rule := range rules {
+		if !assessmentRuleMatchesTouchedPath(root, rule, touchedPaths) {
+			continue
+		}
+		if strings.TrimSpace(rule.ID) == "" {
+			return riskAssessment{}, provenanceIntegrityError("matched active memory rule id must be non-empty for assessment", rule.Path)
+		}
+		servedCitationRefs := servedAssessmentRuleCitations(rule)
+		servedCitations := assessmentRuleCitationURLs(servedCitationRefs)
+		if len(servedCitations) == 0 {
+			return riskAssessment{}, provenanceIntegrityError("matched active memory rule must include citation URLs for assessment", rule.Path)
+		}
+		if math.IsNaN(rule.Confidence) || math.IsInf(rule.Confidence, 0) || rule.Confidence < 0 || rule.Confidence > 1 {
+			return riskAssessment{}, provenanceIntegrityError("matched active memory rule confidence must be between 0 and 1 for assessment", rule.Path)
+		}
+		if commandErr := validateServedAssessmentRuleCitations(rule, servedCitationRefs); commandErr != nil {
+			return riskAssessment{}, commandErr
+		}
+		matches = append(matches, riskAssessmentMatch{
+			RuleID:     rule.ID,
+			Confidence: rule.Confidence,
+		})
+		citations = append(citations, servedCitations...)
+		if rule.Kind == "playbook" {
+			hasPlaybookCoverage = true
+		} else if rule.Confidence > highestAvoidConfidence {
+			highestAvoidConfidence = rule.Confidence
+		}
+	}
+	sort.Slice(matches, func(i, j int) bool {
+		if matches[i].Confidence == matches[j].Confidence {
+			return matches[i].RuleID < matches[j].RuleID
+		}
+		return matches[i].Confidence > matches[j].Confidence
+	})
+	citations = uniqueStrings(citations)
+	if citations == nil {
+		citations = []string{}
+	}
+	riskLevel := "no_coverage"
+	if highestAvoidConfidence >= 0.75 {
+		riskLevel = "match_high"
+	} else if highestAvoidConfidence >= 0 {
+		riskLevel = "match_medium"
+	} else if hasPlaybookCoverage {
+		riskLevel = "covered_clean"
+	}
+	return riskAssessment{
+		ObjectType:    "relia.risk_assessment",
+		SchemaVersion: commandSchemaVersion,
+		AssessmentID:  "assess_" + shortHash(inputRef+"|"+sha256String(string(content))+"|"+strings.Join(touchedPaths, "\x00")),
+		RiskLevel:     riskLevel,
+		Matches:       matches,
+		Citations:     citations,
+		Metadata: map[string]any{
+			"input_path":               inputRef,
+			"diff_fingerprint":         sha256String(string(content)),
+			"touched_paths":            touchedPaths,
+			"repo_relative_paths_only": true,
+			"redaction_status":         "customer_safe",
+		},
+	}, nil
+}
+
+func validateServedAssessmentRuleCitations(rule assessmentRule, servedCitationRefs []assessmentRuleCitation) *CommandError {
+	for _, citation := range servedCitationRefs {
+		prNumber, ok := gitHubPullRequestURLNumber(citation.URL)
+		if !ok {
+			return provenanceIntegrityError("matched active memory rule citation URL must be an https://github.com/<owner>/<repo>/pull/<number> URL", rule.Path)
+		}
+		if citation.PR <= 0 || prNumber != citation.PR {
+			return provenanceIntegrityError("matched active memory rule citation URL pull number must match provenance pr", rule.Path)
+		}
+	}
+	return nil
+}
+
+func servedAssessmentRuleCitationURLs(rule assessmentRule) []string {
+	return assessmentRuleCitationURLs(servedAssessmentRuleCitations(rule))
+}
+
+func servedAssessmentRuleCitations(rule assessmentRule) []assessmentRuleCitation {
+	var refs []assessmentRuleCitation
+	for _, citation := range rule.Citations {
+		if rule.Kind == "playbook" && citation.Outcome != "fix_held" && citation.Outcome != "merged_clean" {
+			continue
+		}
+		refs = append(refs, citation)
+	}
+	return uniqueAssessmentRuleCitations(refs)
+}
+
+func assessmentRuleCitationURLs(refs []assessmentRuleCitation) []string {
+	var citations []string
+	for _, citation := range refs {
+		citations = append(citations, citation.URL)
+	}
+	return uniqueStrings(citations)
+}
+
+func assessmentRuleMatchesTouchedPath(root string, rule assessmentRule, touchedPaths []string) bool {
+	for _, rawScopePath := range rule.ScopePaths {
+		scopePath, directoryScope, ok := normalizeAssessmentScopePath(root, rawScopePath)
+		if !ok {
+			continue
+		}
+		for _, touchedPath := range touchedPaths {
+			touchedPath = filepath.ToSlash(filepath.Clean(filepath.FromSlash(touchedPath)))
+			if scopePatternMatches(scopePath, touchedPath) || scopePath == touchedPath || directoryScopeMatches(scopePath, touchedPath, directoryScope) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func normalizeAssessmentScopePath(root string, raw string) (string, bool, bool) {
+	trimmed := strings.TrimSpace(raw)
+	if trimmed == "" {
+		return "", false, false
+	}
+	slashPath := filepath.ToSlash(trimmed)
+	directoryScope := strings.HasSuffix(slashPath, "/") && !hasGlobMagic(slashPath)
+	clean, ok := cleanRepoPath(slashPath)
+	if !ok {
+		return "", false, false
+	}
+	scopePath := filepath.ToSlash(clean)
+	if !directoryScope && !hasGlobMagic(scopePath) {
+		info, err := os.Stat(filepath.Join(root, filepath.FromSlash(scopePath)))
+		if err == nil {
+			directoryScope = info.IsDir()
+		} else if historicalDirectoryScope(root, scopePath) {
+			directoryScope = true
+		}
+	}
+	return scopePath, directoryScope, true
+}
+
+func directoryScopeMatches(scopePath string, touchedPath string, directoryScope bool) bool {
+	if !directoryScope {
+		return false
+	}
+	return touchedPath == scopePath || strings.HasPrefix(touchedPath, scopePath+"/")
+}
+
+func historicalDirectoryScope(root string, scopePath string) bool {
+	output, err := exec.Command("git", "-C", root, "log", "--all", "--name-only", "--format=", "--", scopePath).Output()
+	if err != nil {
+		return false
+	}
+	prefix := strings.TrimSuffix(scopePath, "/") + "/"
+	for _, line := range strings.Split(string(output), "\n") {
+		clean, ok := cleanRepoPath(line)
+		if ok && strings.HasPrefix(filepath.ToSlash(clean), prefix) {
+			return true
+		}
+	}
+	return false
 }
 
 func readReliaConfig(root string) (yamlDocument, *CommandError) {
@@ -1239,6 +2060,29 @@ func validGitHubProvenanceURLShape(value string) bool {
 		parsed.RawQuery == "" &&
 		parsed.Fragment == "" &&
 		strings.Trim(parsed.Path, "/") != ""
+}
+
+func gitHubPullRequestURLNumber(value string) (int, bool) {
+	parsed, err := url.Parse(strings.TrimSpace(value))
+	if err != nil {
+		return 0, false
+	}
+	if parsed.Scheme != "https" ||
+		!strings.EqualFold(parsed.Host, "github.com") ||
+		parsed.User != nil ||
+		parsed.RawQuery != "" ||
+		parsed.Fragment != "" {
+		return 0, false
+	}
+	parts := strings.Split(strings.Trim(parsed.Path, "/"), "/")
+	if len(parts) != 4 || parts[2] != "pull" {
+		return 0, false
+	}
+	if parts[0] == "" || parts[1] == "" {
+		return 0, false
+	}
+	number, err := strconv.Atoi(parts[3])
+	return number, err == nil && number > 0
 }
 
 func unsafeGitHubURLPathEntropyToken(value string) string {
@@ -2054,7 +2898,7 @@ func internalError(message string, err error) *CommandError {
 }
 
 func renderAndExit(stdout io.Writer, stderr io.Writer, result CommandResult, flags globalFlags, stdoutIsTTY bool) int {
-	machineReadable := flags.json || flags.quiet || flags.compact || !stdoutIsTTY
+	machineReadable := flags.json || flags.quiet || flags.compact || result.MachineReadable || !stdoutIsTTY
 	var err error
 	if machineReadable {
 		err = writeJSON(stdout, result, flags.compact || flags.quiet)

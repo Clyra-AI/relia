@@ -1,0 +1,38 @@
+{
+  "acceptance_item_ids": [
+    "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-004"
+  ],
+  "artifact_type": "work_proof_marker",
+  "changed_paths": [
+    ".factory/artifacts/task-runs/T4.3/proof-of-behavior-scorecard.json",
+    ".factory/artifacts/task-runs/T4.3/validation-report.json",
+    ".factory/artifacts/task-runs/T4.3/work-proof-marker.json",
+    "README.md",
+    "cmd/relia/demo_fixtures_test.go",
+    "cmd/relia/main.go",
+    "cmd/relia/main_test.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/dev/dev_guides.md",
+    "examples/demo/assessment-fixtures/assessment-fixtures.json",
+    "examples/demo/assessment-fixtures/planted-pattern.diff",
+    "examples/demo/assessment-fixtures/seeded-repo/packages/billing/invoice.py",
+    "examples/demo/assessment-fixtures/seeded-repo/packages/search/query.py",
+    "examples/demo/assessment-fixtures/unknown-path.diff",
+    "memory/rules/demo-assessment-active-rule.yaml"
+  ],
+  "evidence_refs": [
+    ".factory/artifacts/task-runs/T4.3/validation-report.json",
+    ".factory/artifacts/task-runs/T4.3/proof-of-behavior-scorecard.json"
+  ],
+  "implementation_performed": true,
+  "objective": "Build assessment fixture coverage for planted-pattern and unknown-path diffs without bundling unrelated corpus work.",
+  "repair_summary": [
+    "Separated served assessment citation validation into validateServedAssessmentRuleCitations so playbook assessment validates only citations it can emit.",
+    "Confirmed active memory rule identity validation still requires a pr on every provenance entry before assessment serving.",
+    "Preserved T4.3 planted-pattern match_high and unknown-path no_coverage fixture behavior."
+  ],
+  "repair_task_id": "20260626T200025.692043000Z-relia-T4.3-repair-33",
+  "schema_version": "1.0",
+  "status": "implemented",
+  "task_id": "T4.3"
+}
