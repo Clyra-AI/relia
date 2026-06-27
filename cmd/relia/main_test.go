@@ -2441,6 +2441,26 @@ rename to b/foo.py
 	}
 }
 
+func TestParseUnifiedDiffTouchedPathsKeepsPriorRootPathWhenMetadataUsesAPrefix(t *testing.T) {
+	paths, commandErr := parseUnifiedDiffTouchedPaths([]byte(`diff --git a/.foo.py b/.foo.py
+--- a/.foo.py
++++ b/.foo.py
+@@ -1 +1 @@
+-old
++new
+diff --git a/.foo.py b/.foo.py
+similarity index 100%
+rename from a/.foo.py
+rename to b/.foo.py
+`), "root-path-before-no-prefix-a-prefix-rename.diff")
+	if commandErr != nil {
+		t.Fatalf("parse diff: %v", commandErr)
+	}
+	if fmt.Sprint(paths) != fmt.Sprint([]string{".foo.py", "a/.foo.py", "b/.foo.py"}) {
+		t.Fatalf("paths = %#v", paths)
+	}
+}
+
 func TestParseUnifiedDiffTouchedPathsKeepsQuotedSpaces(t *testing.T) {
 	paths, commandErr := parseUnifiedDiffTouchedPaths([]byte(`diff --git "a/docs/api guide.md" "b/docs/api guide.md"
 --- "a/docs/api guide.md"

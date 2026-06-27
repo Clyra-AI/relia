@@ -687,6 +687,7 @@ func parseUnifiedDiffTouchedPaths(content []byte, ref string) ([]string, *Comman
 	touched := map[string]bool{}
 	inFileHeader := false
 	gitFileHeader := false
+	currentHeaderAdded := map[string]bool{}
 	hunkOldRemaining := 0
 	hunkNewRemaining := 0
 	lines := strings.Split(string(content), "\n")
@@ -699,10 +700,17 @@ func parseUnifiedDiffTouchedPaths(content []byte, ref string) ([]string, *Comman
 		switch {
 		case strings.HasPrefix(line, "diff --git "):
 			inFileHeader = true
+			currentHeaderAdded = map[string]bool{}
 			headerPaths, stripGitHeaderPrefix := diffGitHeaderPaths(line)
 			gitFileHeader = stripGitHeaderPrefix
 			for _, path := range headerPaths {
-				addDiffPath(touched, path, stripGitHeaderPrefix)
+				if cleanPath, ok := normalizedDiffPath(path, stripGitHeaderPrefix); ok {
+					_, existed := touched[cleanPath]
+					touched[cleanPath] = true
+					if _, tracked := currentHeaderAdded[cleanPath]; !tracked {
+						currentHeaderAdded[cleanPath] = !existed
+					}
+				}
 			}
 		case inFileHeader && strings.HasPrefix(line, "--- "):
 			if !gitFileHeader {
@@ -716,13 +724,13 @@ func parseUnifiedDiffTouchedPaths(content []byte, ref string) ([]string, *Comman
 		case inFileHeader && strings.HasPrefix(line, "+++ "):
 			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "+++ ")), gitFileHeader)
 		case inFileHeader && strings.HasPrefix(line, "rename from "):
-			addDiffMetadataPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "rename from ")))
+			addDiffMetadataPath(touched, currentHeaderAdded, strings.TrimSpace(strings.TrimPrefix(line, "rename from ")))
 		case inFileHeader && strings.HasPrefix(line, "rename to "):
-			addDiffMetadataPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "rename to ")))
+			addDiffMetadataPath(touched, currentHeaderAdded, strings.TrimSpace(strings.TrimPrefix(line, "rename to ")))
 		case inFileHeader && strings.HasPrefix(line, "copy from "):
-			addDiffMetadataPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "copy from ")))
+			addDiffMetadataPath(touched, currentHeaderAdded, strings.TrimSpace(strings.TrimPrefix(line, "copy from ")))
 		case inFileHeader && strings.HasPrefix(line, "copy to "):
-			addDiffMetadataPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "copy to ")))
+			addDiffMetadataPath(touched, currentHeaderAdded, strings.TrimSpace(strings.TrimPrefix(line, "copy to ")))
 		case strings.HasPrefix(line, "@@"):
 			inFileHeader = false
 			gitFileHeader = false
@@ -920,6 +928,12 @@ func nextDiffHeaderPath(input string) (string, string, bool) {
 }
 
 func addDiffPath(touched map[string]bool, raw string, stripGitPrefix bool) {
+	if cleanPath, ok := normalizedDiffPath(raw, stripGitPrefix); ok {
+		touched[cleanPath] = true
+	}
+}
+
+func normalizedDiffPath(raw string, stripGitPrefix bool) (string, bool) {
 	pathPart := strings.TrimSpace(raw)
 	quoted := strings.HasPrefix(pathPart, "\"")
 	if quoted {
@@ -933,28 +947,28 @@ func addDiffPath(touched map[string]bool, raw string, stripGitPrefix bool) {
 		}
 	}
 	if pathPart == "" || pathPart == "/dev/null" {
-		return
+		return "", false
 	}
 	if stripGitPrefix && (strings.HasPrefix(pathPart, "a/") || strings.HasPrefix(pathPart, "b/")) {
 		pathPart = pathPart[2:]
 	}
 	if clean, ok := cleanRepoPath(pathPart); ok {
-		touched[filepath.ToSlash(clean)] = true
+		return filepath.ToSlash(clean), true
 	}
+	return "", false
 }
 
-func addDiffMetadataPath(touched map[string]bool, raw string) {
+func addDiffMetadataPath(touched map[string]bool, currentHeaderAdded map[string]bool, raw string) {
 	addDiffPath(touched, raw, false)
 	raw = strings.TrimSpace(raw)
 	if strings.HasPrefix(raw, "a/") || strings.HasPrefix(raw, "b/") {
-		removeDiffPath(touched, raw[2:])
+		removeDiffPathIfHeaderAdded(touched, currentHeaderAdded, raw[2:])
 	}
 }
 
-func removeDiffPath(touched map[string]bool, raw string) {
-	pathPart := strings.TrimSpace(raw)
-	if clean, ok := cleanRepoPath(pathPart); ok {
-		delete(touched, filepath.ToSlash(clean))
+func removeDiffPathIfHeaderAdded(touched map[string]bool, currentHeaderAdded map[string]bool, raw string) {
+	if cleanPath, ok := normalizedDiffPath(raw, false); ok && currentHeaderAdded[cleanPath] {
+		delete(touched, cleanPath)
 	}
 }
 
