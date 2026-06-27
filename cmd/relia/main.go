@@ -191,6 +191,22 @@ type assessOptions struct {
 	FormatExplicit bool
 }
 
+type distillOptions struct {
+	Format       string
+	RuleDir      string
+	HalfLifeDays int
+}
+
+type reviewOptions struct {
+	Rule  string
+	Label string
+}
+
+type memoryOptions struct {
+	Format     string
+	OutputPath string
+}
+
 type riskAssessment struct {
 	ObjectType    string                `json:"object_type"`
 	SchemaVersion string                `json:"schema_version"`
@@ -402,6 +418,74 @@ type backtestCitation struct {
 	ExperienceID string `json:"experience_id"`
 }
 
+type distilledRule struct {
+	ID              string
+	Kind            string
+	Status          string
+	Statement       string
+	ScopePaths      []string
+	ScopeSignals    []string
+	Confidence      float64
+	EvidenceCount   int
+	Contradictions  int
+	Experiences     []string
+	Provenance      []distilledRuleProvenance
+	ReviewLabel     string
+	StatementOrigin string
+	Metadata        distilledRuleMetadata
+}
+
+type distilledRuleProvenance struct {
+	PR           int
+	Outcome      string
+	URL          string
+	ExperienceID string
+}
+
+type distilledRuleMetadata struct {
+	ConfidenceLabel       string
+	EvidenceCount         int
+	RecencyWeight         float64
+	Contradictions        int
+	FlakeDiscount         float64
+	ExtractionConfidence  float64
+	DraftingModelWeight   float64
+	HalfLifeDays          int
+	LatestEvidenceAt      string
+	OldestEvidenceAt      string
+	AnchorRecordedAt      string
+	LifecycleReason       string
+	ClusterKey            string
+	ClusterKeyHash        string
+	SourceArtifacts       []string
+	SourceArtifactDigest  string
+	Provider              string
+	EmbeddingMode         string
+	ReviewRequired        bool
+	DeterministicFallback bool
+}
+
+type distillCluster struct {
+	Key     string
+	Signal  string
+	Records []backtestExperience
+}
+
+type memoryRuleSummary struct {
+	ID              string
+	Kind            string
+	Status          string
+	Statement       string
+	Confidence      string
+	ConfidenceLabel string
+	EvidenceCount   string
+	Contradictions  string
+	ReviewLabel     string
+	StatementOrigin string
+	Path            string
+	Provenance      []distilledRuleProvenance
+}
+
 func main() {
 	os.Exit(run(os.Args[1:], os.Stdout, os.Stderr, stdoutIsTerminal(os.Stdout)))
 }
@@ -487,12 +571,18 @@ func dispatch(parsed parsedArgs, start time.Time) CommandResult {
 		return backtestResult(parsed.commandArgs, start)
 	case "assess":
 		return assessResult(parsed.commandArgs, start)
+	case "distill":
+		return distillResult(parsed.commandArgs, start)
+	case "review":
+		return reviewResult(parsed.commandArgs, start)
+	case "memory":
+		return memoryResult(parsed.commandArgs, start)
 	case "models":
 		if len(parsed.commandArgs) == 1 && parsed.commandArgs[0] == "pull" {
 			return notImplementedResult("models pull", start)
 		}
 		return errorResult("models", "models", usageError("expected subcommand: pull"), start)
-	case "distill", "review", "memory", "compile", "serve", "demo", "share":
+	case "compile", "serve", "demo", "share":
 		return notImplementedResult(command, start)
 	default:
 		return errorResult(command, command, usageError(fmt.Sprintf("unknown command %q", command)), start)
@@ -1815,6 +1905,1254 @@ func savedBacktestBaselineComparison(baselinePath string, headlineERR float64) (
 		Stale:       false,
 		Reason:      "Saved current headline ERR as the comparison baseline.",
 	}, nil
+}
+
+func distillResult(args []string, start time.Time) CommandResult {
+	options, commandErr := parseDistillArgs(args)
+	withFormat := func(result CommandResult) CommandResult {
+		if options.Format == "json" {
+			result.MachineReadable = true
+		}
+		return result
+	}
+	if commandErr != nil {
+		return withFormat(errorResult("distill", "distill", commandErr, start))
+	}
+	wd, err := os.Getwd()
+	if err != nil {
+		return withFormat(errorResult("distill", "distill", internalError("could not inspect working directory", err), start))
+	}
+	root, ok := findRepoRoot(wd)
+	if !ok {
+		return withFormat(errorResult("distill", "distill", configError("could not locate repository root from current directory"), start))
+	}
+	warnings, commandErr := validateReliaConfig(root)
+	if commandErr != nil {
+		return withFormat(errorResult("distill", "distill", commandErr, start))
+	}
+	config, commandErr := readReliaConfig(root)
+	if commandErr != nil {
+		return withFormat(errorResult("distill", "distill", commandErr, start))
+	}
+	provider, providerRef := distillProvider(config)
+	if provider != "none" {
+		return withFormat(errorResult("distill", "distill", dependencyError("provider-backed distill requires an approved model_provider_endpoint gate; no experience records were sent", providerRef), start))
+	}
+	records, sourceArtifacts, sourceDigest, commandErr := loadBacktestExperiences(root)
+	if commandErr != nil {
+		return withFormat(errorResult("distill", "distill", commandErr, start))
+	}
+	rules, commandErr := buildDistilledRules(root, config, records, sourceArtifacts, sourceDigest, options)
+	if commandErr != nil {
+		return withFormat(errorResult("distill", "distill", commandErr, start))
+	}
+	ruleArtifacts, commandErr := writeDistilledRules(root, options.RuleDir, rules)
+	if commandErr != nil {
+		return withFormat(errorResult("distill", "distill", commandErr, start))
+	}
+	if commandErr := validateMemoryRuleArtifacts(root); commandErr != nil {
+		return withFormat(errorResult("distill", "distill", commandErr, start))
+	}
+
+	statusCounts := distillStatusCounts(rules)
+	result := passResult("distill", "distill", "drafted deterministic memory rules from local experience records", start, map[string]any{
+		"format":                     options.Format,
+		"rule_dir":                   options.RuleDir,
+		"rules_written":              len(rules),
+		"candidate_rules":            statusCounts["candidate"],
+		"active_rules":               statusCounts["active"],
+		"stale_rules":                statusCounts["stale"],
+		"contradicted_rules":         statusCounts["contradicted"],
+		"retired_rules":              statusCounts["retired"],
+		"provider":                   provider,
+		"embedding_mode":             distillEmbeddingMode(config),
+		"review_required":            distillReviewRequired(config),
+		"deterministic_fallback":     true,
+		"confidence_model":           "evidence_count+recency_half_life+contradictions+flake_discount+extraction_confidence",
+		"drafting_model_confidence":  0,
+		"decay_half_life_days":       options.HalfLifeDays,
+		"source_artifacts":           sourceArtifacts,
+		"source_artifact_digest":     sourceDigest,
+		"drafted_rules":              distilledRuleData(rules, ruleArtifacts),
+		"provider_data_disclosure":   "none; provider is none and no network call was attempted",
+		"redacted_records_only":      true,
+		"local_privacy_default":      true,
+		"review_gate_disabled_label": "distill.review_required=false is required before distill can draft active rules",
+	})
+	result.Warnings = append(result.Warnings, warnings...)
+	result.EvidenceRefs = append(result.EvidenceRefs,
+		"schemas/memory-rule.schema.json",
+		"docs/product/prd.md#distill-calibrate-review-memory-page",
+	)
+	for _, artifact := range sourceArtifacts {
+		result.EvidenceRefs = append(result.EvidenceRefs, artifact)
+		result.Artifacts = append(result.Artifacts, ArtifactRef{Kind: "experience_shard", Path: artifact})
+	}
+	for _, artifact := range ruleArtifacts {
+		result.EvidenceRefs = append(result.EvidenceRefs, artifact.Path)
+		result.Artifacts = append(result.Artifacts, artifact)
+	}
+	result.RedactionStatus = "applied"
+	return withFormat(result)
+}
+
+func parseDistillArgs(args []string) (distillOptions, *CommandError) {
+	options := distillOptions{
+		Format:       "json",
+		RuleDir:      "memory/rules",
+		HalfLifeDays: 180,
+	}
+	for index := 0; index < len(args); index++ {
+		arg := args[index]
+		switch arg {
+		case "--format":
+			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
+				return options, usageError("distill requires a value after --format")
+			}
+			options.Format = args[index+1]
+			index++
+		case "--rule-dir":
+			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
+				return options, usageError("distill requires a repo-relative path after --rule-dir")
+			}
+			options.RuleDir = args[index+1]
+			index++
+		case "--half-life-days":
+			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
+				return options, usageError("distill requires a positive integer after --half-life-days")
+			}
+			parsed, err := strconv.Atoi(args[index+1])
+			if err != nil || parsed <= 0 {
+				return options, usageError("distill --half-life-days must be a positive integer")
+			}
+			options.HalfLifeDays = parsed
+			index++
+		default:
+			return options, usageError(fmt.Sprintf("unknown distill argument %q", arg))
+		}
+	}
+	if options.Format != "json" {
+		return options, usageError("distill only supports --format json in this task slice")
+	}
+	if _, ok := cleanRepoPath(options.RuleDir); !ok {
+		return options, usageError("distill --rule-dir must be a repo-relative path")
+	}
+	return options, nil
+}
+
+func reviewResult(args []string, start time.Time) CommandResult {
+	options, commandErr := parseReviewArgs(args)
+	if commandErr != nil {
+		return errorResult("review", "review", commandErr, start)
+	}
+	wd, err := os.Getwd()
+	if err != nil {
+		return errorResult("review", "review", internalError("could not inspect working directory", err), start)
+	}
+	root, ok := findRepoRoot(wd)
+	if !ok {
+		return errorResult("review", "review", configError("could not locate repository root from current directory"), start)
+	}
+	warnings, commandErr := validateReliaConfig(root)
+	if commandErr != nil {
+		return errorResult("review", "review", commandErr, start)
+	}
+	rulePath, commandErr := findMemoryRulePath(root, "memory/rules", options.Rule)
+	if commandErr != nil {
+		return errorResult("review", "review", commandErr, start)
+	}
+	status, commandErr := updateMemoryRuleReview(root, rulePath, options.Label)
+	if commandErr != nil {
+		return errorResult("review", "review", commandErr, start)
+	}
+	rel := displayPath(root, rulePath)
+	result := passResult("review", "review", "updated memory rule review label", start, map[string]any{
+		"rule":         options.Rule,
+		"rule_path":    rel,
+		"review_label": options.Label,
+		"status":       status,
+	})
+	result.Warnings = append(result.Warnings, warnings...)
+	result.EvidenceRefs = append(result.EvidenceRefs, "schemas/memory-rule.schema.json", rel)
+	result.Artifacts = append(result.Artifacts, ArtifactRef{Kind: "memory_rule", Path: rel})
+	return result
+}
+
+func parseReviewArgs(args []string) (reviewOptions, *CommandError) {
+	options := reviewOptions{Label: "accepted"}
+	for index := 0; index < len(args); index++ {
+		arg := args[index]
+		switch arg {
+		case "--rule":
+			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
+				return options, usageError("review requires a rule id or path after --rule")
+			}
+			options.Rule = args[index+1]
+			index++
+		case "--label":
+			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
+				return options, usageError("review requires accepted, suggested, or needs_user_input after --label")
+			}
+			options.Label = args[index+1]
+			index++
+		default:
+			return options, usageError(fmt.Sprintf("unknown review argument %q", arg))
+		}
+	}
+	if strings.TrimSpace(options.Rule) == "" {
+		return options, usageError("review requires --rule <id-or-path>")
+	}
+	switch options.Label {
+	case "accepted", "suggested", "needs_user_input":
+	default:
+		return options, usageError("review --label must be accepted, suggested, or needs_user_input")
+	}
+	return options, nil
+}
+
+func memoryResult(args []string, start time.Time) CommandResult {
+	options, commandErr := parseMemoryArgs(args)
+	withFormat := func(result CommandResult) CommandResult {
+		if options.Format == "json" {
+			result.MachineReadable = true
+		}
+		return result
+	}
+	if commandErr != nil {
+		return withFormat(errorResult("memory", "memory", commandErr, start))
+	}
+	wd, err := os.Getwd()
+	if err != nil {
+		return withFormat(errorResult("memory", "memory", internalError("could not inspect working directory", err), start))
+	}
+	root, ok := findRepoRoot(wd)
+	if !ok {
+		return withFormat(errorResult("memory", "memory", configError("could not locate repository root from current directory"), start))
+	}
+	warnings, commandErr := validateReliaConfig(root)
+	if commandErr != nil {
+		return withFormat(errorResult("memory", "memory", commandErr, start))
+	}
+	rules, commandErr := loadMemoryRuleSummaries(root)
+	if commandErr != nil {
+		return withFormat(errorResult("memory", "memory", commandErr, start))
+	}
+	outputPath, commandErr := writeMemoryPage(root, options.OutputPath, rules)
+	if commandErr != nil {
+		return withFormat(errorResult("memory", "memory", commandErr, start))
+	}
+	statusCounts := memoryStatusCounts(rules)
+	result := passResult("memory", "memory", "rendered MEMORY.md with rule receipts", start, map[string]any{
+		"format":           options.Format,
+		"memory_page_path": outputPath,
+		"rule_count":       len(rules),
+		"active_rules":     statusCounts["active"],
+		"candidate_rules":  statusCounts["candidate"],
+		"stale_rules":      statusCounts["stale"],
+		"contradicted":     statusCounts["contradicted"],
+	})
+	result.Warnings = append(result.Warnings, warnings...)
+	result.EvidenceRefs = append(result.EvidenceRefs, "schemas/memory-rule.schema.json", outputPath)
+	result.Artifacts = append(result.Artifacts, ArtifactRef{Kind: "memory_page", Path: outputPath})
+	for _, rule := range rules {
+		result.EvidenceRefs = append(result.EvidenceRefs, rule.Path)
+		result.Artifacts = append(result.Artifacts, ArtifactRef{Kind: "memory_rule", Path: rule.Path})
+	}
+	return withFormat(result)
+}
+
+func parseMemoryArgs(args []string) (memoryOptions, *CommandError) {
+	options := memoryOptions{Format: "json", OutputPath: "memory/MEMORY.md"}
+	for index := 0; index < len(args); index++ {
+		arg := args[index]
+		switch arg {
+		case "--format":
+			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
+				return options, usageError("memory requires a value after --format")
+			}
+			options.Format = args[index+1]
+			index++
+		case "--output":
+			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
+				return options, usageError("memory requires a repo-relative path after --output")
+			}
+			options.OutputPath = args[index+1]
+			index++
+		default:
+			return options, usageError(fmt.Sprintf("unknown memory argument %q", arg))
+		}
+	}
+	if options.Format != "json" {
+		return options, usageError("memory only supports --format json in this task slice")
+	}
+	if _, ok := cleanRepoPath(options.OutputPath); !ok {
+		return options, usageError("memory --output must be a repo-relative path")
+	}
+	return options, nil
+}
+
+func distillProvider(config yamlDocument) (string, string) {
+	if scalar, ok := config.Scalars["distill.provider"]; ok {
+		return scalar.Value, configRef(scalar)
+	}
+	return "none", defaultConfigFile
+}
+
+func distillEmbeddingMode(config yamlDocument) string {
+	if scalar, ok := config.Scalars["distill.embeddings"]; ok {
+		return scalar.Value
+	}
+	return "signature"
+}
+
+func distillReviewRequired(config yamlDocument) bool {
+	if scalar, ok := config.Scalars["distill.review_required"]; ok {
+		return scalar.Value != "false"
+	}
+	return true
+}
+
+func buildDistilledRules(root string, config yamlDocument, records []backtestExperience, sourceArtifacts []string, sourceDigest string, options distillOptions) ([]distilledRule, *CommandError) {
+	if len(records) == 0 {
+		return nil, artifactContractError("distill found no experience records in .relia/experiences", ".relia/experiences")
+	}
+	sort.Slice(records, func(i, j int) bool {
+		if records[i].RecordedAt.Equal(records[j].RecordedAt) {
+			return records[i].Record.ExperienceID < records[j].Record.ExperienceID
+		}
+		return records[i].RecordedAt.Before(records[j].RecordedAt)
+	})
+	anchor := records[len(records)-1].RecordedAt.UTC()
+	clusters := buildDistillClusters(records)
+	flakeHeuristics := autoFlakeDiscountedExperiences(records)
+	provider, _ := distillProvider(config)
+	embeddingMode := distillEmbeddingMode(config)
+	reviewRequired := distillReviewRequired(config)
+
+	var rules []distilledRule
+	for _, cluster := range clusters {
+		failures := distillFailureEvidence(cluster.Records)
+		positives := distillPositiveEvidence(cluster.Records)
+		if len(failures) > 0 && !allDistillEvidenceDiscounted(failures, flakeHeuristics) {
+			rule, ok := buildDistilledRule(root, "avoid", cluster, failures, len(positives), anchor, sourceArtifacts, sourceDigest, provider, embeddingMode, reviewRequired, options, flakeHeuristics)
+			if ok {
+				rules = append(rules, rule)
+			}
+		}
+		held := distillHeldEvidence(cluster.Records)
+		if len(held) > 0 {
+			playbookEvidence := positives
+			if len(playbookEvidence) == 0 {
+				playbookEvidence = held
+			}
+			contradictions := distillPlaybookContradictions(playbookEvidence, failures)
+			rule, ok := buildDistilledRule(root, "playbook", cluster, playbookEvidence, contradictions, anchor, sourceArtifacts, sourceDigest, provider, embeddingMode, reviewRequired, options, flakeHeuristics)
+			if ok {
+				rules = append(rules, rule)
+			}
+		}
+	}
+	sort.Slice(rules, func(i, j int) bool {
+		return rules[i].ID < rules[j].ID
+	})
+	return rules, nil
+}
+
+func buildDistillClusters(records []backtestExperience) []distillCluster {
+	byKey := map[string]*distillCluster{}
+	for _, record := range records {
+		if record.Record.Attribution.ActorKind == "uncertain" {
+			continue
+		}
+		key := distillClusterKey(record.Record)
+		if key == "" {
+			continue
+		}
+		cluster := byKey[key]
+		if cluster == nil {
+			cluster = &distillCluster{Key: key}
+			byKey[key] = cluster
+		}
+		cluster.Records = append(cluster.Records, record)
+		if cluster.Signal == "" {
+			cluster.Signal = distillRecordSignal(record.Record)
+		}
+	}
+	clusters := make([]distillCluster, 0, len(byKey))
+	for _, cluster := range byKey {
+		sort.Slice(cluster.Records, func(i, j int) bool {
+			if cluster.Records[i].RecordedAt.Equal(cluster.Records[j].RecordedAt) {
+				return cluster.Records[i].Record.ExperienceID < cluster.Records[j].Record.ExperienceID
+			}
+			return cluster.Records[i].RecordedAt.Before(cluster.Records[j].RecordedAt)
+		})
+		clusters = append(clusters, *cluster)
+	}
+	sort.Slice(clusters, func(i, j int) bool {
+		return clusters[i].Key < clusters[j].Key
+	})
+	return clusters
+}
+
+func distillClusterKey(record experienceRecord) string {
+	if strings.TrimSpace(record.Outcome.Signature.SignatureID) != "" {
+		return strings.Join([]string{"id", record.Outcome.Signature.SignatureID}, "\x00")
+	}
+	keys := recurrenceSignatureKeys(record)
+	if len(keys) > 0 {
+		return keys[0]
+	}
+	return ""
+}
+
+func distillRecordSignal(record experienceRecord) string {
+	signatureMetadata, _ := record.Metadata["signature"].(map[string]any)
+	for _, value := range []string{
+		stringFromAny(signatureMetadata["check_name"]),
+		stringFromAny(signatureMetadata["key"]),
+		record.Outcome.Signature.SignatureID,
+		record.Outcome.Kind,
+	} {
+		if strings.TrimSpace(value) != "" {
+			return value
+		}
+	}
+	return "signature"
+}
+
+func distillFailureEvidence(records []backtestExperience) []backtestExperience {
+	var evidence []backtestExperience
+	for _, record := range records {
+		if isFailureOutcome(record.Record.Outcome.Kind) {
+			evidence = append(evidence, record)
+		}
+	}
+	return evidence
+}
+
+func distillPositiveEvidence(records []backtestExperience) []backtestExperience {
+	var evidence []backtestExperience
+	for _, record := range records {
+		switch record.Record.Outcome.Kind {
+		case "fix_held", "merged_clean":
+			evidence = append(evidence, record)
+		}
+	}
+	return evidence
+}
+
+func distillHeldEvidence(records []backtestExperience) []backtestExperience {
+	var evidence []backtestExperience
+	for _, record := range records {
+		if record.Record.Outcome.Kind == "fix_held" {
+			evidence = append(evidence, record)
+		}
+	}
+	return evidence
+}
+
+func allDistillEvidenceDiscounted(records []backtestExperience, flakeHeuristics map[string]string) bool {
+	if len(records) == 0 {
+		return true
+	}
+	for _, record := range records {
+		if distillFlakeDiscount(record, flakeHeuristics) < 0.75 {
+			return false
+		}
+	}
+	return true
+}
+
+func distillPlaybookContradictions(positives []backtestExperience, failures []backtestExperience) int {
+	if len(positives) == 0 || len(failures) == 0 {
+		return 0
+	}
+	latestPositive := positives[0].RecordedAt
+	for _, record := range positives[1:] {
+		if record.RecordedAt.After(latestPositive) {
+			latestPositive = record.RecordedAt
+		}
+	}
+	contradictions := 0
+	for _, failure := range failures {
+		if failure.RecordedAt.After(latestPositive) {
+			contradictions++
+		}
+	}
+	return contradictions
+}
+
+func buildDistilledRule(root string, kind string, cluster distillCluster, evidence []backtestExperience, contradictions int, anchor time.Time, sourceArtifacts []string, sourceDigest string, provider string, embeddingMode string, reviewRequired bool, options distillOptions, flakeHeuristics map[string]string) (distilledRule, bool) {
+	scopePaths := distillScopePaths(evidence)
+	scopeSignals := distillScopeSignals(cluster, evidence)
+	if len(scopePaths) == 0 && len(scopeSignals) == 0 {
+		return distilledRule{}, false
+	}
+	confidence, metadata := distilledConfidenceMetadata(evidence, contradictions, anchor, options.HalfLifeDays, flakeHeuristics)
+	status, reason := distilledRuleStatus(root, kind, scopePaths, len(evidence), contradictions, reviewRequired)
+	metadata.LifecycleReason = reason
+	metadata.ClusterKey = strings.ReplaceAll(cluster.Key, "\x00", "|")
+	metadata.ClusterKeyHash = shortHash(cluster.Key)
+	metadata.SourceArtifacts = append([]string(nil), sourceArtifacts...)
+	metadata.SourceArtifactDigest = sourceDigest
+	metadata.Provider = provider
+	metadata.EmbeddingMode = embeddingMode
+	metadata.ReviewRequired = reviewRequired
+	metadata.DeterministicFallback = provider == "none"
+	id := distilledRuleID(kind, cluster)
+	return distilledRule{
+		ID:              id,
+		Kind:            kind,
+		Status:          status,
+		Statement:       distilledRuleStatement(kind, cluster, scopePaths),
+		ScopePaths:      scopePaths,
+		ScopeSignals:    scopeSignals,
+		Confidence:      confidence,
+		EvidenceCount:   len(evidence),
+		Contradictions:  contradictions,
+		Experiences:     distillExperienceIDs(evidence),
+		Provenance:      distilledProvenance(evidence),
+		ReviewLabel:     distilledReviewLabel(status, confidence),
+		StatementOrigin: "cluster_summary",
+		Metadata:        metadata,
+	}, true
+}
+
+func distillScopePaths(records []backtestExperience) []string {
+	counts := map[string]int{}
+	for _, record := range records {
+		paths := nonTestPaths(record.Record.Context.Paths)
+		if len(paths) == 0 {
+			paths = normalizedRepoPaths(record.Record.Context.Paths)
+		}
+		for _, path := range paths {
+			counts[path]++
+		}
+	}
+	return topCountedStrings(counts, 3)
+}
+
+func distillScopeSignals(cluster distillCluster, records []backtestExperience) []string {
+	counts := map[string]int{}
+	if cluster.Signal != "" {
+		counts[cluster.Signal]++
+	}
+	for _, record := range records {
+		signal := distillRecordSignal(record.Record)
+		if signal != "" {
+			counts[signal]++
+		}
+	}
+	return topCountedStrings(counts, 3)
+}
+
+func topCountedStrings(counts map[string]int, limit int) []string {
+	type counted struct {
+		Value string
+		Count int
+	}
+	var values []counted
+	for value, count := range counts {
+		if strings.TrimSpace(value) == "" {
+			continue
+		}
+		values = append(values, counted{Value: value, Count: count})
+	}
+	sort.Slice(values, func(i, j int) bool {
+		if values[i].Count == values[j].Count {
+			return values[i].Value < values[j].Value
+		}
+		return values[i].Count > values[j].Count
+	})
+	if limit > 0 && len(values) > limit {
+		values = values[:limit]
+	}
+	result := make([]string, 0, len(values))
+	for _, value := range values {
+		result = append(result, value.Value)
+	}
+	return result
+}
+
+func distilledConfidenceMetadata(records []backtestExperience, contradictions int, anchor time.Time, halfLifeDays int, flakeHeuristics map[string]string) (float64, distilledRuleMetadata) {
+	if len(records) == 0 {
+		return 0, distilledRuleMetadata{ConfidenceLabel: "low", HalfLifeDays: halfLifeDays}
+	}
+	oldest := records[0].RecordedAt.UTC()
+	latest := records[0].RecordedAt.UTC()
+	recencyTotal := 0.0
+	extractionTotal := 0.0
+	flakeTotal := 0.0
+	for _, record := range records {
+		if record.RecordedAt.Before(oldest) {
+			oldest = record.RecordedAt.UTC()
+		}
+		if record.RecordedAt.After(latest) {
+			latest = record.RecordedAt.UTC()
+		}
+		ageDays := anchor.Sub(record.RecordedAt.UTC()).Hours() / 24
+		if ageDays < 0 {
+			ageDays = 0
+		}
+		recencyTotal += math.Pow(0.5, ageDays/float64(halfLifeDays))
+		extractionTotal += extractionConfidenceScore(record.Record.Outcome.Signature.ExtractionConfidence)
+		flakeTotal += distillFlakeDiscount(record, flakeHeuristics)
+	}
+	count := float64(len(records))
+	evidenceScore := math.Sqrt(count) / math.Sqrt(3)
+	if evidenceScore > 1 {
+		evidenceScore = 1
+	}
+	recencyWeight := recencyTotal / count
+	extractionScore := extractionTotal / count
+	flakeDiscount := flakeTotal / count
+	flakeScore := 1 - flakeDiscount
+	if flakeScore < 0 {
+		flakeScore = 0
+	}
+	contradictionPenalty := 1 - math.Min(0.65, float64(contradictions)*0.25)
+	confidence := roundFloat((0.40*evidenceScore+0.25*recencyWeight+0.20*extractionScore+0.15*flakeScore)*contradictionPenalty, 4)
+	label := confidenceLabel(confidence)
+	return confidence, distilledRuleMetadata{
+		ConfidenceLabel:      label,
+		EvidenceCount:        len(records),
+		RecencyWeight:        roundFloat(recencyWeight, 4),
+		Contradictions:       contradictions,
+		FlakeDiscount:        roundFloat(flakeDiscount, 4),
+		ExtractionConfidence: roundFloat(extractionScore, 4),
+		DraftingModelWeight:  0,
+		HalfLifeDays:         halfLifeDays,
+		LatestEvidenceAt:     latest.Format(time.RFC3339),
+		OldestEvidenceAt:     oldest.Format(time.RFC3339),
+		AnchorRecordedAt:     anchor.UTC().Format(time.RFC3339),
+	}
+}
+
+func extractionConfidenceScore(value string) float64 {
+	switch value {
+	case "structured":
+		return 1
+	case "log_parsed_high":
+		return 0.85
+	case "log_parsed_low":
+		return 0.45
+	default:
+		return 0.2
+	}
+}
+
+func distillFlakeDiscount(record backtestExperience, flakeHeuristics map[string]string) float64 {
+	discount := record.Record.FlakeDiscount
+	if flakeHeuristics[record.Record.ExperienceID] != "" && discount < 1 {
+		discount = 1
+	}
+	if discount < 0 {
+		return 0
+	}
+	if discount > 1 {
+		return 1
+	}
+	return discount
+}
+
+func confidenceLabel(confidence float64) string {
+	switch {
+	case confidence >= 0.75:
+		return "high"
+	case confidence >= 0.5:
+		return "medium"
+	default:
+		return "low"
+	}
+}
+
+func distilledRuleStatus(root string, kind string, scopePaths []string, evidenceCount int, contradictions int, reviewRequired bool) (string, string) {
+	if len(scopePaths) > 0 && allScopePathsMissing(root, scopePaths) {
+		return "stale", "all scoped paths are missing from the working tree"
+	}
+	if contradictions > 0 && contradictions >= evidenceCount {
+		return "contradicted", "later held or clean evidence contradicts the drafted rule"
+	}
+	if !reviewRequired {
+		return "active", "review gate disabled explicitly in relia.yaml"
+	}
+	return "candidate", "human review required before activation"
+}
+
+func allScopePathsMissing(root string, scopePaths []string) bool {
+	for _, scopePath := range scopePaths {
+		clean, ok := cleanRepoPath(scopePath)
+		if !ok {
+			continue
+		}
+		if workingTreePathMatches(root, clean) {
+			return false
+		}
+	}
+	return true
+}
+
+func distilledReviewLabel(status string, confidence float64) string {
+	switch status {
+	case "active":
+		return "accepted"
+	case "stale", "contradicted", "retired":
+		return "needs_user_input"
+	default:
+		if confidence < 0.55 {
+			return "needs_user_input"
+		}
+		return "suggested"
+	}
+}
+
+func distilledRuleID(kind string, cluster distillCluster) string {
+	slug := slugifyRuleIDPart(cluster.Signal)
+	if slug == "" {
+		slug = "signature"
+	}
+	return fmt.Sprintf("%s-%s-%s", kind, slug, shortHash(kind+"\x00"+cluster.Key))
+}
+
+func slugifyRuleIDPart(value string) string {
+	value = strings.ToLower(strings.TrimSpace(value))
+	var builder strings.Builder
+	lastDash := false
+	for _, r := range value {
+		keep := false
+		switch {
+		case r >= 'a' && r <= 'z':
+			keep = true
+		case r >= '0' && r <= '9':
+			keep = true
+		}
+		if keep {
+			builder.WriteRune(r)
+			lastDash = false
+			continue
+		}
+		if !lastDash && builder.Len() > 0 {
+			builder.WriteByte('-')
+			lastDash = true
+		}
+	}
+	return strings.Trim(builder.String(), "-")
+}
+
+func distilledRuleStatement(kind string, cluster distillCluster, scopePaths []string) string {
+	scope := "this scope"
+	if len(scopePaths) > 0 {
+		scope = strings.Join(scopePaths, ", ")
+	}
+	signal := cluster.Signal
+	if signal == "" {
+		signal = "the clustered signature"
+	}
+	if kind == "playbook" {
+		return fmt.Sprintf("Prefer the held %s pattern in %s when this signature appears.", signal, scope)
+	}
+	return fmt.Sprintf("Avoid repeating %s in %s without addressing the prior failure evidence.", signal, scope)
+}
+
+func distillExperienceIDs(records []backtestExperience) []string {
+	var ids []string
+	for _, record := range records {
+		if strings.TrimSpace(record.Record.ExperienceID) != "" {
+			ids = append(ids, record.Record.ExperienceID)
+		}
+	}
+	return uniqueStrings(ids)
+}
+
+func distilledProvenance(records []backtestExperience) []distilledRuleProvenance {
+	seen := map[string]bool{}
+	var refs []distilledRuleProvenance
+	for _, record := range records {
+		url := primaryProvenanceURL(record.Record)
+		key := fmt.Sprintf("%d\x00%s\x00%s", record.Record.Action.PR, record.Record.Outcome.Kind, url)
+		if seen[key] {
+			continue
+		}
+		seen[key] = true
+		refs = append(refs, distilledRuleProvenance{
+			PR:           record.Record.Action.PR,
+			Outcome:      record.Record.Outcome.Kind,
+			URL:          url,
+			ExperienceID: record.Record.ExperienceID,
+		})
+	}
+	sort.Slice(refs, func(i, j int) bool {
+		if refs[i].PR == refs[j].PR {
+			return refs[i].ExperienceID < refs[j].ExperienceID
+		}
+		return refs[i].PR < refs[j].PR
+	})
+	return refs
+}
+
+func writeDistilledRules(root string, ruleDir string, rules []distilledRule) ([]ArtifactRef, *CommandError) {
+	cleanRuleDir, ok := cleanRepoPath(ruleDir)
+	if !ok {
+		return nil, usageError("distill rule directory must be repo-relative")
+	}
+	ruleDirRel := filepath.ToSlash(cleanRuleDir)
+	ruleDirPath := filepath.Join(root, filepath.FromSlash(ruleDirRel))
+	if err := os.MkdirAll(ruleDirPath, 0o755); err != nil {
+		return nil, internalError("could not create memory rule directory", err)
+	}
+	artifacts := make([]ArtifactRef, 0, len(rules))
+	for _, rule := range rules {
+		rule = mergeExistingRuleLifecycle(root, ruleDirRel, rule)
+		rel := filepath.ToSlash(filepath.Join(ruleDirRel, rule.ID+".yaml"))
+		path := filepath.Join(root, filepath.FromSlash(rel))
+		content := []byte(renderDistilledRuleYAML(rule))
+		if commandErr := writeAtomicRepoFile(path, content, "memory rule"); commandErr != nil {
+			return nil, commandErr
+		}
+		artifacts = append(artifacts, ArtifactRef{Kind: "memory_rule", Path: rel})
+	}
+	return artifacts, nil
+}
+
+func mergeExistingRuleLifecycle(root string, ruleDir string, rule distilledRule) distilledRule {
+	path, commandErr := findMemoryRulePath(root, ruleDir, rule.ID)
+	if commandErr != nil {
+		return rule
+	}
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return rule
+	}
+	document, err := parseYAMLDocument(string(content))
+	if err != nil {
+		return rule
+	}
+	if document.Scalars["status"].Value == "active" &&
+		document.Scalars["review.label"].Value == "accepted" &&
+		rule.Status == "candidate" {
+		rule.Status = "active"
+		rule.ReviewLabel = "accepted"
+		rule.Metadata.LifecycleReason = "previous accepted review preserved"
+	}
+	return rule
+}
+
+func renderDistilledRuleYAML(rule distilledRule) string {
+	var builder strings.Builder
+	builder.WriteString("object_type: relia.memory_rule\n")
+	builder.WriteString("schema_version: \"1.0\"\n")
+	builder.WriteString("id: " + yamlScalarForWrite(rule.ID) + "\n")
+	builder.WriteString("kind: " + yamlScalarForWrite(rule.Kind) + "\n")
+	builder.WriteString("status: " + yamlScalarForWrite(rule.Status) + "\n")
+	builder.WriteString("statement: " + yamlScalarForWrite(rule.Statement) + "\n")
+	builder.WriteString("scope:\n")
+	writeYAMLStringList(&builder, "paths", rule.ScopePaths, 2)
+	writeYAMLStringList(&builder, "signals", rule.ScopeSignals, 2)
+	builder.WriteString("confidence: " + yamlFloat(rule.Confidence) + "\n")
+	builder.WriteString("evidence:\n")
+	builder.WriteString("  count: " + strconv.Itoa(rule.EvidenceCount) + "\n")
+	builder.WriteString("  contradictions: " + strconv.Itoa(rule.Contradictions) + "\n")
+	writeYAMLStringList(&builder, "experiences", rule.Experiences, 2)
+	builder.WriteString("provenance:\n")
+	for _, provenance := range rule.Provenance {
+		builder.WriteString("  - pr: " + strconv.Itoa(provenance.PR) + "\n")
+		builder.WriteString("    outcome: " + yamlScalarForWrite(provenance.Outcome) + "\n")
+		if provenance.URL != "" {
+			builder.WriteString("    url: " + yamlScalarForWrite(provenance.URL) + "\n")
+		}
+		if provenance.ExperienceID != "" {
+			builder.WriteString("    experience_id: " + yamlScalarForWrite(provenance.ExperienceID) + "\n")
+		}
+	}
+	builder.WriteString("review:\n")
+	builder.WriteString("  label: " + yamlScalarForWrite(rule.ReviewLabel) + "\n")
+	builder.WriteString("  statement_origin: " + yamlScalarForWrite(rule.StatementOrigin) + "\n")
+	builder.WriteString("metadata:\n")
+	builder.WriteString("  confidence_label: " + yamlScalarForWrite(rule.Metadata.ConfidenceLabel) + "\n")
+	builder.WriteString("  lifecycle_reason: " + yamlScalarForWrite(rule.Metadata.LifecycleReason) + "\n")
+	builder.WriteString("  confidence_inputs:\n")
+	builder.WriteString("    evidence_count: " + strconv.Itoa(rule.Metadata.EvidenceCount) + "\n")
+	builder.WriteString("    recency_weight: " + yamlFloat(rule.Metadata.RecencyWeight) + "\n")
+	builder.WriteString("    contradictions: " + strconv.Itoa(rule.Metadata.Contradictions) + "\n")
+	builder.WriteString("    flake_discount: " + yamlFloat(rule.Metadata.FlakeDiscount) + "\n")
+	builder.WriteString("    extraction_confidence: " + yamlFloat(rule.Metadata.ExtractionConfidence) + "\n")
+	builder.WriteString("    drafting_model_weight: " + yamlFloat(rule.Metadata.DraftingModelWeight) + "\n")
+	builder.WriteString("  decay:\n")
+	builder.WriteString("    half_life_days: " + strconv.Itoa(rule.Metadata.HalfLifeDays) + "\n")
+	builder.WriteString("    latest_evidence_at: " + yamlScalarForWrite(rule.Metadata.LatestEvidenceAt) + "\n")
+	builder.WriteString("    oldest_evidence_at: " + yamlScalarForWrite(rule.Metadata.OldestEvidenceAt) + "\n")
+	builder.WriteString("    anchor_recorded_at: " + yamlScalarForWrite(rule.Metadata.AnchorRecordedAt) + "\n")
+	builder.WriteString("  cluster:\n")
+	builder.WriteString("    key: " + yamlScalarForWrite(rule.Metadata.ClusterKey) + "\n")
+	builder.WriteString("    key_hash: " + yamlScalarForWrite(rule.Metadata.ClusterKeyHash) + "\n")
+	builder.WriteString("  source_artifact_digest: " + yamlScalarForWrite(rule.Metadata.SourceArtifactDigest) + "\n")
+	writeYAMLStringList(&builder, "source_artifacts", rule.Metadata.SourceArtifacts, 2)
+	builder.WriteString("  provider: " + yamlScalarForWrite(rule.Metadata.Provider) + "\n")
+	builder.WriteString("  embedding_mode: " + yamlScalarForWrite(rule.Metadata.EmbeddingMode) + "\n")
+	builder.WriteString("  review_required: " + strconv.FormatBool(rule.Metadata.ReviewRequired) + "\n")
+	builder.WriteString("  deterministic_fallback: " + strconv.FormatBool(rule.Metadata.DeterministicFallback) + "\n")
+	builder.WriteString("  generated_by: relia distill\n")
+	builder.WriteString("  redaction_status: applied\n")
+	return builder.String()
+}
+
+func writeYAMLStringList(builder *strings.Builder, key string, values []string, indent int) {
+	prefix := strings.Repeat(" ", indent)
+	builder.WriteString(prefix + key + ":\n")
+	for _, value := range values {
+		builder.WriteString(prefix + "  - " + yamlScalarForWrite(value) + "\n")
+	}
+}
+
+func yamlScalarForWrite(value string) string {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return `""`
+	}
+	if strings.ContainsAny(value, "\n\r#") ||
+		strings.HasPrefix(value, "-") ||
+		strings.HasPrefix(value, "{") ||
+		strings.HasPrefix(value, "[") ||
+		strings.HasSuffix(value, ":") ||
+		value == "true" ||
+		value == "false" {
+		return strconv.Quote(value)
+	}
+	return value
+}
+
+func yamlFloat(value float64) string {
+	return strconv.FormatFloat(roundFloat(value, 4), 'f', -1, 64)
+}
+
+func writeAtomicRepoFile(path string, content []byte, label string) *CommandError {
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return internalError("could not create "+label+" directory", err)
+	}
+	tempFile, err := os.CreateTemp(filepath.Dir(path), "."+filepath.Base(path)+".tmp-*")
+	if err != nil {
+		return internalError("could not create temporary "+label, err)
+	}
+	tempPath := tempFile.Name()
+	cleanup := true
+	defer func() {
+		if cleanup {
+			_ = os.Remove(tempPath)
+		}
+	}()
+	if _, err := tempFile.Write(content); err != nil {
+		_ = tempFile.Close()
+		return internalError("could not write temporary "+label, err)
+	}
+	if err := tempFile.Close(); err != nil {
+		return internalError("could not close temporary "+label, err)
+	}
+	if err := os.Chmod(tempPath, 0o644); err != nil {
+		return internalError("could not set temporary "+label+" permissions", err)
+	}
+	if err := os.Rename(tempPath, path); err != nil {
+		return internalError("could not write "+label, err)
+	}
+	cleanup = false
+	return nil
+}
+
+func distillStatusCounts(rules []distilledRule) map[string]int {
+	counts := map[string]int{}
+	for _, rule := range rules {
+		counts[rule.Status]++
+	}
+	return counts
+}
+
+func distilledRuleData(rules []distilledRule, artifacts []ArtifactRef) []map[string]any {
+	pathsByID := map[string]string{}
+	for _, artifact := range artifacts {
+		id := strings.TrimSuffix(filepath.Base(artifact.Path), filepath.Ext(artifact.Path))
+		pathsByID[id] = artifact.Path
+	}
+	data := make([]map[string]any, 0, len(rules))
+	for _, rule := range rules {
+		data = append(data, map[string]any{
+			"id":               rule.ID,
+			"kind":             rule.Kind,
+			"status":           rule.Status,
+			"review_label":     rule.ReviewLabel,
+			"confidence":       rule.Confidence,
+			"confidence_label": rule.Metadata.ConfidenceLabel,
+			"path":             pathsByID[rule.ID],
+		})
+	}
+	return data
+}
+
+func findMemoryRulePath(root string, ruleDir string, rule string) (string, *CommandError) {
+	rule = strings.TrimSpace(rule)
+	if rule == "" {
+		return "", usageError("memory rule id or path must be non-empty")
+	}
+	if clean, ok := cleanRepoPath(rule); ok && (strings.HasSuffix(clean, ".yaml") || strings.HasSuffix(clean, ".yml")) {
+		path := filepath.Join(root, filepath.FromSlash(filepath.ToSlash(clean)))
+		if _, err := os.Stat(path); err == nil {
+			return path, nil
+		}
+	}
+	patterns := []string{
+		filepath.Join(root, filepath.FromSlash(ruleDir), "*.yaml"),
+		filepath.Join(root, filepath.FromSlash(ruleDir), "*.yml"),
+	}
+	for _, pattern := range patterns {
+		paths, err := filepath.Glob(pattern)
+		if err != nil {
+			return "", internalError("could not inspect memory rules", err)
+		}
+		sort.Strings(paths)
+		for _, path := range paths {
+			content, err := os.ReadFile(path)
+			if err != nil {
+				return "", internalError("could not read memory rule artifact", err)
+			}
+			document, parseErr := parseYAMLDocument(string(content))
+			if parseErr != nil {
+				return "", artifactContractError(parseErr.Error(), displayPath(root, path))
+			}
+			if document.Scalars["id"].Value == rule {
+				return path, nil
+			}
+		}
+	}
+	return "", artifactContractError("memory rule was not found", rule)
+}
+
+func updateMemoryRuleReview(root string, rulePath string, label string) (string, *CommandError) {
+	content, err := os.ReadFile(rulePath)
+	if err != nil {
+		return "", internalError("could not read memory rule artifact", err)
+	}
+	rel := displayPath(root, rulePath)
+	document, parseErr := parseYAMLDocument(string(content))
+	if parseErr != nil {
+		return "", artifactContractError(parseErr.Error(), rel)
+	}
+	status := document.Scalars["status"].Value
+	if label == "accepted" {
+		switch status {
+		case "stale", "contradicted", "retired":
+			return "", artifactContractError("cannot mark "+status+" memory rule accepted without fresh distill evidence", rel)
+		}
+		status = "active"
+	} else if status == "active" {
+		status = "candidate"
+	}
+	next := replaceTopLevelYAMLScalar(string(content), "status", status)
+	next = replaceNestedYAMLScalar(next, "review", "label", label)
+	if next == string(content) {
+		return "", artifactContractError("memory rule review fields were not updated", rel)
+	}
+	if commandErr := writeAtomicRepoFile(rulePath, []byte(next), "memory rule"); commandErr != nil {
+		return "", commandErr
+	}
+	if commandErr := validateMemoryRuleArtifact(root, rulePath); commandErr != nil {
+		return "", commandErr
+	}
+	return status, nil
+}
+
+func replaceTopLevelYAMLScalar(content string, key string, value string) string {
+	lines := strings.Split(content, "\n")
+	prefix := key + ":"
+	for index, line := range lines {
+		if leadingSpaces(line) == 0 && strings.HasPrefix(strings.TrimSpace(line), prefix) {
+			lines[index] = key + ": " + yamlScalarForWrite(value)
+			break
+		}
+	}
+	return strings.Join(lines, "\n")
+}
+
+func replaceNestedYAMLScalar(content string, parent string, key string, value string) string {
+	lines := strings.Split(content, "\n")
+	inParent := false
+	parentPrefix := parent + ":"
+	keyPrefix := key + ":"
+	for index, line := range lines {
+		indent := leadingSpaces(line)
+		trimmed := strings.TrimSpace(line)
+		if indent == 0 {
+			inParent = strings.HasPrefix(trimmed, parentPrefix)
+			continue
+		}
+		if inParent && indent == 2 && strings.HasPrefix(trimmed, keyPrefix) {
+			lines[index] = "  " + key + ": " + yamlScalarForWrite(value)
+			break
+		}
+	}
+	return strings.Join(lines, "\n")
+}
+
+func loadMemoryRuleSummaries(root string) ([]memoryRuleSummary, *CommandError) {
+	patterns := []string{
+		filepath.Join(root, "memory", "rules", "*.yaml"),
+		filepath.Join(root, "memory", "rules", "*.yml"),
+	}
+	var paths []string
+	for _, pattern := range patterns {
+		matches, err := filepath.Glob(pattern)
+		if err != nil {
+			return nil, internalError("could not inspect memory rule artifacts", err)
+		}
+		paths = append(paths, matches...)
+	}
+	sort.Strings(paths)
+	var summaries []memoryRuleSummary
+	for _, path := range paths {
+		if commandErr := validateMemoryRuleArtifact(root, path); commandErr != nil {
+			return nil, commandErr
+		}
+		content, err := os.ReadFile(path)
+		if err != nil {
+			return nil, internalError("could not read memory rule artifact", err)
+		}
+		document, parseErr := parseYAMLDocument(string(content))
+		if parseErr != nil {
+			return nil, artifactContractError(parseErr.Error(), displayPath(root, path))
+		}
+		summaries = append(summaries, memoryRuleSummary{
+			ID:              document.Scalars["id"].Value,
+			Kind:            document.Scalars["kind"].Value,
+			Status:          document.Scalars["status"].Value,
+			Statement:       document.Scalars["statement"].Value,
+			Confidence:      document.Scalars["confidence"].Value,
+			ConfidenceLabel: document.Scalars["metadata.confidence_label"].Value,
+			EvidenceCount:   document.Scalars["evidence.count"].Value,
+			Contradictions:  document.Scalars["evidence.contradictions"].Value,
+			ReviewLabel:     document.Scalars["review.label"].Value,
+			StatementOrigin: document.Scalars["review.statement_origin"].Value,
+			Path:            displayPath(root, path),
+			Provenance:      memoryRuleProvenance(document),
+		})
+	}
+	sort.Slice(summaries, func(i, j int) bool {
+		left := memoryStatusRank(summaries[i].Status)
+		right := memoryStatusRank(summaries[j].Status)
+		if left == right {
+			return summaries[i].ID < summaries[j].ID
+		}
+		return left < right
+	})
+	return summaries, nil
+}
+
+func memoryRuleProvenance(document yamlDocument) []distilledRuleProvenance {
+	var provenance []distilledRuleProvenance
+	for _, entry := range document.ListMaps["provenance"] {
+		pr := 0
+		if scalar, ok := entry["pr"]; ok {
+			pr, _ = strconv.Atoi(scalar.Value)
+		}
+		provenance = append(provenance, distilledRuleProvenance{
+			PR:           pr,
+			Outcome:      entry["outcome"].Value,
+			URL:          entry["url"].Value,
+			ExperienceID: entry["experience_id"].Value,
+		})
+	}
+	sort.Slice(provenance, func(i, j int) bool {
+		if provenance[i].PR == provenance[j].PR {
+			return provenance[i].ExperienceID < provenance[j].ExperienceID
+		}
+		return provenance[i].PR < provenance[j].PR
+	})
+	return provenance
+}
+
+func memoryStatusRank(status string) int {
+	switch status {
+	case "active":
+		return 0
+	case "candidate":
+		return 1
+	case "contradicted":
+		return 2
+	case "stale":
+		return 3
+	case "retired":
+		return 4
+	default:
+		return 5
+	}
+}
+
+func memoryStatusCounts(rules []memoryRuleSummary) map[string]int {
+	counts := map[string]int{}
+	for _, rule := range rules {
+		counts[rule.Status]++
+	}
+	return counts
+}
+
+func writeMemoryPage(root string, outputPath string, rules []memoryRuleSummary) (string, *CommandError) {
+	clean, ok := cleanRepoPath(outputPath)
+	if !ok {
+		return "", usageError("memory output path must be repo-relative")
+	}
+	rel := filepath.ToSlash(clean)
+	path := filepath.Join(root, filepath.FromSlash(rel))
+	if commandErr := writeAtomicRepoFile(path, []byte(renderMemoryMarkdown(rules)), "memory page"); commandErr != nil {
+		return "", commandErr
+	}
+	return rel, nil
+}
+
+func renderMemoryMarkdown(rules []memoryRuleSummary) string {
+	var builder strings.Builder
+	builder.WriteString("# Relia Memory\n\n")
+	builder.WriteString("Generated by `relia memory` from reviewed local memory rule artifacts.\n\n")
+	if len(rules) == 0 {
+		builder.WriteString("No memory rules found.\n")
+		return builder.String()
+	}
+	currentStatus := ""
+	for _, rule := range rules {
+		if rule.Status != currentStatus {
+			currentStatus = rule.Status
+			builder.WriteString("## " + titleCaseStatus(currentStatus) + "\n\n")
+		}
+		builder.WriteString("### " + rule.ID + "\n\n")
+		builder.WriteString("- kind: `" + rule.Kind + "`\n")
+		builder.WriteString("- status: `" + rule.Status + "`\n")
+		confidence := rule.Confidence
+		if rule.ConfidenceLabel != "" {
+			confidence += " (" + rule.ConfidenceLabel + ")"
+		}
+		builder.WriteString("- confidence: " + confidence + "\n")
+		builder.WriteString("- review: `" + rule.ReviewLabel + "` from `" + rule.StatementOrigin + "`\n")
+		builder.WriteString("- evidence: " + rule.EvidenceCount + " experiences, " + rule.Contradictions + " contradictions\n")
+		builder.WriteString("- statement: " + rule.Statement + "\n")
+		if len(rule.Provenance) > 0 {
+			builder.WriteString("- provenance: " + strings.Join(memoryProvenanceLinks(rule.Provenance), ", ") + "\n")
+		}
+		builder.WriteString("- artifact: `" + rule.Path + "`\n\n")
+	}
+	return builder.String()
+}
+
+func titleCaseStatus(status string) string {
+	if status == "" {
+		return "Unknown"
+	}
+	return strings.ToUpper(status[:1]) + strings.ReplaceAll(status[1:], "_", " ")
+}
+
+func memoryProvenanceLinks(provenance []distilledRuleProvenance) []string {
+	var links []string
+	for _, ref := range provenance {
+		if ref.URL == "" || ref.PR <= 0 {
+			continue
+		}
+		links = append(links, fmt.Sprintf("[PR #%d](%s)", ref.PR, ref.URL))
+	}
+	return uniqueStrings(links)
 }
 
 func assessResult(args []string, start time.Time) CommandResult {
@@ -4622,7 +5960,7 @@ func validateMemoryRuleArtifact(root string, path string) *CommandError {
 		return artifactContractError("memory rule must declare at least one scope path or signal", rel)
 	}
 	for _, scopePath := range document.Lists["scope.paths"] {
-		if !repoPathExists(root, scopePath.Value) {
+		if status != "stale" && !repoPathExists(root, scopePath.Value) {
 			return artifactContractError("memory rule scope path does not exist in the repo", configRefWithPath(rel, scopePath))
 		}
 	}

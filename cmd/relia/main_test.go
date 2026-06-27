@@ -2230,6 +2230,145 @@ func TestBacktestRepeatedRunsUseStableReportIDAndArtifacts(t *testing.T) {
 	}
 }
 
+func TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "packages", "billing", "invoice.py"), "def total():\n    return 1\n")
+	writeFileForTest(t, filepath.Join(tempDir, "packages", "search", "query.py"), "def query():\n    return []\n")
+	inputPath := filepath.Join(tempDir, "fixtures", "distill-outcomes.jsonl")
+	writeFileForTest(t, inputPath, strings.Join([]string{
+		`{"experience_id":"exp_0101","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-04-01T10:00:00Z","pr":101,"commit":"abc101","paths":["packages/billing/invoice.py","tests/billing/test_invoice.py"],"actor_kind":"agent","attribution_method":"coauthor_trailer","attribution_confidence":0.91,"outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_billing_clock","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/101"]}`,
+		`{"experience_id":"exp_0102","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-04-15T10:00:00Z","pr":102,"commit":"abc102","paths":["packages/billing/invoice.py","tests/billing/test_invoice.py"],"actor_kind":"agent","attribution_method":"coauthor_trailer","attribution_confidence":0.91,"outcome_kind":"revert","terminal_state":"reverted","signature_id":"sig_billing_clock","signature_class":"revert","check_name":"revert","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"log_parsed_high","flake_discount":0.25,"provenance_urls":["https://github.com/acme/billing-service/pull/102"]}`,
+		`{"experience_id":"exp_0110","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-04-20T10:00:00Z","pr":110,"commit":"abc110","paths":["packages/search/query.py","tests/search/test_query.py"],"actor_kind":"agent","attribution_method":"pr_label","attribution_confidence":0.9,"outcome_kind":"fix_held","terminal_state":"held","signature_id":"sig_search_escape","signature_class":"test_failure","check_name":"pytest-search","signature_key":"tests/search/test_query.py::test_escape","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/110"]}`,
+		`{"experience_id":"exp_0111","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-04-22T10:00:00Z","pr":111,"commit":"abc111","paths":["packages/search/query.py","tests/search/test_query.py"],"actor_kind":"agent","attribution_method":"pr_label","attribution_confidence":0.9,"outcome_kind":"merged_clean","terminal_state":"passed","signature_id":"sig_search_escape","signature_class":"test_failure","check_name":"pytest-search","signature_key":"tests/search/test_query.py::test_escape","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/111"]}`,
+	}, "\n")+"\n")
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+	if code != ExitSuccess {
+		t.Fatalf("ingest exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+
+	stdout, stderr, code = runForTest(t, []string{"--json", "distill", "--format", "json"}, false)
+	if code != ExitSuccess {
+		t.Fatalf("distill exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Command != "distill" || result.Status != "pass" {
+		t.Fatalf("result = %#v", result)
+	}
+	if result.RedactionStatus != "applied" {
+		t.Fatalf("redaction_status = %q", result.RedactionStatus)
+	}
+	if got := int(result.Data["rules_written"].(float64)); got != 2 {
+		t.Fatalf("rules_written = %d", got)
+	}
+	if got := int(result.Data["active_rules"].(float64)); got != 0 {
+		t.Fatalf("active_rules = %d, want review gate to keep drafts inactive", got)
+	}
+	rules := loadRuleDocsByKindForTest(t, tempDir)
+	avoid := rules["avoid"]
+	playbook := rules["playbook"]
+	if avoid.Scalars["status"].Value != "candidate" || avoid.Scalars["review.label"].Value != "suggested" {
+		t.Fatalf("avoid lifecycle = status %q review %q", avoid.Scalars["status"].Value, avoid.Scalars["review.label"].Value)
+	}
+	if playbook.Scalars["status"].Value != "candidate" || playbook.Scalars["review.label"].Value != "suggested" {
+		t.Fatalf("playbook lifecycle = status %q review %q", playbook.Scalars["status"].Value, playbook.Scalars["review.label"].Value)
+	}
+	if avoid.Scalars["review.statement_origin"].Value != "cluster_summary" || playbook.Scalars["review.statement_origin"].Value != "cluster_summary" {
+		t.Fatalf("statement origins = avoid %q playbook %q", avoid.Scalars["review.statement_origin"].Value, playbook.Scalars["review.statement_origin"].Value)
+	}
+	if avoid.Scalars["metadata.confidence_inputs.drafting_model_weight"].Value != "0" {
+		t.Fatalf("drafting model affected confidence: %#v", avoid.Scalars["metadata.confidence_inputs.drafting_model_weight"])
+	}
+	if avoid.Scalars["metadata.confidence_inputs.evidence_count"].Value != "2" ||
+		avoid.Scalars["metadata.confidence_inputs.contradictions"].Value != "0" ||
+		avoid.Scalars["metadata.confidence_inputs.flake_discount"].Value == "0" ||
+		avoid.Scalars["metadata.decay.half_life_days"].Value != "180" {
+		t.Fatalf("avoid confidence metadata = %#v", avoid.Scalars)
+	}
+	if !assessmentRuleHasPositivePlaybookEvidence(playbook) {
+		t.Fatalf("playbook rule did not cite held or clean evidence: %#v", playbook.ListMaps["provenance"])
+	}
+	firstAvoidContent := readRuleByIDForTest(t, tempDir, avoid.Scalars["id"].Value)
+	stdout, stderr, code = runForTest(t, []string{"--json", "distill", "--format", "json"}, false)
+	if code != ExitSuccess {
+		t.Fatalf("second distill exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	secondAvoidContent := readRuleByIDForTest(t, tempDir, avoid.Scalars["id"].Value)
+	if firstAvoidContent != secondAvoidContent {
+		t.Fatalf("distill was not deterministic:\nfirst=%s\nsecond=%s", firstAvoidContent, secondAvoidContent)
+	}
+
+	stdout, stderr, code = runForTest(t, []string{"--json", "review", "--rule", avoid.Scalars["id"].Value, "--label", "accepted"}, false)
+	if code != ExitSuccess {
+		t.Fatalf("review exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	reviewed := parseRuleDocForTest(t, readRuleByIDForTest(t, tempDir, avoid.Scalars["id"].Value))
+	if reviewed.Scalars["status"].Value != "active" || reviewed.Scalars["review.label"].Value != "accepted" {
+		t.Fatalf("reviewed lifecycle = status %q review %q", reviewed.Scalars["status"].Value, reviewed.Scalars["review.label"].Value)
+	}
+
+	stdout, stderr, code = runForTest(t, []string{"--json", "memory", "--format", "json"}, false)
+	if code != ExitSuccess {
+		t.Fatalf("memory exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	page, err := os.ReadFile(filepath.Join(tempDir, "memory", "MEMORY.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{
+		"# Relia Memory",
+		"active",
+		"candidate",
+		"confidence",
+		"[PR #101](https://github.com/acme/billing-service/pull/101)",
+		"[PR #110](https://github.com/acme/billing-service/pull/110)",
+	} {
+		if !strings.Contains(string(page), want) {
+			t.Fatalf("MEMORY.md missing %q:\n%s", want, page)
+		}
+	}
+}
+
+func TestDistillMarksContradictedAndStaleRules(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "packages", "billing", "invoice.py"), "def total():\n    return 1\n")
+	inputPath := filepath.Join(tempDir, "fixtures", "distill-lifecycle-outcomes.jsonl")
+	writeFileForTest(t, inputPath, strings.Join([]string{
+		`{"experience_id":"exp_0201","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-03-01T10:00:00Z","pr":201,"commit":"abc201","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_billing_rounding","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_rounding","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/201"]}`,
+		`{"experience_id":"exp_0202","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-03-08T10:00:00Z","pr":202,"commit":"abc202","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"merged_clean","terminal_state":"passed","signature_id":"sig_billing_rounding","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_rounding","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/202"]}`,
+		`{"experience_id":"exp_0301","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-04-01T10:00:00Z","pr":301,"commit":"abc301","paths":["packages/removed/legacy.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_removed_legacy","signature_class":"test_failure","check_name":"pytest-legacy","signature_key":"tests/legacy/test_removed.py::test_legacy","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/301"]}`,
+	}, "\n")+"\n")
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+	if code != ExitSuccess {
+		t.Fatalf("ingest exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+
+	stdout, stderr, code = runForTest(t, []string{"--json", "distill", "--format", "json"}, false)
+	if code != ExitSuccess {
+		t.Fatalf("distill exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	rules := loadRuleDocsByStatusForTest(t, tempDir)
+	contradicted := rules["contradicted"]
+	stale := rules["stale"]
+	if contradicted.Scalars["review.label"].Value != "needs_user_input" ||
+		contradicted.Scalars["evidence.contradictions"].Value != "1" {
+		t.Fatalf("contradicted rule = %#v", contradicted.Scalars)
+	}
+	if stale.Scalars["metadata.lifecycle_reason"].Value != "all scoped paths are missing from the working tree" {
+		t.Fatalf("stale rule metadata = %#v", stale.Scalars)
+	}
+
+	stdout, stderr, code = runForTest(t, []string{"--json", "review", "--rule", stale.Scalars["id"].Value, "--label", "accepted"}, false)
+	if code != ExitValidation {
+		t.Fatalf("review stale exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "artifact_contract_validation_failed" || !strings.Contains(result.Errors[0].Message, "stale") {
+		t.Fatalf("errors = %#v", result.Errors)
+	}
+}
+
 func TestCheckRejectsZeroMatchAttributionConfigWithConcreteRef(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
@@ -4950,6 +5089,70 @@ func decodeJSONLines(t *testing.T, content string) []map[string]any {
 		records = append(records, record)
 	}
 	return records
+}
+
+func loadRuleDocsByKindForTest(t *testing.T, root string) map[string]yamlDocument {
+	t.Helper()
+	return loadRuleDocsByScalarForTest(t, root, "kind")
+}
+
+func loadRuleDocsByStatusForTest(t *testing.T, root string) map[string]yamlDocument {
+	t.Helper()
+	return loadRuleDocsByScalarForTest(t, root, "status")
+}
+
+func loadRuleDocsByScalarForTest(t *testing.T, root string, scalar string) map[string]yamlDocument {
+	t.Helper()
+	paths, err := filepath.Glob(filepath.Join(root, "memory", "rules", "*.yaml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(paths) == 0 {
+		t.Fatal("expected generated memory rule YAML files")
+	}
+	docs := map[string]yamlDocument{}
+	for _, path := range paths {
+		content, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		document := parseRuleDocForTest(t, string(content))
+		key := document.Scalars[scalar].Value
+		if key == "" {
+			t.Fatalf("rule %s missing scalar %s", path, scalar)
+		}
+		docs[key] = document
+	}
+	return docs
+}
+
+func readRuleByIDForTest(t *testing.T, root string, ruleID string) string {
+	t.Helper()
+	paths, err := filepath.Glob(filepath.Join(root, "memory", "rules", "*.yaml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, path := range paths {
+		content, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		document := parseRuleDocForTest(t, string(content))
+		if document.Scalars["id"].Value == ruleID {
+			return string(content)
+		}
+	}
+	t.Fatalf("could not find generated rule %q", ruleID)
+	return ""
+}
+
+func parseRuleDocForTest(t *testing.T, content string) yamlDocument {
+	t.Helper()
+	document, err := parseYAMLDocument(content)
+	if err != nil {
+		t.Fatalf("parse rule YAML:\n%s\n%v", content, err)
+	}
+	return document
 }
 
 func findRepoRootForTest(t *testing.T) string {

@@ -231,6 +231,24 @@ T5 adds deterministic offline recurrence backtesting:
 - `relia check` fails closed when attribution config has zero agent matchers,
   with a concrete `relia.yaml:<line>` reference.
 
+T6 adds deterministic offline distillation, review, and memory-page rendering:
+
+- `relia distill --format json` reads local redacted experience shards and
+  writes generated memory-rule YAML under `memory/rules/`.
+- Signature IDs are the default clustering key. No provider, model, network, or
+  credential call is made when `distill.provider: none` and
+  `distill.embeddings: signature` are configured.
+- Rule confidence is derived only from evidence count, recency half-life,
+  contradictions, flake discounts, and signature extraction confidence. The
+  generated metadata records `drafting_model_weight: 0`.
+- Drafted `avoid` and `playbook` rules remain `candidate` while
+  `distill.review_required: true`. A rule can become `active` only through
+  `relia review --rule <id> --label accepted`; stale and contradicted rules
+  fail closed and cannot be accepted without fresh distill evidence.
+- `relia memory --format json` renders `memory/MEMORY.md` with statements,
+  confidence labels, lifecycle status, review labels, and clickable PR
+  provenance.
+
 ## Structured Data, Proof, Budgets, And Redaction
 
 - PR, check-run, experience, memory, MCP, assessment, report, and config data

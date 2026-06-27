@@ -1,0 +1,88 @@
+{
+  "artifact_type": "proof-of-behavior-scorecard",
+  "schema_version": "1.0",
+  "task_id": "T6",
+  "status": "pass",
+  "generated_at": "2026-06-27T20:33:20Z",
+  "proof_level": "user_visible_behavior",
+  "scorecard": [
+    {
+      "behavior": "relia distill drafts deterministic candidate avoid and playbook rules from local experience shards",
+      "status": "pass",
+      "evidence": "TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage",
+      "covered_acceptance_items": [
+        "FR11-CALIBRATED-CONFIDENCE-001",
+        "FR14-BIDIRECTIONAL-MEMORY-001",
+        "NFR11-STOCHASTIC-HONESTY-001"
+      ]
+    },
+    {
+      "behavior": "confidence metadata records evidence count, recency half-life, contradictions, flake discount, extraction confidence, and drafting_model_weight 0",
+      "status": "pass",
+      "evidence": "TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage",
+      "covered_acceptance_items": [
+        "FR11-CALIBRATED-CONFIDENCE-001",
+        "NFR4-CALIBRATION-HONESTY-001",
+        "NFR13-INFERENCE-HUMILITY-001"
+      ]
+    },
+    {
+      "behavior": "review gate keeps drafted rules inactive until accepted and prevents stale rules from being accepted",
+      "status": "pass",
+      "evidence": "TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage and TestDistillMarksContradictedAndStaleRules",
+      "covered_acceptance_items": [
+        "FR13-HUMAN-REVIEW-GATE-001",
+        "FR12-DECAY-AND-CHURN-INVALIDATION-001"
+      ]
+    },
+    {
+      "behavior": "stale and contradicted lifecycle states are generated deterministically from deleted paths and clean/held contradictions",
+      "status": "pass",
+      "evidence": "TestDistillMarksContradictedAndStaleRules",
+      "covered_acceptance_items": [
+        "FR12-DECAY-AND-CHURN-INVALIDATION-001",
+        "NFR13-INFERENCE-HUMILITY-001"
+      ]
+    },
+    {
+      "behavior": "relia memory renders MEMORY.md with statements, confidence, lifecycle status, review label, and clickable PR provenance",
+      "status": "pass",
+      "evidence": "TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage",
+      "covered_acceptance_items": [
+        "FR15-MEMORY-PAGE-WITH-RECEIPTS-001"
+      ]
+    },
+    {
+      "behavior": "local privacy and structured-data-first posture remain enforced",
+      "status": "pass",
+      "evidence": "make prepush-full, validateReliaConfig, loadBacktestExperiences, schemas/memory-rule.schema.json",
+      "covered_acceptance_items": [
+        "NFR6-LOCAL-PRIVACY-001",
+        "NFR8-STRUCTURED-DATA-FIRST-001"
+      ]
+    }
+  ],
+  "command_evidence": [
+    {
+      "command": "make test-fast",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "make test-contracts",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "make prepush-full",
+      "status": "pass",
+      "exit_code": 0
+    }
+  ],
+  "evidence_refs": [
+    "cmd/relia/main_test.go",
+    "cmd/relia/main.go",
+    "schemas/memory-rule.schema.json",
+    ".factory/artifacts/task-runs/T6/validation-report.json"
+  ]
+}

@@ -103,6 +103,22 @@ config validation, and the recurrence-report schema. Rollback is removal of the
 `.relia/reports` and `.relia/baselines` files can be deleted because experience
 shards remain the source of truth.
 
+T6 adds the local `relia distill`, `relia review`, and `relia memory` command
+surfaces. The state owner is `cmd/relia`, local generated experience shards
+under `.relia/experiences`, reviewed memory artifacts under `memory/rules`, and
+the rendered `memory/MEMORY.md` page. Feedback sources are unit tests, schema
+contract validation, `make test-contracts`, `make test-coverage`, and Factory
+task-run evidence. The command path is offline and deterministic by default:
+signature IDs cluster records, provider drafting fails closed without an
+approved model-provider gate, and confidence is calculated from evidence count,
+recency half-life, contradictions, flake discounts, and extraction confidence
+with no drafting-model contribution. The blast radius is limited to generated
+memory-rule YAML, review status transitions, memory-page rendering, and
+assessment serving eligibility because only accepted active rules are served.
+Rollback is removal of the T6 command implementation, tests, docs, and generated
+`memory/rules/*.yaml` or `memory/MEMORY.md`; `.relia/experiences` remains the
+source of truth for re-distillation.
+
 ## Systems Thinking Map
 
 - State lives in repo-local config, generated artifacts, source files, and Factory evidence.
