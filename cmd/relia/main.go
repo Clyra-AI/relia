@@ -1017,7 +1017,7 @@ func readAssessmentRule(root string, rulePath string) (assessmentRule, bool, *Co
 	if document.Scalars["status"].Value != "active" {
 		return assessmentRule{}, false, nil
 	}
-	if commandErr := validateActiveAssessmentRuleIdentity(document, rel); commandErr != nil {
+	if commandErr := validateActiveAssessmentRuleIdentity(root, document, rel); commandErr != nil {
 		return assessmentRule{}, false, commandErr
 	}
 	confidence, err := strconv.ParseFloat(document.Scalars["confidence"].Value, 64)
@@ -1034,7 +1034,7 @@ func readAssessmentRule(root string, rulePath string) (assessmentRule, bool, *Co
 	}, true, nil
 }
 
-func validateActiveAssessmentRuleIdentity(document yamlDocument, rel string) *CommandError {
+func validateActiveAssessmentRuleIdentity(root string, document yamlDocument, rel string) *CommandError {
 	if document.Scalars["object_type"].Value != "relia.memory_rule" {
 		return artifactContractError("memory rule object_type must be relia.memory_rule", configRefWithPath(rel, document.Scalars["object_type"]))
 	}
@@ -1047,6 +1047,14 @@ func validateActiveAssessmentRuleIdentity(document yamlDocument, rel string) *Co
 	}
 	if kind == "playbook" && !assessmentRuleHasPositivePlaybookEvidence(document) {
 		return artifactContractError("playbook memory rule must cite at least one fix_held or merged_clean provenance outcome", rel)
+	}
+	if len(document.Lists["scope.paths"]) == 0 && len(document.Lists["scope.signals"]) == 0 {
+		return artifactContractError("memory rule must declare at least one scope path or signal", rel)
+	}
+	for _, scopePath := range document.Lists["scope.paths"] {
+		if !repoPathExists(root, scopePath.Value) {
+			return artifactContractError("memory rule scope path does not exist in the repo", configRefWithPath(rel, scopePath))
+		}
 	}
 	reviewLabel, ok := document.Scalars["review.label"]
 	if !ok {

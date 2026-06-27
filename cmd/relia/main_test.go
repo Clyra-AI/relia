@@ -1950,6 +1950,53 @@ metadata: {}
 	}
 }
 
+func TestDemoAssessRejectsActiveRuleWithUnknownScopePath(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "unknown-billing.yaml"), `object_type: relia.memory_rule
+schema_version: "1.0"
+id: unknown-billing-fixture
+kind: avoid
+status: active
+statement: Do not depend on the misspelled billing package.
+scope:
+  paths:
+    - pakcages/billing/
+confidence: 0.86
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_0142
+provenance:
+  - pr: 142
+    outcome: ci_failure
+    url: https://github.com/acme/billing-service/pull/142
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`)
+	writeFileForTest(t, filepath.Join(tempDir, "unknown.diff"), `diff --git a/pakcages/billing/invoice.py b/pakcages/billing/invoice.py
+--- a/pakcages/billing/invoice.py
++++ b/pakcages/billing/invoice.py
+@@ -1,2 +1,3 @@
+ def rollover_day():
+-    return "2026-01-01"
++    return datetime.utcnow().strftime("%Y-%m-%d")
+`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "assess", "--input", "unknown.diff"}, false)
+
+	if code != ExitValidation {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if !strings.Contains(result.Errors[0].Message, "scope path does not exist") {
+		t.Fatalf("error message = %q", result.Errors[0].Message)
+	}
+}
+
 func TestDemoAssessRejectsActiveNonMemoryRuleArtifact(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
