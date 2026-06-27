@@ -762,10 +762,17 @@ func backtestResult(args []string, start time.Time) CommandResult {
 	if commandErr != nil {
 		return withFormat(errorResult("backtest", "backtest", commandErr, start))
 	}
+	var baselineSnapshot backtestBaselineSnapshot
+	baselineSaved := false
 	if options.SaveBaseline && report.Gate.Status != "fail" {
+		baselineSnapshot, commandErr = snapshotBacktestBaseline(root, options.BaselinePath)
+		if commandErr != nil {
+			return withFormat(errorResult("backtest", "backtest", commandErr, start))
+		}
 		if commandErr := saveBacktestBaseline(root, report, options.BaselinePath); commandErr != nil {
 			return withFormat(errorResult("backtest", "backtest", commandErr, start))
 		}
+		baselineSaved = true
 		report.Baseline, commandErr = savedBacktestBaselineComparison(options.BaselinePath, report.HeadlineERR)
 		if commandErr != nil {
 			return withFormat(errorResult("backtest", "backtest", commandErr, start))
@@ -773,6 +780,11 @@ func backtestResult(args []string, start time.Time) CommandResult {
 	}
 	jsonReportPath, htmlReportPath, commandErr := writeBacktestReports(root, report, options.ReportDir)
 	if commandErr != nil {
+		if baselineSaved {
+			if rollbackErr := restoreBacktestBaseline(baselineSnapshot); rollbackErr != nil {
+				commandErr.Message = commandErr.Message + "; additionally could not roll back ERR baseline: " + rollbackErr.Message
+			}
+		}
 		return withFormat(errorResult("backtest", "backtest", commandErr, start))
 	}
 
@@ -939,6 +951,12 @@ func validateBacktestExperience(record experienceRecord, ref string) (time.Time,
 	}
 	if record.SchemaVersion != commandSchemaVersion {
 		return time.Time{}, artifactContractError("backtest experience schema_version must be "+commandSchemaVersion, ref)
+	}
+	if record.ShareScope != "private" {
+		return time.Time{}, redactionSafetyError("backtest experience share_scope must be private", ref)
+	}
+	if record.RedactionStatus != "applied" {
+		return time.Time{}, redactionSafetyError("backtest experience redaction_status must be applied", ref)
 	}
 	if strings.TrimSpace(record.ExperienceID) == "" {
 		return time.Time{}, artifactContractError("backtest experience missing experience_id", ref)
@@ -1500,6 +1518,47 @@ func writeBacktestReports(root string, report recurrenceReport, reportDir string
 		return "", "", internalError("could not write HTML recurrence report", err)
 	}
 	return jsonRel, htmlRel, nil
+}
+
+type backtestBaselineSnapshot struct {
+	Path    string
+	Content []byte
+	Exists  bool
+}
+
+func snapshotBacktestBaseline(root string, baselinePath string) (backtestBaselineSnapshot, *CommandError) {
+	clean, ok := cleanRepoPath(baselinePath)
+	if !ok {
+		return backtestBaselineSnapshot{}, usageError("backtest baseline path must be repo-relative")
+	}
+	path := filepath.Join(root, filepath.FromSlash(filepath.ToSlash(clean)))
+	content, err := os.ReadFile(path)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return backtestBaselineSnapshot{Path: path, Exists: false}, nil
+		}
+		return backtestBaselineSnapshot{}, internalError("could not snapshot ERR baseline", err)
+	}
+	return backtestBaselineSnapshot{Path: path, Content: append([]byte(nil), content...), Exists: true}, nil
+}
+
+func restoreBacktestBaseline(snapshot backtestBaselineSnapshot) *CommandError {
+	if snapshot.Path == "" {
+		return nil
+	}
+	if snapshot.Exists {
+		if err := os.MkdirAll(filepath.Dir(snapshot.Path), 0o755); err != nil {
+			return internalError("could not restore ERR baseline directory", err)
+		}
+		if err := os.WriteFile(snapshot.Path, snapshot.Content, 0o644); err != nil {
+			return internalError("could not restore ERR baseline", err)
+		}
+		return nil
+	}
+	if err := os.Remove(snapshot.Path); err != nil && !errors.Is(err, os.ErrNotExist) {
+		return internalError("could not remove rolled back ERR baseline", err)
+	}
+	return nil
 }
 
 func renderBacktestHTML(report recurrenceReport) string {
