@@ -1065,10 +1065,10 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 			summary.NonFailureOutcomeCount++
 			continue
 		}
-		signatureID := record.Outcome.Signature.SignatureID
+		signatureKey := recurrenceSignatureKey(record)
 		if record.Attribution.ActorKind != "agent" {
 			summary.HumanFailureExcludedCount++
-			priorBySignature[signatureID] = append(priorBySignature[signatureID], current)
+			priorBySignature[signatureKey] = append(priorBySignature[signatureKey], current)
 			continue
 		}
 		summary.AgentFailureDenominator++
@@ -1078,8 +1078,12 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 			addBacktestCitation(citationMap, current)
 			continue
 		}
-		if priors := priorBySignature[signatureID]; len(priors) > 0 {
-			prior, confidence := selectRecurrencePrior(priors, current)
+		if priors := priorBySignature[signatureKey]; len(priors) > 0 {
+			prior, confidence, ok := selectRecurrencePrior(priors, current)
+			if !ok {
+				priorBySignature[signatureKey] = append(priorBySignature[signatureKey], current)
+				continue
+			}
 			pair := buildRecurrencePair(prior, current)
 			if confidence == "confirmed" {
 				pair.Confidence = "confirmed"
@@ -1093,7 +1097,7 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 			addBacktestCitation(citationMap, prior)
 			addBacktestCitation(citationMap, current)
 		}
-		priorBySignature[signatureID] = append(priorBySignature[signatureID], current)
+		priorBySignature[signatureKey] = append(priorBySignature[signatureKey], current)
 	}
 	sortRecurrencePairs(confirmed)
 	sortRecurrencePairs(possible)
@@ -1166,9 +1170,26 @@ func reliableSignatureExtraction(value string) bool {
 	return value == "structured" || value == "log_parsed_high"
 }
 
+func recurrenceSignatureKey(record experienceRecord) string {
+	signatureMetadata, _ := record.Metadata["signature"].(map[string]any)
+	signatureClass := strings.TrimSpace(stringFromAny(signatureMetadata["class"]))
+	signatureKey := strings.TrimSpace(stringFromAny(signatureMetadata["key"]))
+	messageFingerprint := strings.TrimSpace(stringFromAny(signatureMetadata["message_fingerprint"]))
+	if messageFingerprint != "" {
+		return strings.Join([]string{"message", signatureClass, messageFingerprint}, "\x00")
+	}
+	if signatureClass != "" && signatureKey != "" {
+		return strings.Join([]string{"class_key", signatureClass, signatureKey}, "\x00")
+	}
+	return strings.Join([]string{"id", record.Outcome.Signature.SignatureID}, "\x00")
+}
+
 func confirmedRecurrence(prior backtestExperience, current backtestExperience) bool {
+	if prior.Record.Action.PR == current.Record.Action.PR {
+		return false
+	}
 	if prior.Record.Outcome.Signature.SignatureID == "" ||
-		prior.Record.Outcome.Signature.SignatureID != current.Record.Outcome.Signature.SignatureID {
+		recurrenceSignatureKey(prior.Record) != recurrenceSignatureKey(current.Record) {
 		return false
 	}
 	if !reliableSignatureExtraction(prior.Record.Outcome.Signature.ExtractionConfidence) ||
@@ -1178,13 +1199,21 @@ func confirmedRecurrence(prior backtestExperience, current backtestExperience) b
 	return pathSetsOverlap(prior.Record.Context.Paths, current.Record.Context.Paths)
 }
 
-func selectRecurrencePrior(priors []backtestExperience, current backtestExperience) (backtestExperience, string) {
+func selectRecurrencePrior(priors []backtestExperience, current backtestExperience) (backtestExperience, string, bool) {
 	for index := len(priors) - 1; index >= 0; index-- {
+		if priors[index].Record.Action.PR == current.Record.Action.PR {
+			continue
+		}
 		if confirmedRecurrence(priors[index], current) {
-			return priors[index], "confirmed"
+			return priors[index], "confirmed", true
 		}
 	}
-	return priors[len(priors)-1], "possible"
+	for index := len(priors) - 1; index >= 0; index-- {
+		if priors[index].Record.Action.PR != current.Record.Action.PR {
+			return priors[index], "possible", true
+		}
+	}
+	return backtestExperience{}, "", false
 }
 
 func pathSetsOverlap(left []string, right []string) bool {
