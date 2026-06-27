@@ -611,28 +611,36 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "FR4-ATTRIBUTION-WITH-CONFIDENCE-001",
-          "evidence_refs": [],
+          "evidence_refs": [
+            ".factory/artifacts/acceptance-evidence/FR4-ATTRIBUTION-WITH-CONFIDENCE-001/20260627T205710.598967000Z.json",
+            ".factory/artifacts/task-runs/T6/validation-report.json"
+          ],
+          "recorded_at": "2026-06-27T20:57:10Z",
+          "recorded_by": "davidahmann-via-codex",
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "distillation-calibration-and-confidence-part-1"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        ".factory/artifacts/acceptance-evidence/FR4-ATTRIBUTION-WITH-CONFIDENCE-001/20260627T205710.598967000Z.json",
+        ".factory/artifacts/task-runs/T6/validation-report.json"
+      ],
       "group_id": "fr4-attribution-with-confidence",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T6"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T6"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "Relia must attribute agent authorship via bot login, co-author trailer, and PR label, with method and confidence recorded. Uncertain attribution must fail closed (excluded from ERR) by default.",
       "scope_item_id": "FR4-ATTRIBUTION-WITH-CONFIDENCE-001",
       "source_ref": "docs/product/prd.md#fr4-attribution-with-confidence",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T6"
       ]
@@ -719,28 +727,36 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "FR7-DETERMINISTIC-FAILURE-SIGNATURES-001",
-          "evidence_refs": [],
+          "evidence_refs": [
+            ".factory/artifacts/acceptance-evidence/FR7-DETERMINISTIC-FAILURE-SIGNATURES-001/20260627T205710.620871000Z.json",
+            ".factory/artifacts/task-runs/T6/validation-report.json"
+          ],
+          "recorded_at": "2026-06-27T20:57:10Z",
+          "recorded_by": "davidahmann-via-codex",
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "distillation-calibration-and-confidence-part-1"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        ".factory/artifacts/acceptance-evidence/FR7-DETERMINISTIC-FAILURE-SIGNATURES-001/20260627T205710.620871000Z.json",
+        ".factory/artifacts/task-runs/T6/validation-report.json"
+      ],
       "group_id": "fr7-deterministic-failure-signatures",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T6"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T6"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "Signature extraction must prefer structured check-run data and label log-parsed signatures with extraction confidence.",
       "scope_item_id": "FR7-DETERMINISTIC-FAILURE-SIGNATURES-001",
       "source_ref": "docs/product/prd.md#fr7-deterministic-failure-signatures",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T6"
       ]
@@ -885,7 +901,7 @@
     },
     {
       "acceptance_criteria": [
-        "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence — never from the drafting model."
+        "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence \u2014 never from the drafting model."
       ],
       "acceptance_item_ids": [
         "FR11-CALIBRATED-CONFIDENCE-001"
@@ -893,28 +909,36 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "FR11-CALIBRATED-CONFIDENCE-001",
-          "evidence_refs": [],
+          "evidence_refs": [
+            ".factory/artifacts/acceptance-evidence/FR11-CALIBRATED-CONFIDENCE-001/20260627T205710.641570000Z.json",
+            ".factory/artifacts/task-runs/T6/validation-report.json"
+          ],
+          "recorded_at": "2026-06-27T20:57:10Z",
+          "recorded_by": "davidahmann-via-codex",
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "distillation-calibration-and-confidence-part-1"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        ".factory/artifacts/acceptance-evidence/FR11-CALIBRATED-CONFIDENCE-001/20260627T205710.641570000Z.json",
+        ".factory/artifacts/task-runs/T6/validation-report.json"
+      ],
       "group_id": "fr11-calibrated-confidence",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T6"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T6"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
-      "scope_item": "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence — never from the drafting model.",
+      "scope_item": "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence \u2014 never from the drafting model.",
       "scope_item_id": "FR11-CALIBRATED-CONFIDENCE-001",
       "source_ref": "docs/product/prd.md#fr11-calibrated-confidence",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T6"
       ]
@@ -929,30 +953,38 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "FR12-DECAY-AND-CHURN-INVALIDATION-001",
-          "evidence_refs": [],
+          "evidence_refs": [
+            ".factory/artifacts/acceptance-evidence/FR12-DECAY-AND-CHURN-INVALIDATION-001/20260627T205710.663089000Z.json",
+            ".factory/artifacts/task-runs/T6/validation-report.json"
+          ],
+          "recorded_at": "2026-06-27T20:57:10Z",
+          "recorded_by": "davidahmann-via-codex",
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "distillation-calibration-and-confidence-part-1"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        ".factory/artifacts/acceptance-evidence/FR12-DECAY-AND-CHURN-INVALIDATION-001/20260627T205710.663089000Z.json",
+        ".factory/artifacts/task-runs/T6/validation-report.json"
+      ],
       "group_id": "fr12-decay-and-churn-invalidation",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T6"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence.",
         "Sprint 4 remapped this item to smaller task slices or bounded learning-loop follow-up evidence.",
         "Sprint 4 optional post-MVP learning tasks are excluded from MVP closure blockers."
       ],
-      "remaining_task_refs": [
-        "T6"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "Rules must decay by half-life and go `stale` when their scoped paths are deleted.",
       "scope_item_id": "FR12-DECAY-AND-CHURN-INVALIDATION-001",
       "source_ref": "docs/product/prd.md#fr12-decay-and-churn-invalidation",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T6"
       ]
@@ -967,28 +999,36 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "FR13-HUMAN-REVIEW-GATE-001",
-          "evidence_refs": [],
+          "evidence_refs": [
+            ".factory/artifacts/acceptance-evidence/FR13-HUMAN-REVIEW-GATE-001/20260627T205522.720434000Z.json",
+            "https://github.com/Clyra-AI/relia/pull/40"
+          ],
+          "recorded_at": "2026-06-27T20:55:22Z",
+          "recorded_by": "davidahmann-via-codex",
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "distillation-calibration-and-confidence-part-1"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        ".factory/artifacts/acceptance-evidence/FR13-HUMAN-REVIEW-GATE-001/20260627T205522.720434000Z.json",
+        "https://github.com/Clyra-AI/relia/pull/40"
+      ],
       "group_id": "fr13-human-review-gate",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T6"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T6"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": true,
       "scope_item": "Drafted rules must be reviewed before becoming `active`, with `accepted`, `suggested`, and `needs_user_input` labels. Disabling review is an explicit, surfaced configuration choice.",
       "scope_item_id": "FR13-HUMAN-REVIEW-GATE-001",
       "source_ref": "docs/product/prd.md#fr13-human-review-gate",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T6"
       ]
@@ -1003,30 +1043,38 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "FR14-BIDIRECTIONAL-MEMORY-001",
-          "evidence_refs": [],
+          "evidence_refs": [
+            ".factory/artifacts/acceptance-evidence/FR14-BIDIRECTIONAL-MEMORY-001/20260627T205710.683473000Z.json",
+            ".factory/artifacts/task-runs/T6/validation-report.json"
+          ],
+          "recorded_at": "2026-06-27T20:57:10Z",
+          "recorded_by": "davidahmann-via-codex",
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "distillation-calibration-and-confidence-part-1"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        ".factory/artifacts/acceptance-evidence/FR14-BIDIRECTIONAL-MEMORY-001/20260627T205710.683473000Z.json",
+        ".factory/artifacts/task-runs/T6/validation-report.json"
+      ],
       "group_id": "fr14-bidirectional-memory",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T6"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence.",
         "Sprint 4 remapped this item to smaller task slices or bounded learning-loop follow-up evidence.",
         "Sprint 4 optional post-MVP learning tasks are excluded from MVP closure blockers."
       ],
-      "remaining_task_refs": [
-        "T6"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "Relia must support `avoid` rules from failures and `playbook` rules from held fixes, and playbook rules must cite held evidence.",
       "scope_item_id": "FR14-BIDIRECTIONAL-MEMORY-001",
       "source_ref": "docs/product/prd.md#fr14-bidirectional-memory",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T6"
       ]
@@ -1041,30 +1089,38 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "FR15-MEMORY-PAGE-WITH-RECEIPTS-001",
-          "evidence_refs": [],
+          "evidence_refs": [
+            ".factory/artifacts/acceptance-evidence/FR15-MEMORY-PAGE-WITH-RECEIPTS-001/20260627T205710.704969000Z.json",
+            ".factory/artifacts/task-runs/T6/validation-report.json"
+          ],
+          "recorded_at": "2026-06-27T20:57:10Z",
+          "recorded_by": "davidahmann-via-codex",
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "distillation-calibration-and-confidence-part-1"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        ".factory/artifacts/acceptance-evidence/FR15-MEMORY-PAGE-WITH-RECEIPTS-001/20260627T205710.704969000Z.json",
+        ".factory/artifacts/task-runs/T6/validation-report.json"
+      ],
       "group_id": "fr15-memory-page-with-receipts",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T6"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence.",
         "Sprint 4 remapped this item to smaller task slices or bounded learning-loop follow-up evidence.",
         "Sprint 4 optional post-MVP learning tasks are excluded from MVP closure blockers."
       ],
-      "remaining_task_refs": [
-        "T6"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "relia memory` must render MEMORY.md showing statements, confidence, lifecycle status, and clickable provenance.",
       "scope_item_id": "FR15-MEMORY-PAGE-WITH-RECEIPTS-001",
       "source_ref": "docs/product/prd.md#fr15-memory-page-with-receipts",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T6"
       ]
@@ -1500,28 +1556,36 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "NFR2-FAST-FIRST-MEMORY-001",
-          "evidence_refs": [],
+          "evidence_refs": [
+            ".factory/artifacts/acceptance-evidence/NFR2-FAST-FIRST-MEMORY-001/20260627T205710.726688000Z.json",
+            ".factory/artifacts/task-runs/T6/validation-report.json"
+          ],
+          "recorded_at": "2026-06-27T20:57:10Z",
+          "recorded_by": "davidahmann-via-codex",
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "distillation-calibration-and-confidence-part-1"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        ".factory/artifacts/acceptance-evidence/NFR2-FAST-FIRST-MEMORY-001/20260627T205710.726688000Z.json",
+        ".factory/artifacts/task-runs/T6/validation-report.json"
+      ],
       "group_id": "nfr2-fast-first-memory",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T6"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T6"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "A technical user should ingest, distill, and approve their first rule in under 30 minutes.",
       "scope_item_id": "NFR2-FAST-FIRST-MEMORY-001",
       "source_ref": "docs/product/prd.md#nfr2-fast-first-memory",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T6"
       ]
@@ -1586,30 +1650,38 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "NFR4-CALIBRATION-HONESTY-001",
-          "evidence_refs": [],
+          "evidence_refs": [
+            ".factory/artifacts/acceptance-evidence/NFR4-CALIBRATION-HONESTY-001/20260627T205522.685605000Z.json",
+            ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
+          ],
+          "recorded_at": "2026-06-27T20:55:22Z",
+          "recorded_by": "davidahmann-via-codex",
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "distillation-calibration-and-confidence-part-1"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        ".factory/artifacts/acceptance-evidence/NFR4-CALIBRATION-HONESTY-001/20260627T205522.685605000Z.json",
+        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
+      ],
       "group_id": "nfr4-calibration-honesty",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T6"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence.",
         "Sprint 4 remapped this item to smaller task slices or bounded learning-loop follow-up evidence.",
         "Sprint 4 optional post-MVP learning tasks are excluded from MVP closure blockers."
       ],
-      "remaining_task_refs": [
-        "T6"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": true,
       "scope_item": "Reports must clearly distinguish confirmed recurrences, possible recurrences, flake-discounted evidence, and uncertain attribution.",
       "scope_item_id": "NFR4-CALIBRATION-HONESTY-001",
       "source_ref": "docs/product/prd.md#nfr4-calibration-honesty",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T6"
       ]
@@ -1674,30 +1746,38 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "NFR6-LOCAL-PRIVACY-001",
-          "evidence_refs": [],
+          "evidence_refs": [
+            ".factory/artifacts/acceptance-evidence/NFR6-LOCAL-PRIVACY-001/20260627T205710.748971000Z.json",
+            ".factory/artifacts/task-runs/T6/validation-report.json"
+          ],
+          "recorded_at": "2026-06-27T20:57:10Z",
+          "recorded_by": "davidahmann-via-codex",
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "distillation-calibration-and-confidence-part-1"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        ".factory/artifacts/acceptance-evidence/NFR6-LOCAL-PRIVACY-001/20260627T205710.748971000Z.json",
+        ".factory/artifacts/task-runs/T6/validation-report.json"
+      ],
       "group_id": "nfr6-local-privacy",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T6"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence.",
         "Sprint 4 remapped this item to smaller task slices or bounded learning-loop follow-up evidence.",
         "Sprint 4 optional post-MVP learning tasks are excluded from MVP closure blockers."
       ],
-      "remaining_task_refs": [
-        "T6"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "Relia must not send code, diffs, logs, or experience records anywhere by default. When a distill provider is configured, only redacted experience records leave the machine, and `relia check` must say so explicitly.",
       "scope_item_id": "NFR6-LOCAL-PRIVACY-001",
       "source_ref": "docs/product/prd.md#nfr6-local-privacy",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T6"
       ]
@@ -1748,28 +1828,36 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "NFR8-STRUCTURED-DATA-FIRST-001",
-          "evidence_refs": [],
+          "evidence_refs": [
+            ".factory/artifacts/acceptance-evidence/NFR8-STRUCTURED-DATA-FIRST-001/20260627T205522.767232000Z.json",
+            "schemas/memory-rule.schema.json"
+          ],
+          "recorded_at": "2026-06-27T20:55:22Z",
+          "recorded_by": "davidahmann-via-codex",
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "distillation-calibration-and-confidence-part-1"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        ".factory/artifacts/acceptance-evidence/NFR8-STRUCTURED-DATA-FIRST-001/20260627T205522.767232000Z.json",
+        "schemas/memory-rule.schema.json"
+      ],
       "group_id": "nfr8-structured-data-first",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T6"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T6"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": true,
       "scope_item": "Outcome extraction should use the GitHub API's structured data (check runs, review threads, merge/revert metadata) before log scraping; log-parsed values carry confidence labels.",
       "scope_item_id": "NFR8-STRUCTURED-DATA-FIRST-001",
       "source_ref": "docs/product/prd.md#nfr8-structured-data-first",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T6"
       ]
@@ -1870,28 +1958,36 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "NFR11-STOCHASTIC-HONESTY-001",
-          "evidence_refs": [],
+          "evidence_refs": [
+            ".factory/artifacts/acceptance-evidence/NFR11-STOCHASTIC-HONESTY-001/20260627T205710.781954000Z.json",
+            ".factory/artifacts/task-runs/T6/validation-report.json"
+          ],
+          "recorded_at": "2026-06-27T20:57:10Z",
+          "recorded_by": "davidahmann-via-codex",
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "distillation-calibration-and-confidence-part-1"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        ".factory/artifacts/acceptance-evidence/NFR11-STOCHASTIC-HONESTY-001/20260627T205710.781954000Z.json",
+        ".factory/artifacts/task-runs/T6/validation-report.json"
+      ],
       "group_id": "nfr11-stochastic-honesty",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T6"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T6"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "LLM-drafted statements are labeled by origin and reviewable; clustering and calibration are deterministic given the same inputs.",
       "scope_item_id": "NFR11-STOCHASTIC-HONESTY-001",
       "source_ref": "docs/product/prd.md#nfr11-stochastic-honesty",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T6"
       ]
@@ -1953,28 +2049,36 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "NFR13-INFERENCE-HUMILITY-001",
-          "evidence_refs": [],
+          "evidence_refs": [
+            ".factory/artifacts/acceptance-evidence/NFR13-INFERENCE-HUMILITY-001/20260627T205710.813721000Z.json",
+            ".factory/artifacts/task-runs/T6/validation-report.json"
+          ],
+          "recorded_at": "2026-06-27T20:57:10Z",
+          "recorded_by": "davidahmann-via-codex",
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "distillation-calibration-and-confidence-part-1"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        ".factory/artifacts/acceptance-evidence/NFR13-INFERENCE-HUMILITY-001/20260627T205710.813721000Z.json",
+        ".factory/artifacts/task-runs/T6/validation-report.json"
+      ],
       "group_id": "nfr13-inference-humility",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T6"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T6"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "Drafted rules, signatures parsed from logs, attribution inferences, and held-fix detection must be confidence-labeled.",
       "scope_item_id": "NFR13-INFERENCE-HUMILITY-001",
       "source_ref": "docs/product/prd.md#nfr13-inference-humility",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T6"
       ]
@@ -2144,28 +2248,36 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "MVP-IN-SCOPE-003",
-          "evidence_refs": [],
+          "evidence_refs": [
+            ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-003/20260627T205710.835244000Z.json",
+            ".factory/artifacts/task-runs/T6/validation-report.json"
+          ],
+          "recorded_at": "2026-06-27T20:57:10Z",
+          "recorded_by": "davidahmann-via-codex",
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "distillation-calibration-and-confidence-part-1"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-003/20260627T205710.835244000Z.json",
+        ".factory/artifacts/task-runs/T6/validation-report.json"
+      ],
       "group_id": "mvp-in-scope",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T6"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T6"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "agent attribution with confidence",
       "scope_item_id": "MVP-IN-SCOPE-003",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T6"
       ]
@@ -2280,28 +2392,36 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "MVP-IN-SCOPE-006",
-          "evidence_refs": [],
+          "evidence_refs": [
+            ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-006/20260627T205710.855859000Z.json",
+            ".factory/artifacts/task-runs/T6/validation-report.json"
+          ],
+          "recorded_at": "2026-06-27T20:57:10Z",
+          "recorded_by": "davidahmann-via-codex",
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "distillation-calibration-and-confidence-part-1"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-006/20260627T205710.855859000Z.json",
+        ".factory/artifacts/task-runs/T6/validation-report.json"
+      ],
       "group_id": "mvp-in-scope",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T6"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T6"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "deterministic failure signatures with confidence labels",
       "scope_item_id": "MVP-IN-SCOPE-006",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T6"
       ]
@@ -5354,7 +5474,7 @@
       ]
     }
   ],
-  "last_updated_at": "2026-06-27T12:17:29Z",
+  "last_updated_at": "2026-06-27T20:58:20Z",
   "schema_version": "0.1",
   "source_prd_ref": "docs/product/prd.md"
 }

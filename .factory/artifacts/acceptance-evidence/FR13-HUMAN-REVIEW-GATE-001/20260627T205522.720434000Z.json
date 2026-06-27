@@ -1,0 +1,14 @@
+{
+  "acceptance_item_id": "FR13-HUMAN-REVIEW-GATE-001",
+  "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+  "artifact_type": "acceptance_evidence_record",
+  "expires_at": "",
+  "external_evidence_ref": "https://github.com/Clyra-AI/relia/pull/40",
+  "generated_at": "2026-06-27T20:55:22Z",
+  "generated_by": "factoryd record-acceptance",
+  "notes": "PR #40 completed GitHub/Codex review repair cycle: CI green, actionable Codex threads replied to and resolved, then squash-merged.",
+  "repo": "relia",
+  "reviewer": "davidahmann-via-codex",
+  "schema_version": "0.1",
+  "status": "implemented"
+}

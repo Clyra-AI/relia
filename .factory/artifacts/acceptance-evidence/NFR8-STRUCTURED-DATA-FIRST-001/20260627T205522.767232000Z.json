@@ -1,0 +1,14 @@
+{
+  "acceptance_item_id": "NFR8-STRUCTURED-DATA-FIRST-001",
+  "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+  "artifact_type": "acceptance_evidence_record",
+  "expires_at": "",
+  "external_evidence_ref": "schemas/memory-rule.schema.json",
+  "generated_at": "2026-06-27T20:55:22Z",
+  "generated_by": "factoryd record-acceptance",
+  "notes": "T6 added/validated machine-readable memory-rule schema coverage and deterministic JSON/YAML artifacts; validation report records schema formatting and prepush-full pass.",
+  "repo": "relia",
+  "reviewer": "davidahmann-via-codex",
+  "schema_version": "0.1",
+  "status": "implemented"
+}
