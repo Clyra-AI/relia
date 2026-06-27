@@ -976,7 +976,7 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 		windowRecords = append(windowRecords, record)
 	}
 	flakeHeuristics := autoFlakeDiscountedExperiences(windowRecords)
-	priorBySignature := map[string]backtestExperience{}
+	priorBySignature := map[string][]backtestExperience{}
 	var confirmed []recurrencePair
 	var possible []recurrencePair
 	var flakes []backtestFlakeDiscount
@@ -1019,9 +1019,10 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 			continue
 		}
 		signatureID := record.Outcome.Signature.SignatureID
-		if prior, ok := priorBySignature[signatureID]; ok {
+		if priors := priorBySignature[signatureID]; len(priors) > 0 {
+			prior, confidence := selectRecurrencePrior(priors, current)
 			pair := buildRecurrencePair(prior, current)
-			if confirmedRecurrence(prior, current) {
+			if confidence == "confirmed" {
 				pair.Confidence = "confirmed"
 				pair.Reason = "Exact reliable signature repeated with overlapping paths."
 				confirmed = append(confirmed, pair)
@@ -1033,7 +1034,7 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 			addBacktestCitation(citationMap, prior)
 			addBacktestCitation(citationMap, current)
 		}
-		priorBySignature[signatureID] = current
+		priorBySignature[signatureID] = append(priorBySignature[signatureID], current)
 	}
 	sortRecurrencePairs(confirmed)
 	sortRecurrencePairs(possible)
@@ -1114,6 +1115,15 @@ func confirmedRecurrence(prior backtestExperience, current backtestExperience) b
 		return false
 	}
 	return pathSetsOverlap(prior.Record.Context.Paths, current.Record.Context.Paths)
+}
+
+func selectRecurrencePrior(priors []backtestExperience, current backtestExperience) (backtestExperience, string) {
+	for index := len(priors) - 1; index >= 0; index-- {
+		if confirmedRecurrence(priors[index], current) {
+			return priors[index], "confirmed"
+		}
+	}
+	return priors[len(priors)-1], "possible"
 }
 
 func pathSetsOverlap(left []string, right []string) bool {
@@ -3766,6 +3776,12 @@ func configError(message string) *CommandError {
 	}
 }
 
+func configErrorAt(message string, ref string) *CommandError {
+	commandErr := configError(message)
+	commandErr.Ref = ref
+	return commandErr
+}
+
 func validationError(message string, missing []string) *CommandError {
 	return &CommandError{
 		Type:        "operating_pack_validation_failed",
@@ -3959,7 +3975,6 @@ func validateReliaConfig(root string) ([]Finding, *CommandError) {
 		"redaction.standard_token_shapes": "true",
 		"models.local_manifest":           ".relia/models/manifest.json",
 		"serve.advisory_only":             "true",
-		"gate.enabled":                    "false",
 	}
 	for key, want := range requiredExact {
 		scalar, ok := document.Scalars[key]
@@ -3976,6 +3991,38 @@ func validateReliaConfig(root string) ([]Finding, *CommandError) {
 				return nil, configError(fmt.Sprintf("%s must be %s", key, want))
 			}
 		}
+	}
+
+	var warnings []Finding
+	gateEnabled, ok := document.Scalars["gate.enabled"]
+	if !ok {
+		return nil, configError("relia.yaml missing required key gate.enabled")
+	}
+	switch gateEnabled.Value {
+	case "false":
+		if gateLimit, ok := document.Scalars["gate.max_error_recurrence_rate"]; ok {
+			warnings = append(warnings, Finding{
+				Type:    "unenforced_gate_setting",
+				Message: "gate.max_error_recurrence_rate is configured while gate.enabled is false",
+				Ref:     configRef(gateLimit),
+			})
+		}
+	case "true":
+		gateLimit, ok := document.Scalars["gate.max_error_recurrence_rate"]
+		if !ok {
+			return nil, configErrorAt("gate.max_error_recurrence_rate is required when gate.enabled is true", configRef(gateEnabled))
+		}
+		parsed, err := strconv.ParseFloat(gateLimit.Value, 64)
+		if err != nil || parsed < 0 || parsed > 1 {
+			return nil, configErrorAt("gate.max_error_recurrence_rate must be a number between 0 and 1 when gate.enabled is true", configRef(gateLimit))
+		}
+		warnings = append(warnings, Finding{
+			Type:    "recurrence_gate_enabled",
+			Message: "gate.enabled is true; relia backtest exits 5 when headline ERR exceeds the configured threshold",
+			Ref:     configRef(gateEnabled),
+		})
+	default:
+		return nil, configErrorAt("gate.enabled must be true or false", configRef(gateEnabled))
 	}
 
 	embeddings, ok := document.Scalars["distill.embeddings"]
@@ -3999,7 +4046,6 @@ func validateReliaConfig(root string) ([]Finding, *CommandError) {
 	if !ok {
 		return nil, configError("relia.yaml missing required key distill.provider")
 	}
-	var warnings []Finding
 	switch provider.Value {
 	case "none":
 	case "openai_compatible", "anthropic":
@@ -4026,14 +4072,6 @@ func validateReliaConfig(root string) ([]Finding, *CommandError) {
 		})
 	default:
 		return nil, configError("distill.review_required must be true or false")
-	}
-
-	if gateLimit, ok := document.Scalars["gate.max_error_recurrence_rate"]; ok {
-		warnings = append(warnings, Finding{
-			Type:    "unenforced_gate_setting",
-			Message: "gate.max_error_recurrence_rate is configured while gate.enabled is false",
-			Ref:     configRef(gateLimit),
-		})
 	}
 	if len(yamlListValuesWithMapFields(document, "attribution.agent_authors", "login")) == 0 &&
 		len(yamlListValues(document, "attribution.coauthor_trailers")) == 0 &&

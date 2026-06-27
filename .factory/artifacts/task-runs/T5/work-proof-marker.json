@@ -14,19 +14,18 @@
   "evidence_refs": [
     ".factory/artifacts/task-runs/T5/validation-report.json",
     ".factory/artifacts/task-runs/T5/proof-of-behavior-scorecard.json",
-    "cmd/relia/main_test.go",
-    "schemas/recurrence-report.schema.json"
+    "cmd/relia/main.go",
+    "cmd/relia/main_test.go"
   ],
+  "generated_at": "2026-06-27T12:46:42Z",
   "implementation_performed": true,
+  "repair_task_id": "20260627T121729.072098000Z-relia-T5-repair",
   "schema_version": "1.0",
   "status": "implemented",
   "summary": [
-    "Implemented offline relia backtest over local .relia/experiences shards.",
-    "Added deterministic signature recurrence pairing with confirmed and possible outputs.",
-    "Excluded possible recurrences and flake discounts from headline ERR.",
-    "Added saved-baseline comparison with stale-baseline labeling and disabled-by-default recurrence gate handling.",
-    "Added relia check failure for zero-match attribution configuration with relia.yaml line reference.",
-    "Expanded recurrence report schema and synced README, dev guide, and architecture guide."
+    "Repaired conservative recurrence pairing so each current failure scans all earlier same-signature records and chooses a confirmed path-overlap match before falling back to a possible pair.",
+    "Repaired recurrence gate configuration so gate.enabled: true with a numeric max_error_recurrence_rate reaches backtest gate evaluation and can return the documented exit 5 failure.",
+    "Added regression coverage for both Codex review findings."
   ],
   "task_id": "T5"
 }

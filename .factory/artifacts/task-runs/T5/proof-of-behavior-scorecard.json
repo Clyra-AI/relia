@@ -3,64 +3,35 @@
   "schema_version": "1.0",
   "task_id": "T5",
   "status": "pass",
+  "generated_at": "2026-06-27T12:46:42Z",
+  "repair_task_id": "20260627T121729.072098000Z-relia-T5-repair",
   "proof_level": "user_visible_behavior",
   "behavior_checks": [
     {
-      "behavior": "relia backtest --window 180d computes confirmed and possible recurrence pairs separately.",
-      "status": "pass",
-      "evidence_refs": [
-        "cmd/relia/main_test.go"
-      ]
-    },
-    {
-      "behavior": "Possible recurrences are excluded from headline ERR.",
-      "status": "pass",
-      "evidence_refs": [
-        "cmd/relia/main_test.go"
-      ]
-    },
-    {
-      "behavior": "Explicit and heuristic flake discounts are reported and excluded from the ERR numerator.",
+      "behavior": "Backtest keeps all earlier records per signature and pairs a current failure with an earlier confirmed recurrence when the immediately previous same-signature record is only possible.",
       "status": "pass",
       "evidence_refs": [
         "cmd/relia/main.go",
-        "cmd/relia/main_test.go"
+        "cmd/relia/main_test.go::TestBacktestPairsCurrentWithAnyEarlierConfirmedRecurrence"
       ]
     },
     {
-      "behavior": "Backtest writes deterministic JSON and HTML report artifact paths for repeated runs over the same shards and window.",
+      "behavior": "Possible recurrence pairs remain reported separately and excluded from the headline ERR.",
       "status": "pass",
       "evidence_refs": [
-        "cmd/relia/main_test.go"
+        "cmd/relia/main_test.go::TestBacktestPairsCurrentWithAnyEarlierConfirmedRecurrence"
       ]
     },
     {
-      "behavior": "Saved ERR baselines are compared and labeled stale when source artifact digests differ.",
-      "status": "pass",
-      "evidence_refs": [
-        "cmd/relia/main.go",
-        "cmd/relia/main_test.go"
-      ]
-    },
-    {
-      "behavior": "The recurrence gate is implemented but reports off by default under relia.yaml.",
+      "behavior": "An explicitly enabled recurrence gate with a configured max_error_recurrence_rate is evaluated by backtest and returns recurrence_gate_failed with exit 5 when tripped.",
       "status": "pass",
       "evidence_refs": [
         "cmd/relia/main.go",
-        "relia.yaml",
-        "docs/dev/dev_guides.md"
+        "cmd/relia/main_test.go::TestBacktestExplicitEnabledGateEvaluatesThreshold"
       ]
     },
     {
-      "behavior": "relia check flags zero-match attribution config with a concrete relia.yaml line reference.",
-      "status": "pass",
-      "evidence_refs": [
-        "cmd/relia/main.go",
-        "cmd/relia/main_test.go"
-      ]
-    },
-    {
-      "behavior": "Backtest parse and provenance failures use typed command errors with source path or line refs where possible.",
+      "behavior": "Invalid enabled gate configuration remains fail-closed with a line-specific relia.yaml reference.",
       "status": "pass",
       "evidence_refs": [
         "cmd/relia/main.go"
@@ -68,6 +39,11 @@
     }
   ],
   "commands": [
+    {
+      "command": "make test-fast",
+      "status": "pass",
+      "exit_code": 0
+    },
     {
       "command": "make prepush-full",
       "status": "pass",
@@ -77,7 +53,7 @@
   "redaction_posture": {
     "status": "internal",
     "customer_safe": false,
-    "notes": "Task-run evidence remains internal. Backtest report payloads are generated from already-redacted local experience records and mark redaction_status as customer_safe."
+    "notes": "Task-run evidence remains internal and contains only synthetic test references and repo-relative paths."
   },
   "evidence_refs": [
     ".factory/artifacts/task-runs/T5/work-proof-marker.json",
