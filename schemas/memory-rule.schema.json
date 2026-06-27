@@ -144,7 +144,90 @@
     },
     "metadata": {
       "type": "object",
-      "additionalProperties": true
+      "additionalProperties": true,
+      "properties": {
+        "confidence_label": {
+          "enum": ["high", "medium", "low"]
+        },
+        "lifecycle_reason": {
+          "type": "string"
+        },
+        "confidence_inputs": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "evidence_count": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "recency_weight": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "contradictions": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "flake_discount": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "extraction_confidence": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "drafting_model_weight": {
+              "const": 0
+            }
+          }
+        },
+        "decay": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "half_life_days": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "latest_evidence_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "oldest_evidence_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "anchor_recorded_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        "source_artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source_artifact_digest": {
+          "type": "string"
+        },
+        "provider": {
+          "type": "string"
+        },
+        "embedding_mode": {
+          "type": "string"
+        },
+        "review_required": {
+          "type": "boolean"
+        },
+        "deterministic_fallback": {
+          "type": "boolean"
+        }
+      }
     }
   }
 }

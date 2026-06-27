@@ -1,0 +1,241 @@
+{
+  "acceptance_results": [
+    {
+      "acceptance_item_id": "FR4-ATTRIBUTION-WITH-CONFIDENCE-001",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "FR7-DETERMINISTIC-FAILURE-SIGNATURES-001",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "FR11-CALIBRATED-CONFIDENCE-001",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "FR12-DECAY-AND-CHURN-INVALIDATION-001",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "FR13-HUMAN-REVIEW-GATE-001",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "FR14-BIDIRECTIONAL-MEMORY-001",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "FR15-MEMORY-PAGE-WITH-RECEIPTS-001",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "NFR2-FAST-FIRST-MEMORY-001",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
+      ],
+      "notes": "Local distill, review, and memory flows are implemented and covered by fast tests; first-user time-to-approve remains a product-signal item for later lifecycle evidence.",
+      "status": "partial"
+    },
+    {
+      "acceptance_item_id": "NFR4-CALIBRATION-HONESTY-001",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "NFR6-LOCAL-PRIVACY-001",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "NFR8-STRUCTURED-DATA-FIRST-001",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "NFR11-STOCHASTIC-HONESTY-001",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "NFR13-INFERENCE-HUMILITY-001",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-003",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
+      ],
+      "notes": "Part 1 implements the local distill/review/memory behavior; remaining public release boundary work is reserved for later slices.",
+      "status": "partial"
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-006",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
+      ],
+      "notes": "Part 1 implements deterministic distill and memory-page behavior; release/demo/product-signal closure remains outside the worker scope.",
+      "status": "partial"
+    }
+  ],
+  "artifact_type": "validation_report",
+  "baseline_evidence": [
+    {
+      "command": "make lint-fast",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "make test-fast",
+      "exit_code": 0,
+      "status": "pass"
+    }
+  ],
+  "blockers": [],
+  "changed_paths": [
+    ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
+    ".factory/artifacts/task-runs/T6/validation-report.json",
+    ".factory/artifacts/task-runs/T6/work-proof-marker.json",
+    "README.md",
+    "cmd/relia/main.go",
+    "cmd/relia/main_test.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/dev/dev_guides.md",
+    "schemas/memory-rule.schema.json"
+  ],
+  "changelog_result": {
+    "notes": "README and dev/architecture guides document the user-facing T6 command behavior; no standalone changelog file exists in this repo.",
+    "status": "applied_to_docs"
+  },
+  "commands_run": [
+    "make lint-fast",
+    "make test-fast",
+    "make test-fast",
+    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go && make test-fast",
+    "python3 -m json.tool schemas/memory-rule.schema.json >/tmp/memory-rule.schema.pretty.json && make lint-fast",
+    "make test-fast",
+    "make test-contracts",
+    "make prepush-full",
+    "git diff --check",
+    "git diff --name-only | allowed-path policy check",
+    "git diff --name-only | forbidden-path policy check",
+    "python3 -m json.tool .factory/artifacts/task-runs/T6/work-proof-marker.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T6/validation-report.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
+    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
+    "go test ./cmd/relia -count=1 -run 'TestDistillAvoidContradictionsIgnoreOlderPositiveEvidence|TestYAMLScalarForWriteQuotesColonSpace|TestDistillMarksContradictedAndStaleRules'"
+  ],
+  "docs_sync_result": {
+    "status": "pass",
+    "updated_refs": [
+      "README.md",
+      "docs/dev/dev_guides.md",
+      "docs/architecture/architecture_guides.md",
+      "schemas/memory-rule.schema.json"
+    ]
+  },
+  "final_validation_evidence": [
+    {
+      "command": "make prepush-full",
+      "exit_code": 0,
+      "notes": "Coverage reported 81.1% against the 75.0% minimum.",
+      "status": "pass"
+    },
+    {
+      "command": "make prepush-full",
+      "exit_code": 0,
+      "notes": "Coverage reported 81.2% against the 75.0% minimum after Codex review repairs.",
+      "status": "pass"
+    }
+  ],
+  "generated_at": "2026-06-27T20:47:53Z",
+  "green_evidence": [
+    {
+      "command": "make test-fast",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "make test-contracts",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -count=1 -run 'TestDistillAvoidContradictionsIgnoreOlderPositiveEvidence|TestYAMLScalarForWriteQuotesColonSpace|TestDistillMarksContradictedAndStaleRules'",
+      "exit_code": 0,
+      "notes": "Codex review repair coverage for avoid contradiction timing and YAML colon-space quoting.",
+      "status": "pass"
+    }
+  ],
+  "path_policy_result": {
+    "changed_paths_checked": true,
+    "forbidden_paths_changed": false,
+    "outside_allowed_paths_changed": false,
+    "status": "pass"
+  },
+  "plan_drift_result": {
+    "notes": "Implementation stayed inside the T6 objective and did not update tracker, lifecycle, PR, or scope-closure state.",
+    "status": "pass"
+  },
+  "red_evidence": [
+    {
+      "command": "make test-fast",
+      "exit_code": 2,
+      "reason": "New T6 tests failed red-first because distill returned the reserved not_implemented command envelope before implementation.",
+      "status": "expected_fail"
+    }
+  ],
+  "residual_risks": [
+    "Provider-backed drafting remains fail-closed in this part-1 slice and requires a future approved model_provider_endpoint gate.",
+    "First-user under-30-minute product-signal closure is not self-closed by this worker."
+  ],
+  "review_repair_evidence": [
+    {
+      "comments": [
+        "Count only later clean evidence for avoid contradictions",
+        "Quote YAML scalars that contain colon-space"
+      ],
+      "reviewer": "chatgpt-codex-connector",
+      "status": "addressed",
+      "validation": "make prepush-full"
+    }
+  ],
+  "schema_version": "1.0",
+  "status": "pass",
+  "task_id": "T6",
+  "versioning_result": {
+    "notes": "Public output was documented and schema metadata was expanded compatibly.",
+    "status": "pre_1_0_no_version_bump"
+  }
+}

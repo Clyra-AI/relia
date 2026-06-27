@@ -1,0 +1,32 @@
+{
+  "artifact_type": "work_proof_marker",
+  "changed_paths": [
+    ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
+    ".factory/artifacts/task-runs/T6/validation-report.json",
+    ".factory/artifacts/task-runs/T6/work-proof-marker.json",
+    "README.md",
+    "cmd/relia/main.go",
+    "cmd/relia/main_test.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/dev/dev_guides.md",
+    "schemas/memory-rule.schema.json"
+  ],
+  "evidence_refs": [
+    ".factory/artifacts/task-runs/T6/validation-report.json",
+    ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
+  ],
+  "generated_at": "2026-06-27T20:47:53Z",
+  "implementation_performed": true,
+  "implementation_summary": [
+    "Implemented offline relia distill, relia review, and relia memory command paths.",
+    "Added deterministic signature clustering for avoid and playbook rule drafts.",
+    "Added confidence scoring from evidence count, recency half-life, contradictions, flake discounts, and extraction confidence with drafting_model_weight fixed at 0.",
+    "Added stale-path and contradiction lifecycle handling plus review-gated activation.",
+    "Rendered memory/MEMORY.md with statements, confidence, lifecycle status, review labels, and clickable PR provenance.",
+    "Addressed Codex review feedback by making avoid-rule contradiction timing compare positive evidence against the latest summarized failure.",
+    "Quoted generated YAML scalars containing colon-space and added regression tests."
+  ],
+  "schema_version": "1.0",
+  "status": "implemented",
+  "task_id": "T6"
+}
