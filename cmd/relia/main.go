@@ -4176,7 +4176,7 @@ func validateReliaConfig(root string) ([]Finding, *CommandError) {
 			return nil, configErrorAt("gate.max_error_recurrence_rate is required when gate.enabled is true", configRef(gateEnabled))
 		}
 		parsed, err := strconv.ParseFloat(gateLimit.Value, 64)
-		if err != nil || parsed < 0 || parsed > 1 {
+		if err != nil || math.IsNaN(parsed) || math.IsInf(parsed, 0) || parsed < 0 || parsed > 1 {
 			return nil, configErrorAt("gate.max_error_recurrence_rate must be a number between 0 and 1 when gate.enabled is true", configRef(gateLimit))
 		}
 		warnings = append(warnings, Finding{

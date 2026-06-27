@@ -1878,6 +1878,29 @@ func TestCheckRejectsZeroMatchAttributionConfigWithConcreteRef(t *testing.T) {
 	}
 }
 
+func TestCheckRejectsNaNRecurrenceGateThreshold(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	configPath := filepath.Join(tempDir, "relia.yaml")
+	replaceInFile(t, configPath, `gate:
+  enabled: false`, `gate:
+  enabled: true
+  max_error_recurrence_rate: NaN`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitUsage {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if !strings.Contains(result.Errors[0].Message, "gate.max_error_recurrence_rate must be a number between 0 and 1") {
+		t.Fatalf("error message = %q", result.Errors[0].Message)
+	}
+	if !strings.Contains(result.Errors[0].Ref, "relia.yaml:") {
+		t.Fatalf("error ref = %q, want concrete relia.yaml line", result.Errors[0].Ref)
+	}
+}
+
 func TestModelsRejectsUnsupportedSubcommand(t *testing.T) {
 	stdout, stderr, code := runForTest(t, []string{"--json", "models"}, false)
 
