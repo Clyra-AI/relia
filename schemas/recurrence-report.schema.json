@@ -4,15 +4,22 @@
   "title": "Relia Recurrence Report",
   "type": "object",
   "additionalProperties": false,
-  "x-relia-exit-codes": [2, 4, 9],
+  "x-relia-exit-codes": [2, 4, 5, 9],
   "required": [
     "object_type",
     "schema_version",
     "report_id",
+    "source_artifacts",
     "window",
+    "summary",
     "headline_err",
     "confirmed_recurrences",
     "possible_recurrences",
+    "flake_discounts",
+    "attribution_uncertain",
+    "baseline",
+    "gate",
+    "citations",
     "metadata"
   ],
   "properties": {
@@ -26,20 +33,18 @@
       "type": "string",
       "minLength": 1
     },
-    "window": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["start", "end"],
-      "properties": {
-        "start": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "end": {
-          "type": "string",
-          "format": "date-time"
-        }
+    "source_artifacts": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
       }
+    },
+    "window": {
+      "$ref": "#/$defs/window"
+    },
+    "summary": {
+      "$ref": "#/$defs/summary"
     },
     "headline_err": {
       "type": "number",
@@ -58,16 +63,129 @@
         "$ref": "#/$defs/recurrence_pair"
       }
     },
+    "flake_discounts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/flake_discount"
+      }
+    },
+    "attribution_uncertain": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/uncertain_attribution"
+      }
+    },
+    "baseline": {
+      "$ref": "#/$defs/baseline"
+    },
+    "gate": {
+      "$ref": "#/$defs/gate"
+    },
+    "citations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/citation"
+      }
+    },
     "metadata": {
       "type": "object",
       "additionalProperties": true
     }
   },
   "$defs": {
+    "window": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start", "end"],
+      "properties": {
+        "start": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "experience_count",
+        "window_experience_count",
+        "agent_failure_denominator",
+        "confirmed_recurrence_count",
+        "possible_recurrence_count",
+        "headline_err",
+        "headline_err_percent",
+        "flake_discounted_count",
+        "attribution_uncertain_count",
+        "human_failure_excluded_count",
+        "non_failure_outcome_count"
+      ],
+      "properties": {
+        "experience_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "window_experience_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "agent_failure_denominator": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "confirmed_recurrence_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "possible_recurrence_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "headline_err": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "headline_err_percent": {
+          "type": "string"
+        },
+        "flake_discounted_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "attribution_uncertain_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "human_failure_excluded_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "non_failure_outcome_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
     "recurrence_pair": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["current_experience_id", "prior_experience_id", "confidence"],
+      "required": [
+        "current_experience_id",
+        "prior_experience_id",
+        "current_pr",
+        "prior_pr",
+        "current_url",
+        "prior_url",
+        "signature_id",
+        "confidence",
+        "reason",
+        "refs"
+      ],
       "properties": {
         "current_experience_id": {
           "type": "string",
@@ -77,8 +195,211 @@
           "type": "string",
           "minLength": 1
         },
+        "current_pr": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "prior_pr": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "current_url": {
+          "type": "string"
+        },
+        "prior_url": {
+          "type": "string"
+        },
+        "signature_id": {
+          "type": "string",
+          "minLength": 1
+        },
         "confidence": {
           "enum": ["confirmed", "possible"]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "flake_discount": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "experience_id",
+        "pr",
+        "signature_id",
+        "flake_discount",
+        "supporting_prs",
+        "supporting_refs",
+        "reason",
+        "excluded_from_err"
+      ],
+      "properties": {
+        "experience_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "pr": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "signature_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "flake_discount": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "supporting_prs": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "supporting_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "excluded_from_err": {
+          "type": "boolean"
+        }
+      }
+    },
+    "uncertain_attribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "experience_id",
+        "pr",
+        "outcome_kind",
+        "attribution_method",
+        "attribution_confidence",
+        "excluded_from_err",
+        "ref",
+        "reason"
+      ],
+      "properties": {
+        "experience_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "pr": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "outcome_kind": {
+          "type": "string"
+        },
+        "attribution_method": {
+          "type": "string"
+        },
+        "attribution_confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "excluded_from_err": {
+          "type": "boolean"
+        },
+        "ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "baseline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "path", "stale", "reason"],
+      "properties": {
+        "status": {
+          "enum": ["missing", "current", "stale", "saved"]
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "headline_err": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "delta": {
+          "type": "number"
+        },
+        "stale": {
+          "type": "boolean"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled", "status", "reason", "ref"],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "status": {
+          "enum": ["off", "pass", "fail"]
+        },
+        "threshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "citation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pr", "url", "experience_id"],
+      "properties": {
+        "pr": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "url": {
+          "type": "string",
+          "minLength": 1
+        },
+        "experience_id": {
+          "type": "string",
+          "minLength": 1
         }
       }
     }

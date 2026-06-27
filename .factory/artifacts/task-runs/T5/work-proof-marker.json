@@ -1,0 +1,32 @@
+{
+  "artifact_type": "work_proof_marker",
+  "changed_paths": [
+    ".factory/artifacts/task-runs/T5/proof-of-behavior-scorecard.json",
+    ".factory/artifacts/task-runs/T5/validation-report.json",
+    ".factory/artifacts/task-runs/T5/work-proof-marker.json",
+    "README.md",
+    "cmd/relia/main.go",
+    "cmd/relia/main_test.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/dev/dev_guides.md",
+    "schemas/recurrence-report.schema.json"
+  ],
+  "evidence_refs": [
+    ".factory/artifacts/task-runs/T5/validation-report.json",
+    ".factory/artifacts/task-runs/T5/proof-of-behavior-scorecard.json",
+    "cmd/relia/main_test.go",
+    "schemas/recurrence-report.schema.json"
+  ],
+  "implementation_performed": true,
+  "schema_version": "1.0",
+  "status": "implemented",
+  "summary": [
+    "Implemented offline relia backtest over local .relia/experiences shards.",
+    "Added deterministic signature recurrence pairing with confirmed and possible outputs.",
+    "Excluded possible recurrences and flake discounts from headline ERR.",
+    "Added saved-baseline comparison with stale-baseline labeling and disabled-by-default recurrence gate handling.",
+    "Added relia check failure for zero-match attribution configuration with relia.yaml line reference.",
+    "Expanded recurrence report schema and synced README, dev guide, and architecture guide."
+  ],
+  "task_id": "T5"
+}

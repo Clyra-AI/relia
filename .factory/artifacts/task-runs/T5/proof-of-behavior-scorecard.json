@@ -1,0 +1,86 @@
+{
+  "artifact_type": "proof-of-behavior-scorecard",
+  "schema_version": "1.0",
+  "task_id": "T5",
+  "status": "pass",
+  "proof_level": "user_visible_behavior",
+  "behavior_checks": [
+    {
+      "behavior": "relia backtest --window 180d computes confirmed and possible recurrence pairs separately.",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/main_test.go"
+      ]
+    },
+    {
+      "behavior": "Possible recurrences are excluded from headline ERR.",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/main_test.go"
+      ]
+    },
+    {
+      "behavior": "Explicit and heuristic flake discounts are reported and excluded from the ERR numerator.",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go"
+      ]
+    },
+    {
+      "behavior": "Backtest writes deterministic JSON and HTML report artifact paths for repeated runs over the same shards and window.",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/main_test.go"
+      ]
+    },
+    {
+      "behavior": "Saved ERR baselines are compared and labeled stale when source artifact digests differ.",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go"
+      ]
+    },
+    {
+      "behavior": "The recurrence gate is implemented but reports off by default under relia.yaml.",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "relia.yaml",
+        "docs/dev/dev_guides.md"
+      ]
+    },
+    {
+      "behavior": "relia check flags zero-match attribution config with a concrete relia.yaml line reference.",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go"
+      ]
+    },
+    {
+      "behavior": "Backtest parse and provenance failures use typed command errors with source path or line refs where possible.",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/main.go"
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "command": "make prepush-full",
+      "status": "pass",
+      "exit_code": 0
+    }
+  ],
+  "redaction_posture": {
+    "status": "internal",
+    "customer_safe": false,
+    "notes": "Task-run evidence remains internal. Backtest report payloads are generated from already-redacted local experience records and mark redaction_status as customer_safe."
+  },
+  "evidence_refs": [
+    ".factory/artifacts/task-runs/T5/work-proof-marker.json",
+    ".factory/artifacts/task-runs/T5/validation-report.json"
+  ]
+}

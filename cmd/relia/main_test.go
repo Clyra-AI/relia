@@ -149,7 +149,6 @@ func TestHelpAndVersionUseEnvelope(t *testing.T) {
 
 func TestReservedCommandsReturnTypedNotImplemented(t *testing.T) {
 	for _, args := range [][]string{
-		{"--json", "backtest"},
 		{"--json", "models", "pull"},
 	} {
 		stdout, stderr, code := runForTest(t, args, false)
@@ -1215,6 +1214,163 @@ func TestIngestDoesNotPartiallyWriteShardsWhenLaterShardIsCorrupt(t *testing.T) 
 	}
 	if string(februaryContent) != "{not-json}\n" {
 		t.Fatalf("february shard changed unexpectedly:\n%s", februaryContent)
+	}
+}
+
+func TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	inputPath := filepath.Join(tempDir, "fixtures", "outcomes.jsonl")
+	writeFileForTest(t, inputPath, strings.Join([]string{
+		`{"experience_id":"exp_0001","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-01T10:00:00Z","pr":101,"commit":"abc001","paths":["packages/billing/invoice.py","tests/billing/test_invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_time_freeze","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/101"]}`,
+		`{"experience_id":"exp_0002","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-10T10:00:00Z","pr":102,"commit":"abc002","paths":["packages/billing/invoice.py","tests/billing/test_invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_time_freeze","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/102"]}`,
+		`{"experience_id":"exp_0003","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-20T10:00:00Z","pr":103,"commit":"abc003","paths":["packages/billing/invoice.py","tests/billing/test_invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_time_freeze","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"log_parsed_low","provenance_urls":["https://github.com/acme/billing-service/pull/103"]}`,
+		`{"experience_id":"exp_0101","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-02-01T10:00:00Z","pr":201,"commit":"abc101","paths":["packages/notifications/logging.py","tests/notifications/test_retry.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_external_retry","signature_class":"test_failure","check_name":"pytest-notifications","signature_key":"tests/notifications/test_retry.py::test_retry","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/201"]}`,
+		`{"experience_id":"exp_0102","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-02-02T10:00:00Z","pr":202,"commit":"abc102","paths":["packages/worker/retry_queue.py","tests/notifications/test_retry.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_external_retry","signature_class":"test_failure","check_name":"pytest-notifications","signature_key":"tests/notifications/test_retry.py::test_retry","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/202"]}`,
+		`{"experience_id":"exp_0103","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-02-03T10:00:00Z","pr":203,"commit":"abc103","paths":["packages/notifications/client.py","tests/notifications/test_retry.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_external_retry","signature_class":"test_failure","check_name":"pytest-notifications","signature_key":"tests/notifications/test_retry.py::test_retry","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/203"]}`,
+	}, "\n")+"\n")
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+	if code != ExitSuccess {
+		t.Fatalf("ingest exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	writeFileForTest(t, filepath.Join(tempDir, ".relia", "baselines", "error-recurrence-baseline.json"), `{
+  "object_type": "relia.err_baseline",
+  "schema_version": "1.0",
+  "headline_err": 0.1,
+  "metadata": {
+    "source_artifact_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  }
+}
+`)
+
+	stdout, stderr, code = runForTest(t, []string{"--json", "backtest", "--window", "180d"}, false)
+	if code != ExitSuccess {
+		t.Fatalf("backtest exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	report := decodeBacktestReportFromResult(t, result)
+	if report.ObjectType != "relia.recurrence_report" || report.SchemaVersion != commandSchemaVersion {
+		t.Fatalf("report contract = %#v", report)
+	}
+	if report.Summary.AgentFailureDenominator != 6 {
+		t.Fatalf("denominator = %d, want 6", report.Summary.AgentFailureDenominator)
+	}
+	if report.Summary.ConfirmedRecurrenceCount != 1 || len(report.ConfirmedRecurrences) != 1 {
+		t.Fatalf("confirmed recurrences = %#v", report.ConfirmedRecurrences)
+	}
+	if report.Summary.PossibleRecurrenceCount != 1 || len(report.PossibleRecurrences) != 1 {
+		t.Fatalf("possible recurrences = %#v", report.PossibleRecurrences)
+	}
+	if report.HeadlineERR != 0.1667 {
+		t.Fatalf("headline_err = %.4f, want possible recurrence excluded from 1/6 headline", report.HeadlineERR)
+	}
+	if report.ConfirmedRecurrences[0].PriorExperienceID != "exp_0001" || report.ConfirmedRecurrences[0].CurrentExperienceID != "exp_0002" {
+		t.Fatalf("confirmed pair = %#v", report.ConfirmedRecurrences[0])
+	}
+	if report.ConfirmedRecurrences[0].PriorURL == "" || report.ConfirmedRecurrences[0].CurrentURL == "" || len(report.ConfirmedRecurrences[0].Refs) != 2 {
+		t.Fatalf("confirmed pair missing resolvable links and refs: %#v", report.ConfirmedRecurrences[0])
+	}
+	if report.PossibleRecurrences[0].Confidence != "possible" || !strings.Contains(report.PossibleRecurrences[0].Reason, "excluded") {
+		t.Fatalf("possible pair = %#v", report.PossibleRecurrences[0])
+	}
+	if report.Summary.FlakeDiscountedCount != 3 || len(report.FlakeDiscounts) != 3 {
+		t.Fatalf("flake discounts = %#v", report.FlakeDiscounts)
+	}
+	if report.Baseline.Status != "stale" || !report.Baseline.Stale {
+		t.Fatalf("baseline = %#v, want stale", report.Baseline)
+	}
+	if report.Gate.Enabled || report.Gate.Status != "off" {
+		t.Fatalf("gate = %#v, want off by default", report.Gate)
+	}
+	jsonPath, _ := result.Data["json_report_path"].(string)
+	htmlPath, _ := result.Data["html_report_path"].(string)
+	if jsonPath == "" || htmlPath == "" {
+		t.Fatalf("report artifact paths missing from result data: %#v", result.Data)
+	}
+	jsonContent, err := os.ReadFile(filepath.Join(tempDir, filepath.FromSlash(jsonPath)))
+	if err != nil {
+		t.Fatalf("read json report: %v", err)
+	}
+	if !bytes.Contains(jsonContent, []byte(`"object_type": "relia.recurrence_report"`)) {
+		t.Fatalf("json report missing recurrence object:\n%s", jsonContent)
+	}
+	htmlContent, err := os.ReadFile(filepath.Join(tempDir, filepath.FromSlash(htmlPath)))
+	if err != nil {
+		t.Fatalf("read html report: %v", err)
+	}
+	if !bytes.Contains(htmlContent, []byte("Possible Recurrences")) {
+		t.Fatalf("html report missing possible recurrence section:\n%s", htmlContent)
+	}
+}
+
+func TestBacktestRepeatedRunsUseStableReportIDAndArtifacts(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	inputPath := filepath.Join(tempDir, "fixtures", "outcomes.jsonl")
+	writeFileForTest(t, inputPath, strings.Join([]string{
+		`{"experience_id":"exp_0001","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-01T10:00:00Z","pr":101,"commit":"abc001","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_time_freeze","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/101"]}`,
+		`{"experience_id":"exp_0002","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-10T10:00:00Z","pr":102,"commit":"abc002","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_time_freeze","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/102"]}`,
+	}, "\n")+"\n")
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+	if code != ExitSuccess {
+		t.Fatalf("ingest exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+
+	firstStdout, firstStderr, firstCode := runForTest(t, []string{"--json", "backtest", "--window", "180d"}, false)
+	secondStdout, secondStderr, secondCode := runForTest(t, []string{"--json", "backtest", "--window", "180d"}, false)
+	if firstCode != ExitSuccess || secondCode != ExitSuccess {
+		t.Fatalf("backtest codes = %d/%d stderr=%q/%q stdout=%q/%q", firstCode, secondCode, firstStderr, secondStderr, firstStdout, secondStdout)
+	}
+	firstResult := decodeResult(t, firstStdout)
+	secondResult := decodeResult(t, secondStdout)
+	firstReport := decodeBacktestReportFromResult(t, firstResult)
+	secondReport := decodeBacktestReportFromResult(t, secondResult)
+	if firstReport.ReportID != secondReport.ReportID {
+		t.Fatalf("report_id changed across repeated runs: %q then %q", firstReport.ReportID, secondReport.ReportID)
+	}
+	firstPath, _ := firstResult.Data["json_report_path"].(string)
+	secondPath, _ := secondResult.Data["json_report_path"].(string)
+	if firstPath != secondPath {
+		t.Fatalf("json report path changed: %q then %q", firstPath, secondPath)
+	}
+	firstContent, err := os.ReadFile(filepath.Join(tempDir, filepath.FromSlash(firstPath)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	secondContent, err := os.ReadFile(filepath.Join(tempDir, filepath.FromSlash(secondPath)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(firstContent, secondContent) {
+		t.Fatalf("json report content changed across repeated runs:\nfirst=%s\nsecond=%s", firstContent, secondContent)
+	}
+}
+
+func TestCheckRejectsZeroMatchAttributionConfigWithConcreteRef(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	configPath := filepath.Join(tempDir, "relia.yaml")
+	replaceInFile(t, configPath, `  coauthor_trailers:
+    - Claude
+    - Claude Code`, `  coauthor_trailers: []`)
+	replaceInFile(t, configPath, `  pr_labels:
+    - agent-authored`, `  pr_labels: []`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitValidation {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "artifact_contract_validation_failed" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+	if !strings.Contains(result.Errors[0].Message, "zero agent matchers") {
+		t.Fatalf("error message = %q", result.Errors[0].Message)
+	}
+	if !strings.Contains(result.Errors[0].Ref, "relia.yaml:") {
+		t.Fatalf("error ref = %q, want concrete relia.yaml line", result.Errors[0].Ref)
 	}
 }
 
@@ -3858,6 +4014,19 @@ func decodeResult(t *testing.T, output string) CommandResult {
 		t.Fatalf("decode command result from %q: %v", output, err)
 	}
 	return result
+}
+
+func decodeBacktestReportFromResult(t *testing.T, result CommandResult) recurrenceReport {
+	t.Helper()
+	encoded, err := json.Marshal(result.Data["report"])
+	if err != nil {
+		t.Fatalf("encode nested backtest report: %v", err)
+	}
+	var report recurrenceReport
+	if err := json.Unmarshal(encoded, &report); err != nil {
+		t.Fatalf("decode nested backtest report from %s: %v", encoded, err)
+	}
+	return report
 }
 
 func decodeJSONLines(t *testing.T, content string) []map[string]any {

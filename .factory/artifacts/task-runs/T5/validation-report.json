@@ -1,0 +1,223 @@
+{
+  "acceptance_results": [
+    {
+      "acceptance_item_id": "FR8-CONSERVATIVE-RECURRENCE-PAIRING-001",
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        ".factory/artifacts/task-runs/T5/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "FR21-FORWARD-ERR-TRACKING-001",
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        "docs/dev/dev_guides.md"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "NFR3-DETERMINISTIC-BACKTEST-001",
+      "evidence_refs": [
+        "cmd/relia/main_test.go",
+        "schemas/recurrence-report.schema.json"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "NFR9-DEBUGGABLE-ERRORS-001",
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-007",
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "schemas/recurrence-report.schema.json"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-008",
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-009",
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "README.md",
+        "docs/dev/dev_guides.md"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-020",
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-002",
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-003",
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-005",
+      "evidence_refs": [
+        "cmd/relia/main_test.go"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-006",
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-007",
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go"
+      ],
+      "status": "implemented"
+    }
+  ],
+  "artifact_type": "validation_report",
+  "baseline_evidence": [
+    {
+      "command": "make lint-fast",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "make test-fast",
+      "exit_code": 0,
+      "red_first": true,
+      "status": "pass"
+    }
+  ],
+  "blockers": [],
+  "changed_paths": [
+    ".factory/artifacts/task-runs/T5/proof-of-behavior-scorecard.json",
+    ".factory/artifacts/task-runs/T5/validation-report.json",
+    ".factory/artifacts/task-runs/T5/work-proof-marker.json",
+    "README.md",
+    "cmd/relia/main.go",
+    "cmd/relia/main_test.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/dev/dev_guides.md",
+    "schemas/recurrence-report.schema.json"
+  ],
+  "changelog_result": {
+    "notes": "No standalone changelog file exists in the task path set; user-facing behavior was documented in README and repo guides per docs_sync_refs.",
+    "status": "pass"
+  },
+  "commands_run": [
+    "make lint-fast",
+    "make test-fast",
+    "make test-contracts",
+    "make prepush-full",
+    "python3 -m json.tool .factory/artifacts/task-runs/T5/work-proof-marker.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T5/validation-report.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T5/proof-of-behavior-scorecard.json"
+  ],
+  "docs_sync_result": {
+    "status": "pass",
+    "updated_refs": [
+      "README.md",
+      "docs/dev/dev_guides.md",
+      "docs/architecture/architecture_guides.md"
+    ]
+  },
+  "final_validation_evidence": [
+    {
+      "command": "make prepush-full",
+      "coverage": "79.5% statements; minimum 75.0%",
+      "exit_code": 0,
+      "status": "pass"
+    }
+  ],
+  "green_evidence": [
+    {
+      "command": "make test-fast",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "make lint-fast",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "make test-contracts",
+      "exit_code": 0,
+      "status": "pass"
+    }
+  ],
+  "lifecycle_evidence_note": {
+    "refs": [
+      "scope_closure_report",
+      "pr_lifecycle_report",
+      "factoryd_run_once_report"
+    ],
+    "status": "not_worker_owned"
+  },
+  "path_policy_result": {
+    "changed_paths": [
+      ".factory/artifacts/task-runs/T5/proof-of-behavior-scorecard.json",
+      ".factory/artifacts/task-runs/T5/validation-report.json",
+      ".factory/artifacts/task-runs/T5/work-proof-marker.json",
+      "README.md",
+      "cmd/relia/main.go",
+      "cmd/relia/main_test.go",
+      "docs/architecture/architecture_guides.md",
+      "docs/dev/dev_guides.md",
+      "schemas/recurrence-report.schema.json"
+    ],
+    "forbidden_paths_changed": [],
+    "status": "pass"
+  },
+  "plan_drift_result": {
+    "notes": "Implementation remained within the T5 signature, recurrence, flake, backtest, baseline, and conservative classification scope.",
+    "status": "pass"
+  },
+  "residual_risks": [],
+  "schema_version": "1.0",
+  "status": "pass",
+  "task_id": "T5",
+  "test_first_evidence": {
+    "command": "make test-fast",
+    "exit_code": 0,
+    "note": "Baseline/red-first command passed before implementation; behavior-specific tests were then added for the T5 backtest and attribution-config acceptance cases.",
+    "status": "pass"
+  },
+  "versioning_result": {
+    "notes": "Pre-1.0 MVP output contract expanded through schemas/recurrence-report.schema.json.",
+    "status": "pass"
+  }
+}

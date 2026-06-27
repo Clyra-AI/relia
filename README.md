@@ -17,8 +17,8 @@ FACTORY_REPO=/path/to/factory factoryd run --config .factory/factoryd.autoship.e
 
 ## CLI Baseline
 
-The T1/T2/T3/T4.3 command surface establishes the lifecycle skeleton,
-configuration contract, assessment fixture slice, and agent-native output
+The T1/T2/T3/T4.3/T5 command surface establishes the lifecycle skeleton,
+configuration contract, assessment fixture slice, recurrence backtest, and agent-native output
 contract:
 
 - `relia init` creates `relia.yaml` if it is missing and is idempotent when the
@@ -32,6 +32,14 @@ contract:
   experience records, and upserts monthly shards under `.relia/experiences/`.
   This task slice is offline only; live GitHub intake remains behind future
   credential and network gates.
+- `relia backtest --window 180d` reads local `.relia/experiences/*.jsonl`
+  shards, extracts deterministic signatures, pairs confirmed recurrences
+  separately from possible recurrences, discounts flakes, and writes JSON plus
+  HTML reports under `.relia/reports/`. Possible recurrences and discounted
+  flakes are excluded from the headline ERR. A saved ERR baseline under
+  `.relia/baselines/error-recurrence-baseline.json` is compared when present
+  and labeled stale when the source artifact digest differs. The recurrence
+  gate is available through `relia.yaml` but remains off by default.
 - `relia assess --input <diff>` reads a local unified diff, compares touched
   paths with active local `memory/rules/*.yaml` rules, and emits a
   `relia.risk_assessment` payload with `match_high`, `match_medium`, or
@@ -75,6 +83,10 @@ uncertain attribution is excluded from precision, that distill/review lifecycle
 fixtures keep contradicted and stale rules out of serving, that assessment
 fixtures return deterministic repo-relative `match_high` and `no_coverage`
 results, and that demo artifacts do not store seeded secrets.
+
+The live backtest command is deterministic for the same window and local
+experience artifacts: repeated runs use the latest experience timestamp as the
+window anchor and produce the same report ID and artifact paths.
 
 The config in `relia.yaml` is local-only by default: code, diffs, logs, and
 experience records are not sent anywhere; share scope is `private`; redaction
