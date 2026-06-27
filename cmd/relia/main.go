@@ -808,6 +808,9 @@ func diffGitHeaderPaths(line string) []string {
 		}
 		return nil
 	}
+	if !strings.HasPrefix(rest, "\"") {
+		return nil
+	}
 	var paths []string
 	for len(rest) > 0 && len(paths) < 2 {
 		var path string

@@ -2217,6 +2217,22 @@ func TestParseUnifiedDiffTouchedPathsKeepsUnquotedSpaces(t *testing.T) {
 	}
 }
 
+func TestParseUnifiedDiffTouchedPathsKeepsNoPrefixUnquotedSpacesWithoutSplitTokens(t *testing.T) {
+	paths, commandErr := parseUnifiedDiffTouchedPaths([]byte(`diff --git foo bar.txt foo bar.txt
+--- foo bar.txt
++++ foo bar.txt
+@@ -1 +1 @@
+-old
++new
+`), "no-prefix-unquoted-spaces.diff")
+	if commandErr != nil {
+		t.Fatalf("parse diff: %v", commandErr)
+	}
+	if fmt.Sprint(paths) != fmt.Sprint([]string{"foo bar.txt"}) {
+		t.Fatalf("paths = %#v", paths)
+	}
+}
+
 func TestParseUnifiedDiffTouchedPathsSupportsPlainUnifiedDiff(t *testing.T) {
 	paths, commandErr := parseUnifiedDiffTouchedPaths([]byte(`--- packages/billing/invoice.py
 +++ packages/billing/invoice.py
