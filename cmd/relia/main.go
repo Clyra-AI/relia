@@ -770,6 +770,9 @@ func backtestResult(args []string, start time.Time) CommandResult {
 			return withFormat(errorResult("backtest", "backtest", commandErr, start))
 		}
 		if commandErr := saveBacktestBaseline(root, report, options.BaselinePath); commandErr != nil {
+			if rollbackErr := restoreBacktestBaseline(baselineSnapshot); rollbackErr != nil {
+				commandErr.Message = commandErr.Message + "; additionally could not roll back ERR baseline: " + rollbackErr.Message
+			}
 			return withFormat(errorResult("backtest", "backtest", commandErr, start))
 		}
 		baselineSaved = true
@@ -1062,8 +1065,10 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 			summary.NonFailureOutcomeCount++
 			continue
 		}
+		signatureID := record.Outcome.Signature.SignatureID
 		if record.Attribution.ActorKind != "agent" {
 			summary.HumanFailureExcludedCount++
+			priorBySignature[signatureID] = append(priorBySignature[signatureID], current)
 			continue
 		}
 		summary.AgentFailureDenominator++
@@ -1073,7 +1078,6 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 			addBacktestCitation(citationMap, current)
 			continue
 		}
-		signatureID := record.Outcome.Signature.SignatureID
 		if priors := priorBySignature[signatureID]; len(priors) > 0 {
 			prior, confidence := selectRecurrencePrior(priors, current)
 			pair := buildRecurrencePair(prior, current)
