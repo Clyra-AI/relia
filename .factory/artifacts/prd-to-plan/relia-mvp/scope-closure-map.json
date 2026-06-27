@@ -755,28 +755,42 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "FR8-CONSERVATIVE-RECURRENCE-PAIRING-001",
-          "evidence_refs": [],
+          "evidence_refs": [
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/validation-report.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/ship-packet.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "signature-and-recurrence-analysis"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/validation-report.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/ship-packet.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "fr8-conservative-recurrence-pairing",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T5"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T5"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "Relia must pair recurrences conservatively, separate `confirmed` from `possible`, and exclude `possible` from headline ERR.",
       "scope_item_id": "FR8-CONSERVATIVE-RECURRENCE-PAIRING-001",
       "source_ref": "docs/product/prd.md#fr8-conservative-recurrence-pairing",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T5"
       ]
@@ -1245,28 +1259,42 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "FR21-FORWARD-ERR-TRACKING-001",
-          "evidence_refs": [],
+          "evidence_refs": [
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/validation-report.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/ship-packet.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "signature-and-recurrence-analysis"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/validation-report.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/ship-packet.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "fr21-forward-err-tracking",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T5"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T5"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "Relia must track ERR against a saved baseline and label stale baselines.",
       "scope_item_id": "FR21-FORWARD-ERR-TRACKING-001",
       "source_ref": "docs/product/prd.md#fr21-forward-err-tracking",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T5"
       ]
@@ -1508,28 +1536,42 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "NFR3-DETERMINISTIC-BACKTEST-001",
-          "evidence_refs": [],
+          "evidence_refs": [
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/validation-report.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/ship-packet.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "signature-and-recurrence-analysis"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/validation-report.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/ship-packet.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "nfr3-deterministic-backtest",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T5"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T5"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "Repeated backtests over the same window and artifacts must produce the same result.",
       "scope_item_id": "NFR3-DETERMINISTIC-BACKTEST-001",
       "source_ref": "docs/product/prd.md#nfr3-deterministic-backtest",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T5"
       ]
@@ -1742,28 +1784,42 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "NFR9-DEBUGGABLE-ERRORS-001",
-          "evidence_refs": [],
+          "evidence_refs": [
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/validation-report.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/ship-packet.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "signature-and-recurrence-analysis"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/validation-report.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/ship-packet.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "nfr9-debuggable-errors",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T5"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T5"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "Errors must include file, path, PR, command, object, or line references where possible.",
       "scope_item_id": "NFR9-DEBUGGABLE-ERRORS-001",
       "source_ref": "docs/product/prd.md#nfr9-debuggable-errors",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T5"
       ]
@@ -2260,28 +2316,42 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "MVP-IN-SCOPE-007",
-          "evidence_refs": [],
+          "evidence_refs": [
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/validation-report.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/ship-packet.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "signature-and-recurrence-analysis"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/validation-report.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/ship-packet.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "mvp-in-scope",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T5"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T5"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "basic flake discounting",
       "scope_item_id": "MVP-IN-SCOPE-007",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T5"
       ]
@@ -2296,28 +2366,42 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "MVP-IN-SCOPE-008",
-          "evidence_refs": [],
+          "evidence_refs": [
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/validation-report.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/ship-packet.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "signature-and-recurrence-analysis"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/validation-report.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/ship-packet.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "mvp-in-scope",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T5"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T5"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "conservative recurrence pairing and ERR",
       "scope_item_id": "MVP-IN-SCOPE-008",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T5"
       ]
@@ -2332,28 +2416,42 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "MVP-IN-SCOPE-009",
-          "evidence_refs": [],
+          "evidence_refs": [
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/validation-report.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/ship-packet.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "signature-and-recurrence-analysis"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/validation-report.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/ship-packet.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "mvp-in-scope",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T5"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T5"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "read-only backtest with HTML report and JSON",
       "scope_item_id": "MVP-IN-SCOPE-009",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T5"
       ]
@@ -2728,28 +2826,42 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "MVP-IN-SCOPE-020",
-          "evidence_refs": [],
+          "evidence_refs": [
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/validation-report.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/ship-packet.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "signature-and-recurrence-analysis"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/validation-report.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/ship-packet.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "mvp-in-scope",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T5"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T5"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "forward ERR tracking against a baseline; gate available but off by default",
       "scope_item_id": "MVP-IN-SCOPE-020",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T5"
       ]
@@ -3020,28 +3132,42 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-002",
-          "evidence_refs": [],
+          "evidence_refs": [
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/validation-report.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/ship-packet.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "signature-and-recurrence-analysis"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/validation-report.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/ship-packet.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "ingest-attribute-backtest-acceptance-tests",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T5"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T5"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "relia check` flags zero-match attribution config with a concrete reference.",
       "scope_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-002",
       "source_ref": "docs/product/prd.md#ingest-attribute-backtest-acceptance-tests",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T5"
       ]
@@ -3056,28 +3182,42 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-003",
-          "evidence_refs": [],
+          "evidence_refs": [
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/validation-report.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/ship-packet.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "signature-and-recurrence-analysis"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/validation-report.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/ship-packet.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "ingest-attribute-backtest-acceptance-tests",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T5"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T5"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "relia ingest` writes schema-valid, redacted experience records for PRs, check runs, reverts, and marked corrections.",
       "scope_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-003",
       "source_ref": "docs/product/prd.md#ingest-attribute-backtest-acceptance-tests",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T5"
       ]
@@ -3128,28 +3268,42 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-005",
-          "evidence_refs": [],
+          "evidence_refs": [
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/validation-report.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/ship-packet.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "signature-and-recurrence-analysis"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/validation-report.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/ship-packet.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "ingest-attribute-backtest-acceptance-tests",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T5"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T5"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "relia backtest --window 180d` is deterministic on repeated runs.",
       "scope_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-005",
       "source_ref": "docs/product/prd.md#ingest-attribute-backtest-acceptance-tests",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T5"
       ]
@@ -3164,28 +3318,42 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-006",
-          "evidence_refs": [],
+          "evidence_refs": [
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/validation-report.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/ship-packet.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "signature-and-recurrence-analysis"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/validation-report.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/ship-packet.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "ingest-attribute-backtest-acceptance-tests",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T5"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T5"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "Confirmed recurrences are paired with the earlier experience they repeat, with resolvable links.",
       "scope_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-006",
       "source_ref": "docs/product/prd.md#ingest-attribute-backtest-acceptance-tests",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T5"
       ]
@@ -3200,28 +3368,42 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-007",
-          "evidence_refs": [],
+          "evidence_refs": [
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/validation-report.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/ship-packet.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "signature-and-recurrence-analysis"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/validation-report.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/ship-packet.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260627T121729.072098000Z-relia-T5/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "ingest-attribute-backtest-acceptance-tests",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T5"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T5"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "Possible recurrences appear separately and are excluded from headline ERR.",
       "scope_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-007",
       "source_ref": "docs/product/prd.md#ingest-attribute-backtest-acceptance-tests",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T5"
       ]
@@ -5172,7 +5354,7 @@
       ]
     }
   ],
-  "last_updated_at": "2026-06-27T11:59:16Z",
+  "last_updated_at": "2026-06-27T12:17:29Z",
   "schema_version": "0.1",
   "source_prd_ref": "docs/product/prd.md"
 }
