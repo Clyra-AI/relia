@@ -2348,6 +2348,20 @@ rename to a/bar.py
 	}
 }
 
+func TestParseUnifiedDiffTouchedPathsRecognizesNoPrefixCopyMetadata(t *testing.T) {
+	paths, commandErr := parseUnifiedDiffTouchedPaths([]byte(`diff --git foo bar.txt foo copy.txt
+similarity index 100%
+copy from foo bar.txt
+copy to foo copy.txt
+`), "copy-no-prefix.diff")
+	if commandErr != nil {
+		t.Fatalf("parse diff: %v", commandErr)
+	}
+	if fmt.Sprint(paths) != fmt.Sprint([]string{"foo bar.txt", "foo copy.txt"}) {
+		t.Fatalf("paths = %#v", paths)
+	}
+}
+
 func TestNormalizeAssessmentScopePathDoesNotScanHistoryForExistingFile(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	writeFileForTest(t, filepath.Join(tempDir, "packages", "billing", "invoice.py"), "def rollover_day(): pass\n")

@@ -719,6 +719,10 @@ func parseUnifiedDiffTouchedPaths(content []byte, ref string) ([]string, *Comman
 			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "rename from ")), false)
 		case inFileHeader && strings.HasPrefix(line, "rename to "):
 			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "rename to ")), false)
+		case inFileHeader && strings.HasPrefix(line, "copy from "):
+			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "copy from ")), false)
+		case inFileHeader && strings.HasPrefix(line, "copy to "):
+			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "copy to ")), false)
 		case strings.HasPrefix(line, "@@"):
 			inFileHeader = false
 			gitFileHeader = false
