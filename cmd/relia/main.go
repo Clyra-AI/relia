@@ -1006,7 +1006,10 @@ func validateBacktestExperience(record experienceRecord, ref string) (time.Time,
 		if !validGitHubProvenanceURLShape(value) {
 			return time.Time{}, provenanceIntegrityError("backtest experience provenance URL must be a canonical https://github.com/ URL", ref)
 		}
-		if _, ok := gitHubPullRequestURLNumber(value); ok && !gitHubPullRequestURLMatchesExperience(value, record) {
+		if !gitHubProvenanceURLRepoMatchesExperience(value, record) {
+			return time.Time{}, provenanceIntegrityError("backtest experience provenance URL repo must match experience repo", ref)
+		}
+		if number, ok := gitHubPullRequestURLPathNumber(value); ok && number != record.Action.PR {
 			return time.Time{}, provenanceIntegrityError("backtest experience pull request provenance URL must match action.pr", ref)
 		}
 	}
@@ -1180,7 +1183,7 @@ func recurrenceSignatureKeys(record experienceRecord) []string {
 		keys = append(keys, strings.Join([]string{"class_key", signatureClass, signatureKey}, "\x00"))
 	}
 	if messageFingerprint != "" {
-		keys = append(keys, strings.Join([]string{"message", signatureClass, messageFingerprint}, "\x00"))
+		keys = append(keys, strings.Join([]string{"message", messageFingerprint}, "\x00"))
 	}
 	if len(keys) == 0 {
 		keys = append(keys, strings.Join([]string{"id", record.Outcome.Signature.SignatureID}, "\x00"))
@@ -3288,6 +3291,37 @@ func validGitHubProvenanceURLShape(value string) bool {
 		parsed.RawQuery == "" &&
 		parsed.Fragment == "" &&
 		strings.Trim(parsed.Path, "/") != ""
+}
+
+func gitHubProvenanceURLRepoMatchesExperience(value string, record experienceRecord) bool {
+	parsed, err := url.Parse(strings.TrimSpace(value))
+	if err != nil {
+		return false
+	}
+	parts := strings.Split(strings.Trim(parsed.Path, "/"), "/")
+	return len(parts) >= 2 &&
+		strings.EqualFold(parts[0], record.Repo.Owner) &&
+		strings.EqualFold(parts[1], record.Repo.Name)
+}
+
+func gitHubPullRequestURLPathNumber(value string) (int, bool) {
+	parsed, err := url.Parse(strings.TrimSpace(value))
+	if err != nil {
+		return 0, false
+	}
+	if parsed.Scheme != "https" ||
+		!strings.EqualFold(parsed.Host, "github.com") ||
+		parsed.User != nil ||
+		parsed.RawQuery != "" ||
+		parsed.Fragment != "" {
+		return 0, false
+	}
+	parts := strings.Split(strings.Trim(parsed.Path, "/"), "/")
+	if len(parts) < 4 || parts[2] != "pull" {
+		return 0, false
+	}
+	number, err := strconv.Atoi(parts[3])
+	return number, err == nil && number > 0
 }
 
 func gitHubPullRequestURLNumber(value string) (int, bool) {
