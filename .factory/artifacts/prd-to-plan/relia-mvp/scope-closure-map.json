@@ -4024,29 +4024,43 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-004",
-          "evidence_refs": [],
+          "evidence_refs": [
+            "factoryd://runs/20260626T200025.692043000Z-relia-T4.3/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260626T200025.692043000Z-relia-T4.3/lifecycle/validation-report.json",
+            "factoryd://runs/20260626T200025.692043000Z-relia-T4.3/lifecycle/ship-packet.json",
+            "factoryd://runs/20260626T200025.692043000Z-relia-T4.3/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260626T200025.692043000Z-relia-T4.3/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260626T200025.692043000Z-relia-T4.3/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "outcome-fixture-corpus"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260626T200025.692043000Z-relia-T4.3/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260626T200025.692043000Z-relia-T4.3/lifecycle/validation-report.json",
+        "factoryd://runs/20260626T200025.692043000Z-relia-T4.3/lifecycle/ship-packet.json",
+        "factoryd://runs/20260626T200025.692043000Z-relia-T4.3/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260626T200025.692043000Z-relia-T4.3/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260626T200025.692043000Z-relia-T4.3/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "serve-and-advise-acceptance-tests",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T4.3"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence.",
         "Sprint 4 remapped this item to smaller task slices or bounded learning-loop follow-up evidence."
       ],
-      "remaining_task_refs": [
-        "T4.3"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "relia assess` returns `match_high` with citations on a planted-pattern diff and `no_coverage` on unknown paths.",
       "scope_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-004",
       "source_ref": "docs/product/prd.md#serve-and-advise-acceptance-tests",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T4.3"
       ]
@@ -5158,7 +5172,7 @@
       ]
     }
   ],
-  "last_updated_at": "2026-06-26T15:24:53Z",
+  "last_updated_at": "2026-06-27T11:59:16Z",
   "schema_version": "0.1",
   "source_prd_ref": "docs/product/prd.md"
 }
