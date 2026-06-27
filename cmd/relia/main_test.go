@@ -1583,6 +1583,55 @@ metadata: {}
 	}
 }
 
+func TestDemoAssessRejectsPlaybookRuleWithoutPositiveCitation(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "billing-playbook.yaml"), `object_type: relia.memory_rule
+schema_version: "1.0"
+id: billing-playbook-fixture
+kind: playbook
+status: active
+statement: Billing clock changes are covered when they use the approved fixture.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.91
+evidence:
+  count: 2
+  contradictions: 0
+  experiences:
+    - exp_0142
+provenance:
+  - pr: 142
+    outcome: merged_clean
+  - pr: 143
+    outcome: ci_failure
+    url: https://github.com/acme/billing-service/pull/143
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`)
+	writeFileForTest(t, filepath.Join(tempDir, "change.diff"), `diff --git a/packages/billing/invoice.py b/packages/billing/invoice.py
+--- a/packages/billing/invoice.py
++++ b/packages/billing/invoice.py
+@@ -1,2 +1,3 @@
+ def rollover_day():
+-    return "2026-01-01"
++    return billing_clock().strftime("%Y-%m-%d")
+`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "assess", "--input", "change.diff"}, false)
+
+	if code != ExitProvenanceIntegrity {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if !strings.Contains(result.Errors[0].Message, "citation URLs") {
+		t.Fatalf("error message = %q", result.Errors[0].Message)
+	}
+}
+
 func TestDemoAssessMatchesExistingDirectoryScopeWithoutTrailingSlash(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
@@ -2283,6 +2332,53 @@ metadata: {}
 	}
 	result := decodeResult(t, stdout)
 	if !strings.Contains(result.Errors[0].Message, "/pull/<number>") {
+		t.Fatalf("error message = %q", result.Errors[0].Message)
+	}
+}
+
+func TestDemoAssessRejectsMatchedRuleWithMismatchedCitationPR(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "billing-time.yaml"), `object_type: relia.memory_rule
+schema_version: "1.0"
+id: billing-time-fixture
+kind: avoid
+status: active
+statement: Use the billing clock fixture instead of direct UTC calls.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.86
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_0142
+provenance:
+  - pr: 142
+    outcome: ci_failure
+    url: https://github.com/acme/billing-service/pull/999
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`)
+	writeFileForTest(t, filepath.Join(tempDir, "change.diff"), `diff --git a/packages/billing/invoice.py b/packages/billing/invoice.py
+--- a/packages/billing/invoice.py
++++ b/packages/billing/invoice.py
+@@ -1,2 +1,3 @@
+ def rollover_day():
+-    return "2026-01-01"
++    return datetime.utcnow().strftime("%Y-%m-%d")
+`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "assess", "--input", "change.diff"}, false)
+
+	if code != ExitProvenanceIntegrity {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if !strings.Contains(result.Errors[0].Message, "pull number must match provenance pr") {
 		t.Fatalf("error message = %q", result.Errors[0].Message)
 	}
 }

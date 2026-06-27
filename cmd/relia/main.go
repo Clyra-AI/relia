@@ -203,7 +203,13 @@ type assessmentRule struct {
 	Path       string
 	Confidence float64
 	ScopePaths []string
-	Citations  []string
+	Citations  []assessmentRuleCitation
+}
+
+type assessmentRuleCitation struct {
+	URL     string
+	PR      int
+	Outcome string
 }
 
 type experienceRecord struct {
@@ -967,16 +973,42 @@ func assessmentRuleHasPositivePlaybookEvidence(document yamlDocument) bool {
 	return false
 }
 
-func assessmentRuleCitations(document yamlDocument) []string {
-	var citations []string
+func assessmentRuleCitations(document yamlDocument) []assessmentRuleCitation {
+	var citations []assessmentRuleCitation
 	for _, provenance := range document.ListMaps["provenance"] {
 		url, ok := provenance["url"]
 		if !ok || strings.TrimSpace(url.Value) == "" {
 			continue
 		}
-		citations = append(citations, url.Value)
+		prNumber := 0
+		if pr, ok := provenance["pr"]; ok {
+			prNumber, _ = strconv.Atoi(pr.Value)
+		}
+		outcome := ""
+		if value, ok := provenance["outcome"]; ok {
+			outcome = value.Value
+		}
+		citations = append(citations, assessmentRuleCitation{
+			URL:     url.Value,
+			PR:      prNumber,
+			Outcome: outcome,
+		})
 	}
-	return uniqueStrings(citations)
+	return uniqueAssessmentRuleCitations(citations)
+}
+
+func uniqueAssessmentRuleCitations(citations []assessmentRuleCitation) []assessmentRuleCitation {
+	seen := map[string]bool{}
+	var unique []assessmentRuleCitation
+	for _, citation := range citations {
+		key := fmt.Sprintf("%s\x00%d\x00%s", citation.URL, citation.PR, citation.Outcome)
+		if seen[key] {
+			continue
+		}
+		seen[key] = true
+		unique = append(unique, citation)
+	}
+	return unique
 }
 
 func buildRiskAssessment(root string, inputRef string, content []byte, touchedPaths []string, rules []assessmentRule) (riskAssessment, *CommandError) {
@@ -991,22 +1023,27 @@ func buildRiskAssessment(root string, inputRef string, content []byte, touchedPa
 		if strings.TrimSpace(rule.ID) == "" {
 			return riskAssessment{}, provenanceIntegrityError("matched active memory rule id must be non-empty for assessment", rule.Path)
 		}
-		if len(rule.Citations) == 0 {
+		servedCitations := servedAssessmentRuleCitationURLs(rule)
+		if len(servedCitations) == 0 {
 			return riskAssessment{}, provenanceIntegrityError("matched active memory rule must include citation URLs for assessment", rule.Path)
 		}
 		if math.IsNaN(rule.Confidence) || math.IsInf(rule.Confidence, 0) || rule.Confidence < 0 || rule.Confidence > 1 {
 			return riskAssessment{}, provenanceIntegrityError("matched active memory rule confidence must be between 0 and 1 for assessment", rule.Path)
 		}
 		for _, citation := range rule.Citations {
-			if !validGitHubPullRequestURLShape(citation) {
+			prNumber, ok := gitHubPullRequestURLNumber(citation.URL)
+			if !ok {
 				return riskAssessment{}, provenanceIntegrityError("matched active memory rule citation URL must be an https://github.com/<owner>/<repo>/pull/<number> URL", rule.Path)
+			}
+			if citation.PR <= 0 || prNumber != citation.PR {
+				return riskAssessment{}, provenanceIntegrityError("matched active memory rule citation URL pull number must match provenance pr", rule.Path)
 			}
 		}
 		matches = append(matches, riskAssessmentMatch{
 			RuleID:     rule.ID,
 			Confidence: rule.Confidence,
 		})
-		citations = append(citations, rule.Citations...)
+		citations = append(citations, servedCitations...)
 		if rule.Kind == "playbook" {
 			hasPlaybookCoverage = true
 		} else if rule.Confidence > highestAvoidConfidence {
@@ -1046,6 +1083,17 @@ func buildRiskAssessment(root string, inputRef string, content []byte, touchedPa
 			"redaction_status":         "customer_safe",
 		},
 	}, nil
+}
+
+func servedAssessmentRuleCitationURLs(rule assessmentRule) []string {
+	var citations []string
+	for _, citation := range rule.Citations {
+		if rule.Kind == "playbook" && citation.Outcome != "fix_held" && citation.Outcome != "merged_clean" {
+			continue
+		}
+		citations = append(citations, citation.URL)
+	}
+	return uniqueStrings(citations)
 }
 
 func assessmentRuleMatchesTouchedPath(root string, rule assessmentRule, touchedPaths []string) bool {
@@ -1804,27 +1852,27 @@ func validGitHubProvenanceURLShape(value string) bool {
 		strings.Trim(parsed.Path, "/") != ""
 }
 
-func validGitHubPullRequestURLShape(value string) bool {
+func gitHubPullRequestURLNumber(value string) (int, bool) {
 	parsed, err := url.Parse(strings.TrimSpace(value))
 	if err != nil {
-		return false
+		return 0, false
 	}
 	if parsed.Scheme != "https" ||
 		!strings.EqualFold(parsed.Host, "github.com") ||
 		parsed.User != nil ||
 		parsed.RawQuery != "" ||
 		parsed.Fragment != "" {
-		return false
+		return 0, false
 	}
 	parts := strings.Split(strings.Trim(parsed.Path, "/"), "/")
 	if len(parts) != 4 || parts[2] != "pull" {
-		return false
+		return 0, false
 	}
 	if parts[0] == "" || parts[1] == "" {
-		return false
+		return 0, false
 	}
 	number, err := strconv.Atoi(parts[3])
-	return err == nil && number > 0
+	return number, err == nil && number > 0
 }
 
 func unsafeGitHubURLPathEntropyToken(value string) string {
