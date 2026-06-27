@@ -1253,8 +1253,8 @@ func TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline(t *te
 	if report.ObjectType != "relia.recurrence_report" || report.SchemaVersion != commandSchemaVersion {
 		t.Fatalf("report contract = %#v", report)
 	}
-	if report.Summary.AgentFailureDenominator != 6 {
-		t.Fatalf("denominator = %d, want 6", report.Summary.AgentFailureDenominator)
+	if report.Summary.AgentFailureDenominator != 3 {
+		t.Fatalf("denominator = %d, want 3 with flake-discounted rows excluded", report.Summary.AgentFailureDenominator)
 	}
 	if report.Summary.ConfirmedRecurrenceCount != 1 || len(report.ConfirmedRecurrences) != 1 {
 		t.Fatalf("confirmed recurrences = %#v", report.ConfirmedRecurrences)
@@ -1262,8 +1262,8 @@ func TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline(t *te
 	if report.Summary.PossibleRecurrenceCount != 1 || len(report.PossibleRecurrences) != 1 {
 		t.Fatalf("possible recurrences = %#v", report.PossibleRecurrences)
 	}
-	if report.HeadlineERR != 0.1667 {
-		t.Fatalf("headline_err = %.4f, want possible recurrence excluded from 1/6 headline", report.HeadlineERR)
+	if report.HeadlineERR != 0.3333 {
+		t.Fatalf("headline_err = %.4f, want possible and flake-discounted rows excluded from 1/3 headline", report.HeadlineERR)
 	}
 	if report.ConfirmedRecurrences[0].PriorExperienceID != "exp_0001" || report.ConfirmedRecurrences[0].CurrentExperienceID != "exp_0002" {
 		t.Fatalf("confirmed pair = %#v", report.ConfirmedRecurrences[0])
@@ -1332,6 +1332,39 @@ func TestBacktestBaselineAcceptsSummaryHeadlineERR(t *testing.T) {
 	}
 }
 
+func TestBacktestSaveBaselineReportsFreshCurrentValues(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	inputPath := filepath.Join(tempDir, "fixtures", "outcomes.jsonl")
+	writeFileForTest(t, inputPath, strings.Join([]string{
+		`{"experience_id":"exp_0001","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-01T10:00:00Z","pr":101,"commit":"abc001","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_time_freeze","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/101"]}`,
+		`{"experience_id":"exp_0002","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-10T10:00:00Z","pr":102,"commit":"abc002","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_time_freeze","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/102"]}`,
+	}, "\n")+"\n")
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+	if code != ExitSuccess {
+		t.Fatalf("ingest exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	stdout, stderr, code = runForTest(t, []string{"--json", "backtest", "--window", "180d", "--save-baseline"}, false)
+	if code != ExitSuccess {
+		t.Fatalf("backtest exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	report := decodeBacktestReportFromResult(t, decodeResult(t, stdout))
+	if report.HeadlineERR != 0.5 {
+		t.Fatalf("headline_err = %.4f, want 0.5", report.HeadlineERR)
+	}
+	if report.Baseline.Status != "saved" || report.Baseline.Stale || report.Baseline.HeadlineERR != report.HeadlineERR || report.Baseline.Delta != 0 {
+		t.Fatalf("baseline = %#v, want freshly saved current values", report.Baseline)
+	}
+	baselineContent, err := os.ReadFile(filepath.Join(tempDir, ".relia", "baselines", "error-recurrence-baseline.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Contains(baselineContent, []byte(`"headline_err": 0.5`)) {
+		t.Fatalf("saved baseline missing current headline ERR:\n%s", baselineContent)
+	}
+}
+
 func TestBacktestPairsCurrentWithAnyEarlierConfirmedRecurrence(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
@@ -1394,8 +1427,15 @@ func TestBacktestExplicitEnabledGateEvaluatesThreshold(t *testing.T) {
 		t.Fatalf("errors = %#v", result.Errors)
 	}
 	report := decodeBacktestReportFromResult(t, result)
-	if !report.Gate.Enabled || report.Gate.Status != "fail" || report.Gate.Threshold != 0 {
+	if !report.Gate.Enabled || report.Gate.Status != "fail" || report.Gate.Threshold == nil || *report.Gate.Threshold != 0 {
 		t.Fatalf("gate = %#v, want enabled failing threshold", report.Gate)
+	}
+	gateJSON, err := json.Marshal(report.Gate)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Contains(gateJSON, []byte(`"threshold":0`)) {
+		t.Fatalf("gate JSON = %s, want zero threshold preserved", gateJSON)
 	}
 }
 

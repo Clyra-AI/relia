@@ -365,11 +365,11 @@ type baselineComparison struct {
 }
 
 type backtestGateResult struct {
-	Enabled   bool    `json:"enabled"`
-	Status    string  `json:"status"`
-	Threshold float64 `json:"threshold,omitempty"`
-	Reason    string  `json:"reason"`
-	Ref       string  `json:"ref"`
+	Enabled   bool     `json:"enabled"`
+	Status    string   `json:"status"`
+	Threshold *float64 `json:"threshold,omitempty"`
+	Reason    string   `json:"reason"`
+	Ref       string   `json:"ref"`
 }
 
 type backtestCitation struct {
@@ -742,9 +742,10 @@ func backtestResult(args []string, start time.Time) CommandResult {
 		if commandErr := saveBacktestBaseline(root, report, options.BaselinePath); commandErr != nil {
 			return withFormat(errorResult("backtest", "backtest", commandErr, start))
 		}
-		report.Baseline.Status = "saved"
-		report.Baseline.Stale = false
-		report.Baseline.Reason = "Saved current headline ERR as the comparison baseline."
+		report.Baseline, commandErr = savedBacktestBaselineComparison(options.BaselinePath, report.HeadlineERR)
+		if commandErr != nil {
+			return withFormat(errorResult("backtest", "backtest", commandErr, start))
+		}
 	}
 	jsonReportPath, htmlReportPath, commandErr := writeBacktestReports(root, report, options.ReportDir)
 	if commandErr != nil {
@@ -783,7 +784,7 @@ func backtestResult(args []string, start time.Time) CommandResult {
 		result.ExitCode = ExitGate
 		result.Errors = append(result.Errors, CommandError{
 			Type:        "recurrence_gate_failed",
-			Message:     fmt.Sprintf("headline ERR %.4f exceeds configured gate %.4f", report.HeadlineERR, report.Gate.Threshold),
+			Message:     fmt.Sprintf("headline ERR %.4f exceeds configured gate %.4f", report.HeadlineERR, backtestGateThresholdValue(report.Gate)),
 			ExitCode:    ExitGate,
 			Remediation: "Leave gate.enabled false for advisory-only MVP behavior or raise the explicit threshold after reviewing the recurrence report.",
 			Ref:         report.Gate.Ref,
@@ -1011,13 +1012,13 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 			summary.HumanFailureExcludedCount++
 			continue
 		}
-		summary.AgentFailureDenominator++
 		if isBacktestFlakeDiscounted(current, flakeHeuristics) {
 			summary.FlakeDiscountedCount++
 			flakes = append(flakes, buildBacktestFlakeDiscount(current, windowRecords, flakeHeuristics))
 			addBacktestCitation(citationMap, current)
 			continue
 		}
+		summary.AgentFailureDenominator++
 		signatureID := record.Outcome.Signature.SignatureID
 		if priors := priorBySignature[signatureID]; len(priors) > 0 {
 			prior, confidence := selectRecurrencePrior(priors, current)
@@ -1424,10 +1425,17 @@ func backtestGate(config yamlDocument, headlineERR float64) backtestGateResult {
 	return backtestGateResult{
 		Enabled:   true,
 		Status:    status,
-		Threshold: threshold,
+		Threshold: &threshold,
 		Reason:    reason,
 		Ref:       ref,
 	}
+}
+
+func backtestGateThresholdValue(gate backtestGateResult) float64 {
+	if gate.Threshold == nil {
+		return 0
+	}
+	return *gate.Threshold
 }
 
 func writeBacktestReports(root string, report recurrenceReport, reportDir string) (string, string, *CommandError) {
@@ -1528,6 +1536,21 @@ func saveBacktestBaseline(root string, report recurrenceReport, baselinePath str
 		return internalError("could not write ERR baseline", err)
 	}
 	return nil
+}
+
+func savedBacktestBaselineComparison(baselinePath string, headlineERR float64) (baselineComparison, *CommandError) {
+	clean, ok := cleanRepoPath(baselinePath)
+	if !ok {
+		return baselineComparison{}, usageError("backtest baseline path must be repo-relative")
+	}
+	return baselineComparison{
+		Status:      "saved",
+		Path:        filepath.ToSlash(clean),
+		HeadlineERR: roundFloat(headlineERR, 4),
+		Delta:       0,
+		Stale:       false,
+		Reason:      "Saved current headline ERR as the comparison baseline.",
+	}, nil
 }
 
 func assessResult(args []string, start time.Time) CommandResult {
