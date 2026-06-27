@@ -1361,8 +1361,11 @@ func compareBacktestBaseline(root string, baselinePath string, headlineERR float
 	}
 	baselineERR, ok := numericValue(payload["headline_err"])
 	if !ok {
-		if summary, ok := payload["summary"].(map[string]any); ok {
-			baselineERR, ok = numericValue(summary["headline_err"])
+		if summary, summaryOK := payload["summary"].(map[string]any); summaryOK {
+			if summaryERR, headlineOK := numericValue(summary["headline_err"]); headlineOK {
+				baselineERR = summaryERR
+				ok = true
+			}
 		}
 	}
 	if !ok || baselineERR < 0 || baselineERR > 1 {

@@ -1304,6 +1304,34 @@ func TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline(t *te
 	}
 }
 
+func TestBacktestBaselineAcceptsSummaryHeadlineERR(t *testing.T) {
+	tempDir := t.TempDir()
+	baselinePath := filepath.Join(tempDir, ".relia", "baselines", "error-recurrence-baseline.json")
+	writeFileForTest(t, baselinePath, `{
+  "object_type": "relia.err_baseline",
+  "schema_version": "1.0",
+  "summary": {
+    "headline_err": 0.25
+  },
+  "metadata": {
+    "source_artifact_digest": "sha256:baseline"
+  }
+}
+`)
+
+	baseline, commandErr := compareBacktestBaseline(tempDir, ".relia/baselines/error-recurrence-baseline.json", 0.5, "sha256:baseline")
+
+	if commandErr != nil {
+		t.Fatalf("compare baseline returned error: %#v", commandErr)
+	}
+	if baseline.Status != "current" || baseline.Stale {
+		t.Fatalf("baseline status = %#v, want current", baseline)
+	}
+	if baseline.HeadlineERR != 0.25 || baseline.Delta != 0.25 {
+		t.Fatalf("baseline values = %#v, want headline 0.25 and delta 0.25", baseline)
+	}
+}
+
 func TestBacktestPairsCurrentWithAnyEarlierConfirmedRecurrence(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
