@@ -1527,11 +1527,17 @@ func writeBacktestReports(root string, report recurrenceReport, reportDir string
 		return "", "", internalError("could not encode recurrence report", err)
 	}
 	encoded = append(encoded, '\n')
-	if err := os.WriteFile(filepath.Join(root, filepath.FromSlash(jsonRel)), encoded, 0o644); err != nil {
+	jsonPath := filepath.Join(root, filepath.FromSlash(jsonRel))
+	htmlPath := filepath.Join(root, filepath.FromSlash(htmlRel))
+	if err := os.WriteFile(jsonPath, encoded, 0o644); err != nil {
 		return "", "", internalError("could not write JSON recurrence report", err)
 	}
-	if err := os.WriteFile(filepath.Join(root, filepath.FromSlash(htmlRel)), []byte(renderBacktestHTML(report)), 0o644); err != nil {
-		return "", "", internalError("could not write HTML recurrence report", err)
+	if err := os.WriteFile(htmlPath, []byte(renderBacktestHTML(report)), 0o644); err != nil {
+		commandErr := internalError("could not write HTML recurrence report", err)
+		if cleanupErr := os.Remove(jsonPath); cleanupErr != nil && !os.IsNotExist(cleanupErr) {
+			commandErr.Message = commandErr.Message + "; additionally could not remove partial JSON recurrence report: " + cleanupErr.Error()
+		}
+		return "", "", commandErr
 	}
 	return jsonRel, htmlRel, nil
 }

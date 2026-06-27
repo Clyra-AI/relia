@@ -1511,6 +1511,70 @@ func TestBacktestRollsBackBaselineWhenReportWriteFails(t *testing.T) {
 	}
 }
 
+func TestBacktestRemovesJSONReportWhenHTMLWriteFails(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	inputPath := filepath.Join(tempDir, "fixtures", "outcomes.jsonl")
+	writeFileForTest(t, inputPath, strings.Join([]string{
+		`{"experience_id":"exp_0001","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-01T10:00:00Z","pr":101,"commit":"abc001","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_time_freeze","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/101"]}`,
+		`{"experience_id":"exp_0002","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-10T10:00:00Z","pr":102,"commit":"abc002","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_time_freeze","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/102"]}`,
+	}, "\n")+"\n")
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+	if code != ExitSuccess {
+		t.Fatalf("ingest exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	probeStdout, probeStderr, probeCode := runForTest(t, []string{"--json", "backtest", "--window", "180d"}, false)
+	if probeCode != ExitSuccess {
+		t.Fatalf("probe backtest exit code = %d, stderr = %q, stdout = %q", probeCode, probeStderr, probeStdout)
+	}
+	probeResult := decodeResult(t, probeStdout)
+	jsonRel, _ := probeResult.Data["json_report_path"].(string)
+	htmlRel, _ := probeResult.Data["html_report_path"].(string)
+	jsonPath := filepath.Join(tempDir, filepath.FromSlash(jsonRel))
+	htmlPath := filepath.Join(tempDir, filepath.FromSlash(htmlRel))
+	if err := os.Remove(jsonPath); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Remove(htmlPath); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Mkdir(htmlPath, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	baselinePath := filepath.Join(tempDir, ".relia", "baselines", "error-recurrence-baseline.json")
+	originalBaseline := `{
+  "object_type": "relia.err_baseline",
+  "schema_version": "1.0",
+  "headline_err": 0.01,
+  "metadata": {
+    "source_artifact_digest": "sha256:accepted"
+  }
+}
+`
+	writeFileForTest(t, baselinePath, originalBaseline)
+
+	stdout, stderr, code = runForTest(t, []string{"--json", "backtest", "--window", "180d", "--save-baseline"}, false)
+
+	if code == ExitSuccess {
+		t.Fatalf("backtest unexpectedly succeeded, stderr = %q, stdout = %q", stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if len(result.Errors) != 1 || !strings.Contains(result.Errors[0].Message, "HTML recurrence report") {
+		t.Fatalf("errors = %#v", result.Errors)
+	}
+	if _, err := os.Stat(jsonPath); !os.IsNotExist(err) {
+		t.Fatalf("partial JSON report still exists after HTML failure: %v", err)
+	}
+	baselineContent, err := os.ReadFile(baselinePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(baselineContent) != originalBaseline {
+		t.Fatalf("baseline was not rolled back after HTML report failure:\n%s", baselineContent)
+	}
+}
+
 func TestBacktestPreservesBaselineWhenSaveFails(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
