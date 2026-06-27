@@ -12,6 +12,7 @@ import (
 	"sort"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestJSONFlagEmitsStableEnvelope(t *testing.T) {
@@ -2366,6 +2367,41 @@ func TestDistillMarksContradictedAndStaleRules(t *testing.T) {
 	result := decodeResult(t, stdout)
 	if result.Errors[0].Type != "artifact_contract_validation_failed" || !strings.Contains(result.Errors[0].Message, "stale") {
 		t.Fatalf("errors = %#v", result.Errors)
+	}
+}
+
+func TestDistillAvoidContradictionsIgnoreOlderPositiveEvidence(t *testing.T) {
+	timestamp := func(value string) time.Time {
+		t.Helper()
+		parsed, err := time.Parse(time.RFC3339, value)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return parsed
+	}
+	failures := []backtestExperience{
+		{RecordedAt: timestamp("2026-04-10T10:00:00Z")},
+	}
+	positives := []backtestExperience{
+		{RecordedAt: timestamp("2026-04-01T10:00:00Z")},
+	}
+	if got := distillAvoidContradictions(failures, positives); got != 0 {
+		t.Fatalf("older positive evidence counted as contradiction: %d", got)
+	}
+	positives = append(positives, backtestExperience{RecordedAt: timestamp("2026-04-12T10:00:00Z")})
+	if got := distillAvoidContradictions(failures, positives); got != 1 {
+		t.Fatalf("later positive evidence contradictions = %d, want 1", got)
+	}
+}
+
+func TestYAMLScalarForWriteQuotesColonSpace(t *testing.T) {
+	quoted := yamlScalarForWrite("build: lint")
+	if quoted != `"build: lint"` {
+		t.Fatalf("yamlScalarForWrite did not quote colon-space scalar: %q", quoted)
+	}
+	document := parseRuleDocForTest(t, "statement: "+quoted+"\n")
+	if got := document.Scalars["statement"].Value; got != "build: lint" {
+		t.Fatalf("parsed statement = %q", got)
 	}
 }
 

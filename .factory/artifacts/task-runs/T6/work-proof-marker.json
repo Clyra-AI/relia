@@ -15,14 +15,16 @@
     ".factory/artifacts/task-runs/T6/validation-report.json",
     ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
   ],
-  "generated_at": "2026-06-27T20:33:20Z",
+  "generated_at": "2026-06-27T20:47:53Z",
   "implementation_performed": true,
   "implementation_summary": [
     "Implemented offline relia distill, relia review, and relia memory command paths.",
     "Added deterministic signature clustering for avoid and playbook rule drafts.",
     "Added confidence scoring from evidence count, recency half-life, contradictions, flake discounts, and extraction confidence with drafting_model_weight fixed at 0.",
     "Added stale-path and contradiction lifecycle handling plus review-gated activation.",
-    "Rendered memory/MEMORY.md with statements, confidence, lifecycle status, review labels, and clickable PR provenance."
+    "Rendered memory/MEMORY.md with statements, confidence, lifecycle status, review labels, and clickable PR provenance.",
+    "Addressed Codex review feedback by making avoid-rule contradiction timing compare positive evidence against the latest summarized failure.",
+    "Quoted generated YAML scalars containing colon-space and added regression tests."
   ],
   "schema_version": "1.0",
   "status": "implemented",

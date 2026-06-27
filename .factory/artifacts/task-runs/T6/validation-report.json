@@ -142,8 +142,8 @@
     "make lint-fast",
     "make test-fast",
     "make test-fast",
-    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go \u0026\u0026 make test-fast",
-    "python3 -m json.tool schemas/memory-rule.schema.json \u003e/tmp/memory-rule.schema.pretty.json \u0026\u0026 make lint-fast",
+    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go && make test-fast",
+    "python3 -m json.tool schemas/memory-rule.schema.json >/tmp/memory-rule.schema.pretty.json && make lint-fast",
     "make test-fast",
     "make test-contracts",
     "make prepush-full",
@@ -152,7 +152,9 @@
     "git diff --name-only | forbidden-path policy check",
     "python3 -m json.tool .factory/artifacts/task-runs/T6/work-proof-marker.json",
     "python3 -m json.tool .factory/artifacts/task-runs/T6/validation-report.json",
-    "python3 -m json.tool .factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
+    "python3 -m json.tool .factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
+    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
+    "go test ./cmd/relia -count=1 -run 'TestDistillAvoidContradictionsIgnoreOlderPositiveEvidence|TestYAMLScalarForWriteQuotesColonSpace|TestDistillMarksContradictedAndStaleRules'"
   ],
   "docs_sync_result": {
     "status": "pass",
@@ -169,9 +171,15 @@
       "exit_code": 0,
       "notes": "Coverage reported 81.1% against the 75.0% minimum.",
       "status": "pass"
+    },
+    {
+      "command": "make prepush-full",
+      "exit_code": 0,
+      "notes": "Coverage reported 81.2% against the 75.0% minimum after Codex review repairs.",
+      "status": "pass"
     }
   ],
-  "generated_at": "2026-06-27T20:33:20Z",
+  "generated_at": "2026-06-27T20:47:53Z",
   "green_evidence": [
     {
       "command": "make test-fast",
@@ -181,6 +189,12 @@
     {
       "command": "make test-contracts",
       "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -count=1 -run 'TestDistillAvoidContradictionsIgnoreOlderPositiveEvidence|TestYAMLScalarForWriteQuotesColonSpace|TestDistillMarksContradictedAndStaleRules'",
+      "exit_code": 0,
+      "notes": "Codex review repair coverage for avoid contradiction timing and YAML colon-space quoting.",
       "status": "pass"
     }
   ],
@@ -205,6 +219,17 @@
   "residual_risks": [
     "Provider-backed drafting remains fail-closed in this part-1 slice and requires a future approved model_provider_endpoint gate.",
     "First-user under-30-minute product-signal closure is not self-closed by this worker."
+  ],
+  "review_repair_evidence": [
+    {
+      "comments": [
+        "Count only later clean evidence for avoid contradictions",
+        "Quote YAML scalars that contain colon-space"
+      ],
+      "reviewer": "chatgpt-codex-connector",
+      "status": "addressed",
+      "validation": "make prepush-full"
+    }
   ],
   "schema_version": "1.0",
   "status": "pass",

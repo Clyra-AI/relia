@@ -2234,7 +2234,7 @@ func buildDistilledRules(root string, config yamlDocument, records []backtestExp
 		failures := distillFailureEvidence(cluster.Records)
 		positives := distillPositiveEvidence(cluster.Records)
 		if len(failures) > 0 && !allDistillEvidenceDiscounted(failures, flakeHeuristics) {
-			rule, ok := buildDistilledRule(root, "avoid", cluster, failures, len(positives), anchor, sourceArtifacts, sourceDigest, provider, embeddingMode, reviewRequired, options, flakeHeuristics)
+			rule, ok := buildDistilledRule(root, "avoid", cluster, failures, distillAvoidContradictions(failures, positives), anchor, sourceArtifacts, sourceDigest, provider, embeddingMode, reviewRequired, options, flakeHeuristics)
 			if ok {
 				rules = append(rules, rule)
 			}
@@ -2376,6 +2376,25 @@ func distillPlaybookContradictions(positives []backtestExperience, failures []ba
 	contradictions := 0
 	for _, failure := range failures {
 		if failure.RecordedAt.After(latestPositive) {
+			contradictions++
+		}
+	}
+	return contradictions
+}
+
+func distillAvoidContradictions(failures []backtestExperience, positives []backtestExperience) int {
+	if len(failures) == 0 || len(positives) == 0 {
+		return 0
+	}
+	latestFailure := failures[0].RecordedAt
+	for _, failure := range failures[1:] {
+		if failure.RecordedAt.After(latestFailure) {
+			latestFailure = failure.RecordedAt
+		}
+	}
+	contradictions := 0
+	for _, positive := range positives {
+		if positive.RecordedAt.After(latestFailure) {
 			contradictions++
 		}
 	}
@@ -2810,6 +2829,7 @@ func yamlScalarForWrite(value string) string {
 		return `""`
 	}
 	if strings.ContainsAny(value, "\n\r#") ||
+		strings.Contains(value, ": ") ||
 		strings.HasPrefix(value, "-") ||
 		strings.HasPrefix(value, "{") ||
 		strings.HasPrefix(value, "[") ||
