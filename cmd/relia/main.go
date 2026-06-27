@@ -806,8 +806,8 @@ func consumeUnifiedHunkLine(line string, oldRemaining int, newRemaining int) (in
 func diffGitHeaderPaths(line string) ([]string, bool) {
 	rest := strings.TrimSpace(strings.TrimPrefix(line, "diff --git "))
 	if strings.HasPrefix(rest, "a/") {
-		if index := strings.Index(rest, " b/"); index > 0 && strings.LastIndex(rest, " b/") == index {
-			return []string{rest[:index], rest[index+1:]}, true
+		if paths := prefixedGitDiffHeaderPaths(rest); len(paths) > 0 {
+			return paths, true
 		}
 		if paths := identicalNoPrefixDiffHeaderPaths(rest); len(paths) > 0 {
 			return paths, false
@@ -831,6 +831,38 @@ func diffGitHeaderPaths(line string) ([]string, bool) {
 		return paths, true
 	}
 	return paths, false
+}
+
+func prefixedGitDiffHeaderPaths(rest string) []string {
+	type candidate struct {
+		left  string
+		right string
+	}
+	var candidates []candidate
+	searchStart := 0
+	for {
+		index := strings.Index(rest[searchStart:], " b/")
+		if index < 0 {
+			break
+		}
+		split := searchStart + index
+		left := rest[:split]
+		right := rest[split+1:]
+		if strings.HasPrefix(left, "a/") && strings.HasPrefix(right, "b/") {
+			if strings.TrimPrefix(left, "a/") == strings.TrimPrefix(right, "b/") {
+				return []string{left, right}
+			}
+			candidates = append(candidates, candidate{left: left, right: right})
+		}
+		searchStart = split + len(" b/")
+		if searchStart >= len(rest) {
+			break
+		}
+	}
+	if len(candidates) == 1 {
+		return []string{candidates[0].left, candidates[0].right}
+	}
+	return nil
 }
 
 func identicalNoPrefixDiffHeaderPaths(rest string) []string {

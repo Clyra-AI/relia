@@ -2544,6 +2544,19 @@ new mode 100755
 	}
 }
 
+func TestParseUnifiedDiffTouchedPathsHandlesAmbiguousPrefixedModeOnlyHeader(t *testing.T) {
+	paths, commandErr := parseUnifiedDiffTouchedPaths([]byte(`diff --git a/foo b/bar.txt b/foo b/bar.txt
+old mode 100644
+new mode 100755
+`), "mode-only-prefixed-ambiguous-b-prefix.diff")
+	if commandErr != nil {
+		t.Fatalf("parse diff: %v", commandErr)
+	}
+	if fmt.Sprint(paths) != fmt.Sprint([]string{"foo b/bar.txt"}) {
+		t.Fatalf("paths = %#v", paths)
+	}
+}
+
 func TestParseUnifiedDiffTouchedPathsIgnoresPlainHeaderLookalikesInsideHunks(t *testing.T) {
 	paths, commandErr := parseUnifiedDiffTouchedPaths([]byte(`diff --git a/packages/search/query.py b/packages/search/query.py
 --- a/packages/search/query.py
