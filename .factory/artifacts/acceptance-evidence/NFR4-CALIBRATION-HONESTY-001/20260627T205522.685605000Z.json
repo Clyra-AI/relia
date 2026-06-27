@@ -1,0 +1,14 @@
+{
+  "acceptance_item_id": "NFR4-CALIBRATION-HONESTY-001",
+  "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+  "artifact_type": "acceptance_evidence_record",
+  "expires_at": "",
+  "external_evidence_ref": ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
+  "generated_at": "2026-06-27T20:55:22Z",
+  "generated_by": "factoryd record-acceptance",
+  "notes": "T6 scorecard documents confidence scoring, evidence counts, stale/contradicted status, deterministic provider metadata, and review-required behavior; post-repair make prepush-full passed.",
+  "repo": "relia",
+  "reviewer": "davidahmann-via-codex",
+  "schema_version": "0.1",
+  "status": "implemented"
+}

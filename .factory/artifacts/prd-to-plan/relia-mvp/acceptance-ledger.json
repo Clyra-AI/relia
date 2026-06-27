@@ -92,13 +92,19 @@
         "distillation-calibration-and-confidence-part-1"
       ],
       "evidence_mode": "automated",
+      "evidence_refs": [
+        ".factory/artifacts/acceptance-evidence/FR4-ATTRIBUTION-WITH-CONFIDENCE-001/20260627T205710.598967000Z.json",
+        ".factory/artifacts/task-runs/T6/validation-report.json"
+      ],
       "group_id": "fr4-attribution-with-confidence",
       "kind": "acceptance_test",
       "notes": [],
+      "recorded_at": "2026-06-27T20:57:10Z",
+      "recorded_by": "davidahmann-via-codex",
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#fr4-attribution-with-confidence",
       "source_text": "Relia must attribute agent authorship via bot login, co-author trailer, and PR label, with method and confidence recorded. Uncertain attribution must fail closed (excluded from ERR) by default.",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T6"
       ],
@@ -161,13 +167,19 @@
         "distillation-calibration-and-confidence-part-1"
       ],
       "evidence_mode": "automated",
+      "evidence_refs": [
+        ".factory/artifacts/acceptance-evidence/FR7-DETERMINISTIC-FAILURE-SIGNATURES-001/20260627T205710.620871000Z.json",
+        ".factory/artifacts/task-runs/T6/validation-report.json"
+      ],
       "group_id": "fr7-deterministic-failure-signatures",
       "kind": "acceptance_test",
       "notes": [],
+      "recorded_at": "2026-06-27T20:57:10Z",
+      "recorded_by": "davidahmann-via-codex",
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#fr7-deterministic-failure-signatures",
       "source_text": "Signature extraction must prefer structured check-run data and label log-parsed signatures with extraction confidence.",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T6"
       ],
@@ -256,13 +268,19 @@
         "distillation-calibration-and-confidence-part-1"
       ],
       "evidence_mode": "automated",
+      "evidence_refs": [
+        ".factory/artifacts/acceptance-evidence/FR11-CALIBRATED-CONFIDENCE-001/20260627T205710.641570000Z.json",
+        ".factory/artifacts/task-runs/T6/validation-report.json"
+      ],
       "group_id": "fr11-calibrated-confidence",
       "kind": "acceptance_test",
       "notes": [],
+      "recorded_at": "2026-06-27T20:57:10Z",
+      "recorded_by": "davidahmann-via-codex",
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#fr11-calibrated-confidence",
       "source_text": "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence — never from the drafting model.",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T6"
       ],
@@ -279,16 +297,22 @@
         "distillation-calibration-and-confidence-part-1"
       ],
       "evidence_mode": "automated",
+      "evidence_refs": [
+        ".factory/artifacts/acceptance-evidence/FR12-DECAY-AND-CHURN-INVALIDATION-001/20260627T205710.663089000Z.json",
+        ".factory/artifacts/task-runs/T6/validation-report.json"
+      ],
       "group_id": "fr12-decay-and-churn-invalidation",
       "kind": "acceptance_test",
       "notes": [
         "Sprint 4 adds a bounded learning-loop task reference; it cannot close without redacted, owner-approved evidence.",
         "Sprint 4 optional post-MVP learning tasks are tracked in acceptance mapping, not MVP-required ledger refs."
       ],
+      "recorded_at": "2026-06-27T20:57:10Z",
+      "recorded_by": "davidahmann-via-codex",
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#fr12-decay-and-churn-invalidation",
       "source_text": "Rules must decay by half-life and go `stale` when their scoped paths are deleted.",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T6"
       ],
@@ -305,15 +329,21 @@
         "distillation-calibration-and-confidence-part-1"
       ],
       "evidence_mode": "manual_review",
+      "evidence_refs": [
+        ".factory/artifacts/acceptance-evidence/FR13-HUMAN-REVIEW-GATE-001/20260627T205522.720434000Z.json",
+        "https://github.com/Clyra-AI/relia/pull/40"
+      ],
       "group_id": "fr13-human-review-gate",
       "kind": "acceptance_test",
       "notes": [
         "Requires manual review or human approval evidence."
       ],
+      "recorded_at": "2026-06-27T20:55:22Z",
+      "recorded_by": "davidahmann-via-codex",
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#fr13-human-review-gate",
       "source_text": "Drafted rules must be reviewed before becoming `active`, with `accepted`, `suggested`, and `needs_user_input` labels. Disabling review is an explicit, surfaced configuration choice.",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T6"
       ],
@@ -330,16 +360,22 @@
         "distillation-calibration-and-confidence-part-1"
       ],
       "evidence_mode": "automated",
+      "evidence_refs": [
+        ".factory/artifacts/acceptance-evidence/FR14-BIDIRECTIONAL-MEMORY-001/20260627T205710.683473000Z.json",
+        ".factory/artifacts/task-runs/T6/validation-report.json"
+      ],
       "group_id": "fr14-bidirectional-memory",
       "kind": "acceptance_test",
       "notes": [
         "Sprint 4 adds a bounded learning-loop task reference; it cannot close without redacted, owner-approved evidence.",
         "Sprint 4 optional post-MVP learning tasks are tracked in acceptance mapping, not MVP-required ledger refs."
       ],
+      "recorded_at": "2026-06-27T20:57:10Z",
+      "recorded_by": "davidahmann-via-codex",
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#fr14-bidirectional-memory",
       "source_text": "Relia must support `avoid` rules from failures and `playbook` rules from held fixes, and playbook rules must cite held evidence.",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T6"
       ],
@@ -356,16 +392,22 @@
         "distillation-calibration-and-confidence-part-1"
       ],
       "evidence_mode": "automated",
+      "evidence_refs": [
+        ".factory/artifacts/acceptance-evidence/FR15-MEMORY-PAGE-WITH-RECEIPTS-001/20260627T205710.704969000Z.json",
+        ".factory/artifacts/task-runs/T6/validation-report.json"
+      ],
       "group_id": "fr15-memory-page-with-receipts",
       "kind": "acceptance_test",
       "notes": [
         "Sprint 4 adds a bounded learning-loop task reference; it cannot close without redacted, owner-approved evidence.",
         "Sprint 4 optional post-MVP learning tasks are tracked in acceptance mapping, not MVP-required ledger refs."
       ],
+      "recorded_at": "2026-06-27T20:57:10Z",
+      "recorded_by": "davidahmann-via-codex",
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#fr15-memory-page-with-receipts",
       "source_text": "relia memory` must render MEMORY.md showing statements, confidence, lifecycle status, and clickable provenance.",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T6"
       ],
@@ -522,9 +564,18 @@
         "contracts-config-and-validation"
       ],
       "evidence_mode": "automated",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T2/validation-report.json",
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        "https://github.com/Clyra-AI/relia/pull/19"
+      ],
       "group_id": "fr22-stable-cli-output",
       "kind": "acceptance_test",
       "notes": [],
+      "recorded_at": "2026-06-22T17:19:36Z",
+      "recorded_by": "factoryd sync-task-closure",
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#fr22-stable-cli-output",
       "source_text": "Relia must support stable exit codes and `--json`.",
@@ -534,16 +585,7 @@
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/1/validation_commands"
-      ],
-      "evidence_refs": [
-        ".factory/artifacts/task-runs/T2/work-proof-marker.json",
-        ".factory/artifacts/task-runs/T2/validation-report.json",
-        "cmd/relia/main.go",
-        "cmd/relia/main_test.go",
-        "https://github.com/Clyra-AI/relia/pull/19"
-      ],
-      "recorded_by": "factoryd sync-task-closure",
-      "recorded_at": "2026-06-22T17:19:36Z"
+      ]
     },
     {
       "acceptance_item_id": "FR23-PROVIDER-ADAPTERS-AND-NO-LLM-MODE-001",
@@ -652,13 +694,19 @@
         "distillation-calibration-and-confidence-part-1"
       ],
       "evidence_mode": "automated",
+      "evidence_refs": [
+        ".factory/artifacts/acceptance-evidence/NFR2-FAST-FIRST-MEMORY-001/20260627T205710.726688000Z.json",
+        ".factory/artifacts/task-runs/T6/validation-report.json"
+      ],
       "group_id": "nfr2-fast-first-memory",
       "kind": "acceptance_test",
       "notes": [],
+      "recorded_at": "2026-06-27T20:57:10Z",
+      "recorded_by": "davidahmann-via-codex",
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#nfr2-fast-first-memory",
       "source_text": "A technical user should ingest, distill, and approve their first rule in under 30 minutes.",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T6"
       ],
@@ -698,6 +746,10 @@
         "distillation-calibration-and-confidence-part-1"
       ],
       "evidence_mode": "manual_review",
+      "evidence_refs": [
+        ".factory/artifacts/acceptance-evidence/NFR4-CALIBRATION-HONESTY-001/20260627T205522.685605000Z.json",
+        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
+      ],
       "group_id": "nfr4-calibration-honesty",
       "kind": "acceptance_test",
       "notes": [
@@ -705,10 +757,12 @@
         "Sprint 4 adds a bounded learning-loop task reference; it cannot close without redacted, owner-approved evidence.",
         "Sprint 4 optional post-MVP learning tasks are tracked in acceptance mapping, not MVP-required ledger refs."
       ],
+      "recorded_at": "2026-06-27T20:55:22Z",
+      "recorded_by": "davidahmann-via-codex",
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#nfr4-calibration-honesty",
       "source_text": "Reports must clearly distinguish confirmed recurrences, possible recurrences, flake-discounted evidence, and uncertain attribution.",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T6"
       ],
@@ -748,16 +802,22 @@
         "distillation-calibration-and-confidence-part-1"
       ],
       "evidence_mode": "automated",
+      "evidence_refs": [
+        ".factory/artifacts/acceptance-evidence/NFR6-LOCAL-PRIVACY-001/20260627T205710.748971000Z.json",
+        ".factory/artifacts/task-runs/T6/validation-report.json"
+      ],
       "group_id": "nfr6-local-privacy",
       "kind": "acceptance_test",
       "notes": [
         "Sprint 4 adds a bounded learning-loop task reference; it cannot close without redacted, owner-approved evidence.",
         "Sprint 4 optional post-MVP learning tasks are tracked in acceptance mapping, not MVP-required ledger refs."
       ],
+      "recorded_at": "2026-06-27T20:57:10Z",
+      "recorded_by": "davidahmann-via-codex",
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#nfr6-local-privacy",
       "source_text": "Relia must not send code, diffs, logs, or experience records anywhere by default. When a distill provider is configured, only redacted experience records leave the machine, and `relia check` must say so explicitly.",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T6"
       ],
@@ -799,15 +859,21 @@
         "distillation-calibration-and-confidence-part-1"
       ],
       "evidence_mode": "external",
+      "evidence_refs": [
+        ".factory/artifacts/acceptance-evidence/NFR8-STRUCTURED-DATA-FIRST-001/20260627T205522.767232000Z.json",
+        "schemas/memory-rule.schema.json"
+      ],
       "group_id": "nfr8-structured-data-first",
       "kind": "acceptance_test",
       "notes": [
         "Requires approved network allowlist before live closure."
       ],
+      "recorded_at": "2026-06-27T20:55:22Z",
+      "recorded_by": "davidahmann-via-codex",
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#nfr8-structured-data-first",
       "source_text": "Outcome extraction should use the GitHub API's structured data (check runs, review threads, merge/revert metadata) before log scraping; log-parsed values carry confidence labels.",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T6"
       ],
@@ -873,13 +939,19 @@
         "distillation-calibration-and-confidence-part-1"
       ],
       "evidence_mode": "automated",
+      "evidence_refs": [
+        ".factory/artifacts/acceptance-evidence/NFR11-STOCHASTIC-HONESTY-001/20260627T205710.781954000Z.json",
+        ".factory/artifacts/task-runs/T6/validation-report.json"
+      ],
       "group_id": "nfr11-stochastic-honesty",
       "kind": "acceptance_test",
       "notes": [],
+      "recorded_at": "2026-06-27T20:57:10Z",
+      "recorded_by": "davidahmann-via-codex",
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#nfr11-stochastic-honesty",
       "source_text": "LLM-drafted statements are labeled by origin and reviewable; clustering and calibration are deterministic given the same inputs.",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T6"
       ],
@@ -896,9 +968,18 @@
         "contracts-config-and-validation"
       ],
       "evidence_mode": "automated",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T2/validation-report.json",
+        "schemas/command-result.schema.json",
+        "schemas/memory-rule.schema.json",
+        "https://github.com/Clyra-AI/relia/pull/19"
+      ],
       "group_id": "nfr12-artifact-stability",
       "kind": "acceptance_test",
       "notes": [],
+      "recorded_at": "2026-06-22T17:19:36Z",
+      "recorded_by": "factoryd sync-task-closure",
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#nfr12-artifact-stability",
       "source_text": "Schemas and artifacts must be versioned.",
@@ -908,16 +989,7 @@
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/1/validation_commands"
-      ],
-      "evidence_refs": [
-        ".factory/artifacts/task-runs/T2/work-proof-marker.json",
-        ".factory/artifacts/task-runs/T2/validation-report.json",
-        "schemas/command-result.schema.json",
-        "schemas/memory-rule.schema.json",
-        "https://github.com/Clyra-AI/relia/pull/19"
-      ],
-      "recorded_by": "factoryd sync-task-closure",
-      "recorded_at": "2026-06-22T17:19:36Z"
+      ]
     },
     {
       "acceptance_item_id": "NFR13-INFERENCE-HUMILITY-001",
@@ -928,13 +1000,19 @@
         "distillation-calibration-and-confidence-part-1"
       ],
       "evidence_mode": "automated",
+      "evidence_refs": [
+        ".factory/artifacts/acceptance-evidence/NFR13-INFERENCE-HUMILITY-001/20260627T205710.813721000Z.json",
+        ".factory/artifacts/task-runs/T6/validation-report.json"
+      ],
       "group_id": "nfr13-inference-humility",
       "kind": "acceptance_test",
       "notes": [],
+      "recorded_at": "2026-06-27T20:57:10Z",
+      "recorded_by": "davidahmann-via-codex",
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#nfr13-inference-humility",
       "source_text": "Drafted rules, signatures parsed from logs, attribution inferences, and held-fix detection must be confidence-labeled.",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T6"
       ],
@@ -997,9 +1075,18 @@
         "contracts-config-and-validation"
       ],
       "evidence_mode": "automated",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T2/validation-report.json",
+        "cmd/relia/main.go",
+        "relia.yaml",
+        "https://github.com/Clyra-AI/relia/pull/19"
+      ],
       "group_id": "mvp-in-scope",
       "kind": "acceptance_test",
       "notes": [],
+      "recorded_at": "2026-06-22T17:19:36Z",
+      "recorded_by": "factoryd sync-task-closure",
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
       "source_text": "local OSS CLI",
@@ -1009,16 +1096,7 @@
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/1/validation_commands"
-      ],
-      "evidence_refs": [
-        ".factory/artifacts/task-runs/T2/work-proof-marker.json",
-        ".factory/artifacts/task-runs/T2/validation-report.json",
-        "cmd/relia/main.go",
-        "relia.yaml",
-        "https://github.com/Clyra-AI/relia/pull/19"
-      ],
-      "recorded_by": "factoryd sync-task-closure",
-      "recorded_at": "2026-06-22T17:19:36Z"
+      ]
     },
     {
       "acceptance_item_id": "MVP-IN-SCOPE-002",
@@ -1054,13 +1132,19 @@
         "distillation-calibration-and-confidence-part-1"
       ],
       "evidence_mode": "automated",
+      "evidence_refs": [
+        ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-003/20260627T205710.835244000Z.json",
+        ".factory/artifacts/task-runs/T6/validation-report.json"
+      ],
       "group_id": "mvp-in-scope",
       "kind": "acceptance_test",
       "notes": [],
+      "recorded_at": "2026-06-27T20:57:10Z",
+      "recorded_by": "davidahmann-via-codex",
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
       "source_text": "agent attribution with confidence",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T6"
       ],
@@ -1123,13 +1207,19 @@
         "distillation-calibration-and-confidence-part-1"
       ],
       "evidence_mode": "automated",
+      "evidence_refs": [
+        ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-006/20260627T205710.855859000Z.json",
+        ".factory/artifacts/task-runs/T6/validation-report.json"
+      ],
       "group_id": "mvp-in-scope",
       "kind": "acceptance_test",
       "notes": [],
+      "recorded_at": "2026-06-27T20:57:10Z",
+      "recorded_by": "davidahmann-via-codex",
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
       "source_text": "deterministic failure signatures with confidence labels",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T6"
       ],
@@ -1474,9 +1564,18 @@
         "contracts-config-and-validation"
       ],
       "evidence_mode": "automated",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T2/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T2/validation-report.json",
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        "https://github.com/Clyra-AI/relia/pull/19"
+      ],
       "group_id": "mvp-in-scope",
       "kind": "acceptance_test",
       "notes": [],
+      "recorded_at": "2026-06-22T17:19:36Z",
+      "recorded_by": "factoryd sync-task-closure",
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
       "source_text": "stable exit codes and `--json",
@@ -1486,16 +1585,7 @@
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/1/validation_commands"
-      ],
-      "evidence_refs": [
-        ".factory/artifacts/task-runs/T2/work-proof-marker.json",
-        ".factory/artifacts/task-runs/T2/validation-report.json",
-        "cmd/relia/main.go",
-        "cmd/relia/main_test.go",
-        "https://github.com/Clyra-AI/relia/pull/19"
-      ],
-      "recorded_by": "factoryd sync-task-closure",
-      "recorded_at": "2026-06-22T17:19:36Z"
+      ]
     },
     {
       "acceptance_item_id": "MVP-IN-SCOPE-022",
@@ -2919,8 +3009,8 @@
       ]
     }
   ],
+  "last_updated_at": "2026-06-27T20:57:10Z",
   "schema_version": "1.0",
   "source_prd_ref": "docs/product/prd.md",
-  "source_ref": "docs/product/prd.md",
-  "last_updated_at": "2026-06-22T17:19:36Z"
+  "source_ref": "docs/product/prd.md"
 }
