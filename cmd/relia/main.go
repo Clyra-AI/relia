@@ -710,9 +710,9 @@ func parseUnifiedDiffTouchedPaths(content []byte, ref string) ([]string, *Comman
 		case inFileHeader && strings.HasPrefix(line, "+++ "):
 			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "+++ ")), gitFileHeader)
 		case inFileHeader && strings.HasPrefix(line, "rename from "):
-			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "rename from ")), true)
+			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "rename from ")), false)
 		case inFileHeader && strings.HasPrefix(line, "rename to "):
-			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "rename to ")), true)
+			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "rename to ")), false)
 		case strings.HasPrefix(line, "@@"):
 			inFileHeader = false
 			gitFileHeader = false
@@ -998,8 +998,8 @@ func buildRiskAssessment(root string, inputRef string, content []byte, touchedPa
 			return riskAssessment{}, provenanceIntegrityError("matched active memory rule confidence must be between 0 and 1 for assessment", rule.Path)
 		}
 		for _, citation := range rule.Citations {
-			if !validGitHubProvenanceURLShape(citation) {
-				return riskAssessment{}, provenanceIntegrityError("matched active memory rule citation URL must be an https://github.com/ URL", rule.Path)
+			if !validGitHubPullRequestURLShape(citation) {
+				return riskAssessment{}, provenanceIntegrityError("matched active memory rule citation URL must be an https://github.com/<owner>/<repo>/pull/<number> URL", rule.Path)
 			}
 		}
 		matches = append(matches, riskAssessmentMatch{
@@ -1802,6 +1802,29 @@ func validGitHubProvenanceURLShape(value string) bool {
 		parsed.RawQuery == "" &&
 		parsed.Fragment == "" &&
 		strings.Trim(parsed.Path, "/") != ""
+}
+
+func validGitHubPullRequestURLShape(value string) bool {
+	parsed, err := url.Parse(strings.TrimSpace(value))
+	if err != nil {
+		return false
+	}
+	if parsed.Scheme != "https" ||
+		!strings.EqualFold(parsed.Host, "github.com") ||
+		parsed.User != nil ||
+		parsed.RawQuery != "" ||
+		parsed.Fragment != "" {
+		return false
+	}
+	parts := strings.Split(strings.Trim(parsed.Path, "/"), "/")
+	if len(parts) != 4 || parts[2] != "pull" {
+		return false
+	}
+	if parts[0] == "" || parts[1] == "" {
+		return false
+	}
+	number, err := strconv.Atoi(parts[3])
+	return err == nil && number > 0
 }
 
 func unsafeGitHubURLPathEntropyToken(value string) string {
