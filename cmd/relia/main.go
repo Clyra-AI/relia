@@ -364,6 +364,30 @@ type baselineComparison struct {
 	Reason      string  `json:"reason"`
 }
 
+func (comparison baselineComparison) MarshalJSON() ([]byte, error) {
+	type baselineComparisonJSON struct {
+		Status      string   `json:"status"`
+		Path        string   `json:"path"`
+		HeadlineERR *float64 `json:"headline_err,omitempty"`
+		Delta       *float64 `json:"delta,omitempty"`
+		Stale       bool     `json:"stale"`
+		Reason      string   `json:"reason"`
+	}
+	payload := baselineComparisonJSON{
+		Status: comparison.Status,
+		Path:   comparison.Path,
+		Stale:  comparison.Stale,
+		Reason: comparison.Reason,
+	}
+	if comparison.Status != "missing" {
+		headlineERR := comparison.HeadlineERR
+		delta := comparison.Delta
+		payload.HeadlineERR = &headlineERR
+		payload.Delta = &delta
+	}
+	return json.Marshal(payload)
+}
+
 type backtestGateResult struct {
 	Enabled   bool     `json:"enabled"`
 	Status    string   `json:"status"`

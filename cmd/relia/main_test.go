@@ -1371,6 +1371,38 @@ func TestBacktestBaselineMarksWindowMismatchStale(t *testing.T) {
 	}
 }
 
+func TestBacktestBaselineJSONPreservesZeroMetrics(t *testing.T) {
+	current := baselineComparison{
+		Status:      "current",
+		Path:        ".relia/baselines/error-recurrence-baseline.json",
+		HeadlineERR: 0,
+		Delta:       0,
+		Stale:       false,
+		Reason:      "Saved baseline was computed from the same source artifact digest.",
+	}
+	currentJSON, err := json.Marshal(current)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Contains(currentJSON, []byte(`"headline_err":0`)) || !bytes.Contains(currentJSON, []byte(`"delta":0`)) {
+		t.Fatalf("current baseline JSON = %s, want explicit zero metrics", currentJSON)
+	}
+
+	missing := baselineComparison{
+		Status: "missing",
+		Path:   ".relia/baselines/error-recurrence-baseline.json",
+		Stale:  false,
+		Reason: "No saved ERR baseline exists yet; use --save-baseline after reviewing the report to create one.",
+	}
+	missingJSON, err := json.Marshal(missing)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bytes.Contains(missingJSON, []byte("headline_err")) || bytes.Contains(missingJSON, []byte("delta")) {
+		t.Fatalf("missing baseline JSON = %s, want omitted comparison metrics", missingJSON)
+	}
+}
+
 func TestBacktestSaveBaselineReportsFreshCurrentValues(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
