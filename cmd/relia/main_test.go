@@ -2293,6 +2293,22 @@ func TestParseUnifiedDiffTouchedPathsKeepsQuotedSpaces(t *testing.T) {
 	}
 }
 
+func TestParseUnifiedDiffTouchedPathsPreservesQuotedTabPath(t *testing.T) {
+	paths, commandErr := parseUnifiedDiffTouchedPaths([]byte(`diff --git "a/foo\tbar.txt" "b/foo\tbar.txt"
+--- "a/foo\tbar.txt"
++++ "b/foo\tbar.txt"
+@@ -1 +1 @@
+-old
++new
+`), "quoted-tab.diff")
+	if commandErr != nil {
+		t.Fatalf("parse diff: %v", commandErr)
+	}
+	if len(paths) != 1 || paths[0] != "foo\tbar.txt" {
+		t.Fatalf("paths = %#v", paths)
+	}
+}
+
 func TestParseUnifiedDiffTouchedPathsKeepsUnquotedSpaces(t *testing.T) {
 	paths, commandErr := parseUnifiedDiffTouchedPaths([]byte(`diff --git a/docs/api guide.md b/docs/api guide.md
 --- a/docs/api guide.md

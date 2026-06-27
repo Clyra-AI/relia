@@ -858,8 +858,8 @@ func nextDiffHeaderPath(input string) (string, string, bool) {
 			}
 			if char == '"' {
 				token := input[:index+1]
-				if unquoted, err := strconv.Unquote(token); err == nil {
-					return unquoted, input[index+1:], true
+				if _, err := strconv.Unquote(token); err == nil {
+					return token, input[index+1:], true
 				}
 				return strings.Trim(token, "\""), input[index+1:], true
 			}
@@ -873,13 +873,16 @@ func nextDiffHeaderPath(input string) (string, string, bool) {
 
 func addDiffPath(touched map[string]bool, raw string, stripGitPrefix bool) {
 	pathPart := strings.TrimSpace(raw)
-	if strings.HasPrefix(pathPart, "\"") {
+	quoted := strings.HasPrefix(pathPart, "\"")
+	if quoted {
 		if unquoted, err := strconv.Unquote(pathPart); err == nil {
 			pathPart = unquoted
 		}
 	}
-	if index := strings.Index(pathPart, "\t"); index >= 0 {
-		pathPart = pathPart[:index]
+	if !quoted {
+		if index := strings.Index(pathPart, "\t"); index >= 0 {
+			pathPart = pathPart[:index]
+		}
 	}
 	if pathPart == "" || pathPart == "/dev/null" {
 		return
