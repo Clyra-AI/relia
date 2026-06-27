@@ -963,6 +963,15 @@ func validateActiveAssessmentRuleIdentity(document yamlDocument, rel string) *Co
 	if reviewLabel.Value != "accepted" {
 		return artifactContractError("active memory rule review.label must be accepted", configRefWithPath(rel, reviewLabel))
 	}
+	statementOrigin, ok := document.Scalars["review.statement_origin"]
+	if !ok {
+		return artifactContractError("memory rule missing required key review.statement_origin", rel)
+	}
+	switch statementOrigin.Value {
+	case "llm_drafted", "cluster_summary", "human_authored":
+	default:
+		return artifactContractError("memory rule review.statement_origin is invalid", configRefWithPath(rel, statementOrigin))
+	}
 	if len(document.Lists["evidence.experiences"]) == 0 {
 		return artifactContractError("memory rule must cite at least one experience", rel)
 	}
