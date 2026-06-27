@@ -758,8 +758,7 @@ func gitStyleUnifiedFileHeader(lines []string, index int) bool {
 		return false
 	}
 	newPath := strings.TrimSpace(strings.TrimPrefix(newLine, "+++ "))
-	return oldPath == "/dev/null" || newPath == "/dev/null" ||
-		(strings.HasPrefix(oldPath, "a/") && strings.HasPrefix(newPath, "b/"))
+	return strings.HasPrefix(oldPath, "a/") && strings.HasPrefix(newPath, "b/")
 }
 
 func parseUnifiedHunkCounts(line string) (int, int) {
@@ -974,6 +973,17 @@ func validateActiveAssessmentRuleIdentity(document yamlDocument, rel string) *Co
 	count, err := strconv.Atoi(evidenceCount.Value)
 	if err != nil || count < 1 {
 		return artifactContractError("memory rule evidence.count must be at least 1", configRefWithPath(rel, evidenceCount))
+	}
+	for _, provenance := range document.ListMaps["provenance"] {
+		outcome, ok := provenance["outcome"]
+		if !ok {
+			return artifactContractError("memory rule provenance entry missing outcome", rel)
+		}
+		switch outcome.Value {
+		case "ci_failure", "revert", "review_correction", "fix_held", "merged_clean":
+		default:
+			return artifactContractError("memory rule provenance outcome is invalid", configRefWithPath(rel, outcome))
+		}
 	}
 	return nil
 }
