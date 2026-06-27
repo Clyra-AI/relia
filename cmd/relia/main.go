@@ -912,6 +912,9 @@ func readAssessmentRule(root string, rulePath string) (assessmentRule, bool, *Co
 	if document.Scalars["status"].Value != "active" {
 		return assessmentRule{}, false, nil
 	}
+	if commandErr := validateActiveAssessmentRuleIdentity(document, rel); commandErr != nil {
+		return assessmentRule{}, false, commandErr
+	}
 	confidence, err := strconv.ParseFloat(document.Scalars["confidence"].Value, 64)
 	if err != nil {
 		return assessmentRule{}, false, artifactContractError("memory rule confidence must be numeric", rel)
@@ -923,6 +926,23 @@ func readAssessmentRule(root string, rulePath string) (assessmentRule, bool, *Co
 		ScopePaths: yamlListValues(document, "scope.paths"),
 		Citations:  assessmentRuleCitations(document),
 	}, true, nil
+}
+
+func validateActiveAssessmentRuleIdentity(document yamlDocument, rel string) *CommandError {
+	if document.Scalars["object_type"].Value != "relia.memory_rule" {
+		return artifactContractError("memory rule object_type must be relia.memory_rule", configRefWithPath(rel, document.Scalars["object_type"]))
+	}
+	if document.Scalars["schema_version"].Value != commandSchemaVersion {
+		return artifactContractError("memory rule schema_version must be "+commandSchemaVersion, rel)
+	}
+	reviewLabel, ok := document.Scalars["review.label"]
+	if !ok {
+		return artifactContractError("memory rule missing required key review.label", rel)
+	}
+	if reviewLabel.Value != "accepted" {
+		return artifactContractError("active memory rule review.label must be accepted", configRefWithPath(rel, reviewLabel))
+	}
+	return nil
 }
 
 func assessmentRuleCitations(document yamlDocument) []string {
