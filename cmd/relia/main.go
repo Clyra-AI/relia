@@ -199,6 +199,7 @@ type riskAssessmentMatch struct {
 
 type assessmentRule struct {
 	ID         string
+	Kind       string
 	Path       string
 	Confidence float64
 	ScopePaths []string
@@ -921,6 +922,7 @@ func readAssessmentRule(root string, rulePath string) (assessmentRule, bool, *Co
 	}
 	return assessmentRule{
 		ID:         document.Scalars["id"].Value,
+		Kind:       document.Scalars["kind"].Value,
 		Path:       rel,
 		Confidence: confidence,
 		ScopePaths: yamlListValues(document, "scope.paths"),
@@ -934,6 +936,10 @@ func validateActiveAssessmentRuleIdentity(document yamlDocument, rel string) *Co
 	}
 	if document.Scalars["schema_version"].Value != commandSchemaVersion {
 		return artifactContractError("memory rule schema_version must be "+commandSchemaVersion, rel)
+	}
+	kind := document.Scalars["kind"].Value
+	if kind != "avoid" && kind != "playbook" {
+		return artifactContractError("memory rule kind must be avoid or playbook", configRefWithPath(rel, document.Scalars["kind"]))
 	}
 	reviewLabel, ok := document.Scalars["review.label"]
 	if !ok {
@@ -960,6 +966,8 @@ func assessmentRuleCitations(document yamlDocument) []string {
 func buildRiskAssessment(root string, inputRef string, content []byte, touchedPaths []string, rules []assessmentRule) (riskAssessment, *CommandError) {
 	matches := []riskAssessmentMatch{}
 	citations := []string{}
+	highestAvoidConfidence := -1.0
+	hasPlaybookCoverage := false
 	for _, rule := range rules {
 		if !assessmentRuleMatchesTouchedPath(root, rule, touchedPaths) {
 			continue
@@ -983,6 +991,11 @@ func buildRiskAssessment(root string, inputRef string, content []byte, touchedPa
 			Confidence: rule.Confidence,
 		})
 		citations = append(citations, rule.Citations...)
+		if rule.Kind == "playbook" {
+			hasPlaybookCoverage = true
+		} else if rule.Confidence > highestAvoidConfidence {
+			highestAvoidConfidence = rule.Confidence
+		}
 	}
 	sort.Slice(matches, func(i, j int) bool {
 		if matches[i].Confidence == matches[j].Confidence {
@@ -995,12 +1008,12 @@ func buildRiskAssessment(root string, inputRef string, content []byte, touchedPa
 		citations = []string{}
 	}
 	riskLevel := "no_coverage"
-	for _, match := range matches {
-		if match.Confidence >= 0.75 {
-			riskLevel = "match_high"
-			break
-		}
+	if highestAvoidConfidence >= 0.75 {
+		riskLevel = "match_high"
+	} else if highestAvoidConfidence >= 0 {
 		riskLevel = "match_medium"
+	} else if hasPlaybookCoverage {
+		riskLevel = "covered_clean"
 	}
 	return riskAssessment{
 		ObjectType:    "relia.risk_assessment",
