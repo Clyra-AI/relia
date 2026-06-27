@@ -1298,10 +1298,9 @@ func autoFlakeDiscountedExperiences(records []backtestExperience) map[string]str
 		if record.Record.Attribution.ActorKind != "agent" || !isFailureOutcome(record.Record.Outcome.Kind) {
 			continue
 		}
-		if record.Record.Outcome.Signature.SignatureID == "" {
-			continue
+		for _, key := range recurrenceSignatureKeys(record.Record) {
+			bySignature[key] = append(bySignature[key], record)
 		}
-		bySignature[record.Record.Outcome.Signature.SignatureID] = append(bySignature[record.Record.Outcome.Signature.SignatureID], record)
 	}
 	discounted := map[string]string{}
 	for _, group := range bySignature {
@@ -1310,7 +1309,7 @@ func autoFlakeDiscountedExperiences(records []backtestExperience) map[string]str
 		}
 		reason := "Discounted as flaky because the same failure signature appears at least three times across unrelated non-test diff paths."
 		for _, record := range group {
-			if record.Record.FlakeDiscount == 0 {
+			if record.Record.FlakeDiscount == 0 && discounted[record.Record.ExperienceID] == "" {
 				discounted[record.Record.ExperienceID] = reason
 			}
 		}
@@ -2927,8 +2926,8 @@ func normalizeExperienceProvenance(event map[string]any, ref string) (experience
 		return experienceProvenance{}, provenanceIntegrityError("experience record must include at least one provenance URL", ref)
 	}
 	for _, value := range urls {
-		if !strings.HasPrefix(value, "https://github.com/") {
-			return experienceProvenance{}, provenanceIntegrityError("experience provenance URL must be an https://github.com/ URL", ref)
+		if !validGitHubProvenanceURLShape(value) {
+			return experienceProvenance{}, provenanceIntegrityError("experience provenance URL must be a canonical https://github.com/ URL", ref)
 		}
 	}
 	return experienceProvenance{URLs: urls}, nil
