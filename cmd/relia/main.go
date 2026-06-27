@@ -692,11 +692,15 @@ func parseUnifiedDiffTouchedPaths(content []byte, ref string) ([]string, *Comman
 		switch {
 		case strings.HasPrefix(line, "diff --git "):
 			inFileHeader = true
-			gitFileHeader = true
-			for _, path := range diffGitHeaderPaths(line) {
+			headerPaths := diffGitHeaderPaths(line)
+			gitFileHeader = len(headerPaths) > 0
+			for _, path := range headerPaths {
 				addDiffPath(touched, path, true)
 			}
 		case inFileHeader && strings.HasPrefix(line, "--- "):
+			if !gitFileHeader {
+				gitFileHeader = gitStyleUnifiedFileHeader(lines, index)
+			}
 			addDiffPath(touched, strings.TrimSpace(strings.TrimPrefix(line, "--- ")), gitFileHeader)
 		case strings.HasPrefix(line, "--- ") && plainUnifiedFileHeader(lines, index):
 			inFileHeader = true
@@ -731,6 +735,20 @@ func plainUnifiedFileHeader(lines []string, index int) bool {
 	}
 	return strings.HasPrefix(strings.TrimRight(lines[index+1], "\r"), "+++ ") &&
 		strings.HasPrefix(strings.TrimRight(lines[index+2], "\r"), "@@")
+}
+
+func gitStyleUnifiedFileHeader(lines []string, index int) bool {
+	if index+1 >= len(lines) {
+		return false
+	}
+	oldPath := strings.TrimSpace(strings.TrimPrefix(strings.TrimRight(lines[index], "\r"), "--- "))
+	newLine := strings.TrimRight(lines[index+1], "\r")
+	if !strings.HasPrefix(newLine, "+++ ") {
+		return false
+	}
+	newPath := strings.TrimSpace(strings.TrimPrefix(newLine, "+++ "))
+	return oldPath == "/dev/null" || newPath == "/dev/null" ||
+		(strings.HasPrefix(oldPath, "a/") && strings.HasPrefix(newPath, "b/"))
 }
 
 func parseUnifiedHunkCounts(line string) (int, int) {

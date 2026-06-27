@@ -1911,6 +1911,22 @@ func TestParseUnifiedDiffTouchedPathsPreservesPlainDiffLiteralAPrefix(t *testing
 	}
 }
 
+func TestParseUnifiedDiffTouchedPathsPreservesNoPrefixGitLiteralAPrefix(t *testing.T) {
+	paths, commandErr := parseUnifiedDiffTouchedPaths([]byte(`diff --git a/foo.py a/foo.py
+--- a/foo.py
++++ a/foo.py
+@@ -1 +1 @@
+-old
++new
+`), "no-prefix-git-a-prefix.diff")
+	if commandErr != nil {
+		t.Fatalf("parse diff: %v", commandErr)
+	}
+	if fmt.Sprint(paths) != fmt.Sprint([]string{"a/foo.py"}) {
+		t.Fatalf("paths = %#v", paths)
+	}
+}
+
 func TestParseUnifiedDiffTouchedPathsIgnoresPlainHeaderLookalikesInsideHunks(t *testing.T) {
 	paths, commandErr := parseUnifiedDiffTouchedPaths([]byte(`diff --git a/packages/search/query.py b/packages/search/query.py
 --- a/packages/search/query.py
