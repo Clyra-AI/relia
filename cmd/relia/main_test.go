@@ -1250,6 +1250,9 @@ func TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline(t *te
 	}
 	result := decodeResult(t, stdout)
 	report := decodeBacktestReportFromResult(t, result)
+	if result.RedactionStatus != "applied" {
+		t.Fatalf("redaction_status = %q, want applied", result.RedactionStatus)
+	}
 	if report.ObjectType != "relia.recurrence_report" || report.SchemaVersion != commandSchemaVersion {
 		t.Fatalf("report contract = %#v", report)
 	}
@@ -1307,11 +1310,16 @@ func TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline(t *te
 func TestBacktestBaselineAcceptsSummaryHeadlineERR(t *testing.T) {
 	tempDir := t.TempDir()
 	baselinePath := filepath.Join(tempDir, ".relia", "baselines", "error-recurrence-baseline.json")
+	currentWindow := recurrenceWindow{Start: "2026-01-01T00:00:00Z", End: "2026-01-31T00:00:00Z"}
 	writeFileForTest(t, baselinePath, `{
   "object_type": "relia.err_baseline",
   "schema_version": "1.0",
   "summary": {
     "headline_err": 0.25
+  },
+  "window": {
+    "start": "2026-01-01T00:00:00Z",
+    "end": "2026-01-31T00:00:00Z"
   },
   "metadata": {
     "source_artifact_digest": "sha256:baseline"
@@ -1319,13 +1327,44 @@ func TestBacktestBaselineAcceptsSummaryHeadlineERR(t *testing.T) {
 }
 `)
 
-	baseline, commandErr := compareBacktestBaseline(tempDir, ".relia/baselines/error-recurrence-baseline.json", 0.5, "sha256:baseline")
+	baseline, commandErr := compareBacktestBaseline(tempDir, ".relia/baselines/error-recurrence-baseline.json", 0.5, "sha256:baseline", currentWindow)
 
 	if commandErr != nil {
 		t.Fatalf("compare baseline returned error: %#v", commandErr)
 	}
 	if baseline.Status != "current" || baseline.Stale {
 		t.Fatalf("baseline status = %#v, want current", baseline)
+	}
+	if baseline.HeadlineERR != 0.25 || baseline.Delta != 0.25 {
+		t.Fatalf("baseline values = %#v, want headline 0.25 and delta 0.25", baseline)
+	}
+}
+
+func TestBacktestBaselineMarksWindowMismatchStale(t *testing.T) {
+	tempDir := t.TempDir()
+	baselinePath := filepath.Join(tempDir, ".relia", "baselines", "error-recurrence-baseline.json")
+	writeFileForTest(t, baselinePath, `{
+  "object_type": "relia.err_baseline",
+  "schema_version": "1.0",
+  "headline_err": 0.25,
+  "window": {
+    "start": "2026-01-01T00:00:00Z",
+    "end": "2026-06-29T00:00:00Z"
+  },
+  "metadata": {
+    "source_artifact_digest": "sha256:baseline"
+  }
+}
+`)
+
+	currentWindow := recurrenceWindow{Start: "2026-06-01T00:00:00Z", End: "2026-06-29T00:00:00Z"}
+	baseline, commandErr := compareBacktestBaseline(tempDir, ".relia/baselines/error-recurrence-baseline.json", 0.5, "sha256:baseline", currentWindow)
+
+	if commandErr != nil {
+		t.Fatalf("compare baseline returned error: %#v", commandErr)
+	}
+	if baseline.Status != "stale" || !baseline.Stale || !strings.Contains(baseline.Reason, "window") {
+		t.Fatalf("baseline status = %#v, want stale window mismatch", baseline)
 	}
 	if baseline.HeadlineERR != 0.25 || baseline.Delta != 0.25 {
 		t.Fatalf("baseline values = %#v, want headline 0.25 and delta 0.25", baseline)

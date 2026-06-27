@@ -778,7 +778,7 @@ func backtestResult(args []string, start time.Time) CommandResult {
 		ArtifactRef{Kind: "recurrence_report_json", Path: jsonReportPath},
 		ArtifactRef{Kind: "recurrence_report_html", Path: htmlReportPath},
 	)
-	result.RedactionStatus = "customer_safe"
+	result.RedactionStatus = "applied"
 	if report.Gate.Status == "fail" {
 		result.Status = "error"
 		result.ExitCode = ExitGate
@@ -1048,19 +1048,20 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 		summary.HeadlineERR = roundFloat(float64(summary.ConfirmedRecurrenceCount)/float64(summary.AgentFailureDenominator), 4)
 	}
 	summary.HeadlineERRPercent = fmt.Sprintf("%.1f%%", summary.HeadlineERR*100)
-	baseline, commandErr := compareBacktestBaseline(root, options.BaselinePath, summary.HeadlineERR, sourceDigest)
+	window := recurrenceWindow{
+		Start: windowStart.Format(time.RFC3339),
+		End:   windowEnd.Format(time.RFC3339),
+	}
+	baseline, commandErr := compareBacktestBaseline(root, options.BaselinePath, summary.HeadlineERR, sourceDigest, window)
 	if commandErr != nil {
 		return recurrenceReport{}, commandErr
 	}
 	gate := backtestGate(config, summary.HeadlineERR)
 	report := recurrenceReport{
-		ObjectType:      "relia.recurrence_report",
-		SchemaVersion:   commandSchemaVersion,
-		SourceArtifacts: append([]string(nil), sourceArtifacts...),
-		Window: recurrenceWindow{
-			Start: windowStart.Format(time.RFC3339),
-			End:   windowEnd.Format(time.RFC3339),
-		},
+		ObjectType:           "relia.recurrence_report",
+		SchemaVersion:        commandSchemaVersion,
+		SourceArtifacts:      append([]string(nil), sourceArtifacts...),
+		Window:               window,
 		Summary:              summary,
 		HeadlineERR:          summary.HeadlineERR,
 		ConfirmedRecurrences: confirmed,
@@ -1338,7 +1339,7 @@ func roundFloat(value float64, places int) float64 {
 	return math.Round(value*factor) / factor
 }
 
-func compareBacktestBaseline(root string, baselinePath string, headlineERR float64, sourceDigest string) (baselineComparison, *CommandError) {
+func compareBacktestBaseline(root string, baselinePath string, headlineERR float64, sourceDigest string, window recurrenceWindow) (baselineComparison, *CommandError) {
 	clean, ok := cleanRepoPath(baselinePath)
 	if !ok {
 		return baselineComparison{}, usageError("backtest baseline path must be repo-relative")
@@ -1383,6 +1384,10 @@ func compareBacktestBaseline(root string, baselinePath string, headlineERR float
 		status = "stale"
 		stale = true
 		reason = "Saved baseline source artifact digest differs from the current backtest inputs."
+	} else if !baselineWindowMatches(payload, window) {
+		status = "stale"
+		stale = true
+		reason = "Saved baseline window differs from the current backtest window."
 	}
 	return baselineComparison{
 		Status:      status,
@@ -1392,6 +1397,15 @@ func compareBacktestBaseline(root string, baselinePath string, headlineERR float
 		Stale:       stale,
 		Reason:      reason,
 	}, nil
+}
+
+func baselineWindowMatches(payload map[string]any, window recurrenceWindow) bool {
+	baselineWindow, ok := payload["window"].(map[string]any)
+	if !ok {
+		return false
+	}
+	return stringFromAny(baselineWindow["start"]) == window.Start &&
+		stringFromAny(baselineWindow["end"]) == window.End
 }
 
 func backtestGate(config yamlDocument, headlineERR float64) backtestGateResult {
