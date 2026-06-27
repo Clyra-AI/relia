@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"sort"
@@ -859,6 +860,9 @@ func assertAssessmentDiffFixtureMatchesDeclaredPaths(t *testing.T, root string, 
 	}
 	if fmt.Sprint(parsed) != fmt.Sprint(fixtureCase.ExpectedTouchedPaths) {
 		t.Fatalf("%s parsed touched_paths = %#v, want declared expected_touched_paths %#v", fixtureCase.CaseID, parsed, fixtureCase.ExpectedTouchedPaths)
+	}
+	if output, err := exec.Command("git", "-C", root, "apply", "--check", fixtureCase.InputDiff).CombinedOutput(); err != nil {
+		t.Fatalf("%s input_diff is not replayable with git apply --check: %v\n%s", fixtureCase.CaseID, err, string(output))
 	}
 	for _, touchedPath := range fixtureCase.ExpectedTouchedPaths {
 		assertRepoRelativeFixturePath(t, touchedPath)
