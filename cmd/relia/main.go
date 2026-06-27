@@ -1002,17 +1002,13 @@ func validateBacktestExperience(record experienceRecord, ref string) (time.Time,
 	if len(record.Provenance.URLs) == 0 {
 		return time.Time{}, provenanceIntegrityError("backtest experience must include provenance URLs", ref)
 	}
-	matchingPRURL := false
 	for _, value := range record.Provenance.URLs {
 		if !validGitHubProvenanceURLShape(value) {
 			return time.Time{}, provenanceIntegrityError("backtest experience provenance URL must be a canonical https://github.com/ URL", ref)
 		}
-		if gitHubPullRequestURLMatchesExperience(value, record) {
-			matchingPRURL = true
+		if _, ok := gitHubPullRequestURLNumber(value); ok && !gitHubPullRequestURLMatchesExperience(value, record) {
+			return time.Time{}, provenanceIntegrityError("backtest experience pull request provenance URL must match action.pr", ref)
 		}
-	}
-	if !matchingPRURL {
-		return time.Time{}, provenanceIntegrityError("backtest experience provenance URLs must include the action.pr pull request URL", ref)
 	}
 	return recordedAt.UTC(), nil
 }
@@ -1068,6 +1064,10 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 		signatureKey := recurrenceSignatureKey(record)
 		if record.Attribution.ActorKind != "agent" {
 			summary.HumanFailureExcludedCount++
+			if record.FlakeDiscount > 0 {
+				addBacktestCitation(citationMap, current)
+				continue
+			}
 			priorBySignature[signatureKey] = append(priorBySignature[signatureKey], current)
 			continue
 		}
@@ -1370,6 +1370,9 @@ func primaryProvenanceURL(record experienceRecord) string {
 		if gitHubPullRequestURLMatchesExperience(value, record) {
 			return value
 		}
+	}
+	if derived := gitHubPullRequestURLForExperience(record); derived != "" {
+		return derived
 	}
 	if len(record.Provenance.URLs) > 0 {
 		return record.Provenance.URLs[0]
@@ -3222,6 +3225,15 @@ func gitHubPullRequestURLMatchesExperience(value string, record experienceRecord
 		number == record.Action.PR &&
 		strings.EqualFold(parts[0], record.Repo.Owner) &&
 		strings.EqualFold(parts[1], record.Repo.Name)
+}
+
+func gitHubPullRequestURLForExperience(record experienceRecord) string {
+	owner := strings.Trim(strings.TrimSpace(record.Repo.Owner), "/")
+	name := strings.Trim(strings.TrimSpace(record.Repo.Name), "/")
+	if owner == "" || name == "" || record.Action.PR < 1 {
+		return ""
+	}
+	return fmt.Sprintf("https://github.com/%s/%s/pull/%d", owner, name, record.Action.PR)
 }
 
 func unsafeGitHubURLPathEntropyToken(value string) string {

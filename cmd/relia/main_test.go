@@ -1750,6 +1750,31 @@ func TestBacktestRejectsExperienceProvenanceWithoutMatchingPRURL(t *testing.T) {
 	}
 }
 
+func TestBacktestAcceptsCanonicalNonPRProvenanceAndDerivesCitation(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	inputPath := filepath.Join(tempDir, "fixtures", "outcomes.jsonl")
+	writeFileForTest(t, inputPath, strings.Join([]string{
+		`{"experience_id":"exp_0001","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-01T10:00:00Z","pr":101,"commit":"abc001","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_time_freeze","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","check_run_url":"https://github.com/acme/billing-service/actions/runs/991"}`,
+		`{"experience_id":"exp_0002","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-10T10:00:00Z","pr":102,"commit":"abc002","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_time_freeze","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","check_run_url":"https://github.com/acme/billing-service/actions/runs/992"}`,
+	}, "\n")+"\n")
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+	if code != ExitSuccess {
+		t.Fatalf("ingest exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	stdout, stderr, code = runForTest(t, []string{"--json", "backtest", "--window", "180d"}, false)
+	if code != ExitSuccess {
+		t.Fatalf("backtest exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	report := decodeBacktestReportFromResult(t, decodeResult(t, stdout))
+	if len(report.Citations) != 2 ||
+		report.Citations[0].URL != "https://github.com/acme/billing-service/pull/101" ||
+		report.Citations[1].URL != "https://github.com/acme/billing-service/pull/102" {
+		t.Fatalf("citations = %#v, want derived PR citations for non-PR provenance", report.Citations)
+	}
+}
+
 func TestBacktestPairsCurrentWithAnyEarlierConfirmedRecurrence(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
@@ -1812,6 +1837,32 @@ func TestBacktestIndexesHumanFailuresAsPriorRecurrenceEvidence(t *testing.T) {
 	confirmed := report.ConfirmedRecurrences[0]
 	if confirmed.PriorExperienceID != "exp_human_0001" || confirmed.CurrentExperienceID != "exp_agent_0002" {
 		t.Fatalf("confirmed pair = %#v, want agent failure repeating prior human failure", confirmed)
+	}
+}
+
+func TestBacktestSkipsFlakeDiscountedHumanPriors(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	inputPath := filepath.Join(tempDir, "fixtures", "outcomes.jsonl")
+	writeFileForTest(t, inputPath, strings.Join([]string{
+		`{"experience_id":"exp_human_0001","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-01T10:00:00Z","pr":101,"commit":"abc001","paths":["packages/billing/invoice.py"],"actor_kind":"human","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_time_freeze","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","flake_discount":1.0,"provenance_urls":["https://github.com/acme/billing-service/pull/101"]}`,
+		`{"experience_id":"exp_agent_0002","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-10T10:00:00Z","pr":102,"commit":"abc002","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_time_freeze","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/102"]}`,
+	}, "\n")+"\n")
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+	if code != ExitSuccess {
+		t.Fatalf("ingest exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	stdout, stderr, code = runForTest(t, []string{"--json", "backtest", "--window", "180d"}, false)
+	if code != ExitSuccess {
+		t.Fatalf("backtest exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	report := decodeBacktestReportFromResult(t, decodeResult(t, stdout))
+	if report.Summary.HumanFailureExcludedCount != 1 || report.Summary.AgentFailureDenominator != 1 {
+		t.Fatalf("summary = %#v, want one excluded human failure and one agent denominator", report.Summary)
+	}
+	if report.Summary.ConfirmedRecurrenceCount != 0 || report.HeadlineERR != 0 {
+		t.Fatalf("confirmed=%d headline=%.4f, want flaky human prior skipped", report.Summary.ConfirmedRecurrenceCount, report.HeadlineERR)
 	}
 }
 
