@@ -613,7 +613,14 @@
           "acceptance_item_id": "FR4-ATTRIBUTION-WITH-CONFIDENCE-001",
           "evidence_refs": [
             ".factory/artifacts/acceptance-evidence/FR4-ATTRIBUTION-WITH-CONFIDENCE-001/20260627T205710.598967000Z.json",
-            ".factory/artifacts/task-runs/T6/validation-report.json"
+            ".factory/artifacts/task-runs/T6/validation-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/validation-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/ship-packet.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/scope-closure-report.json",
+            ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
           ],
           "recorded_at": "2026-06-27T20:57:10Z",
           "recorded_by": "davidahmann-via-codex",
@@ -626,7 +633,13 @@
       ],
       "evidence_refs": [
         ".factory/artifacts/acceptance-evidence/FR4-ATTRIBUTION-WITH-CONFIDENCE-001/20260627T205710.598967000Z.json",
-        ".factory/artifacts/task-runs/T6/validation-report.json"
+        ".factory/artifacts/task-runs/T6/validation-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/validation-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/ship-packet.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/scope-closure-report.json"
       ],
       "group_id": "fr4-attribution-with-confidence",
       "implemented_task_refs": [
@@ -729,7 +742,14 @@
           "acceptance_item_id": "FR7-DETERMINISTIC-FAILURE-SIGNATURES-001",
           "evidence_refs": [
             ".factory/artifacts/acceptance-evidence/FR7-DETERMINISTIC-FAILURE-SIGNATURES-001/20260627T205710.620871000Z.json",
-            ".factory/artifacts/task-runs/T6/validation-report.json"
+            ".factory/artifacts/task-runs/T6/validation-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/validation-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/ship-packet.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/scope-closure-report.json",
+            ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
           ],
           "recorded_at": "2026-06-27T20:57:10Z",
           "recorded_by": "davidahmann-via-codex",
@@ -742,7 +762,13 @@
       ],
       "evidence_refs": [
         ".factory/artifacts/acceptance-evidence/FR7-DETERMINISTIC-FAILURE-SIGNATURES-001/20260627T205710.620871000Z.json",
-        ".factory/artifacts/task-runs/T6/validation-report.json"
+        ".factory/artifacts/task-runs/T6/validation-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/validation-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/ship-packet.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/scope-closure-report.json"
       ],
       "group_id": "fr7-deterministic-failure-signatures",
       "implemented_task_refs": [
@@ -911,7 +937,14 @@
           "acceptance_item_id": "FR11-CALIBRATED-CONFIDENCE-001",
           "evidence_refs": [
             ".factory/artifacts/acceptance-evidence/FR11-CALIBRATED-CONFIDENCE-001/20260627T205710.641570000Z.json",
-            ".factory/artifacts/task-runs/T6/validation-report.json"
+            ".factory/artifacts/task-runs/T6/validation-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/validation-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/ship-packet.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/scope-closure-report.json",
+            ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
           ],
           "recorded_at": "2026-06-27T20:57:10Z",
           "recorded_by": "davidahmann-via-codex",
@@ -924,7 +957,13 @@
       ],
       "evidence_refs": [
         ".factory/artifacts/acceptance-evidence/FR11-CALIBRATED-CONFIDENCE-001/20260627T205710.641570000Z.json",
-        ".factory/artifacts/task-runs/T6/validation-report.json"
+        ".factory/artifacts/task-runs/T6/validation-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/validation-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/ship-packet.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/scope-closure-report.json"
       ],
       "group_id": "fr11-calibrated-confidence",
       "implemented_task_refs": [
@@ -955,7 +994,15 @@
           "acceptance_item_id": "FR12-DECAY-AND-CHURN-INVALIDATION-001",
           "evidence_refs": [
             ".factory/artifacts/acceptance-evidence/FR12-DECAY-AND-CHURN-INVALIDATION-001/20260627T205710.663089000Z.json",
-            ".factory/artifacts/task-runs/T6/validation-report.json"
+            ".factory/artifacts/task-runs/T6/validation-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/validation-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/ship-packet.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/scope-closure-report.json",
+            ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
+            "cmd/relia/main_test.go"
           ],
           "recorded_at": "2026-06-27T20:57:10Z",
           "recorded_by": "davidahmann-via-codex",
@@ -968,7 +1015,13 @@
       ],
       "evidence_refs": [
         ".factory/artifacts/acceptance-evidence/FR12-DECAY-AND-CHURN-INVALIDATION-001/20260627T205710.663089000Z.json",
-        ".factory/artifacts/task-runs/T6/validation-report.json"
+        ".factory/artifacts/task-runs/T6/validation-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/validation-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/ship-packet.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/scope-closure-report.json"
       ],
       "group_id": "fr12-decay-and-churn-invalidation",
       "implemented_task_refs": [
@@ -1001,7 +1054,16 @@
           "acceptance_item_id": "FR13-HUMAN-REVIEW-GATE-001",
           "evidence_refs": [
             ".factory/artifacts/acceptance-evidence/FR13-HUMAN-REVIEW-GATE-001/20260627T205522.720434000Z.json",
-            "https://github.com/Clyra-AI/relia/pull/40"
+            "https://github.com/Clyra-AI/relia/pull/40",
+            ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
+            "cmd/relia/main.go",
+            "cmd/relia/main_test.go",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/validation-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/ship-packet.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/scope-closure-report.json"
           ],
           "recorded_at": "2026-06-27T20:55:22Z",
           "recorded_by": "davidahmann-via-codex",
@@ -1014,7 +1076,13 @@
       ],
       "evidence_refs": [
         ".factory/artifacts/acceptance-evidence/FR13-HUMAN-REVIEW-GATE-001/20260627T205522.720434000Z.json",
-        "https://github.com/Clyra-AI/relia/pull/40"
+        "https://github.com/Clyra-AI/relia/pull/40",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/validation-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/ship-packet.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/scope-closure-report.json"
       ],
       "group_id": "fr13-human-review-gate",
       "implemented_task_refs": [
@@ -1045,7 +1113,14 @@
           "acceptance_item_id": "FR14-BIDIRECTIONAL-MEMORY-001",
           "evidence_refs": [
             ".factory/artifacts/acceptance-evidence/FR14-BIDIRECTIONAL-MEMORY-001/20260627T205710.683473000Z.json",
-            ".factory/artifacts/task-runs/T6/validation-report.json"
+            ".factory/artifacts/task-runs/T6/validation-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/validation-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/ship-packet.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/scope-closure-report.json",
+            ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
           ],
           "recorded_at": "2026-06-27T20:57:10Z",
           "recorded_by": "davidahmann-via-codex",
@@ -1058,7 +1133,13 @@
       ],
       "evidence_refs": [
         ".factory/artifacts/acceptance-evidence/FR14-BIDIRECTIONAL-MEMORY-001/20260627T205710.683473000Z.json",
-        ".factory/artifacts/task-runs/T6/validation-report.json"
+        ".factory/artifacts/task-runs/T6/validation-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/validation-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/ship-packet.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/scope-closure-report.json"
       ],
       "group_id": "fr14-bidirectional-memory",
       "implemented_task_refs": [
@@ -1091,7 +1172,14 @@
           "acceptance_item_id": "FR15-MEMORY-PAGE-WITH-RECEIPTS-001",
           "evidence_refs": [
             ".factory/artifacts/acceptance-evidence/FR15-MEMORY-PAGE-WITH-RECEIPTS-001/20260627T205710.704969000Z.json",
-            ".factory/artifacts/task-runs/T6/validation-report.json"
+            ".factory/artifacts/task-runs/T6/validation-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/validation-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/ship-packet.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/scope-closure-report.json",
+            ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
           ],
           "recorded_at": "2026-06-27T20:57:10Z",
           "recorded_by": "davidahmann-via-codex",
@@ -1104,7 +1192,13 @@
       ],
       "evidence_refs": [
         ".factory/artifacts/acceptance-evidence/FR15-MEMORY-PAGE-WITH-RECEIPTS-001/20260627T205710.704969000Z.json",
-        ".factory/artifacts/task-runs/T6/validation-report.json"
+        ".factory/artifacts/task-runs/T6/validation-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/validation-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/ship-packet.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/scope-closure-report.json"
       ],
       "group_id": "fr15-memory-page-with-receipts",
       "implemented_task_refs": [
@@ -1557,7 +1651,14 @@
         {
           "acceptance_item_id": "NFR2-FAST-FIRST-MEMORY-001",
           "evidence_refs": [
-            ".factory/artifacts/task-runs/T6/validation-report.json"
+            ".factory/artifacts/task-runs/T6/validation-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/validation-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/ship-packet.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/scope-closure-report.json",
+            ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
           ],
           "recorded_at": "2026-06-28T13:43:00Z",
           "recorded_by": "factoryd closure repair",
@@ -1569,7 +1670,13 @@
         "distillation-calibration-and-confidence-part-1"
       ],
       "evidence_refs": [
-        ".factory/artifacts/task-runs/T6/validation-report.json"
+        ".factory/artifacts/task-runs/T6/validation-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/validation-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/ship-packet.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/scope-closure-report.json"
       ],
       "group_id": "nfr2-fast-first-memory",
       "implemented_task_refs": [],
@@ -1651,7 +1758,13 @@
           "acceptance_item_id": "NFR4-CALIBRATION-HONESTY-001",
           "evidence_refs": [
             ".factory/artifacts/acceptance-evidence/NFR4-CALIBRATION-HONESTY-001/20260627T205522.685605000Z.json",
-            ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
+            ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/validation-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/ship-packet.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/scope-closure-report.json"
           ],
           "recorded_at": "2026-06-27T20:55:22Z",
           "recorded_by": "davidahmann-via-codex",
@@ -1664,7 +1777,13 @@
       ],
       "evidence_refs": [
         ".factory/artifacts/acceptance-evidence/NFR4-CALIBRATION-HONESTY-001/20260627T205522.685605000Z.json",
-        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
+        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/validation-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/ship-packet.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/scope-closure-report.json"
       ],
       "group_id": "nfr4-calibration-honesty",
       "implemented_task_refs": [
@@ -1747,7 +1866,14 @@
           "acceptance_item_id": "NFR6-LOCAL-PRIVACY-001",
           "evidence_refs": [
             ".factory/artifacts/acceptance-evidence/NFR6-LOCAL-PRIVACY-001/20260627T205710.748971000Z.json",
-            ".factory/artifacts/task-runs/T6/validation-report.json"
+            ".factory/artifacts/task-runs/T6/validation-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/validation-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/ship-packet.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/scope-closure-report.json",
+            ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
           ],
           "recorded_at": "2026-06-27T20:57:10Z",
           "recorded_by": "davidahmann-via-codex",
@@ -1760,7 +1886,13 @@
       ],
       "evidence_refs": [
         ".factory/artifacts/acceptance-evidence/NFR6-LOCAL-PRIVACY-001/20260627T205710.748971000Z.json",
-        ".factory/artifacts/task-runs/T6/validation-report.json"
+        ".factory/artifacts/task-runs/T6/validation-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/validation-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/ship-packet.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/scope-closure-report.json"
       ],
       "group_id": "nfr6-local-privacy",
       "implemented_task_refs": [
@@ -1829,7 +1961,14 @@
           "acceptance_item_id": "NFR8-STRUCTURED-DATA-FIRST-001",
           "evidence_refs": [
             ".factory/artifacts/acceptance-evidence/NFR8-STRUCTURED-DATA-FIRST-001/20260627T205522.767232000Z.json",
-            "schemas/memory-rule.schema.json"
+            "schemas/memory-rule.schema.json",
+            ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/validation-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/ship-packet.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/scope-closure-report.json"
           ],
           "recorded_at": "2026-06-27T20:55:22Z",
           "recorded_by": "davidahmann-via-codex",
@@ -1842,7 +1981,13 @@
       ],
       "evidence_refs": [
         ".factory/artifacts/acceptance-evidence/NFR8-STRUCTURED-DATA-FIRST-001/20260627T205522.767232000Z.json",
-        "schemas/memory-rule.schema.json"
+        "schemas/memory-rule.schema.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/validation-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/ship-packet.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/scope-closure-report.json"
       ],
       "group_id": "nfr8-structured-data-first",
       "implemented_task_refs": [
@@ -1959,7 +2104,14 @@
           "acceptance_item_id": "NFR11-STOCHASTIC-HONESTY-001",
           "evidence_refs": [
             ".factory/artifacts/acceptance-evidence/NFR11-STOCHASTIC-HONESTY-001/20260627T205710.781954000Z.json",
-            ".factory/artifacts/task-runs/T6/validation-report.json"
+            ".factory/artifacts/task-runs/T6/validation-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/validation-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/ship-packet.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/scope-closure-report.json",
+            ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
           ],
           "recorded_at": "2026-06-27T20:57:10Z",
           "recorded_by": "davidahmann-via-codex",
@@ -1972,7 +2124,13 @@
       ],
       "evidence_refs": [
         ".factory/artifacts/acceptance-evidence/NFR11-STOCHASTIC-HONESTY-001/20260627T205710.781954000Z.json",
-        ".factory/artifacts/task-runs/T6/validation-report.json"
+        ".factory/artifacts/task-runs/T6/validation-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/validation-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/ship-packet.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/scope-closure-report.json"
       ],
       "group_id": "nfr11-stochastic-honesty",
       "implemented_task_refs": [
@@ -2050,7 +2208,15 @@
           "acceptance_item_id": "NFR13-INFERENCE-HUMILITY-001",
           "evidence_refs": [
             ".factory/artifacts/acceptance-evidence/NFR13-INFERENCE-HUMILITY-001/20260627T205710.813721000Z.json",
-            ".factory/artifacts/task-runs/T6/validation-report.json"
+            ".factory/artifacts/task-runs/T6/validation-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/validation-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/ship-packet.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/scope-closure-report.json",
+            ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
+            "cmd/relia/main_test.go"
           ],
           "recorded_at": "2026-06-27T20:57:10Z",
           "recorded_by": "davidahmann-via-codex",
@@ -2063,7 +2229,13 @@
       ],
       "evidence_refs": [
         ".factory/artifacts/acceptance-evidence/NFR13-INFERENCE-HUMILITY-001/20260627T205710.813721000Z.json",
-        ".factory/artifacts/task-runs/T6/validation-report.json"
+        ".factory/artifacts/task-runs/T6/validation-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/validation-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/ship-packet.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/scope-closure-report.json"
       ],
       "group_id": "nfr13-inference-humility",
       "implemented_task_refs": [
@@ -2248,7 +2420,14 @@
         {
           "acceptance_item_id": "MVP-IN-SCOPE-003",
           "evidence_refs": [
-            ".factory/artifacts/task-runs/T6/validation-report.json"
+            ".factory/artifacts/task-runs/T6/validation-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/validation-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/ship-packet.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/scope-closure-report.json",
+            ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
           ],
           "recorded_at": "2026-06-28T13:43:00Z",
           "recorded_by": "factoryd closure repair",
@@ -2260,7 +2439,13 @@
         "distillation-calibration-and-confidence-part-1"
       ],
       "evidence_refs": [
-        ".factory/artifacts/task-runs/T6/validation-report.json"
+        ".factory/artifacts/task-runs/T6/validation-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/validation-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/ship-packet.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/scope-closure-report.json"
       ],
       "group_id": "mvp-in-scope",
       "implemented_task_refs": [],
@@ -2391,7 +2576,14 @@
         {
           "acceptance_item_id": "MVP-IN-SCOPE-006",
           "evidence_refs": [
-            ".factory/artifacts/task-runs/T6/validation-report.json"
+            ".factory/artifacts/task-runs/T6/validation-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/validation-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/ship-packet.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/scope-closure-report.json",
+            ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
           ],
           "recorded_at": "2026-06-28T13:43:00Z",
           "recorded_by": "factoryd closure repair",
@@ -2403,7 +2595,13 @@
         "distillation-calibration-and-confidence-part-1"
       ],
       "evidence_refs": [
-        ".factory/artifacts/task-runs/T6/validation-report.json"
+        ".factory/artifacts/task-runs/T6/validation-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/validation-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/ship-packet.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260628T145858.029195000Z-relia-T6/lifecycle/scope-closure-report.json"
       ],
       "group_id": "mvp-in-scope",
       "implemented_task_refs": [],
@@ -5474,7 +5672,7 @@
       ]
     }
   ],
-  "last_updated_at": "2026-06-28T13:45:00Z",
+  "last_updated_at": "2026-06-28T15:39:37Z",
   "schema_version": "0.1",
   "source_prd_ref": "docs/product/prd.md"
 }
