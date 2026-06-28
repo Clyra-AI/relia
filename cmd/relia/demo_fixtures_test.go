@@ -960,6 +960,41 @@ func assertLifecycleRuleSchemaShape(t *testing.T, rule demoLifecycleRule) {
 	default:
 		t.Fatalf("lifecycle rule %s review.statement_origin = %q", rule.ID, rule.Review.StatementOrigin)
 	}
+	if rule.Review.StatementOrigin == "llm_drafted" || rule.Review.StatementOrigin == "cluster_summary" {
+		label, ok := rule.Metadata["confidence_label"].(string)
+		if !ok || label == "" {
+			t.Fatalf("drafted lifecycle rule %s missing metadata.confidence_label: %#v", rule.ID, rule.Metadata)
+		}
+		inputs, ok := rule.Metadata["confidence_inputs"].(map[string]interface{})
+		if !ok {
+			t.Fatalf("drafted lifecycle rule %s missing metadata.confidence_inputs: %#v", rule.ID, rule.Metadata)
+		}
+		if got, ok := inputs["evidence_count"].(float64); !ok || int(got) != rule.Evidence.Count {
+			t.Fatalf("drafted lifecycle rule %s confidence evidence_count = %#v, want %d", rule.ID, inputs["evidence_count"], rule.Evidence.Count)
+		}
+		if got, ok := inputs["contradictions"].(float64); !ok || int(got) != rule.Evidence.Contradictions {
+			t.Fatalf("drafted lifecycle rule %s confidence contradictions = %#v, want %d", rule.ID, inputs["contradictions"], rule.Evidence.Contradictions)
+		}
+		if got, ok := inputs["drafting_model_weight"].(float64); !ok || got != 0 {
+			t.Fatalf("drafted lifecycle rule %s drafting_model_weight = %#v, want 0", rule.ID, inputs["drafting_model_weight"])
+		}
+		decay, ok := rule.Metadata["decay"].(map[string]interface{})
+		if !ok {
+			t.Fatalf("drafted lifecycle rule %s missing metadata.decay: %#v", rule.ID, rule.Metadata)
+		}
+		if got, ok := decay["half_life_days"].(float64); !ok || got < 1 {
+			t.Fatalf("drafted lifecycle rule %s decay half_life_days = %#v", rule.ID, decay["half_life_days"])
+		}
+		for _, key := range []string{"latest_evidence_at", "oldest_evidence_at", "anchor_recorded_at"} {
+			value, ok := decay[key].(string)
+			if !ok {
+				t.Fatalf("drafted lifecycle rule %s decay %s = %#v", rule.ID, key, decay[key])
+			}
+			if _, err := time.Parse(time.RFC3339, value); err != nil {
+				t.Fatalf("drafted lifecycle rule %s decay %s is not RFC3339: %q", rule.ID, key, value)
+			}
+		}
+	}
 }
 
 func assertLifecycleCitationsResolve(t *testing.T, fixtureCase demoLifecycleCase, prURLs map[int]string, outcomesByExperience map[string]demoOutcomeFixture) {

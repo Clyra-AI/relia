@@ -31,6 +31,19 @@ review:
   label: accepted
   statement_origin: cluster_summary
 metadata:
+  confidence_label: high
+  confidence_inputs:
+    evidence_count: 3
+    recency_weight: 0.865
+    contradictions: 0
+    flake_discount: 0
+    extraction_confidence: 1
+    drafting_model_weight: 0
+  decay:
+    half_life_days: 90
+    latest_evidence_at: "2026-02-20T13:25:00Z"
+    oldest_evidence_at: "2026-01-08T14:00:00Z"
+    anchor_recorded_at: "2026-02-20T13:25:00Z"
   customer_safe: true
   source_fixture: examples/demo/assessment-fixtures/assessment-fixtures.json
   citation_policy: seeded-pr-index

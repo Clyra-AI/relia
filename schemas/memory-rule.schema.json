@@ -229,5 +229,50 @@
         }
       }
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": ["review"],
+        "properties": {
+          "review": {
+            "required": ["statement_origin"],
+            "properties": {
+              "statement_origin": {
+                "enum": ["llm_drafted", "cluster_summary"]
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "required": ["metadata"],
+        "properties": {
+          "metadata": {
+            "required": ["confidence_label", "confidence_inputs", "decay"],
+            "properties": {
+              "confidence_inputs": {
+                "required": [
+                  "evidence_count",
+                  "recency_weight",
+                  "contradictions",
+                  "flake_discount",
+                  "extraction_confidence",
+                  "drafting_model_weight"
+                ]
+              },
+              "decay": {
+                "required": [
+                  "half_life_days",
+                  "latest_evidence_at",
+                  "oldest_evidence_at",
+                  "anchor_recorded_at"
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
 }

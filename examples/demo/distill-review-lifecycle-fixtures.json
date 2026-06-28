@@ -95,6 +95,21 @@
           "customer_safe": true,
           "source_fixture": "examples/demo/distill-review-lifecycle-fixtures.json",
           "citation_policy": "seeded-pr-index",
+          "confidence_label": "high",
+          "confidence_inputs": {
+            "evidence_count": 3,
+            "recency_weight": 0.865,
+            "contradictions": 0,
+            "flake_discount": 0,
+            "extraction_confidence": 1,
+            "drafting_model_weight": 0
+          },
+          "decay": {
+            "half_life_days": 90,
+            "latest_evidence_at": "2026-02-20T13:25:00Z",
+            "oldest_evidence_at": "2026-01-08T14:00:00Z",
+            "anchor_recorded_at": "2026-02-20T13:25:00Z"
+          },
           "serving_eligible": false
         }
       }
@@ -200,6 +215,21 @@
           "citation_policy": "seeded-pr-index",
           "previous_status": "active",
           "lifecycle_reason": "later clean merges contradicted the avoided pattern",
+          "confidence_label": "low",
+          "confidence_inputs": {
+            "evidence_count": 4,
+            "recency_weight": 0.867,
+            "contradictions": 2,
+            "flake_discount": 0,
+            "extraction_confidence": 1,
+            "drafting_model_weight": 0
+          },
+          "decay": {
+            "half_life_days": 90,
+            "latest_evidence_at": "2026-05-13T10:45:00Z",
+            "oldest_evidence_at": "2026-04-02T08:25:00Z",
+            "anchor_recorded_at": "2026-05-13T10:45:00Z"
+          },
           "serving_eligible": false
         }
       }
@@ -307,6 +337,21 @@
           "lifecycle_reason": "rule_scope_gone",
           "stale_path": "tests/billing/test_invoice_time.py",
           "deletion_pr": 293,
+          "confidence_label": "low",
+          "confidence_inputs": {
+            "evidence_count": 4,
+            "recency_weight": 0.572,
+            "contradictions": 0,
+            "flake_discount": 0,
+            "extraction_confidence": 1,
+            "drafting_model_weight": 0
+          },
+          "decay": {
+            "half_life_days": 90,
+            "latest_evidence_at": "2026-05-22T12:10:00Z",
+            "oldest_evidence_at": "2026-01-08T14:00:00Z",
+            "anchor_recorded_at": "2026-05-22T12:10:00Z"
+          },
           "serving_eligible": false
         }
       }

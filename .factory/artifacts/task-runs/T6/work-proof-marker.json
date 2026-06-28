@@ -4,18 +4,26 @@
     ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
     ".factory/artifacts/task-runs/T6/validation-report.json",
     ".factory/artifacts/task-runs/T6/work-proof-marker.json",
+    "README.md",
+    "cmd/relia/demo_fixtures_test.go",
     "cmd/relia/main.go",
-    "cmd/relia/main_test.go"
+    "cmd/relia/main_test.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/dev/dev_guides.md",
+    "examples/demo/distill-review-lifecycle-fixtures.json",
+    "memory/rules/demo-assessment-active-rule.yaml",
+    "schemas/memory-rule.schema.json"
   ],
   "evidence_refs": [
     ".factory/artifacts/task-runs/T6/validation-report.json",
     ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
   ],
-  "generated_at": "2026-06-28T15:02:46Z",
+  "generated_at": "2026-06-28T16:44:19Z",
   "implementation_performed": true,
   "implementation_summary": [
-    "Validated memory-rule artifacts before review mutations so failed review attempts leave rule YAML unchanged.",
-    "Added regression coverage proving an invalid candidate rule fails closed instead of being promoted to active/accepted before contract validation fails."
+    "Repaired the drafted memory-rule contract so cluster_summary and future llm_drafted rules must carry evidence-derived confidence inputs and decay metadata.",
+    "Aligned schemas/memory-rule.schema.json, relia check validation, demo lifecycle fixtures, the active demo memory rule, and docs with the drafted-rule calibration requirement.",
+    "Added focused tests for fail-closed drafted-rule calibration metadata validation and demo fixture coverage."
   ],
   "schema_version": "1.0",
   "status": "implemented",

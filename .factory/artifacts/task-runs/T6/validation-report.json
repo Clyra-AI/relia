@@ -3,71 +3,101 @@
     {
       "acceptance_item_id": "FR4-ATTRIBUTION-WITH-CONFIDENCE-001",
       "evidence_refs": [
-        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
+        ".factory/artifacts/task-runs/T6/validation-report.json",
+        ".factory/artifacts/task-runs/T6/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go"
       ],
-      "notes": "Existing ingest attribution behavior remains covered by the full validation gate; this patch did not change attribution.",
+      "notes": "Automated repair trace: attribution methods and fail-closed uncertain attribution are covered by the trusted validation report, scorecard, and cmd/relia tests.",
       "status": "implemented"
     },
     {
       "acceptance_item_id": "FR7-DETERMINISTIC-FAILURE-SIGNATURES-001",
       "evidence_refs": [
-        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
+        ".factory/artifacts/task-runs/T6/validation-report.json",
+        ".factory/artifacts/task-runs/T6/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go"
       ],
-      "notes": "Existing deterministic signature confidence behavior remains covered by the full validation gate; this patch did not change signature extraction.",
+      "notes": "Automated repair trace: deterministic signature identity, structured extraction confidence, and log-parsed confidence labels are covered by the trusted validation report, scorecard, and cmd/relia tests.",
       "status": "implemented"
     },
     {
       "acceptance_item_id": "FR11-CALIBRATED-CONFIDENCE-001",
       "evidence_refs": [
-        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
+        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        "schemas/memory-rule.schema.json"
       ],
+      "notes": "Drafted memory-rule confidence metadata is now enforced by schema and relia check validation.",
       "status": "implemented"
     },
     {
       "acceptance_item_id": "FR12-DECAY-AND-CHURN-INVALIDATION-001",
       "evidence_refs": [
         ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
-        "cmd/relia/main_test.go"
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        "README.md",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        "schemas/memory-rule.schema.json",
+        "examples/demo/distill-review-lifecycle-fixtures.json",
+        "memory/rules/demo-assessment-active-rule.yaml"
       ],
+      "notes": "Drafted rules now fail validation when confidence-input or decay metadata is absent, and committed cluster-summary fixtures carry the required decay metadata.",
       "status": "implemented"
     },
     {
       "acceptance_item_id": "FR13-HUMAN-REVIEW-GATE-001",
       "evidence_refs": [
         ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
-        "cmd/relia/main.go",
         "cmd/relia/main_test.go"
       ],
-      "notes": "Review now validates the rule contract before mutation, preserving fail-closed behavior for invalid candidate rules.",
       "status": "implemented"
     },
     {
       "acceptance_item_id": "FR14-BIDIRECTIONAL-MEMORY-001",
       "evidence_refs": [
-        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
+        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
+        "cmd/relia/main_test.go"
       ],
       "status": "implemented"
     },
     {
       "acceptance_item_id": "FR15-MEMORY-PAGE-WITH-RECEIPTS-001",
       "evidence_refs": [
-        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
+        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
+        "cmd/relia/main_test.go"
       ],
       "status": "implemented"
     },
     {
       "acceptance_item_id": "NFR2-FAST-FIRST-MEMORY-001",
       "evidence_refs": [
-        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
+        ".factory/artifacts/task-runs/T6/validation-report.json",
+        ".factory/artifacts/task-runs/T6/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        "README.md",
+        "docs/dev/dev_guides.md"
       ],
-      "notes": "Local distill, review, and memory flows are covered by fast tests; under-30-minute first-user closure is product-signal evidence outside this worker.",
+      "notes": "Automated repair trace: the local ingest, distill, review, and memory commands are covered end-to-end without provider or network requirements, but no manual or product-signal timing evidence record was created. The under-30-minute first-user acceptance remains partial and is not closed by this worker.",
       "status": "partial"
     },
     {
       "acceptance_item_id": "NFR4-CALIBRATION-HONESTY-001",
       "evidence_refs": [
-        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
+        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        "schemas/memory-rule.schema.json"
       ],
+      "notes": "Confidence remains evidence-derived and relia check now rejects drafted rules that omit the evidence-derived confidence input breakdown.",
       "status": "implemented"
     },
     {
@@ -75,7 +105,7 @@
       "evidence_refs": [
         ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
       ],
-      "notes": "No live network or credential work was attempted.",
+      "notes": "No live network, provider, or credential work was attempted.",
       "status": "implemented"
     },
     {
@@ -88,33 +118,55 @@
     {
       "acceptance_item_id": "NFR11-STOCHASTIC-HONESTY-001",
       "evidence_refs": [
-        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
+        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
+        "cmd/relia/main_test.go",
+        "cmd/relia/demo_fixtures_test.go"
       ],
+      "notes": "Drafted lifecycle fixture assertions require confidence labels, input counts, zero drafting-model weight, and RFC3339 decay timestamps.",
       "status": "implemented"
     },
     {
       "acceptance_item_id": "NFR13-INFERENCE-HUMILITY-001",
       "evidence_refs": [
         ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
-        "cmd/relia/main_test.go"
+        "cmd/relia/main.go",
+        "schemas/memory-rule.schema.json"
       ],
-      "notes": "Invalid rule review now fails closed without creating an active inference from incomplete provenance.",
+      "notes": "Drafted statement origins are now tied to explicit calibration metadata; human-authored rules remain allowed without generated-rule metadata.",
       "status": "implemented"
     },
     {
       "acceptance_item_id": "MVP-IN-SCOPE-003",
       "evidence_refs": [
-        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
+        ".factory/artifacts/task-runs/T6/validation-report.json",
+        ".factory/artifacts/task-runs/T6/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        "README.md",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        "schemas/memory-rule.schema.json"
       ],
-      "notes": "Part 1 strengthens deterministic local distill/review/memory behavior; final release/demo/product-signal closure remains outside worker scope.",
+      "notes": "Automated repair trace: T6 part-1 deterministic local distill, review, and memory behavior is implemented and validated, but the MVP release/demo/product-signal boundary remains partial until lifecycle evidence exists.",
       "status": "partial"
     },
     {
       "acceptance_item_id": "MVP-IN-SCOPE-006",
       "evidence_refs": [
-        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
+        ".factory/artifacts/task-runs/T6/validation-report.json",
+        ".factory/artifacts/task-runs/T6/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        "README.md",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        "schemas/memory-rule.schema.json",
+        "examples/demo/distill-review-lifecycle-fixtures.json",
+        "memory/rules/demo-assessment-active-rule.yaml"
       ],
-      "notes": "Part 1 strengthens fail-closed review behavior; release boundary closure remains a later lifecycle gate.",
+      "notes": "Automated repair trace: confidence scoring, decay, deterministic fallback, drafted-rule calibration metadata, and memory-rule traceability are implemented and validated for this T6 part-1 slice, but the MVP release/demo/product-signal boundary remains partial until lifecycle evidence exists.",
       "status": "partial"
     }
   ],
@@ -136,84 +188,169 @@
     ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
     ".factory/artifacts/task-runs/T6/validation-report.json",
     ".factory/artifacts/task-runs/T6/work-proof-marker.json",
+    "README.md",
+    "cmd/relia/demo_fixtures_test.go",
     "cmd/relia/main.go",
-    "cmd/relia/main_test.go"
+    "cmd/relia/main_test.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/dev/dev_guides.md",
+    "examples/demo/distill-review-lifecycle-fixtures.json",
+    "memory/rules/demo-assessment-active-rule.yaml",
+    "schemas/memory-rule.schema.json"
   ],
   "changelog_result": {
-    "notes": "No standalone changelog file exists; the change aligns with existing documented fail-closed review semantics.",
-    "status": "not_applicable"
+    "draft_entry": "Implement PRD-defined clustering, rule drafting, confidence scoring, decay, contradiction handling, and deterministic fallback behavior. Part 1 of 2; scope is split to keep the runner-ready packet bounded.",
+    "notes": "No standalone CHANGELOG file exists in the repo; changelog intent is recorded in this worker evidence and user-facing docs were synced.",
+    "section": "Unreleased",
+    "semver_marker": "pre_1_0_minor_candidate",
+    "status": "recorded"
   },
   "commands_run": [
+    "git status --short",
     "make lint-fast",
     "make test-fast",
-    "go test ./cmd/relia -count=1 -run TestReviewFailsClosedWithoutMutatingInvalidRule",
-    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
-    "go test ./cmd/relia -count=1 -run TestReviewFailsClosedWithoutMutatingInvalidRule",
-    "make prepush-full",
-    "git status --short",
-    "git diff --stat",
+    "git show --name-only --format= HEAD",
+    "nl -ba .factory/artifacts/task-runs/T6/validation-report.json | sed -n '1,260p'",
+    "nl -ba .factory/artifacts/task-runs/T6/work-proof-marker.json | sed -n '1,220p'",
+    "nl -ba .factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json | sed -n '1,260p'",
+    "nl -ba .factory/artifacts/task-runs/T6/validation-report.json | sed -n '260,520p'",
+    "git log --oneline --decorate -8",
+    "git show --name-only --format= b8170ee83eeed4dc2946ebdec4b3fdd22764db53",
+    "git show --name-only --format= fa44b95",
+    "date -u +%Y-%m-%dT%H:%M:%SZ",
+    "find .factory/artifacts/task-runs/T6 -maxdepth 1 -type f -print | sort",
+    "sed -n '1,220p' .factory/artifacts/task-runs/T6/validation-report.json",
+    "sed -n '1,220p' .factory/artifacts/task-runs/T6/work-proof-marker.json",
+    "sed -n '1,260p' .factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
+    "make lint-fast",
+    "make test-fast",
+    "rg -n \"Test.*Attribution|Test.*Signature|Test.*Distill|attribution|signature|confidence\" cmd/relia/main_test.go",
+    "sed -n '710,930p' cmd/relia/main_test.go",
+    "sed -n '2230,2335p' cmd/relia/main_test.go",
     "python3 -m json.tool .factory/artifacts/task-runs/T6/work-proof-marker.json",
     "python3 -m json.tool .factory/artifacts/task-runs/T6/validation-report.json",
-    "python3 -m json.tool .factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
+    "python3 -m json.tool .factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
+    "make prepush-full",
+    "git status --short",
+    "git diff --name-only",
+    "python3 -m json.tool .factory/artifacts/task-runs/T6/work-proof-marker.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T6/validation-report.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
+    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go cmd/relia/demo_fixtures_test.go",
+    "python3 -m json.tool schemas/memory-rule.schema.json",
+    "python3 -m json.tool examples/demo/distill-review-lifecycle-fixtures.json",
+    "go test ./cmd/relia -count=1 -run 'TestCheckRejectsDraftedMemoryRuleMissingCalibrationMetadata|TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage|TestDemoDistillReviewLifecycleFixtures|TestCheckReportsPhase0ContractRefs|TestPhase0SchemasDeclareMetadata|TestDemoAssessMatchesDirectoryScopedActiveRule|TestDemoAssessRejectsMatchedRuleWithOutOfRangeConfidence'",
+    "make prepush-full"
   ],
   "docs_sync_result": {
-    "notes": "Existing README, dev guide, and architecture guide already document default review-gated, fail-closed memory rule behavior.",
-    "status": "pass"
+    "notes": "Docs now state the PRD default 90-day recency half-life and the drafted-rule confidence-input and decay metadata contract.",
+    "status": "pass",
+    "updated_paths": [
+      "README.md",
+      "docs/dev/dev_guides.md",
+      "docs/architecture/architecture_guides.md"
+    ]
   },
   "final_validation_evidence": [
     {
       "command": "make prepush-full",
       "exit_code": 0,
-      "notes": "Passed lint, unit tests, coverage, repo-pack contracts, and demo contracts. Coverage reported 81.2% against the 75.0% minimum.",
+      "notes": "Passed lint, unit tests, coverage, repo-pack contracts, and demo contracts. Coverage reported 81.0% against the 75.0% minimum.",
       "status": "pass"
     }
   ],
-  "generated_at": "2026-06-28T15:02:46Z",
+  "generated_at": "2026-06-28T16:44:19Z",
   "green_evidence": [
     {
-      "command": "go test ./cmd/relia -count=1 -run TestReviewFailsClosedWithoutMutatingInvalidRule",
+      "command": "make lint-fast",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "make test-fast",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -count=1 -run 'TestDistill|TestReview|TestDemoDistillReviewLifecycleFixtures'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -count=1 -run 'TestCheckRejectsDraftedMemoryRuleMissingCalibrationMetadata|TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage|TestDemoDistillReviewLifecycleFixtures|TestCheckReportsPhase0ContractRefs|TestPhase0SchemasDeclareMetadata|TestDemoAssessMatchesDirectoryScopedActiveRule|TestDemoAssessRejectsMatchedRuleWithOutOfRangeConfidence'",
       "exit_code": 0,
       "status": "pass"
     }
   ],
   "json_artifact_validation": {
-    "notes": "python3 -m json.tool was run for each worker-owned evidence artifact and each artifact has a top-level non-blocking status.",
+    "commands": [
+      "python3 -m json.tool .factory/artifacts/task-runs/T6/work-proof-marker.json",
+      "python3 -m json.tool .factory/artifacts/task-runs/T6/validation-report.json",
+      "python3 -m json.tool .factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
+    ],
+    "notes": "Each worker-owned evidence artifact has a top-level non-blocking status.",
     "status": "pass"
   },
+  "lifecycle_evidence_result": {
+    "notes": "scope_closure_report, pr_lifecycle_report, and factoryd_run_once_report are factoryd-owned lifecycle evidence and were not fabricated by this worker.",
+    "status": "not_authored_by_worker"
+  },
   "path_policy_result": {
-    "changed_paths": [
-      ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
-      ".factory/artifacts/task-runs/T6/validation-report.json",
-      ".factory/artifacts/task-runs/T6/work-proof-marker.json",
-      "cmd/relia/main.go",
-      "cmd/relia/main_test.go"
-    ],
     "changed_paths_checked": true,
     "forbidden_paths_changed": false,
+    "notes": "The full T6 worker changed-path inventory is recorded in changed_paths and all entries are within the task allowed_paths list. The repair diff stays inside allowed code, docs, schema, examples, memory, and worker-owned T6 evidence paths. The required coverage command writes ignored .factory/tmp/coverage.out, which is not part of the worker diff.",
     "outside_allowed_paths_changed": false,
     "status": "pass"
   },
   "plan_drift_result": {
-    "notes": "Work stayed within T6 deterministic review-gate fail-closed behavior and did not update tracker, PR lifecycle, merge, or scope-closure state.",
+    "notes": "Repair stayed within the T6 part-1 drafted-rule confidence/decay contract. No tracker, PR lifecycle, merge, live network, credential, or factoryd-owned scope-closure state was changed.",
     "status": "pass"
   },
   "red_evidence": [
     {
-      "command": "go test ./cmd/relia -count=1 -run TestReviewFailsClosedWithoutMutatingInvalidRule",
-      "exit_code": 1,
-      "reason": "The new regression test failed before implementation because relia review rewrote an invalid candidate rule to active/accepted before validation reported the missing provenance contract.",
-      "status": "expected_fail"
+      "command": "make test-fast",
+      "exit_code": 0,
+      "notes": "The packet's red_first command was run before edits and passed because T6 behavior was already broadly covered in the workspace.",
+      "phase": "red_first_command",
+      "status": "pass"
     }
   ],
+  "repair_mode": {
+    "codex_review_findings_repaired": [
+      "Enforced confidence-input and decay metadata for drafted cluster_summary and future llm_drafted memory rules in relia check and active assessment validation.",
+      "Updated schemas/memory-rule.schema.json with the matching drafted-origin conditional contract.",
+      "Updated committed cluster-summary demo fixtures and memory rule artifacts to carry calibration metadata.",
+      "Added focused regression coverage for missing drafted-rule calibration metadata and demo lifecycle fixture metadata."
+    ],
+    "missing_acceptance_item_ids": [
+      "FR4-ATTRIBUTION-WITH-CONFIDENCE-001",
+      "FR7-DETERMINISTIC-FAILURE-SIGNATURES-001",
+      "NFR2-FAST-FIRST-MEMORY-001",
+      "MVP-IN-SCOPE-003",
+      "MVP-IN-SCOPE-006"
+    ],
+    "notes": "Worker-owned evidence was updated for this repair. Factoryd-owned scope closure, PR lifecycle, and run-once artifacts were not authored by this worker.",
+    "status": "pass",
+    "trusted_validation_report_ref": ".factory/artifacts/task-runs/T6/validation-report.json",
+    "updated_worker_evidence_paths": [
+      ".factory/artifacts/task-runs/T6/work-proof-marker.json",
+      ".factory/artifacts/task-runs/T6/validation-report.json",
+      ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
+    ]
+  },
   "residual_risks": [
     "Provider-backed drafting remains fail-closed in this part-1 slice and requires a future approved model_provider_endpoint gate.",
-    "Under-30-minute first-user product signal is not self-closed by this worker."
+    "Under-30-minute first-user product signal is not self-closed by this worker; NFR2 remains partial until that evidence exists."
   ],
   "schema_version": "1.0",
   "status": "pass",
   "task_id": "T6",
+  "test_first_skipped_reason": {
+    "reason": "A failing red-first test was not fabricated after the baseline passed. The bounded repair added focused regression coverage for missing drafted-rule calibration metadata and validated it with the focused Go test plus make prepush-full.",
+    "status": "skipped_non_blocking"
+  },
   "versioning_result": {
-    "notes": "No schema, runtime pin, or public output contract changed.",
+    "notes": "No runtime pin, schema version, module path, or distribution target changed.",
     "status": "pre_1_0_no_version_bump"
   }
 }
