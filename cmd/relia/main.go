@@ -2000,7 +2000,7 @@ func parseDistillArgs(args []string) (distillOptions, *CommandError) {
 	options := distillOptions{
 		Format:       "json",
 		RuleDir:      "memory/rules",
-		HalfLifeDays: 180,
+		HalfLifeDays: 90,
 	}
 	for index := 0; index < len(args); index++ {
 		arg := args[index]

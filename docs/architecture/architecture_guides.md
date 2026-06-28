@@ -111,10 +111,11 @@ contract validation, `make test-contracts`, `make test-coverage`, and Factory
 task-run evidence. The command path is offline and deterministic by default:
 signature IDs cluster records, provider drafting fails closed without an
 approved model-provider gate, and confidence is calculated from evidence count,
-recency half-life, contradictions, flake discounts, and extraction confidence
-with no drafting-model contribution. The blast radius is limited to generated
-memory-rule YAML, review status transitions, memory-page rendering, and
-assessment serving eligibility because only accepted active rules are served.
+the PRD default 90-day recency half-life, contradictions, flake discounts, and
+extraction confidence with no drafting-model contribution. The blast radius is
+limited to generated memory-rule YAML, review status transitions, memory-page
+rendering, and assessment serving eligibility because only accepted active
+rules are served.
 Rollback is removal of the T6 command implementation, tests, docs, and generated
 `memory/rules/*.yaml` or `memory/MEMORY.md`; `.relia/experiences` remains the
 source of truth for re-distillation.

@@ -2283,7 +2283,7 @@ func TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage(t *testing.
 	if avoid.Scalars["metadata.confidence_inputs.evidence_count"].Value != "2" ||
 		avoid.Scalars["metadata.confidence_inputs.contradictions"].Value != "0" ||
 		avoid.Scalars["metadata.confidence_inputs.flake_discount"].Value == "0" ||
-		avoid.Scalars["metadata.decay.half_life_days"].Value != "180" {
+		avoid.Scalars["metadata.decay.half_life_days"].Value != "90" {
 		t.Fatalf("avoid confidence metadata = %#v", avoid.Scalars)
 	}
 	if !assessmentRuleHasPositivePlaybookEvidence(playbook) {

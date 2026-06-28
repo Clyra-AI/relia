@@ -4,18 +4,22 @@
     ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
     ".factory/artifacts/task-runs/T6/validation-report.json",
     ".factory/artifacts/task-runs/T6/work-proof-marker.json",
+    "README.md",
     "cmd/relia/main.go",
-    "cmd/relia/main_test.go"
+    "cmd/relia/main_test.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/dev/dev_guides.md"
   ],
   "evidence_refs": [
     ".factory/artifacts/task-runs/T6/validation-report.json",
     ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
   ],
-  "generated_at": "2026-06-28T15:02:46Z",
+  "generated_at": "2026-06-28T16:12:22Z",
   "implementation_performed": true,
   "implementation_summary": [
-    "Validated memory-rule artifacts before review mutations so failed review attempts leave rule YAML unchanged.",
-    "Added regression coverage proving an invalid candidate rule fails closed instead of being promoted to active/accepted before contract validation fails."
+    "Aligned the deterministic offline distill decay default with the PRD-defined 90-day half-life.",
+    "Updated T6 regression coverage so generated memory-rule metadata records half_life_days: 90.",
+    "Synced README, developer guide, and architecture guide wording for the 90-day confidence-decay default."
   ],
   "schema_version": "1.0",
   "status": "implemented",

@@ -3,22 +3,31 @@
   "schema_version": "1.0",
   "task_id": "T6",
   "status": "pass",
-  "generated_at": "2026-06-28T15:02:46Z",
+  "generated_at": "2026-06-28T16:12:22Z",
   "proof_level": "user_visible_behavior",
   "evidence_refs": [
+    "README.md",
     "cmd/relia/main.go",
     "cmd/relia/main_test.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/dev/dev_guides.md",
     ".factory/artifacts/task-runs/T6/validation-report.json"
   ],
   "command_evidence": [
     {
-      "command": "go test ./cmd/relia -count=1 -run TestReviewFailsClosedWithoutMutatingInvalidRule",
-      "status": "expected_fail",
-      "exit_code": 1,
-      "phase": "red_first"
+      "command": "make lint-fast",
+      "status": "pass",
+      "exit_code": 0,
+      "phase": "baseline"
     },
     {
-      "command": "go test ./cmd/relia -count=1 -run TestReviewFailsClosedWithoutMutatingInvalidRule",
+      "command": "make test-fast",
+      "status": "pass",
+      "exit_code": 0,
+      "phase": "baseline"
+    },
+    {
+      "command": "go test ./cmd/relia -count=1 -run 'TestDistill|TestReview|TestDemoDistillReviewLifecycleFixtures'",
       "status": "pass",
       "exit_code": 0,
       "phase": "focused_green"
@@ -32,36 +41,44 @@
   ],
   "scorecard": [
     {
-      "behavior": "Review validates the existing memory-rule artifact before mutating lifecycle or review labels.",
+      "behavior": "Deterministic offline distill uses the PRD default 90-day half-life for confidence decay when --half-life-days is not supplied.",
       "status": "pass",
-      "evidence": "updateMemoryRuleReview calls validateMemoryRuleArtifact before any write",
-      "covered_acceptance_items": [
-        "FR13-HUMAN-REVIEW-GATE-001",
-        "NFR13-INFERENCE-HUMILITY-001"
-      ]
-    },
-    {
-      "behavior": "An invalid candidate rule with missing provenance fails closed and remains byte-for-byte unchanged after a rejected accepted-review attempt.",
-      "status": "pass",
-      "evidence": "TestReviewFailsClosedWithoutMutatingInvalidRule",
-      "covered_acceptance_items": [
-        "FR13-HUMAN-REVIEW-GATE-001",
-        "NFR13-INFERENCE-HUMILITY-001"
-      ]
-    },
-    {
-      "behavior": "The existing deterministic distill, review, confidence, stale-path, contradiction, playbook, privacy, and memory-page behavior remains covered by the full pre-push gate.",
-      "status": "pass",
-      "evidence": "make prepush-full",
+      "evidence": "parseDistillArgs default HalfLifeDays is 90 and TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage asserts metadata.decay.half_life_days == 90.",
       "covered_acceptance_items": [
         "FR11-CALIBRATED-CONFIDENCE-001",
         "FR12-DECAY-AND-CHURN-INVALIDATION-001",
+        "NFR4-CALIBRATION-HONESTY-001"
+      ]
+    },
+    {
+      "behavior": "Confidence remains deterministic and evidence-only: evidence count, recency half-life, contradictions, flake discounts, and extraction confidence contribute; drafting model weight remains zero.",
+      "status": "pass",
+      "evidence": "TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage and focused T6 go test run.",
+      "covered_acceptance_items": [
+        "FR11-CALIBRATED-CONFIDENCE-001",
+        "NFR11-STOCHASTIC-HONESTY-001",
+        "NFR13-INFERENCE-HUMILITY-001"
+      ]
+    },
+    {
+      "behavior": "Review-gated avoid and playbook rules, stale-path invalidation, contradiction labeling, local privacy, structured data handling, and MEMORY.md rendering remain covered by the full pre-push gate.",
+      "status": "pass",
+      "evidence": "make prepush-full passed, including unit tests, coverage, repo-pack validation, and demo contract tests.",
+      "covered_acceptance_items": [
+        "FR13-HUMAN-REVIEW-GATE-001",
         "FR14-BIDIRECTIONAL-MEMORY-001",
         "FR15-MEMORY-PAGE-WITH-RECEIPTS-001",
-        "NFR4-CALIBRATION-HONESTY-001",
         "NFR6-LOCAL-PRIVACY-001",
-        "NFR8-STRUCTURED-DATA-FIRST-001",
-        "NFR11-STOCHASTIC-HONESTY-001"
+        "NFR8-STRUCTURED-DATA-FIRST-001"
+      ]
+    },
+    {
+      "behavior": "User-facing docs identify the PRD default 90-day confidence-decay half-life for distill outputs.",
+      "status": "pass",
+      "evidence": "README.md, docs/dev/dev_guides.md, and docs/architecture/architecture_guides.md updated.",
+      "covered_acceptance_items": [
+        "FR12-DECAY-AND-CHURN-INVALIDATION-001",
+        "MVP-IN-SCOPE-003"
       ]
     }
   ]
