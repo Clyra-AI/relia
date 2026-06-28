@@ -691,28 +691,34 @@
         "mvp"
       ],
       "delivery_slice_refs": [
-        "distillation-calibration-and-confidence-part-1"
+        "distillation-calibration-and-confidence-part-1",
+        "t6-carried-release-demo-product-signal-proof"
       ],
       "evidence_mode": "automated",
       "evidence_refs": [
-        ".factory/artifacts/task-runs/T6/validation-report.json"
+        ".factory/artifacts/task-runs/T6/validation-report.json",
+        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
+        "https://github.com/Clyra-AI/relia/pull/46"
       ],
       "group_id": "nfr2-fast-first-memory",
       "kind": "acceptance_test",
       "notes": [
-        "Local distill/review/memory commands exist, but T6 validation explicitly left first-user under-30-minute approval as partial pending product-signal or dedicated proof."
+        "Local distill/review/memory commands exist, but T6 validation explicitly left first-user under-30-minute approval as partial pending product-signal or dedicated proof.",
+        "T6 delivered local implementation evidence, but terminal MVP closure is carried to T15.1 for release/demo/product-signal proof."
       ],
-      "recorded_at": "2026-06-28T13:43:00Z",
-      "recorded_by": "factoryd closure repair",
+      "recorded_at": "2026-06-28T17:05:00Z",
+      "recorded_by": "codex plan repair",
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#nfr2-fast-first-memory",
       "source_text": "A technical user should ingest, distill, and approve their first rule in under 30 minutes.",
       "status": "partial",
       "task_refs": [
-        "T6"
+        "T6",
+        "T15.1"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/7/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/7/validation_commands",
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/21/validation_commands"
       ]
     },
     {
@@ -1130,28 +1136,34 @@
         "mvp"
       ],
       "delivery_slice_refs": [
-        "distillation-calibration-and-confidence-part-1"
+        "distillation-calibration-and-confidence-part-1",
+        "t6-carried-release-demo-product-signal-proof"
       ],
       "evidence_mode": "automated",
       "evidence_refs": [
-        ".factory/artifacts/task-runs/T6/validation-report.json"
+        ".factory/artifacts/task-runs/T6/validation-report.json",
+        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
+        "https://github.com/Clyra-AI/relia/pull/46"
       ],
       "group_id": "mvp-in-scope",
       "kind": "acceptance_test",
       "notes": [
-        "T6 validation explicitly left this MVP in-scope item partial; do not record implemented closure without matching implemented acceptance_result evidence."
+        "T6 validation explicitly left this MVP in-scope item partial; do not record implemented closure without matching implemented acceptance_result evidence.",
+        "T6 delivered local implementation evidence, but terminal MVP closure is carried to T15.1 for release/demo/product-signal proof."
       ],
-      "recorded_at": "2026-06-28T13:43:00Z",
-      "recorded_by": "factoryd closure repair",
+      "recorded_at": "2026-06-28T17:05:00Z",
+      "recorded_by": "codex plan repair",
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
       "source_text": "agent attribution with confidence",
       "status": "partial",
       "task_refs": [
-        "T6"
+        "T6",
+        "T15.1"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/7/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/7/validation_commands",
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/21/validation_commands"
       ]
     },
     {
@@ -1206,28 +1218,34 @@
         "mvp"
       ],
       "delivery_slice_refs": [
-        "distillation-calibration-and-confidence-part-1"
+        "distillation-calibration-and-confidence-part-1",
+        "t6-carried-release-demo-product-signal-proof"
       ],
       "evidence_mode": "automated",
       "evidence_refs": [
-        ".factory/artifacts/task-runs/T6/validation-report.json"
+        ".factory/artifacts/task-runs/T6/validation-report.json",
+        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
+        "https://github.com/Clyra-AI/relia/pull/46"
       ],
       "group_id": "mvp-in-scope",
       "kind": "acceptance_test",
       "notes": [
-        "T6 validation explicitly left this MVP in-scope item partial; do not record implemented closure without matching implemented acceptance_result evidence."
+        "T6 validation explicitly left this MVP in-scope item partial; do not record implemented closure without matching implemented acceptance_result evidence.",
+        "T6 delivered local implementation evidence, but terminal MVP closure is carried to T15.1 for release/demo/product-signal proof."
       ],
-      "recorded_at": "2026-06-28T13:43:00Z",
-      "recorded_by": "factoryd closure repair",
+      "recorded_at": "2026-06-28T17:05:00Z",
+      "recorded_by": "codex plan repair",
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
       "source_text": "deterministic failure signatures with confidence labels",
       "status": "partial",
       "task_refs": [
-        "T6"
+        "T6",
+        "T15.1"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/7/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/7/validation_commands",
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/21/validation_commands"
       ]
     },
     {
