@@ -24,7 +24,8 @@
     {
       "acceptance_item_id": "FR12-DECAY-AND-CHURN-INVALIDATION-001",
       "evidence_refs": [
-        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
+        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
+        "cmd/relia/main_test.go"
       ],
       "status": "implemented"
     },
@@ -54,7 +55,7 @@
       "evidence_refs": [
         ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
       ],
-      "notes": "Local distill, review, and memory flows are implemented and covered by fast tests; first-user time-to-approve remains a product-signal item for later lifecycle evidence.",
+      "notes": "Local distill, review, and memory flows are covered by fast tests; under-30-minute first-user closure remains product-signal lifecycle evidence outside this worker.",
       "status": "partial"
     },
     {
@@ -88,7 +89,8 @@
     {
       "acceptance_item_id": "NFR13-INFERENCE-HUMILITY-001",
       "evidence_refs": [
-        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
+        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
+        "cmd/relia/main_test.go"
       ],
       "status": "implemented"
     },
@@ -97,7 +99,7 @@
       "evidence_refs": [
         ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
       ],
-      "notes": "Part 1 implements the local distill/review/memory behavior; remaining public release boundary work is reserved for later slices.",
+      "notes": "Part 1 implements deterministic local distill/review/memory behavior; final release/demo/product-signal closure remains outside worker scope.",
       "status": "partial"
     },
     {
@@ -105,7 +107,7 @@
       "evidence_refs": [
         ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
       ],
-      "notes": "Part 1 implements deterministic distill and memory-page behavior; release/demo/product-signal closure remains outside the worker scope.",
+      "notes": "Part 1 strengthens deterministic contradiction handling; release boundary closure remains a later lifecycle gate.",
       "status": "partial"
     }
   ],
@@ -127,74 +129,49 @@
     ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
     ".factory/artifacts/task-runs/T6/validation-report.json",
     ".factory/artifacts/task-runs/T6/work-proof-marker.json",
-    "README.md",
     "cmd/relia/main.go",
-    "cmd/relia/main_test.go",
-    "docs/architecture/architecture_guides.md",
-    "docs/dev/dev_guides.md",
-    "schemas/memory-rule.schema.json"
+    "cmd/relia/main_test.go"
   ],
   "changelog_result": {
-    "notes": "README and dev/architecture guides document the user-facing T6 command behavior; no standalone changelog file exists in this repo.",
-    "status": "applied_to_docs"
+    "notes": "No standalone changelog file exists; existing README and dev guide already state contradictory clean or held evidence produces contradicted rules.",
+    "status": "not_applicable"
   },
   "commands_run": [
     "make lint-fast",
     "make test-fast",
+    "go test ./cmd/relia -count=1 -run TestDistillMarksAnyLaterContradictionAsContradicted",
+    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
+    "go test ./cmd/relia -count=1 -run TestDistillMarksAnyLaterContradictionAsContradicted",
     "make test-fast",
-    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go && make test-fast",
-    "python3 -m json.tool schemas/memory-rule.schema.json >/tmp/memory-rule.schema.pretty.json && make lint-fast",
-    "make test-fast",
-    "make test-contracts",
     "make prepush-full",
-    "git diff --check",
-    "git diff --name-only | allowed-path policy check",
-    "git diff --name-only | forbidden-path policy check",
     "python3 -m json.tool .factory/artifacts/task-runs/T6/work-proof-marker.json",
     "python3 -m json.tool .factory/artifacts/task-runs/T6/validation-report.json",
     "python3 -m json.tool .factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
-    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
-    "go test ./cmd/relia -count=1 -run 'TestDistillAvoidContradictionsIgnoreOlderPositiveEvidence|TestYAMLScalarForWriteQuotesColonSpace|TestDistillMarksContradictedAndStaleRules'"
+    "git diff --name-only",
+    "git diff --name-only | path policy check"
   ],
   "docs_sync_result": {
-    "status": "pass",
-    "updated_refs": [
-      "README.md",
-      "docs/dev/dev_guides.md",
-      "docs/architecture/architecture_guides.md",
-      "schemas/memory-rule.schema.json"
-    ]
+    "notes": "Existing README, dev guide, and architecture guide already describe the contradicted lifecycle behavior.",
+    "status": "pass"
   },
   "final_validation_evidence": [
     {
       "command": "make prepush-full",
       "exit_code": 0,
-      "notes": "Coverage reported 81.1% against the 75.0% minimum.",
-      "status": "pass"
-    },
-    {
-      "command": "make prepush-full",
-      "exit_code": 0,
-      "notes": "Coverage reported 81.2% against the 75.0% minimum after Codex review repairs.",
+      "notes": "Coverage reported 81.2% against the 75.0% minimum; lint, unit, coverage, repo-pack, and demo contract lanes passed.",
       "status": "pass"
     }
   ],
-  "generated_at": "2026-06-27T20:47:53Z",
+  "generated_at": "2026-06-28T14:15:14Z",
   "green_evidence": [
+    {
+      "command": "go test ./cmd/relia -count=1 -run TestDistillMarksAnyLaterContradictionAsContradicted",
+      "exit_code": 0,
+      "status": "pass"
+    },
     {
       "command": "make test-fast",
       "exit_code": 0,
-      "status": "pass"
-    },
-    {
-      "command": "make test-contracts",
-      "exit_code": 0,
-      "status": "pass"
-    },
-    {
-      "command": "go test ./cmd/relia -count=1 -run 'TestDistillAvoidContradictionsIgnoreOlderPositiveEvidence|TestYAMLScalarForWriteQuotesColonSpace|TestDistillMarksContradictedAndStaleRules'",
-      "exit_code": 0,
-      "notes": "Codex review repair coverage for avoid contradiction timing and YAML colon-space quoting.",
       "status": "pass"
     }
   ],
@@ -205,37 +182,26 @@
     "status": "pass"
   },
   "plan_drift_result": {
-    "notes": "Implementation stayed inside the T6 objective and did not update tracker, lifecycle, PR, or scope-closure state.",
+    "notes": "Work stayed within T6 contradiction handling and did not update tracker, PR lifecycle, merge, or scope-closure state.",
     "status": "pass"
   },
   "red_evidence": [
     {
-      "command": "make test-fast",
-      "exit_code": 2,
-      "reason": "New T6 tests failed red-first because distill returned the reserved not_implemented command envelope before implementation.",
+      "command": "go test ./cmd/relia -count=1 -run TestDistillMarksAnyLaterContradictionAsContradicted",
+      "exit_code": 1,
+      "reason": "The new regression test failed before implementation because no contradicted rule was produced when one later clean result contradicted two earlier failures.",
       "status": "expected_fail"
     }
   ],
   "residual_risks": [
     "Provider-backed drafting remains fail-closed in this part-1 slice and requires a future approved model_provider_endpoint gate.",
-    "First-user under-30-minute product-signal closure is not self-closed by this worker."
-  ],
-  "review_repair_evidence": [
-    {
-      "comments": [
-        "Count only later clean evidence for avoid contradictions",
-        "Quote YAML scalars that contain colon-space"
-      ],
-      "reviewer": "chatgpt-codex-connector",
-      "status": "addressed",
-      "validation": "make prepush-full"
-    }
+    "Under-30-minute first-user product signal is not self-closed by this worker."
   ],
   "schema_version": "1.0",
   "status": "pass",
   "task_id": "T6",
   "versioning_result": {
-    "notes": "Public output was documented and schema metadata was expanded compatibly.",
+    "notes": "No schema or runtime pin changed.",
     "status": "pre_1_0_no_version_bump"
   }
 }
