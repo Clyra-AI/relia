@@ -3679,6 +3679,10 @@ func validateActiveAssessmentRuleIdentity(root string, document yamlDocument, re
 			return artifactContractError("memory rule scope path does not exist in the repo", configRefWithPath(rel, scopePath))
 		}
 	}
+	confidence, err := strconv.ParseFloat(document.Scalars["confidence"].Value, 64)
+	if err != nil {
+		return artifactContractError("memory rule confidence must be numeric", configRefWithPath(rel, document.Scalars["confidence"]))
+	}
 	reviewLabel, ok := document.Scalars["review.label"]
 	if !ok {
 		return artifactContractError("memory rule missing required key review.label", rel)
@@ -3740,6 +3744,9 @@ func validateActiveAssessmentRuleIdentity(root string, document yamlDocument, re
 		default:
 			return artifactContractError("memory rule provenance outcome is invalid", configRefWithPath(rel, outcome))
 		}
+	}
+	if commandErr := validateDraftedMemoryRuleCalibration(document, rel, confidence, count, contradictions); commandErr != nil {
+		return commandErr
 	}
 	return nil
 }
@@ -6060,6 +6067,113 @@ func validateMemoryRuleArtifact(root string, path string) *CommandError {
 	case "llm_drafted", "cluster_summary", "human_authored":
 	default:
 		return artifactContractError("memory rule review.statement_origin is invalid", configRefWithPath(rel, statementOrigin))
+	}
+	if commandErr := validateDraftedMemoryRuleCalibration(document, rel, confidence, count, contradictions); commandErr != nil {
+		return commandErr
+	}
+	return nil
+}
+
+func validateDraftedMemoryRuleCalibration(document yamlDocument, rel string, confidence float64, evidenceCount int, contradictions int) *CommandError {
+	statementOrigin := document.Scalars["review.statement_origin"].Value
+	if statementOrigin == "human_authored" {
+		return nil
+	}
+	confidenceLabel, ok := document.Scalars["metadata.confidence_label"]
+	if !ok {
+		return artifactContractError("drafted memory rule missing required key metadata.confidence_label", rel)
+	}
+	if confidenceLabel.Value != confidenceLabelForRule(confidence) {
+		return artifactContractError("drafted memory rule metadata.confidence_label must match confidence", configRefWithPath(rel, confidenceLabel))
+	}
+
+	inputCount, commandErr := requiredYAMLIntAtLeast(document, rel, "metadata.confidence_inputs.evidence_count", 1)
+	if commandErr != nil {
+		return commandErr
+	}
+	if inputCount != evidenceCount {
+		return artifactContractError("drafted memory rule metadata.confidence_inputs.evidence_count must match evidence.count", configRefWithPath(rel, document.Scalars["metadata.confidence_inputs.evidence_count"]))
+	}
+	inputContradictions, commandErr := requiredYAMLIntAtLeast(document, rel, "metadata.confidence_inputs.contradictions", 0)
+	if commandErr != nil {
+		return commandErr
+	}
+	if inputContradictions != contradictions {
+		return artifactContractError("drafted memory rule metadata.confidence_inputs.contradictions must match evidence.contradictions", configRefWithPath(rel, document.Scalars["metadata.confidence_inputs.contradictions"]))
+	}
+	for _, key := range []string{
+		"metadata.confidence_inputs.recency_weight",
+		"metadata.confidence_inputs.flake_discount",
+		"metadata.confidence_inputs.extraction_confidence",
+	} {
+		if _, commandErr := requiredYAMLFloatRange(document, rel, key, 0, 1); commandErr != nil {
+			return commandErr
+		}
+	}
+	draftingModelWeight, commandErr := requiredYAMLFloatRange(document, rel, "metadata.confidence_inputs.drafting_model_weight", 0, 0)
+	if commandErr != nil {
+		return commandErr
+	}
+	if draftingModelWeight != 0 {
+		return artifactContractError("drafted memory rule metadata.confidence_inputs.drafting_model_weight must be 0", configRefWithPath(rel, document.Scalars["metadata.confidence_inputs.drafting_model_weight"]))
+	}
+	if _, commandErr := requiredYAMLIntAtLeast(document, rel, "metadata.decay.half_life_days", 1); commandErr != nil {
+		return commandErr
+	}
+	for _, key := range []string{
+		"metadata.decay.latest_evidence_at",
+		"metadata.decay.oldest_evidence_at",
+		"metadata.decay.anchor_recorded_at",
+	} {
+		if commandErr := requiredYAMLRFC3339(document, rel, key); commandErr != nil {
+			return commandErr
+		}
+	}
+	return nil
+}
+
+func confidenceLabelForRule(confidence float64) string {
+	switch {
+	case confidence >= 0.75:
+		return "high"
+	case confidence >= 0.5:
+		return "medium"
+	default:
+		return "low"
+	}
+}
+
+func requiredYAMLIntAtLeast(document yamlDocument, rel string, key string, minimum int) (int, *CommandError) {
+	scalar, ok := document.Scalars[key]
+	if !ok {
+		return 0, artifactContractError("drafted memory rule missing required key "+key, rel)
+	}
+	value, err := strconv.Atoi(scalar.Value)
+	if err != nil || value < minimum {
+		return 0, artifactContractError("drafted memory rule "+key+" must be at least "+strconv.Itoa(minimum), configRefWithPath(rel, scalar))
+	}
+	return value, nil
+}
+
+func requiredYAMLFloatRange(document yamlDocument, rel string, key string, minimum float64, maximum float64) (float64, *CommandError) {
+	scalar, ok := document.Scalars[key]
+	if !ok {
+		return 0, artifactContractError("drafted memory rule missing required key "+key, rel)
+	}
+	value, err := strconv.ParseFloat(scalar.Value, 64)
+	if err != nil || value < minimum || value > maximum {
+		return 0, artifactContractError("drafted memory rule "+key+" must be between "+yamlFloat(minimum)+" and "+yamlFloat(maximum), configRefWithPath(rel, scalar))
+	}
+	return value, nil
+}
+
+func requiredYAMLRFC3339(document yamlDocument, rel string, key string) *CommandError {
+	scalar, ok := document.Scalars[key]
+	if !ok {
+		return artifactContractError("drafted memory rule missing required key "+key, rel)
+	}
+	if _, err := time.Parse(time.RFC3339, scalar.Value); err != nil {
+		return artifactContractError("drafted memory rule "+key+" must be RFC3339", configRefWithPath(rel, scalar))
 	}
 	return nil
 }

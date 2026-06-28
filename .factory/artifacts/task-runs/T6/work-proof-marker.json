@@ -5,21 +5,25 @@
     ".factory/artifacts/task-runs/T6/validation-report.json",
     ".factory/artifacts/task-runs/T6/work-proof-marker.json",
     "README.md",
+    "cmd/relia/demo_fixtures_test.go",
     "cmd/relia/main.go",
     "cmd/relia/main_test.go",
     "docs/architecture/architecture_guides.md",
-    "docs/dev/dev_guides.md"
+    "docs/dev/dev_guides.md",
+    "examples/demo/distill-review-lifecycle-fixtures.json",
+    "memory/rules/demo-assessment-active-rule.yaml",
+    "schemas/memory-rule.schema.json"
   ],
   "evidence_refs": [
     ".factory/artifacts/task-runs/T6/validation-report.json",
     ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
   ],
-  "generated_at": "2026-06-28T16:28:42Z",
+  "generated_at": "2026-06-28T16:44:19Z",
   "implementation_performed": true,
   "implementation_summary": [
-    "Repaired automated acceptance traceability for FR4-ATTRIBUTION-WITH-CONFIDENCE-001, FR7-DETERMINISTIC-FAILURE-SIGNATURES-001, NFR2-FAST-FIRST-MEMORY-001, MVP-IN-SCOPE-003, and MVP-IN-SCOPE-006.",
-    "Updated the worker validation report so each repaired item has status-specific trusted validation-report, work-proof, scorecard, code, test, and docs evidence refs.",
-    "Restored the full T6 worker changed-path inventory and left NFR2 partial because no under-30-minute product-signal timing evidence exists."
+    "Repaired the drafted memory-rule contract so cluster_summary and future llm_drafted rules must carry evidence-derived confidence inputs and decay metadata.",
+    "Aligned schemas/memory-rule.schema.json, relia check validation, demo lifecycle fixtures, the active demo memory rule, and docs with the drafted-rule calibration requirement.",
+    "Added focused tests for fail-closed drafted-rule calibration metadata validation and demo fixture coverage."
   ],
   "schema_version": "1.0",
   "status": "implemented",

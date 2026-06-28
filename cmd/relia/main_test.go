@@ -4972,6 +4972,53 @@ metadata: {}
 	}
 }
 
+func TestCheckRejectsDraftedMemoryRuleMissingCalibrationMetadata(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	rulesDir := filepath.Join(tempDir, "memory", "rules")
+	if err := os.MkdirAll(rulesDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	rule := `object_type: relia.memory_rule
+schema_version: "1.0"
+id: avoid-drafted-without-calibration
+kind: avoid
+status: active
+statement: >
+  Avoid retrying the generated schema snapshot path without checking error-shape assertions.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.8
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_001
+provenance:
+  - pr: 142
+    outcome: ci_failure
+review:
+  label: accepted
+  statement_origin: cluster_summary
+metadata:
+  confidence_label: high
+`
+	if err := os.WriteFile(filepath.Join(rulesDir, "avoid-drafted-without-calibration.yaml"), []byte(rule), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitValidation {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if !strings.Contains(result.Errors[0].Message, "metadata.confidence_inputs.evidence_count") {
+		t.Fatalf("error message = %q", result.Errors[0].Message)
+	}
+}
+
 func TestCheckAcceptsPlaybookRuleWithCleanMergeEvidence(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)

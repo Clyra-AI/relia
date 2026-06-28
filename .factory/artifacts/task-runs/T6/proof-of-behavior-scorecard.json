@@ -3,12 +3,16 @@
   "schema_version": "1.0",
   "task_id": "T6",
   "status": "pass",
-  "generated_at": "2026-06-28T16:28:42Z",
+  "generated_at": "2026-06-28T16:44:19Z",
   "proof_level": "user_visible_behavior",
   "evidence_refs": [
     "README.md",
+    "schemas/memory-rule.schema.json",
     "cmd/relia/main.go",
     "cmd/relia/main_test.go",
+    "cmd/relia/demo_fixtures_test.go",
+    "examples/demo/distill-review-lifecycle-fixtures.json",
+    "memory/rules/demo-assessment-active-rule.yaml",
     "docs/architecture/architecture_guides.md",
     "docs/dev/dev_guides.md",
     ".factory/artifacts/task-runs/T6/validation-report.json"
@@ -28,6 +32,12 @@
     },
     {
       "command": "go test ./cmd/relia -count=1 -run 'TestDistill|TestReview|TestDemoDistillReviewLifecycleFixtures'",
+      "status": "pass",
+      "exit_code": 0,
+      "phase": "focused_green"
+    },
+    {
+      "command": "go test ./cmd/relia -count=1 -run 'TestCheckRejectsDraftedMemoryRuleMissingCalibrationMetadata|TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage|TestDemoDistillReviewLifecycleFixtures|TestCheckReportsPhase0ContractRefs|TestPhase0SchemasDeclareMetadata|TestDemoAssessMatchesDirectoryScopedActiveRule|TestDemoAssessRejectsMatchedRuleWithOutOfRangeConfidence'",
       "status": "pass",
       "exit_code": 0,
       "phase": "focused_green"
@@ -54,7 +64,7 @@
     {
       "behavior": "Confidence remains deterministic and evidence-only: evidence count, recency half-life, contradictions, flake discounts, and extraction confidence contribute; drafting model weight remains zero.",
       "status": "pass",
-      "evidence": "TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage and focused T6 go test run.",
+      "evidence": "TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage, TestCheckRejectsDraftedMemoryRuleMissingCalibrationMetadata, schemas/memory-rule.schema.json, and focused T6 go test run.",
       "covered_acceptance_items": [
         "FR7-DETERMINISTIC-FAILURE-SIGNATURES-001",
         "FR11-CALIBRATED-CONFIDENCE-001",
@@ -75,9 +85,21 @@
       ]
     },
     {
+      "behavior": "Drafted cluster-summary and future LLM-drafted memory rules fail closed unless they carry confidence-input and decay metadata.",
+      "status": "pass",
+      "evidence": "validateDraftedMemoryRuleCalibration enforces confidence labels, evidence count, contradictions, recency, flake discount, extraction confidence, zero drafting-model weight, half-life, and RFC3339 decay timestamps; TestCheckRejectsDraftedMemoryRuleMissingCalibrationMetadata covers the fail-closed path.",
+      "covered_acceptance_items": [
+        "FR11-CALIBRATED-CONFIDENCE-001",
+        "FR12-DECAY-AND-CHURN-INVALIDATION-001",
+        "NFR4-CALIBRATION-HONESTY-001",
+        "NFR11-STOCHASTIC-HONESTY-001",
+        "NFR13-INFERENCE-HUMILITY-001"
+      ]
+    },
+    {
       "behavior": "User-facing docs identify the PRD default 90-day confidence-decay half-life for distill outputs.",
       "status": "pass",
-      "evidence": "README.md, docs/dev/dev_guides.md, and docs/architecture/architecture_guides.md updated.",
+      "evidence": "README.md, docs/dev/dev_guides.md, and docs/architecture/architecture_guides.md updated with the 90-day half-life and drafted-rule metadata contract.",
       "covered_acceptance_items": [
         "FR12-DECAY-AND-CHURN-INVALIDATION-001",
         "MVP-IN-SCOPE-003",

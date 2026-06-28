@@ -240,7 +240,9 @@ T6 adds deterministic offline distillation, review, and memory-page rendering:
   `distill.embeddings: signature` are configured.
 - Rule confidence is derived only from evidence count, the PRD default 90-day
   recency half-life, contradictions, flake discounts, and signature extraction
-  confidence. The generated metadata records `drafting_model_weight: 0`.
+  confidence. The generated metadata records `drafting_model_weight: 0`, and
+  `relia check` rejects drafted `cluster_summary` or `llm_drafted` rules that
+  omit confidence-input or decay metadata.
 - Drafted `avoid` and `playbook` rules remain `candidate` while
   `distill.review_required: true`. A rule can become `active` only through
   `relia review --rule <id> --label accepted`; stale and contradicted rules

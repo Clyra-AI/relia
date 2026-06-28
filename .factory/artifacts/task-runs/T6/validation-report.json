@@ -29,8 +29,10 @@
       "evidence_refs": [
         ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
         "cmd/relia/main.go",
-        "cmd/relia/main_test.go"
+        "cmd/relia/main_test.go",
+        "schemas/memory-rule.schema.json"
       ],
+      "notes": "Drafted memory-rule confidence metadata is now enforced by schema and relia check validation.",
       "status": "implemented"
     },
     {
@@ -41,8 +43,12 @@
         "cmd/relia/main_test.go",
         "README.md",
         "docs/dev/dev_guides.md",
-        "docs/architecture/architecture_guides.md"
+        "docs/architecture/architecture_guides.md",
+        "schemas/memory-rule.schema.json",
+        "examples/demo/distill-review-lifecycle-fixtures.json",
+        "memory/rules/demo-assessment-active-rule.yaml"
       ],
+      "notes": "Drafted rules now fail validation when confidence-input or decay metadata is absent, and committed cluster-summary fixtures carry the required decay metadata.",
       "status": "implemented"
     },
     {
@@ -88,8 +94,10 @@
       "evidence_refs": [
         ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
         "cmd/relia/main.go",
-        "cmd/relia/main_test.go"
+        "cmd/relia/main_test.go",
+        "schemas/memory-rule.schema.json"
       ],
+      "notes": "Confidence remains evidence-derived and relia check now rejects drafted rules that omit the evidence-derived confidence input breakdown.",
       "status": "implemented"
     },
     {
@@ -111,16 +119,20 @@
       "acceptance_item_id": "NFR11-STOCHASTIC-HONESTY-001",
       "evidence_refs": [
         ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
-        "cmd/relia/main_test.go"
+        "cmd/relia/main_test.go",
+        "cmd/relia/demo_fixtures_test.go"
       ],
+      "notes": "Drafted lifecycle fixture assertions require confidence labels, input counts, zero drafting-model weight, and RFC3339 decay timestamps.",
       "status": "implemented"
     },
     {
       "acceptance_item_id": "NFR13-INFERENCE-HUMILITY-001",
       "evidence_refs": [
         ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
-        "cmd/relia/main.go"
+        "cmd/relia/main.go",
+        "schemas/memory-rule.schema.json"
       ],
+      "notes": "Drafted statement origins are now tied to explicit calibration metadata; human-authored rules remain allowed without generated-rule metadata.",
       "status": "implemented"
     },
     {
@@ -133,7 +145,8 @@
         "cmd/relia/main_test.go",
         "README.md",
         "docs/dev/dev_guides.md",
-        "docs/architecture/architecture_guides.md"
+        "docs/architecture/architecture_guides.md",
+        "schemas/memory-rule.schema.json"
       ],
       "notes": "Automated repair trace: T6 part-1 deterministic local distill, review, and memory behavior is implemented and validated; lifecycle release-boundary evidence remains factoryd-owned.",
       "status": "implemented"
@@ -148,9 +161,12 @@
         "cmd/relia/main_test.go",
         "README.md",
         "docs/dev/dev_guides.md",
-        "docs/architecture/architecture_guides.md"
+        "docs/architecture/architecture_guides.md",
+        "schemas/memory-rule.schema.json",
+        "examples/demo/distill-review-lifecycle-fixtures.json",
+        "memory/rules/demo-assessment-active-rule.yaml"
       ],
-      "notes": "Automated repair trace: confidence scoring, decay, deterministic fallback, and memory-rule traceability are implemented and validated for this T6 part-1 slice; lifecycle release-boundary evidence remains factoryd-owned.",
+      "notes": "Automated repair trace: confidence scoring, decay, deterministic fallback, drafted-rule calibration metadata, and memory-rule traceability are implemented and validated for this T6 part-1 slice; lifecycle release-boundary evidence remains factoryd-owned.",
       "status": "implemented"
     }
   ],
@@ -173,10 +189,14 @@
     ".factory/artifacts/task-runs/T6/validation-report.json",
     ".factory/artifacts/task-runs/T6/work-proof-marker.json",
     "README.md",
+    "cmd/relia/demo_fixtures_test.go",
     "cmd/relia/main.go",
     "cmd/relia/main_test.go",
     "docs/architecture/architecture_guides.md",
-    "docs/dev/dev_guides.md"
+    "docs/dev/dev_guides.md",
+    "examples/demo/distill-review-lifecycle-fixtures.json",
+    "memory/rules/demo-assessment-active-rule.yaml",
+    "schemas/memory-rule.schema.json"
   ],
   "changelog_result": {
     "draft_entry": "Implement PRD-defined clustering, rule drafting, confidence scoring, decay, contradiction handling, and deterministic fallback behavior. Part 1 of 2; scope is split to keep the runner-ready packet bounded.",
@@ -215,10 +235,15 @@
     "git diff --name-only",
     "python3 -m json.tool .factory/artifacts/task-runs/T6/work-proof-marker.json",
     "python3 -m json.tool .factory/artifacts/task-runs/T6/validation-report.json",
-    "python3 -m json.tool .factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
+    "python3 -m json.tool .factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
+    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go cmd/relia/demo_fixtures_test.go",
+    "python3 -m json.tool schemas/memory-rule.schema.json",
+    "python3 -m json.tool examples/demo/distill-review-lifecycle-fixtures.json",
+    "go test ./cmd/relia -count=1 -run 'TestCheckRejectsDraftedMemoryRuleMissingCalibrationMetadata|TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage|TestDemoDistillReviewLifecycleFixtures|TestCheckReportsPhase0ContractRefs|TestPhase0SchemasDeclareMetadata|TestDemoAssessMatchesDirectoryScopedActiveRule|TestDemoAssessRejectsMatchedRuleWithOutOfRangeConfidence'",
+    "make prepush-full"
   ],
   "docs_sync_result": {
-    "notes": "Docs now state the PRD default 90-day recency half-life for distill confidence decay.",
+    "notes": "Docs now state the PRD default 90-day recency half-life and the drafted-rule confidence-input and decay metadata contract.",
     "status": "pass",
     "updated_paths": [
       "README.md",
@@ -230,11 +255,11 @@
     {
       "command": "make prepush-full",
       "exit_code": 0,
-      "notes": "Passed lint, unit tests, coverage, repo-pack contracts, and demo contracts. Coverage reported 81.2% against the 75.0% minimum.",
+      "notes": "Passed lint, unit tests, coverage, repo-pack contracts, and demo contracts. Coverage reported 81.0% against the 75.0% minimum.",
       "status": "pass"
     }
   ],
-  "generated_at": "2026-06-28T16:28:42Z",
+  "generated_at": "2026-06-28T16:44:19Z",
   "green_evidence": [
     {
       "command": "make lint-fast",
@@ -248,6 +273,11 @@
     },
     {
       "command": "go test ./cmd/relia -count=1 -run 'TestDistill|TestReview|TestDemoDistillReviewLifecycleFixtures'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -count=1 -run 'TestCheckRejectsDraftedMemoryRuleMissingCalibrationMetadata|TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage|TestDemoDistillReviewLifecycleFixtures|TestCheckReportsPhase0ContractRefs|TestPhase0SchemasDeclareMetadata|TestDemoAssessMatchesDirectoryScopedActiveRule|TestDemoAssessRejectsMatchedRuleWithOutOfRangeConfidence'",
       "exit_code": 0,
       "status": "pass"
     }
@@ -268,12 +298,12 @@
   "path_policy_result": {
     "changed_paths_checked": true,
     "forbidden_paths_changed": false,
-    "notes": "The full T6 worker changed-path inventory is recorded in changed_paths and all entries are within the task allowed_paths list. The current repair diff is limited to worker-owned T6 evidence artifacts. The required coverage command writes ignored .factory/tmp/coverage.out, which is not part of the worker diff.",
+    "notes": "The full T6 worker changed-path inventory is recorded in changed_paths and all entries are within the task allowed_paths list. The repair diff stays inside allowed code, docs, schema, examples, memory, and worker-owned T6 evidence paths. The required coverage command writes ignored .factory/tmp/coverage.out, which is not part of the worker diff.",
     "outside_allowed_paths_changed": false,
     "status": "pass"
   },
   "plan_drift_result": {
-    "notes": "Repair stayed inside worker-owned evidence by restoring the full T6 changed-path inventory and leaving NFR2 partial until product-signal timing evidence exists. No product behavior, tracker, PR lifecycle, merge, or factoryd-owned scope-closure state was changed.",
+    "notes": "Repair stayed within the T6 part-1 drafted-rule confidence/decay contract. No tracker, PR lifecycle, merge, live network, credential, or factoryd-owned scope-closure state was changed.",
     "status": "pass"
   },
   "red_evidence": [
@@ -287,8 +317,10 @@
   ],
   "repair_mode": {
     "codex_review_findings_repaired": [
-      "Restored the full T6 worker changed-path inventory in validation-report.json and work-proof-marker.json.",
-      "Kept NFR2-FAST-FIRST-MEMORY-001 partial because no under-30-minute manual or product-signal timing evidence exists."
+      "Enforced confidence-input and decay metadata for drafted cluster_summary and future llm_drafted memory rules in relia check and active assessment validation.",
+      "Updated schemas/memory-rule.schema.json with the matching drafted-origin conditional contract.",
+      "Updated committed cluster-summary demo fixtures and memory rule artifacts to carry calibration metadata.",
+      "Added focused regression coverage for missing drafted-rule calibration metadata and demo lifecycle fixture metadata."
     ],
     "missing_acceptance_item_ids": [
       "FR4-ATTRIBUTION-WITH-CONFIDENCE-001",
@@ -297,7 +329,7 @@
       "MVP-IN-SCOPE-003",
       "MVP-IN-SCOPE-006"
     ],
-    "notes": "Worker-owned evidence was repaired only for automated traceability. Factoryd-owned scope closure, PR lifecycle, and run-once artifacts were not authored by this worker.",
+    "notes": "Worker-owned evidence was updated for this repair. Factoryd-owned scope closure, PR lifecycle, and run-once artifacts were not authored by this worker.",
     "status": "pass",
     "trusted_validation_report_ref": ".factory/artifacts/task-runs/T6/validation-report.json",
     "updated_worker_evidence_paths": [
@@ -314,7 +346,7 @@
   "status": "pass",
   "task_id": "T6",
   "test_first_skipped_reason": {
-    "reason": "A failing red-first test was not fabricated after the baseline passed. The bounded change corrected a PRD default mismatch by updating the existing distill metadata assertion from 180 to 90 days alongside the implementation.",
+    "reason": "A failing red-first test was not fabricated after the baseline passed. The bounded repair added focused regression coverage for missing drafted-rule calibration metadata and validated it with the focused Go test plus make prepush-full.",
     "status": "skipped_non_blocking"
   },
   "versioning_result": {

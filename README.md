@@ -45,9 +45,11 @@ deterministic distillation, and agent-native output contract:
   `playbook` rules under `memory/rules/`. Confidence is calculated from
   evidence count, the PRD default 90-day recency half-life, contradictions,
   flake discounts, and extraction confidence; drafting models do not affect
-  confidence. With the default `distill.review_required: true`, drafted rules
-  are not active until reviewed. Deleted scoped paths produce `stale` rules,
-  and contradictory clean or held evidence produces `contradicted` rules.
+  confidence. Drafted `cluster_summary` and future `llm_drafted` rules must
+  carry their confidence-input and decay metadata. With the default
+  `distill.review_required: true`, drafted rules are not active until reviewed.
+  Deleted scoped paths produce `stale` rules, and contradictory clean or held
+  evidence produces `contradicted` rules.
 - `relia review --rule <id> --label accepted` moves a candidate memory rule to
   `active`. `suggested` and `needs_user_input` keep or return rules to
   candidate review, and stale or contradicted rules cannot be accepted without
