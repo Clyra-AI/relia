@@ -695,18 +695,19 @@
       ],
       "evidence_mode": "automated",
       "evidence_refs": [
-        ".factory/artifacts/acceptance-evidence/NFR2-FAST-FIRST-MEMORY-001/20260627T205710.726688000Z.json",
         ".factory/artifacts/task-runs/T6/validation-report.json"
       ],
       "group_id": "nfr2-fast-first-memory",
       "kind": "acceptance_test",
-      "notes": [],
-      "recorded_at": "2026-06-27T20:57:10Z",
-      "recorded_by": "davidahmann-via-codex",
+      "notes": [
+        "Local distill/review/memory commands exist, but T6 validation explicitly left first-user under-30-minute approval as partial pending product-signal or dedicated proof."
+      ],
+      "recorded_at": "2026-06-28T13:43:00Z",
+      "recorded_by": "factoryd closure repair",
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#nfr2-fast-first-memory",
       "source_text": "A technical user should ingest, distill, and approve their first rule in under 30 minutes.",
-      "status": "implemented",
+      "status": "partial",
       "task_refs": [
         "T6"
       ],
@@ -1133,18 +1134,19 @@
       ],
       "evidence_mode": "automated",
       "evidence_refs": [
-        ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-003/20260627T205710.835244000Z.json",
         ".factory/artifacts/task-runs/T6/validation-report.json"
       ],
       "group_id": "mvp-in-scope",
       "kind": "acceptance_test",
-      "notes": [],
-      "recorded_at": "2026-06-27T20:57:10Z",
-      "recorded_by": "davidahmann-via-codex",
+      "notes": [
+        "T6 validation explicitly left this MVP in-scope item partial; do not record implemented closure without matching implemented acceptance_result evidence."
+      ],
+      "recorded_at": "2026-06-28T13:43:00Z",
+      "recorded_by": "factoryd closure repair",
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
       "source_text": "agent attribution with confidence",
-      "status": "implemented",
+      "status": "partial",
       "task_refs": [
         "T6"
       ],
@@ -1208,18 +1210,19 @@
       ],
       "evidence_mode": "automated",
       "evidence_refs": [
-        ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-006/20260627T205710.855859000Z.json",
         ".factory/artifacts/task-runs/T6/validation-report.json"
       ],
       "group_id": "mvp-in-scope",
       "kind": "acceptance_test",
-      "notes": [],
-      "recorded_at": "2026-06-27T20:57:10Z",
-      "recorded_by": "davidahmann-via-codex",
+      "notes": [
+        "T6 validation explicitly left this MVP in-scope item partial; do not record implemented closure without matching implemented acceptance_result evidence."
+      ],
+      "recorded_at": "2026-06-28T13:43:00Z",
+      "recorded_by": "factoryd closure repair",
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
       "source_text": "deterministic failure signatures with confidence labels",
-      "status": "implemented",
+      "status": "partial",
       "task_refs": [
         "T6"
       ],
@@ -3009,7 +3012,7 @@
       ]
     }
   ],
-  "last_updated_at": "2026-06-27T20:57:10Z",
+  "last_updated_at": "2026-06-28T13:43:00Z",
   "schema_version": "1.0",
   "source_prd_ref": "docs/product/prd.md",
   "source_ref": "docs/product/prd.md"

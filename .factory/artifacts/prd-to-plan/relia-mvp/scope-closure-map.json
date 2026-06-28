@@ -901,7 +901,7 @@
     },
     {
       "acceptance_criteria": [
-        "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence \u2014 never from the drafting model."
+        "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence — never from the drafting model."
       ],
       "acceptance_item_ids": [
         "FR11-CALIBRATED-CONFIDENCE-001"
@@ -935,7 +935,7 @@
       ],
       "remaining_task_refs": [],
       "requires_human_approval": false,
-      "scope_item": "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence \u2014 never from the drafting model.",
+      "scope_item": "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence — never from the drafting model.",
       "scope_item_id": "FR11-CALIBRATED-CONFIDENCE-001",
       "source_ref": "docs/product/prd.md#fr11-calibrated-confidence",
       "status": "implemented",
@@ -1557,35 +1557,34 @@
         {
           "acceptance_item_id": "NFR2-FAST-FIRST-MEMORY-001",
           "evidence_refs": [
-            ".factory/artifacts/acceptance-evidence/NFR2-FAST-FIRST-MEMORY-001/20260627T205710.726688000Z.json",
             ".factory/artifacts/task-runs/T6/validation-report.json"
           ],
-          "recorded_at": "2026-06-27T20:57:10Z",
-          "recorded_by": "davidahmann-via-codex",
+          "recorded_at": "2026-06-28T13:43:00Z",
+          "recorded_by": "factoryd closure repair",
           "repair_task_refs": [],
-          "status": "implemented"
+          "status": "partial"
         }
       ],
       "delivery_slice_refs": [
         "distillation-calibration-and-confidence-part-1"
       ],
       "evidence_refs": [
-        ".factory/artifacts/acceptance-evidence/NFR2-FAST-FIRST-MEMORY-001/20260627T205710.726688000Z.json",
         ".factory/artifacts/task-runs/T6/validation-report.json"
       ],
       "group_id": "nfr2-fast-first-memory",
-      "implemented_task_refs": [
+      "implemented_task_refs": [],
+      "notes": [
+        "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence.",
+        "Local distill/review/memory commands exist, but T6 validation explicitly left first-user under-30-minute approval as partial pending product-signal or dedicated proof."
+      ],
+      "remaining_task_refs": [
         "T6"
       ],
-      "notes": [
-        "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
-      ],
-      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "A technical user should ingest, distill, and approve their first rule in under 30 minutes.",
       "scope_item_id": "NFR2-FAST-FIRST-MEMORY-001",
       "source_ref": "docs/product/prd.md#nfr2-fast-first-memory",
-      "status": "implemented",
+      "status": "partial",
       "task_refs": [
         "T6"
       ]
@@ -2249,35 +2248,34 @@
         {
           "acceptance_item_id": "MVP-IN-SCOPE-003",
           "evidence_refs": [
-            ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-003/20260627T205710.835244000Z.json",
             ".factory/artifacts/task-runs/T6/validation-report.json"
           ],
-          "recorded_at": "2026-06-27T20:57:10Z",
-          "recorded_by": "davidahmann-via-codex",
+          "recorded_at": "2026-06-28T13:43:00Z",
+          "recorded_by": "factoryd closure repair",
           "repair_task_refs": [],
-          "status": "implemented"
+          "status": "partial"
         }
       ],
       "delivery_slice_refs": [
         "distillation-calibration-and-confidence-part-1"
       ],
       "evidence_refs": [
-        ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-003/20260627T205710.835244000Z.json",
         ".factory/artifacts/task-runs/T6/validation-report.json"
       ],
       "group_id": "mvp-in-scope",
-      "implemented_task_refs": [
+      "implemented_task_refs": [],
+      "notes": [
+        "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence.",
+        "T6 validation explicitly left this MVP in-scope item partial; do not record implemented closure without matching implemented acceptance_result evidence."
+      ],
+      "remaining_task_refs": [
         "T6"
       ],
-      "notes": [
-        "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
-      ],
-      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "agent attribution with confidence",
       "scope_item_id": "MVP-IN-SCOPE-003",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
-      "status": "implemented",
+      "status": "partial",
       "task_refs": [
         "T6"
       ]
@@ -2393,35 +2391,34 @@
         {
           "acceptance_item_id": "MVP-IN-SCOPE-006",
           "evidence_refs": [
-            ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-006/20260627T205710.855859000Z.json",
             ".factory/artifacts/task-runs/T6/validation-report.json"
           ],
-          "recorded_at": "2026-06-27T20:57:10Z",
-          "recorded_by": "davidahmann-via-codex",
+          "recorded_at": "2026-06-28T13:43:00Z",
+          "recorded_by": "factoryd closure repair",
           "repair_task_refs": [],
-          "status": "implemented"
+          "status": "partial"
         }
       ],
       "delivery_slice_refs": [
         "distillation-calibration-and-confidence-part-1"
       ],
       "evidence_refs": [
-        ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-006/20260627T205710.855859000Z.json",
         ".factory/artifacts/task-runs/T6/validation-report.json"
       ],
       "group_id": "mvp-in-scope",
-      "implemented_task_refs": [
+      "implemented_task_refs": [],
+      "notes": [
+        "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence.",
+        "T6 validation explicitly left this MVP in-scope item partial; do not record implemented closure without matching implemented acceptance_result evidence."
+      ],
+      "remaining_task_refs": [
         "T6"
       ],
-      "notes": [
-        "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
-      ],
-      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "deterministic failure signatures with confidence labels",
       "scope_item_id": "MVP-IN-SCOPE-006",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
-      "status": "implemented",
+      "status": "partial",
       "task_refs": [
         "T6"
       ]
@@ -3687,11 +3684,14 @@
       ],
       "evidence_refs": [],
       "group_id": "distill-review-memory-page-acceptance-tests",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T4.2"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence.",
         "Sprint 4 remapped this item to smaller task slices or bounded learning-loop follow-up evidence.",
-        "T4.2 provides static fixture evidence only; command-level `relia distill` closure remains with T7.1."
+        "T4.2 provides static fixture evidence only; command-level `relia distill` closure remains with T7.1.",
+        "Closure repair: T4.2 static fixture evidence was already no longer remaining for this item; implemented_task_refs now records T4.2 while command-level distill closure remains with T7.1."
       ],
       "remaining_task_refs": [
         "T7.1"
@@ -5474,7 +5474,7 @@
       ]
     }
   ],
-  "last_updated_at": "2026-06-27T20:58:20Z",
+  "last_updated_at": "2026-06-28T13:45:00Z",
   "schema_version": "0.1",
   "source_prd_ref": "docs/product/prd.md"
 }
