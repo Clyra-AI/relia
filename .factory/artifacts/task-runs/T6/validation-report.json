@@ -80,8 +80,8 @@
         "README.md",
         "docs/dev/dev_guides.md"
       ],
-      "notes": "Automated repair trace: the local ingest, distill, review, and memory commands are covered end-to-end without provider or network requirements; no manual or product-signal evidence record was created.",
-      "status": "implemented"
+      "notes": "Automated repair trace: the local ingest, distill, review, and memory commands are covered end-to-end without provider or network requirements, but no manual or product-signal timing evidence record was created. The under-30-minute first-user acceptance remains partial and is not closed by this worker.",
+      "status": "partial"
     },
     {
       "acceptance_item_id": "NFR4-CALIBRATION-HONESTY-001",
@@ -171,7 +171,12 @@
   "changed_paths": [
     ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
     ".factory/artifacts/task-runs/T6/validation-report.json",
-    ".factory/artifacts/task-runs/T6/work-proof-marker.json"
+    ".factory/artifacts/task-runs/T6/work-proof-marker.json",
+    "README.md",
+    "cmd/relia/main.go",
+    "cmd/relia/main_test.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/dev/dev_guides.md"
   ],
   "changelog_result": {
     "draft_entry": "Implement PRD-defined clustering, rule drafting, confidence scoring, decay, contradiction handling, and deterministic fallback behavior. Part 1 of 2; scope is split to keep the runner-ready packet bounded.",
@@ -182,6 +187,17 @@
   },
   "commands_run": [
     "git status --short",
+    "make lint-fast",
+    "make test-fast",
+    "git show --name-only --format= HEAD",
+    "nl -ba .factory/artifacts/task-runs/T6/validation-report.json | sed -n '1,260p'",
+    "nl -ba .factory/artifacts/task-runs/T6/work-proof-marker.json | sed -n '1,220p'",
+    "nl -ba .factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json | sed -n '1,260p'",
+    "nl -ba .factory/artifacts/task-runs/T6/validation-report.json | sed -n '260,520p'",
+    "git log --oneline --decorate -8",
+    "git show --name-only --format= b8170ee83eeed4dc2946ebdec4b3fdd22764db53",
+    "git show --name-only --format= fa44b95",
+    "date -u +%Y-%m-%dT%H:%M:%SZ",
     "find .factory/artifacts/task-runs/T6 -maxdepth 1 -type f -print | sort",
     "sed -n '1,220p' .factory/artifacts/task-runs/T6/validation-report.json",
     "sed -n '1,220p' .factory/artifacts/task-runs/T6/work-proof-marker.json",
@@ -218,7 +234,7 @@
       "status": "pass"
     }
   ],
-  "generated_at": "2026-06-28T16:18:06Z",
+  "generated_at": "2026-06-28T16:28:42Z",
   "green_evidence": [
     {
       "command": "make lint-fast",
@@ -252,15 +268,28 @@
   "path_policy_result": {
     "changed_paths_checked": true,
     "forbidden_paths_changed": false,
-    "notes": "Current repair diff paths are worker-owned T6 evidence artifacts within the task allowed_paths list. The required coverage command writes ignored .factory/tmp/coverage.out, which is not part of the worker diff.",
+    "notes": "The full T6 worker changed-path inventory is recorded in changed_paths and all entries are within the task allowed_paths list. The current repair diff is limited to worker-owned T6 evidence artifacts. The required coverage command writes ignored .factory/tmp/coverage.out, which is not part of the worker diff.",
     "outside_allowed_paths_changed": false,
     "status": "pass"
   },
   "plan_drift_result": {
-    "notes": "Repair stayed inside automated acceptance traceability for the five missing T6 IDs. No product behavior, tracker, PR lifecycle, merge, or factoryd-owned scope-closure state was changed.",
+    "notes": "Repair stayed inside worker-owned evidence by restoring the full T6 changed-path inventory and leaving NFR2 partial until product-signal timing evidence exists. No product behavior, tracker, PR lifecycle, merge, or factoryd-owned scope-closure state was changed.",
     "status": "pass"
   },
+  "red_evidence": [
+    {
+      "command": "make test-fast",
+      "exit_code": 0,
+      "notes": "The packet's red_first command was run before edits and passed because T6 behavior was already broadly covered in the workspace.",
+      "phase": "red_first_command",
+      "status": "pass"
+    }
+  ],
   "repair_mode": {
+    "codex_review_findings_repaired": [
+      "Restored the full T6 worker changed-path inventory in validation-report.json and work-proof-marker.json.",
+      "Kept NFR2-FAST-FIRST-MEMORY-001 partial because no under-30-minute manual or product-signal timing evidence exists."
+    ],
     "missing_acceptance_item_ids": [
       "FR4-ATTRIBUTION-WITH-CONFIDENCE-001",
       "FR7-DETERMINISTIC-FAILURE-SIGNATURES-001",
@@ -277,18 +306,9 @@
       ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
     ]
   },
-  "red_evidence": [
-    {
-      "command": "make test-fast",
-      "exit_code": 0,
-      "notes": "The packet's red_first command was run before edits and passed because T6 behavior was already broadly covered in the workspace.",
-      "phase": "red_first_command",
-      "status": "pass"
-    }
-  ],
   "residual_risks": [
     "Provider-backed drafting remains fail-closed in this part-1 slice and requires a future approved model_provider_endpoint gate.",
-    "Under-30-minute first-user product signal is not self-closed by this worker."
+    "Under-30-minute first-user product signal is not self-closed by this worker; NFR2 remains partial until that evidence exists."
   ],
   "schema_version": "1.0",
   "status": "pass",

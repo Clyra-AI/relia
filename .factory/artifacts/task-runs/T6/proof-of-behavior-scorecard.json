@@ -3,7 +3,7 @@
   "schema_version": "1.0",
   "task_id": "T6",
   "status": "pass",
-  "generated_at": "2026-06-28T16:18:06Z",
+  "generated_at": "2026-06-28T16:28:42Z",
   "proof_level": "user_visible_behavior",
   "evidence_refs": [
     "README.md",
@@ -70,7 +70,6 @@
         "FR13-HUMAN-REVIEW-GATE-001",
         "FR14-BIDIRECTIONAL-MEMORY-001",
         "FR15-MEMORY-PAGE-WITH-RECEIPTS-001",
-        "NFR2-FAST-FIRST-MEMORY-001",
         "NFR6-LOCAL-PRIVACY-001",
         "NFR8-STRUCTURED-DATA-FIRST-001"
       ]
@@ -103,12 +102,19 @@
       ]
     },
     {
-      "behavior": "A first local memory loop is available through agent-native JSON commands without live network or provider setup.",
+      "behavior": "A local ingest, distill, review, and memory loop is available through agent-native JSON commands without live network or provider setup.",
       "status": "pass",
       "evidence": "TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage executes ingest, distill, review, and memory in one local fixture and verifies review activation plus MEMORY.md receipts.",
       "covered_acceptance_items": [
-        "NFR2-FAST-FIRST-MEMORY-001",
         "MVP-IN-SCOPE-003"
+      ]
+    },
+    {
+      "behavior": "Under-30-minute first-user product-signal timing evidence was not produced by this worker.",
+      "status": "partial",
+      "evidence": "No manual or product-signal timing record exists, so NFR2 is not closed as implemented. The automated local memory loop exists, but the timed user acceptance signal remains outstanding.",
+      "covered_acceptance_items": [
+        "NFR2-FAST-FIRST-MEMORY-001"
       ]
     }
   ]
