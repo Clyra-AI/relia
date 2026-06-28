@@ -5,6 +5,7 @@
       "evidence_refs": [
         ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
       ],
+      "notes": "Existing ingest attribution behavior remains covered by the full validation gate; this patch did not change attribution.",
       "status": "implemented"
     },
     {
@@ -12,6 +13,7 @@
       "evidence_refs": [
         ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
       ],
+      "notes": "Existing deterministic signature confidence behavior remains covered by the full validation gate; this patch did not change signature extraction.",
       "status": "implemented"
     },
     {
@@ -32,8 +34,11 @@
     {
       "acceptance_item_id": "FR13-HUMAN-REVIEW-GATE-001",
       "evidence_refs": [
-        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
+        ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go"
       ],
+      "notes": "Review now validates the rule contract before mutation, preserving fail-closed behavior for invalid candidate rules.",
       "status": "implemented"
     },
     {
@@ -55,7 +60,7 @@
       "evidence_refs": [
         ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
       ],
-      "notes": "Local distill, review, and memory flows are covered by fast tests; under-30-minute first-user closure remains product-signal lifecycle evidence outside this worker.",
+      "notes": "Local distill, review, and memory flows are covered by fast tests; under-30-minute first-user closure is product-signal evidence outside this worker.",
       "status": "partial"
     },
     {
@@ -70,6 +75,7 @@
       "evidence_refs": [
         ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
       ],
+      "notes": "No live network or credential work was attempted.",
       "status": "implemented"
     },
     {
@@ -92,6 +98,7 @@
         ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
         "cmd/relia/main_test.go"
       ],
+      "notes": "Invalid rule review now fails closed without creating an active inference from incomplete provenance.",
       "status": "implemented"
     },
     {
@@ -99,7 +106,7 @@
       "evidence_refs": [
         ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
       ],
-      "notes": "Part 1 implements deterministic local distill/review/memory behavior; final release/demo/product-signal closure remains outside worker scope.",
+      "notes": "Part 1 strengthens deterministic local distill/review/memory behavior; final release/demo/product-signal closure remains outside worker scope.",
       "status": "partial"
     },
     {
@@ -107,7 +114,7 @@
       "evidence_refs": [
         ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
       ],
-      "notes": "Part 1 strengthens deterministic contradiction handling; release boundary closure remains a later lifecycle gate.",
+      "notes": "Part 1 strengthens fail-closed review behavior; release boundary closure remains a later lifecycle gate.",
       "status": "partial"
     }
   ],
@@ -133,63 +140,68 @@
     "cmd/relia/main_test.go"
   ],
   "changelog_result": {
-    "notes": "No standalone changelog file exists; existing README and dev guide already state contradictory clean or held evidence produces contradicted rules.",
+    "notes": "No standalone changelog file exists; the change aligns with existing documented fail-closed review semantics.",
     "status": "not_applicable"
   },
   "commands_run": [
     "make lint-fast",
     "make test-fast",
-    "go test ./cmd/relia -count=1 -run TestDistillMarksAnyLaterContradictionAsContradicted",
+    "go test ./cmd/relia -count=1 -run TestReviewFailsClosedWithoutMutatingInvalidRule",
     "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
-    "go test ./cmd/relia -count=1 -run TestDistillMarksAnyLaterContradictionAsContradicted",
-    "make test-fast",
+    "go test ./cmd/relia -count=1 -run TestReviewFailsClosedWithoutMutatingInvalidRule",
     "make prepush-full",
+    "git status --short",
+    "git diff --stat",
     "python3 -m json.tool .factory/artifacts/task-runs/T6/work-proof-marker.json",
     "python3 -m json.tool .factory/artifacts/task-runs/T6/validation-report.json",
-    "python3 -m json.tool .factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
-    "git diff --name-only",
-    "git diff --name-only | path policy check"
+    "python3 -m json.tool .factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
   ],
   "docs_sync_result": {
-    "notes": "Existing README, dev guide, and architecture guide already describe the contradicted lifecycle behavior.",
+    "notes": "Existing README, dev guide, and architecture guide already document default review-gated, fail-closed memory rule behavior.",
     "status": "pass"
   },
   "final_validation_evidence": [
     {
       "command": "make prepush-full",
       "exit_code": 0,
-      "notes": "Coverage reported 81.2% against the 75.0% minimum; lint, unit, coverage, repo-pack, and demo contract lanes passed.",
+      "notes": "Passed lint, unit tests, coverage, repo-pack contracts, and demo contracts. Coverage reported 81.2% against the 75.0% minimum.",
       "status": "pass"
     }
   ],
-  "generated_at": "2026-06-28T14:15:14Z",
+  "generated_at": "2026-06-28T15:02:46Z",
   "green_evidence": [
     {
-      "command": "go test ./cmd/relia -count=1 -run TestDistillMarksAnyLaterContradictionAsContradicted",
-      "exit_code": 0,
-      "status": "pass"
-    },
-    {
-      "command": "make test-fast",
+      "command": "go test ./cmd/relia -count=1 -run TestReviewFailsClosedWithoutMutatingInvalidRule",
       "exit_code": 0,
       "status": "pass"
     }
   ],
+  "json_artifact_validation": {
+    "notes": "python3 -m json.tool was run for each worker-owned evidence artifact and each artifact has a top-level non-blocking status.",
+    "status": "pass"
+  },
   "path_policy_result": {
+    "changed_paths": [
+      ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
+      ".factory/artifacts/task-runs/T6/validation-report.json",
+      ".factory/artifacts/task-runs/T6/work-proof-marker.json",
+      "cmd/relia/main.go",
+      "cmd/relia/main_test.go"
+    ],
     "changed_paths_checked": true,
     "forbidden_paths_changed": false,
     "outside_allowed_paths_changed": false,
     "status": "pass"
   },
   "plan_drift_result": {
-    "notes": "Work stayed within T6 contradiction handling and did not update tracker, PR lifecycle, merge, or scope-closure state.",
+    "notes": "Work stayed within T6 deterministic review-gate fail-closed behavior and did not update tracker, PR lifecycle, merge, or scope-closure state.",
     "status": "pass"
   },
   "red_evidence": [
     {
-      "command": "go test ./cmd/relia -count=1 -run TestDistillMarksAnyLaterContradictionAsContradicted",
+      "command": "go test ./cmd/relia -count=1 -run TestReviewFailsClosedWithoutMutatingInvalidRule",
       "exit_code": 1,
-      "reason": "The new regression test failed before implementation because no contradicted rule was produced when one later clean result contradicted two earlier failures.",
+      "reason": "The new regression test failed before implementation because relia review rewrote an invalid candidate rule to active/accepted before validation reported the missing provenance contract.",
       "status": "expected_fail"
     }
   ],
@@ -201,7 +213,7 @@
   "status": "pass",
   "task_id": "T6",
   "versioning_result": {
-    "notes": "No schema or runtime pin changed.",
+    "notes": "No schema, runtime pin, or public output contract changed.",
     "status": "pre_1_0_no_version_bump"
   }
 }

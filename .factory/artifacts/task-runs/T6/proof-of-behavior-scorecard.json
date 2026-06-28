@@ -3,7 +3,7 @@
   "schema_version": "1.0",
   "task_id": "T6",
   "status": "pass",
-  "generated_at": "2026-06-28T14:15:14Z",
+  "generated_at": "2026-06-28T15:02:46Z",
   "proof_level": "user_visible_behavior",
   "evidence_refs": [
     "cmd/relia/main.go",
@@ -12,53 +12,50 @@
   ],
   "command_evidence": [
     {
-      "command": "go test ./cmd/relia -count=1 -run TestDistillMarksAnyLaterContradictionAsContradicted",
+      "command": "go test ./cmd/relia -count=1 -run TestReviewFailsClosedWithoutMutatingInvalidRule",
       "status": "expected_fail",
       "exit_code": 1,
       "phase": "red_first"
     },
     {
-      "command": "go test ./cmd/relia -count=1 -run TestDistillMarksAnyLaterContradictionAsContradicted",
+      "command": "go test ./cmd/relia -count=1 -run TestReviewFailsClosedWithoutMutatingInvalidRule",
       "status": "pass",
       "exit_code": 0,
       "phase": "focused_green"
     },
     {
-      "command": "make test-fast",
-      "status": "pass",
-      "exit_code": 0
-    },
-    {
       "command": "make prepush-full",
       "status": "pass",
-      "exit_code": 0
+      "exit_code": 0,
+      "phase": "final_validation"
     }
   ],
   "scorecard": [
     {
-      "behavior": "Any later clean or held evidence contradicting an avoid-rule failure cluster marks the drafted rule contradicted instead of leaving it candidate.",
+      "behavior": "Review validates the existing memory-rule artifact before mutating lifecycle or review labels.",
       "status": "pass",
-      "evidence": "TestDistillMarksAnyLaterContradictionAsContradicted",
+      "evidence": "updateMemoryRuleReview calls validateMemoryRuleArtifact before any write",
       "covered_acceptance_items": [
-        "FR12-DECAY-AND-CHURN-INVALIDATION-001",
+        "FR13-HUMAN-REVIEW-GATE-001",
         "NFR13-INFERENCE-HUMILITY-001"
       ]
     },
     {
-      "behavior": "Contradicted rules receive needs_user_input review labels and cannot be accepted without fresh distill evidence.",
+      "behavior": "An invalid candidate rule with missing provenance fails closed and remains byte-for-byte unchanged after a rejected accepted-review attempt.",
       "status": "pass",
-      "evidence": "TestDistillMarksAnyLaterContradictionAsContradicted and TestDistillMarksContradictedAndStaleRules",
+      "evidence": "TestReviewFailsClosedWithoutMutatingInvalidRule",
       "covered_acceptance_items": [
-        "FR12-DECAY-AND-CHURN-INVALIDATION-001",
-        "FR13-HUMAN-REVIEW-GATE-001"
+        "FR13-HUMAN-REVIEW-GATE-001",
+        "NFR13-INFERENCE-HUMILITY-001"
       ]
     },
     {
-      "behavior": "The existing deterministic distill, review, confidence, stale-path, playbook, privacy, and memory-page behavior remains covered by the full pre-push gate.",
+      "behavior": "The existing deterministic distill, review, confidence, stale-path, contradiction, playbook, privacy, and memory-page behavior remains covered by the full pre-push gate.",
       "status": "pass",
       "evidence": "make prepush-full",
       "covered_acceptance_items": [
         "FR11-CALIBRATED-CONFIDENCE-001",
+        "FR12-DECAY-AND-CHURN-INVALIDATION-001",
         "FR14-BIDIRECTIONAL-MEMORY-001",
         "FR15-MEMORY-PAGE-WITH-RECEIPTS-001",
         "NFR4-CALIBRATION-HONESTY-001",

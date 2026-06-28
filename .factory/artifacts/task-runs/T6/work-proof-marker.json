@@ -11,11 +11,11 @@
     ".factory/artifacts/task-runs/T6/validation-report.json",
     ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
   ],
-  "generated_at": "2026-06-28T14:15:14Z",
+  "generated_at": "2026-06-28T15:02:46Z",
   "implementation_performed": true,
   "implementation_summary": [
-    "Tightened distill lifecycle handling so any later contradictory evidence marks a drafted rule as contradicted before review activation can occur.",
-    "Added red-first regression coverage proving a rule with multiple failures and one later clean contradiction becomes contradicted with needs_user_input review."
+    "Validated memory-rule artifacts before review mutations so failed review attempts leave rule YAML unchanged.",
+    "Added regression coverage proving an invalid candidate rule fails closed instead of being promoted to active/accepted before contract validation fails."
   ],
   "schema_version": "1.0",
   "status": "implemented",

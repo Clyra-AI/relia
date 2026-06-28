@@ -2370,6 +2370,55 @@ func TestDistillMarksContradictedAndStaleRules(t *testing.T) {
 	}
 }
 
+func TestReviewFailsClosedWithoutMutatingInvalidRule(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "packages", "billing", "invoice.py"), "def total():\n    return 1\n")
+	rulePath := filepath.Join(tempDir, "memory", "rules", "invalid-candidate.yaml")
+	writeFileForTest(t, rulePath, `object_type: relia.memory_rule
+schema_version: "1.0"
+id: invalid-candidate
+kind: avoid
+status: candidate
+statement: Avoid direct billing clock calls.
+scope:
+  paths:
+    - packages/billing/invoice.py
+confidence: 0.72
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_0501
+review:
+  label: suggested
+  statement_origin: cluster_summary
+metadata:
+  confidence_label: medium
+`)
+	before, err := os.ReadFile(rulePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "review", "--rule", "invalid-candidate", "--label", "accepted"}, false)
+
+	if code != ExitValidation {
+		t.Fatalf("review exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "artifact_contract_validation_failed" || !strings.Contains(result.Errors[0].Message, "provenance") {
+		t.Fatalf("errors = %#v", result.Errors)
+	}
+	after, err := os.ReadFile(rulePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(after) != string(before) {
+		t.Fatalf("review mutated invalid rule despite failed validation:\nbefore=%s\nafter=%s", before, after)
+	}
+}
+
 func TestDistillMarksAnyLaterContradictionAsContradicted(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)

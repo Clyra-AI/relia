@@ -2948,6 +2948,9 @@ func findMemoryRulePath(root string, ruleDir string, rule string) (string, *Comm
 }
 
 func updateMemoryRuleReview(root string, rulePath string, label string) (string, *CommandError) {
+	if commandErr := validateMemoryRuleArtifact(root, rulePath); commandErr != nil {
+		return "", commandErr
+	}
 	content, err := os.ReadFile(rulePath)
 	if err != nil {
 		return "", internalError("could not read memory rule artifact", err)
