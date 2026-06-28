@@ -148,8 +148,8 @@
         "docs/architecture/architecture_guides.md",
         "schemas/memory-rule.schema.json"
       ],
-      "notes": "Automated repair trace: T6 part-1 deterministic local distill, review, and memory behavior is implemented and validated; lifecycle release-boundary evidence remains factoryd-owned.",
-      "status": "implemented"
+      "notes": "Automated repair trace: T6 part-1 deterministic local distill, review, and memory behavior is implemented and validated, but the MVP release/demo/product-signal boundary remains partial until lifecycle evidence exists.",
+      "status": "partial"
     },
     {
       "acceptance_item_id": "MVP-IN-SCOPE-006",
@@ -166,8 +166,8 @@
         "examples/demo/distill-review-lifecycle-fixtures.json",
         "memory/rules/demo-assessment-active-rule.yaml"
       ],
-      "notes": "Automated repair trace: confidence scoring, decay, deterministic fallback, drafted-rule calibration metadata, and memory-rule traceability are implemented and validated for this T6 part-1 slice; lifecycle release-boundary evidence remains factoryd-owned.",
-      "status": "implemented"
+      "notes": "Automated repair trace: confidence scoring, decay, deterministic fallback, drafted-rule calibration metadata, and memory-rule traceability are implemented and validated for this T6 part-1 slice, but the MVP release/demo/product-signal boundary remains partial until lifecycle evidence exists.",
+      "status": "partial"
     }
   ],
   "artifact_type": "validation_report",

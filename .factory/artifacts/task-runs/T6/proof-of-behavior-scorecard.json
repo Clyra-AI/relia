@@ -57,8 +57,7 @@
       "covered_acceptance_items": [
         "FR11-CALIBRATED-CONFIDENCE-001",
         "FR12-DECAY-AND-CHURN-INVALIDATION-001",
-        "NFR4-CALIBRATION-HONESTY-001",
-        "MVP-IN-SCOPE-006"
+        "NFR4-CALIBRATION-HONESTY-001"
       ]
     },
     {
@@ -101,9 +100,7 @@
       "status": "pass",
       "evidence": "README.md, docs/dev/dev_guides.md, and docs/architecture/architecture_guides.md updated with the 90-day half-life and drafted-rule metadata contract.",
       "covered_acceptance_items": [
-        "FR12-DECAY-AND-CHURN-INVALIDATION-001",
-        "MVP-IN-SCOPE-003",
-        "MVP-IN-SCOPE-006"
+        "FR12-DECAY-AND-CHURN-INVALIDATION-001"
       ]
     },
     {
@@ -119,16 +116,16 @@
       "status": "pass",
       "evidence": "TestIngestGeneratedExperienceIDIncludesSignatureIdentity, TestBacktestGroupsEquivalentCanonicalSignatureFields, TestBacktestAutoFlakeUsesCanonicalSignatureKeys, and TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage cover stable signature identity and structured/log-parsed extraction confidence.",
       "covered_acceptance_items": [
-        "FR7-DETERMINISTIC-FAILURE-SIGNATURES-001",
-        "MVP-IN-SCOPE-006"
+        "FR7-DETERMINISTIC-FAILURE-SIGNATURES-001"
       ]
     },
     {
-      "behavior": "A local ingest, distill, review, and memory loop is available through agent-native JSON commands without live network or provider setup.",
-      "status": "pass",
-      "evidence": "TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage executes ingest, distill, review, and memory in one local fixture and verifies review activation plus MEMORY.md receipts.",
+      "behavior": "The MVP public release/demo/product-signal boundary is not closed by this T6 part-1 slice.",
+      "status": "partial",
+      "evidence": "T6 validates bounded local distill, review, memory, signature, and calibration behavior, but no release/demo/product-signal lifecycle evidence exists for the split MVP boundary.",
       "covered_acceptance_items": [
-        "MVP-IN-SCOPE-003"
+        "MVP-IN-SCOPE-003",
+        "MVP-IN-SCOPE-006"
       ]
     },
     {
