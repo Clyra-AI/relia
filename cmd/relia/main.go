@@ -2589,8 +2589,11 @@ func distilledRuleStatus(root string, kind string, scopePaths []string, evidence
 	if len(scopePaths) > 0 && allScopePathsMissing(root, scopePaths) {
 		return "stale", "all scoped paths are missing from the working tree"
 	}
-	if contradictions > 0 && contradictions >= evidenceCount {
-		return "contradicted", "later held or clean evidence contradicts the drafted rule"
+	if contradictions > 0 {
+		if kind == "playbook" {
+			return "contradicted", "later failure evidence contradicts the drafted playbook rule"
+		}
+		return "contradicted", "later held or clean evidence contradicts the drafted avoid rule"
 	}
 	if !reviewRequired {
 		return "active", "review gate disabled explicitly in relia.yaml"

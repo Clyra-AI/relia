@@ -1,117 +1,71 @@
 {
   "artifact_type": "proof-of-behavior-scorecard",
-  "command_evidence": [
-    {
-      "command": "make test-fast",
-      "exit_code": 0,
-      "status": "pass"
-    },
-    {
-      "command": "make test-contracts",
-      "exit_code": 0,
-      "status": "pass"
-    },
-    {
-      "command": "make prepush-full",
-      "exit_code": 0,
-      "status": "pass"
-    },
-    {
-      "command": "go test ./cmd/relia -count=1 -run 'TestDistillAvoidContradictionsIgnoreOlderPositiveEvidence|TestYAMLScalarForWriteQuotesColonSpace|TestDistillMarksContradictedAndStaleRules'",
-      "exit_code": 0,
-      "status": "pass"
-    },
-    {
-      "command": "make prepush-full",
-      "exit_code": 0,
-      "notes": "Review repair validation; coverage 81.2%.",
-      "status": "pass"
-    }
-  ],
+  "schema_version": "1.0",
+  "task_id": "T6",
+  "status": "pass",
+  "generated_at": "2026-06-28T14:15:14Z",
+  "proof_level": "user_visible_behavior",
   "evidence_refs": [
-    "cmd/relia/main_test.go",
     "cmd/relia/main.go",
-    "schemas/memory-rule.schema.json",
+    "cmd/relia/main_test.go",
     ".factory/artifacts/task-runs/T6/validation-report.json"
   ],
-  "generated_at": "2026-06-27T20:47:53Z",
-  "proof_level": "user_visible_behavior",
-  "schema_version": "1.0",
+  "command_evidence": [
+    {
+      "command": "go test ./cmd/relia -count=1 -run TestDistillMarksAnyLaterContradictionAsContradicted",
+      "status": "expected_fail",
+      "exit_code": 1,
+      "phase": "red_first"
+    },
+    {
+      "command": "go test ./cmd/relia -count=1 -run TestDistillMarksAnyLaterContradictionAsContradicted",
+      "status": "pass",
+      "exit_code": 0,
+      "phase": "focused_green"
+    },
+    {
+      "command": "make test-fast",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "make prepush-full",
+      "status": "pass",
+      "exit_code": 0
+    }
+  ],
   "scorecard": [
     {
-      "behavior": "relia distill drafts deterministic candidate avoid and playbook rules from local experience shards",
+      "behavior": "Any later clean or held evidence contradicting an avoid-rule failure cluster marks the drafted rule contradicted instead of leaving it candidate.",
+      "status": "pass",
+      "evidence": "TestDistillMarksAnyLaterContradictionAsContradicted",
+      "covered_acceptance_items": [
+        "FR12-DECAY-AND-CHURN-INVALIDATION-001",
+        "NFR13-INFERENCE-HUMILITY-001"
+      ]
+    },
+    {
+      "behavior": "Contradicted rules receive needs_user_input review labels and cannot be accepted without fresh distill evidence.",
+      "status": "pass",
+      "evidence": "TestDistillMarksAnyLaterContradictionAsContradicted and TestDistillMarksContradictedAndStaleRules",
+      "covered_acceptance_items": [
+        "FR12-DECAY-AND-CHURN-INVALIDATION-001",
+        "FR13-HUMAN-REVIEW-GATE-001"
+      ]
+    },
+    {
+      "behavior": "The existing deterministic distill, review, confidence, stale-path, playbook, privacy, and memory-page behavior remains covered by the full pre-push gate.",
+      "status": "pass",
+      "evidence": "make prepush-full",
       "covered_acceptance_items": [
         "FR11-CALIBRATED-CONFIDENCE-001",
         "FR14-BIDIRECTIONAL-MEMORY-001",
-        "NFR11-STOCHASTIC-HONESTY-001"
-      ],
-      "evidence": "TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage",
-      "status": "pass"
-    },
-    {
-      "behavior": "confidence metadata records evidence count, recency half-life, contradictions, flake discount, extraction confidence, and drafting_model_weight 0",
-      "covered_acceptance_items": [
-        "FR11-CALIBRATED-CONFIDENCE-001",
-        "NFR4-CALIBRATION-HONESTY-001",
-        "NFR13-INFERENCE-HUMILITY-001"
-      ],
-      "evidence": "TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage",
-      "status": "pass"
-    },
-    {
-      "behavior": "review gate keeps drafted rules inactive until accepted and prevents stale rules from being accepted",
-      "covered_acceptance_items": [
-        "FR13-HUMAN-REVIEW-GATE-001",
-        "FR12-DECAY-AND-CHURN-INVALIDATION-001"
-      ],
-      "evidence": "TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage and TestDistillMarksContradictedAndStaleRules",
-      "status": "pass"
-    },
-    {
-      "behavior": "stale and contradicted lifecycle states are generated deterministically from deleted paths and clean/held contradictions",
-      "covered_acceptance_items": [
-        "FR12-DECAY-AND-CHURN-INVALIDATION-001",
-        "NFR13-INFERENCE-HUMILITY-001"
-      ],
-      "evidence": "TestDistillMarksContradictedAndStaleRules",
-      "status": "pass"
-    },
-    {
-      "behavior": "relia memory renders MEMORY.md with statements, confidence, lifecycle status, review label, and clickable PR provenance",
-      "covered_acceptance_items": [
-        "FR15-MEMORY-PAGE-WITH-RECEIPTS-001"
-      ],
-      "evidence": "TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage",
-      "status": "pass"
-    },
-    {
-      "behavior": "local privacy and structured-data-first posture remain enforced",
-      "covered_acceptance_items": [
-        "NFR6-LOCAL-PRIVACY-001",
-        "NFR8-STRUCTURED-DATA-FIRST-001"
-      ],
-      "evidence": "make prepush-full, validateReliaConfig, loadBacktestExperiences, schemas/memory-rule.schema.json",
-      "status": "pass"
-    },
-    {
-      "behavior": "avoid-rule contradiction scoring ignores positive evidence older than the latest summarized failure",
-      "covered_acceptance_items": [
-        "FR12-DECAY-AND-CHURN-INVALIDATION-001",
-        "NFR13-INFERENCE-HUMILITY-001"
-      ],
-      "evidence": "TestDistillAvoidContradictionsIgnoreOlderPositiveEvidence",
-      "status": "pass"
-    },
-    {
-      "behavior": "generated memory-rule YAML quotes scalar values containing colon-space",
-      "covered_acceptance_items": [
         "FR15-MEMORY-PAGE-WITH-RECEIPTS-001",
-        "NFR8-STRUCTURED-DATA-FIRST-001"
-      ],
-      "evidence": "TestYAMLScalarForWriteQuotesColonSpace",
-      "status": "pass"
+        "NFR4-CALIBRATION-HONESTY-001",
+        "NFR6-LOCAL-PRIVACY-001",
+        "NFR8-STRUCTURED-DATA-FIRST-001",
+        "NFR11-STOCHASTIC-HONESTY-001"
+      ]
     }
-  ],
-  "status": "pass",
-  "task_id": "T6"
+  ]
 }

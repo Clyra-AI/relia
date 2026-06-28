@@ -2370,6 +2370,33 @@ func TestDistillMarksContradictedAndStaleRules(t *testing.T) {
 	}
 }
 
+func TestDistillMarksAnyLaterContradictionAsContradicted(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "packages", "billing", "invoice.py"), "def total():\n    return 1\n")
+	inputPath := filepath.Join(tempDir, "fixtures", "distill-later-contradiction.jsonl")
+	writeFileForTest(t, inputPath, strings.Join([]string{
+		`{"experience_id":"exp_0401","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-03-01T10:00:00Z","pr":401,"commit":"abc401","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_billing_tax_rounding","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_tax_rounding","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/401"]}`,
+		`{"experience_id":"exp_0402","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-03-08T10:00:00Z","pr":402,"commit":"abc402","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_billing_tax_rounding","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_tax_rounding","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/402"]}`,
+		`{"experience_id":"exp_0403","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-03-15T10:00:00Z","pr":403,"commit":"abc403","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"merged_clean","terminal_state":"passed","signature_id":"sig_billing_tax_rounding","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_tax_rounding","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/403"]}`,
+	}, "\n")+"\n")
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+	if code != ExitSuccess {
+		t.Fatalf("ingest exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+
+	stdout, stderr, code = runForTest(t, []string{"--json", "distill", "--format", "json"}, false)
+	if code != ExitSuccess {
+		t.Fatalf("distill exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	rules := loadRuleDocsByStatusForTest(t, tempDir)
+	contradicted := rules["contradicted"]
+	if contradicted.Scalars["evidence.contradictions"].Value != "1" ||
+		contradicted.Scalars["review.label"].Value != "needs_user_input" {
+		t.Fatalf("contradicted rule = %#v", contradicted.Scalars)
+	}
+}
+
 func TestDistillAvoidContradictionsIgnoreOlderPositiveEvidence(t *testing.T) {
 	timestamp := func(value string) time.Time {
 		t.Helper()
