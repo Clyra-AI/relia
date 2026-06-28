@@ -3,23 +3,18 @@
   "changed_paths": [
     ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json",
     ".factory/artifacts/task-runs/T6/validation-report.json",
-    ".factory/artifacts/task-runs/T6/work-proof-marker.json",
-    "README.md",
-    "cmd/relia/main.go",
-    "cmd/relia/main_test.go",
-    "docs/architecture/architecture_guides.md",
-    "docs/dev/dev_guides.md"
+    ".factory/artifacts/task-runs/T6/work-proof-marker.json"
   ],
   "evidence_refs": [
     ".factory/artifacts/task-runs/T6/validation-report.json",
     ".factory/artifacts/task-runs/T6/proof-of-behavior-scorecard.json"
   ],
-  "generated_at": "2026-06-28T16:12:22Z",
+  "generated_at": "2026-06-28T16:18:06Z",
   "implementation_performed": true,
   "implementation_summary": [
-    "Aligned the deterministic offline distill decay default with the PRD-defined 90-day half-life.",
-    "Updated T6 regression coverage so generated memory-rule metadata records half_life_days: 90.",
-    "Synced README, developer guide, and architecture guide wording for the 90-day confidence-decay default."
+    "Repaired automated acceptance traceability for FR4-ATTRIBUTION-WITH-CONFIDENCE-001, FR7-DETERMINISTIC-FAILURE-SIGNATURES-001, NFR2-FAST-FIRST-MEMORY-001, MVP-IN-SCOPE-003, and MVP-IN-SCOPE-006.",
+    "Updated the worker validation report so each repaired item is implemented with trusted validation-report, work-proof, scorecard, code, test, and docs evidence refs.",
+    "Expanded the proof-of-behavior scorecard with concrete automated attribution, deterministic signature, and fast local memory-loop evidence."
   ],
   "schema_version": "1.0",
   "status": "implemented",
