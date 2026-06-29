@@ -188,8 +188,6 @@
         "distill-review-memory-page-acceptance-tests"
       ],
       "acceptance_item_ids": [
-        "MVP-IN-SCOPE-010",
-        "MVP-IN-SCOPE-011",
         "MVP-IN-SCOPE-012",
         "MVP-IN-SCOPE-013",
         "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-004",
@@ -247,6 +245,8 @@
         "FR2-REPO-NATIVE-LOCAL-FIRST-OPERATION-001",
         "FR20-ADVISORY-ONLY-DEFAULT-001",
         "FR23-PROVIDER-ADAPTERS-AND-NO-LLM-MODE-001",
+        "MVP-IN-SCOPE-010",
+        "MVP-IN-SCOPE-011",
         "FR24-COST-VISIBILITY-001",
         "FR25-PORTABLE-ARTIFACTS-001",
         "NFR10-COST-VISIBILITY-001",
@@ -840,7 +840,7 @@
       ],
       "closure_status": "partial",
       "criteria": [
-        "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence — never from the drafting model."
+        "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence \u2014 never from the drafting model."
       ],
       "group_id": "fr11-calibrated-confidence",
       "item_mappings": [
@@ -1982,21 +1982,21 @@
         {
           "acceptance_item_id": "MVP-IN-SCOPE-010",
           "delivery_slice_refs": [
-            "distillation-calibration-and-confidence-part-2"
+            "external-provider-and-network-integration"
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T7"
+            "T9"
           ]
         },
         {
           "acceptance_item_id": "MVP-IN-SCOPE-011",
           "delivery_slice_refs": [
-            "distillation-calibration-and-confidence-part-2"
+            "external-provider-and-network-integration"
           ],
           "evidence_mode": "external",
           "task_refs": [
-            "T7"
+            "T9"
           ]
         },
         {

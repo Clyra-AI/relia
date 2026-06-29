@@ -1346,23 +1346,24 @@
         "mvp"
       ],
       "delivery_slice_refs": [
-        "distillation-calibration-and-confidence-part-2"
+        "external-provider-and-network-integration"
       ],
       "evidence_mode": "external",
       "group_id": "mvp-in-scope",
       "kind": "acceptance_test",
       "notes": [
-        "Requires approved network allowlist before live closure."
+        "Requires approved network allowlist before live closure.",
+        "No-LLM drafting remains covered by T7 offline acceptance; live OpenAI-compatible/Anthropic provider closure remains gated under T9."
       ],
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
       "source_text": "LLM rule drafting (OpenAI-compatible and Anthropic adapters) and no-LLM mode",
       "status": "planned",
       "task_refs": [
-        "T7"
+        "T9"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/8/validation_commands"
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/11/validation_commands"
       ]
     },
     {

@@ -189,8 +189,6 @@
         "distill-review-memory-page-acceptance-tests"
       ],
       "acceptance_item_ids": [
-        "MVP-IN-SCOPE-010",
-        "MVP-IN-SCOPE-011",
         "MVP-IN-SCOPE-012",
         "MVP-IN-SCOPE-013",
         "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-004",
@@ -248,6 +246,8 @@
         "FR2-REPO-NATIVE-LOCAL-FIRST-OPERATION-001",
         "FR20-ADVISORY-ONLY-DEFAULT-001",
         "FR23-PROVIDER-ADAPTERS-AND-NO-LLM-MODE-001",
+        "MVP-IN-SCOPE-010",
+        "MVP-IN-SCOPE-011",
         "FR24-COST-VISIBILITY-001",
         "FR25-PORTABLE-ARTIFACTS-001",
         "NFR10-COST-VISIBILITY-001",
@@ -4336,7 +4336,7 @@
       "acceptance_checks": [
         "Relia must attribute agent authorship via bot login, co-author trailer, and PR label, with method and confidence recorded. Uncertain attribution must fail closed (excluded from ERR) by default.",
         "Signature extraction must prefer structured check-run data and label log-parsed signatures with extraction confidence.",
-        "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence — never from the drafting model.",
+        "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence \u2014 never from the drafting model.",
         "Rules must decay by half-life and go `stale` when their scoped paths are deleted.",
         "Drafted rules must be reviewed before becoming `active`, with `accepted`, `suggested`, and `needs_user_input` labels. Disabling review is an explicit, surfaced configuration choice.",
         "Relia must support `avoid` rules from failures and `playbook` rules from held fixes, and playbook rules must cite held evidence.",
@@ -5020,7 +5020,7 @@
         "acceptance_criteria": [
           "Relia must attribute agent authorship via bot login, co-author trailer, and PR label, with method and confidence recorded. Uncertain attribution must fail closed (excluded from ERR) by default.",
           "Signature extraction must prefer structured check-run data and label log-parsed signatures with extraction confidence.",
-          "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence — never from the drafting model.",
+          "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence \u2014 never from the drafting model.",
           "Rules must decay by half-life and go `stale` when their scoped paths are deleted.",
           "Drafted rules must be reviewed before becoming `active`, with `accepted`, `suggested`, and `needs_user_input` labels. Disabling review is an explicit, surfaced configuration choice.",
           "Relia must support `avoid` rules from failures and `playbook` rules from held fixes, and playbook rules must cite held evidence.",
@@ -5097,8 +5097,6 @@
     },
     {
       "acceptance_checks": [
-        "tiered clustering (deterministic signature keys, explicitly pulled local embeddings, provider embeddings opt-in)",
-        "LLM rule drafting (OpenAI-compatible and Anthropic adapters) and no-LLM mode",
         "bidirectional rules (`avoid`, `playbook`) with mandatory provenance",
         "calibrated confidence, decay, churn invalidation, lifecycle states",
         "Attribution records method and confidence; an ambiguous trailer yields `attribution_uncertain` and exclusion from ERR.",
@@ -5134,8 +5132,6 @@
       ],
       "acceptance_group_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json#/groups",
       "acceptance_item_ids": [
-        "MVP-IN-SCOPE-010",
-        "MVP-IN-SCOPE-011",
         "MVP-IN-SCOPE-012",
         "MVP-IN-SCOPE-013",
         "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-004",
@@ -5152,52 +5148,6 @@
       ],
       "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
       "acceptance_result_requirements": [
-        {
-          "acceptance_item_id": "MVP-IN-SCOPE-010",
-          "allowed_statuses": [
-            "implemented",
-            "partial",
-            "missing",
-            "blocked",
-            "deferred_with_approval"
-          ],
-          "evidence_required": [
-            "validation_report",
-            "work_proof_marker",
-            "proof-of-behavior-scorecard"
-          ],
-          "worker_evidence_required": [
-            "validation_report",
-            "work_proof_marker",
-            "proof-of-behavior-scorecard"
-          ],
-          "lifecycle_evidence_required": [
-            "scope_closure_report"
-          ]
-        },
-        {
-          "acceptance_item_id": "MVP-IN-SCOPE-011",
-          "allowed_statuses": [
-            "implemented",
-            "partial",
-            "missing",
-            "blocked",
-            "deferred_with_approval"
-          ],
-          "evidence_required": [
-            "validation_report",
-            "work_proof_marker",
-            "proof-of-behavior-scorecard"
-          ],
-          "worker_evidence_required": [
-            "validation_report",
-            "work_proof_marker",
-            "proof-of-behavior-scorecard"
-          ],
-          "lifecycle_evidence_required": [
-            "scope_closure_report"
-          ]
-        },
         {
           "acceptance_item_id": "MVP-IN-SCOPE-012",
           "allowed_statuses": [
@@ -5696,25 +5646,9 @@
       "factoryd_runtime": {
         "approval_posture": "human approval required for high risk, live credentials, and merge",
         "branch_prefix": "codex",
-        "capability_grants": [
-          {
-            "approved": false,
-            "budget_posture": "pending-approved-model-provider-budget",
-            "capability": "model_provider_endpoint",
-            "credential_environment": "pending-approved-model-provider-env-var",
-            "evidence_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions/model_provider_endpoint",
-            "network_allowlist": [
-              "pending-approved-model-provider-host"
-            ],
-            "provider_endpoint": "pending-approved-provider-endpoint",
-            "provider_identity": "pending-approved-provider",
-            "provider_model": "pending-approved-model",
-            "redaction_posture": "pending-approved-model-provider-redaction",
-            "task_id": "T7"
-          }
-        ],
-        "credential_posture": "no ambient secrets; approved model_provider_endpoint credential environment required before provider work",
-        "network_posture": "offline by default; allowlisted only after approved model_provider_endpoint grant",
+        "capability_grants": [],
+        "credential_posture": "no ambient secrets",
+        "network_posture": "offline by default",
         "runtime_control": {
           "autonomy_level": "restricted",
           "conflict_behavior": "fail_closed",
@@ -5775,23 +5709,6 @@
       "max_iterations": 2,
       "migration_impact": "None expected unless this task changes public output, schemas, artifacts, or install/distribution behavior.",
       "mission_contract_ref": "docs/product/prd.md",
-      "model_provider_requirements": {
-        "approval_policy": "Provider embedding and LLM rule-drafting integrations for OpenAI-compatible and Anthropic adapters require a complete model_provider_endpoint grant with provider identity, provider model, endpoint or base_url, credential environment, budget posture, redaction posture, and allowlist. Generic network or credential approval alone does not satisfy this model-specific gate.",
-        "provider_surfaces": [
-          "openai_compatible_http",
-          "anthropic_messages_http"
-        ],
-        "required_fields": [
-          "provider_identity",
-          "provider_model",
-          "provider_endpoint_or_base_url",
-          "credential_environment",
-          "budget_posture",
-          "redaction_posture",
-          "network_allowlist"
-        ],
-        "required_grant": "model_provider_endpoint"
-      },
       "objective": "Implement PRD-defined clustering, rule drafting, confidence scoring, decay, contradiction handling, and deterministic fallback behavior. Part 2 of 2; scope is split to keep the runner-ready packet bounded.",
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
       "proof_scorecard_artifact": "proof-of-behavior-scorecard",
@@ -5812,10 +5729,9 @@
         "commit-push",
         "post-merge-monitor"
       ],
-      "requires_credentials": true,
+      "requires_credentials": false,
       "requires_human_approval": false,
-      "requires_model_provider_endpoint": true,
-      "requires_network": true,
+      "requires_network": false,
       "risk_class": "low",
       "runtime_pins": {
         "artifact_namespace": ".factory/artifacts/",
@@ -5834,7 +5750,8 @@
         "Do not self-close manual, product-signal, or judgment-only acceptance without recorded evidence.",
         "Do not bundle model weights or inference-runtime payloads into source, binaries, containers, or release artifacts.",
         "Do not call provider embedding endpoints unless provider credentials, cost cap, redaction posture, and network allowlist are explicitly approved.",
-        "No model provider endpoint calls without a complete model_provider_endpoint grant with provider identity, provider model, endpoint or base_url, credential environment, budget posture, redaction posture, and allowlist."
+        "No model provider endpoint calls without a complete model_provider_endpoint grant with provider identity, provider model, endpoint or base_url, credential environment, budget posture, redaction posture, and allowlist.",
+        "T7 may add offline provider interfaces, deterministic no-LLM behavior, and fail-closed local/provider gates, but must not make live provider calls or require credentials."
       ],
       "security_scanner_gates": {
         "exception_policy": "approved_exception_required_when_required_or_surface_touched",
@@ -5870,7 +5787,8 @@
         "model artifact download attempted without explicit relia models pull scope or approved network posture",
         "model weights or inference-runtime payloads are added to source, binary, container, or release artifacts without an approved distribution decision",
         "embeddings: local silently falls back instead of failing closed on missing or digest-mismatched artifact",
-        "model provider endpoint work attempted without model_provider_endpoint grant"
+        "model provider endpoint work attempted without model_provider_endpoint grant",
+        "T7 requires live provider credentials, network, or model_provider_endpoint approval"
       ],
       "structured_parser_policy_refs": [
         "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
@@ -5906,7 +5824,6 @@
       "validation_contract_inheritance": {
         "acceptance_criteria": [
           "tiered clustering (deterministic signature keys, explicitly pulled local embeddings, provider embeddings opt-in)",
-          "LLM rule drafting (OpenAI-compatible and Anthropic adapters) and no-LLM mode",
           "bidirectional rules (`avoid`, `playbook`) with mandatory provenance",
           "calibrated confidence, decay, churn invalidation, lifecycle states",
           "Attribution records method and confidence; an ambiguous trailer yields `attribution_uncertain` and exclusion from ERR.",
@@ -5923,7 +5840,6 @@
         ],
         "acceptance_item_ids": [
           "MVP-IN-SCOPE-010",
-          "MVP-IN-SCOPE-011",
           "MVP-IN-SCOPE-012",
           "MVP-IN-SCOPE-013",
           "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-004",
@@ -6913,6 +6829,8 @@
         "The MVP must work without a hosted Relia account. Memory lives in the repository.",
         "The GitHub Action must never block merges by default. The recurrence gate requires explicit configuration and exits `5` when tripped.",
         "Distillation must support OpenAI-compatible and Anthropic adapters behind a pluggable interface, BYO key, cost caps, and a deterministic no-LLM mode.",
+        "tiered clustering (deterministic signature keys, explicitly pulled local embeddings, provider embeddings opt-in)",
+        "LLM rule drafting (OpenAI-compatible and Anthropic adapters) and no-LLM mode",
         "Distill runs using a provider must report token and estimated cost information.",
         "Experience records, rules, memory pages, reports, and baselines must remain useful outside any hosted service.",
         "Provider-backed distillation must show token and estimated cost information and respect `max_cost_usd_per_run`.",
@@ -6937,6 +6855,8 @@
         "FR2-REPO-NATIVE-LOCAL-FIRST-OPERATION-001",
         "FR20-ADVISORY-ONLY-DEFAULT-001",
         "FR23-PROVIDER-ADAPTERS-AND-NO-LLM-MODE-001",
+        "MVP-IN-SCOPE-010",
+        "MVP-IN-SCOPE-011",
         "FR24-COST-VISIBILITY-001",
         "FR25-PORTABLE-ARTIFACTS-001",
         "NFR10-COST-VISIBILITY-001",
@@ -6994,6 +6914,52 @@
         },
         {
           "acceptance_item_id": "FR23-PROVIDER-ADAPTERS-AND-NO-LLM-MODE-001",
+          "allowed_statuses": [
+            "implemented",
+            "partial",
+            "missing",
+            "blocked",
+            "deferred_with_approval"
+          ],
+          "evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
+            "scope_closure_report"
+          ]
+        },
+        {
+          "acceptance_item_id": "MVP-IN-SCOPE-011",
+          "allowed_statuses": [
+            "implemented",
+            "partial",
+            "missing",
+            "blocked",
+            "deferred_with_approval"
+          ],
+          "evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
+            "scope_closure_report"
+          ]
+        },
+        {
+          "acceptance_item_id": "MVP-IN-SCOPE-010",
           "allowed_statuses": [
             "implemented",
             "partial",
@@ -7480,7 +7446,8 @@
         "No completion claim without acceptance evidence.",
         "No live credentials, API keys, tokens, or secrets without explicit approval.",
         "No live network/provider calls without explicit approval and allowlist.",
-        "No model provider endpoint calls without a complete model_provider_endpoint grant with provider identity, provider model, endpoint or base_url, credential environment, budget posture, redaction posture, and allowlist."
+        "No model provider endpoint calls without a complete model_provider_endpoint grant with provider identity, provider model, endpoint or base_url, credential environment, budget posture, redaction posture, and allowlist.",
+        "T9 owns live OpenAI-compatible and Anthropic provider closure; do not run provider endpoints without a complete model_provider_endpoint grant."
       ],
       "security_scanner_gates": {
         "exception_policy": "approved_exception_required_when_required_or_surface_touched",
@@ -7549,6 +7516,7 @@
           "The MVP must work without a hosted Relia account. Memory lives in the repository.",
           "The GitHub Action must never block merges by default. The recurrence gate requires explicit configuration and exits `5` when tripped.",
           "Distillation must support OpenAI-compatible and Anthropic adapters behind a pluggable interface, BYO key, cost caps, and a deterministic no-LLM mode.",
+          "LLM rule drafting (OpenAI-compatible and Anthropic adapters) and no-LLM mode",
           "Distill runs using a provider must report token and estimated cost information.",
           "Experience records, rules, memory pages, reports, and baselines must remain useful outside any hosted service.",
           "Provider-backed distillation must show token and estimated cost information and respect `max_cost_usd_per_run`.",
@@ -7560,6 +7528,7 @@
           "FR2-REPO-NATIVE-LOCAL-FIRST-OPERATION-001",
           "FR20-ADVISORY-ONLY-DEFAULT-001",
           "FR23-PROVIDER-ADAPTERS-AND-NO-LLM-MODE-001",
+          "MVP-IN-SCOPE-011",
           "FR24-COST-VISIBILITY-001",
           "FR25-PORTABLE-ARTIFACTS-001",
           "NFR10-COST-VISIBILITY-001",

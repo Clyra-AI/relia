@@ -190,8 +190,6 @@
         "distill-review-memory-page-acceptance-tests"
       ],
       "acceptance_item_ids": [
-        "MVP-IN-SCOPE-010",
-        "MVP-IN-SCOPE-011",
         "MVP-IN-SCOPE-012",
         "MVP-IN-SCOPE-013",
         "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-004",
@@ -249,6 +247,8 @@
         "FR2-REPO-NATIVE-LOCAL-FIRST-OPERATION-001",
         "FR20-ADVISORY-ONLY-DEFAULT-001",
         "FR23-PROVIDER-ADAPTERS-AND-NO-LLM-MODE-001",
+        "MVP-IN-SCOPE-010",
+        "MVP-IN-SCOPE-011",
         "FR24-COST-VISIBILITY-001",
         "FR25-PORTABLE-ARTIFACTS-001",
         "NFR10-COST-VISIBILITY-001",
@@ -942,7 +942,7 @@
     },
     {
       "acceptance_criteria": [
-        "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence — never from the drafting model."
+        "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence \u2014 never from the drafting model."
       ],
       "acceptance_item_ids": [
         "FR11-CALIBRATED-CONFIDENCE-001"
@@ -989,7 +989,7 @@
       ],
       "remaining_task_refs": [],
       "requires_human_approval": false,
-      "scope_item": "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence — never from the drafting model.",
+      "scope_item": "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence \u2014 never from the drafting model.",
       "scope_item_id": "FR11-CALIBRATED-CONFIDENCE-001",
       "source_ref": "docs/product/prd.md#fr11-calibrated-confidence",
       "status": "implemented",
@@ -2838,16 +2838,17 @@
         }
       ],
       "delivery_slice_refs": [
-        "distillation-calibration-and-confidence-part-2"
+        "external-provider-and-network-integration"
       ],
       "evidence_refs": [],
       "group_id": "mvp-in-scope",
       "implemented_task_refs": [],
       "notes": [
-        "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
+        "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence.",
+        "Moved to T9 because this acceptance item includes provider embeddings opt-in; offline/no-LLM distill behavior remains covered by T7 command-level acceptance."
       ],
       "remaining_task_refs": [
-        "T7"
+        "T9"
       ],
       "requires_human_approval": false,
       "scope_item": "tiered clustering (deterministic signature keys, explicitly pulled local embeddings, provider embeddings opt-in)",
@@ -2855,7 +2856,7 @@
       "source_ref": "docs/product/prd.md#mvp-in-scope",
       "status": "partial",
       "task_refs": [
-        "T7"
+        "T9"
       ]
     },
     {
@@ -2869,21 +2870,24 @@
         {
           "acceptance_item_id": "MVP-IN-SCOPE-011",
           "evidence_refs": [],
-          "repair_task_refs": [],
+          "repair_task_refs": [
+            "T9"
+          ],
           "status": "partial"
         }
       ],
       "delivery_slice_refs": [
-        "distillation-calibration-and-confidence-part-2"
+        "external-provider-and-network-integration"
       ],
       "evidence_refs": [],
       "group_id": "mvp-in-scope",
       "implemented_task_refs": [],
       "notes": [
-        "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
+        "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence.",
+        "No-LLM drafting remains covered by T7 offline acceptance; live OpenAI-compatible/Anthropic provider closure remains gated under T9."
       ],
       "remaining_task_refs": [
-        "T7"
+        "T9"
       ],
       "requires_human_approval": true,
       "scope_item": "LLM rule drafting (OpenAI-compatible and Anthropic adapters) and no-LLM mode",
@@ -2891,7 +2895,7 @@
       "source_ref": "docs/product/prd.md#mvp-in-scope",
       "status": "partial",
       "task_refs": [
-        "T7"
+        "T9"
       ]
     },
     {

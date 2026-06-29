@@ -271,8 +271,6 @@
         "distill-review-memory-page-acceptance-tests"
       ],
       "acceptance_item_ids": [
-        "MVP-IN-SCOPE-010",
-        "MVP-IN-SCOPE-011",
         "MVP-IN-SCOPE-012",
         "MVP-IN-SCOPE-013",
         "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-004",
@@ -330,6 +328,8 @@
         "FR2-REPO-NATIVE-LOCAL-FIRST-OPERATION-001",
         "FR20-ADVISORY-ONLY-DEFAULT-001",
         "FR23-PROVIDER-ADAPTERS-AND-NO-LLM-MODE-001",
+        "MVP-IN-SCOPE-010",
+        "MVP-IN-SCOPE-011",
         "FR24-COST-VISIBILITY-001",
         "FR25-PORTABLE-ARTIFACTS-001",
         "NFR10-COST-VISIBILITY-001",
@@ -823,7 +823,7 @@
       "Relia must pair recurrences conservatively, separate `confirmed` from `possible`, and exclude `possible` from headline ERR.",
       "relia backtest` must deliver the ERR headline and paired evidence read-only, with no rules, review, or workflow change required.",
       "Every rule must cite at least one experience and one PR. Uncited rules fail validation and never render.",
-      "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence — never from the drafting model.",
+      "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence \u2014 never from the drafting model.",
       "Rules must decay by half-life and go `stale` when their scoped paths are deleted.",
       "Drafted rules must be reviewed before becoming `active`, with `accepted`, `suggested`, and `needs_user_input` labels. Disabling review is an explicit, surfaced configuration choice.",
       "Relia must support `avoid` rules from failures and `playbook` rules from held fixes, and playbook rules must cite held evidence.",
@@ -1633,8 +1633,6 @@
           "distill-review-memory-page-acceptance-tests"
         ],
         "acceptance_item_ids": [
-          "MVP-IN-SCOPE-010",
-          "MVP-IN-SCOPE-011",
           "MVP-IN-SCOPE-012",
           "MVP-IN-SCOPE-013",
           "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-004",
@@ -1692,6 +1690,7 @@
           "FR2-REPO-NATIVE-LOCAL-FIRST-OPERATION-001",
           "FR20-ADVISORY-ONLY-DEFAULT-001",
           "FR23-PROVIDER-ADAPTERS-AND-NO-LLM-MODE-001",
+          "MVP-IN-SCOPE-010",
           "FR24-COST-VISIBILITY-001",
           "FR25-PORTABLE-ARTIFACTS-001",
           "NFR10-COST-VISIBILITY-001",
