@@ -2462,6 +2462,35 @@ func TestDistillSeparatesCanonicalSignatureClustersByCheckName(t *testing.T) {
 	}
 }
 
+func TestDistillInputPreservesCanonicalExperienceSignatureMetadata(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "packages", "billing", "invoice.py"), "def total():\n    return 1\n")
+	writeFileForTest(t, filepath.Join(tempDir, "packages", "payments", "clock.py"), "def now():\n    return 1\n")
+	inputRel := filepath.ToSlash(filepath.Join("fixtures", "distill-canonical-experience-records.jsonl"))
+	inputPath := filepath.Join(tempDir, filepath.FromSlash(inputRel))
+	writeFileForTest(t, inputPath, strings.Join([]string{
+		`{"object_type":"relia.experience_record","schema_version":"1.0","experience_id":"exp_0521","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-04-01T10:00:00Z","attribution":{"actor_kind":"agent","method":"manual","confidence":1},"context":{"paths":["packages/billing/invoice.py"],"diff_fingerprint":"sha256:canonical-a"},"action":{"pr":521,"commit":"abc521"},"outcome":{"kind":"ci_failure","terminal_state":"failed","signature":{"signature_id":"sig_canonical_a","extraction_confidence":"structured"}},"provenance":{"urls":["https://github.com/acme/billing-service/pull/521"]},"flake_discount":0,"org_eligible":false,"share_scope":"private","redaction_status":"applied","metadata":{"signature":{"class":"test_failure","check_name":"pytest-billing","key":"tests/billing/test_invoice.py::test_clock","message_fingerprint":"sha256:canonical-shared-input","extraction_method":"structured"},"source_kind":"ingest"}}`,
+		`{"object_type":"relia.experience_record","schema_version":"1.0","experience_id":"exp_0522","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-04-08T10:00:00Z","attribution":{"actor_kind":"agent","method":"manual","confidence":1},"context":{"paths":["packages/payments/clock.py"],"diff_fingerprint":"sha256:canonical-b"},"action":{"pr":522,"commit":"abc522"},"outcome":{"kind":"ci_failure","terminal_state":"failed","signature":{"signature_id":"sig_canonical_b","extraction_confidence":"structured"}},"provenance":{"urls":["https://github.com/acme/billing-service/pull/522"]},"flake_discount":0,"org_eligible":false,"share_scope":"private","redaction_status":"applied","metadata":{"signature":{"class":"test_failure","check_name":"go-test-payments","key":"tests/payments/test_clock.py::test_clock","message_fingerprint":"sha256:canonical-shared-input","extraction_method":"structured"},"source_kind":"ingest"}}`,
+	}, "\n")+"\n")
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "distill", "--input", inputRel, "--format", "json"}, false)
+	if code != ExitSuccess {
+		t.Fatalf("distill input exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if got := int(result.Data["rules_written"].(float64)); got != 1 {
+		t.Fatalf("rules_written = %d, want one canonical message-fingerprint cluster", got)
+	}
+	avoid := loadRuleDocsByKindForTest(t, tempDir)["avoid"]
+	if got := yamlScalarValuesForTest(avoid.Lists["evidence.experiences"]); !stringSlicesEqual(got, []string{"exp_0521", "exp_0522"}) {
+		t.Fatalf("avoid evidence experiences = %#v, want canonical input message-fingerprint cluster", got)
+	}
+	if got := avoid.Scalars["metadata.cluster.key"].Value; got != "message|sha256:canonical-shared-input" {
+		t.Fatalf("metadata.cluster.key = %q, want canonical message fingerprint key", got)
+	}
+}
+
 func TestDistillStableIDCheckKeyClustersPositiveEvidence(t *testing.T) {
 	failure := distillClusterKeyForTest("ci_failure", "sig_time_freeze", "test_failure", "pytest-billing", "tests/billing/test_invoice_time.py::test_rollover_uses_frozen_clock")
 	revert := distillClusterKeyForTest("revert", "sig_time_freeze", "revert", "pytest-billing", "tests/billing/test_invoice_time.py::test_rollover_uses_frozen_clock")

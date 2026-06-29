@@ -1070,6 +1070,21 @@ func loadDistillExperiences(root string, config yamlDocument, options distillOpt
 		if !ok {
 			return nil, nil, "", artifactContractError("distill input event must be a JSON object", eventRef)
 		}
+		if record, canonical, commandErr := canonicalDistillInputExperienceRecord(redactedEvent, eventRef); commandErr != nil {
+			return nil, nil, "", commandErr
+		} else if canonical {
+			recordedAt, commandErr := validateBacktestExperience(record, eventRef)
+			if commandErr != nil {
+				return nil, nil, "", commandErr
+			}
+			records = append(records, backtestExperience{
+				Record:     record,
+				RecordedAt: recordedAt,
+				SourcePath: rel,
+				SourceLine: index + 1,
+			})
+			continue
+		}
 		record, skipped, commandErr := normalizeExperienceRecord(config, redactedEvent, index, eventRef)
 		if commandErr != nil {
 			return nil, nil, "", commandErr
@@ -1099,6 +1114,21 @@ func loadDistillExperiences(root string, config yamlDocument, options distillOpt
 	})
 	digest := sha256String(rel + "\x00" + sha256String(string(content)))
 	return records, []string{rel}, digest, nil
+}
+
+func canonicalDistillInputExperienceRecord(event map[string]any, ref string) (experienceRecord, bool, *CommandError) {
+	if stringField(event, "object_type") != "relia.experience_record" {
+		return experienceRecord{}, false, nil
+	}
+	content, err := json.Marshal(event)
+	if err != nil {
+		return experienceRecord{}, true, internalError("could not decode canonical distill input experience record", err)
+	}
+	var record experienceRecord
+	if err := decodeJSONUseNumber(string(content), &record); err != nil {
+		return experienceRecord{}, true, artifactContractError("canonical distill input experience record is invalid", ref)
+	}
+	return record, true, nil
 }
 
 func validateBacktestExperience(record experienceRecord, ref string) (time.Time, *CommandError) {
