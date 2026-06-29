@@ -3971,19 +3971,34 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-001",
-          "evidence_refs": [],
+          "evidence_refs": [
+            ".factory/artifacts/task-runs/T7.1/work-proof-marker.json",
+            ".factory/artifacts/task-runs/T7.1/validation-report.json",
+            ".factory/artifacts/task-runs/T7.1/proof-of-behavior-scorecard.json",
+            "cmd/relia/main.go",
+            "cmd/relia/main_test.go",
+            "examples/demo/seeded-repo/outcomes.jsonl",
+            "https://github.com/Clyra-AI/relia/pull/51",
+            "origin/main@53a0ed437c574607e3273f7ed2412dcc3df1b199",
+            ".factory/artifacts/task-runs/T7.1/scope-closure-map.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "outcome-fixture-corpus",
         "distillation-calibration-and-confidence-part-2"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T7.1/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T7.1/validation-report.json",
+        ".factory/artifacts/task-runs/T7.1/work-proof-marker.json"
+      ],
       "group_id": "distill-review-memory-page-acceptance-tests",
       "implemented_task_refs": [
-        "T4.2"
+        "T4.2",
+        "T7.1"
       ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence.",
@@ -3991,14 +4006,12 @@
         "T4.2 provides static fixture evidence only; command-level `relia distill` closure remains with T7.1.",
         "Closure repair: T4.2 static fixture evidence was already no longer remaining for this item; implemented_task_refs now records T4.2 while command-level distill closure remains with T7.1."
       ],
-      "remaining_task_refs": [
-        "T7.1"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "relia distill` drafts an `avoid` rule from the planted recurrence cluster with correct citations.",
       "scope_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-001",
       "source_ref": "docs/product/prd.md#distill-review-memory-page-acceptance-tests",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T4.2",
         "T7.1"
@@ -5923,7 +5936,7 @@
       ]
     }
   ],
-  "last_updated_at": "2026-06-29T00:44:59Z",
+  "last_updated_at": "2026-06-29T18:09:40Z",
   "schema_version": "0.1",
   "source_prd_ref": "docs/product/prd.md"
 }

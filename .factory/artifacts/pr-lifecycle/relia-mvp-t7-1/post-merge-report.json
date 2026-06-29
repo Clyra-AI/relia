@@ -1,0 +1,33 @@
+{
+  "artifact_type": "post_merge_report",
+  "task_id": "T7.1",
+  "work_item_id": "relia-mvp-t7-1",
+  "status": "healthy",
+  "merge_performed": true,
+  "merge_reference": "53a0ed437c574607e3273f7ed2412dcc3df1b199",
+  "default_branch_checked": true,
+  "default_branch_ref": "origin/main@53a0ed437c574607e3273f7ed2412dcc3df1b199",
+  "post_merge_evidence_ref": "https://github.com/Clyra-AI/relia/pull/51",
+  "scope_closure_report_ref": ".factory/artifacts/task-runs/T7.1/scope-closure-report.json",
+  "checks_observed": [
+    {
+      "workflow": "validate",
+      "run_id": 28392638132,
+      "conclusion": "success",
+      "head_sha": "53a0ed437c574607e3273f7ed2412dcc3df1b199"
+    },
+    {
+      "workflow": "codeql",
+      "run_id": 28392638120,
+      "conclusion": "success",
+      "head_sha": "53a0ed437c574607e3273f7ed2412dcc3df1b199"
+    },
+    {
+      "workflow": "CodeQL",
+      "run_id": 28392637714,
+      "conclusion": "success",
+      "head_sha": "53a0ed437c574607e3273f7ed2412dcc3df1b199"
+    }
+  ],
+  "operator_notes": "Terminal post-merge evidence recorded after manual repair and merge of PR #51; all PR review threads were resolved and main-branch validate/codeql/CodeQL workflows passed."
+}
