@@ -1120,6 +1120,9 @@ func canonicalDistillInputExperienceRecord(event map[string]any, ref string) (ex
 	if stringField(event, "object_type") != "relia.experience_record" {
 		return experienceRecord{}, false, nil
 	}
+	if commandErr := validateCanonicalDistillInputCompleteness(event, ref); commandErr != nil {
+		return experienceRecord{}, true, commandErr
+	}
 	content, err := json.Marshal(event)
 	if err != nil {
 		return experienceRecord{}, true, internalError("could not decode canonical distill input experience record", err)
@@ -1129,6 +1132,22 @@ func canonicalDistillInputExperienceRecord(event map[string]any, ref string) (ex
 		return experienceRecord{}, true, artifactContractError("canonical distill input experience record is invalid", ref)
 	}
 	return record, true, nil
+}
+
+func validateCanonicalDistillInputCompleteness(event map[string]any, ref string) *CommandError {
+	for _, path := range []string{"action.commit", "attribution.method", "context.diff_fingerprint"} {
+		if stringField(event, path) == "" {
+			return artifactContractError("canonical distill input "+path+" must be provided", ref)
+		}
+	}
+	confidence, ok := nestedField(event, "attribution.confidence")
+	if !ok {
+		return artifactContractError("canonical distill input attribution.confidence must be provided", ref)
+	}
+	if _, valid := numericValue(confidence); !valid {
+		return artifactContractError("canonical distill input attribution.confidence must be numeric", ref)
+	}
+	return nil
 }
 
 func validateBacktestExperience(record experienceRecord, ref string) (time.Time, *CommandError) {
@@ -1160,6 +1179,9 @@ func validateBacktestExperience(record experienceRecord, ref string) (time.Time,
 	if record.Action.PR < 1 {
 		return time.Time{}, provenanceIntegrityError("backtest experience action.pr must be a positive integer", ref)
 	}
+	if strings.TrimSpace(record.Action.Commit) == "" {
+		return time.Time{}, provenanceIntegrityError("backtest experience action.commit must be provided", ref)
+	}
 	if !validOutcomeKind(record.Outcome.Kind) || !validTerminalState(record.Outcome.TerminalState) {
 		return time.Time{}, artifactContractError("backtest experience outcome is invalid", ref)
 	}
@@ -1174,8 +1196,19 @@ func validateBacktestExperience(record experienceRecord, ref string) (time.Time,
 	default:
 		return time.Time{}, artifactContractError("backtest experience attribution actor_kind must be agent, human, or uncertain", ref)
 	}
+	switch record.Attribution.Method {
+	case "bot_login", "coauthor_trailer", "pr_label", "manual", "uncertain":
+	default:
+		return time.Time{}, artifactContractError("backtest experience attribution method is invalid", ref)
+	}
+	if record.Attribution.Confidence < 0 || record.Attribution.Confidence > 1 || math.IsNaN(record.Attribution.Confidence) || math.IsInf(record.Attribution.Confidence, 0) {
+		return time.Time{}, artifactContractError("backtest experience attribution confidence must be between 0 and 1", ref)
+	}
 	if len(record.Context.Paths) == 0 {
 		return time.Time{}, artifactContractError("backtest experience context.paths must include at least one path", ref)
+	}
+	if strings.TrimSpace(record.Context.DiffFingerprint) == "" {
+		return time.Time{}, artifactContractError("backtest experience context.diff_fingerprint must be provided", ref)
 	}
 	for _, path := range record.Context.Paths {
 		if _, ok := cleanRepoPath(path); !ok {
