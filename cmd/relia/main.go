@@ -1144,6 +1144,9 @@ func validateBacktestExperience(record experienceRecord, ref string) (time.Time,
 	if record.RedactionStatus != "applied" {
 		return time.Time{}, redactionSafetyError("backtest experience redaction_status must be applied", ref)
 	}
+	if record.OrgEligible {
+		return time.Time{}, artifactContractError("backtest experience org_eligible must be false", ref)
+	}
 	if strings.TrimSpace(record.ExperienceID) == "" {
 		return time.Time{}, artifactContractError("backtest experience missing experience_id", ref)
 	}
