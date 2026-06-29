@@ -14,6 +14,7 @@ PROVIDER_ACCEPTANCE_IDS = {
     "FR23-PROVIDER-ADAPTERS-AND-NO-LLM-MODE-001",
     "MVP-IN-SCOPE-010",
     "MVP-IN-SCOPE-011",
+    "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-010",
 }
 RUNNER_READY_TASK_FIELDS = [
     "task_id",
@@ -561,13 +562,13 @@ def validate_model_provider_gate(task):
         fail(f"{task_id}.stop_conditions must fail closed without model_provider_endpoint grant")
 
 
-def model_provider_gate_task(task_id="T7", grant_task_id="*"):
+def model_provider_gate_task(task_id="T9", grant_task_id="*"):
     return {
         "task_id": task_id,
         "requires_model_provider_endpoint": True,
         "requires_network": True,
         "requires_credentials": True,
-        "requires_human_approval": False,
+        "requires_human_approval": task_id == "T9",
         "model_provider_requirements": {
             "required_grant": "model_provider_endpoint",
             "provider_surfaces": ["openai_compatible_http", "anthropic_messages_http"],
@@ -901,6 +902,8 @@ def self_test():
         fail("duplicate_values must preserve duplicate ids in first duplicate order")
     if "FR23-PROVIDER-ADAPTERS-AND-NO-LLM-MODE-001" not in PROVIDER_ACCEPTANCE_IDS:
         fail("provider gate fallback must include FR23 provider adapter acceptance item")
+    if "MVP-IN-SCOPE-010" not in PROVIDER_ACCEPTANCE_IDS:
+        fail("provider gate fallback must include tiered provider-embedding acceptance item")
     self_test_public_release_boundary()
     validate_model_provider_gate(model_provider_gate_task())
     sample_task = {key: "value" for key in RUNNER_READY_TASK_FIELDS}
@@ -1302,7 +1305,7 @@ def self_test():
             fail("validation contract unknown evidence key fixture did not fail closed")
 
         active_config_grant = {
-            "task_id": "T7",
+            "task_id": "T9",
             "capability": "model_provider_endpoint",
             "approved": True,
             "evidence_ref": ".factory/artifacts/approvals/model_provider_endpoint.md",
@@ -1344,11 +1347,11 @@ def self_test():
                     "model_provider_endpoint": {
                         "required_grant": "model_provider_endpoint",
                         "generic_grants_sufficient": False,
-                        "required_before_dispatch": ["T7", "T9"],
+                        "required_before_dispatch": ["T9"],
                     }
                 }
             },
-            {"T7", "T9"},
+            {"T9"},
         )
         try:
             validate_context_brief(
@@ -1357,11 +1360,11 @@ def self_test():
                         "model_provider_endpoint": {
                             "required_grant": "model_provider_endpoint",
                             "generic_grants_sufficient": False,
-                            "required_before_dispatch": ["T9"],
+                            "required_before_dispatch": [],
                         }
                     }
                 },
-                {"T7", "T9"},
+                {"T9"},
             )
         except AssertionError as exc:
             if "required_before_dispatch missing provider-gated tasks" not in str(exc):
@@ -1394,10 +1397,10 @@ def self_test():
             fail("active wildcard model-provider grant fixture did not fail closed")
         globals()["factoryd_config_capability_grants"] = original_config_grants
 
-        pending_base_url_task = model_provider_gate_task("T7", "T7")
+        pending_base_url_task = model_provider_gate_task("T9", "T9")
         pending_base_url_task["factoryd_runtime"]["capability_grants"] = []
         pending_base_url_grant = {
-            "task_id": "T7",
+            "task_id": "T9",
             "capability": "model_provider_endpoint",
             "evidence_ref": ".factory/artifacts/approvals/model_provider_endpoint.md",
         }
@@ -1426,7 +1429,7 @@ def self_test():
         finally:
             globals()["factoryd_config_capability_grants"] = original_config_grants
 
-        pending_extra_base_url_task = model_provider_gate_task("T7", "T7")
+        pending_extra_base_url_task = model_provider_gate_task("T9", "T9")
         pending_extra_base_url_task["factoryd_runtime"]["capability_grants"] = []
         pending_extra_base_url_grant = dict(active_config_grant)
         pending_extra_base_url_grant["base_url"] = "pending-approved-base-url"
@@ -1442,7 +1445,7 @@ def self_test():
         finally:
             globals()["factoryd_config_capability_grants"] = original_config_grants
 
-        approved_seed_task = model_provider_gate_task("T7", "T7")
+        approved_seed_task = model_provider_gate_task("T9", "T9")
         approved_seed_grant = approved_seed_task["factoryd_runtime"]["capability_grants"][0]
         approved_seed_grant.update(
             {
@@ -1464,7 +1467,7 @@ def self_test():
         else:
             fail("approved seed model-provider grant fixture did not fail closed")
 
-        non_string_allowlist_task = model_provider_gate_task("T7", "T7")
+        non_string_allowlist_task = model_provider_gate_task("T9", "T9")
         non_string_allowlist_grant = non_string_allowlist_task["factoryd_runtime"]["capability_grants"][0]
         non_string_allowlist_grant["network_allowlist"] = [{"host": "api.example.com"}]
         try:
@@ -1475,7 +1478,7 @@ def self_test():
         else:
             fail("non-string provider allowlist fixture did not fail closed")
 
-        non_string_metadata_task = model_provider_gate_task("T7", "T7")
+        non_string_metadata_task = model_provider_gate_task("T9", "T9")
         non_string_metadata_task["factoryd_runtime"]["capability_grants"] = []
         non_string_metadata_grant = dict(active_config_grant)
         non_string_metadata_grant["provider_model"] = {"name": "example-model"}
@@ -1491,7 +1494,7 @@ def self_test():
         finally:
             globals()["factoryd_config_capability_grants"] = original_config_grants
 
-        missing_requirement_field_task = model_provider_gate_task("T7", "T7")
+        missing_requirement_field_task = model_provider_gate_task("T9", "T9")
         missing_requirement_field_task["model_provider_requirements"]["required_fields"].remove("network_allowlist")
         try:
             validate_model_provider_gate(missing_requirement_field_task)
@@ -1501,10 +1504,10 @@ def self_test():
         else:
             fail("missing model-provider requirement field fixture did not fail closed")
 
-        missing_seed_metadata_task = model_provider_gate_task("T7", "T7")
+        missing_seed_metadata_task = model_provider_gate_task("T9", "T9")
         missing_seed_metadata_task["factoryd_runtime"]["capability_grants"] = [
             {
-                "task_id": "T7",
+                "task_id": "T9",
                 "capability": "model_provider_endpoint",
                 "approved": False,
             }
