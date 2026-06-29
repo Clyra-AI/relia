@@ -47,9 +47,12 @@
     "gofmt -w cmd/relia/main_test.go",
     "go test ./cmd/relia -run TestDistillInputDraftsAvoidRuleFromPlantedRecurrenceCluster -count=1",
     "go test ./cmd/relia -run TestDistillInputDraftsAvoidRuleFromPlantedRecurrenceCluster -count=1",
+    "go test ./cmd/relia -count=1 -run 'TestDistill(StableIDKeyClustersRevertsAndPositiveEvidence|SeparatesCanonicalSignatureClustersByCheckName|InputDraftsAvoidRuleFromPlantedRecurrenceCluster|MarksContradictedAndStaleRules|MarksAnyLaterContradictionAsContradicted)|TestBacktest(AutoFlakeUsesCanonicalSignatureKeys|GroupsEquivalentCanonicalSignatureFields)'",
     "make lint-fast",
     "make test-fast",
     "make test-contracts",
+    "make prepush-full",
+    "go test ./cmd/relia -count=1 -run 'TestDistill(StableIDKeyClustersRevertsAndPositiveEvidence|SeparatesCanonicalSignatureClustersByCheckName|InputDraftsAvoidRuleFromPlantedRecurrenceCluster|MarksContradictedAndStaleRules|MarksAnyLaterContradictionAsContradicted)|TestBacktest(AutoFlakeUsesCanonicalSignatureKeys|GroupsEquivalentCanonicalSignatureFields)'",
     "make prepush-full",
     "git diff --check",
     "python3 -m json.tool .factory/artifacts/task-runs/T7.1/work-proof-marker.json",
@@ -68,7 +71,7 @@
   "final_validation_evidence": [
     {
       "command": "make prepush-full",
-      "evidence": "coverage 79.6% \u003e= 75.0%; repo pack ok; TestDemo contract lane pass",
+      "evidence": "coverage 79.7% \u003e= 75.0%; repo pack ok; TestDemo contract lane pass",
       "exit_code": 0,
       "status": "pass"
     }
@@ -93,6 +96,16 @@
       "command": "make test-contracts",
       "exit_code": 0,
       "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -count=1 -run 'TestDistill(StableIDKeyClustersRevertsAndPositiveEvidence|SeparatesCanonicalSignatureClustersByCheckName|InputDraftsAvoidRuleFromPlantedRecurrenceCluster|MarksContradictedAndStaleRules|MarksAnyLaterContradictionAsContradicted)|TestBacktest(AutoFlakeUsesCanonicalSignatureKeys|GroupsEquivalentCanonicalSignatureFields)'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "make prepush-full",
+      "exit_code": 0,
+      "status": "pass"
     }
   ],
   "path_policy_result": {
@@ -113,7 +126,7 @@
     "status": "pass"
   },
   "plan_drift_result": {
-    "notes": "Repair stayed within command-level distill avoid-rule acceptance by using the governed seeded recurrence fixture and test helpers only.",
+    "notes": "Repair stayed within command-level distill avoid-rule acceptance by using the governed seeded recurrence fixture, focused cluster-key regression tests, and test helpers only.",
     "status": "pass"
   },
   "red_evidence": [
@@ -136,7 +149,7 @@
   "schema_version": "1.0",
   "status": "pass",
   "task_id": "T7.1",
-  "updated_at": "2026-06-29T17:14:26Z",
+  "updated_at": "2026-06-29T17:30:54Z",
   "versioning_result": {
     "notes": "Pre-1.0 command behavior expanded with explicit docs; no schema or runtime pin change.",
     "status": "pass"

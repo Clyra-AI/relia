@@ -2641,7 +2641,10 @@ func buildDistillClusters(records []backtestExperience) []distillCluster {
 }
 
 func distillClusterKey(record experienceRecord) string {
-	keys := recurrenceSignatureKeys(record)
+	if key := distillStableSignatureKey(record); key != "" {
+		return key
+	}
+	keys := distillCanonicalSignatureKeys(record)
 	if len(keys) > 0 {
 		return keys[0]
 	}
@@ -2650,6 +2653,38 @@ func distillClusterKey(record experienceRecord) string {
 		return strings.Join([]string{"id", signatureID}, "\x00")
 	}
 	return ""
+}
+
+func distillStableSignatureKey(record experienceRecord) string {
+	signatureID := strings.TrimSpace(record.Outcome.Signature.SignatureID)
+	if signatureID == "" || strings.HasPrefix(signatureID, "sig_generated") {
+		return ""
+	}
+	signatureMetadata, _ := record.Metadata["signature"].(map[string]any)
+	signatureKey := strings.TrimSpace(stringFromAny(signatureMetadata["key"]))
+	if signatureKey == "" {
+		return ""
+	}
+	return strings.Join([]string{"id_key", signatureID, signatureKey}, "\x00")
+}
+
+func distillCanonicalSignatureKeys(record experienceRecord) []string {
+	signatureMetadata, _ := record.Metadata["signature"].(map[string]any)
+	signatureClass := strings.TrimSpace(stringFromAny(signatureMetadata["class"]))
+	checkName := strings.TrimSpace(stringFromAny(signatureMetadata["check_name"]))
+	signatureKey := strings.TrimSpace(stringFromAny(signatureMetadata["key"]))
+	messageFingerprint := strings.TrimSpace(stringFromAny(signatureMetadata["message_fingerprint"]))
+	keys := []string{}
+	if signatureClass != "" && checkName != "" && signatureKey != "" {
+		keys = append(keys, strings.Join([]string{"class_check_key", signatureClass, checkName, signatureKey}, "\x00"))
+	}
+	if messageFingerprint != "" {
+		keys = append(keys, strings.Join([]string{"message", messageFingerprint}, "\x00"))
+	}
+	if len(keys) == 0 {
+		keys = append(keys, strings.Join([]string{"id", record.Outcome.Signature.SignatureID}, "\x00"))
+	}
+	return keys
 }
 
 func distillRecordSignal(record experienceRecord) string {

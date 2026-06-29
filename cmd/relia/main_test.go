@@ -1353,8 +1353,8 @@ func TestBacktestAutoFlakeUsesCanonicalSignatureKeys(t *testing.T) {
 	inputPath := filepath.Join(tempDir, "fixtures", "outcomes.jsonl")
 	writeFileForTest(t, inputPath, strings.Join([]string{
 		`{"experience_id":"exp_0001","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-01T10:00:00Z","pr":101,"commit":"abc001","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_generated_pytest","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/101"]}`,
-		`{"experience_id":"exp_0002","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-10T10:00:00Z","pr":102,"commit":"abc002","paths":["packages/worker/clock.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_generated_go_test","signature_class":"test_failure","check_name":"go-test-rerun","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/102"]}`,
-		`{"experience_id":"exp_0003","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-20T10:00:00Z","pr":103,"commit":"abc003","paths":["packages/notifications/clock.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_generated_actions","signature_class":"test_failure","check_name":"actions-retry","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/103"]}`,
+		`{"experience_id":"exp_0002","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-10T10:00:00Z","pr":102,"commit":"abc002","paths":["packages/worker/clock.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_generated_go_test","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/102"]}`,
+		`{"experience_id":"exp_0003","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-20T10:00:00Z","pr":103,"commit":"abc003","paths":["packages/notifications/clock.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_generated_actions","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/103"]}`,
 	}, "\n")+"\n")
 
 	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
@@ -2405,7 +2405,7 @@ func TestDistillInputDraftsAvoidRuleFromPlantedRecurrenceCluster(t *testing.T) {
 	}
 }
 
-func TestDistillUsesCanonicalSignatureClustersAndCapsThinEvidenceConfidence(t *testing.T) {
+func TestDistillSeparatesCanonicalSignatureClustersByCheckName(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
 	writeFileForTest(t, filepath.Join(tempDir, "packages", "billing", "invoice.py"), "def total():\n    return 1\n")
@@ -2424,24 +2424,56 @@ func TestDistillUsesCanonicalSignatureClustersAndCapsThinEvidenceConfidence(t *t
 		t.Fatalf("distill exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
 	}
 	result := decodeResult(t, stdout)
-	if got := int(result.Data["rules_written"].(float64)); got != 1 {
-		t.Fatalf("rules_written = %d, want one canonical class/key cluster", got)
+	if got := int(result.Data["rules_written"].(float64)); got != 2 {
+		t.Fatalf("rules_written = %d, want separate class/check/key clusters", got)
 	}
-	rules := loadRuleDocsByKindForTest(t, tempDir)
-	avoid := rules["avoid"]
-	if avoid.Scalars["evidence.count"].Value != "2" {
-		t.Fatalf("evidence.count = %q, want both canonical-cluster records", avoid.Scalars["evidence.count"].Value)
+	wantEvidence := map[string]bool{"exp_0501": false, "exp_0502": false}
+	for _, rule := range loadRuleDocsForTest(t, tempDir) {
+		if rule.Scalars["kind"].Value != "avoid" {
+			continue
+		}
+		if rule.Scalars["evidence.count"].Value != "1" {
+			t.Fatalf("evidence.count = %q, want one record per class/check/key cluster", rule.Scalars["evidence.count"].Value)
+		}
+		experiences := yamlScalarValuesForTest(rule.Lists["evidence.experiences"])
+		if len(experiences) != 1 {
+			t.Fatalf("evidence experiences = %#v, want one record per separated check", experiences)
+		}
+		if _, ok := wantEvidence[experiences[0]]; !ok {
+			t.Fatalf("unexpected evidence experience %q", experiences[0])
+		}
+		wantEvidence[experiences[0]] = true
+		confidence, err := strconv.ParseFloat(rule.Scalars["confidence"].Value, 64)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if confidence > 0.6 {
+			t.Fatalf("confidence = %.4f, want capped at 0.6 until three confirmed experiences", confidence)
+		}
+		if rule.Scalars["metadata.embedding_mode"].Value != "signature" ||
+			rule.Scalars["metadata.cluster.provenance"].Value != "signature_only" {
+			t.Fatalf("signature fallback provenance metadata = %#v", rule.Scalars)
+		}
 	}
-	confidence, err := strconv.ParseFloat(avoid.Scalars["confidence"].Value, 64)
-	if err != nil {
-		t.Fatal(err)
+	for experienceID, seen := range wantEvidence {
+		if !seen {
+			t.Fatalf("missing separated avoid rule for %s", experienceID)
+		}
 	}
-	if confidence > 0.6 {
-		t.Fatalf("confidence = %.4f, want capped at 0.6 until three confirmed experiences", confidence)
+}
+
+func TestDistillStableIDKeyClustersRevertsAndPositiveEvidence(t *testing.T) {
+	failure := distillClusterKeyForTest("ci_failure", "sig_time_freeze", "test_failure", "pytest-billing", "tests/billing/test_invoice_time.py::test_rollover_uses_frozen_clock")
+	revert := distillClusterKeyForTest("revert", "sig_time_freeze", "revert", "revert", "tests/billing/test_invoice_time.py::test_rollover_uses_frozen_clock")
+	held := distillClusterKeyForTest("fix_held", "sig_time_freeze", "held_fix", "pytest-billing", "tests/billing/test_invoice_time.py::test_rollover_uses_frozen_clock")
+	if failure == "" || revert == "" {
+		t.Fatalf("failure key = %q revert key = %q, want non-empty keys", failure, revert)
 	}
-	if avoid.Scalars["metadata.embedding_mode"].Value != "signature" ||
-		avoid.Scalars["metadata.cluster.provenance"].Value != "signature_only" {
-		t.Fatalf("signature fallback provenance metadata = %#v", avoid.Scalars)
+	if failure != revert {
+		t.Fatalf("failure key = %q revert key = %q, want stable signature ID/key fallback to co-cluster failures", failure, revert)
+	}
+	if held != failure {
+		t.Fatalf("held fix key = %q failure key = %q, want stable ID/key to keep positive evidence attached to the same distill cluster", held, failure)
 	}
 }
 
@@ -5749,6 +5781,24 @@ func findRuleDocByEvidenceForTest(t *testing.T, root string, kind string, experi
 	}
 	t.Fatalf("could not find %s rule with evidence experiences %#v", kind, experienceIDs)
 	return yamlDocument{}
+}
+
+func distillClusterKeyForTest(kind string, signatureID string, signatureClass string, checkName string, signatureKey string) string {
+	return distillClusterKey(experienceRecord{
+		Outcome: experienceOutcome{
+			Kind: kind,
+			Signature: experienceSignature{
+				SignatureID: signatureID,
+			},
+		},
+		Metadata: map[string]any{
+			"signature": map[string]any{
+				"class":      signatureClass,
+				"check_name": checkName,
+				"key":        signatureKey,
+			},
+		},
+	})
 }
 
 func yamlScalarValuesForTest(scalars []yamlScalar) []string {
