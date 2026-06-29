@@ -2698,11 +2698,12 @@ func distillStableSignatureKey(record experienceRecord) string {
 		return ""
 	}
 	signatureMetadata, _ := record.Metadata["signature"].(map[string]any)
+	checkName := strings.TrimSpace(stringFromAny(signatureMetadata["check_name"]))
 	signatureKey := strings.TrimSpace(stringFromAny(signatureMetadata["key"]))
-	if signatureKey == "" {
+	if checkName == "" || signatureKey == "" {
 		return ""
 	}
-	return strings.Join([]string{"id_key", signatureID, signatureKey}, "\x00")
+	return strings.Join([]string{"id_check_key", signatureID, checkName, signatureKey}, "\x00")
 }
 
 func distillCanonicalSignatureKeys(record experienceRecord) []string {

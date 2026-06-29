@@ -2462,18 +2462,42 @@ func TestDistillSeparatesCanonicalSignatureClustersByCheckName(t *testing.T) {
 	}
 }
 
-func TestDistillStableIDKeyClustersRevertsAndPositiveEvidence(t *testing.T) {
+func TestDistillStableIDCheckKeyClustersPositiveEvidence(t *testing.T) {
 	failure := distillClusterKeyForTest("ci_failure", "sig_time_freeze", "test_failure", "pytest-billing", "tests/billing/test_invoice_time.py::test_rollover_uses_frozen_clock")
-	revert := distillClusterKeyForTest("revert", "sig_time_freeze", "revert", "revert", "tests/billing/test_invoice_time.py::test_rollover_uses_frozen_clock")
+	revert := distillClusterKeyForTest("revert", "sig_time_freeze", "revert", "pytest-billing", "tests/billing/test_invoice_time.py::test_rollover_uses_frozen_clock")
 	held := distillClusterKeyForTest("fix_held", "sig_time_freeze", "held_fix", "pytest-billing", "tests/billing/test_invoice_time.py::test_rollover_uses_frozen_clock")
 	if failure == "" || revert == "" {
 		t.Fatalf("failure key = %q revert key = %q, want non-empty keys", failure, revert)
 	}
 	if failure != revert {
-		t.Fatalf("failure key = %q revert key = %q, want stable signature ID/key fallback to co-cluster failures", failure, revert)
+		t.Fatalf("failure key = %q revert key = %q, want stable signature ID/check/key to co-cluster related outcomes", failure, revert)
 	}
 	if held != failure {
-		t.Fatalf("held fix key = %q failure key = %q, want stable ID/key to keep positive evidence attached to the same distill cluster", held, failure)
+		t.Fatalf("held fix key = %q failure key = %q, want stable ID/check/key to keep positive evidence attached to the same distill cluster", held, failure)
+	}
+}
+
+func TestDistillSeparatesReusedStableSignatureIDsByCheckName(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "packages", "billing", "invoice.py"), "def total():\n    return 1\n")
+	inputPath := filepath.Join(tempDir, "fixtures", "distill-reused-stable-id-outcomes.jsonl")
+	writeFileForTest(t, inputPath, strings.Join([]string{
+		`{"experience_id":"exp_0551","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-04-01T10:00:00Z","pr":551,"commit":"abc551","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_reused_monorepo","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/551"]}`,
+		`{"experience_id":"exp_0552","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-04-08T10:00:00Z","pr":552,"commit":"abc552","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_reused_monorepo","signature_class":"test_failure","check_name":"go-test-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/552"]}`,
+	}, "\n")+"\n")
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+	if code != ExitSuccess {
+		t.Fatalf("ingest exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+
+	stdout, stderr, code = runForTest(t, []string{"--json", "distill", "--format", "json"}, false)
+	if code != ExitSuccess {
+		t.Fatalf("distill exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if got := int(result.Data["rules_written"].(float64)); got != 2 {
+		t.Fatalf("rules_written = %d, want reused stable signature ID separated by check_name", got)
 	}
 }
 
