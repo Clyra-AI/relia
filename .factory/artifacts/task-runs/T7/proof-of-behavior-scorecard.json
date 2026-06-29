@@ -1,0 +1,75 @@
+{
+  "artifact_type": "proof-of-behavior-scorecard",
+  "schema_version": "1.0",
+  "task_id": "T7",
+  "status": "pass",
+  "proof_level": "user_visible_behavior",
+  "scorecard_items": [
+    {
+      "behavior": "No-LLM distill clusters generated signatures by canonical class/key, records signature-only provenance, and caps confidence at 0.6 until three confirmed experiences.",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/main_test.go:2350"
+      ]
+    },
+    {
+      "behavior": "Stable signature IDs still keep failure and revert evidence in one deterministic cluster.",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/main_test.go:2210"
+      ]
+    },
+    {
+      "behavior": "Drafted rules remain suggested or needs_user_input and never become accepted without review.",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/main_test.go:2210"
+      ]
+    },
+    {
+      "behavior": "Review approve, edit, and reject commands write active, candidate human_authored, and retired lifecycle states.",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/main_test.go:2395"
+      ]
+    },
+    {
+      "behavior": "MEMORY.md separates strong active memory from weak candidate, stale, contradicted, and retired memory while preserving resolvable PR receipts.",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/main_test.go:2210",
+        "examples/reports/memory-page-demo.md"
+      ]
+    },
+    {
+      "behavior": "relia models pull records model ID, version, source URL, license, digest, cache path, update policy, rollback policy, and ready status without network download.",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/main_test.go:4709"
+      ]
+    },
+    {
+      "behavior": "embeddings: local fails closed with exit 8 for stale local model manifests, while signature mode remains zero-install.",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/main_test.go:4787",
+        "docs/architecture/decision-0003-local-embedding-boundary.md"
+      ]
+    },
+    {
+      "behavior": "No model weights or inference-runtime payloads were added to tracked source, binaries, containers, or release artifacts.",
+      "status": "pass",
+      "evidence_refs": [
+        "docs/architecture/decision-0003-local-embedding-boundary.md",
+        ".factory/artifacts/task-runs/T7/validation-report.json"
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "command": "make prepush-full",
+      "status": "pass",
+      "exit_code": 0
+    }
+  ]
+}

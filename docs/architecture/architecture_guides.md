@@ -122,6 +122,26 @@ Rollback is removal of the T6 command implementation, tests, docs, and generated
 `memory/rules/*.yaml` or `memory/MEMORY.md`; `.relia/experiences` remains the
 source of truth for re-distillation.
 
+T7 completes the deterministic distillation boundary without adding live model
+or network behavior. The state owner remains `cmd/relia`, with generated rule
+artifacts under `memory/rules`, rendered memory under `memory/MEMORY.md`, and
+local model manifests under `.relia/models/manifest.json` when an operator
+records an already-present local artifact. Feedback sources are focused
+distill/review/model tests, schema contract validation, `make prepush-full`,
+and Factory task-run evidence. Deterministic clustering now uses canonical
+signature keys before generated signature IDs, confidence is capped at `0.6`
+until three confirmed experiences exist, review supports approve/edit/reject
+state transitions, and MEMORY.md separates strong active memory from weak
+candidate, stale, contradicted, and retired memory. The local embedding
+inference boundary is decision-recorded in
+`docs/architecture/decision-0003-local-embedding-boundary.md`: T7 validates
+manifests and fails closed for missing, stale, or digest-mismatched artifacts,
+but does not add model weights, inference runtime payloads, or runtime
+embedding refinement.
+Rollback is removal of the T7 command refinements, tests, docs, and any local
+`.relia/models/manifest.json`; signature-only distillation remains the fallback
+source of truth.
+
 ## Systems Thinking Map
 
 - State lives in repo-local config, generated artifacts, source files, and Factory evidence.

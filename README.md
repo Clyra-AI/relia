@@ -17,7 +17,7 @@ FACTORY_REPO=/path/to/factory factoryd run --config .factory/factoryd.autoship.e
 
 ## CLI Baseline
 
-The T1/T2/T3/T4.3/T5/T6 command surface establishes the lifecycle skeleton,
+The T1/T2/T3/T4.3/T5/T6/T7 command surface establishes the lifecycle skeleton,
 configuration contract, assessment fixture slice, recurrence backtest,
 deterministic distillation, and agent-native output contract:
 
@@ -41,22 +41,31 @@ deterministic distillation, and agent-native output contract:
   and labeled stale when the source artifact digest differs. The recurrence
   gate is available through `relia.yaml` but remains off by default.
 - `relia distill --format json` reads local redacted experience shards,
-  clusters deterministic signature IDs, and writes candidate `avoid` and
+  clusters deterministic signature keys, and writes candidate `avoid` and
   `playbook` rules under `memory/rules/`. Confidence is calculated from
   evidence count, the PRD default 90-day recency half-life, contradictions,
-  flake discounts, and extraction confidence; drafting models do not affect
-  confidence. Drafted `cluster_summary` and future `llm_drafted` rules must
-  carry their confidence-input and decay metadata. With the default
+  flake discounts, and extraction confidence; confidence is capped at `0.6`
+  until a draft has three confirmed experiences, and drafting models do not
+  affect confidence. Drafted `cluster_summary` and future `llm_drafted` rules
+  must carry their confidence-input and decay metadata. With the default
   `distill.review_required: true`, drafted rules are not active until reviewed.
   Deleted scoped paths produce `stale` rules, and contradictory clean or held
   evidence produces `contradicted` rules.
-- `relia review --rule <id> --label accepted` moves a candidate memory rule to
-  `active`. `suggested` and `needs_user_input` keep or return rules to
-  candidate review, and stale or contradicted rules cannot be accepted without
-  fresh distill evidence.
+- `relia models pull --model-id ... --version ... --source-url ... --license
+  ... --digest ... --cache-path ... --update-policy ... --rollback-policy ...`
+  records the local embedding artifact manifest for an already-present local
+  artifact. It performs no network download in the offline MVP runner path and
+  validates the artifact digest before `embeddings: local` can pass.
+- `relia review approve --rule <id>` moves a candidate memory rule to
+  `active`. `relia review edit --rule <id> --statement <text>` marks the
+  statement `human_authored` and keeps it in candidate review. `relia review
+  reject --rule <id> --reason <text>` moves it to `retired`. The legacy
+  `relia review --rule <id> --label accepted|suggested|needs_user_input` form
+  remains supported.
 - `relia memory --format json` renders `memory/MEMORY.md` with each rule's
   statement, confidence, lifecycle status, review label, and clickable PR
-  provenance.
+  provenance, separating active accepted rules as strong memory from candidate,
+  stale, contradicted, and retired weak memory.
 - `relia assess --input <diff>` reads a local unified diff, compares touched
   paths with active local `memory/rules/*.yaml` rules, and emits a
   `relia.risk_assessment` payload with `match_high`, `match_medium`, or
@@ -106,15 +115,17 @@ experience artifacts: repeated runs use the latest experience timestamp as the
 window anchor and produce the same report ID and artifact paths.
 
 The live distill command is also deterministic for the same local experience
-shards and config. The default path is signature-only and offline; provider
-drafting fails closed unless a future approved `model_provider_endpoint` gate is
-present.
+shards and config. The default path is signature-only and offline; local
+embedding mode fails closed unless a recorded manifest and matching local
+artifact are present, and provider drafting fails closed unless a future
+approved `model_provider_endpoint` gate is present.
 
 The config in `relia.yaml` is local-only by default: code, diffs, logs, and
 experience records are not sent anywhere; share scope is `private`; redaction
 uses entropy scanning and fails closed. `distill.embeddings: signature` is the
 zero-install default. `distill.embeddings: local` requires a pulled model
-manifest and fails closed with exit `8` when it is absent.
+manifest and fails closed with exit `8` when it is absent, stale, or
+digest-mismatched.
 
 Ingested records must include PR provenance. Known token shapes and
 secret-named fields are redacted before `.relia/experiences/*.jsonl` is written;

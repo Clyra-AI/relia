@@ -1,0 +1,24 @@
+{
+  "artifact_type": "work_proof_marker",
+  "changed_paths": [
+    ".factory/artifacts/task-runs/T7/proof-of-behavior-scorecard.json",
+    ".factory/artifacts/task-runs/T7/validation-report.json",
+    ".factory/artifacts/task-runs/T7/work-proof-marker.json",
+    "README.md",
+    "cmd/relia/main.go",
+    "cmd/relia/main_test.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/architecture/decision-0003-local-embedding-boundary.md",
+    "docs/dev/dev_guides.md",
+    "examples/reports/memory-page-demo.md"
+  ],
+  "evidence_refs": [
+    ".factory/artifacts/task-runs/T7/validation-report.json",
+    ".factory/artifacts/task-runs/T7/proof-of-behavior-scorecard.json"
+  ],
+  "implementation_performed": true,
+  "schema_version": "1.0",
+  "status": "implemented",
+  "summary": "Implemented T7 deterministic distill/review/model-artifact behavior: canonical signature clustering, capped confidence for thin evidence, signature-only provenance, weak/strong memory rendering, review approve/edit/reject transitions, offline local model manifest recording, stale/digest fail-closed local embedding validation, and ADR/docs coverage for the local embedding boundary.",
+  "task_id": "T7"
+}

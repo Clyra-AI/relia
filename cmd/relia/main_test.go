@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -150,7 +151,8 @@ func TestHelpAndVersionUseEnvelope(t *testing.T) {
 
 func TestReservedCommandsReturnTypedNotImplemented(t *testing.T) {
 	for _, args := range [][]string{
-		{"--json", "models", "pull"},
+		{"--json", "compile"},
+		{"--json", "serve"},
 	} {
 		stdout, stderr, code := runForTest(t, args, false)
 		if code != ExitInternal {
@@ -2327,6 +2329,134 @@ func TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage(t *testing.
 		if !strings.Contains(string(page), want) {
 			t.Fatalf("MEMORY.md missing %q:\n%s", want, page)
 		}
+	}
+	for _, want := range []string{
+		"## Strong Memory",
+		"## Weak Memory",
+		"Active accepted rules",
+		"Candidate, stale, contradicted, and retired",
+	} {
+		if !strings.Contains(string(page), want) {
+			t.Fatalf("MEMORY.md missing weak/strong separation marker %q:\n%s", want, page)
+		}
+	}
+}
+
+func TestDistillUsesCanonicalSignatureClustersAndCapsThinEvidenceConfidence(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "packages", "billing", "invoice.py"), "def total():\n    return 1\n")
+	inputPath := filepath.Join(tempDir, "fixtures", "distill-canonical-outcomes.jsonl")
+	writeFileForTest(t, inputPath, strings.Join([]string{
+		`{"experience_id":"exp_0501","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-04-01T10:00:00Z","pr":501,"commit":"abc501","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_generated_a","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/501"]}`,
+		`{"experience_id":"exp_0502","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-04-08T10:00:00Z","pr":502,"commit":"abc502","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_generated_b","signature_class":"test_failure","check_name":"pytest-billing-rerun","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/502"]}`,
+	}, "\n")+"\n")
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+	if code != ExitSuccess {
+		t.Fatalf("ingest exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+
+	stdout, stderr, code = runForTest(t, []string{"--json", "distill", "--format", "json"}, false)
+	if code != ExitSuccess {
+		t.Fatalf("distill exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if got := int(result.Data["rules_written"].(float64)); got != 1 {
+		t.Fatalf("rules_written = %d, want one canonical class/key cluster", got)
+	}
+	rules := loadRuleDocsByKindForTest(t, tempDir)
+	avoid := rules["avoid"]
+	if avoid.Scalars["evidence.count"].Value != "2" {
+		t.Fatalf("evidence.count = %q, want both canonical-cluster records", avoid.Scalars["evidence.count"].Value)
+	}
+	confidence, err := strconv.ParseFloat(avoid.Scalars["confidence"].Value, 64)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if confidence > 0.6 {
+		t.Fatalf("confidence = %.4f, want capped at 0.6 until three confirmed experiences", confidence)
+	}
+	if avoid.Scalars["metadata.embedding_mode"].Value != "signature" ||
+		avoid.Scalars["metadata.cluster.provenance"].Value != "signature_only" {
+		t.Fatalf("signature fallback provenance metadata = %#v", avoid.Scalars)
+	}
+}
+
+func TestReviewApproveEditRejectTransitions(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "packages", "billing", "invoice.py"), "def total():\n    return 1\n")
+	rulePath := filepath.Join(tempDir, "memory", "rules", "billing-time.yaml")
+	writeFileForTest(t, rulePath, `object_type: relia.memory_rule
+schema_version: "1.0"
+id: billing-time
+kind: avoid
+status: candidate
+statement: Avoid direct billing clock calls.
+scope:
+  paths:
+    - packages/billing/invoice.py
+confidence: 0.6
+evidence:
+  count: 2
+  contradictions: 0
+  experiences:
+    - exp_0601
+    - exp_0602
+provenance:
+  - pr: 601
+    outcome: ci_failure
+    url: https://github.com/acme/billing-service/pull/601
+review:
+  label: suggested
+  statement_origin: cluster_summary
+metadata:
+  confidence_label: medium
+  lifecycle_reason: human review required before activation
+  confidence_inputs:
+    evidence_count: 2
+    recency_weight: 1
+    contradictions: 0
+    flake_discount: 0
+    extraction_confidence: 1
+    drafting_model_weight: 0
+  decay:
+    half_life_days: 90
+    latest_evidence_at: 2026-04-08T10:00:00Z
+    oldest_evidence_at: 2026-04-01T10:00:00Z
+    anchor_recorded_at: 2026-04-08T10:00:00Z
+`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "review", "edit", "--rule", "billing-time", "--statement", "Use the billing clock fixture instead of direct UTC calls."}, false)
+	if code != ExitSuccess {
+		t.Fatalf("review edit exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	edited := parseRuleDocForTest(t, readRuleByIDForTest(t, tempDir, "billing-time"))
+	if edited.Scalars["status"].Value != "candidate" ||
+		edited.Scalars["review.label"].Value != "suggested" ||
+		edited.Scalars["review.statement_origin"].Value != "human_authored" ||
+		edited.Scalars["statement"].Value != "Use the billing clock fixture instead of direct UTC calls." {
+		t.Fatalf("edited rule = %#v", edited.Scalars)
+	}
+
+	stdout, stderr, code = runForTest(t, []string{"--json", "review", "approve", "--rule", "billing-time"}, false)
+	if code != ExitSuccess {
+		t.Fatalf("review approve exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	approved := parseRuleDocForTest(t, readRuleByIDForTest(t, tempDir, "billing-time"))
+	if approved.Scalars["status"].Value != "active" || approved.Scalars["review.label"].Value != "accepted" {
+		t.Fatalf("approved rule = %#v", approved.Scalars)
+	}
+
+	stdout, stderr, code = runForTest(t, []string{"--json", "review", "reject", "--rule", "billing-time", "--reason", "superseded by a narrower billing rule"}, false)
+	if code != ExitSuccess {
+		t.Fatalf("review reject exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	rejected := parseRuleDocForTest(t, readRuleByIDForTest(t, tempDir, "billing-time"))
+	if rejected.Scalars["status"].Value != "retired" ||
+		rejected.Scalars["review.label"].Value != "needs_user_input" ||
+		!strings.Contains(rejected.Scalars["metadata.lifecycle_reason"].Value, "superseded") {
+		t.Fatalf("rejected rule = %#v", rejected.Scalars)
 	}
 }
 
@@ -4578,6 +4708,53 @@ func TestCheckRejectsIncompleteLocalModelManifest(t *testing.T) {
 	}
 }
 
+func TestModelsPullRecordsLocalManifestWithoutNetwork(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	artifactContent := []byte("deterministic local model artifact")
+	artifactRel := filepath.ToSlash(filepath.Join(".relia", "models", "artifact.bin"))
+	writeFileForTest(t, filepath.Join(tempDir, filepath.FromSlash(artifactRel)), string(artifactContent))
+	digest := sha256.Sum256(artifactContent)
+
+	stdout, stderr, code := runForTest(t, []string{
+		"--json",
+		"models",
+		"pull",
+		"--model-id", "text-embedding-test",
+		"--version", "2026-06-22",
+		"--source-url", "https://example.test/model.bin",
+		"--license", "Apache-2.0",
+		"--digest", fmt.Sprintf("%x", digest),
+		"--cache-path", artifactRel,
+		"--update-policy", "manual",
+		"--rollback-policy", "delete artifact and restore signature embeddings",
+	}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("models pull exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Command != "models pull" || result.Status != "pass" {
+		t.Fatalf("result = %#v", result)
+	}
+	manifestPath := filepath.Join(tempDir, ".relia", "models", "manifest.json")
+	var manifest map[string]any
+	readJSONFileForTest(t, manifestPath, &manifest)
+	if manifest["model_id"] != "text-embedding-test" ||
+		manifest["version"] != "2026-06-22" ||
+		manifest["source_url"] != "https://example.test/model.bin" ||
+		manifest["license"] != "Apache-2.0" ||
+		manifest["cache_path"] != artifactRel ||
+		manifest["update_policy"] != "manual" ||
+		manifest["rollback_policy"] == "" ||
+		manifest["status"] != "ready" {
+		t.Fatalf("manifest = %#v", manifest)
+	}
+	if commandErr := validateLocalModelManifest(tempDir, yamlScalar{Value: ".relia/models/manifest.json", Line: 1}); commandErr != nil {
+		t.Fatalf("manifest did not validate after models pull: %#v", commandErr)
+	}
+}
+
 func TestCheckValidatesLocalModelManifestDigest(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
@@ -4606,6 +4783,38 @@ func TestCheckValidatesLocalModelManifestDigest(t *testing.T) {
 	result := decodeResult(t, stdout)
 	if result.Status != "pass" {
 		t.Fatalf("status = %q", result.Status)
+	}
+}
+
+func TestCheckRejectsStaleLocalModelManifest(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	replaceInFile(t, filepath.Join(tempDir, "relia.yaml"), "embeddings: signature", "embeddings: local")
+	artifactContent := []byte("deterministic local model artifact")
+	artifactRel := filepath.Join(".relia", "models", "artifact.bin")
+	writeFileForTest(t, filepath.Join(tempDir, artifactRel), string(artifactContent))
+	digest := sha256.Sum256(artifactContent)
+	writeFileForTest(t, filepath.Join(tempDir, ".relia", "models", "manifest.json"), fmt.Sprintf(`{
+  "model_id": "text-embedding-test",
+  "version": "2026-06-22",
+  "source_url": "https://example.test/model.bin",
+  "license": "Apache-2.0",
+  "digest": "%x",
+  "cache_path": "%s",
+  "update_policy": "manual",
+  "rollback_policy": "delete artifact and restore signature embeddings",
+  "status": "stale"
+}
+`, digest, filepath.ToSlash(artifactRel)))
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitDependency {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "dependency_error" || !strings.Contains(result.Errors[0].Message, "stale") {
+		t.Fatalf("errors = %#v", result.Errors)
 	}
 }
 

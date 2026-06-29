@@ -195,11 +195,16 @@ type distillOptions struct {
 	Format       string
 	RuleDir      string
 	HalfLifeDays int
+	Embeddings   string
 }
 
 type reviewOptions struct {
-	Rule  string
-	Label string
+	Action     string
+	Rule       string
+	Label      string
+	Statement  string
+	Reason     string
+	ScopePaths []string
 }
 
 type memoryOptions struct {
@@ -457,6 +462,7 @@ type distilledRuleMetadata struct {
 	LifecycleReason       string
 	ClusterKey            string
 	ClusterKeyHash        string
+	ClusterProvenance     string
 	SourceArtifacts       []string
 	SourceArtifactDigest  string
 	Provider              string
@@ -578,10 +584,7 @@ func dispatch(parsed parsedArgs, start time.Time) CommandResult {
 	case "memory":
 		return memoryResult(parsed.commandArgs, start)
 	case "models":
-		if len(parsed.commandArgs) == 1 && parsed.commandArgs[0] == "pull" {
-			return notImplementedResult("models pull", start)
-		}
-		return errorResult("models", "models", usageError("expected subcommand: pull"), start)
+		return modelsResult(parsed.commandArgs, start)
 	case "compile", "serve", "demo", "share":
 		return notImplementedResult(command, start)
 	default:
@@ -1926,7 +1929,7 @@ func distillResult(args []string, start time.Time) CommandResult {
 	if !ok {
 		return withFormat(errorResult("distill", "distill", configError("could not locate repository root from current directory"), start))
 	}
-	warnings, commandErr := validateReliaConfig(root)
+	warnings, commandErr := validateReliaConfigForDistill(root, options.Embeddings)
 	if commandErr != nil {
 		return withFormat(errorResult("distill", "distill", commandErr, start))
 	}
@@ -1938,11 +1941,12 @@ func distillResult(args []string, start time.Time) CommandResult {
 	if provider != "none" {
 		return withFormat(errorResult("distill", "distill", dependencyError("provider-backed distill requires an approved model_provider_endpoint gate; no experience records were sent", providerRef), start))
 	}
+	embeddingMode := effectiveDistillEmbeddingMode(config, options)
 	records, sourceArtifacts, sourceDigest, commandErr := loadBacktestExperiences(root)
 	if commandErr != nil {
 		return withFormat(errorResult("distill", "distill", commandErr, start))
 	}
-	rules, commandErr := buildDistilledRules(root, config, records, sourceArtifacts, sourceDigest, options)
+	rules, commandErr := buildDistilledRules(root, config, records, sourceArtifacts, sourceDigest, embeddingMode, options)
 	if commandErr != nil {
 		return withFormat(errorResult("distill", "distill", commandErr, start))
 	}
@@ -1965,9 +1969,9 @@ func distillResult(args []string, start time.Time) CommandResult {
 		"contradicted_rules":         statusCounts["contradicted"],
 		"retired_rules":              statusCounts["retired"],
 		"provider":                   provider,
-		"embedding_mode":             distillEmbeddingMode(config),
+		"embedding_mode":             embeddingMode,
 		"review_required":            distillReviewRequired(config),
-		"deterministic_fallback":     true,
+		"deterministic_fallback":     provider == "none" && embeddingMode == "signature",
 		"confidence_model":           "evidence_count+recency_half_life+contradictions+flake_discount+extraction_confidence",
 		"drafting_model_confidence":  0,
 		"decay_half_life_days":       options.HalfLifeDays,
@@ -2027,6 +2031,12 @@ func parseDistillArgs(args []string) (distillOptions, *CommandError) {
 			}
 			options.HalfLifeDays = parsed
 			index++
+		case "--embeddings":
+			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
+				return options, usageError("distill requires signature, local, or provider after --embeddings")
+			}
+			options.Embeddings = args[index+1]
+			index++
 		default:
 			return options, usageError(fmt.Sprintf("unknown distill argument %q", arg))
 		}
@@ -2036,6 +2046,11 @@ func parseDistillArgs(args []string) (distillOptions, *CommandError) {
 	}
 	if _, ok := cleanRepoPath(options.RuleDir); !ok {
 		return options, usageError("distill --rule-dir must be a repo-relative path")
+	}
+	switch options.Embeddings {
+	case "", "signature", "local", "provider":
+	default:
+		return options, usageError("distill --embeddings must be signature, local, or provider")
 	}
 	return options, nil
 }
@@ -2061,7 +2076,7 @@ func reviewResult(args []string, start time.Time) CommandResult {
 	if commandErr != nil {
 		return errorResult("review", "review", commandErr, start)
 	}
-	status, commandErr := updateMemoryRuleReview(root, rulePath, options.Label)
+	status, commandErr := updateMemoryRuleReview(root, rulePath, options)
 	if commandErr != nil {
 		return errorResult("review", "review", commandErr, start)
 	}
@@ -2069,6 +2084,7 @@ func reviewResult(args []string, start time.Time) CommandResult {
 	result := passResult("review", "review", "updated memory rule review label", start, map[string]any{
 		"rule":         options.Rule,
 		"rule_path":    rel,
+		"action":       options.Action,
 		"review_label": options.Label,
 		"status":       status,
 	})
@@ -2079,7 +2095,14 @@ func reviewResult(args []string, start time.Time) CommandResult {
 }
 
 func parseReviewArgs(args []string) (reviewOptions, *CommandError) {
-	options := reviewOptions{Label: "accepted"}
+	var options reviewOptions
+	if len(args) > 0 {
+		switch args[0] {
+		case "approve", "edit", "reject":
+			options.Action = args[0]
+			args = args[1:]
+		}
+	}
 	for index := 0; index < len(args); index++ {
 		arg := args[index]
 		switch arg {
@@ -2095,17 +2118,74 @@ func parseReviewArgs(args []string) (reviewOptions, *CommandError) {
 			}
 			options.Label = args[index+1]
 			index++
+		case "--statement":
+			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
+				return options, usageError("review edit requires a statement after --statement")
+			}
+			options.Statement = args[index+1]
+			index++
+		case "--reason":
+			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
+				return options, usageError("review reject requires a reason after --reason")
+			}
+			options.Reason = args[index+1]
+			index++
+		case "--scope-path":
+			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
+				return options, usageError("review edit requires a repo-relative path after --scope-path")
+			}
+			options.ScopePaths = append(options.ScopePaths, args[index+1])
+			index++
 		default:
 			return options, usageError(fmt.Sprintf("unknown review argument %q", arg))
 		}
 	}
+	if options.Action == "" {
+		options.Action = "label"
+	}
 	if strings.TrimSpace(options.Rule) == "" {
 		return options, usageError("review requires --rule <id-or-path>")
+	}
+	switch options.Action {
+	case "approve":
+		if options.Label != "" && options.Label != "accepted" {
+			return options, usageError("review approve can only use review label accepted")
+		}
+		options.Label = "accepted"
+	case "reject":
+		if strings.TrimSpace(options.Reason) == "" {
+			return options, usageError("review reject requires --reason <text>")
+		}
+		if options.Label != "" && options.Label != "needs_user_input" {
+			return options, usageError("review reject can only use review label needs_user_input")
+		}
+		options.Label = "needs_user_input"
+	case "edit":
+		if strings.TrimSpace(options.Statement) == "" && len(options.ScopePaths) == 0 {
+			return options, usageError("review edit requires --statement or --scope-path")
+		}
+		if options.Label == "" {
+			options.Label = "suggested"
+		}
+		if options.Label == "accepted" {
+			return options, usageError("review edit keeps a rule candidate; run review approve after editing")
+		}
+	case "label":
+		if options.Label == "" {
+			options.Label = "accepted"
+		}
+	default:
+		return options, usageError("review action must be approve, edit, reject, or omitted for --label")
 	}
 	switch options.Label {
 	case "accepted", "suggested", "needs_user_input":
 	default:
 		return options, usageError("review --label must be accepted, suggested, or needs_user_input")
+	}
+	for _, scopePath := range options.ScopePaths {
+		if _, ok := cleanRepoPath(scopePath); !ok {
+			return options, usageError("review --scope-path must be repo-relative")
+		}
 	}
 	return options, nil
 }
@@ -2191,6 +2271,169 @@ func parseMemoryArgs(args []string) (memoryOptions, *CommandError) {
 	return options, nil
 }
 
+func modelsResult(args []string, start time.Time) CommandResult {
+	if len(args) == 0 || args[0] != "pull" {
+		return errorResult("models", "models", usageError("expected subcommand: pull"), start)
+	}
+	options, commandErr := parseModelsPullArgs(args[1:])
+	if commandErr != nil {
+		return errorResult("models pull", "models", commandErr, start)
+	}
+	wd, err := os.Getwd()
+	if err != nil {
+		return errorResult("models pull", "models", internalError("could not inspect working directory", err), start)
+	}
+	root, ok := findRepoRoot(wd)
+	if !ok {
+		return errorResult("models pull", "models", configError("could not locate repository root from current directory"), start)
+	}
+	config, commandErr := readReliaConfig(root)
+	if commandErr != nil {
+		return errorResult("models pull", "models", commandErr, start)
+	}
+	manifestRel := ".relia/models/manifest.json"
+	if scalar, ok := config.Scalars["models.local_manifest"]; ok {
+		manifestRel = scalar.Value
+	}
+	if _, ok := cleanRepoPath(manifestRel); !ok {
+		return errorResult("models pull", "models", dependencyError("local model manifest path must be repo-relative", defaultConfigFile), start)
+	}
+	manifest := localModelManifest{
+		ModelID:        options.ModelID,
+		Version:        options.Version,
+		SourceURL:      options.SourceURL,
+		License:        options.License,
+		Digest:         canonicalModelDigest(options.Digest),
+		CachePath:      filepath.ToSlash(filepath.Clean(options.CachePath)),
+		UpdatePolicy:   options.UpdatePolicy,
+		RollbackPolicy: options.RollbackPolicy,
+		Status:         "ready",
+	}
+	if commandErr := validateLocalModelManifestPayload(root, manifest, manifestRel); commandErr != nil {
+		return errorResult("models pull", "models", commandErr, start)
+	}
+	encoded, err := json.MarshalIndent(manifest, "", "  ")
+	if err != nil {
+		return errorResult("models pull", "models", internalError("could not encode local model manifest", err), start)
+	}
+	manifestPath := filepath.Join(root, filepath.FromSlash(filepath.ToSlash(filepath.Clean(manifestRel))))
+	if commandErr := writeAtomicRepoFile(manifestPath, append(encoded, '\n'), "local model manifest"); commandErr != nil {
+		return errorResult("models pull", "models", commandErr, start)
+	}
+	result := passResult("models pull", "models", "recorded local embedding model artifact manifest", start, map[string]any{
+		"model_id":        manifest.ModelID,
+		"version":         manifest.Version,
+		"source_url":      manifest.SourceURL,
+		"license":         manifest.License,
+		"digest":          manifest.Digest,
+		"cache_path":      manifest.CachePath,
+		"update_policy":   manifest.UpdatePolicy,
+		"rollback_policy": manifest.RollbackPolicy,
+		"manifest_path":   filepath.ToSlash(filepath.Clean(manifestRel)),
+		"network_used":    false,
+		"status":          manifest.Status,
+	})
+	manifestDisplayPath := filepath.ToSlash(filepath.Clean(manifestRel))
+	result.EvidenceRefs = append(result.EvidenceRefs,
+		"docs/dev/dev_guides.md#model-provider-and-artifact-policy",
+		manifestDisplayPath,
+	)
+	result.Artifacts = append(result.Artifacts,
+		ArtifactRef{Kind: "local_model_manifest", Path: manifestDisplayPath},
+		ArtifactRef{Kind: "local_model_artifact", Path: manifest.CachePath},
+	)
+	return result
+}
+
+func parseModelsPullArgs(args []string) (modelsPullOptions, *CommandError) {
+	var options modelsPullOptions
+	for index := 0; index < len(args); index++ {
+		arg := args[index]
+		needValue := func(message string) (string, bool) {
+			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
+				return message, false
+			}
+			return args[index+1], true
+		}
+		switch arg {
+		case "--model-id":
+			value, ok := needValue("models pull requires a value after --model-id")
+			if !ok {
+				return options, usageError(value)
+			}
+			options.ModelID = value
+			index++
+		case "--version":
+			value, ok := needValue("models pull requires a value after --version")
+			if !ok {
+				return options, usageError(value)
+			}
+			options.Version = value
+			index++
+		case "--source-url":
+			value, ok := needValue("models pull requires a value after --source-url")
+			if !ok {
+				return options, usageError(value)
+			}
+			options.SourceURL = value
+			index++
+		case "--license":
+			value, ok := needValue("models pull requires a value after --license")
+			if !ok {
+				return options, usageError(value)
+			}
+			options.License = value
+			index++
+		case "--digest":
+			value, ok := needValue("models pull requires a value after --digest")
+			if !ok {
+				return options, usageError(value)
+			}
+			options.Digest = value
+			index++
+		case "--cache-path":
+			value, ok := needValue("models pull requires a repo-relative path after --cache-path")
+			if !ok {
+				return options, usageError(value)
+			}
+			options.CachePath = value
+			index++
+		case "--update-policy":
+			value, ok := needValue("models pull requires a value after --update-policy")
+			if !ok {
+				return options, usageError(value)
+			}
+			options.UpdatePolicy = value
+			index++
+		case "--rollback-policy":
+			value, ok := needValue("models pull requires a value after --rollback-policy")
+			if !ok {
+				return options, usageError(value)
+			}
+			options.RollbackPolicy = value
+			index++
+		default:
+			return options, usageError(fmt.Sprintf("unknown models pull argument %q", arg))
+		}
+	}
+	required := map[string]string{
+		"--model-id":        options.ModelID,
+		"--version":         options.Version,
+		"--source-url":      options.SourceURL,
+		"--license":         options.License,
+		"--digest":          options.Digest,
+		"--cache-path":      options.CachePath,
+		"--update-policy":   options.UpdatePolicy,
+		"--rollback-policy": options.RollbackPolicy,
+	}
+	for flag, value := range required {
+		if strings.TrimSpace(value) == "" {
+			return options, usageError("models pull requires " + flag)
+		}
+	}
+	return options, nil
+}
+
 func distillProvider(config yamlDocument) (string, string) {
 	if scalar, ok := config.Scalars["distill.provider"]; ok {
 		return scalar.Value, configRef(scalar)
@@ -2205,6 +2448,13 @@ func distillEmbeddingMode(config yamlDocument) string {
 	return "signature"
 }
 
+func effectiveDistillEmbeddingMode(config yamlDocument, options distillOptions) string {
+	if options.Embeddings != "" {
+		return options.Embeddings
+	}
+	return distillEmbeddingMode(config)
+}
+
 func distillReviewRequired(config yamlDocument) bool {
 	if scalar, ok := config.Scalars["distill.review_required"]; ok {
 		return scalar.Value != "false"
@@ -2212,7 +2462,7 @@ func distillReviewRequired(config yamlDocument) bool {
 	return true
 }
 
-func buildDistilledRules(root string, config yamlDocument, records []backtestExperience, sourceArtifacts []string, sourceDigest string, options distillOptions) ([]distilledRule, *CommandError) {
+func buildDistilledRules(root string, config yamlDocument, records []backtestExperience, sourceArtifacts []string, sourceDigest string, embeddingMode string, options distillOptions) ([]distilledRule, *CommandError) {
 	if len(records) == 0 {
 		return nil, artifactContractError("distill found no experience records in .relia/experiences", ".relia/experiences")
 	}
@@ -2226,7 +2476,6 @@ func buildDistilledRules(root string, config yamlDocument, records []backtestExp
 	clusters := buildDistillClusters(records)
 	flakeHeuristics := autoFlakeDiscountedExperiences(records)
 	provider, _ := distillProvider(config)
-	embeddingMode := distillEmbeddingMode(config)
 	reviewRequired := distillReviewRequired(config)
 
 	var rules []distilledRule
@@ -2295,12 +2544,16 @@ func buildDistillClusters(records []backtestExperience) []distillCluster {
 }
 
 func distillClusterKey(record experienceRecord) string {
-	if strings.TrimSpace(record.Outcome.Signature.SignatureID) != "" {
-		return strings.Join([]string{"id", record.Outcome.Signature.SignatureID}, "\x00")
+	signatureID := strings.TrimSpace(record.Outcome.Signature.SignatureID)
+	if signatureID != "" && !strings.HasPrefix(signatureID, "sig_generated") {
+		return strings.Join([]string{"id", signatureID}, "\x00")
 	}
 	keys := recurrenceSignatureKeys(record)
 	if len(keys) > 0 {
 		return keys[0]
+	}
+	if signatureID != "" {
+		return strings.Join([]string{"id", signatureID}, "\x00")
 	}
 	return ""
 }
@@ -2318,6 +2571,19 @@ func distillRecordSignal(record experienceRecord) string {
 		}
 	}
 	return "signature"
+}
+
+func distillClusterProvenance(embeddingMode string) string {
+	switch embeddingMode {
+	case "signature":
+		return "signature_only"
+	case "local":
+		return "local_manifest_verified"
+	case "provider":
+		return "provider_opt_in"
+	default:
+		return "unknown"
+	}
 }
 
 func distillFailureEvidence(records []backtestExperience) []backtestExperience {
@@ -2412,12 +2678,13 @@ func buildDistilledRule(root string, kind string, cluster distillCluster, eviden
 	metadata.LifecycleReason = reason
 	metadata.ClusterKey = strings.ReplaceAll(cluster.Key, "\x00", "|")
 	metadata.ClusterKeyHash = shortHash(cluster.Key)
+	metadata.ClusterProvenance = distillClusterProvenance(embeddingMode)
 	metadata.SourceArtifacts = append([]string(nil), sourceArtifacts...)
 	metadata.SourceArtifactDigest = sourceDigest
 	metadata.Provider = provider
 	metadata.EmbeddingMode = embeddingMode
 	metadata.ReviewRequired = reviewRequired
-	metadata.DeterministicFallback = provider == "none"
+	metadata.DeterministicFallback = provider == "none" && embeddingMode == "signature"
 	id := distilledRuleID(kind, cluster)
 	return distilledRule{
 		ID:              id,
@@ -2531,6 +2798,9 @@ func distilledConfidenceMetadata(records []backtestExperience, contradictions in
 	}
 	contradictionPenalty := 1 - math.Min(0.65, float64(contradictions)*0.25)
 	confidence := roundFloat((0.40*evidenceScore+0.25*recencyWeight+0.20*extractionScore+0.15*flakeScore)*contradictionPenalty, 4)
+	if len(records) < 3 && confidence > 0.6 {
+		confidence = 0.6
+	}
 	label := confidenceLabel(confidence)
 	return confidence, distilledRuleMetadata{
 		ConfidenceLabel:      label,
@@ -2807,6 +3077,7 @@ func renderDistilledRuleYAML(rule distilledRule) string {
 	builder.WriteString("  cluster:\n")
 	builder.WriteString("    key: " + yamlScalarForWrite(rule.Metadata.ClusterKey) + "\n")
 	builder.WriteString("    key_hash: " + yamlScalarForWrite(rule.Metadata.ClusterKeyHash) + "\n")
+	builder.WriteString("    provenance: " + yamlScalarForWrite(rule.Metadata.ClusterProvenance) + "\n")
 	builder.WriteString("  source_artifact_digest: " + yamlScalarForWrite(rule.Metadata.SourceArtifactDigest) + "\n")
 	writeYAMLStringList(&builder, "source_artifacts", rule.Metadata.SourceArtifacts, 2)
 	builder.WriteString("  provider: " + yamlScalarForWrite(rule.Metadata.Provider) + "\n")
@@ -2947,7 +3218,7 @@ func findMemoryRulePath(root string, ruleDir string, rule string) (string, *Comm
 	return "", artifactContractError("memory rule was not found", rule)
 }
 
-func updateMemoryRuleReview(root string, rulePath string, label string) (string, *CommandError) {
+func updateMemoryRuleReview(root string, rulePath string, options reviewOptions) (string, *CommandError) {
 	if commandErr := validateMemoryRuleArtifact(root, rulePath); commandErr != nil {
 		return "", commandErr
 	}
@@ -2961,16 +3232,51 @@ func updateMemoryRuleReview(root string, rulePath string, label string) (string,
 		return "", artifactContractError(parseErr.Error(), rel)
 	}
 	status := document.Scalars["status"].Value
-	if label == "accepted" {
+	label := options.Label
+	next := string(content)
+	switch options.Action {
+	case "approve":
 		switch status {
 		case "stale", "contradicted", "retired":
 			return "", artifactContractError("cannot mark "+status+" memory rule accepted without fresh distill evidence", rel)
 		}
 		status = "active"
-	} else if status == "active" {
+		label = "accepted"
+		next = replaceOrAddNestedYAMLScalar(next, "metadata", "lifecycle_reason", "approved by human review")
+	case "reject":
+		status = "retired"
+		label = "needs_user_input"
+		next = replaceOrAddNestedYAMLScalar(next, "metadata", "lifecycle_reason", "rejected by human review: "+strings.TrimSpace(options.Reason))
+	case "edit":
+		switch status {
+		case "stale", "contradicted", "retired":
+			return "", artifactContractError("cannot edit "+status+" memory rule without fresh distill evidence", rel)
+		}
 		status = "candidate"
+		if strings.TrimSpace(options.Statement) != "" {
+			next = replaceTopLevelYAMLScalar(next, "statement", strings.TrimSpace(options.Statement))
+			next = replaceNestedYAMLScalar(next, "review", "statement_origin", "human_authored")
+		}
+		if len(options.ScopePaths) > 0 {
+			next = replaceNestedYAMLStringList(next, "scope", "paths", normalizedRepoPaths(options.ScopePaths))
+		}
+		next = replaceOrAddNestedYAMLScalar(next, "metadata", "lifecycle_reason", "edited by human review; pending approval")
+	case "label":
+		if label == "accepted" {
+			switch status {
+			case "stale", "contradicted", "retired":
+				return "", artifactContractError("cannot mark "+status+" memory rule accepted without fresh distill evidence", rel)
+			}
+			status = "active"
+			next = replaceOrAddNestedYAMLScalar(next, "metadata", "lifecycle_reason", "approved by human review")
+		} else if status == "active" {
+			status = "candidate"
+			next = replaceOrAddNestedYAMLScalar(next, "metadata", "lifecycle_reason", "returned to candidate review")
+		}
+	default:
+		return "", usageError("review action must be approve, edit, reject, or omitted for --label")
 	}
-	next := replaceTopLevelYAMLScalar(string(content), "status", status)
+	next = replaceTopLevelYAMLScalar(next, "status", status)
 	next = replaceNestedYAMLScalar(next, "review", "label", label)
 	if next == string(content) {
 		return "", artifactContractError("memory rule review fields were not updated", rel)
@@ -3014,6 +3320,110 @@ func replaceNestedYAMLScalar(content string, parent string, key string, value st
 		}
 	}
 	return strings.Join(lines, "\n")
+}
+
+func replaceOrAddNestedYAMLScalar(content string, parent string, key string, value string) string {
+	lines := strings.Split(content, "\n")
+	parentPrefix := parent + ":"
+	keyPrefix := key + ":"
+	parentIndex := -1
+	insertIndex := len(lines)
+	inParent := false
+	for index, line := range lines {
+		indent := leadingSpaces(line)
+		trimmed := strings.TrimSpace(line)
+		if indent == 0 {
+			if inParent {
+				insertIndex = index
+				break
+			}
+			inParent = strings.HasPrefix(trimmed, parentPrefix)
+			if inParent {
+				parentIndex = index
+				insertIndex = index + 1
+			}
+			continue
+		}
+		if inParent {
+			insertIndex = index + 1
+			if indent == 2 && strings.HasPrefix(trimmed, keyPrefix) {
+				lines[index] = "  " + key + ": " + yamlScalarForWrite(value)
+				return strings.Join(lines, "\n")
+			}
+		}
+	}
+	newLine := "  " + key + ": " + yamlScalarForWrite(value)
+	if parentIndex == -1 {
+		if len(lines) > 0 && lines[len(lines)-1] == "" {
+			lines[len(lines)-1] = parentPrefix
+			lines = append(lines, newLine, "")
+			return strings.Join(lines, "\n")
+		}
+		lines = append(lines, parentPrefix, newLine)
+		return strings.Join(lines, "\n")
+	}
+	next := append([]string{}, lines[:insertIndex]...)
+	next = append(next, newLine)
+	next = append(next, lines[insertIndex:]...)
+	return strings.Join(next, "\n")
+}
+
+func replaceNestedYAMLStringList(content string, parent string, key string, values []string) string {
+	lines := strings.Split(content, "\n")
+	parentPrefix := parent + ":"
+	keyPrefix := key + ":"
+	inParent := false
+	parentIndex := -1
+	insertStart := -1
+	insertEnd := -1
+	for index, line := range lines {
+		indent := leadingSpaces(line)
+		trimmed := strings.TrimSpace(line)
+		if indent == 0 {
+			if inParent && insertStart == -1 {
+				insertStart = index
+				insertEnd = index
+				break
+			}
+			inParent = strings.HasPrefix(trimmed, parentPrefix)
+			if inParent {
+				parentIndex = index
+			}
+			continue
+		}
+		if !inParent {
+			continue
+		}
+		if indent == 2 && strings.HasPrefix(trimmed, keyPrefix) {
+			insertStart = index
+			insertEnd = index + 1
+			for insertEnd < len(lines) {
+				nextLine := lines[insertEnd]
+				nextIndent := leadingSpaces(nextLine)
+				nextTrimmed := strings.TrimSpace(nextLine)
+				if nextTrimmed != "" && nextIndent <= 2 {
+					break
+				}
+				insertEnd++
+			}
+			break
+		}
+	}
+	replacement := []string{"  " + key + ":"}
+	for _, value := range values {
+		replacement = append(replacement, "    - "+yamlScalarForWrite(value))
+	}
+	if insertStart == -1 {
+		if parentIndex == -1 {
+			return content
+		}
+		insertStart = parentIndex + 1
+		insertEnd = insertStart
+	}
+	next := append([]string{}, lines[:insertStart]...)
+	next = append(next, replacement...)
+	next = append(next, lines[insertEnd:]...)
+	return strings.Join(next, "\n")
 }
 
 func loadMemoryRuleSummaries(root string) ([]memoryRuleSummary, *CommandError) {
@@ -3138,13 +3548,43 @@ func renderMemoryMarkdown(rules []memoryRuleSummary) string {
 		builder.WriteString("No memory rules found.\n")
 		return builder.String()
 	}
+	builder.WriteString("## Strong Memory\n\n")
+	builder.WriteString("Active accepted rules are eligible for serving and assessment.\n\n")
+	activeRules := filterMemoryRulesByActiveStatus(rules, true)
+	if len(activeRules) == 0 {
+		builder.WriteString("No active accepted rules.\n\n")
+	} else {
+		renderMemoryRulesByStatus(&builder, activeRules)
+	}
+	builder.WriteString("## Weak Memory\n\n")
+	builder.WriteString("Candidate, stale, contradicted, and retired rules are visible for review but are not served as active memory.\n\n")
+	weakRules := filterMemoryRulesByActiveStatus(rules, false)
+	if len(weakRules) == 0 {
+		builder.WriteString("No weak memory rules.\n")
+		return builder.String()
+	}
+	renderMemoryRulesByStatus(&builder, weakRules)
+	return builder.String()
+}
+
+func filterMemoryRulesByActiveStatus(rules []memoryRuleSummary, active bool) []memoryRuleSummary {
+	filtered := make([]memoryRuleSummary, 0, len(rules))
+	for _, rule := range rules {
+		if (rule.Status == "active") == active {
+			filtered = append(filtered, rule)
+		}
+	}
+	return filtered
+}
+
+func renderMemoryRulesByStatus(builder *strings.Builder, rules []memoryRuleSummary) {
 	currentStatus := ""
 	for _, rule := range rules {
 		if rule.Status != currentStatus {
 			currentStatus = rule.Status
-			builder.WriteString("## " + titleCaseStatus(currentStatus) + "\n\n")
+			builder.WriteString("### " + titleCaseStatus(currentStatus) + "\n\n")
 		}
-		builder.WriteString("### " + rule.ID + "\n\n")
+		builder.WriteString("#### " + rule.ID + "\n\n")
 		builder.WriteString("- kind: `" + rule.Kind + "`\n")
 		builder.WriteString("- status: `" + rule.Status + "`\n")
 		confidence := rule.Confidence
@@ -3160,7 +3600,6 @@ func renderMemoryMarkdown(rules []memoryRuleSummary) string {
 		}
 		builder.WriteString("- artifact: `" + rule.Path + "`\n\n")
 	}
-	return builder.String()
 }
 
 func titleCaseStatus(status string) string {
@@ -5671,6 +6110,14 @@ func gitIgnoreContainsRelia(content []byte) bool {
 }
 
 func validateReliaConfig(root string) ([]Finding, *CommandError) {
+	return validateReliaConfigWithEmbeddingOverride(root, "")
+}
+
+func validateReliaConfigForDistill(root string, embeddingOverride string) ([]Finding, *CommandError) {
+	return validateReliaConfigWithEmbeddingOverride(root, embeddingOverride)
+}
+
+func validateReliaConfigWithEmbeddingOverride(root string, embeddingOverride string) ([]Finding, *CommandError) {
 	path := filepath.Join(root, defaultConfigFile)
 	content, err := os.ReadFile(path)
 	if err != nil {
@@ -5754,6 +6201,17 @@ func validateReliaConfig(root string) ([]Finding, *CommandError) {
 		return nil, configError("relia.yaml missing required key distill.embeddings")
 	}
 	switch embeddings.Value {
+	case "signature", "local", "provider":
+	default:
+		return nil, configError("distill.embeddings must be signature, local, or provider")
+	}
+	effectiveEmbeddings := embeddings.Value
+	effectiveEmbeddingsRef := configRef(embeddings)
+	if embeddingOverride != "" {
+		effectiveEmbeddings = embeddingOverride
+		effectiveEmbeddingsRef = "relia distill --embeddings"
+	}
+	switch effectiveEmbeddings {
 	case "signature":
 	case "local":
 		manifest := document.Scalars["models.local_manifest"]
@@ -5761,7 +6219,7 @@ func validateReliaConfig(root string) ([]Finding, *CommandError) {
 			return nil, commandErr
 		}
 	case "provider":
-		return nil, dependencyError("provider embeddings require an approved model_provider_endpoint gate", configRef(embeddings))
+		return nil, dependencyError("provider embeddings require an approved model_provider_endpoint gate", effectiveEmbeddingsRef)
 	default:
 		return nil, configError("distill.embeddings must be signature, local, or provider")
 	}
@@ -5814,6 +6272,18 @@ type localModelManifest struct {
 	CachePath      string `json:"cache_path"`
 	UpdatePolicy   string `json:"update_policy"`
 	RollbackPolicy string `json:"rollback_policy"`
+	Status         string `json:"status,omitempty"`
+}
+
+type modelsPullOptions struct {
+	ModelID        string
+	Version        string
+	SourceURL      string
+	License        string
+	Digest         string
+	CachePath      string
+	UpdatePolicy   string
+	RollbackPolicy string
 }
 
 func validateLocalModelManifest(root string, manifestScalar yamlScalar) *CommandError {
@@ -5833,6 +6303,10 @@ func validateLocalModelManifest(root string, manifestScalar yamlScalar) *Command
 	if err := json.Unmarshal(content, &manifest); err != nil {
 		return dependencyError("local model manifest is not valid JSON", manifestRel)
 	}
+	return validateLocalModelManifestPayload(root, manifest, manifestRel)
+}
+
+func validateLocalModelManifestPayload(root string, manifest localModelManifest, ref string) *CommandError {
 	required := map[string]string{
 		"model_id":        manifest.ModelID,
 		"version":         manifest.Version,
@@ -5845,37 +6319,48 @@ func validateLocalModelManifest(root string, manifestScalar yamlScalar) *Command
 	}
 	for field, value := range required {
 		if strings.TrimSpace(value) == "" {
-			return dependencyError("local model manifest missing required field "+field, manifestRel)
+			return dependencyError("local model manifest missing required field "+field, ref)
 		}
 	}
 	if !strings.HasPrefix(manifest.SourceURL, "https://") {
-		return dependencyError("local model manifest source_url must be https", manifestRel)
+		return dependencyError("local model manifest source_url must be https", ref)
 	}
-	digest := strings.TrimPrefix(strings.ToLower(strings.TrimSpace(manifest.Digest)), "sha256:")
+	digest := canonicalModelDigest(manifest.Digest)
 	if len(digest) != 64 || !isHexDigest(digest) {
-		return dependencyError("local model manifest digest must be a SHA-256 hex digest", manifestRel)
+		return dependencyError("local model manifest digest must be a SHA-256 hex digest", ref)
+	}
+	switch manifest.Status {
+	case "", "ready":
+	case "stale":
+		return dependencyError("local model artifact is stale", ref)
+	default:
+		return dependencyError("local model manifest status must be ready or stale", ref)
 	}
 	cachePath := filepath.Clean(manifest.CachePath)
 	cachePathSlash := filepath.ToSlash(cachePath)
 	if filepath.IsAbs(manifest.CachePath) || cachePath == "." || cachePath == ".." || strings.HasPrefix(cachePathSlash, "../") {
-		return dependencyError("local model manifest cache_path must stay inside the repository", manifestRel)
+		return dependencyError("local model manifest cache_path must stay inside the repository", ref)
 	}
 	if cachePathSlash == ".relia/models" || !strings.HasPrefix(cachePathSlash, ".relia/models/") {
-		return dependencyError("local model manifest cache_path must stay under .relia/models", manifestRel)
+		return dependencyError("local model manifest cache_path must stay under .relia/models", ref)
 	}
 	artifactPath := filepath.Join(root, cachePath)
 	artifactContent, err := os.ReadFile(artifactPath)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			return dependencyError("local model artifact is missing", manifestRel)
+			return dependencyError("local model artifact is missing", ref)
 		}
 		return internalError("could not read local model artifact", err)
 	}
 	actual := fmt.Sprintf("%x", sha256.Sum256(artifactContent))
 	if actual != digest {
-		return dependencyError("local model artifact digest does not match manifest", manifestRel)
+		return dependencyError("local model artifact digest does not match manifest", ref)
 	}
 	return nil
+}
+
+func canonicalModelDigest(value string) string {
+	return strings.TrimPrefix(strings.ToLower(strings.TrimSpace(value)), "sha256:")
 }
 
 func isHexDigest(value string) bool {
