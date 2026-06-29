@@ -18,8 +18,11 @@
     ".factory/artifacts/task-runs/T7.1/proof-of-behavior-scorecard.json"
   ],
   "implementation_performed": true,
+  "repair_performed": true,
+  "repair_summary": "Repaired command-level planted recurrence acceptance coverage so the focused test runs relia distill against examples/demo/seeded-repo/outcomes.jsonl and finds the generated avoid rule by exact evidence citations.",
   "schema_version": "1.0",
   "status": "implemented",
   "summary": "Implemented command-level relia distill --input support for local outcome JSON/JSONL, normalized and redacted inputs in memory, preferred canonical signature keys before signature ID fallback, and added planted recurrence citation coverage.",
-  "task_id": "T7.1"
+  "task_id": "T7.1",
+  "updated_at": "2026-06-29T17:14:26Z"
 }

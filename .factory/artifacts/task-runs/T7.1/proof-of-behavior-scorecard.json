@@ -6,11 +6,12 @@
   "proof_level": "user_visible_behavior",
   "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-001",
   "behavior_under_test": "`relia distill --input <json-or-jsonl> --format json` drafts an `avoid` rule from the planted recurrence cluster with correct PR citations.",
+  "updated_at": "2026-06-29T17:14:26Z",
   "scorecard": [
     {
       "check": "distill accepts explicit local input without requiring pre-persisted .relia experience shards",
       "status": "pass",
-      "evidence": "TestDistillInputDraftsAvoidRuleFromPlantedRecurrenceCluster runs relia distill --input against local JSONL."
+      "evidence": "TestDistillInputDraftsAvoidRuleFromPlantedRecurrenceCluster runs relia distill --input against the governed examples/demo/seeded-repo/outcomes.jsonl JSONL fixture."
     },
     {
       "check": "planted recurrence cluster drafts an avoid rule",
@@ -25,7 +26,7 @@
     {
       "check": "canonical signature keys prevent unrelated held-fix evidence from contaminating the avoid rule",
       "status": "pass",
-      "evidence": "The test includes held-fix PR 210 with the same signature_id but a different canonical signature key; avoid evidence remains exp_0142, exp_0187, and exp_0203 only."
+      "evidence": "The seeded fixture includes held-fix PR 210 with the same signature_id but a different canonical signature key; avoid evidence remains exp_0142, exp_0187, and exp_0203 only."
     },
     {
       "check": "offline trust posture preserved",
@@ -48,6 +49,7 @@
   "evidence_refs": [
     "cmd/relia/main.go",
     "cmd/relia/main_test.go",
+    "examples/demo/seeded-repo/outcomes.jsonl",
     ".factory/artifacts/task-runs/T7.1/validation-report.json"
   ]
 }

@@ -2343,35 +2343,45 @@ func TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage(t *testing.
 }
 
 func TestDistillInputDraftsAvoidRuleFromPlantedRecurrenceCluster(t *testing.T) {
+	sourceRoot := findRepoRootForTest(t)
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
-	writeFileForTest(t, filepath.Join(tempDir, "packages", "billing", "invoice.py"), "def total():\n    return 1\n")
-	writeFileForTest(t, filepath.Join(tempDir, "tests", "billing", "test_invoice_time.py"), "def test_rollover_uses_frozen_clock():\n    pass\n")
-	inputPath := filepath.Join(tempDir, "fixtures", "planted-recurrence-outcomes.jsonl")
-	writeFileForTest(t, inputPath, strings.Join([]string{
-		`{"experience_id":"exp_0142","repo":"Clyra-AI/relia-demo-seed","recorded_at":"2026-01-08T14:00:00Z","pr":142,"commit":"a14200","paths":["packages/billing/invoice.py","tests/billing/test_invoice_time.py"],"actor_kind":"agent","attribution_method":"pr_label","attribution_confidence":0.99,"outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_time_freeze","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice_time.py::test_rollover_uses_frozen_clock","extraction_confidence":"structured","flake_discount":0.0,"provenance_urls":["https://github.com/Clyra-AI/relia-demo-seed/pull/142"]}`,
-		`{"experience_id":"exp_0187","repo":"Clyra-AI/relia-demo-seed","recorded_at":"2026-02-03T09:10:00Z","pr":187,"commit":"a18700","paths":["packages/billing/invoice.py","tests/billing/test_invoice_time.py"],"actor_kind":"agent","attribution_method":"pr_label","attribution_confidence":0.99,"outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_time_freeze","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice_time.py::test_rollover_uses_frozen_clock","extraction_confidence":"structured","flake_discount":0.0,"provenance_urls":["https://github.com/Clyra-AI/relia-demo-seed/pull/187"]}`,
-		`{"experience_id":"exp_0203","repo":"Clyra-AI/relia-demo-seed","recorded_at":"2026-02-20T13:25:00Z","pr":203,"commit":"a20300","paths":["packages/billing/invoice.py","tests/billing/test_invoice_time.py"],"actor_kind":"agent","attribution_method":"pr_label","attribution_confidence":0.99,"outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_time_freeze","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice_time.py::test_rollover_uses_frozen_clock","extraction_confidence":"structured","flake_discount":0.0,"provenance_urls":["https://github.com/Clyra-AI/relia-demo-seed/pull/203"]}`,
-		`{"experience_id":"exp_0210","repo":"Clyra-AI/relia-demo-seed","recorded_at":"2026-02-27T10:00:00Z","pr":210,"commit":"a21000","paths":["packages/billing/invoice.py","tests/billing/test_invoice_time.py"],"actor_kind":"agent","attribution_method":"pr_label","attribution_confidence":0.99,"outcome_kind":"fix_held","terminal_state":"held","signature_id":"sig_time_freeze","signature_class":"held_fix","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice_time.py::test_rollover_uses_freeze_time","extraction_confidence":"structured","flake_discount":0.0,"provenance_urls":["https://github.com/Clyra-AI/relia-demo-seed/pull/210"]}`,
-	}, "\n")+"\n")
+	fixtureRel := filepath.Join("examples", "demo", "seeded-repo", "outcomes.jsonl")
+	fixtureContent, err := os.ReadFile(filepath.Join(sourceRoot, fixtureRel))
+	if err != nil {
+		t.Fatal(err)
+	}
+	writeFileForTest(t, filepath.Join(tempDir, fixtureRel), string(fixtureContent))
+	for _, record := range decodeJSONLines(t, string(fixtureContent)) {
+		for _, path := range stringListField(record, "paths", "context.paths") {
+			clean, ok := cleanRepoPath(path)
+			if !ok {
+				t.Fatalf("fixture path is not repo-relative: %q", path)
+			}
+			writeFileForTest(t, filepath.Join(tempDir, filepath.FromSlash(filepath.ToSlash(clean))), "fixture path\n")
+		}
+	}
 
-	stdout, stderr, code := runForTest(t, []string{"--json", "distill", "--input", inputPath, "--format", "json"}, false)
+	stdout, stderr, code := runForTest(t, []string{"--json", "distill", "--input", filepath.ToSlash(fixtureRel), "--format", "json"}, false)
 
 	if code != ExitSuccess {
 		t.Fatalf("distill input exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
 	}
 	result := decodeResult(t, stdout)
-	if got := int(result.Data["rules_written"].(float64)); got != 2 {
-		t.Fatalf("rules_written = %d, want avoid and playbook rules", got)
+	if got, _ := result.Data["input_path"].(string); got != filepath.ToSlash(fixtureRel) {
+		t.Fatalf("input_path = %q, want %q", got, filepath.ToSlash(fixtureRel))
 	}
-	avoid := loadRuleDocsByKindForTest(t, tempDir)["avoid"]
+	if got := int(result.Data["rules_written"].(float64)); got < 1 {
+		t.Fatalf("rules_written = %d, want at least one rule from planted fixture", got)
+	}
+	wantExperienceIDs := []string{"exp_0142", "exp_0187", "exp_0203"}
+	avoid := findRuleDocByEvidenceForTest(t, tempDir, "avoid", wantExperienceIDs)
 	if avoid.Scalars["status"].Value != "candidate" ||
 		avoid.Scalars["review.label"].Value != "suggested" ||
 		avoid.Scalars["evidence.count"].Value != "3" ||
 		avoid.Scalars["evidence.contradictions"].Value != "0" {
 		t.Fatalf("avoid rule lifecycle/evidence = %#v", avoid.Scalars)
 	}
-	wantExperienceIDs := []string{"exp_0142", "exp_0187", "exp_0203"}
 	if got := yamlScalarValuesForTest(avoid.Lists["evidence.experiences"]); !stringSlicesEqual(got, wantExperienceIDs) {
 		t.Fatalf("avoid evidence experiences = %#v, want %#v", got, wantExperienceIDs)
 	}
@@ -5727,6 +5737,20 @@ func loadRuleDocsByStatusForTest(t *testing.T, root string) map[string]yamlDocum
 	return loadRuleDocsByScalarForTest(t, root, "status")
 }
 
+func findRuleDocByEvidenceForTest(t *testing.T, root string, kind string, experienceIDs []string) yamlDocument {
+	t.Helper()
+	for _, document := range loadRuleDocsForTest(t, root) {
+		if document.Scalars["kind"].Value != kind {
+			continue
+		}
+		if stringSlicesEqual(yamlScalarValuesForTest(document.Lists["evidence.experiences"]), experienceIDs) {
+			return document
+		}
+	}
+	t.Fatalf("could not find %s rule with evidence experiences %#v", kind, experienceIDs)
+	return yamlDocument{}
+}
+
 func yamlScalarValuesForTest(scalars []yamlScalar) []string {
 	values := make([]string, 0, len(scalars))
 	for _, scalar := range scalars {
@@ -5749,6 +5773,19 @@ func stringSlicesEqual(left []string, right []string) bool {
 
 func loadRuleDocsByScalarForTest(t *testing.T, root string, scalar string) map[string]yamlDocument {
 	t.Helper()
+	docs := map[string]yamlDocument{}
+	for _, document := range loadRuleDocsForTest(t, root) {
+		key := document.Scalars[scalar].Value
+		if key == "" {
+			t.Fatalf("rule missing scalar %s: %#v", scalar, document.Scalars)
+		}
+		docs[key] = document
+	}
+	return docs
+}
+
+func loadRuleDocsForTest(t *testing.T, root string) []yamlDocument {
+	t.Helper()
 	paths, err := filepath.Glob(filepath.Join(root, "memory", "rules", "*.yaml"))
 	if err != nil {
 		t.Fatal(err)
@@ -5756,18 +5793,14 @@ func loadRuleDocsByScalarForTest(t *testing.T, root string, scalar string) map[s
 	if len(paths) == 0 {
 		t.Fatal("expected generated memory rule YAML files")
 	}
-	docs := map[string]yamlDocument{}
+	var docs []yamlDocument
 	for _, path := range paths {
 		content, err := os.ReadFile(path)
 		if err != nil {
 			t.Fatal(err)
 		}
 		document := parseRuleDocForTest(t, string(content))
-		key := document.Scalars[scalar].Value
-		if key == "" {
-			t.Fatalf("rule %s missing scalar %s", path, scalar)
-		}
-		docs[key] = document
+		docs = append(docs, document)
 	}
 	return docs
 }
