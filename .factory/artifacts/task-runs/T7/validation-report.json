@@ -116,17 +116,21 @@
     "docs/architecture/architecture_guides.md",
     "docs/architecture/decision-0003-local-embedding-boundary.md",
     "docs/dev/dev_guides.md",
-    "examples/reports/memory-page-demo.md"
+    "examples/reports/memory-page-demo.md",
+    "schemas/memory-rule.schema.json"
   ],
   "changelog_result": {
-    "notes": "No dedicated changelog file exists in the allowed path set; user-facing behavior changes were documented in README.md, docs/dev/dev_guides.md, docs/architecture/architecture_guides.md, and decision-0003.",
+    "notes": "No dedicated changelog file exists in the allowed path set; user-facing behavior changes were documented in README.md, docs/dev/dev_guides.md, docs/architecture/architecture_guides.md, decision-0003, and schemas/memory-rule.schema.json.",
     "status": "pass"
   },
   "commands_run": [
     "make lint-fast",
     "make test-fast",
+    "go test ./cmd/relia -run 'TestDistillReviewRequiredFalseStillDraftsCandidateRules|TestCheckRejectsMemoryRuleWithoutProvenanceURL' -count=1",
     "go test ./cmd/relia -run 'TestModelsPullRecordsLocalManifestWithoutNetwork|TestCheckRejectsStaleLocalModelManifest|TestDistillUsesCanonicalSignatureClustersAndCapsThinEvidenceConfidence|TestReviewApproveEditRejectTransitions|TestDistillGeneratesCandidateRulesReviewAndMemoryPage' -count=1",
     "go test ./cmd/relia -run 'TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage|TestDistillUsesCanonicalSignatureClustersAndCapsThinEvidenceConfidence' -count=1",
+    "go test ./cmd/relia -count=1",
+    "python3 -m json.tool schemas/memory-rule.schema.json",
     "make test-contracts",
     "make prepush-full",
     "python3 -m json.tool .factory/artifacts/task-runs/T7/work-proof-marker.json",
@@ -151,6 +155,11 @@
       "status": "pass"
     },
     {
+      "command": "python3 -m json.tool schemas/memory-rule.schema.json",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
       "command": "python3 -m json.tool .factory/artifacts/task-runs/T7/work-proof-marker.json",
       "exit_code": 0,
       "status": "pass"
@@ -167,6 +176,21 @@
     }
   ],
   "green_evidence": [
+    {
+      "command": "go test ./cmd/relia -run 'TestDistillReviewRequiredFalseStillDraftsCandidateRules|TestCheckRejectsMemoryRuleWithoutProvenanceURL' -count=1",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -count=1",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "python3 -m json.tool schemas/memory-rule.schema.json",
+      "exit_code": 0,
+      "status": "pass"
+    },
     {
       "command": "go test ./cmd/relia -run 'TestModelsPullRecordsLocalManifestWithoutNetwork|TestCheckRejectsStaleLocalModelManifest|TestDistillUsesCanonicalSignatureClustersAndCapsThinEvidenceConfidence|TestReviewApproveEditRejectTransitions|TestDistillGeneratesCandidateRulesReviewAndMemoryPage' -count=1",
       "exit_code": 0,
@@ -197,6 +221,7 @@
       "docs/architecture/decision-0003-local-embedding-boundary.md",
       "docs/dev/dev_guides.md",
       "examples/reports/memory-page-demo.md",
+      "schemas/memory-rule.schema.json",
       ".factory/artifacts/task-runs/T7/work-proof-marker.json",
       ".factory/artifacts/task-runs/T7/validation-report.json",
       ".factory/artifacts/task-runs/T7/proof-of-behavior-scorecard.json"
@@ -205,10 +230,19 @@
     "status": "pass"
   },
   "plan_drift_result": {
-    "notes": "Implementation stayed within T7 distill, review, memory-page, local model gate, tests, docs, and worker evidence scope.",
+    "notes": "Implementation and repair stayed within T7 distill, review, memory-page, provenance, local model gate, tests, docs, schema, and worker evidence scope.",
     "status": "pass"
   },
   "red_evidence": [
+    {
+      "command": "go test ./cmd/relia -run 'TestDistillReviewRequiredFalseStillDraftsCandidateRules|TestCheckRejectsMemoryRuleWithoutProvenanceURL' -count=1",
+      "exit_code": 1,
+      "observed_failures": [
+        "distill.review_required=false auto-accepted a generated draft as active/accepted",
+        "relia check accepted a memory rule provenance entry with pr/outcome but no resolvable URL receipt"
+      ],
+      "status": "fail_before_repair"
+    },
     {
       "command": "go test ./cmd/relia -run 'TestModelsPullRecordsLocalManifestWithoutNetwork|TestCheckRejectsStaleLocalModelManifest|TestDistillUsesCanonicalSignatureClustersAndCapsThinEvidenceConfidence|TestReviewApproveEditRejectTransitions|TestDistillGeneratesCandidateRulesReviewAndMemoryPage' -count=1",
       "exit_code": 1,
@@ -221,12 +255,14 @@
       "status": "fail_before_implementation"
     }
   ],
+  "repair_task_id": "20260629T004459.524213000Z-relia-T7-repair",
   "residual_risks": [
     "The local embedding path records and validates manifests but intentionally does not add an inference runtime or semantic embedding refinement in T7."
   ],
   "schema_version": "1.0",
   "status": "pass",
   "task_id": "T7",
+  "updated_at": "2026-06-29T01:18:37Z",
   "versioning_result": {
     "notes": "Pre-1.0 behavior extension; no schema version bump required.",
     "status": "pass"

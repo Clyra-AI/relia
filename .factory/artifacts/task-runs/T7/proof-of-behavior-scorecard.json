@@ -2,6 +2,8 @@
   "artifact_type": "proof-of-behavior-scorecard",
   "schema_version": "1.0",
   "task_id": "T7",
+  "repair_task_id": "20260629T004459.524213000Z-relia-T7-repair",
+  "updated_at": "2026-06-29T01:18:37Z",
   "status": "pass",
   "proof_level": "user_visible_behavior",
   "scorecard_items": [
@@ -9,35 +11,51 @@
       "behavior": "No-LLM distill clusters generated signatures by canonical class/key, records signature-only provenance, and caps confidence at 0.6 until three confirmed experiences.",
       "status": "pass",
       "evidence_refs": [
-        "cmd/relia/main_test.go:2350"
+        "cmd/relia/main_test.go:2345"
       ]
     },
     {
       "behavior": "Stable signature IDs still keep failure and revert evidence in one deterministic cluster.",
       "status": "pass",
       "evidence_refs": [
-        "cmd/relia/main_test.go:2210"
+        "cmd/relia/main_test.go:2236"
       ]
     },
     {
       "behavior": "Drafted rules remain suggested or needs_user_input and never become accepted without review.",
       "status": "pass",
       "evidence_refs": [
-        "cmd/relia/main_test.go:2210"
+        "cmd/relia/main_test.go:2236"
+      ]
+    },
+    {
+      "behavior": "Generated distill drafts remain candidate and are not auto-accepted even when distill.review_required is set to false.",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/main_test.go:2385",
+        "cmd/relia/main.go"
+      ]
+    },
+    {
+      "behavior": "relia check rejects memory rules whose provenance entries lack resolvable GitHub PR URL receipts.",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/main_test.go:4929",
+        "schemas/memory-rule.schema.json"
       ]
     },
     {
       "behavior": "Review approve, edit, and reject commands write active, candidate human_authored, and retired lifecycle states.",
       "status": "pass",
       "evidence_refs": [
-        "cmd/relia/main_test.go:2395"
+        "cmd/relia/main_test.go:2413"
       ]
     },
     {
       "behavior": "MEMORY.md separates strong active memory from weak candidate, stale, contradicted, and retired memory while preserving resolvable PR receipts.",
       "status": "pass",
       "evidence_refs": [
-        "cmd/relia/main_test.go:2210",
+        "cmd/relia/main_test.go:2236",
         "examples/reports/memory-page-demo.md"
       ]
     },
@@ -45,14 +63,14 @@
       "behavior": "relia models pull records model ID, version, source URL, license, digest, cache path, update policy, rollback policy, and ready status without network download.",
       "status": "pass",
       "evidence_refs": [
-        "cmd/relia/main_test.go:4709"
+        "cmd/relia/main_test.go:4739"
       ]
     },
     {
       "behavior": "embeddings: local fails closed with exit 8 for stale local model manifests, while signature mode remains zero-install.",
       "status": "pass",
       "evidence_refs": [
-        "cmd/relia/main_test.go:4787",
+        "cmd/relia/main_test.go:4817",
         "docs/architecture/decision-0003-local-embedding-boundary.md"
       ]
     },

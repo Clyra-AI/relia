@@ -10,15 +10,18 @@
     "docs/architecture/architecture_guides.md",
     "docs/architecture/decision-0003-local-embedding-boundary.md",
     "docs/dev/dev_guides.md",
-    "examples/reports/memory-page-demo.md"
+    "examples/reports/memory-page-demo.md",
+    "schemas/memory-rule.schema.json"
   ],
   "evidence_refs": [
     ".factory/artifacts/task-runs/T7/validation-report.json",
     ".factory/artifacts/task-runs/T7/proof-of-behavior-scorecard.json"
   ],
   "implementation_performed": true,
+  "repair_task_id": "20260629T004459.524213000Z-relia-T7-repair",
   "schema_version": "1.0",
   "status": "implemented",
-  "summary": "Implemented T7 deterministic distill/review/model-artifact behavior: canonical signature clustering, capped confidence for thin evidence, signature-only provenance, weak/strong memory rendering, review approve/edit/reject transitions, offline local model manifest recording, stale/digest fail-closed local embedding validation, and ADR/docs coverage for the local embedding boundary.",
-  "task_id": "T7"
+  "summary": "Implemented and repaired T7 deterministic distill/review/model-artifact behavior: canonical signature clustering, capped confidence for thin evidence, signature-only provenance, weak/strong memory rendering, review approve/edit/reject transitions, no auto-acceptance of generated drafts, mandatory resolvable PR receipt URLs on memory rules, offline local model manifest recording, stale/digest fail-closed local embedding validation, and ADR/docs coverage for the local embedding boundary.",
+  "task_id": "T7",
+  "updated_at": "2026-06-29T01:18:37Z"
 }

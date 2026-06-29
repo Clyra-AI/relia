@@ -1981,7 +1981,7 @@ func distillResult(args []string, start time.Time) CommandResult {
 		"provider_data_disclosure":   "none; provider is none and no network call was attempted",
 		"redacted_records_only":      true,
 		"local_privacy_default":      true,
-		"review_gate_disabled_label": "distill.review_required=false is required before distill can draft active rules",
+		"review_gate_disabled_label": "distill.review_required=false is surfaced but does not auto-accept drafted rules in the MVP",
 	})
 	result.Warnings = append(result.Warnings, warnings...)
 	result.EvidenceRefs = append(result.EvidenceRefs,
@@ -2866,7 +2866,7 @@ func distilledRuleStatus(root string, kind string, scopePaths []string, evidence
 		return "contradicted", "later held or clean evidence contradicts the drafted avoid rule"
 	}
 	if !reviewRequired {
-		return "active", "review gate disabled explicitly in relia.yaml"
+		return "candidate", "review_required=false is surfaced but human review is still required before activation"
 	}
 	return "candidate", "human review required before activation"
 }
@@ -6249,7 +6249,7 @@ func validateReliaConfigWithEmbeddingOverride(root string, embeddingOverride str
 	case "false":
 		warnings = append(warnings, Finding{
 			Type:    "review_gate_disabled",
-			Message: "distill.review_required is disabled; drafted rules can bypass the default human review posture",
+			Message: "distill.review_required is disabled, but drafted rules still require explicit review before activation in the MVP",
 			Ref:     configRef(reviewRequired),
 		})
 	default:
@@ -6516,6 +6516,17 @@ func validateMemoryRuleArtifact(root string, path string) *CommandError {
 		if err != nil || prNumber < 1 {
 			return artifactContractError("memory rule provenance pr must be at least 1", configRefWithPath(rel, pr))
 		}
+		provenanceURL, ok := provenance["url"]
+		if !ok || strings.TrimSpace(provenanceURL.Value) == "" {
+			return artifactContractError("memory rule provenance url is required", rel)
+		}
+		provenanceURLPR, ok := gitHubPullRequestURLNumber(provenanceURL.Value)
+		if !ok {
+			return artifactContractError("memory rule provenance url must be an https://github.com/<owner>/<repo>/pull/<number> URL", configRefWithPath(rel, provenanceURL))
+		}
+		if provenanceURLPR != prNumber {
+			return artifactContractError("memory rule provenance url pull number must match provenance pr", configRefWithPath(rel, provenanceURL))
+		}
 		outcome, ok := provenance["outcome"]
 		if !ok {
 			return artifactContractError("memory rule provenance entry missing outcome", rel)
@@ -6543,6 +6554,9 @@ func validateMemoryRuleArtifact(root string, path string) *CommandError {
 	}
 	if status == "active" && reviewLabel.Value != "accepted" {
 		return artifactContractError("active memory rule review.label must be accepted", configRefWithPath(rel, reviewLabel))
+	}
+	if status != "active" && reviewLabel.Value == "accepted" {
+		return artifactContractError("accepted memory rule status must be active", configRefWithPath(rel, reviewLabel))
 	}
 	statementOrigin, ok := document.Scalars["review.statement_origin"]
 	if !ok {

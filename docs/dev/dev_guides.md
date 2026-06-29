@@ -180,7 +180,9 @@ T2 extends the contract layer:
   `.relia/baselines`, `memory/rules`, and `memory/compiled`.
 - `relia check` validates the explicit local-only config defaults in
   `relia.yaml`, required Phase 0 schema files, and memory rule provenance when
-  rule artifacts exist.
+  rule artifacts exist. Memory rule provenance entries must include
+  `https://github.com/<owner>/<repo>/pull/<number>` URLs whose pull numbers
+  match the recorded `pr` receipts.
 - Unsafe privacy or redaction settings fail closed with the stable exit code
   assigned by the command model.
 - `distill.embeddings: local` fails closed with exit `8` until an approved
@@ -246,8 +248,9 @@ T6 adds deterministic offline distillation, review, and memory-page rendering:
   the draft. The generated metadata records `drafting_model_weight: 0`, and
   `relia check` rejects drafted `cluster_summary` or `llm_drafted` rules that
   omit confidence-input or decay metadata.
-- Drafted `avoid` and `playbook` rules remain `candidate` while
-  `distill.review_required: true`. A rule can become `active` through
+- Drafted `avoid` and `playbook` rules remain `candidate` in the MVP. A
+  `distill.review_required: false` configuration is surfaced as a warning but
+  does not auto-accept generated drafts. A rule can become `active` through
   `relia review approve --rule <id>` or the legacy
   `relia review --rule <id> --label accepted`; stale and contradicted rules
   fail closed and cannot be accepted without fresh distill evidence. `review

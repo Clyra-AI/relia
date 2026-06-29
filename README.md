@@ -27,6 +27,8 @@ deterministic distillation, and agent-native output contract:
 - `relia check` validates the repo-local operating pack baseline, required
   Phase 0 schemas, explicit privacy defaults, fail-closed redaction defaults,
   local model-artifact posture, and any `memory/rules/*.yaml` artifacts present.
+  Memory rule provenance must include GitHub PR URLs whose pull numbers match
+  the recorded `pr` receipts.
 - `relia ingest --input <path>` reads local JSON or JSONL outcome events,
   redacts and entropy-scans them before persistence, normalizes canonical
   experience records, and upserts monthly shards under `.relia/experiences/`.
@@ -48,7 +50,8 @@ deterministic distillation, and agent-native output contract:
   until a draft has three confirmed experiences, and drafting models do not
   affect confidence. Drafted `cluster_summary` and future `llm_drafted` rules
   must carry their confidence-input and decay metadata. With the default
-  `distill.review_required: true`, drafted rules are not active until reviewed.
+  `distill.review_required: true`, drafted rules are not active until reviewed;
+  setting it to `false` is surfaced but does not auto-accept drafts in the MVP.
   Deleted scoped paths produce `stale` rules, and contradictory clean or held
   evidence produces `contradicted` rules.
 - `relia models pull --model-id ... --version ... --source-url ... --license

@@ -2382,6 +2382,34 @@ func TestDistillUsesCanonicalSignatureClustersAndCapsThinEvidenceConfidence(t *t
 	}
 }
 
+func TestDistillReviewRequiredFalseStillDraftsCandidateRules(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	replaceInFile(t, filepath.Join(tempDir, "relia.yaml"), "review_required: true", "review_required: false")
+	writeFileForTest(t, filepath.Join(tempDir, "packages", "billing", "invoice.py"), "def total():\n    return 1\n")
+	inputPath := filepath.Join(tempDir, "fixtures", "distill-review-gate-outcomes.jsonl")
+	writeFileForTest(t, inputPath, strings.Join([]string{
+		`{"experience_id":"exp_0701","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-04-01T10:00:00Z","pr":701,"commit":"abc701","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_billing_review_gate","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_review_gate","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/701"]}`,
+		`{"experience_id":"exp_0702","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-04-08T10:00:00Z","pr":702,"commit":"abc702","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_billing_review_gate","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_review_gate","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/702"]}`,
+	}, "\n")+"\n")
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+	if code != ExitSuccess {
+		t.Fatalf("ingest exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+
+	stdout, stderr, code = runForTest(t, []string{"--json", "distill", "--format", "json"}, false)
+	if code != ExitSuccess {
+		t.Fatalf("distill exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	avoid := loadRuleDocsByKindForTest(t, tempDir)["avoid"]
+	if avoid.Scalars["status"].Value != "candidate" || avoid.Scalars["review.label"].Value == "accepted" {
+		t.Fatalf("review_required=false auto-accepted draft: status %q review %q", avoid.Scalars["status"].Value, avoid.Scalars["review.label"].Value)
+	}
+	if avoid.Scalars["metadata.review_required"].Value != "false" {
+		t.Fatalf("review_required metadata = %#v", avoid.Scalars["metadata.review_required"])
+	}
+}
+
 func TestReviewApproveEditRejectTransitions(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
@@ -4898,6 +4926,55 @@ metadata: {}
 	}
 }
 
+func TestCheckRejectsMemoryRuleWithoutProvenanceURL(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	rulesDir := filepath.Join(tempDir, "memory", "rules")
+	if err := os.MkdirAll(rulesDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	rule := `object_type: relia.memory_rule
+schema_version: "1.0"
+id: avoid-direct-time
+kind: avoid
+status: active
+statement: >
+  Do not mock time directly.
+scope:
+  paths:
+    - tests/
+confidence: 0.8
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_001
+provenance:
+  - pr: 142
+    outcome: revert
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`
+	if err := os.WriteFile(filepath.Join(rulesDir, "avoid-direct-time.yaml"), []byte(rule), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitValidation {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "artifact_contract_validation_failed" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+	if !strings.Contains(result.Errors[0].Message, "provenance url") {
+		t.Fatalf("error message = %q", result.Errors[0].Message)
+	}
+}
+
 func TestCheckAcceptsDocumentedScopedConfigAndMemoryRuleListMaps(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
@@ -4930,6 +5007,7 @@ evidence:
 provenance:
   - pr: 142
     outcome: revert
+    url: https://github.com/acme/billing-service/pull/142
 review:
   label: accepted
   statement_origin: human_authored
@@ -4976,6 +5054,7 @@ evidence:
 provenance:
   - pr: 210
     outcome: ci_failure
+    url: https://github.com/acme/billing-service/pull/210
 review:
   label: accepted
   statement_origin: human_authored
@@ -5025,6 +5104,7 @@ evidence:
 provenance:
   - pr: 142
     outcome: revert
+    url: https://github.com/acme/billing-service/pull/142
 review:
   label: suggested
   statement_origin: human_authored
@@ -5069,6 +5149,7 @@ evidence:
 provenance:
   - pr: 142
     outcome: revert
+    url: https://github.com/acme/billing-service/pull/142
 review:
   label: accepted
   statement_origin: human_authored
@@ -5115,6 +5196,7 @@ evidence:
 provenance:
   - pr: 142
     outcome: revert
+    url: https://github.com/acme/billing-service/pull/142
 review:
   label: accepted
   statement_origin: human_authored
@@ -5161,6 +5243,7 @@ evidence:
 provenance:
   - pr: 142
     outcome: revert
+    url: https://github.com/acme/billing-service/pull/142
 review:
   label: accepted
   statement_origin: human_authored
@@ -5207,6 +5290,7 @@ evidence:
 provenance:
   - pr: 142
     outcome: ci_failure
+    url: https://github.com/acme/billing-service/pull/142
 review:
   label: accepted
   statement_origin: cluster_summary
@@ -5254,6 +5338,7 @@ evidence:
 provenance:
   - pr: 210
     outcome: merged_clean
+    url: https://github.com/acme/billing-service/pull/210
 review:
   label: accepted
   statement_origin: human_authored
