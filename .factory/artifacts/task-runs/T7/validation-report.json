@@ -135,7 +135,8 @@
     "make prepush-full",
     "python3 -m json.tool .factory/artifacts/task-runs/T7/work-proof-marker.json",
     "python3 -m json.tool .factory/artifacts/task-runs/T7/validation-report.json",
-    "python3 -m json.tool .factory/artifacts/task-runs/T7/proof-of-behavior-scorecard.json"
+    "python3 -m json.tool .factory/artifacts/task-runs/T7/proof-of-behavior-scorecard.json",
+    "go test ./cmd/relia -count=1 -run 'TestReview(ApproveEditRejectTransitions|FailsClosedWithoutMutatingInvalidRule|RejectsEditOnlyFlagsWithoutEditAction|EditRejectsMissingScopePathWithoutMutatingRule)|TestModelsPull(RecordsLocalManifestWithoutNetwork|RejectsCachePathAtManifestPath)'"
   ],
   "docs_sync_result": {
     "status": "pass",
@@ -151,7 +152,7 @@
     {
       "command": "make prepush-full",
       "exit_code": 0,
-      "notes": "Includes lint-fast, go test ./..., coverage 79.4% against 75.0% minimum, repo pack validation, and TestDemo contract lane.",
+      "notes": "Includes lint-fast, go test ./..., coverage 79.6% against 75.0% minimum, repo pack validation, and TestDemo contract lane after manual review repair.",
       "status": "pass"
     },
     {
@@ -171,6 +172,11 @@
     },
     {
       "command": "python3 -m json.tool .factory/artifacts/task-runs/T7/proof-of-behavior-scorecard.json",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -count=1 -run 'TestReview(ApproveEditRejectTransitions|FailsClosedWithoutMutatingInvalidRule|RejectsEditOnlyFlagsWithoutEditAction|EditRejectsMissingScopePathWithoutMutatingRule)|TestModelsPull(RecordsLocalManifestWithoutNetwork|RejectsCachePathAtManifestPath)'",
       "exit_code": 0,
       "status": "pass"
     }
@@ -208,6 +214,11 @@
     },
     {
       "command": "make test-contracts",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -count=1 -run 'TestReview(ApproveEditRejectTransitions|FailsClosedWithoutMutatingInvalidRule|RejectsEditOnlyFlagsWithoutEditAction|EditRejectsMissingScopePathWithoutMutatingRule)|TestModelsPull(RecordsLocalManifestWithoutNetwork|RejectsCachePathAtManifestPath)'",
       "exit_code": 0,
       "status": "pass"
     }
@@ -255,14 +266,14 @@
       "status": "fail_before_implementation"
     }
   ],
-  "repair_task_id": "20260629T004459.524213000Z-relia-T7-repair",
+  "repair_task_id": "20260629T004459.524213000Z-relia-T7-manual-review-repair",
   "residual_risks": [
     "The local embedding path records and validates manifests but intentionally does not add an inference runtime or semantic embedding refinement in T7."
   ],
   "schema_version": "1.0",
   "status": "pass",
   "task_id": "T7",
-  "updated_at": "2026-06-29T01:18:37Z",
+  "updated_at": "2026-06-29T01:33:23Z",
   "versioning_result": {
     "notes": "Pre-1.0 behavior extension; no schema version bump required.",
     "status": "pass"

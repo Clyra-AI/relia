@@ -2577,6 +2577,95 @@ metadata:
 	}
 }
 
+func TestReviewRejectsEditOnlyFlagsWithoutEditAction(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "review", "--rule", "billing-time", "--statement", "Use a safer billing clock."}, false)
+
+	if code != ExitUsage {
+		t.Fatalf("review edit-only flag exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "invalid_usage" || !strings.Contains(result.Errors[0].Message, "require review edit") {
+		t.Fatalf("errors = %#v", result.Errors)
+	}
+
+	stdout, stderr, code = runForTest(t, []string{"--json", "review", "--rule", "billing-time", "--reason", "not enough evidence"}, false)
+	if code != ExitUsage {
+		t.Fatalf("review reason-only flag exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result = decodeResult(t, stdout)
+	if result.Errors[0].Type != "invalid_usage" || !strings.Contains(result.Errors[0].Message, "requires review reject") {
+		t.Fatalf("errors = %#v", result.Errors)
+	}
+}
+
+func TestReviewEditRejectsMissingScopePathWithoutMutatingRule(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "packages", "billing", "invoice.py"), "def total():\n    return 1\n")
+	rulePath := filepath.Join(tempDir, "memory", "rules", "billing-time.yaml")
+	writeFileForTest(t, rulePath, `object_type: relia.memory_rule
+schema_version: "1.0"
+id: billing-time
+kind: avoid
+status: candidate
+statement: Avoid direct billing clock calls.
+scope:
+  paths:
+    - packages/billing/invoice.py
+confidence: 0.6
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_0601
+provenance:
+  - pr: 601
+    outcome: ci_failure
+    url: https://github.com/acme/billing-service/pull/601
+review:
+  label: suggested
+  statement_origin: cluster_summary
+metadata:
+  confidence_label: medium
+  confidence_inputs:
+    evidence_count: 1
+    recency_weight: 1
+    contradictions: 0
+    flake_discount: 0
+    extraction_confidence: 1
+    drafting_model_weight: 0
+  decay:
+    half_life_days: 90
+    latest_evidence_at: 2026-04-08T10:00:00Z
+    oldest_evidence_at: 2026-04-01T10:00:00Z
+    anchor_recorded_at: 2026-04-08T10:00:00Z
+`)
+	before, err := os.ReadFile(rulePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "review", "edit", "--rule", "billing-time", "--scope-path", "packages/billing/missing.py"}, false)
+
+	if code != ExitValidation {
+		t.Fatalf("review edit missing scope exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "artifact_contract_validation_failed" || !strings.Contains(result.Errors[0].Message, "scope path does not exist") {
+		t.Fatalf("errors = %#v", result.Errors)
+	}
+	after, err := os.ReadFile(rulePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(after) != string(before) {
+		t.Fatalf("review edit mutated rule despite invalid scope:\nbefore=%s\nafter=%s", before, after)
+	}
+}
+
 func TestDistillMarksAnyLaterContradictionAsContradicted(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
@@ -4780,6 +4869,37 @@ func TestModelsPullRecordsLocalManifestWithoutNetwork(t *testing.T) {
 	}
 	if commandErr := validateLocalModelManifest(tempDir, yamlScalar{Value: ".relia/models/manifest.json", Line: 1}); commandErr != nil {
 		t.Fatalf("manifest did not validate after models pull: %#v", commandErr)
+	}
+}
+
+func TestModelsPullRejectsCachePathAtManifestPath(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	digest := sha256.Sum256([]byte("manifest collision payload"))
+
+	stdout, stderr, code := runForTest(t, []string{
+		"--json",
+		"models",
+		"pull",
+		"--model-id", "text-embedding-test",
+		"--version", "2026-06-22",
+		"--source-url", "https://example.test/model.bin",
+		"--license", "Apache-2.0",
+		"--digest", fmt.Sprintf("%x", digest),
+		"--cache-path", ".relia/models/manifest.json",
+		"--update-policy", "manual",
+		"--rollback-policy", "delete artifact and restore signature embeddings",
+	}, false)
+
+	if code != ExitUsage {
+		t.Fatalf("models pull manifest cache exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "invalid_usage" || !strings.Contains(result.Errors[0].Message, "must not equal") {
+		t.Fatalf("errors = %#v", result.Errors)
+	}
+	if _, err := os.Stat(filepath.Join(tempDir, ".relia", "models", "manifest.json")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("manifest path exists after rejected models pull: %v", err)
 	}
 }
 

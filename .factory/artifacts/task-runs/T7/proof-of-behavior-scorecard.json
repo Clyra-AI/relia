@@ -2,8 +2,8 @@
   "artifact_type": "proof-of-behavior-scorecard",
   "schema_version": "1.0",
   "task_id": "T7",
-  "repair_task_id": "20260629T004459.524213000Z-relia-T7-repair",
-  "updated_at": "2026-06-29T01:18:37Z",
+  "repair_task_id": "20260629T004459.524213000Z-relia-T7-manual-review-repair",
+  "updated_at": "2026-06-29T01:33:23Z",
   "status": "pass",
   "proof_level": "user_visible_behavior",
   "scorecard_items": [
@@ -81,6 +81,30 @@
         "docs/architecture/decision-0003-local-embedding-boundary.md",
         ".factory/artifacts/task-runs/T7/validation-report.json"
       ]
+    },
+    {
+      "behavior": "Review rejects edit-only flags unless the review edit subcommand is explicit, and rejects --reason unless review reject is explicit.",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/main_test.go:2580",
+        "cmd/relia/main.go"
+      ]
+    },
+    {
+      "behavior": "Review edit validates proposed scope paths before writing so an invalid path does not mutate the memory rule artifact.",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/main_test.go:2604",
+        "cmd/relia/main.go"
+      ]
+    },
+    {
+      "behavior": "models pull rejects cache paths that target the local model manifest path before writing the manifest.",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/main_test.go:4875",
+        "cmd/relia/main.go"
+      ]
     }
   ],
   "commands": [
@@ -88,6 +112,11 @@
       "command": "make prepush-full",
       "status": "pass",
       "exit_code": 0
+    },
+    {
+      "command": "go test ./cmd/relia -count=1 -run 'TestReview(ApproveEditRejectTransitions|FailsClosedWithoutMutatingInvalidRule|RejectsEditOnlyFlagsWithoutEditAction|EditRejectsMissingScopePathWithoutMutatingRule)|TestModelsPull(RecordsLocalManifestWithoutNetwork|RejectsCachePathAtManifestPath)'",
+      "exit_code": 0,
+      "status": "pass"
     }
   ]
 }

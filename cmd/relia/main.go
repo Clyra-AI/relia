@@ -2146,6 +2146,13 @@ func parseReviewArgs(args []string) (reviewOptions, *CommandError) {
 	if strings.TrimSpace(options.Rule) == "" {
 		return options, usageError("review requires --rule <id-or-path>")
 	}
+	hasEditInput := strings.TrimSpace(options.Statement) != "" || len(options.ScopePaths) > 0
+	if options.Action != "edit" && hasEditInput {
+		return options, usageError("review --statement and --scope-path require review edit")
+	}
+	if options.Action != "reject" && strings.TrimSpace(options.Reason) != "" {
+		return options, usageError("review --reason requires review reject")
+	}
 	switch options.Action {
 	case "approve":
 		if options.Label != "" && options.Label != "accepted" {
@@ -2295,8 +2302,18 @@ func modelsResult(args []string, start time.Time) CommandResult {
 	if scalar, ok := config.Scalars["models.local_manifest"]; ok {
 		manifestRel = scalar.Value
 	}
-	if _, ok := cleanRepoPath(manifestRel); !ok {
+	cleanManifestRel, ok := cleanRepoPath(manifestRel)
+	if !ok {
 		return errorResult("models pull", "models", dependencyError("local model manifest path must be repo-relative", defaultConfigFile), start)
+	}
+	manifestDisplayPath := filepath.ToSlash(filepath.Clean(cleanManifestRel))
+	cleanCachePath, ok := cleanRepoPath(options.CachePath)
+	if !ok {
+		return errorResult("models pull", "models", usageError("models pull --cache-path must be repo-relative"), start)
+	}
+	cachePath := filepath.ToSlash(filepath.Clean(cleanCachePath))
+	if cachePath == manifestDisplayPath {
+		return errorResult("models pull", "models", usageError("models pull --cache-path must not equal the local model manifest path"), start)
 	}
 	manifest := localModelManifest{
 		ModelID:        options.ModelID,
@@ -2304,7 +2321,7 @@ func modelsResult(args []string, start time.Time) CommandResult {
 		SourceURL:      options.SourceURL,
 		License:        options.License,
 		Digest:         canonicalModelDigest(options.Digest),
-		CachePath:      filepath.ToSlash(filepath.Clean(options.CachePath)),
+		CachePath:      cachePath,
 		UpdatePolicy:   options.UpdatePolicy,
 		RollbackPolicy: options.RollbackPolicy,
 		Status:         "ready",
@@ -2316,7 +2333,7 @@ func modelsResult(args []string, start time.Time) CommandResult {
 	if err != nil {
 		return errorResult("models pull", "models", internalError("could not encode local model manifest", err), start)
 	}
-	manifestPath := filepath.Join(root, filepath.FromSlash(filepath.ToSlash(filepath.Clean(manifestRel))))
+	manifestPath := filepath.Join(root, filepath.FromSlash(manifestDisplayPath))
 	if commandErr := writeAtomicRepoFile(manifestPath, append(encoded, '\n'), "local model manifest"); commandErr != nil {
 		return errorResult("models pull", "models", commandErr, start)
 	}
@@ -2329,11 +2346,10 @@ func modelsResult(args []string, start time.Time) CommandResult {
 		"cache_path":      manifest.CachePath,
 		"update_policy":   manifest.UpdatePolicy,
 		"rollback_policy": manifest.RollbackPolicy,
-		"manifest_path":   filepath.ToSlash(filepath.Clean(manifestRel)),
+		"manifest_path":   manifestDisplayPath,
 		"network_used":    false,
 		"status":          manifest.Status,
 	})
-	manifestDisplayPath := filepath.ToSlash(filepath.Clean(manifestRel))
 	result.EvidenceRefs = append(result.EvidenceRefs,
 		"docs/dev/dev_guides.md#model-provider-and-artifact-policy",
 		manifestDisplayPath,
@@ -3258,7 +3274,13 @@ func updateMemoryRuleReview(root string, rulePath string, options reviewOptions)
 			next = replaceNestedYAMLScalar(next, "review", "statement_origin", "human_authored")
 		}
 		if len(options.ScopePaths) > 0 {
-			next = replaceNestedYAMLStringList(next, "scope", "paths", normalizedRepoPaths(options.ScopePaths))
+			scopePaths := normalizedRepoPaths(options.ScopePaths)
+			for _, scopePath := range scopePaths {
+				if !repoPathExists(root, scopePath) {
+					return "", artifactContractError("memory rule scope path does not exist in the repo", rel)
+				}
+			}
+			next = replaceNestedYAMLStringList(next, "scope", "paths", scopePaths)
 		}
 		next = replaceOrAddNestedYAMLScalar(next, "metadata", "lifecycle_reason", "edited by human review; pending approval")
 	case "label":
@@ -3380,9 +3402,11 @@ func replaceNestedYAMLStringList(content string, parent string, key string, valu
 		indent := leadingSpaces(line)
 		trimmed := strings.TrimSpace(line)
 		if indent == 0 {
-			if inParent && insertStart == -1 {
-				insertStart = index
-				insertEnd = index
+			if inParent {
+				if insertStart < 0 {
+					insertStart = index
+					insertEnd = index
+				}
 				break
 			}
 			inParent = strings.HasPrefix(trimmed, parentPrefix)
