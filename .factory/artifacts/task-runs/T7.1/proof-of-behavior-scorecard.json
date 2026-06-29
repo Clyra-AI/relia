@@ -6,7 +6,7 @@
   "proof_level": "user_visible_behavior",
   "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-001",
   "behavior_under_test": "`relia distill --input <json-or-jsonl> --format json` drafts an `avoid` rule from the planted recurrence cluster with correct PR citations.",
-  "updated_at": "2026-06-29T17:30:54Z",
+  "updated_at": "2026-06-29T17:40:44Z",
   "scorecard": [
     {
       "check": "distill accepts explicit local input without requiring pre-persisted .relia experience shards",
@@ -39,6 +39,16 @@
       "evidence": "TestDistillSeparatesCanonicalSignatureClustersByCheckName verifies generated signatures with the same class/key but different check_name values draft separate avoid rules with one evidence record each."
     },
     {
+      "check": "matching message fingerprints still co-cluster across different checks",
+      "status": "pass",
+      "evidence": "TestDistillClustersMatchingMessageFingerprintsAcrossChecks verifies two failures with different check_name values but the same message_fingerprint draft one recurrence-backed avoid rule."
+    },
+    {
+      "check": "explicit blank distill input is rejected",
+      "status": "pass",
+      "evidence": "TestDistillRejectsBlankExplicitInput verifies relia distill --input \" \" exits with usage validation instead of falling back to persisted shards."
+    },
+    {
       "check": "offline trust posture preserved",
       "status": "pass",
       "evidence": "Implementation reuses local ingest normalization and redaction, does not call network or provider endpoints, and preserves signature-only deterministic fallback."
@@ -51,7 +61,7 @@
       "exit_code": 0
     },
     {
-      "command": "go test ./cmd/relia -count=1 -run 'TestDistill(StableIDKeyClustersRevertsAndPositiveEvidence|SeparatesCanonicalSignatureClustersByCheckName|InputDraftsAvoidRuleFromPlantedRecurrenceCluster|MarksContradictedAndStaleRules|MarksAnyLaterContradictionAsContradicted)|TestBacktest(AutoFlakeUsesCanonicalSignatureKeys|GroupsEquivalentCanonicalSignatureFields)'",
+      "command": "go test ./cmd/relia -count=1 -run 'TestDistill(StableIDKeyClustersRevertsAndPositiveEvidence|SeparatesCanonicalSignatureClustersByCheckName|ClustersMatchingMessageFingerprintsAcrossChecks|RejectsBlankExplicitInput|InputDraftsAvoidRuleFromPlantedRecurrenceCluster|MarksContradictedAndStaleRules|MarksAnyLaterContradictionAsContradicted)|TestBacktest(AutoFlakeUsesCanonicalSignatureKeys|GroupsEquivalentCanonicalSignatureFields)'",
       "status": "pass",
       "exit_code": 0
     },

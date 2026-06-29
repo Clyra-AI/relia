@@ -2084,6 +2084,9 @@ func parseDistillArgs(args []string) (distillOptions, *CommandError) {
 			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
 				return options, usageError("distill requires a path after --input")
 			}
+			if strings.TrimSpace(args[index+1]) == "" {
+				return options, usageError("distill --input must be a non-empty path")
+			}
 			options.InputPath = args[index+1]
 			index++
 		case "--rule-dir":
@@ -2610,13 +2613,28 @@ func buildDistillClusters(records []backtestExperience) []distillCluster {
 		if record.Record.Attribution.ActorKind == "uncertain" {
 			continue
 		}
-		key := distillClusterKey(record.Record)
-		if key == "" {
+		keys := distillClusterKeys(record.Record)
+		if len(keys) == 0 {
 			continue
 		}
-		cluster := byKey[key]
+		var cluster *distillCluster
+		for _, key := range keys {
+			existing := byKey[key]
+			if existing == nil {
+				continue
+			}
+			if cluster == nil {
+				cluster = existing
+				continue
+			}
+			if cluster != existing {
+				mergeDistillClusters(byKey, cluster, existing)
+			}
+		}
 		if cluster == nil {
-			cluster = &distillCluster{Key: key}
+			cluster = &distillCluster{Key: keys[0]}
+		}
+		for _, key := range keys {
 			byKey[key] = cluster
 		}
 		cluster.Records = append(cluster.Records, record)
@@ -2625,7 +2643,12 @@ func buildDistillClusters(records []backtestExperience) []distillCluster {
 		}
 	}
 	clusters := make([]distillCluster, 0, len(byKey))
+	seen := map[*distillCluster]bool{}
 	for _, cluster := range byKey {
+		if seen[cluster] {
+			continue
+		}
+		seen[cluster] = true
 		sort.Slice(cluster.Records, func(i, j int) bool {
 			if cluster.Records[i].RecordedAt.Equal(cluster.Records[j].RecordedAt) {
 				return cluster.Records[i].Record.ExperienceID < cluster.Records[j].Record.ExperienceID
@@ -2640,19 +2663,33 @@ func buildDistillClusters(records []backtestExperience) []distillCluster {
 	return clusters
 }
 
-func distillClusterKey(record experienceRecord) string {
-	if key := distillStableSignatureKey(record); key != "" {
-		return key
+func mergeDistillClusters(byKey map[string]*distillCluster, target *distillCluster, source *distillCluster) {
+	target.Records = append(target.Records, source.Records...)
+	if target.Signal == "" {
+		target.Signal = source.Signal
 	}
-	keys := distillCanonicalSignatureKeys(record)
+	for key, cluster := range byKey {
+		if cluster == source {
+			byKey[key] = target
+		}
+	}
+}
+
+func distillClusterKey(record experienceRecord) string {
+	keys := distillClusterKeys(record)
 	if len(keys) > 0 {
 		return keys[0]
 	}
-	signatureID := strings.TrimSpace(record.Outcome.Signature.SignatureID)
-	if signatureID != "" {
-		return strings.Join([]string{"id", signatureID}, "\x00")
-	}
 	return ""
+}
+
+func distillClusterKeys(record experienceRecord) []string {
+	keys := []string{}
+	if key := distillStableSignatureKey(record); key != "" {
+		keys = append(keys, key)
+	}
+	keys = append(keys, distillCanonicalSignatureKeys(record)...)
+	return keys
 }
 
 func distillStableSignatureKey(record experienceRecord) string {

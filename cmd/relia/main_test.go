@@ -2477,6 +2477,49 @@ func TestDistillStableIDKeyClustersRevertsAndPositiveEvidence(t *testing.T) {
 	}
 }
 
+func TestDistillClustersMatchingMessageFingerprintsAcrossChecks(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "packages", "billing", "invoice.py"), "def total():\n    return 1\n")
+	inputPath := filepath.Join(tempDir, "fixtures", "distill-message-fingerprint-outcomes.jsonl")
+	writeFileForTest(t, inputPath, strings.Join([]string{
+		`{"experience_id":"exp_0601","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-04-01T10:00:00Z","pr":601,"commit":"abc601","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_clock","message_fingerprint":"sha256:shared-clock-failure","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/601"]}`,
+		`{"experience_id":"exp_0602","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-04-08T10:00:00Z","pr":602,"commit":"abc602","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_class":"test_failure","check_name":"go-test-billing","signature_key":"tests/billing/test_invoice.py::test_clock","message_fingerprint":"sha256:shared-clock-failure","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/602"]}`,
+	}, "\n")+"\n")
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+	if code != ExitSuccess {
+		t.Fatalf("ingest exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+
+	stdout, stderr, code = runForTest(t, []string{"--json", "distill", "--format", "json"}, false)
+	if code != ExitSuccess {
+		t.Fatalf("distill exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if got := int(result.Data["rules_written"].(float64)); got != 1 {
+		t.Fatalf("rules_written = %d, want one message-fingerprint cluster", got)
+	}
+	avoid := loadRuleDocsByKindForTest(t, tempDir)["avoid"]
+	if got := yamlScalarValuesForTest(avoid.Lists["evidence.experiences"]); !stringSlicesEqual(got, []string{"exp_0601", "exp_0602"}) {
+		t.Fatalf("avoid evidence experiences = %#v, want message-fingerprint cluster", got)
+	}
+}
+
+func TestDistillRejectsBlankExplicitInput(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "distill", "--input", " ", "--format", "json"}, false)
+
+	if code != ExitUsage {
+		t.Fatalf("distill blank input exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if len(result.Errors) != 1 || !strings.Contains(result.Errors[0].Message, "distill --input must be a non-empty path") {
+		t.Fatalf("errors = %#v", result.Errors)
+	}
+}
+
 func TestDistillReviewRequiredFalseStillDraftsCandidateRules(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)

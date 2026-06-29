@@ -19,10 +19,10 @@
   ],
   "implementation_performed": true,
   "repair_performed": true,
-  "repair_summary": "Repaired command-level planted recurrence acceptance coverage, preserved stable signature ID/key clustering for reverted and positive evidence, and separated generated canonical distill clusters by class/check/key so different checks do not share avoid-rule citations.",
+  "repair_summary": "Repaired command-level planted recurrence acceptance coverage, preserved stable signature ID/key clustering for reverted and positive evidence, separated generated canonical distill clusters by class/check/key, preserved message-fingerprint clustering across different checks, and rejected explicit blank distill input paths.",
   "schema_version": "1.0",
   "status": "implemented",
-  "summary": "Implemented command-level relia distill --input support for local outcome JSON/JSONL, normalized and redacted inputs in memory, uses stable signature ID/key fallback before canonical class/check/key distill clustering, and added planted recurrence citation coverage.",
+  "summary": "Implemented command-level relia distill --input support for local outcome JSON/JSONL, normalized and redacted inputs in memory, uses multi-key deterministic distill clustering across stable ID/key, class/check/key, and message fingerprints, and added planted recurrence citation coverage.",
   "task_id": "T7.1",
-  "updated_at": "2026-06-29T17:30:54Z"
+  "updated_at": "2026-06-29T17:40:44Z"
 }
