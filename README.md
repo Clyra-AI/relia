@@ -42,16 +42,19 @@ deterministic distillation, and agent-native output contract:
   `.relia/baselines/error-recurrence-baseline.json` is compared when present
   and labeled stale when the source artifact digest differs. The recurrence
   gate is available through `relia.yaml` but remains off by default.
-- `relia distill --format json` reads local redacted experience shards,
-  clusters deterministic signature keys, and writes candidate `avoid` and
-  `playbook` rules under `memory/rules/`. Confidence is calculated from
-  evidence count, the PRD default 90-day recency half-life, contradictions,
-  flake discounts, and extraction confidence; confidence is capped at `0.6`
-  until a draft has three confirmed experiences, and drafting models do not
-  affect confidence. Drafted `cluster_summary` and future `llm_drafted` rules
-  must carry their confidence-input and decay metadata. With the default
-  `distill.review_required: true`, drafted rules are not active until reviewed;
-  setting it to `false` is surfaced but does not auto-accept drafts in the MVP.
+- `relia distill --format json` reads local redacted experience shards, or
+  `relia distill --input <json-or-jsonl> --format json` reads one local
+  redacted outcome file without persisting shards. It clusters canonical
+  deterministic signature keys before signature ID fallback and writes
+  candidate `avoid` and `playbook` rules under `memory/rules/`. Confidence is
+  calculated from evidence count, the PRD default 90-day recency half-life,
+  contradictions, flake discounts, and extraction confidence; confidence is
+  capped at `0.6` until a draft has three confirmed experiences, and drafting
+  models do not affect confidence. Drafted `cluster_summary` and future
+  `llm_drafted` rules must carry their confidence-input and decay metadata. With
+  the default `distill.review_required: true`, drafted rules are not active
+  until reviewed; setting it to `false` is surfaced but does not auto-accept
+  drafts in the MVP.
   Deleted scoped paths produce `stale` rules, and contradictory clean or held
   evidence produces `contradicted` rules.
 - `relia models pull --model-id ... --version ... --source-url ... --license
@@ -118,10 +121,10 @@ experience artifacts: repeated runs use the latest experience timestamp as the
 window anchor and produce the same report ID and artifact paths.
 
 The live distill command is also deterministic for the same local experience
-shards and config. The default path is signature-only and offline; local
-embedding mode fails closed unless a recorded manifest and matching local
-artifact are present, and provider drafting fails closed unless a future
-approved `model_provider_endpoint` gate is present.
+shards or explicit `--input` file and config. The default path is signature-only
+and offline; local embedding mode fails closed unless a recorded manifest and
+matching local artifact are present, and provider drafting fails closed unless a
+future approved `model_provider_endpoint` gate is present.
 
 The config in `relia.yaml` is local-only by default: code, diffs, logs, and
 experience records are not sent anywhere; share scope is `private`; redaction

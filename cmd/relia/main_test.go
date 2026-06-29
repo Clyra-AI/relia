@@ -1353,8 +1353,8 @@ func TestBacktestAutoFlakeUsesCanonicalSignatureKeys(t *testing.T) {
 	inputPath := filepath.Join(tempDir, "fixtures", "outcomes.jsonl")
 	writeFileForTest(t, inputPath, strings.Join([]string{
 		`{"experience_id":"exp_0001","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-01T10:00:00Z","pr":101,"commit":"abc001","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_generated_pytest","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/101"]}`,
-		`{"experience_id":"exp_0002","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-10T10:00:00Z","pr":102,"commit":"abc002","paths":["packages/worker/clock.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_generated_go_test","signature_class":"test_failure","check_name":"go-test-rerun","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/102"]}`,
-		`{"experience_id":"exp_0003","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-20T10:00:00Z","pr":103,"commit":"abc003","paths":["packages/notifications/clock.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_generated_actions","signature_class":"test_failure","check_name":"actions-retry","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/103"]}`,
+		`{"experience_id":"exp_0002","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-10T10:00:00Z","pr":102,"commit":"abc002","paths":["packages/worker/clock.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_generated_go_test","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/102"]}`,
+		`{"experience_id":"exp_0003","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-20T10:00:00Z","pr":103,"commit":"abc003","paths":["packages/notifications/clock.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_generated_actions","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/103"]}`,
 	}, "\n")+"\n")
 
 	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
@@ -2241,7 +2241,7 @@ func TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage(t *testing.
 	inputPath := filepath.Join(tempDir, "fixtures", "distill-outcomes.jsonl")
 	writeFileForTest(t, inputPath, strings.Join([]string{
 		`{"experience_id":"exp_0101","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-04-01T10:00:00Z","pr":101,"commit":"abc101","paths":["packages/billing/invoice.py","tests/billing/test_invoice.py"],"actor_kind":"agent","attribution_method":"coauthor_trailer","attribution_confidence":0.91,"outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_billing_clock","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/101"]}`,
-		`{"experience_id":"exp_0102","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-04-15T10:00:00Z","pr":102,"commit":"abc102","paths":["packages/billing/invoice.py","tests/billing/test_invoice.py"],"actor_kind":"agent","attribution_method":"coauthor_trailer","attribution_confidence":0.91,"outcome_kind":"revert","terminal_state":"reverted","signature_id":"sig_billing_clock","signature_class":"revert","check_name":"revert","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"log_parsed_high","flake_discount":0.25,"provenance_urls":["https://github.com/acme/billing-service/pull/102"]}`,
+		`{"experience_id":"exp_0102","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-04-15T10:00:00Z","pr":102,"commit":"abc102","paths":["packages/billing/invoice.py","tests/billing/test_invoice.py"],"actor_kind":"agent","attribution_method":"coauthor_trailer","attribution_confidence":0.91,"outcome_kind":"revert","terminal_state":"reverted","signature_id":"sig_billing_clock","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"log_parsed_high","flake_discount":0.25,"provenance_urls":["https://github.com/acme/billing-service/pull/102"]}`,
 		`{"experience_id":"exp_0110","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-04-20T10:00:00Z","pr":110,"commit":"abc110","paths":["packages/search/query.py","tests/search/test_query.py"],"actor_kind":"agent","attribution_method":"pr_label","attribution_confidence":0.9,"outcome_kind":"fix_held","terminal_state":"held","signature_id":"sig_search_escape","signature_class":"test_failure","check_name":"pytest-search","signature_key":"tests/search/test_query.py::test_escape","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/110"]}`,
 		`{"experience_id":"exp_0111","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-04-22T10:00:00Z","pr":111,"commit":"abc111","paths":["packages/search/query.py","tests/search/test_query.py"],"actor_kind":"agent","attribution_method":"pr_label","attribution_confidence":0.9,"outcome_kind":"merged_clean","terminal_state":"passed","signature_id":"sig_search_escape","signature_class":"test_failure","check_name":"pytest-search","signature_key":"tests/search/test_query.py::test_escape","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/111"]}`,
 	}, "\n")+"\n")
@@ -2342,7 +2342,70 @@ func TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage(t *testing.
 	}
 }
 
-func TestDistillUsesCanonicalSignatureClustersAndCapsThinEvidenceConfidence(t *testing.T) {
+func TestDistillInputDraftsAvoidRuleFromPlantedRecurrenceCluster(t *testing.T) {
+	sourceRoot := findRepoRootForTest(t)
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	fixtureRel := filepath.Join("examples", "demo", "seeded-repo", "outcomes.jsonl")
+	fixtureContent, err := os.ReadFile(filepath.Join(sourceRoot, fixtureRel))
+	if err != nil {
+		t.Fatal(err)
+	}
+	writeFileForTest(t, filepath.Join(tempDir, fixtureRel), string(fixtureContent))
+	for _, record := range decodeJSONLines(t, string(fixtureContent)) {
+		for _, path := range stringListField(record, "paths", "context.paths") {
+			clean, ok := cleanRepoPath(path)
+			if !ok {
+				t.Fatalf("fixture path is not repo-relative: %q", path)
+			}
+			writeFileForTest(t, filepath.Join(tempDir, filepath.FromSlash(filepath.ToSlash(clean))), "fixture path\n")
+		}
+	}
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "distill", "--input", filepath.ToSlash(fixtureRel), "--format", "json"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("distill input exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if got, _ := result.Data["input_path"].(string); got != filepath.ToSlash(fixtureRel) {
+		t.Fatalf("input_path = %q, want %q", got, filepath.ToSlash(fixtureRel))
+	}
+	if got := int(result.Data["rules_written"].(float64)); got < 1 {
+		t.Fatalf("rules_written = %d, want at least one rule from planted fixture", got)
+	}
+	wantExperienceIDs := []string{"exp_0142", "exp_0187", "exp_0203"}
+	avoid := findRuleDocByEvidenceForTest(t, tempDir, "avoid", wantExperienceIDs)
+	if avoid.Scalars["status"].Value != "candidate" ||
+		avoid.Scalars["review.label"].Value != "suggested" ||
+		avoid.Scalars["evidence.count"].Value != "3" ||
+		avoid.Scalars["evidence.contradictions"].Value != "0" {
+		t.Fatalf("avoid rule lifecycle/evidence = %#v", avoid.Scalars)
+	}
+	if got := yamlScalarValuesForTest(avoid.Lists["evidence.experiences"]); !stringSlicesEqual(got, wantExperienceIDs) {
+		t.Fatalf("avoid evidence experiences = %#v, want %#v", got, wantExperienceIDs)
+	}
+	wantCitations := map[int]string{
+		142: "https://github.com/Clyra-AI/relia-demo-seed/pull/142",
+		187: "https://github.com/Clyra-AI/relia-demo-seed/pull/187",
+		203: "https://github.com/Clyra-AI/relia-demo-seed/pull/203",
+	}
+	for _, entry := range avoid.ListMaps["provenance"] {
+		pr, err := strconv.Atoi(entry["pr"].Value)
+		if err != nil {
+			t.Fatalf("provenance pr = %#v", entry["pr"])
+		}
+		if wantCitations[pr] != entry["url"].Value {
+			t.Fatalf("provenance entry = %#v, want PR citation %q", entry, wantCitations[pr])
+		}
+		delete(wantCitations, pr)
+	}
+	if len(wantCitations) != 0 {
+		t.Fatalf("missing planted recurrence citations: %#v", wantCitations)
+	}
+}
+
+func TestDistillSeparatesCanonicalSignatureClustersByCheckName(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
 	writeFileForTest(t, filepath.Join(tempDir, "packages", "billing", "invoice.py"), "def total():\n    return 1\n")
@@ -2361,24 +2424,126 @@ func TestDistillUsesCanonicalSignatureClustersAndCapsThinEvidenceConfidence(t *t
 		t.Fatalf("distill exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
 	}
 	result := decodeResult(t, stdout)
+	if got := int(result.Data["rules_written"].(float64)); got != 2 {
+		t.Fatalf("rules_written = %d, want separate class/check/key clusters", got)
+	}
+	wantEvidence := map[string]bool{"exp_0501": false, "exp_0502": false}
+	for _, rule := range loadRuleDocsForTest(t, tempDir) {
+		if rule.Scalars["kind"].Value != "avoid" {
+			continue
+		}
+		if rule.Scalars["evidence.count"].Value != "1" {
+			t.Fatalf("evidence.count = %q, want one record per class/check/key cluster", rule.Scalars["evidence.count"].Value)
+		}
+		experiences := yamlScalarValuesForTest(rule.Lists["evidence.experiences"])
+		if len(experiences) != 1 {
+			t.Fatalf("evidence experiences = %#v, want one record per separated check", experiences)
+		}
+		if _, ok := wantEvidence[experiences[0]]; !ok {
+			t.Fatalf("unexpected evidence experience %q", experiences[0])
+		}
+		wantEvidence[experiences[0]] = true
+		confidence, err := strconv.ParseFloat(rule.Scalars["confidence"].Value, 64)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if confidence > 0.6 {
+			t.Fatalf("confidence = %.4f, want capped at 0.6 until three confirmed experiences", confidence)
+		}
+		if rule.Scalars["metadata.embedding_mode"].Value != "signature" ||
+			rule.Scalars["metadata.cluster.provenance"].Value != "signature_only" {
+			t.Fatalf("signature fallback provenance metadata = %#v", rule.Scalars)
+		}
+	}
+	for experienceID, seen := range wantEvidence {
+		if !seen {
+			t.Fatalf("missing separated avoid rule for %s", experienceID)
+		}
+	}
+}
+
+func TestDistillStableIDCheckKeyClustersPositiveEvidence(t *testing.T) {
+	failure := distillClusterKeyForTest("ci_failure", "sig_time_freeze", "test_failure", "pytest-billing", "tests/billing/test_invoice_time.py::test_rollover_uses_frozen_clock")
+	revert := distillClusterKeyForTest("revert", "sig_time_freeze", "revert", "pytest-billing", "tests/billing/test_invoice_time.py::test_rollover_uses_frozen_clock")
+	held := distillClusterKeyForTest("fix_held", "sig_time_freeze", "held_fix", "pytest-billing", "tests/billing/test_invoice_time.py::test_rollover_uses_frozen_clock")
+	if failure == "" || revert == "" {
+		t.Fatalf("failure key = %q revert key = %q, want non-empty keys", failure, revert)
+	}
+	if failure != revert {
+		t.Fatalf("failure key = %q revert key = %q, want stable signature ID/check/key to co-cluster related outcomes", failure, revert)
+	}
+	if held != failure {
+		t.Fatalf("held fix key = %q failure key = %q, want stable ID/check/key to keep positive evidence attached to the same distill cluster", held, failure)
+	}
+}
+
+func TestDistillSeparatesReusedStableSignatureIDsByCheckName(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "packages", "billing", "invoice.py"), "def total():\n    return 1\n")
+	inputPath := filepath.Join(tempDir, "fixtures", "distill-reused-stable-id-outcomes.jsonl")
+	writeFileForTest(t, inputPath, strings.Join([]string{
+		`{"experience_id":"exp_0551","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-04-01T10:00:00Z","pr":551,"commit":"abc551","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_reused_monorepo","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/551"]}`,
+		`{"experience_id":"exp_0552","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-04-08T10:00:00Z","pr":552,"commit":"abc552","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_reused_monorepo","signature_class":"test_failure","check_name":"go-test-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/552"]}`,
+	}, "\n")+"\n")
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+	if code != ExitSuccess {
+		t.Fatalf("ingest exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+
+	stdout, stderr, code = runForTest(t, []string{"--json", "distill", "--format", "json"}, false)
+	if code != ExitSuccess {
+		t.Fatalf("distill exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if got := int(result.Data["rules_written"].(float64)); got != 2 {
+		t.Fatalf("rules_written = %d, want reused stable signature ID separated by check_name", got)
+	}
+}
+
+func TestDistillClustersMatchingMessageFingerprintsAcrossChecks(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "packages", "billing", "invoice.py"), "def total():\n    return 1\n")
+	inputPath := filepath.Join(tempDir, "fixtures", "distill-message-fingerprint-outcomes.jsonl")
+	writeFileForTest(t, inputPath, strings.Join([]string{
+		`{"experience_id":"exp_0601","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-04-01T10:00:00Z","pr":601,"commit":"abc601","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_clock","message_fingerprint":"sha256:shared-clock-failure","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/601"]}`,
+		`{"experience_id":"exp_0602","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-04-08T10:00:00Z","pr":602,"commit":"abc602","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_class":"test_failure","check_name":"go-test-billing","signature_key":"tests/billing/test_invoice.py::test_clock","message_fingerprint":"sha256:shared-clock-failure","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/602"]}`,
+	}, "\n")+"\n")
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+	if code != ExitSuccess {
+		t.Fatalf("ingest exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+
+	stdout, stderr, code = runForTest(t, []string{"--json", "distill", "--format", "json"}, false)
+	if code != ExitSuccess {
+		t.Fatalf("distill exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
 	if got := int(result.Data["rules_written"].(float64)); got != 1 {
-		t.Fatalf("rules_written = %d, want one canonical class/key cluster", got)
+		t.Fatalf("rules_written = %d, want one message-fingerprint cluster", got)
 	}
-	rules := loadRuleDocsByKindForTest(t, tempDir)
-	avoid := rules["avoid"]
-	if avoid.Scalars["evidence.count"].Value != "2" {
-		t.Fatalf("evidence.count = %q, want both canonical-cluster records", avoid.Scalars["evidence.count"].Value)
+	avoid := loadRuleDocsByKindForTest(t, tempDir)["avoid"]
+	if got := yamlScalarValuesForTest(avoid.Lists["evidence.experiences"]); !stringSlicesEqual(got, []string{"exp_0601", "exp_0602"}) {
+		t.Fatalf("avoid evidence experiences = %#v, want message-fingerprint cluster", got)
 	}
-	confidence, err := strconv.ParseFloat(avoid.Scalars["confidence"].Value, 64)
-	if err != nil {
-		t.Fatal(err)
+	if got := avoid.Scalars["metadata.cluster.key"].Value; got != "message|sha256:shared-clock-failure" {
+		t.Fatalf("metadata.cluster.key = %q, want shared message fingerprint key", got)
 	}
-	if confidence > 0.6 {
-		t.Fatalf("confidence = %.4f, want capped at 0.6 until three confirmed experiences", confidence)
+}
+
+func TestDistillRejectsBlankExplicitInput(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "distill", "--input", " ", "--format", "json"}, false)
+
+	if code != ExitUsage {
+		t.Fatalf("distill blank input exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
 	}
-	if avoid.Scalars["metadata.embedding_mode"].Value != "signature" ||
-		avoid.Scalars["metadata.cluster.provenance"].Value != "signature_only" {
-		t.Fatalf("signature fallback provenance metadata = %#v", avoid.Scalars)
+	result := decodeResult(t, stdout)
+	if len(result.Errors) != 1 || !strings.Contains(result.Errors[0].Message, "distill --input must be a non-empty path") {
+		t.Fatalf("errors = %#v", result.Errors)
 	}
 }
 
@@ -5674,7 +5839,72 @@ func loadRuleDocsByStatusForTest(t *testing.T, root string) map[string]yamlDocum
 	return loadRuleDocsByScalarForTest(t, root, "status")
 }
 
+func findRuleDocByEvidenceForTest(t *testing.T, root string, kind string, experienceIDs []string) yamlDocument {
+	t.Helper()
+	for _, document := range loadRuleDocsForTest(t, root) {
+		if document.Scalars["kind"].Value != kind {
+			continue
+		}
+		if stringSlicesEqual(yamlScalarValuesForTest(document.Lists["evidence.experiences"]), experienceIDs) {
+			return document
+		}
+	}
+	t.Fatalf("could not find %s rule with evidence experiences %#v", kind, experienceIDs)
+	return yamlDocument{}
+}
+
+func distillClusterKeyForTest(kind string, signatureID string, signatureClass string, checkName string, signatureKey string) string {
+	return distillClusterKey(experienceRecord{
+		Outcome: experienceOutcome{
+			Kind: kind,
+			Signature: experienceSignature{
+				SignatureID: signatureID,
+			},
+		},
+		Metadata: map[string]any{
+			"signature": map[string]any{
+				"class":      signatureClass,
+				"check_name": checkName,
+				"key":        signatureKey,
+			},
+		},
+	})
+}
+
+func yamlScalarValuesForTest(scalars []yamlScalar) []string {
+	values := make([]string, 0, len(scalars))
+	for _, scalar := range scalars {
+		values = append(values, scalar.Value)
+	}
+	return values
+}
+
+func stringSlicesEqual(left []string, right []string) bool {
+	if len(left) != len(right) {
+		return false
+	}
+	for index := range left {
+		if left[index] != right[index] {
+			return false
+		}
+	}
+	return true
+}
+
 func loadRuleDocsByScalarForTest(t *testing.T, root string, scalar string) map[string]yamlDocument {
+	t.Helper()
+	docs := map[string]yamlDocument{}
+	for _, document := range loadRuleDocsForTest(t, root) {
+		key := document.Scalars[scalar].Value
+		if key == "" {
+			t.Fatalf("rule missing scalar %s: %#v", scalar, document.Scalars)
+		}
+		docs[key] = document
+	}
+	return docs
+}
+
+func loadRuleDocsForTest(t *testing.T, root string) []yamlDocument {
 	t.Helper()
 	paths, err := filepath.Glob(filepath.Join(root, "memory", "rules", "*.yaml"))
 	if err != nil {
@@ -5683,18 +5913,14 @@ func loadRuleDocsByScalarForTest(t *testing.T, root string, scalar string) map[s
 	if len(paths) == 0 {
 		t.Fatal("expected generated memory rule YAML files")
 	}
-	docs := map[string]yamlDocument{}
+	var docs []yamlDocument
 	for _, path := range paths {
 		content, err := os.ReadFile(path)
 		if err != nil {
 			t.Fatal(err)
 		}
 		document := parseRuleDocForTest(t, string(content))
-		key := document.Scalars[scalar].Value
-		if key == "" {
-			t.Fatalf("rule %s missing scalar %s", path, scalar)
-		}
-		docs[key] = document
+		docs = append(docs, document)
 	}
 	return docs
 }

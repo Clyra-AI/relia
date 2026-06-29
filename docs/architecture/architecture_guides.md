@@ -109,9 +109,11 @@ under `.relia/experiences`, reviewed memory artifacts under `memory/rules`, and
 the rendered `memory/MEMORY.md` page. Feedback sources are unit tests, schema
 contract validation, `make test-contracts`, `make test-coverage`, and Factory
 task-run evidence. The command path is offline and deterministic by default:
-signature IDs cluster records, provider drafting fails closed without an
-approved model-provider gate, and confidence is calculated from evidence count,
-the PRD default 90-day recency half-life, contradictions, flake discounts, and
+explicit `--input` files use the same redacted local outcome normalization as
+ingest without persisting shards, canonical signature keys cluster records
+before signature ID fallback, provider drafting fails closed without an approved
+model-provider gate, and confidence is calculated from evidence count, the PRD
+default 90-day recency half-life, contradictions, flake discounts, and
 extraction confidence with no drafting-model contribution. Drafted
 `cluster_summary` and future `llm_drafted` rules are invalid unless their
 metadata carries confidence inputs and decay fields. The blast radius is limited
@@ -129,7 +131,7 @@ local model manifests under `.relia/models/manifest.json` when an operator
 records an already-present local artifact. Feedback sources are focused
 distill/review/model tests, schema contract validation, `make prepush-full`,
 and Factory task-run evidence. Deterministic clustering now uses canonical
-signature keys before generated signature IDs, confidence is capped at `0.6`
+signature keys before signature ID fallback, confidence is capped at `0.6`
 until three confirmed experiences exist, review supports approve/edit/reject
 state transitions, and MEMORY.md separates strong active memory from weak
 candidate, stale, contradicted, and retired memory. The local embedding

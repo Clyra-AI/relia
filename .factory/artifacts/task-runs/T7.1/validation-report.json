@@ -1,0 +1,157 @@
+{
+  "acceptance_results": [
+    {
+      "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-001",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T7.1/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T7.1/proof-of-behavior-scorecard.json",
+        "cmd/relia/main_test.go",
+        "examples/demo/seeded-repo/outcomes.jsonl"
+      ],
+      "status": "implemented"
+    }
+  ],
+  "artifact_type": "validation_report",
+  "baseline_evidence": [
+    {
+      "command": "make lint-fast",
+      "exit_code": 0,
+      "phase": "repair_pre_edit",
+      "status": "pass"
+    },
+    {
+      "command": "make test-fast",
+      "exit_code": 0,
+      "phase": "repair_pre_edit",
+      "status": "pass"
+    }
+  ],
+  "blockers": [],
+  "changed_paths": [
+    ".factory/artifacts/task-runs/T7.1/proof-of-behavior-scorecard.json",
+    ".factory/artifacts/task-runs/T7.1/validation-report.json",
+    ".factory/artifacts/task-runs/T7.1/work-proof-marker.json",
+    "README.md",
+    "cmd/relia/main.go",
+    "cmd/relia/main_test.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/dev/dev_guides.md"
+  ],
+  "changelog_result": {
+    "notes": "No changelog file exists in the allowed repository surface; README and dev/architecture docs were synced.",
+    "status": "not_applicable"
+  },
+  "commands_run": [
+    "make lint-fast",
+    "make test-fast",
+    "gofmt -w cmd/relia/main_test.go",
+    "go test ./cmd/relia -run TestDistillInputDraftsAvoidRuleFromPlantedRecurrenceCluster -count=1",
+    "go test ./cmd/relia -run TestDistillInputDraftsAvoidRuleFromPlantedRecurrenceCluster -count=1",
+    "go test ./cmd/relia -count=1 -run 'TestDistill(StableIDCheckKeyClustersPositiveEvidence|SeparatesReusedStableSignatureIDsByCheckName|SeparatesCanonicalSignatureClustersByCheckName|ClustersMatchingMessageFingerprintsAcrossChecks|RejectsBlankExplicitInput|InputDraftsAvoidRuleFromPlantedRecurrenceCluster|MarksContradictedAndStaleRules|MarksAnyLaterContradictionAsContradicted)|TestBacktest(AutoFlakeUsesCanonicalSignatureKeys|GroupsEquivalentCanonicalSignatureFields)'",
+    "make lint-fast",
+    "make test-fast",
+    "make test-contracts",
+    "make prepush-full",
+    "go test ./cmd/relia -count=1 -run 'TestDistill(StableIDCheckKeyClustersPositiveEvidence|SeparatesReusedStableSignatureIDsByCheckName|SeparatesCanonicalSignatureClustersByCheckName|ClustersMatchingMessageFingerprintsAcrossChecks|RejectsBlankExplicitInput|InputDraftsAvoidRuleFromPlantedRecurrenceCluster|MarksContradictedAndStaleRules|MarksAnyLaterContradictionAsContradicted)|TestBacktest(AutoFlakeUsesCanonicalSignatureKeys|GroupsEquivalentCanonicalSignatureFields)'",
+    "make prepush-full",
+    "git diff --check",
+    "python3 -m json.tool .factory/artifacts/task-runs/T7.1/work-proof-marker.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T7.1/validation-report.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T7.1/proof-of-behavior-scorecard.json"
+  ],
+  "docs_sync_result": {
+    "notes": "No docs changes were needed for the repair; existing T7.1 docs sync remains accurate.",
+    "status": "pass",
+    "updated_paths": [
+      "README.md",
+      "docs/dev/dev_guides.md",
+      "docs/architecture/architecture_guides.md"
+    ]
+  },
+  "final_validation_evidence": [
+    {
+      "command": "make prepush-full",
+      "evidence": "coverage 80.0% \u003e= 75.0%; repo pack ok; TestDemo contract lane pass",
+      "exit_code": 0,
+      "status": "pass"
+    }
+  ],
+  "green_evidence": [
+    {
+      "command": "go test ./cmd/relia -run TestDistillInputDraftsAvoidRuleFromPlantedRecurrenceCluster -count=1",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "make test-fast",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "make lint-fast",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "make test-contracts",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -count=1 -run 'TestDistill(StableIDCheckKeyClustersPositiveEvidence|SeparatesReusedStableSignatureIDsByCheckName|SeparatesCanonicalSignatureClustersByCheckName|ClustersMatchingMessageFingerprintsAcrossChecks|RejectsBlankExplicitInput|InputDraftsAvoidRuleFromPlantedRecurrenceCluster|MarksContradictedAndStaleRules|MarksAnyLaterContradictionAsContradicted)|TestBacktest(AutoFlakeUsesCanonicalSignatureKeys|GroupsEquivalentCanonicalSignatureFields)'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "make prepush-full",
+      "exit_code": 0,
+      "status": "pass"
+    }
+  ],
+  "path_policy_result": {
+    "changed_paths": [
+      ".factory/artifacts/task-runs/T7.1/proof-of-behavior-scorecard.json",
+      ".factory/artifacts/task-runs/T7.1/validation-report.json",
+      ".factory/artifacts/task-runs/T7.1/work-proof-marker.json",
+      "README.md",
+      "cmd/relia/main.go",
+      "cmd/relia/main_test.go",
+      "docs/architecture/architecture_guides.md",
+      "docs/dev/dev_guides.md"
+    ],
+    "forbidden_path_changes": [],
+    "ignored_transient_outputs": [
+      ".factory/tmp/"
+    ],
+    "status": "pass"
+  },
+  "plan_drift_result": {
+    "notes": "Repair stayed within command-level distill avoid-rule acceptance by using the governed seeded recurrence fixture, focused cluster-key and input-validation regression tests, and test helpers only.",
+    "status": "pass"
+  },
+  "red_evidence": [
+    {
+      "command": "go test ./cmd/relia -run TestDistillInputDraftsAvoidRuleFromPlantedRecurrenceCluster -count=1",
+      "exit_code": 1,
+      "observed_failure": "relia distill returned invalid_usage for unknown distill argument \"--input\"",
+      "phase": "red_first",
+      "status": "fail"
+    },
+    {
+      "command": "go test ./cmd/relia -run TestDistillInputDraftsAvoidRuleFromPlantedRecurrenceCluster -count=1",
+      "exit_code": 1,
+      "observed_failure": "Repair test initially resolved the seeded fixture path after t.Chdir into the temp repo; fixed by resolving the source repo before changing directories.",
+      "phase": "repair_iteration",
+      "status": "fail"
+    }
+  ],
+  "residual_risks": [],
+  "schema_version": "1.0",
+  "status": "pass",
+  "task_id": "T7.1",
+  "updated_at": "2026-06-29T18:00:28Z",
+  "versioning_result": {
+    "notes": "Pre-1.0 command behavior expanded with explicit docs; no schema or runtime pin change.",
+    "status": "pass"
+  }
+}

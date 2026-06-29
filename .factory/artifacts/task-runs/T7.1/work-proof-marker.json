@@ -1,0 +1,28 @@
+{
+  "acceptance_item_ids": [
+    "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-001"
+  ],
+  "artifact_type": "work_proof_marker",
+  "changed_paths": [
+    ".factory/artifacts/task-runs/T7.1/proof-of-behavior-scorecard.json",
+    ".factory/artifacts/task-runs/T7.1/validation-report.json",
+    ".factory/artifacts/task-runs/T7.1/work-proof-marker.json",
+    "README.md",
+    "cmd/relia/main.go",
+    "cmd/relia/main_test.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/dev/dev_guides.md"
+  ],
+  "evidence_refs": [
+    ".factory/artifacts/task-runs/T7.1/validation-report.json",
+    ".factory/artifacts/task-runs/T7.1/proof-of-behavior-scorecard.json"
+  ],
+  "implementation_performed": true,
+  "repair_performed": true,
+  "repair_summary": "Repaired command-level planted recurrence acceptance coverage, preserved stable signature ID/check/key clustering for related outcomes, separated reused stable signature IDs and generated canonical distill clusters by check_name, preserved message-fingerprint clustering across different checks with the shared message key as the durable cluster key, and rejected explicit blank distill input paths.",
+  "schema_version": "1.0",
+  "status": "implemented",
+  "summary": "Implemented command-level relia distill --input support for local outcome JSON/JSONL, normalized and redacted inputs in memory, uses multi-key deterministic distill clustering across stable ID/check/key, class/check/key, and message fingerprints, and added planted recurrence citation coverage.",
+  "task_id": "T7.1",
+  "updated_at": "2026-06-29T18:00:28Z"
+}
