@@ -2508,6 +2508,104 @@ func TestDistillInputRejectsOrgEligibleCanonicalExperience(t *testing.T) {
 	}
 }
 
+func TestDistillInputRejectsIncompleteCanonicalExperience(t *testing.T) {
+	tests := []struct {
+		name        string
+		removePath  []string
+		wantMessage string
+	}{
+		{name: "commit", removePath: []string{"action", "commit"}, wantMessage: "action.commit must be provided"},
+		{name: "method", removePath: []string{"attribution", "method"}, wantMessage: "attribution.method must be provided"},
+		{name: "confidence", removePath: []string{"attribution", "confidence"}, wantMessage: "attribution.confidence must be provided"},
+		{name: "diff", removePath: []string{"context", "diff_fingerprint"}, wantMessage: "context.diff_fingerprint must be provided"},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			tempDir := setupContractRepo(t)
+			t.Chdir(tempDir)
+			inputRel := filepath.ToSlash(filepath.Join("fixtures", "distill-incomplete-canonical-experience.jsonl"))
+			inputPath := filepath.Join(tempDir, filepath.FromSlash(inputRel))
+			record := canonicalExperienceRecordMapForTest("exp_0524", 524)
+			deleteNestedMapFieldForTest(record, tc.removePath...)
+			content, err := json.Marshal(record)
+			if err != nil {
+				t.Fatal(err)
+			}
+			writeFileForTest(t, inputPath, string(content)+"\n")
+
+			stdout, stderr, code := runForTest(t, []string{"--json", "distill", "--input", inputRel, "--format", "json"}, false)
+			if code != ExitValidation {
+				t.Fatalf("distill incomplete input exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+			}
+			result := decodeResult(t, stdout)
+			if len(result.Errors) != 1 || !strings.Contains(result.Errors[0].Message, tc.wantMessage) {
+				t.Fatalf("distill incomplete errors = %#v, want %q", result.Errors, tc.wantMessage)
+			}
+		})
+	}
+}
+
+func canonicalExperienceRecordMapForTest(experienceID string, pr int) map[string]any {
+	return map[string]any{
+		"object_type":    "relia.experience_record",
+		"schema_version": commandSchemaVersion,
+		"experience_id":  experienceID,
+		"repo": map[string]any{
+			"provider": "github",
+			"owner":    "acme",
+			"name":     "billing-service",
+		},
+		"recorded_at": "2026-04-01T10:00:00Z",
+		"attribution": map[string]any{
+			"actor_kind": "agent",
+			"method":     "manual",
+			"confidence": 1,
+		},
+		"context": map[string]any{
+			"paths":            []any{"packages/billing/invoice.py"},
+			"diff_fingerprint": "sha256:canonical-complete",
+		},
+		"action": map[string]any{
+			"pr":     pr,
+			"commit": "abc524",
+		},
+		"outcome": map[string]any{
+			"kind":           "ci_failure",
+			"terminal_state": "failed",
+			"signature": map[string]any{
+				"signature_id":          "sig_canonical_complete",
+				"extraction_confidence": "structured",
+			},
+		},
+		"provenance": map[string]any{
+			"urls": []any{fmt.Sprintf("https://github.com/acme/billing-service/pull/%d", pr)},
+		},
+		"flake_discount":   0,
+		"org_eligible":     false,
+		"share_scope":      "private",
+		"redaction_status": "applied",
+		"metadata": map[string]any{
+			"signature": map[string]any{
+				"class":               "test_failure",
+				"check_name":          "pytest-billing",
+				"key":                 "tests/billing/test_invoice.py::test_clock",
+				"message_fingerprint": "sha256:canonical-complete",
+				"extraction_method":   "structured",
+			},
+			"source_kind": "ingest",
+		},
+	}
+}
+
+func deleteNestedMapFieldForTest(root map[string]any, path ...string) {
+	current := root
+	for _, key := range path[:len(path)-1] {
+		next, _ := current[key].(map[string]any)
+		current = next
+	}
+	delete(current, path[len(path)-1])
+}
+
 func TestDistillStableIDCheckKeyClustersPositiveEvidence(t *testing.T) {
 	failure := distillClusterKeyForTest("ci_failure", "sig_time_freeze", "test_failure", "pytest-billing", "tests/billing/test_invoice_time.py::test_rollover_uses_frozen_clock")
 	revert := distillClusterKeyForTest("revert", "sig_time_freeze", "revert", "pytest-billing", "tests/billing/test_invoice_time.py::test_rollover_uses_frozen_clock")
