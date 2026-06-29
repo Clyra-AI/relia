@@ -2908,28 +2908,43 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "MVP-IN-SCOPE-012",
-          "evidence_refs": [],
+          "evidence_refs": [
+            ".factory/artifacts/task-runs/T7/proof-of-behavior-scorecard.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/validation-report.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/ship-packet.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "distillation-calibration-and-confidence-part-2"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/validation-report.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/ship-packet.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "mvp-in-scope",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T7"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T7"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "bidirectional rules (`avoid`, `playbook`) with mandatory provenance",
       "scope_item_id": "MVP-IN-SCOPE-012",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T7"
       ]
@@ -2944,28 +2959,43 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "MVP-IN-SCOPE-013",
-          "evidence_refs": [],
+          "evidence_refs": [
+            ".factory/artifacts/task-runs/T7/proof-of-behavior-scorecard.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/validation-report.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/ship-packet.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "distillation-calibration-and-confidence-part-2"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/validation-report.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/ship-packet.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "mvp-in-scope",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T7"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T7"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "calibrated confidence, decay, churn invalidation, lifecycle states",
       "scope_item_id": "MVP-IN-SCOPE-013",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T7"
       ]
@@ -3602,28 +3632,43 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-004",
-          "evidence_refs": [],
+          "evidence_refs": [
+            ".factory/artifacts/task-runs/T7/proof-of-behavior-scorecard.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/validation-report.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/ship-packet.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "distillation-calibration-and-confidence-part-2"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/validation-report.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/ship-packet.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "ingest-attribute-backtest-acceptance-tests",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T7"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T7"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "Attribution records method and confidence; an ambiguous trailer yields `attribution_uncertain` and exclusion from ERR.",
       "scope_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-004",
       "source_ref": "docs/product/prd.md#ingest-attribute-backtest-acceptance-tests",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T7"
       ]
@@ -3969,28 +4014,43 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-002",
-          "evidence_refs": [],
+          "evidence_refs": [
+            ".factory/artifacts/task-runs/T7/proof-of-behavior-scorecard.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/validation-report.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/ship-packet.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "distillation-calibration-and-confidence-part-2"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/validation-report.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/ship-packet.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "distill-review-memory-page-acceptance-tests",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T7"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T7"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "relia distill` drafts a `playbook` rule citing the held fix.",
       "scope_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-002",
       "source_ref": "docs/product/prd.md#distill-review-memory-page-acceptance-tests",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T7"
       ]
@@ -4005,28 +4065,43 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-003",
-          "evidence_refs": [],
+          "evidence_refs": [
+            ".factory/artifacts/task-runs/T7/proof-of-behavior-scorecard.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/validation-report.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/ship-packet.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "distillation-calibration-and-confidence-part-2"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/validation-report.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/ship-packet.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "distill-review-memory-page-acceptance-tests",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T7"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T7"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "A rule without provenance fails `relia check` with exit 4.",
       "scope_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-003",
       "source_ref": "docs/product/prd.md#distill-review-memory-page-acceptance-tests",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T7"
       ]
@@ -4041,28 +4116,43 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-004",
-          "evidence_refs": [],
+          "evidence_refs": [
+            ".factory/artifacts/task-runs/T7/proof-of-behavior-scorecard.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/validation-report.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/ship-packet.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "distillation-calibration-and-confidence-part-2"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/validation-report.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/ship-packet.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "distill-review-memory-page-acceptance-tests",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T7"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T7"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "Drafted rules are `suggested` or `needs_user_input`, never auto-`accepted`.",
       "scope_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-004",
       "source_ref": "docs/product/prd.md#distill-review-memory-page-acceptance-tests",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T7"
       ]
@@ -4077,28 +4167,43 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-005",
-          "evidence_refs": [],
+          "evidence_refs": [
+            ".factory/artifacts/task-runs/T7/proof-of-behavior-scorecard.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/validation-report.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/ship-packet.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "distillation-calibration-and-confidence-part-2"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/validation-report.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/ship-packet.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "distill-review-memory-page-acceptance-tests",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T7"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T7"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "relia review` approve/edit/reject transitions write correct lifecycle states.",
       "scope_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-005",
       "source_ref": "docs/product/prd.md#distill-review-memory-page-acceptance-tests",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T7"
       ]
@@ -4215,28 +4320,43 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-008",
-          "evidence_refs": [],
+          "evidence_refs": [
+            ".factory/artifacts/task-runs/T7/proof-of-behavior-scorecard.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/validation-report.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/ship-packet.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "distillation-calibration-and-confidence-part-2"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/validation-report.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/ship-packet.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "distill-review-memory-page-acceptance-tests",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T7"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T7"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "MEMORY.md renders receipts as resolvable links and separates weak from strong memory.",
       "scope_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-008",
       "source_ref": "docs/product/prd.md#distill-review-memory-page-acceptance-tests",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T7"
       ]
@@ -4251,28 +4371,43 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-009",
-          "evidence_refs": [],
+          "evidence_refs": [
+            ".factory/artifacts/task-runs/T7/proof-of-behavior-scorecard.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/validation-report.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/ship-packet.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "distillation-calibration-and-confidence-part-2"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/validation-report.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/ship-packet.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "distill-review-memory-page-acceptance-tests",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T7"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T7"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "No-LLM mode produces deterministic cluster-summary drafts.",
       "scope_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-009",
       "source_ref": "docs/product/prd.md#distill-review-memory-page-acceptance-tests",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T7"
       ]
@@ -4323,28 +4458,43 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-011",
-          "evidence_refs": [],
+          "evidence_refs": [
+            ".factory/artifacts/task-runs/T7/proof-of-behavior-scorecard.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/validation-report.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/ship-packet.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "distillation-calibration-and-confidence-part-2"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/validation-report.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/ship-packet.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "distill-review-memory-page-acceptance-tests",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T7"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T7"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "relia models pull records model ID, version, source URL, license, digest, cache path, update policy, and rollback policy before local embedding refinement is used.",
       "scope_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-011",
       "source_ref": "docs/product/prd.md#distill-review-memory-page-acceptance-tests",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T7"
       ]
@@ -4359,28 +4509,43 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-012",
-          "evidence_refs": [],
+          "evidence_refs": [
+            ".factory/artifacts/task-runs/T7/proof-of-behavior-scorecard.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/validation-report.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/ship-packet.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "distillation-calibration-and-confidence-part-2"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/validation-report.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/ship-packet.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "distill-review-memory-page-acceptance-tests",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T7"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T7"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "embeddings: local fails closed with exit 8 when the local model artifact is missing, stale, or digest-mismatched, while embeddings: signature remains the zero-install deterministic fallback with signature-only provenance.",
       "scope_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-012",
       "source_ref": "docs/product/prd.md#distill-review-memory-page-acceptance-tests",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T7"
       ]
@@ -4395,24 +4560,40 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-013",
-          "evidence_refs": [],
+          "evidence_refs": [
+            ".factory/artifacts/task-runs/T7/proof-of-behavior-scorecard.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/validation-report.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/ship-packet.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "distillation-calibration-and-confidence-part-2",
         "release-demo-and-product-signals-part-2"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/validation-report.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/ship-packet.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "distill-review-memory-page-acceptance-tests",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T7"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence.",
         "Release packaging tasks inherit this check so closure cannot happen before release artifacts are validated."
       ],
       "remaining_task_refs": [
-        "T7",
         "T16"
       ],
       "requires_human_approval": false,
@@ -4435,28 +4616,43 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-014",
-          "evidence_refs": [],
+          "evidence_refs": [
+            ".factory/artifacts/task-runs/T7/proof-of-behavior-scorecard.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/validation-report.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/ship-packet.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "distillation-calibration-and-confidence-part-2"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/validation-report.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/ship-packet.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260629T004459.524213000Z-relia-T7/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "distill-review-memory-page-acceptance-tests",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T7"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T7"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "The local embedding inference boundary is covered by an ADR before implementation chooses a pure Go library, ONNX/runtime binding, or external local process.",
       "scope_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-014",
       "source_ref": "docs/product/prd.md#distill-review-memory-page-acceptance-tests",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T7"
       ]
@@ -5727,7 +5923,7 @@
       ]
     }
   ],
-  "last_updated_at": "2026-06-28T17:05:00Z",
+  "last_updated_at": "2026-06-29T00:44:59Z",
   "schema_version": "0.1",
   "source_prd_ref": "docs/product/prd.md"
 }
