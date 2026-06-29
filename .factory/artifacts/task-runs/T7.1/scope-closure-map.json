@@ -4,7 +4,7 @@
   "task_id": "T7.1",
   "work_item_id": "relia-mvp-t7-1",
   "canonical_scope_closure_map_ref": ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
-  "canonical_scope_closure_map_modified": false,
+  "canonical_scope_closure_map_modified": true,
   "acceptance_results": [
     {
       "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-001",
