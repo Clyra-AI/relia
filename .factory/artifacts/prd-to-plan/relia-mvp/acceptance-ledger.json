@@ -1947,7 +1947,7 @@
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#distill-review-memory-page-acceptance-tests",
       "source_text": "relia distill` drafts an `avoid` rule from the planted recurrence cluster with correct citations.",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T4.2",
         "T7.1"
@@ -1955,7 +1955,19 @@
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/4/validation_commands",
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/9/validation_commands"
-      ]
+      ],
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T7.1/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T7.1/validation-report.json",
+        ".factory/artifacts/task-runs/T7.1/proof-of-behavior-scorecard.json",
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        "examples/demo/seeded-repo/outcomes.jsonl",
+        "https://github.com/Clyra-AI/relia/pull/51",
+        "origin/main@53a0ed437c574607e3273f7ed2412dcc3df1b199"
+      ],
+      "recorded_by": "factoryd sync-task-closure",
+      "recorded_at": "2026-06-29T18:09:40Z"
     },
     {
       "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-002",
@@ -3031,7 +3043,7 @@
       ]
     }
   ],
-  "last_updated_at": "2026-06-28T13:43:00Z",
+  "last_updated_at": "2026-06-29T18:09:40Z",
   "schema_version": "1.0",
   "source_prd_ref": "docs/product/prd.md",
   "source_ref": "docs/product/prd.md"

@@ -1,0 +1,55 @@
+{
+  "artifact_type": "scope_closure_report",
+  "schema_version": "0.1",
+  "task_id": "T7.1",
+  "work_item_id": "relia-mvp-t7-1",
+  "overall_status": "closed",
+  "closure_status": "closed",
+  "approved_deferral_refs": [],
+  "blocker_refs": [],
+  "delivery_debt_refs": [],
+  "event_log_ref": "factoryd://runs/20260629T165237.330582000Z-relia-T7.1",
+  "intent_source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T7.1",
+  "mission_contract_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T7.1",
+  "validation_report_refs": [
+    ".factory/artifacts/task-runs/T7.1/validation-report.json"
+  ],
+  "work_proof_marker_refs": [
+    ".factory/artifacts/task-runs/T7.1/work-proof-marker.json"
+  ],
+  "closure_items": [
+    {
+      "intent_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-001",
+      "intent_statement": "relia distill` drafts an `avoid` rule from the planted recurrence cluster with correct citations.",
+      "classification": "implemented",
+      "task_refs": [
+        "T4.2",
+        "T7.1"
+      ],
+      "implemented_task_refs": [
+        "T4.2",
+        "T7.1"
+      ],
+      "remaining_task_refs": [],
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T7.1/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T7.1/validation-report.json",
+        ".factory/artifacts/task-runs/T7.1/proof-of-behavior-scorecard.json",
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        "examples/demo/seeded-repo/outcomes.jsonl",
+        "https://github.com/Clyra-AI/relia/pull/51",
+        "origin/main@53a0ed437c574607e3273f7ed2412dcc3df1b199"
+      ],
+      "work_proof_marker_refs": [
+        ".factory/artifacts/task-runs/T7.1/work-proof-marker.json"
+      ],
+      "implementation_refs": [
+        ".factory/artifacts/task-runs/T7.1/proof-of-behavior-scorecard.json",
+        "cmd/relia/main_test.go"
+      ],
+      "repair_report_refs": [],
+      "repair_task_packet_refs": []
+    }
+  ]
+}
