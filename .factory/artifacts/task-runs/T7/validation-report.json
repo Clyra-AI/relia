@@ -1,0 +1,281 @@
+{
+  "acceptance_results": [
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-012",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T7/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-013",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T7/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-004",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T7/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-002",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T7/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-003",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T7/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-004",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T7/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-005",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T7/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-008",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T7/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-009",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T7/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-011",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T7/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-012",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T7/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-013",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T7/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-014",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T7/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    }
+  ],
+  "artifact_type": "validation_report",
+  "baseline_evidence": [
+    {
+      "command": "make lint-fast",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "make test-fast",
+      "exit_code": 0,
+      "status": "pass"
+    }
+  ],
+  "blockers": [],
+  "changed_paths": [
+    ".factory/artifacts/task-runs/T7/proof-of-behavior-scorecard.json",
+    ".factory/artifacts/task-runs/T7/validation-report.json",
+    ".factory/artifacts/task-runs/T7/work-proof-marker.json",
+    "README.md",
+    "cmd/relia/main.go",
+    "cmd/relia/main_test.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/architecture/decision-0003-local-embedding-boundary.md",
+    "docs/dev/dev_guides.md",
+    "examples/reports/memory-page-demo.md",
+    "schemas/memory-rule.schema.json"
+  ],
+  "changelog_result": {
+    "notes": "No dedicated changelog file exists in the allowed path set; user-facing behavior changes were documented in README.md, docs/dev/dev_guides.md, docs/architecture/architecture_guides.md, decision-0003, and schemas/memory-rule.schema.json.",
+    "status": "pass"
+  },
+  "commands_run": [
+    "make lint-fast",
+    "make test-fast",
+    "go test ./cmd/relia -run 'TestDistillReviewRequiredFalseStillDraftsCandidateRules|TestCheckRejectsMemoryRuleWithoutProvenanceURL' -count=1",
+    "go test ./cmd/relia -run 'TestModelsPullRecordsLocalManifestWithoutNetwork|TestCheckRejectsStaleLocalModelManifest|TestDistillUsesCanonicalSignatureClustersAndCapsThinEvidenceConfidence|TestReviewApproveEditRejectTransitions|TestDistillGeneratesCandidateRulesReviewAndMemoryPage' -count=1",
+    "go test ./cmd/relia -run 'TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage|TestDistillUsesCanonicalSignatureClustersAndCapsThinEvidenceConfidence' -count=1",
+    "go test ./cmd/relia -count=1",
+    "python3 -m json.tool schemas/memory-rule.schema.json",
+    "make test-contracts",
+    "make prepush-full",
+    "python3 -m json.tool .factory/artifacts/task-runs/T7/work-proof-marker.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T7/validation-report.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T7/proof-of-behavior-scorecard.json",
+    "go test ./cmd/relia -count=1 -run 'TestReview(ApproveEditRejectTransitions|FailsClosedWithoutMutatingInvalidRule|RejectsEditOnlyFlagsWithoutEditAction|EditRejectsMissingScopePathWithoutMutatingRule)|TestModelsPull(RecordsLocalManifestWithoutNetwork|RejectsCachePathAtManifestPath)'"
+  ],
+  "docs_sync_result": {
+    "status": "pass",
+    "updated_paths": [
+      "README.md",
+      "docs/dev/dev_guides.md",
+      "docs/architecture/architecture_guides.md",
+      "docs/architecture/decision-0003-local-embedding-boundary.md",
+      "examples/reports/memory-page-demo.md"
+    ]
+  },
+  "final_validation_evidence": [
+    {
+      "command": "make prepush-full",
+      "exit_code": 0,
+      "notes": "Includes lint-fast, go test ./..., coverage 79.6% against 75.0% minimum, repo pack validation, and TestDemo contract lane after manual review repair.",
+      "status": "pass"
+    },
+    {
+      "command": "python3 -m json.tool schemas/memory-rule.schema.json",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "python3 -m json.tool .factory/artifacts/task-runs/T7/work-proof-marker.json",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "python3 -m json.tool .factory/artifacts/task-runs/T7/validation-report.json",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "python3 -m json.tool .factory/artifacts/task-runs/T7/proof-of-behavior-scorecard.json",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -count=1 -run 'TestReview(ApproveEditRejectTransitions|FailsClosedWithoutMutatingInvalidRule|RejectsEditOnlyFlagsWithoutEditAction|EditRejectsMissingScopePathWithoutMutatingRule)|TestModelsPull(RecordsLocalManifestWithoutNetwork|RejectsCachePathAtManifestPath)'",
+      "exit_code": 0,
+      "status": "pass"
+    }
+  ],
+  "green_evidence": [
+    {
+      "command": "go test ./cmd/relia -run 'TestDistillReviewRequiredFalseStillDraftsCandidateRules|TestCheckRejectsMemoryRuleWithoutProvenanceURL' -count=1",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -count=1",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "python3 -m json.tool schemas/memory-rule.schema.json",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestModelsPullRecordsLocalManifestWithoutNetwork|TestCheckRejectsStaleLocalModelManifest|TestDistillUsesCanonicalSignatureClustersAndCapsThinEvidenceConfidence|TestReviewApproveEditRejectTransitions|TestDistillGeneratesCandidateRulesReviewAndMemoryPage' -count=1",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "make test-fast",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "make lint-fast",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "make test-contracts",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -count=1 -run 'TestReview(ApproveEditRejectTransitions|FailsClosedWithoutMutatingInvalidRule|RejectsEditOnlyFlagsWithoutEditAction|EditRejectsMissingScopePathWithoutMutatingRule)|TestModelsPull(RecordsLocalManifestWithoutNetwork|RejectsCachePathAtManifestPath)'",
+      "exit_code": 0,
+      "status": "pass"
+    }
+  ],
+  "path_policy_result": {
+    "changed_paths_checked": [
+      "README.md",
+      "cmd/relia/main.go",
+      "cmd/relia/main_test.go",
+      "docs/architecture/architecture_guides.md",
+      "docs/architecture/decision-0003-local-embedding-boundary.md",
+      "docs/dev/dev_guides.md",
+      "examples/reports/memory-page-demo.md",
+      "schemas/memory-rule.schema.json",
+      ".factory/artifacts/task-runs/T7/work-proof-marker.json",
+      ".factory/artifacts/task-runs/T7/validation-report.json",
+      ".factory/artifacts/task-runs/T7/proof-of-behavior-scorecard.json"
+    ],
+    "forbidden_path_changes": [],
+    "status": "pass"
+  },
+  "plan_drift_result": {
+    "notes": "Implementation and repair stayed within T7 distill, review, memory-page, provenance, local model gate, tests, docs, schema, and worker evidence scope.",
+    "status": "pass"
+  },
+  "red_evidence": [
+    {
+      "command": "go test ./cmd/relia -run 'TestDistillReviewRequiredFalseStillDraftsCandidateRules|TestCheckRejectsMemoryRuleWithoutProvenanceURL' -count=1",
+      "exit_code": 1,
+      "observed_failures": [
+        "distill.review_required=false auto-accepted a generated draft as active/accepted",
+        "relia check accepted a memory rule provenance entry with pr/outcome but no resolvable URL receipt"
+      ],
+      "status": "fail_before_repair"
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestModelsPullRecordsLocalManifestWithoutNetwork|TestCheckRejectsStaleLocalModelManifest|TestDistillUsesCanonicalSignatureClustersAndCapsThinEvidenceConfidence|TestReviewApproveEditRejectTransitions|TestDistillGeneratesCandidateRulesReviewAndMemoryPage' -count=1",
+      "exit_code": 1,
+      "observed_failures": [
+        "distill wrote two rules instead of one canonical class/key cluster",
+        "review edit was rejected as an unknown review argument",
+        "models pull returned invalid usage instead of recording a manifest",
+        "stale local model manifest passed check instead of failing closed"
+      ],
+      "status": "fail_before_implementation"
+    }
+  ],
+  "repair_task_id": "20260629T004459.524213000Z-relia-T7-manual-review-repair",
+  "residual_risks": [
+    "The local embedding path records and validates manifests but intentionally does not add an inference runtime or semantic embedding refinement in T7."
+  ],
+  "schema_version": "1.0",
+  "status": "pass",
+  "task_id": "T7",
+  "updated_at": "2026-06-29T01:33:23Z",
+  "versioning_result": {
+    "notes": "Pre-1.0 behavior extension; no schema version bump required.",
+    "status": "pass"
+  }
+}

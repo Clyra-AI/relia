@@ -180,7 +180,9 @@ T2 extends the contract layer:
   `.relia/baselines`, `memory/rules`, and `memory/compiled`.
 - `relia check` validates the explicit local-only config defaults in
   `relia.yaml`, required Phase 0 schema files, and memory rule provenance when
-  rule artifacts exist.
+  rule artifacts exist. Memory rule provenance entries must include
+  `https://github.com/<owner>/<repo>/pull/<number>` URLs whose pull numbers
+  match the recorded `pr` receipts.
 - Unsafe privacy or redaction settings fail closed with the stable exit code
   assigned by the command model.
 - `distill.embeddings: local` fails closed with exit `8` until an approved
@@ -235,21 +237,30 @@ T6 adds deterministic offline distillation, review, and memory-page rendering:
 
 - `relia distill --format json` reads local redacted experience shards and
   writes generated memory-rule YAML under `memory/rules/`.
-- Signature IDs are the default clustering key. No provider, model, network, or
-  credential call is made when `distill.provider: none` and
+- Deterministic signature keys are the default clustering key: class/check/key
+  and message fingerprints are preferred before generated signature IDs. No
+  provider, model, network, or credential call is made when
+  `distill.provider: none` and
   `distill.embeddings: signature` are configured.
 - Rule confidence is derived only from evidence count, the PRD default 90-day
   recency half-life, contradictions, flake discounts, and signature extraction
-  confidence. The generated metadata records `drafting_model_weight: 0`, and
+  confidence, and is capped at `0.6` until three confirmed experiences support
+  the draft. The generated metadata records `drafting_model_weight: 0`, and
   `relia check` rejects drafted `cluster_summary` or `llm_drafted` rules that
   omit confidence-input or decay metadata.
-- Drafted `avoid` and `playbook` rules remain `candidate` while
-  `distill.review_required: true`. A rule can become `active` only through
+- Drafted `avoid` and `playbook` rules remain `candidate` in the MVP. A
+  `distill.review_required: false` configuration is surfaced as a warning but
+  does not auto-accept generated drafts. A rule can become `active` through
+  `relia review approve --rule <id>` or the legacy
   `relia review --rule <id> --label accepted`; stale and contradicted rules
-  fail closed and cannot be accepted without fresh distill evidence.
+  fail closed and cannot be accepted without fresh distill evidence. `review
+  edit` keeps a rule in candidate review and marks the statement
+  `human_authored`; `review reject --reason <text>` retires the rule with the
+  rejection reason in lifecycle metadata.
 - `relia memory --format json` renders `memory/MEMORY.md` with statements,
   confidence labels, lifecycle status, review labels, and clickable PR
-  provenance.
+  provenance. The renderer separates strong active memory from weak candidate,
+  stale, contradicted, and retired memory.
 
 ## Structured Data, Proof, Budgets, And Redaction
 
@@ -275,8 +286,10 @@ T6 adds deterministic offline distillation, review, and memory-page rendering:
 - Default clustering must run with `embeddings: signature` and require no
   network, provider credential, model key, or downloaded model artifact.
 - `embeddings: local` requires an explicit `relia models pull` command before
-  use. The pulled artifact must record model ID, version, source URL, license,
-  SHA-256 content digest, cache path, update policy, and rollback policy.
+  use. The pulled artifact manifest must record model ID, version, source URL,
+  license, SHA-256 content digest, cache path, update policy, rollback policy,
+  and ready/stale status. The offline task runner path validates an
+  already-present local artifact and does not download model bytes.
 - If `embeddings: local` is configured and the artifact is absent, stale, or
   digest-mismatched, Relia must fail closed with exit `8` and clear remediation.
   It must not silently degrade to provider embeddings or unlabeled signature-only

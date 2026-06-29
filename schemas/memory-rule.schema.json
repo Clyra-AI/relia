@@ -114,7 +114,7 @@
       "items": {
         "type": "object",
         "additionalProperties": true,
-        "required": ["pr", "outcome"],
+        "required": ["pr", "outcome", "url"],
         "properties": {
           "pr": {
             "type": "integer",
@@ -122,6 +122,10 @@
           },
           "outcome": {
             "enum": ["ci_failure", "revert", "review_correction", "fix_held", "merged_clean"]
+          },
+          "url": {
+            "type": "string",
+            "pattern": "^https://github\\.com/[^/]+/[^/]+/pull/[1-9][0-9]*$"
           }
         }
       }
@@ -231,6 +235,52 @@
     }
   },
   "allOf": [
+    {
+      "if": {
+        "required": ["status"],
+        "properties": {
+          "status": {
+            "const": "active"
+          }
+        }
+      },
+      "then": {
+        "required": ["review"],
+        "properties": {
+          "review": {
+            "required": ["label"],
+            "properties": {
+              "label": {
+                "const": "accepted"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": ["review"],
+        "properties": {
+          "review": {
+            "required": ["label"],
+            "properties": {
+              "label": {
+                "const": "accepted"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "required": ["status"],
+        "properties": {
+          "status": {
+            "const": "active"
+          }
+        }
+      }
+    },
     {
       "if": {
         "required": ["review"],

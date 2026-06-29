@@ -5,13 +5,16 @@ Backtest baseline: **21.4%** headline ERR from 3 confirmed recurrences across
 failures and 3 uncertain attribution cases excluded from the headline: PRs
 #233, #252, and #271.
 
-## Serving Snapshot
+## Strong Memory
 
 No rules are served by this lifecycle fixture. The seeded recurrence draft and
 the later contradiction and stale-path transitions are preserved below with
 citations instead of being rendered as actionable recommendations.
 
-## Lifecycle Outcomes
+## Weak Memory
+
+Candidate, stale, contradicted, and retired rules are visible for review but
+are not served as active memory.
 
 ### Contradicted: avoid-blind-schema-snapshot-regeneration
 
