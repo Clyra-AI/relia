@@ -6,7 +6,7 @@
   "proof_level": "user_visible_behavior",
   "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-001",
   "behavior_under_test": "`relia distill --input <json-or-jsonl> --format json` drafts an `avoid` rule from the planted recurrence cluster with correct PR citations.",
-  "updated_at": "2026-06-29T17:52:22Z",
+  "updated_at": "2026-06-29T18:00:28Z",
   "scorecard": [
     {
       "check": "distill accepts explicit local input without requiring pre-persisted .relia experience shards",
@@ -41,7 +41,7 @@
     {
       "check": "matching message fingerprints still co-cluster across different checks",
       "status": "pass",
-      "evidence": "TestDistillClustersMatchingMessageFingerprintsAcrossChecks verifies two failures with different check_name values but the same message_fingerprint draft one recurrence-backed avoid rule."
+      "evidence": "TestDistillClustersMatchingMessageFingerprintsAcrossChecks verifies two failures with different check_name values but the same message_fingerprint draft one recurrence-backed avoid rule whose metadata.cluster.key is the shared message key."
     },
     {
       "check": "explicit blank distill input is rejected",

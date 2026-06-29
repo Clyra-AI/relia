@@ -2527,6 +2527,9 @@ func TestDistillClustersMatchingMessageFingerprintsAcrossChecks(t *testing.T) {
 	if got := yamlScalarValuesForTest(avoid.Lists["evidence.experiences"]); !stringSlicesEqual(got, []string{"exp_0601", "exp_0602"}) {
 		t.Fatalf("avoid evidence experiences = %#v, want message-fingerprint cluster", got)
 	}
+	if got := avoid.Scalars["metadata.cluster.key"].Value; got != "message|sha256:shared-clock-failure" {
+		t.Fatalf("metadata.cluster.key = %q, want shared message fingerprint key", got)
+	}
 }
 
 func TestDistillRejectsBlankExplicitInput(t *testing.T) {

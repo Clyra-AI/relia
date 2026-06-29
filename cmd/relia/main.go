@@ -2618,11 +2618,13 @@ func buildDistillClusters(records []backtestExperience) []distillCluster {
 			continue
 		}
 		var cluster *distillCluster
+		var matchedKeys []string
 		for _, key := range keys {
 			existing := byKey[key]
 			if existing == nil {
 				continue
 			}
+			matchedKeys = append(matchedKeys, key)
 			if cluster == nil {
 				cluster = existing
 				continue
@@ -2633,6 +2635,8 @@ func buildDistillClusters(records []backtestExperience) []distillCluster {
 		}
 		if cluster == nil {
 			cluster = &distillCluster{Key: keys[0]}
+		} else {
+			promoteDistillClusterKeyForMatches(cluster, matchedKeys)
 		}
 		for _, key := range keys {
 			byKey[key] = cluster
@@ -2661,6 +2665,25 @@ func buildDistillClusters(records []backtestExperience) []distillCluster {
 		return clusters[i].Key < clusters[j].Key
 	})
 	return clusters
+}
+
+func promoteDistillClusterKeyForMatches(cluster *distillCluster, matchedKeys []string) {
+	var messageKey string
+	for _, key := range matchedKeys {
+		if !isDistillMessageKey(key) {
+			return
+		}
+		if messageKey == "" {
+			messageKey = key
+		}
+	}
+	if messageKey != "" {
+		cluster.Key = messageKey
+	}
+}
+
+func isDistillMessageKey(key string) bool {
+	return strings.HasPrefix(key, "message\x00")
 }
 
 func mergeDistillClusters(byKey map[string]*distillCluster, target *distillCluster, source *distillCluster) {
