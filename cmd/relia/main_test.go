@@ -2241,7 +2241,7 @@ func TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage(t *testing.
 	inputPath := filepath.Join(tempDir, "fixtures", "distill-outcomes.jsonl")
 	writeFileForTest(t, inputPath, strings.Join([]string{
 		`{"experience_id":"exp_0101","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-04-01T10:00:00Z","pr":101,"commit":"abc101","paths":["packages/billing/invoice.py","tests/billing/test_invoice.py"],"actor_kind":"agent","attribution_method":"coauthor_trailer","attribution_confidence":0.91,"outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_billing_clock","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/101"]}`,
-		`{"experience_id":"exp_0102","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-04-15T10:00:00Z","pr":102,"commit":"abc102","paths":["packages/billing/invoice.py","tests/billing/test_invoice.py"],"actor_kind":"agent","attribution_method":"coauthor_trailer","attribution_confidence":0.91,"outcome_kind":"revert","terminal_state":"reverted","signature_id":"sig_billing_clock","signature_class":"revert","check_name":"revert","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"log_parsed_high","flake_discount":0.25,"provenance_urls":["https://github.com/acme/billing-service/pull/102"]}`,
+		`{"experience_id":"exp_0102","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-04-15T10:00:00Z","pr":102,"commit":"abc102","paths":["packages/billing/invoice.py","tests/billing/test_invoice.py"],"actor_kind":"agent","attribution_method":"coauthor_trailer","attribution_confidence":0.91,"outcome_kind":"revert","terminal_state":"reverted","signature_id":"sig_billing_clock","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"log_parsed_high","flake_discount":0.25,"provenance_urls":["https://github.com/acme/billing-service/pull/102"]}`,
 		`{"experience_id":"exp_0110","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-04-20T10:00:00Z","pr":110,"commit":"abc110","paths":["packages/search/query.py","tests/search/test_query.py"],"actor_kind":"agent","attribution_method":"pr_label","attribution_confidence":0.9,"outcome_kind":"fix_held","terminal_state":"held","signature_id":"sig_search_escape","signature_class":"test_failure","check_name":"pytest-search","signature_key":"tests/search/test_query.py::test_escape","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/110"]}`,
 		`{"experience_id":"exp_0111","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-04-22T10:00:00Z","pr":111,"commit":"abc111","paths":["packages/search/query.py","tests/search/test_query.py"],"actor_kind":"agent","attribution_method":"pr_label","attribution_confidence":0.9,"outcome_kind":"merged_clean","terminal_state":"passed","signature_id":"sig_search_escape","signature_class":"test_failure","check_name":"pytest-search","signature_key":"tests/search/test_query.py::test_escape","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/111"]}`,
 	}, "\n")+"\n")
@@ -2339,6 +2339,59 @@ func TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage(t *testing.
 		if !strings.Contains(string(page), want) {
 			t.Fatalf("MEMORY.md missing weak/strong separation marker %q:\n%s", want, page)
 		}
+	}
+}
+
+func TestDistillInputDraftsAvoidRuleFromPlantedRecurrenceCluster(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "packages", "billing", "invoice.py"), "def total():\n    return 1\n")
+	writeFileForTest(t, filepath.Join(tempDir, "tests", "billing", "test_invoice_time.py"), "def test_rollover_uses_frozen_clock():\n    pass\n")
+	inputPath := filepath.Join(tempDir, "fixtures", "planted-recurrence-outcomes.jsonl")
+	writeFileForTest(t, inputPath, strings.Join([]string{
+		`{"experience_id":"exp_0142","repo":"Clyra-AI/relia-demo-seed","recorded_at":"2026-01-08T14:00:00Z","pr":142,"commit":"a14200","paths":["packages/billing/invoice.py","tests/billing/test_invoice_time.py"],"actor_kind":"agent","attribution_method":"pr_label","attribution_confidence":0.99,"outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_time_freeze","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice_time.py::test_rollover_uses_frozen_clock","extraction_confidence":"structured","flake_discount":0.0,"provenance_urls":["https://github.com/Clyra-AI/relia-demo-seed/pull/142"]}`,
+		`{"experience_id":"exp_0187","repo":"Clyra-AI/relia-demo-seed","recorded_at":"2026-02-03T09:10:00Z","pr":187,"commit":"a18700","paths":["packages/billing/invoice.py","tests/billing/test_invoice_time.py"],"actor_kind":"agent","attribution_method":"pr_label","attribution_confidence":0.99,"outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_time_freeze","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice_time.py::test_rollover_uses_frozen_clock","extraction_confidence":"structured","flake_discount":0.0,"provenance_urls":["https://github.com/Clyra-AI/relia-demo-seed/pull/187"]}`,
+		`{"experience_id":"exp_0203","repo":"Clyra-AI/relia-demo-seed","recorded_at":"2026-02-20T13:25:00Z","pr":203,"commit":"a20300","paths":["packages/billing/invoice.py","tests/billing/test_invoice_time.py"],"actor_kind":"agent","attribution_method":"pr_label","attribution_confidence":0.99,"outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_time_freeze","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice_time.py::test_rollover_uses_frozen_clock","extraction_confidence":"structured","flake_discount":0.0,"provenance_urls":["https://github.com/Clyra-AI/relia-demo-seed/pull/203"]}`,
+		`{"experience_id":"exp_0210","repo":"Clyra-AI/relia-demo-seed","recorded_at":"2026-02-27T10:00:00Z","pr":210,"commit":"a21000","paths":["packages/billing/invoice.py","tests/billing/test_invoice_time.py"],"actor_kind":"agent","attribution_method":"pr_label","attribution_confidence":0.99,"outcome_kind":"fix_held","terminal_state":"held","signature_id":"sig_time_freeze","signature_class":"held_fix","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice_time.py::test_rollover_uses_freeze_time","extraction_confidence":"structured","flake_discount":0.0,"provenance_urls":["https://github.com/Clyra-AI/relia-demo-seed/pull/210"]}`,
+	}, "\n")+"\n")
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "distill", "--input", inputPath, "--format", "json"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("distill input exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if got := int(result.Data["rules_written"].(float64)); got != 2 {
+		t.Fatalf("rules_written = %d, want avoid and playbook rules", got)
+	}
+	avoid := loadRuleDocsByKindForTest(t, tempDir)["avoid"]
+	if avoid.Scalars["status"].Value != "candidate" ||
+		avoid.Scalars["review.label"].Value != "suggested" ||
+		avoid.Scalars["evidence.count"].Value != "3" ||
+		avoid.Scalars["evidence.contradictions"].Value != "0" {
+		t.Fatalf("avoid rule lifecycle/evidence = %#v", avoid.Scalars)
+	}
+	wantExperienceIDs := []string{"exp_0142", "exp_0187", "exp_0203"}
+	if got := yamlScalarValuesForTest(avoid.Lists["evidence.experiences"]); !stringSlicesEqual(got, wantExperienceIDs) {
+		t.Fatalf("avoid evidence experiences = %#v, want %#v", got, wantExperienceIDs)
+	}
+	wantCitations := map[int]string{
+		142: "https://github.com/Clyra-AI/relia-demo-seed/pull/142",
+		187: "https://github.com/Clyra-AI/relia-demo-seed/pull/187",
+		203: "https://github.com/Clyra-AI/relia-demo-seed/pull/203",
+	}
+	for _, entry := range avoid.ListMaps["provenance"] {
+		pr, err := strconv.Atoi(entry["pr"].Value)
+		if err != nil {
+			t.Fatalf("provenance pr = %#v", entry["pr"])
+		}
+		if wantCitations[pr] != entry["url"].Value {
+			t.Fatalf("provenance entry = %#v, want PR citation %q", entry, wantCitations[pr])
+		}
+		delete(wantCitations, pr)
+	}
+	if len(wantCitations) != 0 {
+		t.Fatalf("missing planted recurrence citations: %#v", wantCitations)
 	}
 }
 
@@ -5672,6 +5725,26 @@ func loadRuleDocsByKindForTest(t *testing.T, root string) map[string]yamlDocumen
 func loadRuleDocsByStatusForTest(t *testing.T, root string) map[string]yamlDocument {
 	t.Helper()
 	return loadRuleDocsByScalarForTest(t, root, "status")
+}
+
+func yamlScalarValuesForTest(scalars []yamlScalar) []string {
+	values := make([]string, 0, len(scalars))
+	for _, scalar := range scalars {
+		values = append(values, scalar.Value)
+	}
+	return values
+}
+
+func stringSlicesEqual(left []string, right []string) bool {
+	if len(left) != len(right) {
+		return false
+	}
+	for index := range left {
+		if left[index] != right[index] {
+			return false
+		}
+	}
+	return true
 }
 
 func loadRuleDocsByScalarForTest(t *testing.T, root string, scalar string) map[string]yamlDocument {

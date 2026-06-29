@@ -235,10 +235,12 @@ T5 adds deterministic offline recurrence backtesting:
 
 T6 adds deterministic offline distillation, review, and memory-page rendering:
 
-- `relia distill --format json` reads local redacted experience shards and
-  writes generated memory-rule YAML under `memory/rules/`.
+- `relia distill --format json` reads local redacted experience shards, and
+  `relia distill --input <json-or-jsonl> --format json` reads one local
+  redacted outcome file without persisting shards. Both paths write generated
+  memory-rule YAML under `memory/rules/`.
 - Deterministic signature keys are the default clustering key: class/check/key
-  and message fingerprints are preferred before generated signature IDs. No
+  and message fingerprints are preferred before signature ID fallback. No
   provider, model, network, or credential call is made when
   `distill.provider: none` and
   `distill.embeddings: signature` are configured.

@@ -196,6 +196,7 @@ type distillOptions struct {
 	RuleDir      string
 	HalfLifeDays int
 	Embeddings   string
+	InputPath    string
 }
 
 type reviewOptions struct {
@@ -1039,6 +1040,65 @@ func loadBacktestExperiences(root string) ([]backtestExperience, []string, strin
 	}
 	sort.Strings(digestParts)
 	return records, sourceArtifacts, sha256String(strings.Join(digestParts, "\x00")), nil
+}
+
+func loadDistillExperiences(root string, config yamlDocument, options distillOptions) ([]backtestExperience, []string, string, *CommandError) {
+	if strings.TrimSpace(options.InputPath) == "" {
+		return loadBacktestExperiences(root)
+	}
+	inputPath := resolveInputPath(root, options.InputPath)
+	rel := displayPath(root, inputPath)
+	content, err := os.ReadFile(inputPath)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return nil, nil, "", artifactContractError("distill input is missing", rel)
+		}
+		return nil, nil, "", internalError("could not read distill input", err)
+	}
+	events, commandErr := parseIngestEvents(content, rel)
+	if commandErr != nil {
+		return nil, nil, "", commandErr
+	}
+	records := make([]backtestExperience, 0, len(events))
+	for index, event := range events {
+		eventRef := fmt.Sprintf("%s:%d", rel, index+1)
+		redacted, commandErr := redactForPersistence(event, eventRef)
+		if commandErr != nil {
+			return nil, nil, "", commandErr
+		}
+		redactedEvent, ok := redacted.(map[string]any)
+		if !ok {
+			return nil, nil, "", artifactContractError("distill input event must be a JSON object", eventRef)
+		}
+		record, skipped, commandErr := normalizeExperienceRecord(config, redactedEvent, index, eventRef)
+		if commandErr != nil {
+			return nil, nil, "", commandErr
+		}
+		if skipped {
+			continue
+		}
+		recordedAt, commandErr := validateBacktestExperience(record, eventRef)
+		if commandErr != nil {
+			return nil, nil, "", commandErr
+		}
+		records = append(records, backtestExperience{
+			Record:     record,
+			RecordedAt: recordedAt,
+			SourcePath: rel,
+			SourceLine: index + 1,
+		})
+	}
+	if len(records) == 0 {
+		return nil, nil, "", artifactContractError("distill found no usable experience records in input", rel)
+	}
+	sort.Slice(records, func(i, j int) bool {
+		if records[i].RecordedAt.Equal(records[j].RecordedAt) {
+			return records[i].Record.ExperienceID < records[j].Record.ExperienceID
+		}
+		return records[i].RecordedAt.Before(records[j].RecordedAt)
+	})
+	digest := sha256String(rel + "\x00" + sha256String(string(content)))
+	return records, []string{rel}, digest, nil
 }
 
 func validateBacktestExperience(record experienceRecord, ref string) (time.Time, *CommandError) {
@@ -1942,7 +2002,7 @@ func distillResult(args []string, start time.Time) CommandResult {
 		return withFormat(errorResult("distill", "distill", dependencyError("provider-backed distill requires an approved model_provider_endpoint gate; no experience records were sent", providerRef), start))
 	}
 	embeddingMode := effectiveDistillEmbeddingMode(config, options)
-	records, sourceArtifacts, sourceDigest, commandErr := loadBacktestExperiences(root)
+	records, sourceArtifacts, sourceDigest, commandErr := loadDistillExperiences(root, config, options)
 	if commandErr != nil {
 		return withFormat(errorResult("distill", "distill", commandErr, start))
 	}
@@ -1961,6 +2021,7 @@ func distillResult(args []string, start time.Time) CommandResult {
 	statusCounts := distillStatusCounts(rules)
 	result := passResult("distill", "distill", "drafted deterministic memory rules from local experience records", start, map[string]any{
 		"format":                     options.Format,
+		"input_path":                 distillInputPathMetadata(options, sourceArtifacts),
 		"rule_dir":                   options.RuleDir,
 		"rules_written":              len(rules),
 		"candidate_rules":            statusCounts["candidate"],
@@ -1988,9 +2049,13 @@ func distillResult(args []string, start time.Time) CommandResult {
 		"schemas/memory-rule.schema.json",
 		"docs/product/prd.md#distill-calibrate-review-memory-page",
 	)
+	sourceArtifactKind := "experience_shard"
+	if strings.TrimSpace(options.InputPath) != "" {
+		sourceArtifactKind = "input"
+	}
 	for _, artifact := range sourceArtifacts {
 		result.EvidenceRefs = append(result.EvidenceRefs, artifact)
-		result.Artifacts = append(result.Artifacts, ArtifactRef{Kind: "experience_shard", Path: artifact})
+		result.Artifacts = append(result.Artifacts, ArtifactRef{Kind: sourceArtifactKind, Path: artifact})
 	}
 	for _, artifact := range ruleArtifacts {
 		result.EvidenceRefs = append(result.EvidenceRefs, artifact.Path)
@@ -2014,6 +2079,12 @@ func parseDistillArgs(args []string) (distillOptions, *CommandError) {
 				return options, usageError("distill requires a value after --format")
 			}
 			options.Format = args[index+1]
+			index++
+		case "--input", "-i":
+			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
+				return options, usageError("distill requires a path after --input")
+			}
+			options.InputPath = args[index+1]
 			index++
 		case "--rule-dir":
 			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
@@ -2053,6 +2124,16 @@ func parseDistillArgs(args []string) (distillOptions, *CommandError) {
 		return options, usageError("distill --embeddings must be signature, local, or provider")
 	}
 	return options, nil
+}
+
+func distillInputPathMetadata(options distillOptions, sourceArtifacts []string) string {
+	if strings.TrimSpace(options.InputPath) == "" {
+		return ""
+	}
+	if len(sourceArtifacts) == 0 {
+		return ""
+	}
+	return sourceArtifacts[0]
 }
 
 func reviewResult(args []string, start time.Time) CommandResult {
@@ -2560,14 +2641,11 @@ func buildDistillClusters(records []backtestExperience) []distillCluster {
 }
 
 func distillClusterKey(record experienceRecord) string {
-	signatureID := strings.TrimSpace(record.Outcome.Signature.SignatureID)
-	if signatureID != "" && !strings.HasPrefix(signatureID, "sig_generated") {
-		return strings.Join([]string{"id", signatureID}, "\x00")
-	}
 	keys := recurrenceSignatureKeys(record)
 	if len(keys) > 0 {
 		return keys[0]
 	}
+	signatureID := strings.TrimSpace(record.Outcome.Signature.SignatureID)
 	if signatureID != "" {
 		return strings.Join([]string{"id", signatureID}, "\x00")
 	}
