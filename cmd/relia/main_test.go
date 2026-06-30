@@ -4252,6 +4252,41 @@ metadata: {}
 	}
 }
 
+func TestAdviseEscapesTouchedPathsInAdvisoryComment(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	diffContent := "diff --git a/packages/weird/`@here.py b/packages/weird/`@here.py\n" +
+		"--- a/packages/weird/`@here.py\n" +
+		"+++ b/packages/weird/`@here.py\n" +
+		"@@ -1,2 +1,3 @@\n" +
+		" def work():\n" +
+		"-    return \"old\"\n" +
+		"+    return \"new\"\n"
+	writeFileForTest(t, filepath.Join(tempDir, "change.diff"), diffContent)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "advise", "--input", "change.diff", "--format", "json"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("advise exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	assessment := result.Data["assessment"].(map[string]any)
+	if result.Data["should_comment"] != true || assessment["risk_level"] != "no_coverage" {
+		t.Fatalf("advise result = %#v", result.Data)
+	}
+	comment, err := os.ReadFile(filepath.Join(tempDir, ".relia", "reports", "advisory-comment.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	commentText := string(comment)
+	if strings.Contains(commentText, "`packages/weird/`@here.py`") {
+		t.Fatalf("comment rendered unsafe single-backtick path span:\n%s", commentText)
+	}
+	if !strings.Contains(commentText, "`` packages/weird/`@here.py ``") {
+		t.Fatalf("comment missing escaped path code span:\n%s", commentText)
+	}
+}
+
 func TestAdvisoryWorkflowKeepsTokenOutOfReliaBuildAndSeedsState(t *testing.T) {
 	sourceRoot := findRepoRootForTest(t)
 	contentBytes, err := os.ReadFile(filepath.Join(sourceRoot, ".github", "workflows", "relia-advisory.yml"))

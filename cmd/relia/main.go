@@ -3421,16 +3421,36 @@ func renderAdvisoryComment(assessment riskAssessment, touchedPaths []string, dif
 
 func markdownInlineList(values []string, limit int) string {
 	if len(values) == 0 {
-		return "`this change`"
+		return markdownCodeSpan("this change")
 	}
 	if limit > 0 && len(values) > limit {
 		values = values[:limit]
 	}
 	parts := make([]string, 0, len(values))
 	for _, value := range values {
-		parts = append(parts, "`"+value+"`")
+		parts = append(parts, markdownCodeSpan(value))
 	}
 	return strings.Join(parts, ", ")
+}
+
+func markdownCodeSpan(value string) string {
+	cleaned := strings.Map(func(r rune) rune {
+		if r == '\n' || r == '\r' || r == '\t' || r < 0x20 || r == 0x7f {
+			return ' '
+		}
+		return r
+	}, value)
+	if cleaned == "" {
+		cleaned = " "
+	}
+	delimiter := "`"
+	for strings.Contains(cleaned, delimiter) {
+		delimiter += "`"
+	}
+	if strings.Contains(cleaned, "`") || strings.HasPrefix(cleaned, " ") || strings.HasSuffix(cleaned, " ") {
+		return delimiter + " " + cleaned + " " + delimiter
+	}
+	return delimiter + cleaned + delimiter
 }
 
 func writeRepoRelativeFile(root string, rel string, content []byte, label string) *CommandError {
