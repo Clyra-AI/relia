@@ -4126,6 +4126,55 @@ metadata: {}
 	}
 }
 
+func TestServeFiltersPlaybookCitationsToCleanEvidence(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "billing-playbook.yaml"), `object_type: relia.memory_rule
+schema_version: "1.0"
+id: billing-playbook-fixture
+kind: playbook
+status: active
+statement: Billing clock changes are covered when they use the approved fixture.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.91
+evidence:
+  count: 2
+  contradictions: 1
+  experiences:
+    - exp_0141
+    - exp_0142
+provenance:
+  - pr: 141
+    outcome: ci_failure
+    url: https://github.com/acme/billing-service/pull/141
+  - pr: 142
+    outcome: merged_clean
+    url: https://github.com/acme/billing-service/pull/142
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "serve", "--format", "json"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("serve exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	rules := result.Data["served_rules"].([]any)
+	if len(rules) != 1 {
+		t.Fatalf("served_rules = %#v", rules)
+	}
+	rule := rules[0].(map[string]any)
+	citations := stringsFromInterfaceSlice(t, rule["citations"])
+	if fmt.Sprint(citations) != fmt.Sprint([]string{"https://github.com/acme/billing-service/pull/142"}) {
+		t.Fatalf("citations = %#v", citations)
+	}
+}
+
 func TestAdviseWritesOneAdvisoryCommentPlanAndSkipsUnchangedDiff(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)

@@ -3083,7 +3083,7 @@ func servedRuleData(rules []assessmentRule) []map[string]any {
 			"kind":        rule.Kind,
 			"confidence":  rule.Confidence,
 			"scope_paths": append([]string(nil), rule.ScopePaths...),
-			"citations":   assessmentRuleCitationURLs(rule.Citations),
+			"citations":   servedAssessmentRuleCitationURLs(rule),
 			"path":        rule.Path,
 		})
 	}
