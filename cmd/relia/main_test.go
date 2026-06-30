@@ -224,6 +224,13 @@ func TestIngestPersistsCanonicalExperienceWithRedactionAndProvenance(t *testing.
 	if urls := provenance["urls"].([]any); len(urls) != 2 {
 		t.Fatalf("provenance urls = %#v", urls)
 	}
+	metadata := record["metadata"].(map[string]any)
+	if _, err := time.Parse(time.RFC3339, metadata["last_ingest_at"].(string)); err != nil {
+		t.Fatalf("metadata.last_ingest_at = %#v, err = %v", metadata["last_ingest_at"], err)
+	}
+	if metadata["merged_prs_since_last_ingest"] != float64(0) {
+		t.Fatalf("metadata.merged_prs_since_last_ingest = %#v", metadata["merged_prs_since_last_ingest"])
+	}
 }
 
 func TestIngestRedactsPluralSecretFieldsBeforePersistence(t *testing.T) {
@@ -1500,12 +1507,15 @@ func TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline(t *te
 		t.Fatalf("operator feedback = %#v", report.OperatorFeedback)
 	}
 	if report.Badge.Label != "Relia" ||
-		report.Badge.Message != "ERR 16.7% stale" ||
-		report.Badge.Status != "stale" ||
-		!report.Badge.Stale ||
-		report.Badge.Color != "lightgrey" ||
-		!strings.Contains(report.Badge.Reason, "30-day freshness window") {
+		report.Badge.Message != "ERR 16.7%" ||
+		report.Badge.Status != "current" ||
+		report.Badge.Stale ||
+		report.Badge.Color != "yellow" ||
+		!strings.Contains(report.Badge.Reason, "ingest metadata") {
 		t.Fatalf("badge = %#v", report.Badge)
+	}
+	if report.Metadata["last_ingest_at"] == "" || report.Metadata["merged_prs_since_last_ingest"] != float64(0) {
+		t.Fatalf("badge freshness metadata = %#v", report.Metadata)
 	}
 	assertReportDiagnosticTypes(t, report.Diagnostics, []string{
 		"memory_source_verified",
@@ -1538,7 +1548,7 @@ func TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline(t *te
 		t.Fatalf("html report missing possible recurrence section:\n%s", htmlContent)
 	}
 	if !bytes.Contains(htmlContent, []byte("Top Repeated Mistakes")) ||
-		!bytes.Contains(htmlContent, []byte("Badge: Relia ERR 16.7% stale")) {
+		!bytes.Contains(htmlContent, []byte("Badge: Relia ERR 16.7%")) {
 		t.Fatalf("html report missing operator summary and badge:\n%s", htmlContent)
 	}
 }
@@ -1546,10 +1556,11 @@ func TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline(t *te
 func TestBuildReportBadgeComputesFreshness(t *testing.T) {
 	report := recurrenceReport{
 		ReportID:    "backtest_fresh",
-		Window:      recurrenceWindow{End: "2026-06-20T00:00:00Z"},
+		Window:      recurrenceWindow{End: "2026-01-20T00:00:00Z"},
 		Summary:     recurrenceSummary{HeadlineERRPercent: "4.1%"},
 		HeadlineERR: 0.041,
 		Metadata: map[string]any{
+			"last_ingest_at":               "2026-06-20T00:00:00Z",
 			"merged_prs_since_last_ingest": 0,
 		},
 	}
@@ -1559,17 +1570,28 @@ func TestBuildReportBadgeComputesFreshness(t *testing.T) {
 	if badge.Status != "current" || badge.Stale || badge.Message != "ERR 4.1%" || badge.Color != "brightgreen" {
 		t.Fatalf("fresh badge = %#v, want current", badge)
 	}
-	if !strings.Contains(badge.Reason, "30-day freshness window") {
+	if !strings.Contains(badge.Reason, "ingest metadata") {
 		t.Fatalf("fresh badge reason = %q", badge.Reason)
 	}
 
-	report.Window.End = "2026-05-29T00:00:00Z"
+	report.Metadata["last_ingest_at"] = "2026-05-29T00:00:00Z"
 	badge = buildReportBadgeAt(report, now)
 	if badge.Status != "stale" || !badge.Stale || badge.Message != "ERR 4.1% stale" || badge.Color != "lightgrey" {
 		t.Fatalf("old badge = %#v, want stale", badge)
 	}
-	if !strings.Contains(badge.Reason, "30-day freshness window") {
+	if !strings.Contains(badge.Reason, "Last ingest exceeds") {
 		t.Fatalf("old badge reason = %q", badge.Reason)
+	}
+
+	report.Metadata = map[string]any{
+		"merged_prs_since_last_ingest": 0,
+	}
+	badge = buildReportBadgeAt(report, now)
+	if badge.Status != "stale" || !badge.Stale {
+		t.Fatalf("missing ingest badge = %#v, want stale", badge)
+	}
+	if !strings.Contains(badge.Reason, "Ingest freshness is unavailable") {
+		t.Fatalf("missing ingest badge reason = %q", badge.Reason)
 	}
 }
 
@@ -1579,6 +1601,7 @@ func TestBuildReportBadgeComputesActivityStaleness(t *testing.T) {
 		Window:   recurrenceWindow{End: "2026-06-20T00:00:00Z"},
 		Summary:  recurrenceSummary{HeadlineERRPercent: "4.1%"},
 		Metadata: map[string]any{
+			"last_ingest_at":               "2026-06-20T00:00:00Z",
 			"merged_prs_since_last_ingest": float64(21),
 		},
 	}
@@ -1592,7 +1615,9 @@ func TestBuildReportBadgeComputesActivityStaleness(t *testing.T) {
 		t.Fatalf("activity badge reason = %q", badge.Reason)
 	}
 
-	report.Metadata = nil
+	report.Metadata = map[string]any{
+		"last_ingest_at": "2026-06-20T00:00:00Z",
+	}
 	badge = buildReportBadgeAt(report, now)
 	if badge.Status != "stale" || !badge.Stale {
 		t.Fatalf("missing activity badge = %#v, want stale", badge)
@@ -1658,7 +1683,7 @@ func TestBacktestInteractiveOutputShowsOperatorSummaryAndBadge(t *testing.T) {
 		"Confirmed recurrences: 1",
 		"Top repeated mistakes:",
 		"Error recurrence rate: 50.0%",
-		"Badge: Relia ERR 50.0% stale",
+		"Badge: Relia ERR 50.0%",
 		"Report: .relia/reports/",
 	} {
 		if !strings.Contains(stdout, want) {

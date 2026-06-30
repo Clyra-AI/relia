@@ -43,6 +43,8 @@ const (
 const (
 	badgeStaleAfterDays      = 30
 	badgeStaleAfterMergedPRs = 20
+	badgeMetadataLastIngest  = "last_ingest_at"
+	badgeMetadataMergedPRs   = "merged_prs_since_last_ingest"
 )
 
 var requiredCheckFiles = []string{
@@ -802,6 +804,7 @@ func ingestResult(args []string, start time.Time) CommandResult {
 	skippedUncertain := 0
 	agentAttributed := 0
 	humanAttributed := 0
+	ingestedAt := start.UTC().Format(time.RFC3339)
 	for index, event := range events {
 		redacted, commandErr := redactForPersistence(event, displayPath(root, inputPath))
 		if commandErr != nil {
@@ -819,6 +822,11 @@ func ingestResult(args []string, start time.Time) CommandResult {
 			skippedUncertain++
 			continue
 		}
+		if record.Metadata == nil {
+			record.Metadata = map[string]any{}
+		}
+		record.Metadata[badgeMetadataLastIngest] = ingestedAt
+		record.Metadata[badgeMetadataMergedPRs] = 0
 		switch record.Attribution.ActorKind {
 		case "agent":
 			agentAttributed++
@@ -1464,6 +1472,25 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 	}
 	gate := backtestGate(config, summary.HeadlineERR)
 	repoID := recurrenceReportRepoID(windowRecords)
+	metadata := map[string]any{
+		"repo_id":                                repoID,
+		"window_days":                            windowDays,
+		"source_artifact_digest":                 sourceDigest,
+		"possible_excluded_from_err":             true,
+		"flake_discount_excluded_from_numerator": true,
+		"flake_discount_retained_in_denominator": true,
+		"deterministic_window_anchor":            "latest_recorded_at_in_source_artifacts",
+		"network_required":                       false,
+		"redaction_status":                       "customer_safe",
+		"repo_relative_paths_only":               true,
+		"baseline_gate_enabled_default":          false,
+	}
+	if lastIngestAt, mergedSinceIngest, hasLastIngestAt, hasMergedSinceIngest := reportIngestFreshnessMetadata(records); hasLastIngestAt {
+		metadata[badgeMetadataLastIngest] = lastIngestAt.Format(time.RFC3339)
+		if hasMergedSinceIngest {
+			metadata[badgeMetadataMergedPRs] = mergedSinceIngest
+		}
+	}
 	report := recurrenceReport{
 		ObjectType:           "relia.recurrence_report",
 		SchemaVersion:        commandSchemaVersion,
@@ -1482,19 +1509,7 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 		Citations:            citations,
 		Diagnostics:          buildReportDiagnostics(summary, baseline, sourceArtifacts),
 		OperatorFeedback:     buildReportOperatorFeedback(summary),
-		Metadata: map[string]any{
-			"repo_id":                                repoID,
-			"window_days":                            windowDays,
-			"source_artifact_digest":                 sourceDigest,
-			"possible_excluded_from_err":             true,
-			"flake_discount_excluded_from_numerator": true,
-			"flake_discount_retained_in_denominator": true,
-			"deterministic_window_anchor":            "latest_recorded_at_in_source_artifacts",
-			"network_required":                       false,
-			"redaction_status":                       "customer_safe",
-			"repo_relative_paths_only":               true,
-			"baseline_gate_enabled_default":          false,
-		},
+		Metadata:             metadata,
 	}
 	report.ReportID = "backtest_" + shortHash(strings.Join([]string{
 		report.Window.Start,
@@ -1517,6 +1532,35 @@ func recurrenceReportRepoID(records []backtestExperience) string {
 		return ""
 	}
 	return repo.Owner + "/" + repo.Name
+}
+
+func reportIngestFreshnessMetadata(records []backtestExperience) (time.Time, int, bool, bool) {
+	var latestIngestAt time.Time
+	mergedSinceIngest := 0
+	hasLastIngestAt := false
+	hasMergedSinceIngest := false
+	for _, record := range records {
+		ingestedAt, ok := metadataTime(record.Record.Metadata, badgeMetadataLastIngest)
+		if !ok {
+			continue
+		}
+		if !hasLastIngestAt || ingestedAt.After(latestIngestAt) {
+			latestIngestAt = ingestedAt
+			mergedSinceIngest = 0
+			hasLastIngestAt = true
+			hasMergedSinceIngest = false
+		}
+		if !ingestedAt.Equal(latestIngestAt) {
+			continue
+		}
+		if value, ok := metadataInt(record.Record.Metadata, badgeMetadataMergedPRs); ok {
+			if !hasMergedSinceIngest || value > mergedSinceIngest {
+				mergedSinceIngest = value
+			}
+			hasMergedSinceIngest = true
+		}
+	}
+	return latestIngestAt, mergedSinceIngest, hasLastIngestAt, hasMergedSinceIngest
 }
 
 func buildTopRepeatedMistakes(pairs []recurrencePair) []topRepeatedMistake {
@@ -1678,28 +1722,24 @@ func buildReportBadgeAt(report recurrenceReport, now time.Time) reportBadge {
 }
 
 func reportBadgeStaleness(report recurrenceReport, now time.Time) (bool, string) {
-	mergedSinceIngest, hasMergedSinceIngest := metadataInt(report.Metadata, "merged_prs_since_last_ingest")
-	if hasMergedSinceIngest && mergedSinceIngest > badgeStaleAfterMergedPRs {
-		return true, fmt.Sprintf("More than %d PRs have merged since the last ingest; rerun relia ingest and backtest before publishing the README badge.", badgeStaleAfterMergedPRs)
-	}
 	if now.IsZero() {
 		now = time.Now().UTC()
 	}
-	windowEndText := strings.TrimSpace(report.Window.End)
-	if windowEndText == "" {
-		return true, "Report window end is unavailable; rerun relia ingest and backtest before publishing the README badge."
+	lastIngestAt, hasLastIngestAt := metadataTime(report.Metadata, badgeMetadataLastIngest)
+	if !hasLastIngestAt {
+		return true, "Ingest freshness is unavailable; rerun relia ingest before publishing the README badge."
 	}
-	windowEnd, err := time.Parse(time.RFC3339, windowEndText)
-	if err != nil {
-		return true, "Report window end is invalid; rerun relia ingest and backtest before publishing the README badge."
+	if now.UTC().Sub(lastIngestAt.UTC()) > time.Duration(badgeStaleAfterDays)*24*time.Hour {
+		return true, fmt.Sprintf("Last ingest exceeds the %d-day freshness window; rerun relia ingest and backtest before publishing the README badge.", badgeStaleAfterDays)
 	}
-	if now.UTC().Sub(windowEnd.UTC()) > time.Duration(badgeStaleAfterDays)*24*time.Hour {
-		return true, fmt.Sprintf("Source experience data exceeds the %d-day freshness window; rerun relia ingest and backtest before publishing the README badge.", badgeStaleAfterDays)
-	}
+	mergedSinceIngest, hasMergedSinceIngest := metadataInt(report.Metadata, badgeMetadataMergedPRs)
 	if !hasMergedSinceIngest {
 		return true, "Merged PR activity freshness is unavailable; provide merged_prs_since_last_ingest metadata before publishing the README badge."
 	}
-	return false, fmt.Sprintf("Generated from source experience data within the %d-day freshness window and %d merged PRs since ingest.", badgeStaleAfterDays, mergedSinceIngest)
+	if mergedSinceIngest > badgeStaleAfterMergedPRs {
+		return true, fmt.Sprintf("More than %d PRs have merged since the last ingest; rerun relia ingest and backtest before publishing the README badge.", badgeStaleAfterMergedPRs)
+	}
+	return false, fmt.Sprintf("Generated from ingest metadata within the %d-day freshness window and %d merged PRs since ingest.", badgeStaleAfterDays, mergedSinceIngest)
 }
 
 func metadataInt(metadata map[string]any, key string) (int, bool) {
@@ -1726,6 +1766,22 @@ func metadataInt(metadata map[string]any, key string) (int, bool) {
 	default:
 		return 0, false
 	}
+}
+
+func metadataTime(metadata map[string]any, key string) (time.Time, bool) {
+	value, ok := metadata[key]
+	if !ok {
+		return time.Time{}, false
+	}
+	text := strings.TrimSpace(stringFromAny(value))
+	if text == "" {
+		return time.Time{}, false
+	}
+	parsed, err := time.Parse(time.RFC3339, text)
+	if err != nil {
+		return time.Time{}, false
+	}
+	return parsed.UTC(), true
 }
 
 func isFailureOutcome(kind string) bool {

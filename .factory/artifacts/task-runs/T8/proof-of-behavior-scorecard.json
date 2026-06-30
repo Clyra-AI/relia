@@ -12,13 +12,13 @@
     "README.md",
     "docs/dev/dev_guides.md"
   ],
-  "produced_at": "2026-06-30T13:39:48Z",
+  "produced_at": "2026-06-30T14:01:09Z",
   "redaction_posture": {
     "classification": "customer_safe",
     "notes": "No customer data, live credentials, network calls, or unredacted machine-local paths were introduced.",
     "status": "pass"
   },
-  "repair_task_id": "20260630T113048.990974000Z-relia-T8-review-9-repair",
+  "repair_task_id": "20260630T113048.990974000Z-relia-T8-review-10-repair",
   "required_proof_level": "user_visible_behavior",
   "schema_version": "1.0",
   "scorecard": [
@@ -145,9 +145,11 @@
       "status": "pass"
     },
     {
-      "behavior": "README badge fields render stale when source data exceeds 30 days, merged-PR activity exceeds 20 PRs, or merged-PR activity metadata is unavailable.",
+      "behavior": "README badge fields render stale from explicit last_ingest_at metadata and merged-PR activity metadata, while freshly ingested historical records remain current until ingest freshness or merged-PR thresholds expire.",
       "proof_refs": [
         "cmd/relia/main_test.go",
+        "TestIngestPersistsCanonicalExperienceWithRedactionAndProvenance",
+        "TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline",
         "TestBuildReportBadgeComputesFreshness",
         "TestBuildReportBadgeComputesActivityStaleness",
         "schemas/recurrence-report.schema.json"

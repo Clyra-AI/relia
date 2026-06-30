@@ -77,6 +77,10 @@
     "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
     "python3 -m json.tool schemas/recurrence-report.schema.json",
     "go test ./cmd/relia -run 'TestShardConsumersRejectSelfReportMarkersBeforeStructDecode|TestIngestRejectsNestedSourceMetadataBeforePersistence|TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite'",
+    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
+    "go test ./cmd/relia -run 'TestIngestPersistsCanonicalExperienceWithRedactionAndProvenance|TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline|TestBuildReportBadgeComputesFreshness|TestBuildReportBadgeComputesActivityStaleness'",
+    "go test ./cmd/relia -run 'TestBacktestInteractiveOutputShowsOperatorSummaryAndBadge|TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline|TestBuildReportBadgeComputesFreshness|TestBuildReportBadgeComputesActivityStaleness'",
+    "git diff --check",
     "make prepush-full"
   ],
   "docs_sync_result": {
@@ -107,7 +111,7 @@
   "final_validation_evidence": [
     {
       "command": "make prepush-full",
-      "evidence_summary": "go test ./... passed after the focused latest-head Codex review repair; coverage 80.1% against the 75.0% minimum; repo-pack validation and demo contracts passed.",
+      "evidence_summary": "go test ./... passed after the focused ingest-freshness badge repair; coverage 80.3% against the 75.0% minimum; repo-pack validation and demo contracts passed.",
       "exit_code": 0,
       "status": "pass"
     },
@@ -170,6 +174,21 @@
       "command": "go test ./cmd/relia -run 'TestShardConsumersRejectSelfReportMarkersBeforeStructDecode|TestIngestRejectsNestedSourceMetadataBeforePersistence|TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite'",
       "exit_code": 0,
       "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestIngestPersistsCanonicalExperienceWithRedactionAndProvenance|TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline|TestBuildReportBadgeComputesFreshness|TestBuildReportBadgeComputesActivityStaleness'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestBacktestInteractiveOutputShowsOperatorSummaryAndBadge|TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline|TestBuildReportBadgeComputesFreshness|TestBuildReportBadgeComputesActivityStaleness'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "status": "pass"
     }
   ],
   "green_evidence": [
@@ -224,6 +243,21 @@
       "status": "pass"
     },
     {
+      "command": "go test ./cmd/relia -run 'TestIngestPersistsCanonicalExperienceWithRedactionAndProvenance|TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline|TestBuildReportBadgeComputesFreshness|TestBuildReportBadgeComputesActivityStaleness'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestBacktestInteractiveOutputShowsOperatorSummaryAndBadge|TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline|TestBuildReportBadgeComputesFreshness|TestBuildReportBadgeComputesActivityStaleness'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
       "command": "make prepush-full",
       "exit_code": 0,
       "status": "pass"
@@ -239,7 +273,7 @@
     "status": "not_worker_owned"
   },
   "migration_result": {
-    "notes": "Pre-1.0 recurrence report output gained explicit metrics, diagnostics, feedback, badge fields, and optional merged-PR badge freshness metadata, but newly emitted T8 schema fields remain optional for schema_version 1.0 compatibility; no persisted user-authored migration is required.",
+    "notes": "Pre-1.0 recurrence report output gained explicit metrics, diagnostics, feedback, badge fields, and optional last_ingest_at plus merged-PR badge freshness metadata, but newly emitted T8 schema fields remain optional for schema_version 1.0 compatibility; no persisted user-authored migration is required.",
     "status": "pass"
   },
   "path_policy_result": {
@@ -265,7 +299,7 @@
     "notes": "Resolved the Codex review repair findings inside the T8 reporting-and-evidence slice without changing lifecycle state, PR state, runtime pins, provider posture, or Factory daemon state.",
     "status": "pass"
   },
-  "produced_at": "2026-06-30T13:39:48Z",
+  "produced_at": "2026-06-30T14:01:09Z",
   "red_evidence": [
     {
       "command": "go test ./cmd/relia",
@@ -275,7 +309,7 @@
       "status": "expected_fail"
     }
   ],
-  "repair_task_id": "20260630T113048.990974000Z-relia-T8-review-9-repair",
+  "repair_task_id": "20260630T113048.990974000Z-relia-T8-review-10-repair",
   "residual_risks": [
     "Lifecycle evidence remains assigned to factoryd workers after local validation."
   ],
@@ -283,7 +317,7 @@
   "status": "pass",
   "task_id": "T8",
   "versioning_result": {
-    "notes": "Pre-1.0 output evolution remains backward-compatible: recurrence-report schema_version 1.0 keeps newly emitted T8 fields and optional badge freshness metadata optional.",
+    "notes": "Pre-1.0 output evolution remains backward-compatible: recurrence-report schema_version 1.0 keeps newly emitted T8 fields and optional last_ingest_at plus merged-PR badge freshness metadata optional.",
     "status": "pass"
   }
 }

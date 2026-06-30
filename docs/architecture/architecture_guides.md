@@ -151,10 +151,11 @@ state owner remains `cmd/relia`, with generated recurrence reports under
 Feedback sources are unit tests, schema contract validation,
 `make prepush-full`, and task-run evidence. Backtest reports now carry
 operator-visible metrics, top repeated mistakes, diagnostics, summary text, and
-badge-ready fields derived from canonical experience records plus optional
-activity metadata, without adding network access to the offline backtest
-command. Ingest and canonical experience consumers reject inputs marked as agent
-self-reports or reflections before persistence or memory-rule writes, and
+badge-staleness fields derived from canonical experience records, explicit
+`last_ingest_at` metadata, and merged-PR activity metadata, without adding
+network access to the offline backtest command. Ingest and canonical experience
+consumers reject inputs marked as agent self-reports or reflections before
+persistence or memory-rule writes, and
 generated rules record `metadata.memory_source: verified_outcome_events`. The
 blast radius is limited to local CLI output, recurrence-report schema and
 artifacts, generated rule metadata, and docs. Rollback is removal of the T8

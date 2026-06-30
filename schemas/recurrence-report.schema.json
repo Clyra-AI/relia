@@ -111,6 +111,10 @@
     "metadata": {
       "type": "object",
       "properties": {
+        "last_ingest_at": {
+          "type": "string",
+          "format": "date-time"
+        },
         "merged_prs_since_last_ingest": {
           "type": "integer",
           "minimum": 0

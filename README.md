@@ -47,8 +47,8 @@ output contract:
   experience counts distinct from unique agent-attributed PR counts, top
   repeated mistakes, diagnostics, feedback text, and badge-ready fields
   generated from the JSON command result. Badge fields render as stale when
-  the latest source window is older than 30 days or artifact metadata reports
-  more than 20 merged PRs since ingest; missing activity metadata is also
+  artifact metadata reports `last_ingest_at` older than 30 days or more than
+  20 merged PRs since ingest; missing ingest or activity metadata is also
   treated as stale before publishing a README badge. The recurrence gate is
   available through `relia.yaml` but remains off by default.
 - `relia distill --format json` reads local redacted experience shards, or
