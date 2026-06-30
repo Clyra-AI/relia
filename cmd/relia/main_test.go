@@ -755,6 +755,7 @@ func TestIngestRejectsAgentSelfReportsBeforePersistence(t *testing.T) {
 func TestIngestRejectsNestedSourceMetadataBeforePersistence(t *testing.T) {
 	for _, tc := range []struct {
 		name     string
+		prefix   string
 		metadata string
 	}{
 		{
@@ -765,17 +766,26 @@ func TestIngestRejectsNestedSourceMetadataBeforePersistence(t *testing.T) {
 			name:     "source_type",
 			metadata: `{"source": {"type": "agent_self_report"}}`,
 		},
+		{
+			name:   "object_type",
+			prefix: `"object_type": "agent_self_report",`,
+		},
+		{
+			name:   "event_type",
+			prefix: `"event_type": "agent_reflection",`,
+		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			tempDir := setupContractRepo(t)
 			t.Chdir(tempDir)
 			inputPath := filepath.Join(tempDir, "fixtures", "self-report-outcomes.json")
 			writeFileForTest(t, inputPath, fmt.Sprintf(`[
-  {
-    "experience_id": "exp_%s",
-    "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},
-    "recorded_at": "2026-04-04T18:21:00Z",
-    "pr": 144,
+	  {
+	    "experience_id": "exp_%s",
+	    %s
+	    "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},
+	    "recorded_at": "2026-04-04T18:21:00Z",
+	    "pr": 144,
     "commit": "abc9999",
     "paths": ["packages/billing/invoice.py"],
     "actor_kind": "agent",
@@ -784,12 +794,12 @@ func TestIngestRejectsNestedSourceMetadataBeforePersistence(t *testing.T) {
     "terminal_state": "failed",
     "signature_class": "test_failure",
     "check_name": "pytest-billing",
-    "signature_key": "tests/test_invoice.py::test_tz_rollover",
-    "extraction_confidence": "structured",
-    "provenance_urls": ["https://github.com/acme/billing-service/pull/144"],
-    "metadata": %s
-  }
-]`, tc.name, tc.metadata))
+	    "signature_key": "tests/test_invoice.py::test_tz_rollover",
+	    "extraction_confidence": "structured",
+	    "provenance_urls": ["https://github.com/acme/billing-service/pull/144"],
+	    "metadata": %s
+	  }
+	]`, tc.name, tc.prefix, metadataForSelfReportTest(tc.metadata)))
 
 			stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
 
@@ -806,6 +816,13 @@ func TestIngestRejectsNestedSourceMetadataBeforePersistence(t *testing.T) {
 			}
 		})
 	}
+}
+
+func metadataForSelfReportTest(metadata string) string {
+	if metadata == "" {
+		return `{}`
+	}
+	return metadata
 }
 
 func TestIngestInfersAttributionAndUpsertsIdempotently(t *testing.T) {
@@ -3571,6 +3588,30 @@ func TestPhase0SchemasDeclareMetadata(t *testing.T) {
 	root := findRepoRootForTest(t)
 	if commandErr := validateSchemaContracts(root); commandErr != nil {
 		t.Fatalf("schema contracts failed: %#v", commandErr)
+	}
+}
+
+func TestRecurrenceReportSchemaKeepsT8FieldsOptionalForV1(t *testing.T) {
+	content, err := os.ReadFile(filepath.Join(findRepoRootForTest(t), "schemas", "recurrence-report.schema.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var schema map[string]any
+	if err := json.Unmarshal(content, &schema); err != nil {
+		t.Fatal(err)
+	}
+	requiredValues, ok := schema["required"].([]any)
+	if !ok {
+		t.Fatalf("schema required field = %#v", schema["required"])
+	}
+	required := map[string]bool{}
+	for _, value := range requiredValues {
+		required[fmt.Sprint(value)] = true
+	}
+	for _, field := range []string{"metrics", "top_repeated_mistakes"} {
+		if required[field] {
+			t.Fatalf("%s must stay optional while recurrence-report schema_version remains 1.0", field)
+		}
 	}
 }
 

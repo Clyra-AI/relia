@@ -5178,6 +5178,11 @@ func normalizeExperienceRecord(config yamlDocument, event map[string]any, index 
 
 func validateEventMemorySource(event map[string]any, ref string) *CommandError {
 	for _, path := range []string{
+		"object_type",
+		"event_type",
+		"event_kind",
+		"type",
+		"kind",
 		"source",
 		"source_kind",
 		"source.type",

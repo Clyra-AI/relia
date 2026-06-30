@@ -12,13 +12,13 @@
     "README.md",
     "docs/dev/dev_guides.md"
   ],
-  "produced_at": "2026-06-30T12:14:01Z",
+  "produced_at": "2026-06-30T12:30:13Z",
   "redaction_posture": {
     "classification": "customer_safe",
     "notes": "No customer data, live credentials, network calls, or unredacted machine-local paths were introduced.",
     "status": "pass"
   },
-  "repair_task_id": "20260630T113048.990974000Z-relia-T8-repair-2",
+  "repair_task_id": "20260630T113048.990974000Z-relia-T8-review-3-repair",
   "required_proof_level": "user_visible_behavior",
   "schema_version": "1.0",
   "scorecard": [
@@ -32,6 +32,14 @@
     },
     {
       "behavior": "Nested source metadata marked as an agent self-report or reflection fails before persistence.",
+      "proof_refs": [
+        "cmd/relia/main_test.go",
+        "TestIngestRejectsNestedSourceMetadataBeforePersistence"
+      ],
+      "status": "pass"
+    },
+    {
+      "behavior": "Top-level object_type and event_type markers marked as agent self-reports or reflections fail before persistence.",
       "proof_refs": [
         "cmd/relia/main_test.go",
         "TestIngestRejectsNestedSourceMetadataBeforePersistence"
@@ -86,6 +94,15 @@
       "proof_refs": [
         "cmd/relia/main_test.go",
         "TestBacktestTopRepeatedMistakesAggregateByMatchedSignature",
+        "schemas/recurrence-report.schema.json"
+      ],
+      "status": "pass"
+    },
+    {
+      "behavior": "Recurrence report schema_version 1.0 keeps newly emitted T8 report fields optional for backward compatibility.",
+      "proof_refs": [
+        "cmd/relia/main_test.go",
+        "TestRecurrenceReportSchemaKeepsT8FieldsOptionalForV1",
         "schemas/recurrence-report.schema.json"
       ],
       "status": "pass"

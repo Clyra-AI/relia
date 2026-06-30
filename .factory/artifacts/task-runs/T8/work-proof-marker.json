@@ -27,10 +27,12 @@
     "Separated backtest command-result experience metrics from unique PR metrics: experiences_agent_attributed now counts canonical experience records and agent_attributed_prs carries the PR count.",
     "Extended recurrence report metrics with agent_attributed_experiences and kept schema, tests, README, and developer guide output-contract notes in sync.",
     "Rebuilt report diagnostics and badge fields after --save-baseline replaces stale baseline comparison state.",
-    "Aggregated top repeated mistakes by matched recurrence signature while preserving the current record signature_id on recurrence pairs."
+    "Aggregated top repeated mistakes by matched recurrence signature while preserving the current record signature_id on recurrence pairs.",
+    "Rejected top-level object_type and event_type self-report/reflection markers before ingest persistence.",
+    "Kept T8 recurrence-report metrics and top_repeated_mistakes optional for schema_version 1.0 while continuing to emit them from new reports."
   ],
-  "produced_at": "2026-06-30T12:14:01Z",
-  "repair_task_id": "20260630T113048.990974000Z-relia-T8-repair-2",
+  "produced_at": "2026-06-30T12:30:13Z",
+  "repair_task_id": "20260630T113048.990974000Z-relia-T8-review-3-repair",
   "schema_version": "1.0",
   "status": "implemented",
   "task_id": "T8"
