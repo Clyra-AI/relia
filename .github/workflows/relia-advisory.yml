@@ -38,13 +38,20 @@ jobs:
           mkdir -p .relia/reports
           gh pr diff "$PR_NUMBER" --patch > .relia/pr.diff
           comments_json=.relia/reports/github-comments.json
-          gh api "repos/${REPOSITORY}/issues/${PR_NUMBER}/comments?per_page=100" > "$comments_json"
+          gh api --paginate --slurp "repos/${REPOSITORY}/issues/${PR_NUMBER}/comments?per_page=100" > "$comments_json"
           python3 - <<'PY'
           import json
           import re
           from pathlib import Path
 
-          comments = json.loads(Path(".relia/reports/github-comments.json").read_text() or "[]")
+          def flatten_comments(payload):
+              if isinstance(payload, list) and all(isinstance(page, list) for page in payload):
+                  return [comment for page in payload for comment in page]
+              if isinstance(payload, list):
+                  return payload
+              return []
+
+          comments = flatten_comments(json.loads(Path(".relia/reports/github-comments.json").read_text() or "[]"))
           marker = "<!-- relia-advisory:v1"
           fingerprint = ""
           pattern = re.compile(r"<!--\s*relia-advisory:v1\s+diff_fingerprint=([^ >]+)\s*-->")
@@ -75,51 +82,55 @@ jobs:
           REPOSITORY: ${{ github.repository }}
         run: |
           set -euo pipefail
-          python3 - <<'PY' > .relia/reports/advisory-env
+          python3 - <<'PY'
           import json
+          import os
+          import subprocess
           from pathlib import Path
+
+          def flatten_comments(payload):
+              if isinstance(payload, list) and all(isinstance(page, list) for page in payload):
+                  return [comment for page in payload for comment in page]
+              if isinstance(payload, list):
+                  return payload
+              return []
 
           result = json.loads(Path(".relia/reports/advisory-result.json").read_text())
           data = result.get("data") or {}
-          should_comment = bool(data.get("should_comment"))
-          print(f"SHOULD_COMMENT={'true' if should_comment else 'false'}")
-          print(f"DIFF_FINGERPRINT={data.get('diff_fingerprint', '')}")
-          print(f"SKIP_REASON={data.get('skip_reason', '')}")
-          PY
-          . .relia/reports/advisory-env
-          if [ "$SHOULD_COMMENT" != "true" ]; then
-            echo "Relia advisory skipped: ${SKIP_REASON:-no_comment_needed}"
-            exit 0
-          fi
-          comments_json=.relia/reports/github-comments.json
-          comment_id="$(python3 - <<'PY'
-          import json
-          from pathlib import Path
+          if not bool(data.get("should_comment")):
+              print("Relia advisory skipped: " + str(data.get("skip_reason") or "no_comment_needed"))
+              raise SystemExit(0)
 
-          comments = json.loads(Path(".relia/reports/github-comments.json").read_text() or "[]")
+          comments = flatten_comments(json.loads(Path(".relia/reports/github-comments.json").read_text() or "[]"))
+          comment_id = ""
           for comment in comments:
               body = comment.get("body") or ""
               if "<!-- relia-advisory:v1" in body:
-                  print(comment["id"])
+                  comment_id = str(comment["id"])
                   break
-          PY
-          )"
-          python3 - <<'PY'
-          import json
-          from pathlib import Path
 
           Path(".relia/reports/advisory-body.json").write_text(json.dumps({
               "body": Path(".relia/reports/advisory-comment.md").read_text()
           }))
-          PY
-          if [ -n "$comment_id" ]; then
-            gh api --method PATCH "repos/${REPOSITORY}/issues/comments/${comment_id}" --input .relia/reports/advisory-body.json >/dev/null || {
-              echo "Relia advisory publish skipped: GitHub token could not update the existing comment"
-              exit 0
-            }
+
+          repository = os.environ["REPOSITORY"]
+          pr_number = os.environ["PR_NUMBER"]
+          if comment_id:
+              command = [
+                  "gh", "api", "--method", "PATCH",
+                  f"repos/{repository}/issues/comments/{comment_id}",
+                  "--input", ".relia/reports/advisory-body.json",
+              ]
+              failure_action = "update the existing comment"
           else
-            gh api --method POST "repos/${REPOSITORY}/issues/${PR_NUMBER}/comments" --input .relia/reports/advisory-body.json >/dev/null || {
-              echo "Relia advisory publish skipped: GitHub token could not create the advisory comment"
-              exit 0
-            }
-          fi
+              command = [
+                  "gh", "api", "--method", "POST",
+                  f"repos/{repository}/issues/{pr_number}/comments",
+                  "--input", ".relia/reports/advisory-body.json",
+              ]
+              failure_action = "create the advisory comment"
+          completed = subprocess.run(command, stdout=subprocess.DEVNULL)
+          if completed.returncode != 0:
+              print("Relia advisory publish skipped: GitHub token could not " + failure_action)
+              raise SystemExit(0)
+          PY

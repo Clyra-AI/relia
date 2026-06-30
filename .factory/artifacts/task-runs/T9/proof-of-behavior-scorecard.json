@@ -3,7 +3,7 @@
   "schema_version": "1.0",
   "task_id": "T9",
   "status": "pass",
-  "updated_at": "2026-06-30T19:40:04Z",
+  "updated_at": "2026-06-30T19:50:11Z",
   "required_proof_level": "user_visible_behavior",
   "scenarios": [
     {
@@ -27,6 +27,16 @@
       "evidence": "TestAdvisoryWorkflowKeepsTokenOutOfReliaBuildAndSeedsState"
     },
     {
+      "scenario": "The GitHub advisory workflow paginates and flattens all issue-comment pages before looking up the hidden advisory marker.",
+      "status": "pass",
+      "evidence": "TestAdvisoryWorkflowKeepsTokenOutOfReliaBuildAndSeedsState"
+    },
+    {
+      "scenario": "The GitHub advisory workflow publish step parses planner JSON directly and invokes gh without sourcing planner-controlled shell environment text while the Actions token is present.",
+      "status": "pass",
+      "evidence": "TestAdvisoryWorkflowKeepsTokenOutOfReliaBuildAndSeedsState"
+    },
+    {
       "scenario": "The advisory planner still writes one hidden-marker PR advisory plan with real PR citations and skips unchanged diff fingerprints.",
       "status": "pass",
       "evidence": "TestAdviseWritesOneAdvisoryCommentPlanAndSkipsUnchangedDiff"
@@ -43,7 +53,7 @@
     }
   ],
   "commands_run": [
-    "go test ./cmd/relia -run 'TestAdvise|TestAdvisoryWorkflow'",
+    "go test ./cmd/relia -count=1 -run 'TestAdvise|TestAdvisoryWorkflow'",
     "make prepush-full"
   ],
   "network_and_credential_posture": {
