@@ -179,9 +179,10 @@ network transports fail closed. `relia advise` reuses the assessment engine to
 write one-comment advisory artifacts while respecting disabled advise config,
 unchanged diff fingerprints, and a zero comment cap. The GitHub Action uses the
 explicit Actions token only in GitHub API steps, disables persisted checkout
-credentials, seeds local state from all hidden-marker PR comment pages, parses
-planner JSON directly during publish without sourcing planner-produced shell
-environment text, and runs checked-out Relia code without the token. Existing
+credentials, runs trusted base-branch Relia code and memory rules against the
+PR diff, seeds local state from bot-authored hidden-marker PR comment pages,
+parses planner JSON directly during publish without sourcing planner-produced
+shell environment text, and never grants the token to Relia code. Existing
 advisory comments are updated with a cleared state when a later diff becomes
 covered clean. The blast radius is limited to CLI output, local
 `.relia/reports` advisory artifacts, provider config validation, and optional
