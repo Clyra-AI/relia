@@ -218,6 +218,12 @@
       "evidence": "Twelfth focused repair coverage passed for rewarning unchanged diffs when prior clear state no longer matches current risk.",
       "exit_code": 0,
       "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -count=1 -run 'TestAdvise|TestAdvisoryWorkflow|TestCheckRejectsProviderBaseURLUserInfo|TestServe'",
+      "evidence": "Thirteenth focused repair coverage passed for using avoid-rule confidence, not playbook confidence, when enforcing advisory thresholds.",
+      "exit_code": 0,
+      "status": "pass"
     }
   ],
   "path_policy_result": {
@@ -250,5 +256,5 @@
   "status": "pass",
   "task_id": "T9",
   "test_first_skipped_reason": "Codex review supplied the failing behavioral evidence for this repair. The repair encoded the review findings as focused regression coverage and then ran the focused Go test and final repository validation.",
-  "updated_at": "2026-06-30T21:21:24Z"
+  "updated_at": "2026-06-30T21:30:52Z"
 }

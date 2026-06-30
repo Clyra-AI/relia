@@ -4621,6 +4621,85 @@ metadata: {}
 	}
 }
 
+func TestAdviseIgnoresPlaybookConfidenceForCommentThreshold(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "billing-low-confidence.yaml"), `object_type: relia.memory_rule
+schema_version: "1.0"
+id: billing-low-confidence-fixture
+kind: avoid
+status: active
+statement: Low confidence billing changes should not publish advisory comments.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.55
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_0142
+provenance:
+  - pr: 142
+    outcome: ci_failure
+    url: https://github.com/acme/billing-service/pull/142
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`)
+	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "billing-playbook.yaml"), `object_type: relia.memory_rule
+schema_version: "1.0"
+id: billing-playbook-fixture
+kind: playbook
+status: active
+statement: Billing clock changes are covered when they use the approved fixture.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.91
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_0143
+provenance:
+  - pr: 143
+    outcome: merged_clean
+    url: https://github.com/acme/billing-service/pull/143
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`)
+	writeFileForTest(t, filepath.Join(tempDir, "change.diff"), `diff --git a/packages/billing/invoice.py b/packages/billing/invoice.py
+--- a/packages/billing/invoice.py
++++ b/packages/billing/invoice.py
+@@ -1,2 +1,3 @@
+ def rollover_day():
+-    return "2026-01-01"
++    return maybe_safe_billing_clock().strftime("%Y-%m-%d")
+`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "advise", "--input", "change.diff", "--format", "json"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("advise mixed confidence exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Data["should_comment"] != false || result.Data["skip_reason"] != "below_min_confidence" {
+		t.Fatalf("advise result = %#v", result.Data)
+	}
+	assessment := result.Data["assessment"].(map[string]any)
+	metadata := assessment["metadata"].(map[string]any)
+	if metadata["max_avoid_confidence"] != float64(0.55) {
+		t.Fatalf("max_avoid_confidence = %#v, metadata = %#v", metadata["max_avoid_confidence"], metadata)
+	}
+	if _, err := os.Stat(filepath.Join(tempDir, ".relia", "reports", "advisory-comment.md")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("advisory comment should not be written for low-confidence avoid match, stat err = %v", err)
+	}
+}
+
 func TestAdviseRewarnsUnchangedDiffWhenPriorMarkerWasClear(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)

@@ -3385,7 +3385,14 @@ func advisoryCommentDecision(settings adviseSettings, assessment riskAssessment,
 func advisoryBelowMinConfidence(settings adviseSettings, assessment riskAssessment) bool {
 	return assessment.RiskLevel != "no_coverage" &&
 		assessment.RiskLevel != "covered_clean" &&
-		advisoryMaxConfidence(assessment) < settings.MinConfidence
+		advisoryRiskConfidence(assessment) < settings.MinConfidence
+}
+
+func advisoryRiskConfidence(assessment riskAssessment) float64 {
+	if value, ok := assessment.Metadata["max_avoid_confidence"].(float64); ok {
+		return value
+	}
+	return advisoryMaxConfidence(assessment)
 }
 
 func advisoryMaxConfidence(assessment riskAssessment) float64 {
@@ -5894,6 +5901,16 @@ func buildRiskAssessment(root string, inputRef string, content []byte, touchedPa
 	} else if hasPlaybookCoverage {
 		riskLevel = "covered_clean"
 	}
+	metadata := map[string]any{
+		"input_path":               inputRef,
+		"diff_fingerprint":         sha256String(string(content)),
+		"touched_paths":            touchedPaths,
+		"repo_relative_paths_only": true,
+		"redaction_status":         "customer_safe",
+	}
+	if highestAvoidConfidence >= 0 {
+		metadata["max_avoid_confidence"] = highestAvoidConfidence
+	}
 	return riskAssessment{
 		ObjectType:    "relia.risk_assessment",
 		SchemaVersion: commandSchemaVersion,
@@ -5901,13 +5918,7 @@ func buildRiskAssessment(root string, inputRef string, content []byte, touchedPa
 		RiskLevel:     riskLevel,
 		Matches:       matches,
 		Citations:     citations,
-		Metadata: map[string]any{
-			"input_path":               inputRef,
-			"diff_fingerprint":         sha256String(string(content)),
-			"touched_paths":            touchedPaths,
-			"repo_relative_paths_only": true,
-			"redaction_status":         "customer_safe",
-		},
+		Metadata:      metadata,
 	}, nil
 }
 
