@@ -296,6 +296,10 @@
           "type": "string",
           "minLength": 1
         },
+        "matched_signature_id": {
+          "type": "string",
+          "minLength": 1
+        },
         "confidence": {
           "enum": ["confirmed", "possible"]
         },

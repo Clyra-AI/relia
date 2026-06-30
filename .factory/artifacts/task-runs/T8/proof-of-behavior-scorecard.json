@@ -12,13 +12,13 @@
     "README.md",
     "docs/dev/dev_guides.md"
   ],
-  "produced_at": "2026-06-30T12:01:04Z",
+  "produced_at": "2026-06-30T12:14:01Z",
   "redaction_posture": {
     "classification": "customer_safe",
     "notes": "No customer data, live credentials, network calls, or unredacted machine-local paths were introduced.",
     "status": "pass"
   },
-  "repair_task_id": "20260630T113048.990974000Z-relia-T8-repair",
+  "repair_task_id": "20260630T113048.990974000Z-relia-T8-repair-2",
   "required_proof_level": "user_visible_behavior",
   "schema_version": "1.0",
   "scorecard": [
@@ -69,6 +69,23 @@
       "proof_refs": [
         "cmd/relia/main_test.go",
         "TestBacktestCommandResultCountsAgentAttributedExperiencesSeparatelyFromPRs",
+        "schemas/recurrence-report.schema.json"
+      ],
+      "status": "pass"
+    },
+    {
+      "behavior": "Backtest --save-baseline reports saved baseline state without carrying stale-baseline diagnostics from the pre-save comparison.",
+      "proof_refs": [
+        "cmd/relia/main_test.go",
+        "TestBacktestSaveBaselineReportsFreshCurrentValues"
+      ],
+      "status": "pass"
+    },
+    {
+      "behavior": "Top repeated mistakes aggregate by the matched recurrence signature when generated signature IDs differ across the same canonical class/key cluster.",
+      "proof_refs": [
+        "cmd/relia/main_test.go",
+        "TestBacktestTopRepeatedMistakesAggregateByMatchedSignature",
         "schemas/recurrence-report.schema.json"
       ],
       "status": "pass"

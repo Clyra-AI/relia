@@ -368,6 +368,7 @@ type recurrencePair struct {
 	CurrentURL          string   `json:"current_url"`
 	PriorURL            string   `json:"prior_url"`
 	SignatureID         string   `json:"signature_id"`
+	MatchedSignatureID  string   `json:"matched_signature_id,omitempty"`
 	Confidence          string   `json:"confidence"`
 	Reason              string   `json:"reason"`
 	Refs                []string `json:"refs"`
@@ -928,6 +929,8 @@ func backtestResult(args []string, start time.Time) CommandResult {
 		if commandErr != nil {
 			return withFormat(errorResult("backtest", "backtest", commandErr, start))
 		}
+		report.Diagnostics = buildReportDiagnostics(report.Summary, report.Baseline, report.SourceArtifacts)
+		report.Badge = buildReportBadge(report)
 	}
 	jsonReportPath, htmlReportPath, commandErr := writeBacktestReports(root, report, options.ReportDir)
 	if commandErr != nil {
@@ -1508,6 +1511,9 @@ func buildTopRepeatedMistakes(pairs []recurrencePair) []topRepeatedMistake {
 	bySignature := map[string]*aggregate{}
 	for _, pair := range pairs {
 		key := pair.SignatureID
+		if pair.MatchedSignatureID != "" {
+			key = pair.MatchedSignatureID
+		}
 		if key == "" {
 			continue
 		}
@@ -1668,6 +1674,43 @@ func recurrenceSignatureKeys(record experienceRecord) []string {
 	return keys
 }
 
+func matchedRecurrenceSignatureID(left experienceRecord, right experienceRecord) string {
+	leftSignatureID := strings.TrimSpace(left.Outcome.Signature.SignatureID)
+	rightSignatureID := strings.TrimSpace(right.Outcome.Signature.SignatureID)
+	if leftSignatureID != "" && leftSignatureID == rightSignatureID {
+		return rightSignatureID
+	}
+	rightKeys := map[string]bool{}
+	for _, key := range recurrenceSignatureKeys(right) {
+		rightKeys[key] = true
+	}
+	for _, key := range recurrenceSignatureKeys(left) {
+		if rightKeys[key] {
+			return displayRecurrenceSignatureKey(key, rightSignatureID)
+		}
+	}
+	if rightSignatureID != "" {
+		return rightSignatureID
+	}
+	return leftSignatureID
+}
+
+func displayRecurrenceSignatureKey(key string, fallback string) string {
+	parts := strings.Split(key, "\x00")
+	switch {
+	case len(parts) == 3 && parts[0] == "class_key":
+		return strings.Join([]string{"class_key", parts[1], parts[2]}, ":")
+	case len(parts) == 2 && parts[0] == "message":
+		return "message:" + parts[1]
+	case len(parts) == 2 && parts[0] == "id":
+		return parts[1]
+	case fallback != "":
+		return fallback
+	default:
+		return strings.ReplaceAll(key, "\x00", ":")
+	}
+}
+
 func appendRecurrencePrior(priorBySignature map[string][]backtestExperience, keys []string, current backtestExperience) {
 	for _, key := range keys {
 		priorBySignature[key] = append(priorBySignature[key], current)
@@ -1768,6 +1811,7 @@ func buildRecurrencePair(prior backtestExperience, current backtestExperience) r
 		CurrentURL:          primaryProvenanceURL(current.Record),
 		PriorURL:            primaryProvenanceURL(prior.Record),
 		SignatureID:         current.Record.Outcome.Signature.SignatureID,
+		MatchedSignatureID:  matchedRecurrenceSignatureID(prior.Record, current.Record),
 		Refs:                []string{sourceLineRef(prior), sourceLineRef(current)},
 	}
 }

@@ -1718,6 +1718,19 @@ func TestBacktestSaveBaselineReportsFreshCurrentValues(t *testing.T) {
 	if code != ExitSuccess {
 		t.Fatalf("ingest exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
 	}
+	writeFileForTest(t, filepath.Join(tempDir, ".relia", "baselines", "error-recurrence-baseline.json"), `{
+  "object_type": "relia.err_baseline",
+  "schema_version": "1.0",
+  "headline_err": 0.1,
+  "window": {
+    "start": "2025-01-01T00:00:00Z",
+    "end": "2025-01-31T00:00:00Z"
+  },
+  "metadata": {
+    "source_artifact_digest": "sha256:stale"
+  }
+}
+`)
 	stdout, stderr, code = runForTest(t, []string{"--json", "backtest", "--window", "180d", "--save-baseline"}, false)
 	if code != ExitSuccess {
 		t.Fatalf("backtest exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
@@ -1728,6 +1741,11 @@ func TestBacktestSaveBaselineReportsFreshCurrentValues(t *testing.T) {
 	}
 	if report.Baseline.Status != "saved" || report.Baseline.Stale || report.Baseline.HeadlineERR != report.HeadlineERR || report.Baseline.Delta != 0 {
 		t.Fatalf("baseline = %#v, want freshly saved current values", report.Baseline)
+	}
+	for _, diagnostic := range report.Diagnostics {
+		if diagnostic.Type == "stale_baseline" {
+			t.Fatalf("diagnostics retained stale baseline after save: %#v", report.Diagnostics)
+		}
 	}
 	baselineContent, err := os.ReadFile(filepath.Join(tempDir, ".relia", "baselines", "error-recurrence-baseline.json"))
 	if err != nil {
@@ -2275,6 +2293,43 @@ func TestBacktestGroupsEquivalentCanonicalSignatureFields(t *testing.T) {
 	confirmed := report.ConfirmedRecurrences[0]
 	if confirmed.PriorExperienceID != "exp_0001" || confirmed.CurrentExperienceID != "exp_0002" {
 		t.Fatalf("confirmed pair = %#v, want canonical class/key grouping despite different generated ids", confirmed)
+	}
+}
+
+func TestBacktestTopRepeatedMistakesAggregateByMatchedSignature(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	inputPath := filepath.Join(tempDir, "fixtures", "outcomes.jsonl")
+	writeFileForTest(t, inputPath, strings.Join([]string{
+		`{"experience_id":"exp_0001","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-01T10:00:00Z","pr":101,"commit":"abc001","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_generated_pytest","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/101"]}`,
+		`{"experience_id":"exp_0002","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-10T10:00:00Z","pr":102,"commit":"abc002","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_generated_go_test","signature_class":"test_failure","check_name":"go-test-rerun","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/102"]}`,
+		`{"experience_id":"exp_0003","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-20T10:00:00Z","pr":103,"commit":"abc003","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_generated_rspec","signature_class":"test_failure","check_name":"rspec-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/103"]}`,
+	}, "\n")+"\n")
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+	if code != ExitSuccess {
+		t.Fatalf("ingest exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	stdout, stderr, code = runForTest(t, []string{"--json", "backtest", "--window", "180d"}, false)
+	if code != ExitSuccess {
+		t.Fatalf("backtest exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	report := decodeBacktestReportFromResult(t, decodeResult(t, stdout))
+	if report.Summary.ConfirmedRecurrenceCount != 2 {
+		t.Fatalf("confirmed recurrences = %d, report=%#v", report.Summary.ConfirmedRecurrenceCount, report)
+	}
+	if len(report.TopRepeatedMistakes) != 1 {
+		t.Fatalf("top repeated mistakes = %#v, want one matched-signature aggregate", report.TopRepeatedMistakes)
+	}
+	mistake := report.TopRepeatedMistakes[0]
+	if mistake.SignatureID != "class_key:test_failure:tests/billing/test_invoice.py::test_clock" || mistake.RepeatCount != 2 {
+		t.Fatalf("top repeated mistake = %#v, want matched class/key count 2", mistake)
+	}
+	if len(mistake.PRs) != 3 || mistake.PRs[0] != 101 || mistake.PRs[1] != 102 || mistake.PRs[2] != 103 {
+		t.Fatalf("top repeated mistake PRs = %#v, want all matched PRs", mistake.PRs)
+	}
+	if !stringSlicesEqual(mistake.ExperienceIDs, []string{"exp_0001", "exp_0002", "exp_0003"}) {
+		t.Fatalf("top repeated mistake experiences = %#v", mistake.ExperienceIDs)
 	}
 }
 

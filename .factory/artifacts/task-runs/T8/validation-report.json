@@ -47,7 +47,10 @@
     "python3 -m json.tool .factory/artifacts/task-runs/T8/work-proof-marker.json",
     "python3 -m json.tool .factory/artifacts/task-runs/T8/validation-report.json",
     "python3 -m json.tool .factory/artifacts/task-runs/T8/proof-of-behavior-scorecard.json",
-    "python3 - \u003c\u003c'PY' (verify worker-owned evidence top-level statuses)"
+    "python3 - \u003c\u003c'PY' (verify worker-owned evidence top-level statuses)",
+    "go test ./cmd/relia -run 'TestBacktest(SaveBaselineReportsFreshCurrentValues|TopRepeatedMistakesAggregateByMatchedSignature|GroupsEquivalentCanonicalSignatureFields|GroupsEquivalentMessageFingerprint)'",
+    "python3 -m json.tool schemas/recurrence-report.schema.json",
+    "make prepush-full"
   ],
   "docs_sync_result": {
     "status": "pass",
@@ -76,7 +79,7 @@
   "final_validation_evidence": [
     {
       "command": "make prepush-full",
-      "evidence_summary": "go test ./... passed; coverage 80.3% against the 75.0% minimum; repo-pack validation and demo contracts passed.",
+      "evidence_summary": "go test ./... passed after the focused review-2 repair; coverage 80.3% against the 75.0% minimum; repo-pack validation and demo contracts passed.",
       "exit_code": 0,
       "status": "pass"
     },
@@ -104,6 +107,11 @@
   "green_evidence": [
     {
       "command": "go test ./cmd/relia",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestBacktest(SaveBaselineReportsFreshCurrentValues|TopRepeatedMistakesAggregateByMatchedSignature|GroupsEquivalentCanonicalSignatureFields|GroupsEquivalentMessageFingerprint)'",
       "exit_code": 0,
       "status": "pass"
     },
@@ -149,7 +157,7 @@
     "notes": "Resolved the Codex review repair findings inside the T8 reporting-and-evidence slice without changing lifecycle state, PR state, runtime pins, provider posture, or Factory daemon state.",
     "status": "pass"
   },
-  "produced_at": "2026-06-30T12:01:04Z",
+  "produced_at": "2026-06-30T12:14:01Z",
   "red_evidence": [
     {
       "command": "go test ./cmd/relia",
@@ -159,7 +167,7 @@
       "status": "expected_fail"
     }
   ],
-  "repair_task_id": "20260630T113048.990974000Z-relia-T8-repair",
+  "repair_task_id": "20260630T113048.990974000Z-relia-T8-repair-2",
   "residual_risks": [
     "Lifecycle evidence remains assigned to factoryd workers after local validation."
   ],
