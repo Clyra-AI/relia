@@ -1146,7 +1146,7 @@
           "delivery_slice_refs": [
             "external-provider-and-network-integration"
           ],
-          "evidence_mode": "external",
+          "evidence_mode": "automated",
           "task_refs": [
             "T9"
           ]
@@ -1245,7 +1245,7 @@
           "delivery_slice_refs": [
             "external-provider-and-network-integration"
           ],
-          "evidence_mode": "external",
+          "evidence_mode": "automated",
           "task_refs": [
             "T9"
           ]
@@ -1278,7 +1278,7 @@
           "delivery_slice_refs": [
             "external-provider-and-network-integration"
           ],
-          "evidence_mode": "external",
+          "evidence_mode": "automated",
           "task_refs": [
             "T9"
           ]
@@ -1646,7 +1646,7 @@
           "delivery_slice_refs": [
             "external-provider-and-network-integration"
           ],
-          "evidence_mode": "external",
+          "evidence_mode": "automated",
           "task_refs": [
             "T9"
           ]
@@ -1994,7 +1994,7 @@
           "delivery_slice_refs": [
             "external-provider-and-network-integration"
           ],
-          "evidence_mode": "external",
+          "evidence_mode": "automated",
           "task_refs": [
             "T9"
           ]
@@ -2074,7 +2074,7 @@
           "delivery_slice_refs": [
             "external-provider-and-network-integration"
           ],
-          "evidence_mode": "external",
+          "evidence_mode": "automated",
           "task_refs": [
             "T9"
           ]
@@ -2477,7 +2477,7 @@
           "delivery_slice_refs": [
             "external-provider-and-network-integration"
           ],
-          "evidence_mode": "external",
+          "evidence_mode": "automated",
           "task_refs": [
             "T9"
           ]
@@ -2614,7 +2614,7 @@
           "delivery_slice_refs": [
             "external-provider-and-network-integration"
           ],
-          "evidence_mode": "external",
+          "evidence_mode": "automated",
           "task_refs": [
             "T9"
           ]

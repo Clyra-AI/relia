@@ -527,11 +527,11 @@
       "delivery_slice_refs": [
         "external-provider-and-network-integration"
       ],
-      "evidence_mode": "external",
+      "evidence_mode": "automated",
       "group_id": "fr20-advisory-only-default",
       "kind": "acceptance_test",
       "notes": [
-        "Requires approved network allowlist before live closure."
+        "Automated closure uses workflow and CLI fixture tests; live GitHub/network smoke remains gated by explicit network approval."
       ],
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#fr20-advisory-only-default",
@@ -607,12 +607,11 @@
       "delivery_slice_refs": [
         "external-provider-and-network-integration"
       ],
-      "evidence_mode": "external",
+      "evidence_mode": "automated",
       "group_id": "fr23-provider-adapters-and-no-llm-mode",
       "kind": "acceptance_test",
       "notes": [
-        "Requires approved scoped credentials before live closure.",
-        "Requires approved network allowlist before live closure."
+        "Automated closure uses provider-adapter and no-LLM fixture tests; live provider smoke remains gated by model_provider_endpoint, scoped credentials, budget, redaction, and network allowlist."
       ],
       "risk_class": "high",
       "source_ref": "docs/product/prd.md#fr23-provider-adapters-and-no-llm-mode",
@@ -633,12 +632,11 @@
       "delivery_slice_refs": [
         "external-provider-and-network-integration"
       ],
-      "evidence_mode": "external",
+      "evidence_mode": "automated",
       "group_id": "fr24-cost-visibility",
       "kind": "acceptance_test",
       "notes": [
-        "Requires approved scoped credentials before live closure.",
-        "Requires approved network allowlist before live closure."
+        "Automated closure uses fake provider token and estimated-cost fixtures; live provider smoke remains gated by model_provider_endpoint, scoped credentials, budget, redaction, and network allowlist."
       ],
       "risk_class": "high",
       "source_ref": "docs/product/prd.md#fr24-cost-visibility",
@@ -931,12 +929,11 @@
       "delivery_slice_refs": [
         "external-provider-and-network-integration"
       ],
-      "evidence_mode": "external",
+      "evidence_mode": "automated",
       "group_id": "nfr10-cost-visibility",
       "kind": "acceptance_test",
       "notes": [
-        "Requires approved scoped credentials before live closure.",
-        "Requires approved network allowlist before live closure."
+        "Automated closure uses fake provider token, cost, and cap-enforcement fixtures; live provider smoke remains gated by model_provider_endpoint, scoped credentials, budget, redaction, and network allowlist."
       ],
       "risk_class": "high",
       "source_ref": "docs/product/prd.md#nfr10-cost-visibility",
@@ -1360,12 +1357,11 @@
       "delivery_slice_refs": [
         "external-provider-and-network-integration"
       ],
-      "evidence_mode": "external",
+      "evidence_mode": "automated",
       "group_id": "mvp-in-scope",
       "kind": "acceptance_test",
       "notes": [
-        "Requires approved network allowlist before live closure.",
-        "No-LLM drafting remains covered by T7 offline acceptance; live OpenAI-compatible/Anthropic provider closure remains gated under T9."
+        "Automated closure uses OpenAI-compatible/Anthropic adapter fixtures plus deterministic no-LLM tests; live provider smoke remains gated by model_provider_endpoint, scoped credentials, budget, redaction, and network allowlist."
       ],
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
@@ -1549,11 +1545,11 @@
       "delivery_slice_refs": [
         "external-provider-and-network-integration"
       ],
-      "evidence_mode": "external",
+      "evidence_mode": "automated",
       "group_id": "mvp-in-scope",
       "kind": "acceptance_test",
       "notes": [
-        "Requires approved network allowlist before live closure."
+        "Automated closure uses workflow and advisory-comment fixture tests; live GitHub/network smoke remains gated by explicit network approval."
       ],
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
@@ -2173,11 +2169,11 @@
       "delivery_slice_refs": [
         "external-provider-and-network-integration"
       ],
-      "evidence_mode": "external",
+      "evidence_mode": "automated",
       "group_id": "distill-review-memory-page-acceptance-tests",
       "kind": "acceptance_test",
       "notes": [
-        "Requires approved network allowlist before live closure."
+        "Automated closure uses fake provider cost-cap fixtures; live provider smoke remains gated by model_provider_endpoint, scoped credentials, budget, redaction, and network allowlist."
       ],
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#distill-review-memory-page-acceptance-tests",
@@ -2387,11 +2383,11 @@
       "delivery_slice_refs": [
         "external-provider-and-network-integration"
       ],
-      "evidence_mode": "external",
+      "evidence_mode": "automated",
       "group_id": "serve-and-advise-acceptance-tests",
       "kind": "acceptance_test",
       "notes": [
-        "Requires approved network allowlist before live closure."
+        "Automated closure uses workflow and advisory-comment fixture tests; live GitHub/network smoke remains gated by explicit network approval."
       ],
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#serve-and-advise-acceptance-tests",
