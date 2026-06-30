@@ -271,6 +271,8 @@ T8 adds report/evidence feedback on top of the local artifact path:
 - `relia backtest` reports metrics, top repeated mistakes, diagnostics,
   operator feedback, and badge-ready fields in
   `schemas/recurrence-report.schema.json` and the command result envelope.
+  The command result `experiences_agent_attributed` metric counts canonical
+  experience records, while `agent_attributed_prs` counts unique PRs.
 - Interactive `relia backtest` output renders those same operator-facing
   details, while non-interactive output remains machine-readable JSON.
 - Generated memory rules record

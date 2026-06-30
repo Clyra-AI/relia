@@ -337,6 +337,7 @@ type recurrenceWindow struct {
 type recurrenceMetrics struct {
 	PRsAnalyzed                int            `json:"prs_analyzed"`
 	AgentAttributedPRs         int            `json:"agent_attributed_prs"`
+	AgentAttributedExperiences int            `json:"agent_attributed_experiences"`
 	AgentFailuresByOutcomeKind map[string]int `json:"agent_failures_by_outcome_kind"`
 	ErrorRecurrenceRate        float64        `json:"error_recurrence_rate"`
 	ConfirmedRecurrences       int            `json:"confirmed_recurrences"`
@@ -942,7 +943,8 @@ func backtestResult(args []string, start time.Time) CommandResult {
 		"window":                         report.Window,
 		"repo_id":                        report.Metadata["repo_id"],
 		"experiences_total":              report.Summary.ExperienceCount,
-		"experiences_agent_attributed":   report.Metrics.AgentAttributedPRs,
+		"experiences_agent_attributed":   report.Metrics.AgentAttributedExperiences,
+		"agent_attributed_prs":           report.Metrics.AgentAttributedPRs,
 		"agent_failures_by_outcome_kind": report.Metrics.AgentFailuresByOutcomeKind,
 		"headline_err":                   report.HeadlineERR,
 		"headline_err_percent":           report.Summary.HeadlineERRPercent,
@@ -1331,6 +1333,7 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 	citationMap := map[int]backtestCitation{}
 	prsAnalyzed := map[int]bool{}
 	agentAttributedPRs := map[int]bool{}
+	agentAttributedExperiences := 0
 	agentFailuresByOutcomeKind := map[string]int{}
 	summary := recurrenceSummary{
 		ExperienceCount:       len(records),
@@ -1341,6 +1344,7 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 		prsAnalyzed[record.Action.PR] = true
 		if record.Attribution.ActorKind == "agent" {
 			agentAttributedPRs[record.Action.PR] = true
+			agentAttributedExperiences++
 			if isFailureOutcome(record.Outcome.Kind) {
 				agentFailuresByOutcomeKind[record.Outcome.Kind]++
 			}
@@ -1416,6 +1420,7 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 	metrics := recurrenceMetrics{
 		PRsAnalyzed:                len(prsAnalyzed),
 		AgentAttributedPRs:         len(agentAttributedPRs),
+		AgentAttributedExperiences: agentAttributedExperiences,
 		AgentFailuresByOutcomeKind: agentFailuresByOutcomeKind,
 		ErrorRecurrenceRate:        summary.HeadlineERR,
 		ConfirmedRecurrences:       summary.ConfirmedRecurrenceCount,
@@ -5129,12 +5134,18 @@ func normalizeExperienceRecord(config yamlDocument, event map[string]any, index 
 
 func validateEventMemorySource(event map[string]any, ref string) *CommandError {
 	for _, path := range []string{
+		"source",
 		"source_kind",
 		"source.type",
 		"source.kind",
+		"source.memory_source",
 		"memory_source",
+		"metadata.source",
 		"metadata.source_kind",
 		"metadata.source_type",
+		"metadata.source.type",
+		"metadata.source.kind",
+		"metadata.source.memory_source",
 		"metadata.memory_source",
 	} {
 		if unverifiedMemorySourceKind(stringField(event, path)) {
@@ -5146,11 +5157,13 @@ func validateEventMemorySource(event map[string]any, ref string) *CommandError {
 
 func validateExperienceRecordMemorySource(record experienceRecord, ref string) *CommandError {
 	for _, path := range []string{
+		"source",
 		"source_kind",
 		"source_type",
 		"memory_source",
 		"source.kind",
 		"source.type",
+		"source.memory_source",
 	} {
 		if unverifiedMemorySourceKind(metadataStringField(record.Metadata, path)) {
 			return unverifiedMemorySourceError(ref)

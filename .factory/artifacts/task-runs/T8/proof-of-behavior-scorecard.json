@@ -1,74 +1,91 @@
 {
-  "artifact_type": "proof-of-behavior-scorecard",
-  "schema_version": "1.0",
-  "task_id": "T8",
-  "status": "pass",
-  "produced_at": "2026-06-30T11:46:42Z",
-  "required_proof_level": "user_visible_behavior",
   "acceptance_item_ids": [
     "FR1-OUTCOMES-AS-THE-ONLY-MEMORY-SOURCE-001"
   ],
+  "artifact_type": "proof-of-behavior-scorecard",
+  "evidence_refs": [
+    ".factory/artifacts/task-runs/T8/work-proof-marker.json",
+    ".factory/artifacts/task-runs/T8/validation-report.json"
+  ],
+  "operator_visible_feedback_refs": [
+    "cmd/relia/main.go",
+    "README.md",
+    "docs/dev/dev_guides.md"
+  ],
+  "produced_at": "2026-06-30T12:01:04Z",
+  "redaction_posture": {
+    "classification": "customer_safe",
+    "notes": "No customer data, live credentials, network calls, or unredacted machine-local paths were introduced.",
+    "status": "pass"
+  },
+  "repair_task_id": "20260630T113048.990974000Z-relia-T8-repair",
+  "required_proof_level": "user_visible_behavior",
+  "schema_version": "1.0",
   "scorecard": [
     {
       "behavior": "Raw outcome input marked as an agent self-report fails before persistence.",
-      "status": "pass",
       "proof_refs": [
         "cmd/relia/main_test.go",
         "TestIngestRejectsAgentSelfReportsBeforePersistence"
-      ]
+      ],
+      "status": "pass"
+    },
+    {
+      "behavior": "Nested source metadata marked as an agent self-report or reflection fails before persistence.",
+      "proof_refs": [
+        "cmd/relia/main_test.go",
+        "TestIngestRejectsNestedSourceMetadataBeforePersistence"
+      ],
+      "status": "pass"
     },
     {
       "behavior": "Canonical experience input marked as an agent reflection fails before distill can write memory rules.",
-      "status": "pass",
       "proof_refs": [
         "cmd/relia/main_test.go",
         "TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite"
-      ]
+      ],
+      "status": "pass"
     },
     {
       "behavior": "Generated memory rules identify verified outcome events as the memory source and list self-report/reflection exclusions.",
-      "status": "pass",
       "proof_refs": [
         "cmd/relia/main_test.go",
         "TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage",
         "schemas/memory-rule.schema.json"
-      ]
+      ],
+      "status": "pass"
     },
     {
       "behavior": "Backtest JSON and HTML reports expose metrics, top repeated mistakes, diagnostics, operator feedback, and badge-ready data derived from canonical experience records.",
-      "status": "pass",
       "proof_refs": [
         "cmd/relia/main_test.go",
         "TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline",
         "schemas/recurrence-report.schema.json"
-      ]
+      ],
+      "status": "pass"
+    },
+    {
+      "behavior": "Backtest command-result metrics count agent-attributed experience records separately from unique agent-attributed PRs.",
+      "proof_refs": [
+        "cmd/relia/main_test.go",
+        "TestBacktestCommandResultCountsAgentAttributedExperiencesSeparatelyFromPRs",
+        "schemas/recurrence-report.schema.json"
+      ],
+      "status": "pass"
     },
     {
       "behavior": "Interactive backtest output shows operator-visible report summary, top repeated mistakes, report path, diagnostics, and badge text while non-interactive output remains JSON.",
-      "status": "pass",
       "proof_refs": [
         "cmd/relia/main_test.go",
         "TestBacktestInteractiveOutputShowsOperatorSummaryAndBadge",
         "README.md"
-      ]
+      ],
+      "status": "pass"
     }
   ],
+  "status": "pass",
+  "task_id": "T8",
   "validation_refs": [
-    ".factory/artifacts/task-runs/T8/validation-report.json"
-  ],
-  "redaction_posture": {
-    "status": "pass",
-    "classification": "customer_safe",
-    "notes": "No customer data, live credentials, network calls, or unredacted machine-local paths were introduced."
-  },
-  "operator_visible_feedback_refs": [
-    "cmd/relia/main.go",
-    "README.md",
-    "docs/dev/dev_guides.md",
-    "docs/architecture/architecture_guides.md"
-  ],
-  "evidence_refs": [
-    ".factory/artifacts/task-runs/T8/work-proof-marker.json",
     ".factory/artifacts/task-runs/T8/validation-report.json"
   ]
 }

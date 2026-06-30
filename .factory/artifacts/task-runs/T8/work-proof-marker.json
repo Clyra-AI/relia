@@ -19,17 +19,16 @@
     ".factory/artifacts/task-runs/T8/validation-report.json",
     ".factory/artifacts/task-runs/T8/proof-of-behavior-scorecard.json",
     "cmd/relia/main_test.go",
-    "schemas/recurrence-report.schema.json",
-    "schemas/memory-rule.schema.json"
+    "schemas/recurrence-report.schema.json"
   ],
   "implementation_performed": true,
   "implementation_summary": [
-    "Rejected agent self-report and reflection sources before experience persistence and before canonical records can feed distillation.",
-    "Extended recurrence reports with metrics, top repeated mistakes, diagnostics, operator feedback, and badge-ready fields derived from canonical experience records.",
-    "Rendered the same backtest feedback in local HTML reports and interactive CLI output while preserving JSON automation behavior.",
-    "Marked generated memory rules with verified-outcome memory-source metadata and documented the schema/docs changes."
+    "Repaired self-report/reflection memory-source validation so nested metadata.source.kind, metadata.source.type, and related source fields are rejected before ingest persistence.",
+    "Separated backtest command-result experience metrics from unique PR metrics: experiences_agent_attributed now counts canonical experience records and agent_attributed_prs carries the PR count.",
+    "Extended recurrence report metrics with agent_attributed_experiences and kept schema, tests, README, and developer guide output-contract notes in sync."
   ],
-  "produced_at": "2026-06-30T11:46:42Z",
+  "produced_at": "2026-06-30T12:01:04Z",
+  "repair_task_id": "20260630T113048.990974000Z-relia-T8-repair",
   "schema_version": "1.0",
   "status": "implemented",
   "task_id": "T8"

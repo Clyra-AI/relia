@@ -43,10 +43,11 @@ output contract:
   flakes are excluded from the headline ERR. A saved ERR baseline under
   `.relia/baselines/error-recurrence-baseline.json` is compared when present
   and labeled stale when the source artifact digest differs. The report and
-  command result expose operator-ready metrics, top repeated mistakes,
-  diagnostics, feedback text, and badge-ready fields generated from the JSON
-  command result. The recurrence gate is available through `relia.yaml` but
-  remains off by default.
+  command result expose operator-ready metrics, including agent-attributed
+  experience counts distinct from unique agent-attributed PR counts, top
+  repeated mistakes, diagnostics, feedback text, and badge-ready fields
+  generated from the JSON command result. The recurrence gate is available
+  through `relia.yaml` but remains off by default.
 - `relia distill --format json` reads local redacted experience shards, or
   `relia distill --input <json-or-jsonl> --format json` reads one local
   redacted outcome file without persisting shards. It clusters canonical

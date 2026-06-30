@@ -203,6 +203,7 @@
       "required": [
         "prs_analyzed",
         "agent_attributed_prs",
+        "agent_attributed_experiences",
         "agent_failures_by_outcome_kind",
         "error_recurrence_rate",
         "confirmed_recurrences",
@@ -216,6 +217,10 @@
           "minimum": 0
         },
         "agent_attributed_prs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "agent_attributed_experiences": {
           "type": "integer",
           "minimum": 0
         },

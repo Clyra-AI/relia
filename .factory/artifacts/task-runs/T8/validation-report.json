@@ -7,23 +7,18 @@
         ".factory/artifacts/task-runs/T8/proof-of-behavior-scorecard.json",
         "cmd/relia/main_test.go"
       ],
-      "evidence_summary": "Self-report/reflection sources are rejected before ingest persistence and before canonical distill input can write memory rules; generated memory rules disclose verified outcome source metadata.",
+      "evidence_summary": "Self-report/reflection sources, including nested metadata.source.kind/type forms, are rejected before ingest persistence; generated memory rules disclose verified outcome source metadata.",
       "status": "implemented"
     }
   ],
   "artifact_type": "validation_report",
   "baseline_evidence": [
     {
-      "command": "make lint-fast",
-      "exit_code": 0,
-      "phase": "pre_edit",
-      "status": "pass"
-    },
-    {
-      "command": "make test-fast",
-      "exit_code": 0,
-      "phase": "pre_edit",
-      "status": "pass"
+      "command": "go test ./cmd/relia",
+      "evidence_summary": "Regression tests were added before implementation; the package failed to compile because recurrenceMetrics.AgentAttributedExperiences did not exist yet.",
+      "exit_code": 1,
+      "phase": "after_red_tests_before_implementation",
+      "status": "expected_fail"
     }
   ],
   "blockers": [],
@@ -40,16 +35,14 @@
     "schemas/recurrence-report.schema.json"
   ],
   "changelog_result": {
-    "notes": "No changelog file exists inside the task allowed paths; user-facing behavior was documented in README.md and repo guides per docs_sync_refs.",
+    "notes": "No changelog file exists inside the task allowed paths; user-facing output-contract details were documented in README.md and docs/dev/dev_guides.md.",
     "status": "not_applicable"
   },
   "commands_run": [
-    "make lint-fast",
-    "make test-fast",
-    "make test-fast",
-    "python3 -m json.tool schemas/recurrence-report.schema.json \u003e/tmp/recurrence-report.schema.pretty.json",
-    "python3 -m json.tool schemas/memory-rule.schema.json \u003e/tmp/memory-rule.schema.pretty.json",
-    "make test-contracts",
+    "go test ./cmd/relia",
+    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
+    "go test ./cmd/relia",
+    "python3 -m json.tool schemas/recurrence-report.schema.json",
     "make prepush-full",
     "python3 -m json.tool .factory/artifacts/task-runs/T8/work-proof-marker.json",
     "python3 -m json.tool .factory/artifacts/task-runs/T8/validation-report.json",
@@ -60,8 +53,7 @@
     "status": "pass",
     "updated_refs": [
       "README.md",
-      "docs/dev/dev_guides.md",
-      "docs/architecture/architecture_guides.md"
+      "docs/dev/dev_guides.md"
     ]
   },
   "evidence_status_checks": [
@@ -84,44 +76,39 @@
   "final_validation_evidence": [
     {
       "command": "make prepush-full",
-      "evidence_summary": "go test ./... passed; coverage 80.3% against 75.0% minimum; repo pack and demo contracts passed.",
+      "evidence_summary": "go test ./... passed; coverage 80.3% against the 75.0% minimum; repo-pack validation and demo contracts passed.",
       "exit_code": 0,
       "status": "pass"
     },
     {
-      "command": "python3 -m json.tool schemas/recurrence-report.schema.json \u003e/tmp/recurrence-report.schema.pretty.json",
+      "command": "python3 -m json.tool schemas/recurrence-report.schema.json",
       "exit_code": 0,
       "status": "pass"
     },
     {
-      "command": "python3 -m json.tool schemas/memory-rule.schema.json \u003e/tmp/memory-rule.schema.pretty.json",
+      "command": "python3 -m json.tool .factory/artifacts/task-runs/T8/work-proof-marker.json",
       "exit_code": 0,
       "status": "pass"
     },
     {
-      "command": "python3 -m json.tool .factory/artifacts/task-runs/T8/work-proof-marker.json \u003e/tmp/work-proof-marker.pretty.json",
+      "command": "python3 -m json.tool .factory/artifacts/task-runs/T8/validation-report.json",
       "exit_code": 0,
       "status": "pass"
     },
     {
-      "command": "python3 -m json.tool .factory/artifacts/task-runs/T8/validation-report.json \u003e/tmp/validation-report.pretty.json",
-      "exit_code": 0,
-      "status": "pass"
-    },
-    {
-      "command": "python3 -m json.tool .factory/artifacts/task-runs/T8/proof-of-behavior-scorecard.json \u003e/tmp/proof-scorecard.pretty.json",
+      "command": "python3 -m json.tool .factory/artifacts/task-runs/T8/proof-of-behavior-scorecard.json",
       "exit_code": 0,
       "status": "pass"
     }
   ],
   "green_evidence": [
     {
-      "command": "make test-fast",
+      "command": "go test ./cmd/relia",
       "exit_code": 0,
       "status": "pass"
     },
     {
-      "command": "make test-contracts",
+      "command": "make prepush-full",
       "exit_code": 0,
       "status": "pass"
     }
@@ -136,7 +123,7 @@
     "status": "not_worker_owned"
   },
   "migration_result": {
-    "notes": "Generated recurrence reports now include additional required fields under the same pre-1.0 schema version; no persisted user-authored migration is required.",
+    "notes": "Pre-1.0 recurrence report schema gained an explicit agent_attributed_experiences metric; no persisted user-authored migration is required.",
     "status": "pass"
   },
   "path_policy_result": {
@@ -159,27 +146,28 @@
     "status": "pass"
   },
   "plan_drift_result": {
-    "notes": "Implemented reporting-and-evidence behavior for the T8 acceptance item without changing lifecycle state, PR state, runtime pins, provider posture, or release-slice README badge mutation.",
+    "notes": "Resolved the Codex review repair findings inside the T8 reporting-and-evidence slice without changing lifecycle state, PR state, runtime pins, provider posture, or Factory daemon state.",
     "status": "pass"
   },
-  "produced_at": "2026-06-30T11:46:42Z",
+  "produced_at": "2026-06-30T12:01:04Z",
   "red_evidence": [
     {
-      "command": "make test-fast",
-      "evidence_summary": "New T8 tests failed to compile because recurrence report metrics/diagnostics/badge fields and reportDiagnostic did not exist yet.",
-      "exit_code": 2,
+      "command": "go test ./cmd/relia",
+      "evidence_summary": "New review-repair regression tests failed before implementation because the recurrence report contract lacked the agent-attributed experience metric.",
+      "exit_code": 1,
       "phase": "after_red_tests_before_implementation",
       "status": "expected_fail"
     }
   ],
+  "repair_task_id": "20260630T113048.990974000Z-relia-T8-repair",
   "residual_risks": [
-    "README badge file mutation and release/demo product-signal acceptance remain assigned to later lifecycle/release slices; this task only emits badge-ready report data."
+    "Lifecycle evidence remains assigned to factoryd workers after local validation."
   ],
   "schema_version": "1.0",
   "status": "pass",
   "task_id": "T8",
   "versioning_result": {
-    "notes": "Pre-1.0 schema evolution; recurrence-report schema and memory-rule metadata documentation were updated in place.",
+    "notes": "Pre-1.0 schema evolution; recurrence-report schema and command-result docs were updated in place.",
     "status": "pass"
   }
 }

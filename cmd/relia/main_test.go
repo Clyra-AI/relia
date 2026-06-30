@@ -752,6 +752,62 @@ func TestIngestRejectsAgentSelfReportsBeforePersistence(t *testing.T) {
 	}
 }
 
+func TestIngestRejectsNestedSourceMetadataBeforePersistence(t *testing.T) {
+	for _, tc := range []struct {
+		name     string
+		metadata string
+	}{
+		{
+			name:     "source_kind",
+			metadata: `{"source": {"kind": "agent_reflection"}}`,
+		},
+		{
+			name:     "source_type",
+			metadata: `{"source": {"type": "agent_self_report"}}`,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			tempDir := setupContractRepo(t)
+			t.Chdir(tempDir)
+			inputPath := filepath.Join(tempDir, "fixtures", "self-report-outcomes.json")
+			writeFileForTest(t, inputPath, fmt.Sprintf(`[
+  {
+    "experience_id": "exp_%s",
+    "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},
+    "recorded_at": "2026-04-04T18:21:00Z",
+    "pr": 144,
+    "commit": "abc9999",
+    "paths": ["packages/billing/invoice.py"],
+    "actor_kind": "agent",
+    "attribution_method": "manual",
+    "outcome_kind": "ci_failure",
+    "terminal_state": "failed",
+    "signature_class": "test_failure",
+    "check_name": "pytest-billing",
+    "signature_key": "tests/test_invoice.py::test_tz_rollover",
+    "extraction_confidence": "structured",
+    "provenance_urls": ["https://github.com/acme/billing-service/pull/144"],
+    "metadata": %s
+  }
+]`, tc.name, tc.metadata))
+
+			stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+
+			if code != ExitValidation {
+				t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+			}
+			result := decodeResult(t, stdout)
+			if result.Errors[0].Type != "artifact_contract_validation_failed" ||
+				!strings.Contains(result.Errors[0].Message, "self-reports") {
+				t.Fatalf("errors = %#v", result.Errors)
+			}
+			if _, err := os.Stat(filepath.Join(tempDir, ".relia", "experiences", "2026-04.jsonl")); !errors.Is(err, os.ErrNotExist) {
+				t.Fatalf("nested source metadata should not be persisted: %v", err)
+			}
+		})
+	}
+}
+
 func TestIngestInfersAttributionAndUpsertsIdempotently(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
@@ -1422,6 +1478,36 @@ func TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline(t *te
 	if !bytes.Contains(htmlContent, []byte("Top Repeated Mistakes")) ||
 		!bytes.Contains(htmlContent, []byte("Badge: Relia ERR 16.7%")) {
 		t.Fatalf("html report missing operator summary and badge:\n%s", htmlContent)
+	}
+}
+
+func TestBacktestCommandResultCountsAgentAttributedExperiencesSeparatelyFromPRs(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	inputPath := filepath.Join(tempDir, "fixtures", "outcomes.jsonl")
+	writeFileForTest(t, inputPath, strings.Join([]string{
+		`{"experience_id":"exp_0001","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-01T10:00:00Z","pr":101,"commit":"abc001","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_invoice_tax","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_tax","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/101"]}`,
+		`{"experience_id":"exp_0002","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-02T10:00:00Z","pr":101,"commit":"abc001","paths":["packages/billing/payment.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"review_correction","terminal_state":"corrected","signature_id":"sig_payment_rounding","signature_class":"review_correction","check_name":"review","signature_key":"packages/billing/payment.py::rounding","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/101"]}`,
+	}, "\n")+"\n")
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+	if code != ExitSuccess {
+		t.Fatalf("ingest exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+
+	stdout, stderr, code = runForTest(t, []string{"--json", "backtest", "--window", "180d"}, false)
+	if code != ExitSuccess {
+		t.Fatalf("backtest exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	report := decodeBacktestReportFromResult(t, result)
+	if got := int(result.Data["experiences_agent_attributed"].(float64)); got != 2 {
+		t.Fatalf("experiences_agent_attributed = %d, want two agent-attributed records", got)
+	}
+	if got := int(result.Data["agent_attributed_prs"].(float64)); got != 1 {
+		t.Fatalf("agent_attributed_prs = %d, want one unique agent-attributed PR", got)
+	}
+	if report.Metrics.AgentAttributedExperiences != 2 || report.Metrics.AgentAttributedPRs != 1 {
+		t.Fatalf("metrics = %#v, want separate experience and PR counts", report.Metrics)
 	}
 }
 
