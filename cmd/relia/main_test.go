@@ -4621,6 +4621,83 @@ metadata: {}
 	}
 }
 
+func TestAdviseRewarnsUnchangedDiffWhenPriorMarkerWasClear(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "billing-time.yaml"), `object_type: relia.memory_rule
+schema_version: "1.0"
+id: billing-time-fixture
+kind: avoid
+status: active
+statement: Use the billing clock fixture instead of direct UTC calls.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.86
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_0142
+provenance:
+  - pr: 142
+    outcome: ci_failure
+    url: https://github.com/acme/billing-service/pull/142
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`)
+	diffContent := `diff --git a/packages/billing/invoice.py b/packages/billing/invoice.py
+--- a/packages/billing/invoice.py
++++ b/packages/billing/invoice.py
+@@ -1,2 +1,3 @@
+ def rollover_day():
+-    return "2026-01-01"
++    return datetime.utcnow().strftime("%Y-%m-%d")
+`
+	writeFileForTest(t, filepath.Join(tempDir, "change.diff"), diffContent)
+	writeFileForTest(t, filepath.Join(tempDir, ".relia", "reports", "advisory-state.json"), fmt.Sprintf(`{
+  "object_type": "relia.advisory_state",
+  "schema_version": "1.0",
+  "diff_fingerprint": %q,
+  "metadata": {
+    "generated_at": %q,
+    "risk_level": "covered_clean"
+  }
+}
+`, sha256String(diffContent), time.Now().UTC().Add(-time.Hour).Format(time.RFC3339)))
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "advise", "--input", "change.diff", "--format", "json"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("advise rewarn exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Data["should_comment"] != true || result.Data["skip_reason"] != "" {
+		t.Fatalf("advise result = %#v", result.Data)
+	}
+	comment, err := os.ReadFile(filepath.Join(tempDir, ".relia", "reports", "advisory-comment.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	commentText := string(comment)
+	for _, want := range []string{"risk_level=match_high", "billing-time-fixture", "https://github.com/acme/billing-service/pull/142"} {
+		if !strings.Contains(commentText, want) {
+			t.Fatalf("rewarn comment missing %q:\n%s", want, commentText)
+		}
+	}
+
+	stdout, stderr, code = runForTest(t, []string{"--json", "advise", "--input", "change.diff", "--format", "json"}, false)
+	if code != ExitSuccess {
+		t.Fatalf("second advise rewarn exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result = decodeResult(t, stdout)
+	if result.Data["should_comment"] != false || result.Data["skip_reason"] != "unchanged_diff_fingerprint" {
+		t.Fatalf("second advise result = %#v", result.Data)
+	}
+}
+
 func TestAdviseStaysSilentForCoveredCleanAssessment(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)

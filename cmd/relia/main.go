@@ -3368,7 +3368,10 @@ func advisoryCommentDecision(settings adviseSettings, assessment riskAssessment,
 		return false, "below_min_confidence"
 	}
 	if previousFingerprint != "" && previousFingerprint == diffFingerprint {
-		return false, "unchanged_diff_fingerprint"
+		currentRiskLevel := advisoryPublishedRiskLevel(assessment, "")
+		if previousState.RiskLevel == "" || previousState.RiskLevel == currentRiskLevel {
+			return false, "unchanged_diff_fingerprint"
+		}
 	}
 	if previousFingerprint != "" && settings.ReassessDebounceMinutes > 0 && !previousState.GeneratedAt.IsZero() {
 		debounceWindow := time.Duration(settings.ReassessDebounceMinutes) * time.Minute
