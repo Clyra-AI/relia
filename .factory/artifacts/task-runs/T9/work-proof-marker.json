@@ -1,0 +1,26 @@
+{
+  "artifact_type": "work_proof_marker",
+  "changed_paths": [
+    ".factory/artifacts/task-runs/T9/proof-of-behavior-scorecard.json",
+    ".factory/artifacts/task-runs/T9/validation-report.json",
+    ".factory/artifacts/task-runs/T9/work-proof-marker.json",
+    ".github/action-ref-exceptions.yaml",
+    ".github/workflows/relia-advisory.yml",
+    "README.md",
+    "cmd/relia/main.go",
+    "cmd/relia/main_test.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/architecture/decision-0004-provider-advisory-boundary.md",
+    "docs/dev/dev_guides.md",
+    "relia.yaml"
+  ],
+  "evidence_refs": [
+    ".factory/artifacts/task-runs/T9/validation-report.json",
+    ".factory/artifacts/task-runs/T9/proof-of-behavior-scorecard.json"
+  ],
+  "implementation_performed": true,
+  "schema_version": "1.0",
+  "status": "implemented",
+  "summary": "Implemented offline provider adapter planning and cost caps, local serve capability output, PR advisory planning, and an advisory GitHub workflow behind explicit approval boundaries.",
+  "task_id": "T9"
+}

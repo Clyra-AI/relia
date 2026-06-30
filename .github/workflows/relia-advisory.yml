@@ -1,0 +1,93 @@
+name: relia advisory
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: relia-advisory-${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  advise:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6.0.2
+      - name: Set up Go
+        uses: actions/setup-go@v6.3.0
+        with:
+          go-version-file: go.mod
+          check-latest: false
+          cache: true
+      - name: Build PR advisory
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          mkdir -p .relia/reports
+          gh pr diff "$PR_NUMBER" --patch > .relia/pr.diff
+          go run ./cmd/relia --json advise --input .relia/pr.diff --format json > .relia/reports/advisory-result.json
+      - name: Publish one advisory comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' > .relia/reports/advisory-env
+          import json
+          from pathlib import Path
+
+          result = json.loads(Path(".relia/reports/advisory-result.json").read_text())
+          data = result.get("data") or {}
+          should_comment = bool(data.get("should_comment"))
+          print(f"SHOULD_COMMENT={'true' if should_comment else 'false'}")
+          print(f"DIFF_FINGERPRINT={data.get('diff_fingerprint', '')}")
+          print(f"SKIP_REASON={data.get('skip_reason', '')}")
+          PY
+          . .relia/reports/advisory-env
+          if [ "$SHOULD_COMMENT" != "true" ]; then
+            echo "Relia advisory skipped: ${SKIP_REASON:-no_comment_needed}"
+            exit 0
+          fi
+          comments_json=.relia/reports/github-comments.json
+          gh api "repos/${REPOSITORY}/issues/${PR_NUMBER}/comments?per_page=100" > "$comments_json"
+          comment_id="$(python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          comments = json.loads(Path(".relia/reports/github-comments.json").read_text() or "[]")
+          for comment in comments:
+              body = comment.get("body") or ""
+              if "<!-- relia-advisory:v1" in body:
+                  print(comment["id"])
+                  break
+          PY
+          )"
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          Path(".relia/reports/advisory-body.json").write_text(json.dumps({
+              "body": Path(".relia/reports/advisory-comment.md").read_text()
+          }))
+          PY
+          if [ -n "$comment_id" ]; then
+            gh api --method PATCH "repos/${REPOSITORY}/issues/comments/${comment_id}" --input .relia/reports/advisory-body.json >/dev/null || {
+              echo "Relia advisory publish skipped: GitHub token could not update the existing comment"
+              exit 0
+            }
+          else
+            gh api --method POST "repos/${REPOSITORY}/issues/${PR_NUMBER}/comments" --input .relia/reports/advisory-body.json >/dev/null || {
+              echo "Relia advisory publish skipped: GitHub token could not create the advisory comment"
+              exit 0
+            }
+          fi

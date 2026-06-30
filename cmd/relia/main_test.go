@@ -152,7 +152,6 @@ func TestHelpAndVersionUseEnvelope(t *testing.T) {
 func TestReservedCommandsReturnTypedNotImplemented(t *testing.T) {
 	for _, args := range [][]string{
 		{"--json", "compile"},
-		{"--json", "serve"},
 	} {
 		stdout, stderr, code := runForTest(t, args, false)
 		if code != ExitInternal {
@@ -3286,6 +3285,90 @@ func TestDistillReviewRequiredFalseStillDraftsCandidateRules(t *testing.T) {
 	}
 }
 
+func TestCheckDisclosesOpenAICompatibleProviderBoundary(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	enableProviderForTest(t, tempDir, "openai_compatible", "gpt-test", "https://openai-compatible.example.test/v1", "RELIA_OPENAI_COMPATIBLE_API_KEY", "5.00")
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("check exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if len(result.Warnings) == 0 {
+		t.Fatal("expected provider disclosure warning")
+	}
+	var disclosure Finding
+	for _, warning := range result.Warnings {
+		if warning.Type == "provider_data_disclosure" {
+			disclosure = warning
+			break
+		}
+	}
+	if disclosure.Type == "" || !strings.Contains(disclosure.Message, "redacted experience records") {
+		t.Fatalf("warnings = %#v", result.Warnings)
+	}
+}
+
+func TestDistillProviderPlanReportsCostAndFailsClosedWithoutGrant(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	enableProviderForTest(t, tempDir, "anthropic", "claude-test", "https://api.anthropic.example.test", "RELIA_ANTHROPIC_API_KEY", "5.00")
+	inputRel := filepath.ToSlash(filepath.Join("fixtures", "provider-distill.jsonl"))
+	writeFileForTest(t, filepath.Join(tempDir, filepath.FromSlash(inputRel)), `{"experience_id":"exp_0901","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-04-01T10:00:00Z","pr":901,"commit":"abc901","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_provider_plan","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_provider","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/901"]}`+"\n")
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "distill", "--input", inputRel, "--format", "json"}, false)
+
+	if code != ExitDependency {
+		t.Fatalf("distill provider exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if len(result.Errors) != 1 || !strings.Contains(result.Errors[0].Message, "model_provider_endpoint") {
+		t.Fatalf("errors = %#v", result.Errors)
+	}
+	plan := result.Data["provider_plan"].(map[string]any)
+	if plan["provider"] != "anthropic" || plan["adapter"] != "anthropic_messages_http" || plan["model"] != "claude-test" {
+		t.Fatalf("provider_plan = %#v", plan)
+	}
+	cost := plan["cost"].(map[string]any)
+	if cost["estimated_cost_usd"].(float64) <= 0 ||
+		cost["input_tokens_estimated"].(float64) <= 0 ||
+		cost["output_tokens_estimated"].(float64) <= 0 {
+		t.Fatalf("cost estimate = %#v", cost)
+	}
+	if plan["provider_call_attempted"] != false || plan["approval_required"] != "model_provider_endpoint" {
+		t.Fatalf("provider execution boundary = %#v", plan)
+	}
+	if matches, err := filepath.Glob(filepath.Join(tempDir, "memory", "rules", "*.yaml")); err != nil {
+		t.Fatal(err)
+	} else if len(matches) != 0 {
+		t.Fatalf("provider-gated distill wrote memory rules without grant: %#v", matches)
+	}
+}
+
+func TestDistillProviderPlanRespectsConfiguredCostCap(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	enableProviderForTest(t, tempDir, "anthropic", "claude-test", "https://api.anthropic.example.test", "RELIA_ANTHROPIC_API_KEY", "0.000001")
+	inputRel := filepath.ToSlash(filepath.Join("fixtures", "provider-cost-cap.jsonl"))
+	writeFileForTest(t, filepath.Join(tempDir, filepath.FromSlash(inputRel)), `{"experience_id":"exp_0911","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-04-01T10:00:00Z","pr":911,"commit":"abc911","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_provider_cap","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_provider_cap","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/911"]}`+"\n")
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "distill", "--input", inputRel, "--format", "json"}, false)
+
+	if code != ExitDependency {
+		t.Fatalf("distill provider cap exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if len(result.Errors) != 1 || !strings.Contains(result.Errors[0].Message, "max_cost_usd_per_run") {
+		t.Fatalf("errors = %#v", result.Errors)
+	}
+	cost := result.Data["provider_plan"].(map[string]any)["cost"].(map[string]any)
+	if cost["cap_status"] != "exceeded" {
+		t.Fatalf("cost estimate = %#v", cost)
+	}
+}
+
 func TestReviewApproveEditRejectTransitions(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
@@ -3943,6 +4026,200 @@ metadata: {}
 	}
 	if fmt.Sprint(assessment.Citations) != fmt.Sprint([]string{"https://github.com/acme/billing-service/pull/142"}) {
 		t.Fatalf("citations = %#v", assessment.Citations)
+	}
+}
+
+func TestServeExposesLocalMCPCapabilityManifestForActiveRules(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "billing-time.yaml"), `object_type: relia.memory_rule
+schema_version: "1.0"
+id: billing-time-fixture
+kind: avoid
+status: active
+statement: Use the billing clock fixture instead of direct UTC calls.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.86
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_0142
+provenance:
+  - pr: 142
+    outcome: ci_failure
+    url: https://github.com/acme/billing-service/pull/142
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`)
+	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "candidate.yaml"), `object_type: relia.memory_rule
+schema_version: "1.0"
+id: candidate-rule
+kind: avoid
+status: candidate
+statement: Candidate rules must not be served.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.86
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_0143
+provenance:
+  - pr: 143
+    outcome: ci_failure
+    url: https://github.com/acme/billing-service/pull/143
+review:
+  label: suggested
+  statement_origin: cluster_summary
+metadata: {}
+`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "serve", "--format", "json"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("serve exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Command != "serve" || result.Status != "pass" {
+		t.Fatalf("result = %#v", result)
+	}
+	if result.Data["hosted_service_required"] != false || result.Data["live_network_required"] != false {
+		t.Fatalf("serve boundary = %#v", result.Data)
+	}
+	mcp := result.Data["mcp"].(map[string]any)
+	tools := stringsFromInterfaceSlice(t, mcp["tools"])
+	if fmt.Sprint(tools) != fmt.Sprint([]string{"recall", "assess", "coverage"}) {
+		t.Fatalf("tools = %#v", tools)
+	}
+	if got := int(result.Data["active_rule_count"].(float64)); got != 1 {
+		t.Fatalf("active_rule_count = %d", got)
+	}
+	rules := result.Data["served_rules"].([]any)
+	if len(rules) != 1 || !strings.Contains(fmt.Sprint(rules[0]), "billing-time-fixture") || strings.Contains(fmt.Sprint(rules[0]), "candidate-rule") {
+		t.Fatalf("served_rules = %#v", rules)
+	}
+}
+
+func TestAdviseWritesOneAdvisoryCommentPlanAndSkipsUnchangedDiff(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "billing-time.yaml"), `object_type: relia.memory_rule
+schema_version: "1.0"
+id: billing-time-fixture
+kind: avoid
+status: active
+statement: Use the billing clock fixture instead of direct UTC calls.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.86
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_0142
+provenance:
+  - pr: 142
+    outcome: ci_failure
+    url: https://github.com/acme/billing-service/pull/142
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`)
+	writeFileForTest(t, filepath.Join(tempDir, "change.diff"), `diff --git a/packages/billing/invoice.py b/packages/billing/invoice.py
+--- a/packages/billing/invoice.py
++++ b/packages/billing/invoice.py
+@@ -1,2 +1,3 @@
+ def rollover_day():
+-    return "2026-01-01"
++    return datetime.utcnow().strftime("%Y-%m-%d")
+`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "advise", "--input", "change.diff", "--format", "json"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("advise exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Data["should_comment"] != true {
+		t.Fatalf("advise result = %#v", result.Data)
+	}
+	if result.Data["comment_strategy"].(map[string]any)["max_comments_per_pr"].(float64) != 1 {
+		t.Fatalf("comment_strategy = %#v", result.Data["comment_strategy"])
+	}
+	commentPath := filepath.Join(tempDir, ".relia", "reports", "advisory-comment.md")
+	comment, err := os.ReadFile(commentPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{"<!-- relia-advisory:v1", "Relia advisory", "billing-time-fixture", "https://github.com/acme/billing-service/pull/142"} {
+		if !strings.Contains(string(comment), want) {
+			t.Fatalf("comment missing %q:\n%s", want, comment)
+		}
+	}
+
+	stdout, stderr, code = runForTest(t, []string{"--json", "advise", "--input", "change.diff", "--format", "json"}, false)
+	if code != ExitSuccess {
+		t.Fatalf("second advise exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result = decodeResult(t, stdout)
+	if result.Data["should_comment"] != false || result.Data["skip_reason"] != "unchanged_diff_fingerprint" {
+		t.Fatalf("second advise result = %#v", result.Data)
+	}
+}
+
+func TestAdviseStaysSilentForCoveredCleanAssessment(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "billing-playbook.yaml"), `object_type: relia.memory_rule
+schema_version: "1.0"
+id: billing-playbook-fixture
+kind: playbook
+status: active
+statement: Billing clock changes are covered when they use the approved fixture.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.91
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_0142
+provenance:
+  - pr: 142
+    outcome: merged_clean
+    url: https://github.com/acme/billing-service/pull/142
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`)
+	writeFileForTest(t, filepath.Join(tempDir, "change.diff"), `diff --git a/packages/billing/invoice.py b/packages/billing/invoice.py
+--- a/packages/billing/invoice.py
++++ b/packages/billing/invoice.py
+@@ -1,2 +1,3 @@
+ def rollover_day():
+-    return "2026-01-01"
++    return billing_clock().strftime("%Y-%m-%d")
+`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "advise", "--input", "change.diff", "--format", "json"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("advise covered clean exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Data["should_comment"] != false || result.Data["skip_reason"] != "covered_clean" {
+		t.Fatalf("advise result = %#v", result.Data)
 	}
 }
 
@@ -6754,6 +7031,29 @@ func setupContractRepo(t *testing.T) string {
 		writeFileForTest(t, filepath.Join(tempDir, rel), string(content))
 	}
 	return tempDir
+}
+
+func enableProviderForTest(t *testing.T, root string, provider string, model string, baseURL string, credentialEnv string, maxCost string) {
+	t.Helper()
+	replaceInFile(t, filepath.Join(root, "relia.yaml"), `distill:
+  embeddings: signature
+  provider: none
+  model: ""
+  base_url: ""
+  credential_env: ""
+  max_cost_usd_per_run: 0
+  input_cost_usd_per_1k_tokens: 0
+  output_cost_usd_per_1k_tokens: 0
+  review_required: true`, fmt.Sprintf(`distill:
+  embeddings: signature
+  provider: %s
+  model: %s
+  base_url: %s
+  credential_env: %s
+  max_cost_usd_per_run: %s
+  input_cost_usd_per_1k_tokens: 0.001
+  output_cost_usd_per_1k_tokens: 0.002
+  review_required: true`, provider, model, baseURL, credentialEnv, maxCost))
 }
 
 func writeFileForTest(t *testing.T, path string, content string) {

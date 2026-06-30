@@ -1,0 +1,62 @@
+{
+  "artifact_type": "proof-of-behavior-scorecard",
+  "schema_version": "1.0",
+  "task_id": "T9",
+  "status": "pass",
+  "required_proof_level": "user_visible_behavior",
+  "scenarios": [
+    {
+      "scenario": "OpenAI-compatible provider config is disclosed without reading credentials",
+      "status": "pass",
+      "evidence": "TestCheckDisclosesOpenAICompatibleProviderBoundary"
+    },
+    {
+      "scenario": "Anthropic provider-backed distill reports token and cost estimates and fails closed before provider calls without model_provider_endpoint approval",
+      "status": "pass",
+      "evidence": "TestDistillProviderPlanReportsCostAndFailsClosedWithoutGrant"
+    },
+    {
+      "scenario": "Provider-backed distill respects max_cost_usd_per_run before any provider call",
+      "status": "pass",
+      "evidence": "TestDistillProviderPlanRespectsConfiguredCostCap"
+    },
+    {
+      "scenario": "Serve exposes recall, assess, and coverage over active local rules only, with no hosted-service or network requirement",
+      "status": "pass",
+      "evidence": "TestServeExposesLocalMCPCapabilityManifestForActiveRules"
+    },
+    {
+      "scenario": "Advisory planner writes a one-comment PR advisory plan with real PR citations and skips unchanged diffs",
+      "status": "pass",
+      "evidence": "TestAdviseWritesOneAdvisoryCommentPlanAndSkipsUnchangedDiff"
+    },
+    {
+      "scenario": "Advisory planner stays silent for covered_clean assessments",
+      "status": "pass",
+      "evidence": "TestAdviseStaysSilentForCoveredCleanAssessment"
+    },
+    {
+      "scenario": "GitHub Action is advisory-only by default and uses a hidden marker to update one Relia comment",
+      "status": "pass",
+      "evidence": ".github/workflows/relia-advisory.yml"
+    }
+  ],
+  "commands_run": [
+    "go test ./cmd/relia -count=1 -run 'Test(CheckDisclosesOpenAICompatibleProviderBoundary|DistillProviderPlan|ServeExposesLocalMCPCapabilityManifest|Advise)'",
+    "make prepush-full"
+  ],
+  "network_and_credential_posture": {
+    "live_provider_calls_attempted": false,
+    "live_github_api_calls_attempted_by_worker": false,
+    "model_provider_endpoint_grant_required": true,
+    "model_provider_endpoint_grant_present": false,
+    "credential_values_read": false
+  },
+  "evidence_refs": [
+    "cmd/relia/main.go",
+    "cmd/relia/main_test.go",
+    ".github/workflows/relia-advisory.yml",
+    "docs/architecture/decision-0004-provider-advisory-boundary.md",
+    ".factory/artifacts/task-runs/T9/validation-report.json"
+  ]
+}

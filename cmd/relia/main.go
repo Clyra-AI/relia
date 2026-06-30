@@ -99,6 +99,7 @@ var primaryCommands = []string{
 	"compile",
 	"serve",
 	"assess",
+	"advise",
 }
 
 var knownSecretPatterns = []*regexp.Regexp{
@@ -205,6 +206,17 @@ type distillOptions struct {
 	HalfLifeDays int
 	Embeddings   string
 	InputPath    string
+}
+
+type serveOptions struct {
+	Format string
+}
+
+type adviseOptions struct {
+	InputPath   string
+	Format      string
+	StatePath   string
+	CommentPath string
 }
 
 type reviewOptions struct {
@@ -540,6 +552,43 @@ type distillCluster struct {
 	Records []backtestExperience
 }
 
+type distillProviderConfig struct {
+	Provider                 string
+	Model                    string
+	BaseURL                  string
+	CredentialEnv            string
+	MaxCostUSDPerRun         float64
+	InputCostUSDPer1KTokens  float64
+	OutputCostUSDPer1KTokens float64
+	ProviderRef              string
+}
+
+type distillProviderCostEstimate struct {
+	InputTokensEstimated  int     `json:"input_tokens_estimated"`
+	OutputTokensEstimated int     `json:"output_tokens_estimated"`
+	TotalTokensEstimated  int     `json:"total_tokens_estimated"`
+	EstimatedCostUSD      float64 `json:"estimated_cost_usd"`
+	MaxCostUSDPerRun      float64 `json:"max_cost_usd_per_run"`
+	CapStatus             string  `json:"cap_status"`
+}
+
+type distillProviderAdapter interface {
+	Provider() string
+	Surface() string
+	RequestShape(distillProviderConfig) map[string]any
+}
+
+type openAICompatibleAdapter struct{}
+type anthropicMessagesAdapter struct{}
+
+type adviseSettings struct {
+	Enabled                 bool
+	MaxCommentsPerPR        int
+	UpdateInPlace           bool
+	ReassessDebounceMinutes int
+	MinConfidence           float64
+}
+
 type memoryRuleSummary struct {
 	ID              string
 	Kind            string
@@ -646,9 +695,13 @@ func dispatch(parsed parsedArgs, start time.Time) CommandResult {
 		return reviewResult(parsed.commandArgs, start)
 	case "memory":
 		return memoryResult(parsed.commandArgs, start)
+	case "serve":
+		return serveResult(parsed.commandArgs, start)
+	case "advise":
+		return adviseResult(parsed.commandArgs, start)
 	case "models":
 		return modelsResult(parsed.commandArgs, start)
-	case "compile", "serve", "demo", "share":
+	case "compile", "demo", "share":
 		return notImplementedResult(command, start)
 	default:
 		return errorResult(command, command, usageError(fmt.Sprintf("unknown command %q", command)), start)
@@ -2571,14 +2624,31 @@ func distillResult(args []string, start time.Time) CommandResult {
 	if commandErr != nil {
 		return withFormat(errorResult("distill", "distill", commandErr, start))
 	}
-	provider, providerRef := distillProvider(config)
-	if provider != "none" {
-		return withFormat(errorResult("distill", "distill", dependencyError("provider-backed distill requires an approved model_provider_endpoint gate; no experience records were sent", providerRef), start))
+	providerConfig, commandErr := distillProviderConfigFromYAML(config)
+	if commandErr != nil {
+		return withFormat(errorResult("distill", "distill", commandErr, start))
 	}
 	embeddingMode := effectiveDistillEmbeddingMode(config, options)
 	records, sourceArtifacts, sourceDigest, commandErr := loadDistillExperiences(root, config, options)
 	if commandErr != nil {
 		return withFormat(errorResult("distill", "distill", commandErr, start))
+	}
+	if providerConfig.Provider != "none" || embeddingMode == "provider" {
+		providerPlan, commandErr := buildDistillProviderPlan(providerConfig, records, embeddingMode, sourceArtifacts, sourceDigest)
+		if commandErr != nil {
+			return withFormat(errorResultWithData("distill", "distill", commandErr, start, map[string]any{
+				"provider_plan": providerPlan,
+			}))
+		}
+		cost := providerPlan["cost"].(distillProviderCostEstimate)
+		if cost.CapStatus == "exceeded" {
+			return withFormat(errorResultWithData("distill", "distill", dependencyError("provider-backed distill estimated cost exceeds distill.max_cost_usd_per_run; no provider call was attempted", providerConfig.ProviderRef), start, map[string]any{
+				"provider_plan": providerPlan,
+			}))
+		}
+		return withFormat(errorResultWithData("distill", "distill", dependencyError("provider-backed distill requires an approved model_provider_endpoint gate; no experience records were sent", providerConfig.ProviderRef), start, map[string]any{
+			"provider_plan": providerPlan,
+		}))
 	}
 	rules, commandErr := buildDistilledRules(root, config, records, sourceArtifacts, sourceDigest, embeddingMode, options)
 	if commandErr != nil {
@@ -2603,12 +2673,13 @@ func distillResult(args []string, start time.Time) CommandResult {
 		"stale_rules":                statusCounts["stale"],
 		"contradicted_rules":         statusCounts["contradicted"],
 		"retired_rules":              statusCounts["retired"],
-		"provider":                   provider,
+		"provider":                   providerConfig.Provider,
 		"embedding_mode":             embeddingMode,
 		"review_required":            distillReviewRequired(config),
-		"deterministic_fallback":     provider == "none" && embeddingMode == "signature",
+		"deterministic_fallback":     providerConfig.Provider == "none" && embeddingMode == "signature",
 		"confidence_model":           "evidence_count+recency_half_life+contradictions+flake_discount+extraction_confidence",
 		"drafting_model_confidence":  0,
+		"provider_cost":              deterministicNoProviderCost(),
 		"decay_half_life_days":       options.HalfLifeDays,
 		"source_artifacts":           sourceArtifacts,
 		"source_artifact_digest":     sourceDigest,
@@ -2936,6 +3007,379 @@ func parseMemoryArgs(args []string) (memoryOptions, *CommandError) {
 	return options, nil
 }
 
+func serveResult(args []string, start time.Time) CommandResult {
+	options, commandErr := parseServeArgs(args)
+	withFormat := func(result CommandResult) CommandResult {
+		if options.Format == "json" {
+			result.MachineReadable = true
+		}
+		return result
+	}
+	if commandErr != nil {
+		return withFormat(errorResult("serve", "serve", commandErr, start))
+	}
+	wd, err := os.Getwd()
+	if err != nil {
+		return withFormat(errorResult("serve", "serve", internalError("could not inspect working directory", err), start))
+	}
+	root, ok := findRepoRoot(wd)
+	if !ok {
+		return withFormat(errorResult("serve", "serve", configError("could not locate repository root from current directory"), start))
+	}
+	warnings, commandErr := validateReliaConfig(root)
+	if commandErr != nil {
+		return withFormat(errorResult("serve", "serve", commandErr, start))
+	}
+	rules, commandErr := loadAssessmentRules(root)
+	if commandErr != nil {
+		return withFormat(errorResult("serve", "serve", commandErr, start))
+	}
+	result := passResult("serve", "serve", "exposed local MCP capability manifest for active memory rules", start, map[string]any{
+		"format":                  options.Format,
+		"mcp":                     map[string]any{"transport": "stdio", "tools": []string{"recall", "assess", "coverage"}},
+		"active_rule_count":       len(rules),
+		"served_rules":            servedRuleData(rules),
+		"hosted_service_required": false,
+		"live_network_required":   false,
+		"advisory_only":           true,
+	})
+	result.Warnings = append(result.Warnings, warnings...)
+	result.EvidenceRefs = append(result.EvidenceRefs, "schemas/risk-assessment.schema.json", "schemas/memory-rule.schema.json")
+	for _, rule := range rules {
+		result.Artifacts = append(result.Artifacts, ArtifactRef{Kind: "memory_rule", Path: rule.Path})
+		result.EvidenceRefs = append(result.EvidenceRefs, rule.Path)
+	}
+	return withFormat(result)
+}
+
+func parseServeArgs(args []string) (serveOptions, *CommandError) {
+	options := serveOptions{Format: "json"}
+	for index := 0; index < len(args); index++ {
+		arg := args[index]
+		switch arg {
+		case "--format":
+			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
+				return options, usageError("serve requires a value after --format")
+			}
+			options.Format = args[index+1]
+			index++
+		case "--listen", "--http", "--hosted":
+			return options, dependencyError("hosted or network serve transports are outside the MVP default and require explicit network approval", "docs/product/prd.md#serve-and-advise")
+		default:
+			return options, usageError(fmt.Sprintf("unknown serve argument %q", arg))
+		}
+	}
+	if options.Format != "json" {
+		return options, usageError("serve only supports --format json in this task slice")
+	}
+	return options, nil
+}
+
+func servedRuleData(rules []assessmentRule) []map[string]any {
+	data := make([]map[string]any, 0, len(rules))
+	for _, rule := range rules {
+		data = append(data, map[string]any{
+			"rule_id":     rule.ID,
+			"kind":        rule.Kind,
+			"confidence":  rule.Confidence,
+			"scope_paths": append([]string(nil), rule.ScopePaths...),
+			"citations":   assessmentRuleCitationURLs(rule.Citations),
+			"path":        rule.Path,
+		})
+	}
+	return data
+}
+
+func adviseResult(args []string, start time.Time) CommandResult {
+	options, commandErr := parseAdviseArgs(args)
+	withFormat := func(result CommandResult) CommandResult {
+		if options.Format == "json" {
+			result.MachineReadable = true
+		}
+		return result
+	}
+	if commandErr != nil {
+		return withFormat(errorResult("advise", "advise", commandErr, start))
+	}
+	wd, err := os.Getwd()
+	if err != nil {
+		return withFormat(errorResult("advise", "advise", internalError("could not inspect working directory", err), start))
+	}
+	root, ok := findRepoRoot(wd)
+	if !ok {
+		return withFormat(errorResult("advise", "advise", configError("could not locate repository root from current directory"), start))
+	}
+	warnings, commandErr := validateReliaConfig(root)
+	if commandErr != nil {
+		return withFormat(errorResult("advise", "advise", commandErr, start))
+	}
+	config, commandErr := readReliaConfig(root)
+	if commandErr != nil {
+		return withFormat(errorResult("advise", "advise", commandErr, start))
+	}
+	settings, commandErr := adviseSettingsFromConfig(config)
+	if commandErr != nil {
+		return withFormat(errorResult("advise", "advise", commandErr, start))
+	}
+	inputPath := resolveInputPath(root, options.InputPath)
+	inputContent, err := os.ReadFile(inputPath)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return withFormat(errorResult("advise", "advise", artifactContractError("advise input diff is missing", displayPath(root, inputPath)), start))
+		}
+		return withFormat(errorResult("advise", "advise", internalError("could not read advise input", err), start))
+	}
+	touchedPaths, commandErr := parseUnifiedDiffTouchedPaths(inputContent, displayPath(root, inputPath))
+	if commandErr != nil {
+		return withFormat(errorResult("advise", "advise", commandErr, start))
+	}
+	rules, commandErr := loadAssessmentRules(root)
+	if commandErr != nil {
+		return withFormat(errorResult("advise", "advise", commandErr, start))
+	}
+	assessment, commandErr := buildRiskAssessment(root, displayPath(root, inputPath), inputContent, touchedPaths, rules)
+	if commandErr != nil {
+		return withFormat(errorResult("advise", "advise", commandErr, start))
+	}
+	diffFingerprint := sha256String(string(inputContent))
+	previousFingerprint, commandErr := advisoryPreviousDiffFingerprint(root, options.StatePath)
+	if commandErr != nil {
+		return withFormat(errorResult("advise", "advise", commandErr, start))
+	}
+	shouldComment, skipReason := advisoryCommentDecision(settings, assessment, diffFingerprint, previousFingerprint)
+	body := ""
+	if shouldComment {
+		body = renderAdvisoryComment(assessment, touchedPaths, diffFingerprint)
+		if commandErr := writeRepoRelativeFile(root, options.CommentPath, []byte(body), "advisory comment"); commandErr != nil {
+			return withFormat(errorResult("advise", "advise", commandErr, start))
+		}
+	}
+	state := map[string]any{
+		"object_type":               "relia.advisory_state",
+		"schema_version":            commandSchemaVersion,
+		"input_path":                displayPath(root, inputPath),
+		"diff_fingerprint":          diffFingerprint,
+		"previous_diff_fingerprint": previousFingerprint,
+		"should_comment":            shouldComment,
+		"skip_reason":               skipReason,
+		"assessment":                assessment,
+		"comment_strategy":          advisoryCommentStrategy(settings),
+		"comment_marker":            "relia-advisory:v1",
+		"metadata": map[string]any{
+			"generated_by":              "relia advise",
+			"hosted_service_required":   false,
+			"github_api_required_later": shouldComment,
+		},
+	}
+	encodedState, err := json.MarshalIndent(state, "", "  ")
+	if err != nil {
+		return withFormat(errorResult("advise", "advise", internalError("could not encode advisory state", err), start))
+	}
+	if commandErr := writeRepoRelativeFile(root, options.StatePath, append(encodedState, '\n'), "advisory state"); commandErr != nil {
+		return withFormat(errorResult("advise", "advise", commandErr, start))
+	}
+	result := passResult("advise", "advise", "planned advisory PR comment from local assessment", start, map[string]any{
+		"input_path":         displayPath(root, inputPath),
+		"format":             options.Format,
+		"touched_paths":      touchedPaths,
+		"active_rule_count":  len(rules),
+		"matched_rule_count": len(assessment.Matches),
+		"assessment":         assessment,
+		"diff_fingerprint":   diffFingerprint,
+		"should_comment":     shouldComment,
+		"skip_reason":        skipReason,
+		"comment_path":       options.CommentPath,
+		"state_path":         options.StatePath,
+		"comment_strategy":   advisoryCommentStrategy(settings),
+	})
+	result.Warnings = append(result.Warnings, warnings...)
+	result.EvidenceRefs = append(result.EvidenceRefs,
+		"schemas/risk-assessment.schema.json",
+		displayPath(root, inputPath),
+		options.StatePath,
+	)
+	result.Artifacts = append(result.Artifacts,
+		ArtifactRef{Kind: "input_diff", Path: displayPath(root, inputPath)},
+		ArtifactRef{Kind: "advisory_state", Path: options.StatePath},
+	)
+	if shouldComment {
+		result.EvidenceRefs = append(result.EvidenceRefs, options.CommentPath)
+		result.Artifacts = append(result.Artifacts, ArtifactRef{Kind: "advisory_comment", Path: options.CommentPath})
+	}
+	for _, rule := range rules {
+		result.Artifacts = append(result.Artifacts, ArtifactRef{Kind: "memory_rule", Path: rule.Path})
+		result.EvidenceRefs = append(result.EvidenceRefs, rule.Path)
+	}
+	return withFormat(result)
+}
+
+func parseAdviseArgs(args []string) (adviseOptions, *CommandError) {
+	options := adviseOptions{
+		Format:      "json",
+		StatePath:   ".relia/reports/advisory-state.json",
+		CommentPath: ".relia/reports/advisory-comment.md",
+	}
+	for index := 0; index < len(args); index++ {
+		arg := args[index]
+		switch arg {
+		case "--input", "--diff", "-i":
+			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
+				return options, usageError("advise requires a path after " + arg)
+			}
+			options.InputPath = args[index+1]
+			index++
+		case "--format":
+			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
+				return options, usageError("advise requires a value after --format")
+			}
+			options.Format = args[index+1]
+			index++
+		case "--state":
+			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
+				return options, usageError("advise requires a repo-relative path after --state")
+			}
+			options.StatePath = args[index+1]
+			index++
+		case "--comment":
+			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
+				return options, usageError("advise requires a repo-relative path after --comment")
+			}
+			options.CommentPath = args[index+1]
+			index++
+		default:
+			return options, usageError(fmt.Sprintf("unknown advise argument %q", arg))
+		}
+	}
+	if strings.TrimSpace(options.InputPath) == "" {
+		return options, usageError("advise requires --input <diff> in offline mode")
+	}
+	if options.Format != "json" {
+		return options, usageError("advise only supports --format json in this task slice")
+	}
+	for _, item := range []struct {
+		label string
+		path  string
+	}{
+		{"advise --state", options.StatePath},
+		{"advise --comment", options.CommentPath},
+	} {
+		if _, ok := cleanRepoPath(item.path); !ok {
+			return options, usageError(item.label + " must be repo-relative")
+		}
+	}
+	return options, nil
+}
+
+func advisoryPreviousDiffFingerprint(root string, statePath string) (string, *CommandError) {
+	clean, ok := cleanRepoPath(statePath)
+	if !ok {
+		return "", usageError("advise --state must be repo-relative")
+	}
+	content, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(filepath.ToSlash(clean))))
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return "", nil
+		}
+		return "", internalError("could not read prior advisory state", err)
+	}
+	var state map[string]any
+	if err := json.Unmarshal(content, &state); err != nil {
+		return "", artifactContractError("prior advisory state is not valid JSON", filepath.ToSlash(clean))
+	}
+	fingerprint, _ := state["diff_fingerprint"].(string)
+	return fingerprint, nil
+}
+
+func advisoryCommentDecision(settings adviseSettings, assessment riskAssessment, diffFingerprint string, previousFingerprint string) (bool, string) {
+	if !settings.Enabled {
+		return false, "advise_disabled"
+	}
+	if previousFingerprint != "" && previousFingerprint == diffFingerprint {
+		return false, "unchanged_diff_fingerprint"
+	}
+	if assessment.RiskLevel == "covered_clean" {
+		return false, "covered_clean"
+	}
+	if assessment.RiskLevel != "no_coverage" && advisoryMaxConfidence(assessment) < settings.MinConfidence {
+		return false, "below_min_confidence"
+	}
+	return true, ""
+}
+
+func advisoryMaxConfidence(assessment riskAssessment) float64 {
+	maxConfidence := 0.0
+	for _, match := range assessment.Matches {
+		if match.Confidence > maxConfidence {
+			maxConfidence = match.Confidence
+		}
+	}
+	return maxConfidence
+}
+
+func advisoryCommentStrategy(settings adviseSettings) map[string]any {
+	return map[string]any{
+		"max_comments_per_pr":         settings.MaxCommentsPerPR,
+		"update_in_place":             settings.UpdateInPlace,
+		"reassess_debounce_minutes":   settings.ReassessDebounceMinutes,
+		"min_confidence":              settings.MinConfidence,
+		"comment_marker":              "relia-advisory:v1",
+		"unchanged_diff_skip_enabled": true,
+	}
+}
+
+func renderAdvisoryComment(assessment riskAssessment, touchedPaths []string, diffFingerprint string) string {
+	var builder strings.Builder
+	builder.WriteString("<!-- relia-advisory:v1 diff_fingerprint=" + diffFingerprint + " -->\n")
+	switch assessment.RiskLevel {
+	case "no_coverage":
+		builder.WriteString("Relia advisory - no prior active memory covers ")
+		builder.WriteString(markdownInlineList(touchedPaths, 3))
+		builder.WriteString(". Suggest closer review.\n")
+	default:
+		builder.WriteString("Relia advisory - this change matches ")
+		for index, match := range assessment.Matches {
+			if index > 0 {
+				builder.WriteString(", ")
+			}
+			builder.WriteString("`" + match.RuleID + "`")
+			builder.WriteString(" (confidence " + yamlFloat(match.Confidence) + ")")
+		}
+		if len(assessment.Citations) > 0 {
+			builder.WriteString(". Evidence: ")
+			for index, citation := range assessment.Citations {
+				if index > 0 {
+					builder.WriteString(", ")
+				}
+				builder.WriteString(citation)
+			}
+		}
+		builder.WriteString(".\n")
+	}
+	return builder.String()
+}
+
+func markdownInlineList(values []string, limit int) string {
+	if len(values) == 0 {
+		return "`this change`"
+	}
+	if limit > 0 && len(values) > limit {
+		values = values[:limit]
+	}
+	parts := make([]string, 0, len(values))
+	for _, value := range values {
+		parts = append(parts, "`"+value+"`")
+	}
+	return strings.Join(parts, ", ")
+}
+
+func writeRepoRelativeFile(root string, rel string, content []byte, label string) *CommandError {
+	clean, ok := cleanRepoPath(rel)
+	if !ok {
+		return usageError(label + " path must be repo-relative")
+	}
+	return writeAtomicRepoFile(filepath.Join(root, filepath.FromSlash(filepath.ToSlash(clean))), content, label)
+}
+
 func modelsResult(args []string, start time.Time) CommandResult {
 	if len(args) == 0 || args[0] != "pull" {
 		return errorResult("models", "models", usageError("expected subcommand: pull"), start)
@@ -3110,9 +3554,239 @@ func parseModelsPullArgs(args []string) (modelsPullOptions, *CommandError) {
 
 func distillProvider(config yamlDocument) (string, string) {
 	if scalar, ok := config.Scalars["distill.provider"]; ok {
-		return scalar.Value, configRef(scalar)
+		return normalizeDistillProvider(scalar.Value), configRef(scalar)
 	}
 	return "none", defaultConfigFile
+}
+
+func normalizeDistillProvider(value string) string {
+	switch strings.TrimSpace(value) {
+	case "", "none":
+		return "none"
+	case "openai-compatible", "openai_compatible":
+		return "openai_compatible"
+	case "anthropic":
+		return "anthropic"
+	default:
+		return strings.TrimSpace(value)
+	}
+}
+
+func distillProviderConfigFromYAML(config yamlDocument) (distillProviderConfig, *CommandError) {
+	provider, providerRef := distillProvider(config)
+	cfg := distillProviderConfig{
+		Provider:    provider,
+		ProviderRef: providerRef,
+	}
+	if provider == "none" {
+		return cfg, nil
+	}
+	if _, ok := distillProviderAdapterFor(provider); !ok {
+		return cfg, configErrorAt("distill.provider must be none, openai_compatible, openai-compatible, or anthropic", providerRef)
+	}
+	required := []struct {
+		key    string
+		target *string
+	}{
+		{key: "distill.model", target: &cfg.Model},
+		{key: "distill.base_url", target: &cfg.BaseURL},
+		{key: "distill.credential_env", target: &cfg.CredentialEnv},
+	}
+	for _, item := range required {
+		scalar, ok := config.Scalars[item.key]
+		if !ok || strings.TrimSpace(scalar.Value) == "" {
+			return cfg, configErrorAt(item.key+" is required when distill.provider is "+provider, providerRef)
+		}
+		*item.target = strings.TrimSpace(scalar.Value)
+	}
+	if !validCredentialEnvName(cfg.CredentialEnv) {
+		scalar := config.Scalars["distill.credential_env"]
+		return cfg, configErrorAt("distill.credential_env must name an environment variable, not a secret value", configRef(scalar))
+	}
+	if commandErr := validateProviderBaseURL(cfg.BaseURL, config.Scalars["distill.base_url"]); commandErr != nil {
+		return cfg, commandErr
+	}
+	var commandErr *CommandError
+	cfg.MaxCostUSDPerRun, commandErr = requiredYAMLFloat(config, "distill.max_cost_usd_per_run", providerRef)
+	if commandErr != nil {
+		return cfg, commandErr
+	}
+	cfg.InputCostUSDPer1KTokens, commandErr = requiredYAMLFloat(config, "distill.input_cost_usd_per_1k_tokens", providerRef)
+	if commandErr != nil {
+		return cfg, commandErr
+	}
+	cfg.OutputCostUSDPer1KTokens, commandErr = requiredYAMLFloat(config, "distill.output_cost_usd_per_1k_tokens", providerRef)
+	if commandErr != nil {
+		return cfg, commandErr
+	}
+	for key, value := range map[string]float64{
+		"distill.max_cost_usd_per_run":          cfg.MaxCostUSDPerRun,
+		"distill.input_cost_usd_per_1k_tokens":  cfg.InputCostUSDPer1KTokens,
+		"distill.output_cost_usd_per_1k_tokens": cfg.OutputCostUSDPer1KTokens,
+	} {
+		if math.IsNaN(value) || math.IsInf(value, 0) || value < 0 {
+			return cfg, configErrorAt(key+" must be a non-negative number", configRef(config.Scalars[key]))
+		}
+	}
+	return cfg, nil
+}
+
+func requiredYAMLFloat(config yamlDocument, key string, fallbackRef string) (float64, *CommandError) {
+	scalar, ok := config.Scalars[key]
+	if !ok || strings.TrimSpace(scalar.Value) == "" {
+		return 0, configErrorAt(key+" is required when provider-backed distill is configured", fallbackRef)
+	}
+	parsed, err := strconv.ParseFloat(scalar.Value, 64)
+	if err != nil {
+		return 0, configErrorAt(key+" must be a number", configRef(scalar))
+	}
+	return parsed, nil
+}
+
+func validCredentialEnvName(value string) bool {
+	if value == "" {
+		return false
+	}
+	for index, r := range value {
+		switch {
+		case r >= 'A' && r <= 'Z':
+		case r >= '0' && r <= '9' && index > 0:
+		case r == '_' && index > 0:
+		default:
+			return false
+		}
+	}
+	return true
+}
+
+func validateProviderBaseURL(value string, scalar yamlScalar) *CommandError {
+	parsed, err := url.Parse(value)
+	if err != nil || parsed.Scheme != "https" || parsed.Host == "" {
+		return configErrorAt("distill.base_url must be an https URL for provider-backed distill", configRef(scalar))
+	}
+	if parsed.RawQuery != "" || parsed.Fragment != "" {
+		return configErrorAt("distill.base_url must not include query or fragment components", configRef(scalar))
+	}
+	return nil
+}
+
+func distillProviderAdapterFor(provider string) (distillProviderAdapter, bool) {
+	switch normalizeDistillProvider(provider) {
+	case "openai_compatible":
+		return openAICompatibleAdapter{}, true
+	case "anthropic":
+		return anthropicMessagesAdapter{}, true
+	default:
+		return nil, false
+	}
+}
+
+func (openAICompatibleAdapter) Provider() string { return "openai_compatible" }
+
+func (openAICompatibleAdapter) Surface() string { return "openai_compatible_chat_completions_http" }
+
+func (openAICompatibleAdapter) RequestShape(config distillProviderConfig) map[string]any {
+	return map[string]any{
+		"method":            "POST",
+		"url":               strings.TrimRight(config.BaseURL, "/") + "/chat/completions",
+		"credential_header": "Authorization: Bearer ${" + config.CredentialEnv + "}",
+		"redaction_posture": "redacted_experience_records_only",
+		"response_contract": "draft rule statements only; evidence, scope, and confidence remain deterministic",
+		"network_attempted": false,
+	}
+}
+
+func (anthropicMessagesAdapter) Provider() string { return "anthropic" }
+
+func (anthropicMessagesAdapter) Surface() string { return "anthropic_messages_http" }
+
+func (anthropicMessagesAdapter) RequestShape(config distillProviderConfig) map[string]any {
+	return map[string]any{
+		"method":            "POST",
+		"url":               strings.TrimRight(config.BaseURL, "/") + "/v1/messages",
+		"credential_header": "x-api-key: ${" + config.CredentialEnv + "}",
+		"redaction_posture": "redacted_experience_records_only",
+		"response_contract": "draft rule statements only; evidence, scope, and confidence remain deterministic",
+		"network_attempted": false,
+	}
+}
+
+func buildDistillProviderPlan(config distillProviderConfig, records []backtestExperience, embeddingMode string, sourceArtifacts []string, sourceDigest string) (map[string]any, *CommandError) {
+	if config.Provider == "none" {
+		return map[string]any{
+			"provider":                "none",
+			"provider_call_attempted": false,
+		}, dependencyError("provider embeddings require distill.provider to be configured", defaultConfigFile)
+	}
+	adapter, ok := distillProviderAdapterFor(config.Provider)
+	if !ok {
+		return map[string]any{"provider": config.Provider}, configErrorAt("unsupported distill.provider "+config.Provider, config.ProviderRef)
+	}
+	cost := estimateDistillProviderCost(config, records)
+	return map[string]any{
+		"provider":                config.Provider,
+		"adapter":                 adapter.Surface(),
+		"model":                   config.Model,
+		"base_url":                config.BaseURL,
+		"credential_env":          config.CredentialEnv,
+		"embedding_mode":          embeddingMode,
+		"cost":                    cost,
+		"request_shape":           adapter.RequestShape(config),
+		"source_artifacts":        sourceArtifacts,
+		"source_artifact_digest":  sourceDigest,
+		"redacted_records_only":   true,
+		"provider_call_attempted": false,
+		"approval_required":       "model_provider_endpoint",
+	}, nil
+}
+
+func estimateDistillProviderCost(config distillProviderConfig, records []backtestExperience) distillProviderCostEstimate {
+	inputTokens := 0
+	for _, record := range records {
+		encoded, err := json.Marshal(record.Record)
+		if err != nil {
+			inputTokens += 1
+			continue
+		}
+		inputTokens += estimatedTokensForBytes(len(encoded))
+	}
+	outputTokens := 96
+	if len(records) > 0 {
+		outputTokens += len(records) * 64
+	}
+	total := inputTokens + outputTokens
+	estimate := (float64(inputTokens)/1000.0)*config.InputCostUSDPer1KTokens +
+		(float64(outputTokens)/1000.0)*config.OutputCostUSDPer1KTokens
+	estimate = roundFloat(estimate, 6)
+	capStatus := "within_cap"
+	if estimate > config.MaxCostUSDPerRun {
+		capStatus = "exceeded"
+	}
+	return distillProviderCostEstimate{
+		InputTokensEstimated:  inputTokens,
+		OutputTokensEstimated: outputTokens,
+		TotalTokensEstimated:  total,
+		EstimatedCostUSD:      estimate,
+		MaxCostUSDPerRun:      config.MaxCostUSDPerRun,
+		CapStatus:             capStatus,
+	}
+}
+
+func estimatedTokensForBytes(length int) int {
+	if length <= 0 {
+		return 0
+	}
+	return int(math.Ceil(float64(length) / 4.0))
+}
+
+func deterministicNoProviderCost() map[string]any {
+	return map[string]any{
+		"input_tokens_estimated":  0,
+		"output_tokens_estimated": 0,
+		"total_tokens_estimated":  0,
+		"estimated_cost_usd":      0,
+		"cap_status":              "not_applicable",
+	}
 }
 
 func distillEmbeddingMode(config yamlDocument) string {
@@ -6795,6 +7469,12 @@ func errorResult(command string, mode string, commandErr *CommandError, start ti
 	return result
 }
 
+func errorResultWithData(command string, mode string, commandErr *CommandError, start time.Time, data map[string]any) CommandResult {
+	result := errorResult(command, mode, commandErr, start)
+	result.Data = data
+	return result
+}
+
 func baseResult(command string, mode string, status string, exitCode int, start time.Time, data map[string]any) CommandResult {
 	return CommandResult{
 		ObjectType:    commandResultObjectType,
@@ -7210,25 +7890,36 @@ func validateReliaConfigWithEmbeddingOverride(root string, embeddingOverride str
 			return nil, commandErr
 		}
 	case "provider":
-		return nil, dependencyError("provider embeddings require an approved model_provider_endpoint gate", effectiveEmbeddingsRef)
+		if embeddingOverride == "" {
+			return nil, dependencyError("provider embeddings require an approved model_provider_endpoint gate", effectiveEmbeddingsRef)
+		}
+		warnings = append(warnings, Finding{
+			Type:    "provider_embedding_gate_required",
+			Message: "provider embeddings are opt-in live model work and require a model_provider_endpoint gate before any network call",
+			Ref:     effectiveEmbeddingsRef,
+		})
 	default:
 		return nil, configError("distill.embeddings must be signature, local, or provider")
 	}
 
-	provider, ok := document.Scalars["distill.provider"]
+	providerScalar, ok := document.Scalars["distill.provider"]
 	if !ok {
 		return nil, configError("relia.yaml missing required key distill.provider")
 	}
-	switch provider.Value {
+	switch normalizeDistillProvider(providerScalar.Value) {
 	case "none":
 	case "openai_compatible", "anthropic":
+		providerConfig, commandErr := distillProviderConfigFromYAML(document)
+		if commandErr != nil {
+			return nil, commandErr
+		}
 		warnings = append(warnings, Finding{
 			Type:    "provider_data_disclosure",
-			Message: "provider-backed distill may send redacted experience records outside the machine when explicitly run",
-			Ref:     configRef(provider),
+			Message: "provider-backed distill may send redacted experience records outside the machine only after an approved model_provider_endpoint gate; credential values are not read by relia check",
+			Ref:     providerConfig.ProviderRef,
 		})
 	default:
-		return nil, configError("distill.provider must be none, openai_compatible, or anthropic")
+		return nil, configError("distill.provider must be none, openai_compatible, openai-compatible, or anthropic")
 	}
 
 	reviewRequired, ok := document.Scalars["distill.review_required"]
@@ -7251,7 +7942,73 @@ func validateReliaConfigWithEmbeddingOverride(root string, embeddingOverride str
 		len(yamlListValues(document, "attribution.pr_labels")) == 0 {
 		return nil, artifactContractError("attribution config has zero agent matchers; configure at least one agent_authors login, coauthor_trailer, or pr_label", yamlPathRef(document, "attribution"))
 	}
+	if commandErr := validateAdviseConfig(document); commandErr != nil {
+		return nil, commandErr
+	}
 	return warnings, nil
+}
+
+func validateAdviseConfig(document yamlDocument) *CommandError {
+	_, commandErr := adviseSettingsFromConfig(document)
+	return commandErr
+}
+
+func adviseSettingsFromConfig(document yamlDocument) (adviseSettings, *CommandError) {
+	settings := adviseSettings{
+		Enabled:                 true,
+		MaxCommentsPerPR:        1,
+		UpdateInPlace:           true,
+		ReassessDebounceMinutes: 10,
+		MinConfidence:           0.6,
+	}
+	if scalar, ok := document.Scalars["advise.enabled"]; ok {
+		switch scalar.Value {
+		case "true":
+			settings.Enabled = true
+		case "false":
+			settings.Enabled = false
+		default:
+			return settings, configErrorAt("advise.enabled must be true or false", configRef(scalar))
+		}
+	}
+	if scalar, ok := document.Scalars["advise.max_comments_per_pr"]; ok {
+		parsed, err := strconv.Atoi(scalar.Value)
+		if err != nil || parsed < 0 {
+			return settings, configErrorAt("advise.max_comments_per_pr must be a non-negative integer", configRef(scalar))
+		}
+		settings.MaxCommentsPerPR = parsed
+	}
+	if settings.MaxCommentsPerPR > 1 {
+		return settings, configErrorAt("advise.max_comments_per_pr must be 0 or 1 for MVP advisory restraint", yamlPathRef(document, "advise.max_comments_per_pr"))
+	}
+	if scalar, ok := document.Scalars["advise.update_in_place"]; ok {
+		switch scalar.Value {
+		case "true":
+			settings.UpdateInPlace = true
+		case "false":
+			settings.UpdateInPlace = false
+		default:
+			return settings, configErrorAt("advise.update_in_place must be true or false", configRef(scalar))
+		}
+	}
+	if !settings.UpdateInPlace && settings.MaxCommentsPerPR == 1 {
+		return settings, configErrorAt("advise.update_in_place must remain true when advisory comments are enabled", yamlPathRef(document, "advise.update_in_place"))
+	}
+	if scalar, ok := document.Scalars["advise.reassess_debounce_minutes"]; ok {
+		parsed, err := strconv.Atoi(scalar.Value)
+		if err != nil || parsed < 0 {
+			return settings, configErrorAt("advise.reassess_debounce_minutes must be a non-negative integer", configRef(scalar))
+		}
+		settings.ReassessDebounceMinutes = parsed
+	}
+	if scalar, ok := document.Scalars["advise.min_confidence"]; ok {
+		parsed, err := strconv.ParseFloat(scalar.Value, 64)
+		if err != nil || math.IsNaN(parsed) || math.IsInf(parsed, 0) || parsed < 0 || parsed > 1 {
+			return settings, configErrorAt("advise.min_confidence must be a number between 0 and 1", configRef(scalar))
+		}
+		settings.MinConfidence = parsed
+	}
+	return settings, nil
 }
 
 type localModelManifest struct {
@@ -8050,6 +8807,12 @@ redaction:
 distill:
   embeddings: signature
   provider: none
+  model: ""
+  base_url: ""
+  credential_env: ""
+  max_cost_usd_per_run: 0
+  input_cost_usd_per_1k_tokens: 0
+  output_cost_usd_per_1k_tokens: 0
   review_required: true
 
 models:
@@ -8057,6 +8820,13 @@ models:
 
 serve:
   advisory_only: true
+
+advise:
+  enabled: true
+  max_comments_per_pr: 1
+  update_in_place: true
+  reassess_debounce_minutes: 10
+  min_confidence: 0.6
 
 gate:
   enabled: false

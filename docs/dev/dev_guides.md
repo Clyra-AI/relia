@@ -283,6 +283,30 @@ T8 adds report/evidence feedback on top of the local artifact path:
   `metadata.memory_source: verified_outcome_events` and the excluded
   self-report/reflection source classes.
 
+T9 adds provider and advisory integration boundaries without changing the
+offline default:
+
+- `relia distill` validates OpenAI-compatible and Anthropic provider adapter
+  config, estimates input/output tokens and cost from redacted local experience
+  records, enforces `distill.max_cost_usd_per_run`, and fails closed before any
+  provider call unless a complete `model_provider_endpoint` grant exists.
+- Provider config must name the provider, model, HTTPS `base_url`, credential
+  environment variable name, cost cap, and deterministic input/output unit cost
+  estimates. `relia check` discloses the redacted-record provider boundary
+  without reading credential values or opening network sockets.
+- `relia serve --format json` exposes a local MCP capability manifest for
+  `recall`, `assess`, and `coverage` over active accepted rules only. Hosted or
+  network transports fail closed in the MVP default posture.
+- `relia advise --input <diff>` reuses the assessment engine and writes
+  `.relia/reports/advisory-state.json` plus, when appropriate,
+  `.relia/reports/advisory-comment.md`. The planner is silent for
+  `covered_clean`, below `advise.min_confidence`, disabled advise config, and
+  unchanged diff fingerprints.
+- `.github/workflows/relia-advisory.yml` wraps the planner on pull requests and
+  uses the explicit GitHub Actions token only in the publish step to create or
+  update one hidden-marker Relia comment. The workflow is advisory-only by
+  default and is not part of the required-check manifest.
+
 ## Structured Data, Proof, Budgets, And Redaction
 
 - PR, check-run, experience, memory, MCP, assessment, report, and config data
@@ -320,6 +344,10 @@ T8 adds report/evidence feedback on top of the local artifact path:
   environment, cost cap, redaction posture, and network allowlist through a
   complete `model_provider_endpoint` grant. Generic network or credential
   approval does not satisfy this gate.
+- The offline runner may build provider request and cost plans, but it must not
+  read model-provider credential values or perform provider HTTP calls without
+  the grant. Cost plans use configured per-1K-token estimates so validation does
+  not depend on external pricing tables.
 - Release binaries, containers, and tracked source must not include model weights
   or inference-runtime payloads unless a future distribution decision records
   license, size, security, cross-platform, update, and rollback evidence.
