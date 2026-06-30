@@ -20,7 +20,7 @@
     ".factory/artifacts/pr-lifecycle/relia-mvp-t9/post-merge-report.json"
   ],
   "recovery_notes": [
-    "scope_closure_report strict evidence .factory/artifacts/task-runs/T9/scope-closure-report.json was superseded by terminal merged-PR recovery evidence",
+    "scope_closure_report strict evidence .factory/artifacts/task-runs/T9/scope-closure-report.json was materialized from terminal merged-PR recovery evidence",
     "pr_lifecycle_report strict evidence .factory/artifacts/pr-lifecycle/relia-mvp-t9/pr-lifecycle-report.json was superseded by terminal merged-PR recovery evidence",
     "factoryd_run_once_report strict evidence .factory/artifacts/task-runs/T9/factoryd-run-once-report.json was superseded by terminal merged-PR recovery evidence"
   ],
