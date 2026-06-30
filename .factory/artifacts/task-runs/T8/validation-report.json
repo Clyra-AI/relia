@@ -53,6 +53,9 @@
     "make prepush-full",
     "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
     "go test ./cmd/relia -run 'TestIngestRejectsNestedSourceMetadataBeforePersistence|TestRecurrenceReportSchemaKeepsT8FieldsOptionalForV1|TestBacktest(SaveBaselineReportsFreshCurrentValues|TopRepeatedMistakesAggregateByMatchedSignature|GroupsEquivalentCanonicalSignatureFields|GroupsEquivalentMessageFingerprint)|TestBacktestCommandResultCountsAgentAttributedExperiencesSeparatelyFromPRs'",
+    "python3 -m json.tool schemas/recurrence-report.schema.json",
+    "gofmt -w cmd/relia/main_test.go",
+    "go test ./cmd/relia -run 'TestRecurrenceReportSchemaKeepsT8FieldsOptionalForV1|TestIngestRejectsNestedSourceMetadataBeforePersistence'",
     "python3 -m json.tool schemas/recurrence-report.schema.json"
   ],
   "docs_sync_result": {
@@ -110,6 +113,11 @@
       "command": "go test ./cmd/relia -run 'TestIngestRejectsNestedSourceMetadataBeforePersistence|TestRecurrenceReportSchemaKeepsT8FieldsOptionalForV1|TestBacktest(SaveBaselineReportsFreshCurrentValues|TopRepeatedMistakesAggregateByMatchedSignature|GroupsEquivalentCanonicalSignatureFields|GroupsEquivalentMessageFingerprint)|TestBacktestCommandResultCountsAgentAttributedExperiencesSeparatelyFromPRs'",
       "exit_code": 0,
       "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestRecurrenceReportSchemaKeepsT8FieldsOptionalForV1|TestIngestRejectsNestedSourceMetadataBeforePersistence'",
+      "exit_code": 0,
+      "status": "pass"
     }
   ],
   "green_evidence": [
@@ -129,6 +137,11 @@
       "status": "pass"
     },
     {
+      "command": "go test ./cmd/relia -run 'TestRecurrenceReportSchemaKeepsT8FieldsOptionalForV1|TestIngestRejectsNestedSourceMetadataBeforePersistence'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
       "command": "make prepush-full",
       "exit_code": 0,
       "status": "pass"
@@ -144,7 +157,7 @@
     "status": "not_worker_owned"
   },
   "migration_result": {
-    "notes": "Pre-1.0 recurrence report output gained explicit metrics, but new T8 schema fields remain optional for schema_version 1.0 compatibility; no persisted user-authored migration is required.",
+    "notes": "Pre-1.0 recurrence report output gained explicit metrics, diagnostics, feedback, and badge fields, but newly emitted T8 schema fields remain optional for schema_version 1.0 compatibility; no persisted user-authored migration is required.",
     "status": "pass"
   },
   "path_policy_result": {
@@ -170,7 +183,7 @@
     "notes": "Resolved the Codex review repair findings inside the T8 reporting-and-evidence slice without changing lifecycle state, PR state, runtime pins, provider posture, or Factory daemon state.",
     "status": "pass"
   },
-  "produced_at": "2026-06-30T12:30:13Z",
+  "produced_at": "2026-06-30T12:39:50Z",
   "red_evidence": [
     {
       "command": "go test ./cmd/relia",
@@ -180,7 +193,7 @@
       "status": "expected_fail"
     }
   ],
-  "repair_task_id": "20260630T113048.990974000Z-relia-T8-review-3-repair",
+  "repair_task_id": "20260630T113048.990974000Z-relia-T8-review-4-repair",
   "residual_risks": [
     "Lifecycle evidence remains assigned to factoryd workers after local validation."
   ],

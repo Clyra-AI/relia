@@ -3608,7 +3608,7 @@ func TestRecurrenceReportSchemaKeepsT8FieldsOptionalForV1(t *testing.T) {
 	for _, value := range requiredValues {
 		required[fmt.Sprint(value)] = true
 	}
-	for _, field := range []string{"metrics", "top_repeated_mistakes"} {
+	for _, field := range []string{"metrics", "top_repeated_mistakes", "diagnostics", "operator_feedback", "badge"} {
 		if required[field] {
 			t.Fatalf("%s must stay optional while recurrence-report schema_version remains 1.0", field)
 		}

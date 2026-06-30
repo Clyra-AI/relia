@@ -20,9 +20,6 @@
     "baseline",
     "gate",
     "citations",
-    "diagnostics",
-    "operator_feedback",
-    "badge",
     "metadata"
   ],
   "properties": {
