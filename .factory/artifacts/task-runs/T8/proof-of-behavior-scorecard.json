@@ -12,13 +12,13 @@
     "README.md",
     "docs/dev/dev_guides.md"
   ],
-  "produced_at": "2026-06-30T13:18:58Z",
+  "produced_at": "2026-06-30T13:27:58Z",
   "redaction_posture": {
     "classification": "customer_safe",
     "notes": "No customer data, live credentials, network calls, or unredacted machine-local paths were introduced.",
     "status": "pass"
   },
-  "repair_task_id": "20260630T113048.990974000Z-relia-T8-review-7-repair",
+  "repair_task_id": "20260630T113048.990974000Z-relia-T8-review-8-repair",
   "required_proof_level": "user_visible_behavior",
   "schema_version": "1.0",
   "scorecard": [
@@ -59,6 +59,16 @@
       "proof_refs": [
         "cmd/relia/main.go",
         "cmd/relia/main_test.go",
+        "TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite"
+      ],
+      "status": "pass"
+    },
+    {
+      "behavior": "Metadata-level object, event, type, and kind markers marked as self-reports or reflections fail before ingest persistence or canonical distill memory-rule writes.",
+      "proof_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        "TestIngestRejectsNestedSourceMetadataBeforePersistence",
         "TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite"
       ],
       "status": "pass"
