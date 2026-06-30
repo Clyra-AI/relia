@@ -3161,12 +3161,13 @@ func adviseResult(args []string, start time.Time) CommandResult {
 	shouldComment, skipReason := advisoryCommentDecision(settings, assessment, diffFingerprint, previousState, start)
 	body := ""
 	if shouldComment {
-		body = renderAdvisoryComment(assessment, touchedPaths, diffFingerprint, start)
+		body = renderAdvisoryComment(assessment, touchedPaths, diffFingerprint, start, skipReason)
 		if commandErr := writeRepoRelativeFile(root, options.CommentPath, []byte(body), "advisory comment"); commandErr != nil {
 			return withFormat(errorResult("advise", "advise", commandErr, start))
 		}
 	}
 	generatedAt := start.UTC().Format(time.RFC3339)
+	publishedRiskLevel := advisoryPublishedRiskLevel(assessment, skipReason)
 	stateDiffFingerprint := diffFingerprint
 	stateGeneratedAt := generatedAt
 	stateMetadata := map[string]any{
@@ -3174,6 +3175,7 @@ func adviseResult(args []string, start time.Time) CommandResult {
 		"generated_at":              stateGeneratedAt,
 		"hosted_service_required":   false,
 		"github_api_required_later": shouldComment,
+		"risk_level":                publishedRiskLevel,
 	}
 	if skipReason == "reassess_debounce_window" && previousState.DiffFingerprint != "" {
 		stateDiffFingerprint = previousState.DiffFingerprint
@@ -3300,6 +3302,7 @@ type advisoryPriorState struct {
 	DiffFingerprint string
 	GeneratedAt     time.Time
 	RiskLevel       string
+	SkipReason      string
 }
 
 func advisoryPreviousState(root string, statePath string) (advisoryPriorState, *CommandError) {
@@ -3321,6 +3324,7 @@ func advisoryPreviousState(root string, statePath string) (advisoryPriorState, *
 	prior := advisoryPriorState{}
 	fingerprint, _ := state["diff_fingerprint"].(string)
 	prior.DiffFingerprint = fingerprint
+	prior.SkipReason, _ = state["skip_reason"].(string)
 	if metadata, ok := state["metadata"].(map[string]any); ok {
 		if generatedAt, _ := metadata["generated_at"].(string); generatedAt != "" {
 			if parsed, err := time.Parse(time.RFC3339, generatedAt); err == nil {
@@ -3330,7 +3334,7 @@ func advisoryPreviousState(root string, statePath string) (advisoryPriorState, *
 		prior.RiskLevel, _ = metadata["risk_level"].(string)
 	}
 	if assessment, ok := state["assessment"].(map[string]any); ok {
-		if riskLevel, _ := assessment["risk_level"].(string); riskLevel != "" {
+		if riskLevel, _ := assessment["risk_level"].(string); riskLevel != "" && prior.RiskLevel == "" {
 			prior.RiskLevel = riskLevel
 		}
 	}
@@ -3354,6 +3358,15 @@ func advisoryCommentDecision(settings adviseSettings, assessment riskAssessment,
 		}
 		return false, "covered_clean"
 	}
+	if advisoryBelowMinConfidence(settings, assessment) {
+		if previousFingerprint != "" {
+			if previousFingerprint == diffFingerprint && previousState.RiskLevel == "below_min_confidence" {
+				return false, "unchanged_diff_fingerprint"
+			}
+			return true, "below_min_confidence"
+		}
+		return false, "below_min_confidence"
+	}
 	if previousFingerprint != "" && previousFingerprint == diffFingerprint {
 		return false, "unchanged_diff_fingerprint"
 	}
@@ -3363,10 +3376,13 @@ func advisoryCommentDecision(settings adviseSettings, assessment riskAssessment,
 			return false, "reassess_debounce_window"
 		}
 	}
-	if assessment.RiskLevel != "no_coverage" && advisoryMaxConfidence(assessment) < settings.MinConfidence {
-		return false, "below_min_confidence"
-	}
 	return true, ""
+}
+
+func advisoryBelowMinConfidence(settings adviseSettings, assessment riskAssessment) bool {
+	return assessment.RiskLevel != "no_coverage" &&
+		assessment.RiskLevel != "covered_clean" &&
+		advisoryMaxConfidence(assessment) < settings.MinConfidence
 }
 
 func advisoryMaxConfidence(assessment riskAssessment) float64 {
@@ -3390,9 +3406,31 @@ func advisoryCommentStrategy(settings adviseSettings) map[string]any {
 	}
 }
 
-func renderAdvisoryComment(assessment riskAssessment, touchedPaths []string, diffFingerprint string, generatedAt time.Time) string {
+func advisoryPublishedRiskLevel(assessment riskAssessment, skipReason string) string {
+	if skipReason == "below_min_confidence" {
+		return "below_min_confidence"
+	}
+	return assessment.RiskLevel
+}
+
+func renderAdvisoryComment(assessment riskAssessment, touchedPaths []string, diffFingerprint string, generatedAt time.Time, skipReason string) string {
 	var builder strings.Builder
-	builder.WriteString("<!-- relia-advisory:v1 diff_fingerprint=" + diffFingerprint + " generated_at=" + generatedAt.UTC().Format(time.RFC3339) + " risk_level=" + assessment.RiskLevel + " -->\n")
+	builder.WriteString("<!-- relia-advisory:v1 diff_fingerprint=" + diffFingerprint + " generated_at=" + generatedAt.UTC().Format(time.RFC3339) + " risk_level=" + advisoryPublishedRiskLevel(assessment, skipReason) + " -->\n")
+	if skipReason == "below_min_confidence" {
+		builder.WriteString("Relia advisory - current diff is below the advisory confidence threshold. Prior advisory cleared.")
+		if len(assessment.Matches) > 0 {
+			builder.WriteString(" Matched ")
+			for index, match := range assessment.Matches {
+				if index > 0 {
+					builder.WriteString(", ")
+				}
+				builder.WriteString("`" + match.RuleID + "`")
+				builder.WriteString(" (confidence " + yamlFloat(match.Confidence) + ")")
+			}
+		}
+		builder.WriteString(".\n")
+		return builder.String()
+	}
 	switch assessment.RiskLevel {
 	case "no_coverage":
 		builder.WriteString("Relia advisory - no prior active memory covers ")
