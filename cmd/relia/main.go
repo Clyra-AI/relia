@@ -1097,11 +1097,23 @@ func loadBacktestExperiences(root string) ([]backtestExperience, []string, strin
 			if strings.TrimSpace(line) == "" {
 				continue
 			}
-			var record experienceRecord
-			if err := decodeJSONUseNumber(line, &record); err != nil {
+			ref := fmt.Sprintf("%s:%d", rel, lineNumber+1)
+			var event map[string]any
+			if err := decodeJSONUseNumber(line, &event); err != nil {
 				return nil, nil, "", artifactContractError(fmt.Sprintf("experience shard line %d is not valid JSON", lineNumber+1), fmt.Sprintf("%s:%d", rel, lineNumber+1))
 			}
-			recordedAt, commandErr := validateBacktestExperience(record, fmt.Sprintf("%s:%d", rel, lineNumber+1))
+			if commandErr := validateEventMemorySource(event, ref); commandErr != nil {
+				return nil, nil, "", commandErr
+			}
+			content, err := json.Marshal(event)
+			if err != nil {
+				return nil, nil, "", internalError("could not decode experience shard line", err)
+			}
+			var record experienceRecord
+			if err := decodeJSONUseNumber(string(content), &record); err != nil {
+				return nil, nil, "", artifactContractError(fmt.Sprintf("experience shard line %d is not valid JSON", lineNumber+1), ref)
+			}
+			recordedAt, commandErr := validateBacktestExperience(record, ref)
 			if commandErr != nil {
 				return nil, nil, "", commandErr
 			}

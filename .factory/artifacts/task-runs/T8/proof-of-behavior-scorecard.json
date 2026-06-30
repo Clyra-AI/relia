@@ -12,13 +12,13 @@
     "README.md",
     "docs/dev/dev_guides.md"
   ],
-  "produced_at": "2026-06-30T13:27:58Z",
+  "produced_at": "2026-06-30T13:39:48Z",
   "redaction_posture": {
     "classification": "customer_safe",
     "notes": "No customer data, live credentials, network calls, or unredacted machine-local paths were introduced.",
     "status": "pass"
   },
-  "repair_task_id": "20260630T113048.990974000Z-relia-T8-review-8-repair",
+  "repair_task_id": "20260630T113048.990974000Z-relia-T8-review-9-repair",
   "required_proof_level": "user_visible_behavior",
   "schema_version": "1.0",
   "scorecard": [
@@ -70,6 +70,15 @@
         "cmd/relia/main_test.go",
         "TestIngestRejectsNestedSourceMetadataBeforePersistence",
         "TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite"
+      ],
+      "status": "pass"
+    },
+    {
+      "behavior": "Backtest and shard-backed distill reject existing experience shard lines marked with top-level self-report or reflection markers before struct decoding.",
+      "proof_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        "TestShardConsumersRejectSelfReportMarkersBeforeStructDecode"
       ],
       "status": "pass"
     },

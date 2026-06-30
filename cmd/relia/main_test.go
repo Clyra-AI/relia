@@ -1109,6 +1109,45 @@ func TestIngestReportsCorruptShardAsProvenanceIntegrity(t *testing.T) {
 	}
 }
 
+func TestShardConsumersRejectSelfReportMarkersBeforeStructDecode(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		args []string
+	}{
+		{
+			name: "backtest",
+			args: []string{"--json", "backtest", "--window", "180d"},
+		},
+		{
+			name: "distill",
+			args: []string{"--json", "distill", "--format", "json"},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			tempDir := setupContractRepo(t)
+			t.Chdir(tempDir)
+			record := canonicalExperienceRecordMapForTest("exp_shard_self_report", 531)
+			record["event_type"] = "agent_reflection"
+			content, err := json.Marshal(record)
+			if err != nil {
+				t.Fatal(err)
+			}
+			writeFileForTest(t, filepath.Join(tempDir, ".relia", "experiences", "2026-04.jsonl"), string(content)+"\n")
+
+			stdout, stderr, code := runForTest(t, tc.args, false)
+
+			if code != ExitValidation {
+				t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+			}
+			result := decodeResult(t, stdout)
+			if result.Errors[0].Type != "artifact_contract_validation_failed" ||
+				!strings.Contains(result.Errors[0].Message, "self-reports") {
+				t.Fatalf("errors = %#v", result.Errors)
+			}
+		})
+	}
+}
+
 func TestIngestRejectsFractionalPRNumbers(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)

@@ -73,6 +73,10 @@
     "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
     "python3 -m json.tool schemas/recurrence-report.schema.json",
     "go test ./cmd/relia -run 'TestIngestRejectsNestedSourceMetadataBeforePersistence|TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite'",
+    "make prepush-full",
+    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
+    "python3 -m json.tool schemas/recurrence-report.schema.json",
+    "go test ./cmd/relia -run 'TestShardConsumersRejectSelfReportMarkersBeforeStructDecode|TestIngestRejectsNestedSourceMetadataBeforePersistence|TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite'",
     "make prepush-full"
   ],
   "docs_sync_result": {
@@ -103,7 +107,7 @@
   "final_validation_evidence": [
     {
       "command": "make prepush-full",
-      "evidence_summary": "go test ./... passed after the focused latest-head Codex review repair; coverage 80.2% against the 75.0% minimum; repo-pack validation and demo contracts passed.",
+      "evidence_summary": "go test ./... passed after the focused latest-head Codex review repair; coverage 80.1% against the 75.0% minimum; repo-pack validation and demo contracts passed.",
       "exit_code": 0,
       "status": "pass"
     },
@@ -161,6 +165,11 @@
       "command": "go test ./cmd/relia -run 'TestIngestRejectsNestedSourceMetadataBeforePersistence|TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite'",
       "exit_code": 0,
       "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestShardConsumersRejectSelfReportMarkersBeforeStructDecode|TestIngestRejectsNestedSourceMetadataBeforePersistence|TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite'",
+      "exit_code": 0,
+      "status": "pass"
     }
   ],
   "green_evidence": [
@@ -210,6 +219,11 @@
       "status": "pass"
     },
     {
+      "command": "go test ./cmd/relia -run 'TestShardConsumersRejectSelfReportMarkersBeforeStructDecode|TestIngestRejectsNestedSourceMetadataBeforePersistence|TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
       "command": "make prepush-full",
       "exit_code": 0,
       "status": "pass"
@@ -251,7 +265,7 @@
     "notes": "Resolved the Codex review repair findings inside the T8 reporting-and-evidence slice without changing lifecycle state, PR state, runtime pins, provider posture, or Factory daemon state.",
     "status": "pass"
   },
-  "produced_at": "2026-06-30T13:27:58Z",
+  "produced_at": "2026-06-30T13:39:48Z",
   "red_evidence": [
     {
       "command": "go test ./cmd/relia",
@@ -261,7 +275,7 @@
       "status": "expected_fail"
     }
   ],
-  "repair_task_id": "20260630T113048.990974000Z-relia-T8-review-8-repair",
+  "repair_task_id": "20260630T113048.990974000Z-relia-T8-review-9-repair",
   "residual_risks": [
     "Lifecycle evidence remains assigned to factoryd workers after local validation."
   ],
