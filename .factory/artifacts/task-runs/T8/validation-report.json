@@ -80,6 +80,8 @@
     "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
     "go test ./cmd/relia -run 'TestIngestPersistsCanonicalExperienceWithRedactionAndProvenance|TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline|TestBuildReportBadgeComputesFreshness|TestBuildReportBadgeComputesActivityStaleness'",
     "go test ./cmd/relia -run 'TestBacktestInteractiveOutputShowsOperatorSummaryAndBadge|TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline|TestBuildReportBadgeComputesFreshness|TestBuildReportBadgeComputesActivityStaleness'",
+    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
+    "go test ./cmd/relia -run 'TestIngestRejectsNestedSourceMetadataBeforePersistence|TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite'",
     "git diff --check",
     "make prepush-full"
   ],
@@ -299,7 +301,7 @@
     "notes": "Resolved the Codex review repair findings inside the T8 reporting-and-evidence slice without changing lifecycle state, PR state, runtime pins, provider posture, or Factory daemon state.",
     "status": "pass"
   },
-  "produced_at": "2026-06-30T14:01:09Z",
+  "produced_at": "2026-06-30T14:08:44Z",
   "red_evidence": [
     {
       "command": "go test ./cmd/relia",
@@ -309,7 +311,7 @@
       "status": "expected_fail"
     }
   ],
-  "repair_task_id": "20260630T113048.990974000Z-relia-T8-review-10-repair",
+  "repair_task_id": "20260630T113048.990974000Z-relia-T8-review-11-repair",
   "residual_risks": [
     "Lifecycle evidence remains assigned to factoryd workers after local validation."
   ],
