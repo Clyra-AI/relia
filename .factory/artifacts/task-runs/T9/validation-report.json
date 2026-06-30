@@ -152,6 +152,12 @@
       "evidence": "No whitespace errors in the repair diff.",
       "exit_code": 0,
       "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -count=1 -run 'TestAdvise|TestAdvisoryWorkflow'",
+      "evidence": "Second focused advisory repair coverage passed for persisted checkout credentials and covered-clean comment clearing.",
+      "exit_code": 0,
+      "status": "pass"
     }
   ],
   "path_policy_result": {
@@ -178,11 +184,11 @@
     "status": "pass"
   },
   "residual_risks": [
-    "Live GitHub comment publishing was not attempted by this worker because network and credential work require explicit approval; workflow behavior is covered by static regression tests and local validation."
+    "Local validation covers workflow token posture and advisory publish planning statically; live GitHub comment publishing is exercised only by the PR workflow after push."
   ],
   "schema_version": "1.0",
   "status": "pass",
   "task_id": "T9",
-  "test_first_skipped_reason": "Codex review supplied the failing behavioral evidence for this repair. The repair encoded the three review findings as focused regression coverage and then ran the focused Go test and final repository validation.",
-  "updated_at": "2026-06-30T19:26:53Z"
+  "test_first_skipped_reason": "Codex review supplied the failing behavioral evidence for this repair. The repair encoded the review findings as focused regression coverage and then ran the focused Go test and final repository validation.",
+  "updated_at": "2026-06-30T19:40:04Z"
 }
