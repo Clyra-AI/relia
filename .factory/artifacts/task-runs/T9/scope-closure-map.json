@@ -1,0 +1,230 @@
+{
+  "acceptance_results": [
+    {
+      "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-010",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T9/proof-of-behavior-scorecard.json",
+        ".factory/artifacts/task-runs/T9/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T9/validation-report.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-report.json",
+        "README.md",
+        ".github/workflows/relia-advisory.yml",
+        "cmd/relia/main_test.go",
+        "cmd/relia/main.go",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        "https://github.com/Clyra-AI/relia/pull/59",
+        "refs/remotes/origin/main@5462fad04f0c8f097dffd2449f5f967a112db42d"
+      ],
+      "status": "implemented",
+      "summary": ""
+    },
+    {
+      "acceptance_item_id": "FR2-REPO-NATIVE-LOCAL-FIRST-OPERATION-001",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T9/proof-of-behavior-scorecard.json",
+        "README.md",
+        ".factory/artifacts/task-runs/T9/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T9/validation-report.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-report.json",
+        ".github/workflows/relia-advisory.yml",
+        "cmd/relia/main_test.go",
+        "cmd/relia/main.go",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        "https://github.com/Clyra-AI/relia/pull/59",
+        "refs/remotes/origin/main@5462fad04f0c8f097dffd2449f5f967a112db42d"
+      ],
+      "status": "implemented",
+      "summary": ""
+    },
+    {
+      "acceptance_item_id": "FR20-ADVISORY-ONLY-DEFAULT-001",
+      "evidence_refs": [
+        ".github/workflows/relia-advisory.yml",
+        "cmd/relia/main_test.go",
+        ".factory/artifacts/task-runs/T9/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T9/validation-report.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T9/proof-of-behavior-scorecard.json",
+        "README.md",
+        "cmd/relia/main.go",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        "https://github.com/Clyra-AI/relia/pull/59",
+        "refs/remotes/origin/main@5462fad04f0c8f097dffd2449f5f967a112db42d"
+      ],
+      "status": "implemented",
+      "summary": ""
+    },
+    {
+      "acceptance_item_id": "FR23-PROVIDER-ADAPTERS-AND-NO-LLM-MODE-001",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T9/proof-of-behavior-scorecard.json",
+        ".factory/artifacts/task-runs/T9/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T9/validation-report.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-report.json",
+        "README.md",
+        ".github/workflows/relia-advisory.yml",
+        "cmd/relia/main_test.go",
+        "cmd/relia/main.go",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        "https://github.com/Clyra-AI/relia/pull/59",
+        "refs/remotes/origin/main@5462fad04f0c8f097dffd2449f5f967a112db42d"
+      ],
+      "status": "implemented",
+      "summary": ""
+    },
+    {
+      "acceptance_item_id": "FR24-COST-VISIBILITY-001",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T9/proof-of-behavior-scorecard.json",
+        ".factory/artifacts/task-runs/T9/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T9/validation-report.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-report.json",
+        "README.md",
+        ".github/workflows/relia-advisory.yml",
+        "cmd/relia/main_test.go",
+        "cmd/relia/main.go",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        "https://github.com/Clyra-AI/relia/pull/59",
+        "refs/remotes/origin/main@5462fad04f0c8f097dffd2449f5f967a112db42d"
+      ],
+      "status": "implemented",
+      "summary": ""
+    },
+    {
+      "acceptance_item_id": "FR25-PORTABLE-ARTIFACTS-001",
+      "evidence_refs": [
+        "README.md",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        ".factory/artifacts/task-runs/T9/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T9/validation-report.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T9/proof-of-behavior-scorecard.json",
+        ".github/workflows/relia-advisory.yml",
+        "cmd/relia/main_test.go",
+        "cmd/relia/main.go",
+        "https://github.com/Clyra-AI/relia/pull/59",
+        "refs/remotes/origin/main@5462fad04f0c8f097dffd2449f5f967a112db42d"
+      ],
+      "status": "implemented",
+      "summary": ""
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-010",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T9/proof-of-behavior-scorecard.json",
+        ".factory/artifacts/task-runs/T9/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T9/validation-report.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-report.json",
+        "README.md",
+        ".github/workflows/relia-advisory.yml",
+        "cmd/relia/main_test.go",
+        "cmd/relia/main.go",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        "https://github.com/Clyra-AI/relia/pull/59",
+        "refs/remotes/origin/main@5462fad04f0c8f097dffd2449f5f967a112db42d"
+      ],
+      "status": "implemented",
+      "summary": ""
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-011",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T9/proof-of-behavior-scorecard.json",
+        ".factory/artifacts/task-runs/T9/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T9/validation-report.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-report.json",
+        "README.md",
+        ".github/workflows/relia-advisory.yml",
+        "cmd/relia/main_test.go",
+        "cmd/relia/main.go",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        "https://github.com/Clyra-AI/relia/pull/59",
+        "refs/remotes/origin/main@5462fad04f0c8f097dffd2449f5f967a112db42d"
+      ],
+      "status": "implemented",
+      "summary": ""
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-019",
+      "evidence_refs": [
+        ".github/workflows/relia-advisory.yml",
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        ".factory/artifacts/task-runs/T9/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T9/validation-report.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T9/proof-of-behavior-scorecard.json",
+        "README.md",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        "https://github.com/Clyra-AI/relia/pull/59",
+        "refs/remotes/origin/main@5462fad04f0c8f097dffd2449f5f967a112db42d"
+      ],
+      "status": "implemented",
+      "summary": ""
+    },
+    {
+      "acceptance_item_id": "NFR10-COST-VISIBILITY-001",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T9/proof-of-behavior-scorecard.json",
+        ".factory/artifacts/task-runs/T9/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T9/validation-report.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-report.json",
+        "README.md",
+        ".github/workflows/relia-advisory.yml",
+        "cmd/relia/main_test.go",
+        "cmd/relia/main.go",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        "https://github.com/Clyra-AI/relia/pull/59",
+        "refs/remotes/origin/main@5462fad04f0c8f097dffd2449f5f967a112db42d"
+      ],
+      "status": "implemented",
+      "summary": ""
+    },
+    {
+      "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-005",
+      "evidence_refs": [
+        ".github/workflows/relia-advisory.yml",
+        "cmd/relia/main_test.go",
+        ".factory/artifacts/task-runs/T9/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T9/validation-report.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T9/proof-of-behavior-scorecard.json",
+        "README.md",
+        "cmd/relia/main.go",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        "https://github.com/Clyra-AI/relia/pull/59",
+        "refs/remotes/origin/main@5462fad04f0c8f097dffd2449f5f967a112db42d"
+      ],
+      "status": "implemented",
+      "summary": ""
+    }
+  ],
+  "artifact_type": "task_scope_closure_map",
+  "canonical_scope_closure_map_modified": false,
+  "canonical_scope_closure_map_ref": ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+  "schema_version": "1.0",
+  "task_id": "T9",
+  "work_item_id": "relia-mvp-t9"
+}

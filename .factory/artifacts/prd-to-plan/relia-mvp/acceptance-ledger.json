@@ -62,13 +62,30 @@
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#fr2-repo-native-local-first-operation",
       "source_text": "The MVP must work without a hosted Relia account. Memory lives in the repository.",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T9"
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/11/validation_commands"
-      ]
+      ],
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T9/proof-of-behavior-scorecard.json",
+        "README.md",
+        ".factory/artifacts/task-runs/T9/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T9/validation-report.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-report.json",
+        ".github/workflows/relia-advisory.yml",
+        "cmd/relia/main_test.go",
+        "cmd/relia/main.go",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        "https://github.com/Clyra-AI/relia/pull/59",
+        "refs/remotes/origin/main@5462fad04f0c8f097dffd2449f5f967a112db42d"
+      ],
+      "recorded_by": "factoryd sync-task-closure",
+      "recorded_at": "2026-06-30T21:46:06Z"
     },
     {
       "acceptance_item_id": "FR3-GITHUB-OUTCOME-INTAKE-001",
@@ -536,13 +553,30 @@
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#fr20-advisory-only-default",
       "source_text": "The GitHub Action must never block merges by default. The recurrence gate requires explicit configuration and exits `5` when tripped.",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T9"
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/11/validation_commands"
-      ]
+      ],
+      "evidence_refs": [
+        ".github/workflows/relia-advisory.yml",
+        "cmd/relia/main_test.go",
+        ".factory/artifacts/task-runs/T9/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T9/validation-report.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T9/proof-of-behavior-scorecard.json",
+        "README.md",
+        "cmd/relia/main.go",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        "https://github.com/Clyra-AI/relia/pull/59",
+        "refs/remotes/origin/main@5462fad04f0c8f097dffd2449f5f967a112db42d"
+      ],
+      "recorded_by": "factoryd sync-task-closure",
+      "recorded_at": "2026-06-30T21:46:06Z"
     },
     {
       "acceptance_item_id": "FR21-FORWARD-ERR-TRACKING-001",
@@ -616,13 +650,30 @@
       "risk_class": "high",
       "source_ref": "docs/product/prd.md#fr23-provider-adapters-and-no-llm-mode",
       "source_text": "Distillation must support OpenAI-compatible and Anthropic adapters behind a pluggable interface, BYO key, cost caps, and a deterministic no-LLM mode.",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T9"
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/11/validation_commands"
-      ]
+      ],
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T9/proof-of-behavior-scorecard.json",
+        ".factory/artifacts/task-runs/T9/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T9/validation-report.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-report.json",
+        "README.md",
+        ".github/workflows/relia-advisory.yml",
+        "cmd/relia/main_test.go",
+        "cmd/relia/main.go",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        "https://github.com/Clyra-AI/relia/pull/59",
+        "refs/remotes/origin/main@5462fad04f0c8f097dffd2449f5f967a112db42d"
+      ],
+      "recorded_by": "factoryd sync-task-closure",
+      "recorded_at": "2026-06-30T21:46:06Z"
     },
     {
       "acceptance_item_id": "FR24-COST-VISIBILITY-001",
@@ -641,13 +692,30 @@
       "risk_class": "high",
       "source_ref": "docs/product/prd.md#fr24-cost-visibility",
       "source_text": "Distill runs using a provider must report token and estimated cost information.",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T9"
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/11/validation_commands"
-      ]
+      ],
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T9/proof-of-behavior-scorecard.json",
+        ".factory/artifacts/task-runs/T9/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T9/validation-report.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-report.json",
+        "README.md",
+        ".github/workflows/relia-advisory.yml",
+        "cmd/relia/main_test.go",
+        "cmd/relia/main.go",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        "https://github.com/Clyra-AI/relia/pull/59",
+        "refs/remotes/origin/main@5462fad04f0c8f097dffd2449f5f967a112db42d"
+      ],
+      "recorded_by": "factoryd sync-task-closure",
+      "recorded_at": "2026-06-30T21:46:06Z"
     },
     {
       "acceptance_item_id": "FR25-PORTABLE-ARTIFACTS-001",
@@ -664,13 +732,30 @@
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#fr25-portable-artifacts",
       "source_text": "Experience records, rules, memory pages, reports, and baselines must remain useful outside any hosted service.",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T9"
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/11/validation_commands"
-      ]
+      ],
+      "evidence_refs": [
+        "README.md",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        ".factory/artifacts/task-runs/T9/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T9/validation-report.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T9/proof-of-behavior-scorecard.json",
+        ".github/workflows/relia-advisory.yml",
+        "cmd/relia/main_test.go",
+        "cmd/relia/main.go",
+        "https://github.com/Clyra-AI/relia/pull/59",
+        "refs/remotes/origin/main@5462fad04f0c8f097dffd2449f5f967a112db42d"
+      ],
+      "recorded_by": "factoryd sync-task-closure",
+      "recorded_at": "2026-06-30T21:46:06Z"
     },
     {
       "acceptance_item_id": "NFR1-FAST-FIRST-VALUE-001",
@@ -938,13 +1023,30 @@
       "risk_class": "high",
       "source_ref": "docs/product/prd.md#nfr10-cost-visibility",
       "source_text": "Provider-backed distillation must show token and estimated cost information and respect `max_cost_usd_per_run`.",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T9"
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/11/validation_commands"
-      ]
+      ],
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T9/proof-of-behavior-scorecard.json",
+        ".factory/artifacts/task-runs/T9/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T9/validation-report.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-report.json",
+        "README.md",
+        ".github/workflows/relia-advisory.yml",
+        "cmd/relia/main_test.go",
+        "cmd/relia/main.go",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        "https://github.com/Clyra-AI/relia/pull/59",
+        "refs/remotes/origin/main@5462fad04f0c8f097dffd2449f5f967a112db42d"
+      ],
+      "recorded_by": "factoryd sync-task-closure",
+      "recorded_at": "2026-06-30T21:46:06Z"
     },
     {
       "acceptance_item_id": "NFR11-STOCHASTIC-HONESTY-001",
@@ -1341,13 +1443,31 @@
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
       "source_text": "tiered clustering (deterministic signature keys, explicitly pulled local embeddings, provider embeddings opt-in)",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T7"
       ],
       "validation_refs": [
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/8/validation_commands"
-      ]
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/8/validation_commands",
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/11/validation_commands"
+      ],
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T9/proof-of-behavior-scorecard.json",
+        ".factory/artifacts/task-runs/T9/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T9/validation-report.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-report.json",
+        "README.md",
+        ".github/workflows/relia-advisory.yml",
+        "cmd/relia/main_test.go",
+        "cmd/relia/main.go",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        "https://github.com/Clyra-AI/relia/pull/59",
+        "refs/remotes/origin/main@5462fad04f0c8f097dffd2449f5f967a112db42d"
+      ],
+      "recorded_by": "factoryd sync-task-closure",
+      "recorded_at": "2026-06-30T21:46:06Z"
     },
     {
       "acceptance_item_id": "MVP-IN-SCOPE-011",
@@ -1366,13 +1486,30 @@
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
       "source_text": "LLM rule drafting (OpenAI-compatible and Anthropic adapters) and no-LLM mode",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T9"
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/11/validation_commands"
-      ]
+      ],
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T9/proof-of-behavior-scorecard.json",
+        ".factory/artifacts/task-runs/T9/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T9/validation-report.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-report.json",
+        "README.md",
+        ".github/workflows/relia-advisory.yml",
+        "cmd/relia/main_test.go",
+        "cmd/relia/main.go",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        "https://github.com/Clyra-AI/relia/pull/59",
+        "refs/remotes/origin/main@5462fad04f0c8f097dffd2449f5f967a112db42d"
+      ],
+      "recorded_by": "factoryd sync-task-closure",
+      "recorded_at": "2026-06-30T21:46:06Z"
     },
     {
       "acceptance_item_id": "MVP-IN-SCOPE-012",
@@ -1554,13 +1691,30 @@
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
       "source_text": "GitHub Action with one advisory, evidence-citing PR comment",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T9"
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/11/validation_commands"
-      ]
+      ],
+      "evidence_refs": [
+        ".github/workflows/relia-advisory.yml",
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        ".factory/artifacts/task-runs/T9/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T9/validation-report.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T9/proof-of-behavior-scorecard.json",
+        "README.md",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        "https://github.com/Clyra-AI/relia/pull/59",
+        "refs/remotes/origin/main@5462fad04f0c8f097dffd2449f5f967a112db42d"
+      ],
+      "recorded_by": "factoryd sync-task-closure",
+      "recorded_at": "2026-06-30T21:46:06Z"
     },
     {
       "acceptance_item_id": "MVP-IN-SCOPE-020",
@@ -2178,13 +2332,30 @@
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#distill-review-memory-page-acceptance-tests",
       "source_text": "Provider-backed distill reports cost and respects the configured cap.",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T9"
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/11/validation_commands"
-      ]
+      ],
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T9/proof-of-behavior-scorecard.json",
+        ".factory/artifacts/task-runs/T9/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T9/validation-report.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-report.json",
+        "README.md",
+        ".github/workflows/relia-advisory.yml",
+        "cmd/relia/main_test.go",
+        "cmd/relia/main.go",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        "https://github.com/Clyra-AI/relia/pull/59",
+        "refs/remotes/origin/main@5462fad04f0c8f097dffd2449f5f967a112db42d"
+      ],
+      "recorded_by": "factoryd sync-task-closure",
+      "recorded_at": "2026-06-30T21:46:06Z"
     },
     {
       "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-011",
@@ -2392,13 +2563,30 @@
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#serve-and-advise-acceptance-tests",
       "source_text": "The GitHub Action posts at most one advisory comment per PR, citing real PRs.",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T9"
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/11/validation_commands"
-      ]
+      ],
+      "evidence_refs": [
+        ".github/workflows/relia-advisory.yml",
+        "cmd/relia/main_test.go",
+        ".factory/artifacts/task-runs/T9/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T9/validation-report.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T9/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T9/proof-of-behavior-scorecard.json",
+        "README.md",
+        "cmd/relia/main.go",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        "https://github.com/Clyra-AI/relia/pull/59",
+        "refs/remotes/origin/main@5462fad04f0c8f097dffd2449f5f967a112db42d"
+      ],
+      "recorded_by": "factoryd sync-task-closure",
+      "recorded_at": "2026-06-30T21:46:06Z"
     },
     {
       "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-006",
@@ -3051,7 +3239,7 @@
       ]
     }
   ],
-  "last_updated_at": "2026-06-30T14:55:49Z",
+  "last_updated_at": "2026-06-30T21:46:06Z",
   "schema_version": "1.0",
   "source_prd_ref": "docs/product/prd.md",
   "source_ref": "docs/product/prd.md"
