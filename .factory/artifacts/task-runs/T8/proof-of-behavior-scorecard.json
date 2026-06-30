@@ -12,13 +12,13 @@
     "README.md",
     "docs/dev/dev_guides.md"
   ],
-  "produced_at": "2026-06-30T14:30:46Z",
+  "produced_at": "2026-06-30T14:43:22Z",
   "redaction_posture": {
     "classification": "customer_safe",
     "notes": "No customer data, live credentials, network calls, or unredacted machine-local paths were introduced.",
     "status": "pass"
   },
-  "repair_task_id": "20260630T113048.990974000Z-relia-T8-review-13-repair",
+  "repair_task_id": "20260630T113048.990974000Z-relia-T8-review-14-repair",
   "required_proof_level": "user_visible_behavior",
   "schema_version": "1.0",
   "scorecard": [
@@ -65,6 +65,16 @@
     },
     {
       "behavior": "Metadata-level object, event, type, kind, and nested source.object_type markers marked as self-reports or reflections fail before ingest persistence or canonical distill memory-rule writes.",
+      "proof_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        "TestIngestRejectsNestedSourceMetadataBeforePersistence",
+        "TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite"
+      ],
+      "status": "pass"
+    },
+    {
+      "behavior": "Separatorless and camelCase self-report markers such as agentSelfReport and selfReported fail before ingest persistence or canonical distill memory-rule writes.",
       "proof_refs": [
         "cmd/relia/main.go",
         "cmd/relia/main_test.go",

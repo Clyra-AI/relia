@@ -7,7 +7,7 @@
         ".factory/artifacts/task-runs/T8/proof-of-behavior-scorecard.json",
         "cmd/relia/main_test.go"
       ],
-      "evidence_summary": "Self-report/reflection sources, including nested metadata.source.kind/type and top-level object/event marker forms, are rejected before ingest persistence; generated memory rules disclose verified outcome source metadata.",
+      "evidence_summary": "Self-report/reflection sources, including nested metadata.source.kind/type, separatorless/camelCase source markers, and top-level object/event marker forms, are rejected before ingest persistence; generated memory rules disclose verified outcome source metadata.",
       "status": "implemented"
     }
   ],
@@ -87,7 +87,14 @@
     "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
     "go test ./cmd/relia -run 'TestBuildReportBadgeComputesActivityStaleness|TestBuildReportBadgeComputesFreshness|TestRecurrenceReportSchemaKeepsT8FieldsOptionalForV1'",
     "git diff --check",
-    "make prepush-full"
+    "make prepush-full",
+    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
+    "go test ./cmd/relia -run 'TestIngestRejectsNestedSourceMetadataBeforePersistence|TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite'",
+    "make prepush-full",
+    "python3 -m json.tool .factory/artifacts/task-runs/T8/work-proof-marker.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T8/validation-report.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T8/proof-of-behavior-scorecard.json",
+    "git diff --check"
   ],
   "docs_sync_result": {
     "status": "pass",
@@ -117,7 +124,7 @@
   "final_validation_evidence": [
     {
       "command": "make prepush-full",
-      "evidence_summary": "go test ./... passed after the focused negative-activity-metadata repair; coverage 80.4% against the 75.0% minimum; repo-pack validation and demo contracts passed.",
+      "evidence_summary": "go test ./... passed after the focused negative-activity and camelCase self-report marker repairs; coverage 80.4% against the 75.0% minimum; repo-pack validation and demo contracts passed.",
       "exit_code": 0,
       "status": "pass"
     },
@@ -192,6 +199,18 @@
       "status": "pass"
     },
     {
+      "command": "go test ./cmd/relia -run 'TestIngestRejectsNestedSourceMetadataBeforePersistence|TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite'",
+      "evidence_summary": "Focused ingest and distill regressions pass with separatorless/camelCase self-report markers rejected before persistence or memory-rule writes.",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "make prepush-full",
+      "evidence_summary": "Full local validation passed after the final camelCase self-report marker repair.",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
       "command": "git diff --check",
       "exit_code": 0,
       "status": "pass"
@@ -259,6 +278,11 @@
       "status": "pass"
     },
     {
+      "command": "go test ./cmd/relia -run 'TestIngestRejectsNestedSourceMetadataBeforePersistence|TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
       "command": "git diff --check",
       "exit_code": 0,
       "status": "pass"
@@ -305,7 +329,7 @@
     "notes": "Resolved the Codex review repair findings inside the T8 reporting-and-evidence slice without changing lifecycle state, PR state, runtime pins, provider posture, or Factory daemon state.",
     "status": "pass"
   },
-  "produced_at": "2026-06-30T14:30:46Z",
+  "produced_at": "2026-06-30T14:43:22Z",
   "red_evidence": [
     {
       "command": "go test ./cmd/relia",
@@ -315,7 +339,7 @@
       "status": "expected_fail"
     }
   ],
-  "repair_task_id": "20260630T113048.990974000Z-relia-T8-review-13-repair",
+  "repair_task_id": "20260630T113048.990974000Z-relia-T8-review-14-repair",
   "residual_risks": [
     "Lifecycle evidence remains assigned to factoryd workers after local validation."
   ],

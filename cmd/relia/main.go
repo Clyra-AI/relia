@@ -5436,11 +5436,20 @@ func unverifiedMemorySourceKind(value string) bool {
 	normalized := strings.ToLower(strings.TrimSpace(value))
 	normalized = strings.ReplaceAll(normalized, "-", "_")
 	normalized = strings.ReplaceAll(normalized, " ", "_")
+	compact := strings.ReplaceAll(normalized, "_", "")
 	switch normalized {
 	case "agent_self_report", "self_report", "self_reported", "agent_reflection", "reflection", "agent_observation", "agent_note":
 		return true
 	default:
-		return strings.Contains(normalized, "self_report") || strings.Contains(normalized, "reflection")
+		switch compact {
+		case "agentselfreport", "selfreport", "selfreported", "agentreflection", "reflection", "agentobservation", "agentnote":
+			return true
+		default:
+			return strings.Contains(normalized, "self_report") ||
+				strings.Contains(normalized, "reflection") ||
+				strings.Contains(compact, "selfreport") ||
+				strings.Contains(compact, "reflection")
+		}
 	}
 }
 

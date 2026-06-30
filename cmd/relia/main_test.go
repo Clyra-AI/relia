@@ -782,6 +782,14 @@ func TestIngestRejectsNestedSourceMetadataBeforePersistence(t *testing.T) {
 			metadata: `{"event_type": "agent_reflection"}`,
 		},
 		{
+			name:     "camel_case_source_kind",
+			metadata: `{"source_kind": "agentSelfReport"}`,
+		},
+		{
+			name:     "camel_case_source_type",
+			metadata: `{"source": {"type": "selfReported"}}`,
+		},
+		{
 			name:   "object_type",
 			prefix: `"object_type": "agent_self_report",`,
 		},
@@ -2907,6 +2915,13 @@ func TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite(t *testing.T) {
 			mutate: func(record map[string]any) {
 				metadata := record["metadata"].(map[string]any)
 				metadata["source"] = map[string]any{"object_type": "agent_self_report"}
+			},
+		},
+		{
+			name: "camel_case_metadata_source_kind",
+			mutate: func(record map[string]any) {
+				metadata := record["metadata"].(map[string]any)
+				metadata["source_kind"] = "agentSelfReport"
 			},
 		},
 		{
