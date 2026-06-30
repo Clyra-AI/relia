@@ -175,6 +175,8 @@ grant naming provider, model, endpoint or `base_url`, credential environment,
 budget posture, redaction posture, and allowlist. Local embedding artifact pulls
 require a separate `model_artifact_pull` grant. Generic network or credential
 approval does not satisfy either model-specific gate.
+Provider `base_url` values must be HTTPS endpoints without query, fragment,
+user-info, or embedded credential components.
 
 The advisory workflow is `.github/workflows/relia-advisory.yml`. It runs through
 `pull_request_target`, builds a local diff assessment from trusted base-branch

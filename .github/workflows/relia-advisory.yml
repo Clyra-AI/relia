@@ -57,7 +57,8 @@ jobs:
           marker = "<!-- relia-advisory:v1"
           fingerprint = ""
           generated_at = ""
-          pattern = re.compile(r"<!--\s*relia-advisory:v1\s+diff_fingerprint=([^ >]+)(?:\s+generated_at=([^ >]+))?\s*-->")
+          risk_level = ""
+          pattern = re.compile(r"<!--\s*relia-advisory:v1\s+diff_fingerprint=([^ >]+)(?:\s+generated_at=([^ >]+))?(?:\s+risk_level=([^ >]+))?\s*-->")
           for comment in comments:
               author = ((comment.get("user") or {}).get("login") or "")
               if author not in trusted_marker_authors:
@@ -69,11 +70,14 @@ jobs:
               if match:
                   fingerprint = match.group(1)
                   generated_at = match.group(2) or ""
+                  risk_level = match.group(3) or ""
                   break
           if fingerprint:
               metadata = {"source": "existing_github_comment_marker"}
               if generated_at:
                   metadata["generated_at"] = generated_at
+              if risk_level:
+                  metadata["risk_level"] = risk_level
               Path(".relia/reports/advisory-state.json").write_text(json.dumps({
                   "object_type": "relia.advisory_state",
                   "schema_version": "1.0",

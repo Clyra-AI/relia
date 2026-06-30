@@ -3275,6 +3275,7 @@ func parseAdviseArgs(args []string) (adviseOptions, *CommandError) {
 type advisoryPriorState struct {
 	DiffFingerprint string
 	GeneratedAt     time.Time
+	RiskLevel       string
 }
 
 func advisoryPreviousState(root string, statePath string) (advisoryPriorState, *CommandError) {
@@ -3302,6 +3303,12 @@ func advisoryPreviousState(root string, statePath string) (advisoryPriorState, *
 				prior.GeneratedAt = parsed
 			}
 		}
+		prior.RiskLevel, _ = metadata["risk_level"].(string)
+	}
+	if assessment, ok := state["assessment"].(map[string]any); ok {
+		if riskLevel, _ := assessment["risk_level"].(string); riskLevel != "" {
+			prior.RiskLevel = riskLevel
+		}
 	}
 	return prior, nil
 }
@@ -3314,6 +3321,15 @@ func advisoryCommentDecision(settings adviseSettings, assessment riskAssessment,
 		return false, "comment_cap_zero"
 	}
 	previousFingerprint := previousState.DiffFingerprint
+	if assessment.RiskLevel == "covered_clean" {
+		if previousFingerprint != "" {
+			if previousFingerprint == diffFingerprint && previousState.RiskLevel == "covered_clean" {
+				return false, "unchanged_diff_fingerprint"
+			}
+			return true, ""
+		}
+		return false, "covered_clean"
+	}
 	if previousFingerprint != "" && previousFingerprint == diffFingerprint {
 		return false, "unchanged_diff_fingerprint"
 	}
@@ -3322,12 +3338,6 @@ func advisoryCommentDecision(settings adviseSettings, assessment riskAssessment,
 		if now.Sub(previousState.GeneratedAt) < debounceWindow {
 			return false, "reassess_debounce_window"
 		}
-	}
-	if assessment.RiskLevel == "covered_clean" {
-		if previousFingerprint != "" {
-			return true, ""
-		}
-		return false, "covered_clean"
 	}
 	if assessment.RiskLevel != "no_coverage" && advisoryMaxConfidence(assessment) < settings.MinConfidence {
 		return false, "below_min_confidence"
@@ -3358,7 +3368,7 @@ func advisoryCommentStrategy(settings adviseSettings) map[string]any {
 
 func renderAdvisoryComment(assessment riskAssessment, touchedPaths []string, diffFingerprint string, generatedAt time.Time) string {
 	var builder strings.Builder
-	builder.WriteString("<!-- relia-advisory:v1 diff_fingerprint=" + diffFingerprint + " generated_at=" + generatedAt.UTC().Format(time.RFC3339) + " -->\n")
+	builder.WriteString("<!-- relia-advisory:v1 diff_fingerprint=" + diffFingerprint + " generated_at=" + generatedAt.UTC().Format(time.RFC3339) + " risk_level=" + assessment.RiskLevel + " -->\n")
 	switch assessment.RiskLevel {
 	case "no_coverage":
 		builder.WriteString("Relia advisory - no prior active memory covers ")
@@ -3717,6 +3727,9 @@ func validateProviderBaseURL(value string, scalar yamlScalar) *CommandError {
 	}
 	if parsed.RawQuery != "" || parsed.Fragment != "" {
 		return configErrorAt("distill.base_url must not include query or fragment components", configRef(scalar))
+	}
+	if parsed.User != nil {
+		return configErrorAt("distill.base_url must not include user info or embedded credentials", configRef(scalar))
 	}
 	return nil
 }
