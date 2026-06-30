@@ -3,7 +3,7 @@
   "schema_version": "1.0",
   "task_id": "T9",
   "status": "pass",
-  "updated_at": "2026-06-30T19:26:53Z",
+  "updated_at": "2026-06-30T19:40:04Z",
   "required_proof_level": "user_visible_behavior",
   "scenarios": [
     {
@@ -13,6 +13,11 @@
     },
     {
       "scenario": "The GitHub advisory workflow does not expose GH_TOKEN or github.token while executing checked-out Relia code.",
+      "status": "pass",
+      "evidence": "TestAdvisoryWorkflowKeepsTokenOutOfReliaBuildAndSeedsState"
+    },
+    {
+      "scenario": "The GitHub advisory workflow disables persisted checkout credentials before executing checked-out Relia code.",
       "status": "pass",
       "evidence": "TestAdvisoryWorkflowKeepsTokenOutOfReliaBuildAndSeedsState"
     },
@@ -27,9 +32,14 @@
       "evidence": "TestAdviseWritesOneAdvisoryCommentPlanAndSkipsUnchangedDiff"
     },
     {
-      "scenario": "The advisory planner stays silent for covered_clean assessments.",
+      "scenario": "The advisory planner stays silent for covered_clean assessments when no prior advisory marker exists.",
       "status": "pass",
       "evidence": "TestAdviseStaysSilentForCoveredCleanAssessment"
+    },
+    {
+      "scenario": "The advisory planner updates an existing advisory marker with a cleared covered-clean advisory instead of leaving stale warning text.",
+      "status": "pass",
+      "evidence": "TestAdviseClearsExistingAdvisoryForCoveredCleanAssessment"
     }
   ],
   "commands_run": [

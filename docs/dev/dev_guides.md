@@ -304,10 +304,13 @@ offline default:
   `advise.max_comments_per_pr: 0`, and unchanged diff fingerprints.
 - `.github/workflows/relia-advisory.yml` wraps the planner on pull requests and
   uses the explicit GitHub Actions token only in GitHub API steps, never while
-  executing checked-out Relia code. The input step fetches the PR diff and seeds
-  local advisory state from any existing hidden-marker comment before the
-  token-free planner runs. The workflow is advisory-only by default and is not
-  part of the required-check manifest.
+  executing checked-out Relia code; checkout also disables persisted GitHub
+  credentials before the token-free planner runs. The input step fetches the PR
+  diff and seeds local advisory state from any existing hidden-marker comment.
+  A new `covered_clean` assessment stays silent when no prior marker exists, but
+  updates an existing marker with a cleared advisory so stale warning comments do
+  not remain visible. The workflow is advisory-only by default and is not part
+  of the required-check manifest.
 
 ## Structured Data, Proof, Budgets, And Redaction
 

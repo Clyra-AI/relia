@@ -4160,6 +4160,9 @@ metadata: {}
 	if err != nil {
 		t.Fatal(err)
 	}
+	if count := strings.Count(string(comment), "<!-- relia-advisory:v1"); count != 1 {
+		t.Fatalf("comment marker count = %d, want 1:\n%s", count, comment)
+	}
 	for _, want := range []string{"<!-- relia-advisory:v1", "Relia advisory", "billing-time-fixture", "https://github.com/acme/billing-service/pull/142"} {
 		if !strings.Contains(string(comment), want) {
 			t.Fatalf("comment missing %q:\n%s", want, comment)
@@ -4241,6 +4244,10 @@ func TestAdvisoryWorkflowKeepsTokenOutOfReliaBuildAndSeedsState(t *testing.T) {
 	if !strings.Contains(prepareBlock, "GH_TOKEN: ${{ github.token }}") {
 		t.Fatalf("prepare step must own GitHub token for API reads:\n%s", prepareBlock)
 	}
+	checkoutBlock := workflowStepBlock(content, "Check out repository")
+	if !strings.Contains(checkoutBlock, "persist-credentials: false") {
+		t.Fatalf("checkout must not persist the GitHub token for later PR-code execution:\n%s", checkoutBlock)
+	}
 	for _, want := range []string{".relia/reports/github-comments.json", "advisory-state.json", "diff_fingerprint"} {
 		if !strings.Contains(prepareBlock, want) {
 			t.Fatalf("prepare step missing %q:\n%s", want, prepareBlock)
@@ -4252,6 +4259,77 @@ func TestAdvisoryWorkflowKeepsTokenOutOfReliaBuildAndSeedsState(t *testing.T) {
 	}
 	if !strings.Contains(buildBlock, "go run ./cmd/relia --json advise") {
 		t.Fatalf("build step missing relia advise invocation:\n%s", buildBlock)
+	}
+}
+
+func TestAdviseClearsExistingAdvisoryForCoveredCleanAssessment(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "billing-playbook.yaml"), `object_type: relia.memory_rule
+schema_version: "1.0"
+id: billing-playbook-fixture
+kind: playbook
+status: active
+statement: Billing clock changes are covered when they use the approved fixture.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.91
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_0142
+provenance:
+  - pr: 142
+    outcome: merged_clean
+    url: https://github.com/acme/billing-service/pull/142
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`)
+	writeFileForTest(t, filepath.Join(tempDir, "change.diff"), `diff --git a/packages/billing/invoice.py b/packages/billing/invoice.py
+--- a/packages/billing/invoice.py
++++ b/packages/billing/invoice.py
+@@ -1,2 +1,3 @@
+ def rollover_day():
+-    return "2026-01-01"
++    return billing_clock().strftime("%Y-%m-%d")
+`)
+	writeFileForTest(t, filepath.Join(tempDir, ".relia", "reports", "advisory-state.json"), `{
+  "object_type": "relia.advisory_state",
+  "schema_version": "1.0",
+  "diff_fingerprint": "sha256:old-warning-fingerprint"
+}
+`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "advise", "--input", "change.diff", "--format", "json"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("advise covered clean clear exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Data["should_comment"] != true || result.Data["skip_reason"] != "" {
+		t.Fatalf("advise result = %#v", result.Data)
+	}
+	comment, err := os.ReadFile(filepath.Join(tempDir, ".relia", "reports", "advisory-comment.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{"Prior advisory cleared", "billing-playbook-fixture", "https://github.com/acme/billing-service/pull/142"} {
+		if !strings.Contains(string(comment), want) {
+			t.Fatalf("clear comment missing %q:\n%s", want, comment)
+		}
+	}
+
+	stdout, stderr, code = runForTest(t, []string{"--json", "advise", "--input", "change.diff", "--format", "json"}, false)
+	if code != ExitSuccess {
+		t.Fatalf("second advise covered clean exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result = decodeResult(t, stdout)
+	if result.Data["should_comment"] != false || result.Data["skip_reason"] != "unchanged_diff_fingerprint" {
+		t.Fatalf("second advise result = %#v", result.Data)
 	}
 }
 

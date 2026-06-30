@@ -3301,6 +3301,9 @@ func advisoryCommentDecision(settings adviseSettings, assessment riskAssessment,
 		return false, "unchanged_diff_fingerprint"
 	}
 	if assessment.RiskLevel == "covered_clean" {
+		if previousFingerprint != "" {
+			return true, ""
+		}
 		return false, "covered_clean"
 	}
 	if assessment.RiskLevel != "no_coverage" && advisoryMaxConfidence(assessment) < settings.MinConfidence {
@@ -3338,6 +3341,28 @@ func renderAdvisoryComment(assessment riskAssessment, touchedPaths []string, dif
 		builder.WriteString("Relia advisory - no prior active memory covers ")
 		builder.WriteString(markdownInlineList(touchedPaths, 3))
 		builder.WriteString(". Suggest closer review.\n")
+	case "covered_clean":
+		builder.WriteString("Relia advisory - current diff is covered by active memory. Prior advisory cleared.")
+		if len(assessment.Matches) > 0 {
+			builder.WriteString(" Matched ")
+			for index, match := range assessment.Matches {
+				if index > 0 {
+					builder.WriteString(", ")
+				}
+				builder.WriteString("`" + match.RuleID + "`")
+				builder.WriteString(" (confidence " + yamlFloat(match.Confidence) + ")")
+			}
+		}
+		if len(assessment.Citations) > 0 {
+			builder.WriteString(". Evidence: ")
+			for index, citation := range assessment.Citations {
+				if index > 0 {
+					builder.WriteString(", ")
+				}
+				builder.WriteString(citation)
+			}
+		}
+		builder.WriteString(".\n")
 	default:
 		builder.WriteString("Relia advisory - this change matches ")
 		for index, match := range assessment.Matches {

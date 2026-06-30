@@ -43,11 +43,30 @@
       ],
       "review_finding": "Honor a zero advisory comment cap",
       "status": "implemented"
+    },
+    {
+      "evidence_refs": [
+        ".github/workflows/relia-advisory.yml",
+        "cmd/relia/main_test.go"
+      ],
+      "review_finding": "Disable persisted credentials before running PR code",
+      "status": "implemented"
+    },
+    {
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        "README.md",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md"
+      ],
+      "review_finding": "Clear resolved advisory comments instead of skipping",
+      "status": "implemented"
     }
   ],
   "schema_version": "1.0",
   "status": "implemented",
-  "summary": "Repaired actionable Codex review feedback by keeping the GitHub write token out of the relia build step, seeding unchanged-diff advisory state from an existing hidden-marker comment, and honoring advise.max_comments_per_pr: 0.",
+  "summary": "Repaired actionable Codex review feedback by keeping GitHub credentials out of checked-out Relia execution, seeding unchanged-diff advisory state from an existing hidden-marker comment, honoring advise.max_comments_per_pr: 0, and clearing stale advisory comments when a later diff is covered clean.",
   "task_id": "T9",
-  "updated_at": "2026-06-30T19:26:53Z"
+  "updated_at": "2026-06-30T19:40:04Z"
 }
