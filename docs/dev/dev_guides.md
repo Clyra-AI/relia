@@ -292,8 +292,10 @@ offline default:
   provider call unless a complete `model_provider_endpoint` grant exists.
 - Provider config must name the provider, model, HTTPS `base_url`, credential
   environment variable name, cost cap, and deterministic input/output unit cost
-  estimates. `relia check` discloses the redacted-record provider boundary
-  without reading credential values or opening network sockets.
+  estimates. `base_url` values with query, fragment, user-info, or embedded
+  credential components are rejected before they can appear in command output.
+  `relia check` discloses the redacted-record provider boundary without reading
+  credential values or opening network sockets.
 - `relia serve --format json` exposes a local MCP capability manifest for
   `recall`, `assess`, and `coverage` over active accepted rules only. Hosted or
   network transports fail closed in the MVP default posture.

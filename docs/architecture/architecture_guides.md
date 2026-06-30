@@ -172,7 +172,9 @@ provider/advisory unit tests, workflow metadata, `make prepush-full`, and
 Factory task-run evidence. Provider-backed distill validates OpenAI-compatible
 and Anthropic adapter config, estimates tokens and cost from redacted local
 records, enforces `distill.max_cost_usd_per_run`, and fails closed before
-network or credential use without a complete `model_provider_endpoint` grant.
+network or credential use without a complete `model_provider_endpoint` grant;
+provider base URLs with user-info or embedded credentials are rejected before
+they can be echoed in provider plans.
 `relia serve --format json` exposes a local MCP capability manifest for
 `recall`, `assess`, and `coverage` over active accepted rules only; hosted or
 network transports fail closed. `relia advise` reuses the assessment engine to

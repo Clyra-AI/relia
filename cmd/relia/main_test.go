@@ -3311,6 +3311,25 @@ func TestCheckDisclosesOpenAICompatibleProviderBoundary(t *testing.T) {
 	}
 }
 
+func TestCheckRejectsProviderBaseURLUserInfo(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	enableProviderForTest(t, tempDir, "openai_compatible", "gpt-test", "https://token@openai-compatible.example.test/v1", "RELIA_OPENAI_COMPATIBLE_API_KEY", "5.00")
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "check"}, false)
+
+	if code != ExitUsage {
+		t.Fatalf("check user-info URL exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if len(result.Errors) != 1 || !strings.Contains(result.Errors[0].Message, "must not include user info") {
+		t.Fatalf("errors = %#v", result.Errors)
+	}
+	if strings.Contains(stdout, "token@") || strings.Contains(stderr, "token@") {
+		t.Fatalf("provider URL user info leaked in output: stdout=%q stderr=%q", stdout, stderr)
+	}
+}
+
 func TestDistillProviderPlanReportsCostAndFailsClosedWithoutGrant(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
@@ -4254,7 +4273,7 @@ func TestAdvisoryWorkflowKeepsTokenOutOfReliaBuildAndSeedsState(t *testing.T) {
 	if !strings.Contains(checkoutBlock, "persist-credentials: false") {
 		t.Fatalf("checkout must not persist the GitHub token for later PR-code execution:\n%s", checkoutBlock)
 	}
-	for _, want := range []string{".relia/reports/github-comments.json", "advisory-state.json", "diff_fingerprint", "generated_at"} {
+	for _, want := range []string{".relia/reports/github-comments.json", "advisory-state.json", "diff_fingerprint", "generated_at", "risk_level"} {
 		if !strings.Contains(prepareBlock, want) {
 			t.Fatalf("prepare step missing %q:\n%s", want, prepareBlock)
 		}
@@ -4342,20 +4361,24 @@ review:
   statement_origin: human_authored
 metadata: {}
 `)
-	writeFileForTest(t, filepath.Join(tempDir, "change.diff"), `diff --git a/packages/billing/invoice.py b/packages/billing/invoice.py
+	diffContent := `diff --git a/packages/billing/invoice.py b/packages/billing/invoice.py
 --- a/packages/billing/invoice.py
 +++ b/packages/billing/invoice.py
 @@ -1,2 +1,3 @@
  def rollover_day():
 -    return "2026-01-01"
 +    return billing_clock().strftime("%Y-%m-%d")
-`)
-	writeFileForTest(t, filepath.Join(tempDir, ".relia", "reports", "advisory-state.json"), `{
+`
+	writeFileForTest(t, filepath.Join(tempDir, "change.diff"), diffContent)
+	writeFileForTest(t, filepath.Join(tempDir, ".relia", "reports", "advisory-state.json"), fmt.Sprintf(`{
   "object_type": "relia.advisory_state",
   "schema_version": "1.0",
-  "diff_fingerprint": "sha256:old-warning-fingerprint"
+  "diff_fingerprint": %q,
+  "metadata": {
+    "risk_level": "match_high"
+  }
 }
-`)
+`, sha256String(diffContent)))
 
 	stdout, stderr, code := runForTest(t, []string{"--json", "advise", "--input", "change.diff", "--format", "json"}, false)
 

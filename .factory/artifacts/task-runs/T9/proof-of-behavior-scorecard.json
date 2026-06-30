@@ -3,7 +3,7 @@
   "schema_version": "1.0",
   "task_id": "T9",
   "status": "pass",
-  "updated_at": "2026-06-30T20:18:02Z",
+  "updated_at": "2026-06-30T20:28:26Z",
   "required_proof_level": "user_visible_behavior",
   "scenarios": [
     {
@@ -20,6 +20,11 @@
       "scenario": "The GitHub advisory workflow disables persisted checkout credentials before executing checked-out Relia code.",
       "status": "pass",
       "evidence": "TestAdvisoryWorkflowKeepsTokenOutOfReliaBuildAndSeedsState"
+    },
+    {
+      "scenario": "Provider-backed distill rejects provider base URLs that include user-info or embedded credentials before those values can appear in command output.",
+      "status": "pass",
+      "evidence": "TestCheckRejectsProviderBaseURLUserInfo"
     },
     {
       "scenario": "The GitHub advisory workflow seeds local advisory state from an existing hidden-marker comment before running the token-free planner.",
@@ -75,10 +80,15 @@
       "scenario": "The advisory planner updates an existing advisory marker with a cleared covered-clean advisory instead of leaving stale warning text.",
       "status": "pass",
       "evidence": "TestAdviseClearsExistingAdvisoryForCoveredCleanAssessment"
+    },
+    {
+      "scenario": "The advisory planner clears a stale warning when the same diff fingerprint is now covered clean, then records risk_level=covered_clean so subsequent unchanged runs skip.",
+      "status": "pass",
+      "evidence": "TestAdviseClearsExistingAdvisoryForCoveredCleanAssessment"
     }
   ],
   "commands_run": [
-    "go test ./cmd/relia -count=1 -run 'TestAdvise|TestAdvisoryWorkflow'",
+    "go test ./cmd/relia -count=1 -run 'TestAdvise|TestAdvisoryWorkflow|TestCheckRejectsProviderBaseURLUserInfo'",
     "make prepush-full"
   ],
   "network_and_credential_posture": {

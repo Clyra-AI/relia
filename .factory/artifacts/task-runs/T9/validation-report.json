@@ -102,7 +102,7 @@
     "relia.yaml"
   ],
   "commands_run": [
-    "go test ./cmd/relia -count=1 -run 'TestAdvise|TestAdvisoryWorkflow'",
+    "go test ./cmd/relia -count=1 -run 'TestAdvise|TestAdvisoryWorkflow|TestCheckRejectsProviderBaseURLUserInfo'",
     "git diff --check",
     "make prepush-full",
     "python3 -m json.tool .factory/artifacts/task-runs/T9/work-proof-marker.json",
@@ -182,6 +182,12 @@
       "evidence": "Sixth focused advisory repair coverage passed for pull_request_target trusted-base execution and reassessment debounce enforcement.",
       "exit_code": 0,
       "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -count=1 -run 'TestAdvise|TestAdvisoryWorkflow|TestCheckRejectsProviderBaseURLUserInfo'",
+      "evidence": "Seventh focused repair coverage passed for provider base URL user-info rejection and covered-clean clearing before unchanged-diff skips.",
+      "exit_code": 0,
+      "status": "pass"
     }
   ],
   "path_policy_result": {
@@ -214,5 +220,5 @@
   "status": "pass",
   "task_id": "T9",
   "test_first_skipped_reason": "Codex review supplied the failing behavioral evidence for this repair. The repair encoded the review findings as focused regression coverage and then ran the focused Go test and final repository validation.",
-  "updated_at": "2026-06-30T20:18:02Z"
+  "updated_at": "2026-06-30T20:28:26Z"
 }

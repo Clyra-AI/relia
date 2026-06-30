@@ -136,11 +136,31 @@
       ],
       "review_finding": "Enforce the advisory debounce window",
       "status": "implemented"
+    },
+    {
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        "README.md",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md"
+      ],
+      "review_finding": "Reject user-info in provider base URLs",
+      "status": "implemented"
+    },
+    {
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        ".github/workflows/relia-advisory.yml"
+      ],
+      "review_finding": "Clear covered advisories before unchanged-diff skips",
+      "status": "implemented"
     }
   ],
   "schema_version": "1.0",
   "status": "implemented",
-  "summary": "Repaired actionable Codex review and CI feedback by keeping GitHub credentials out of Relia execution, running advisory planning from trusted base-branch code and memory rules under pull_request_target, seeding unchanged-diff advisory state only from bot-authored hidden-marker comments across paginated comment results, honoring advise.max_comments_per_pr: 0 and advise.reassess_debounce_minutes, clearing stale advisory comments when a later diff is covered clean, publishing advisory comments without sourcing planner-controlled shell environment text, and keeping advisory workflow Python heredocs parseable.",
+  "summary": "Repaired actionable Codex review and CI feedback by keeping GitHub credentials out of Relia execution, running advisory planning from trusted base-branch code and memory rules under pull_request_target, rejecting provider base URLs with embedded user-info credentials, seeding unchanged-diff advisory state only from bot-authored hidden-marker comments across paginated comment results, honoring advise.max_comments_per_pr: 0 and advise.reassess_debounce_minutes, clearing stale advisory comments when a later diff or rule state is covered clean, publishing advisory comments without sourcing planner-controlled shell environment text, and keeping advisory workflow Python heredocs parseable.",
   "task_id": "T9",
-  "updated_at": "2026-06-30T20:18:02Z"
+  "updated_at": "2026-06-30T20:28:26Z"
 }
