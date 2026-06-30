@@ -1,0 +1,353 @@
+{
+  "acceptance_results": [
+    {
+      "acceptance_item_id": "FR1-OUTCOMES-AS-THE-ONLY-MEMORY-SOURCE-001",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T8/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T8/proof-of-behavior-scorecard.json",
+        "cmd/relia/main_test.go"
+      ],
+      "evidence_summary": "Self-report/reflection sources, including nested metadata.source.kind/type, separatorless/camelCase source markers, and top-level object/event marker forms, are rejected before ingest persistence; generated memory rules disclose verified outcome source metadata.",
+      "status": "implemented"
+    }
+  ],
+  "artifact_type": "validation_report",
+  "baseline_evidence": [
+    {
+      "command": "go test ./cmd/relia",
+      "evidence_summary": "Regression tests were added before implementation; the package failed to compile because recurrenceMetrics.AgentAttributedExperiences did not exist yet.",
+      "exit_code": 1,
+      "phase": "after_red_tests_before_implementation",
+      "status": "expected_fail"
+    }
+  ],
+  "blockers": [],
+  "changed_paths": [
+    ".factory/artifacts/task-runs/T8/proof-of-behavior-scorecard.json",
+    ".factory/artifacts/task-runs/T8/validation-report.json",
+    ".factory/artifacts/task-runs/T8/work-proof-marker.json",
+    "README.md",
+    "cmd/relia/main.go",
+    "cmd/relia/main_test.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/dev/dev_guides.md",
+    "schemas/memory-rule.schema.json",
+    "schemas/recurrence-report.schema.json"
+  ],
+  "changelog_result": {
+    "notes": "No changelog file exists inside the task allowed paths; user-facing output-contract details were documented in README.md and docs/dev/dev_guides.md.",
+    "status": "not_applicable"
+  },
+  "commands_run": [
+    "go test ./cmd/relia",
+    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
+    "go test ./cmd/relia",
+    "python3 -m json.tool schemas/recurrence-report.schema.json",
+    "make prepush-full",
+    "python3 -m json.tool .factory/artifacts/task-runs/T8/work-proof-marker.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T8/validation-report.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T8/proof-of-behavior-scorecard.json",
+    "python3 - \u003c\u003c'PY' (verify worker-owned evidence top-level statuses)",
+    "go test ./cmd/relia -run 'TestBacktest(SaveBaselineReportsFreshCurrentValues|TopRepeatedMistakesAggregateByMatchedSignature|GroupsEquivalentCanonicalSignatureFields|GroupsEquivalentMessageFingerprint)'",
+    "python3 -m json.tool schemas/recurrence-report.schema.json",
+    "make prepush-full",
+    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
+    "go test ./cmd/relia -run 'TestIngestRejectsNestedSourceMetadataBeforePersistence|TestRecurrenceReportSchemaKeepsT8FieldsOptionalForV1|TestBacktest(SaveBaselineReportsFreshCurrentValues|TopRepeatedMistakesAggregateByMatchedSignature|GroupsEquivalentCanonicalSignatureFields|GroupsEquivalentMessageFingerprint)|TestBacktestCommandResultCountsAgentAttributedExperiencesSeparatelyFromPRs'",
+    "python3 -m json.tool schemas/recurrence-report.schema.json",
+    "gofmt -w cmd/relia/main_test.go",
+    "go test ./cmd/relia -run 'TestRecurrenceReportSchemaKeepsT8FieldsOptionalForV1|TestIngestRejectsNestedSourceMetadataBeforePersistence'",
+    "python3 -m json.tool schemas/recurrence-report.schema.json",
+    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
+    "go test ./cmd/relia -run 'TestBacktestTopRepeatedMistakesAggregateByMatchedSignature|TestBacktestGroupsEquivalentCanonicalSignatureFields|TestBacktestGroupsEquivalentMessageFingerprint'",
+    "make prepush-full",
+    "gofmt -w cmd/relia/main_test.go",
+    "go test ./cmd/relia -run 'TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline|TestBacktestTopRepeatedMistakesAggregateByMatchedSignature|TestBacktestGroupsEquivalentCanonicalSignatureFields|TestBacktestGroupsEquivalentMessageFingerprint'",
+    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
+    "python3 -m json.tool schemas/recurrence-report.schema.json",
+    "go test ./cmd/relia -run 'TestBuildReportBadgeComputes(Freshness|ActivityStaleness)|TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline|TestBacktestInteractiveOutputShowsOperatorSummaryAndBadge|TestRecurrenceReportSchemaKeepsT8FieldsOptionalForV1'",
+    "make prepush-full",
+    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
+    "python3 -m json.tool schemas/recurrence-report.schema.json",
+    "go test ./cmd/relia -run 'TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite|TestIngestRejectsNestedSourceMetadataBeforePersistence|TestBuildReportBadgeComputes(Freshness|ActivityStaleness)|TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline|TestBacktestInteractiveOutputShowsOperatorSummaryAndBadge|TestRecurrenceReportSchemaKeepsT8FieldsOptionalForV1'",
+    "make prepush-full",
+    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
+    "python3 -m json.tool schemas/recurrence-report.schema.json",
+    "go test ./cmd/relia -run 'TestIngestRejectsNestedSourceMetadataBeforePersistence|TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite'",
+    "make prepush-full",
+    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
+    "python3 -m json.tool schemas/recurrence-report.schema.json",
+    "go test ./cmd/relia -run 'TestShardConsumersRejectSelfReportMarkersBeforeStructDecode|TestIngestRejectsNestedSourceMetadataBeforePersistence|TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite'",
+    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
+    "go test ./cmd/relia -run 'TestIngestPersistsCanonicalExperienceWithRedactionAndProvenance|TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline|TestBuildReportBadgeComputesFreshness|TestBuildReportBadgeComputesActivityStaleness'",
+    "go test ./cmd/relia -run 'TestBacktestInteractiveOutputShowsOperatorSummaryAndBadge|TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline|TestBuildReportBadgeComputesFreshness|TestBuildReportBadgeComputesActivityStaleness'",
+    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
+    "go test ./cmd/relia -run 'TestIngestRejectsNestedSourceMetadataBeforePersistence|TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite'",
+    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
+    "go test ./cmd/relia -run 'TestBacktestBaselineDigestIgnoresIngestFreshnessMetadata|TestBacktestSaveBaselineReportsFreshCurrentValues|TestBuildReportBadgeComputesFreshness|TestIngestRejectsNestedSourceMetadataBeforePersistence|TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite'",
+    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
+    "go test ./cmd/relia -run 'TestBuildReportBadgeComputesActivityStaleness|TestBuildReportBadgeComputesFreshness|TestRecurrenceReportSchemaKeepsT8FieldsOptionalForV1'",
+    "git diff --check",
+    "make prepush-full",
+    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
+    "go test ./cmd/relia -run 'TestIngestRejectsNestedSourceMetadataBeforePersistence|TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite'",
+    "make prepush-full",
+    "python3 -m json.tool .factory/artifacts/task-runs/T8/work-proof-marker.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T8/validation-report.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T8/proof-of-behavior-scorecard.json",
+    "git diff --check"
+  ],
+  "docs_sync_result": {
+    "status": "pass",
+    "updated_refs": [
+      "README.md",
+      "docs/dev/dev_guides.md",
+      "docs/architecture/architecture_guides.md"
+    ]
+  },
+  "evidence_status_checks": [
+    {
+      "blocking": false,
+      "path": ".factory/artifacts/task-runs/T8/work-proof-marker.json",
+      "status": "implemented"
+    },
+    {
+      "blocking": false,
+      "path": ".factory/artifacts/task-runs/T8/validation-report.json",
+      "status": "pass"
+    },
+    {
+      "blocking": false,
+      "path": ".factory/artifacts/task-runs/T8/proof-of-behavior-scorecard.json",
+      "status": "pass"
+    }
+  ],
+  "final_validation_evidence": [
+    {
+      "command": "make prepush-full",
+      "evidence_summary": "go test ./... passed after the focused negative-activity and camelCase self-report marker repairs; coverage 80.4% against the 75.0% minimum; repo-pack validation and demo contracts passed.",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "python3 -m json.tool schemas/recurrence-report.schema.json",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "python3 -m json.tool .factory/artifacts/task-runs/T8/work-proof-marker.json",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "python3 -m json.tool .factory/artifacts/task-runs/T8/validation-report.json",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "python3 -m json.tool .factory/artifacts/task-runs/T8/proof-of-behavior-scorecard.json",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestIngestRejectsNestedSourceMetadataBeforePersistence|TestRecurrenceReportSchemaKeepsT8FieldsOptionalForV1|TestBacktest(SaveBaselineReportsFreshCurrentValues|TopRepeatedMistakesAggregateByMatchedSignature|GroupsEquivalentCanonicalSignatureFields|GroupsEquivalentMessageFingerprint)|TestBacktestCommandResultCountsAgentAttributedExperiencesSeparatelyFromPRs'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestRecurrenceReportSchemaKeepsT8FieldsOptionalForV1|TestIngestRejectsNestedSourceMetadataBeforePersistence'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestBacktestTopRepeatedMistakesAggregateByMatchedSignature|TestBacktestGroupsEquivalentCanonicalSignatureFields|TestBacktestGroupsEquivalentMessageFingerprint'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline|TestBacktestTopRepeatedMistakesAggregateByMatchedSignature|TestBacktestGroupsEquivalentCanonicalSignatureFields|TestBacktestGroupsEquivalentMessageFingerprint'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestBuildReportBadgeComputes(Freshness|ActivityStaleness)|TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline|TestBacktestInteractiveOutputShowsOperatorSummaryAndBadge|TestRecurrenceReportSchemaKeepsT8FieldsOptionalForV1'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite|TestIngestRejectsNestedSourceMetadataBeforePersistence|TestBuildReportBadgeComputes(Freshness|ActivityStaleness)|TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline|TestBacktestInteractiveOutputShowsOperatorSummaryAndBadge|TestRecurrenceReportSchemaKeepsT8FieldsOptionalForV1'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestIngestRejectsNestedSourceMetadataBeforePersistence|TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestShardConsumersRejectSelfReportMarkersBeforeStructDecode|TestIngestRejectsNestedSourceMetadataBeforePersistence|TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestIngestPersistsCanonicalExperienceWithRedactionAndProvenance|TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline|TestBuildReportBadgeComputesFreshness|TestBuildReportBadgeComputesActivityStaleness'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestBacktestInteractiveOutputShowsOperatorSummaryAndBadge|TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline|TestBuildReportBadgeComputesFreshness|TestBuildReportBadgeComputesActivityStaleness'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestIngestRejectsNestedSourceMetadataBeforePersistence|TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite'",
+      "evidence_summary": "Focused ingest and distill regressions pass with separatorless/camelCase self-report markers rejected before persistence or memory-rule writes.",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "make prepush-full",
+      "evidence_summary": "Full local validation passed after the final camelCase self-report marker repair.",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "status": "pass"
+    }
+  ],
+  "green_evidence": [
+    {
+      "command": "go test ./cmd/relia",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestBacktest(SaveBaselineReportsFreshCurrentValues|TopRepeatedMistakesAggregateByMatchedSignature|GroupsEquivalentCanonicalSignatureFields|GroupsEquivalentMessageFingerprint)'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestIngestRejectsNestedSourceMetadataBeforePersistence|TestRecurrenceReportSchemaKeepsT8FieldsOptionalForV1|TestBacktest(SaveBaselineReportsFreshCurrentValues|TopRepeatedMistakesAggregateByMatchedSignature|GroupsEquivalentCanonicalSignatureFields|GroupsEquivalentMessageFingerprint)|TestBacktestCommandResultCountsAgentAttributedExperiencesSeparatelyFromPRs'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestRecurrenceReportSchemaKeepsT8FieldsOptionalForV1|TestIngestRejectsNestedSourceMetadataBeforePersistence'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestBacktestTopRepeatedMistakesAggregateByMatchedSignature|TestBacktestGroupsEquivalentCanonicalSignatureFields|TestBacktestGroupsEquivalentMessageFingerprint'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline|TestBacktestTopRepeatedMistakesAggregateByMatchedSignature|TestBacktestGroupsEquivalentCanonicalSignatureFields|TestBacktestGroupsEquivalentMessageFingerprint'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestBuildReportBadgeComputes(Freshness|ActivityStaleness)|TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline|TestBacktestInteractiveOutputShowsOperatorSummaryAndBadge|TestRecurrenceReportSchemaKeepsT8FieldsOptionalForV1'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite|TestIngestRejectsNestedSourceMetadataBeforePersistence|TestBuildReportBadgeComputes(Freshness|ActivityStaleness)|TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline|TestBacktestInteractiveOutputShowsOperatorSummaryAndBadge|TestRecurrenceReportSchemaKeepsT8FieldsOptionalForV1'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestIngestRejectsNestedSourceMetadataBeforePersistence|TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestShardConsumersRejectSelfReportMarkersBeforeStructDecode|TestIngestRejectsNestedSourceMetadataBeforePersistence|TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestIngestPersistsCanonicalExperienceWithRedactionAndProvenance|TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline|TestBuildReportBadgeComputesFreshness|TestBuildReportBadgeComputesActivityStaleness'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestBacktestInteractiveOutputShowsOperatorSummaryAndBadge|TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline|TestBuildReportBadgeComputesFreshness|TestBuildReportBadgeComputesActivityStaleness'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestIngestRejectsNestedSourceMetadataBeforePersistence|TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "make prepush-full",
+      "exit_code": 0,
+      "status": "pass"
+    }
+  ],
+  "lifecycle_evidence_note": {
+    "lifecycle_evidence_required": [
+      "scope_closure_report",
+      "pr_lifecycle_report",
+      "factoryd_run_once_report"
+    ],
+    "notes": "Lifecycle evidence is factoryd-owned and was not authored by this worker.",
+    "status": "not_worker_owned"
+  },
+  "migration_result": {
+    "notes": "Pre-1.0 recurrence report output gained explicit metrics, diagnostics, feedback, badge fields, and optional last_ingest_at plus merged-PR badge freshness metadata, but newly emitted T8 schema fields remain optional for schema_version 1.0 compatibility; no persisted user-authored migration is required.",
+    "status": "pass"
+  },
+  "path_policy_result": {
+    "changed_paths": [
+      ".factory/artifacts/task-runs/T8/proof-of-behavior-scorecard.json",
+      ".factory/artifacts/task-runs/T8/validation-report.json",
+      ".factory/artifacts/task-runs/T8/work-proof-marker.json",
+      "README.md",
+      "cmd/relia/main.go",
+      "cmd/relia/main_test.go",
+      "docs/architecture/architecture_guides.md",
+      "docs/dev/dev_guides.md",
+      "schemas/memory-rule.schema.json",
+      "schemas/recurrence-report.schema.json"
+    ],
+    "forbidden_path_diff": false,
+    "notes": [
+      ".factory/tmp/ appears only as an ignored validation cache produced by make prepush-full; it is not in the worker diff."
+    ],
+    "status": "pass"
+  },
+  "plan_drift_result": {
+    "notes": "Resolved the Codex review repair findings inside the T8 reporting-and-evidence slice without changing lifecycle state, PR state, runtime pins, provider posture, or Factory daemon state.",
+    "status": "pass"
+  },
+  "produced_at": "2026-06-30T14:43:22Z",
+  "red_evidence": [
+    {
+      "command": "go test ./cmd/relia",
+      "evidence_summary": "New review-repair regression tests failed before implementation because the recurrence report contract lacked the agent-attributed experience metric.",
+      "exit_code": 1,
+      "phase": "after_red_tests_before_implementation",
+      "status": "expected_fail"
+    }
+  ],
+  "repair_task_id": "20260630T113048.990974000Z-relia-T8-review-14-repair",
+  "residual_risks": [
+    "Lifecycle evidence remains assigned to factoryd workers after local validation."
+  ],
+  "schema_version": "1.0",
+  "status": "pass",
+  "task_id": "T8",
+  "versioning_result": {
+    "notes": "Pre-1.0 output evolution remains backward-compatible: recurrence-report schema_version 1.0 keeps newly emitted T8 fields and optional last_ingest_at plus merged-PR badge freshness metadata optional.",
+    "status": "pass"
+  }
+}

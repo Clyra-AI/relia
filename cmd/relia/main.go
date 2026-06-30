@@ -40,6 +40,13 @@ const (
 	defaultConfigFile       = "relia.yaml"
 )
 
+const (
+	badgeStaleAfterDays      = 30
+	badgeStaleAfterMergedPRs = 20
+	badgeMetadataLastIngest  = "last_ingest_at"
+	badgeMetadataMergedPRs   = "merged_prs_since_last_ingest"
+)
+
 var requiredCheckFiles = []string{
 	"AGENTS.md",
 	"WORKFLOW.md",
@@ -178,11 +185,12 @@ type ingestOptions struct {
 }
 
 type backtestOptions struct {
-	Window       string
-	Format       string
-	BaselinePath string
-	ReportDir    string
-	SaveBaseline bool
+	Window         string
+	Format         string
+	FormatExplicit bool
+	BaselinePath   string
+	ReportDir      string
+	SaveBaseline   bool
 }
 
 type assessOptions struct {
@@ -312,20 +320,37 @@ type recurrenceReport struct {
 	SourceArtifacts      []string                `json:"source_artifacts"`
 	Window               recurrenceWindow        `json:"window"`
 	Summary              recurrenceSummary       `json:"summary"`
+	Metrics              recurrenceMetrics       `json:"metrics"`
 	HeadlineERR          float64                 `json:"headline_err"`
 	ConfirmedRecurrences []recurrencePair        `json:"confirmed_recurrences"`
 	PossibleRecurrences  []recurrencePair        `json:"possible_recurrences"`
+	TopRepeatedMistakes  []topRepeatedMistake    `json:"top_repeated_mistakes"`
 	FlakeDiscounts       []backtestFlakeDiscount `json:"flake_discounts"`
 	AttributionUncertain []backtestUncertain     `json:"attribution_uncertain"`
 	Baseline             baselineComparison      `json:"baseline"`
 	Gate                 backtestGateResult      `json:"gate"`
 	Citations            []backtestCitation      `json:"citations"`
+	Diagnostics          []reportDiagnostic      `json:"diagnostics"`
+	OperatorFeedback     reportOperatorFeedback  `json:"operator_feedback"`
+	Badge                reportBadge             `json:"badge"`
 	Metadata             map[string]any          `json:"metadata"`
 }
 
 type recurrenceWindow struct {
 	Start string `json:"start"`
 	End   string `json:"end"`
+}
+
+type recurrenceMetrics struct {
+	PRsAnalyzed                int            `json:"prs_analyzed"`
+	AgentAttributedPRs         int            `json:"agent_attributed_prs"`
+	AgentAttributedExperiences int            `json:"agent_attributed_experiences"`
+	AgentFailuresByOutcomeKind map[string]int `json:"agent_failures_by_outcome_kind"`
+	ErrorRecurrenceRate        float64        `json:"error_recurrence_rate"`
+	ConfirmedRecurrences       int            `json:"confirmed_recurrences"`
+	PossibleRecurrences        int            `json:"possible_recurrences"`
+	FlakeDiscountedCount       int            `json:"flake_discounted_count"`
+	AttributionUncertainCount  int            `json:"attribution_uncertain_count"`
 }
 
 type recurrenceSummary struct {
@@ -350,9 +375,20 @@ type recurrencePair struct {
 	CurrentURL          string   `json:"current_url"`
 	PriorURL            string   `json:"prior_url"`
 	SignatureID         string   `json:"signature_id"`
+	MatchedSignatureID  string   `json:"matched_signature_id,omitempty"`
 	Confidence          string   `json:"confidence"`
 	Reason              string   `json:"reason"`
 	Refs                []string `json:"refs"`
+}
+
+type topRepeatedMistake struct {
+	Rank          int      `json:"rank"`
+	SignatureID   string   `json:"signature_id"`
+	RepeatCount   int      `json:"repeat_count"`
+	PRs           []int    `json:"prs"`
+	URLs          []string `json:"urls"`
+	ExperienceIDs []string `json:"experience_ids"`
+	Refs          []string `json:"refs"`
 }
 
 type backtestFlakeDiscount struct {
@@ -424,6 +460,29 @@ type backtestCitation struct {
 	ExperienceID string `json:"experience_id"`
 }
 
+type reportDiagnostic struct {
+	Type    string `json:"type"`
+	Status  string `json:"status"`
+	Message string `json:"message"`
+	Ref     string `json:"ref"`
+}
+
+type reportOperatorFeedback struct {
+	Summary                  string `json:"summary"`
+	ConservativeMatchingNote string `json:"conservative_matching_note"`
+	NextCommand              string `json:"next_command"`
+}
+
+type reportBadge struct {
+	Label          string `json:"label"`
+	Message        string `json:"message"`
+	Status         string `json:"status"`
+	Stale          bool   `json:"stale"`
+	Color          string `json:"color"`
+	Reason         string `json:"reason"`
+	SourceReportID string `json:"source_report_id"`
+}
+
 type distilledRule struct {
 	ID              string
 	Kind            string
@@ -470,6 +529,9 @@ type distilledRuleMetadata struct {
 	EmbeddingMode         string
 	ReviewRequired        bool
 	DeterministicFallback bool
+	MemorySource          string
+	SourceRecordType      string
+	ExcludedMemorySources []string
 }
 
 type distillCluster struct {
@@ -742,6 +804,7 @@ func ingestResult(args []string, start time.Time) CommandResult {
 	skippedUncertain := 0
 	agentAttributed := 0
 	humanAttributed := 0
+	ingestedAt := start.UTC().Format(time.RFC3339)
 	for index, event := range events {
 		redacted, commandErr := redactForPersistence(event, displayPath(root, inputPath))
 		if commandErr != nil {
@@ -759,6 +822,11 @@ func ingestResult(args []string, start time.Time) CommandResult {
 			skippedUncertain++
 			continue
 		}
+		if record.Metadata == nil {
+			record.Metadata = map[string]any{}
+		}
+		record.Metadata[badgeMetadataLastIngest] = ingestedAt
+		record.Metadata[badgeMetadataMergedPRs] = 0
 		switch record.Attribution.ActorKind {
 		case "agent":
 			agentAttributed++
@@ -820,7 +888,7 @@ func parseIngestArgs(args []string) (ingestOptions, *CommandError) {
 func backtestResult(args []string, start time.Time) CommandResult {
 	options, commandErr := parseBacktestArgs(args)
 	withFormat := func(result CommandResult) CommandResult {
-		if options.Format == "json" {
+		if options.FormatExplicit && options.Format == "json" {
 			result.MachineReadable = true
 		}
 		return result
@@ -874,6 +942,8 @@ func backtestResult(args []string, start time.Time) CommandResult {
 		if commandErr != nil {
 			return withFormat(errorResult("backtest", "backtest", commandErr, start))
 		}
+		report.Diagnostics = buildReportDiagnostics(report.Summary, report.Baseline, report.SourceArtifacts)
+		report.Badge = buildReportBadge(report)
 	}
 	jsonReportPath, htmlReportPath, commandErr := writeBacktestReports(root, report, options.ReportDir)
 	if commandErr != nil {
@@ -886,17 +956,32 @@ func backtestResult(args []string, start time.Time) CommandResult {
 	}
 
 	result := passResult("backtest", "backtest", "computed conservative recurrence backtest", start, map[string]any{
-		"window":                 report.Window,
-		"headline_err":           report.HeadlineERR,
-		"headline_err_percent":   report.Summary.HeadlineERRPercent,
-		"confirmed_recurrences":  report.Summary.ConfirmedRecurrenceCount,
-		"possible_recurrences":   report.Summary.PossibleRecurrenceCount,
-		"flake_discounted_count": report.Summary.FlakeDiscountedCount,
-		"baseline":               report.Baseline,
-		"gate":                   report.Gate,
-		"report":                 report,
-		"json_report_path":       jsonReportPath,
-		"html_report_path":       htmlReportPath,
+		"window":                         report.Window,
+		"repo_id":                        report.Metadata["repo_id"],
+		"experiences_total":              report.Summary.ExperienceCount,
+		"experiences_agent_attributed":   report.Metrics.AgentAttributedExperiences,
+		"agent_attributed_prs":           report.Metrics.AgentAttributedPRs,
+		"agent_failures_by_outcome_kind": report.Metrics.AgentFailuresByOutcomeKind,
+		"headline_err":                   report.HeadlineERR,
+		"headline_err_percent":           report.Summary.HeadlineERRPercent,
+		"error_recurrence_rate":          report.HeadlineERR,
+		"recurrences_confirmed":          report.Summary.ConfirmedRecurrenceCount,
+		"recurrences_possible":           report.Summary.PossibleRecurrenceCount,
+		"confirmed_recurrences":          report.Summary.ConfirmedRecurrenceCount,
+		"possible_recurrences":           report.Summary.PossibleRecurrenceCount,
+		"flake_discounted_count":         report.Summary.FlakeDiscountedCount,
+		"attribution_uncertain_count":    report.Summary.AttributionUncertainCount,
+		"top_repeated_mistakes":          report.TopRepeatedMistakes,
+		"diagnostics":                    report.Diagnostics,
+		"operator_feedback":              report.OperatorFeedback,
+		"badge":                          report.Badge,
+		"baseline":                       report.Baseline,
+		"baseline_ref":                   report.Baseline.Path,
+		"gate":                           report.Gate,
+		"report":                         report,
+		"report_path":                    htmlReportPath,
+		"json_report_path":               jsonReportPath,
+		"html_report_path":               htmlReportPath,
 	})
 	result.Warnings = append(result.Warnings, warnings...)
 	result.EvidenceRefs = append(result.EvidenceRefs,
@@ -943,6 +1028,7 @@ func parseBacktestArgs(args []string) (backtestOptions, *CommandError) {
 			options.Window = args[index+1]
 			index++
 		case "--format":
+			options.FormatExplicit = true
 			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
 				return options, usageError("backtest requires a value after --format")
 			}
@@ -1014,16 +1100,29 @@ func loadBacktestExperiences(root string) ([]backtestExperience, []string, strin
 			return nil, nil, "", internalError("could not read experience shard "+rel, err)
 		}
 		sourceArtifacts = append(sourceArtifacts, rel)
-		digestParts = append(digestParts, rel+"\x00"+sha256String(string(content)))
+		shardDigestLines := []string{}
 		for lineNumber, line := range strings.Split(string(content), "\n") {
 			if strings.TrimSpace(line) == "" {
 				continue
 			}
-			var record experienceRecord
-			if err := decodeJSONUseNumber(line, &record); err != nil {
+			ref := fmt.Sprintf("%s:%d", rel, lineNumber+1)
+			var event map[string]any
+			if err := decodeJSONUseNumber(line, &event); err != nil {
 				return nil, nil, "", artifactContractError(fmt.Sprintf("experience shard line %d is not valid JSON", lineNumber+1), fmt.Sprintf("%s:%d", rel, lineNumber+1))
 			}
-			recordedAt, commandErr := validateBacktestExperience(record, fmt.Sprintf("%s:%d", rel, lineNumber+1))
+			shardDigestLines = append(shardDigestLines, experienceDigestLine(event))
+			if commandErr := validateEventMemorySource(event, ref); commandErr != nil {
+				return nil, nil, "", commandErr
+			}
+			content, err := json.Marshal(event)
+			if err != nil {
+				return nil, nil, "", internalError("could not decode experience shard line", err)
+			}
+			var record experienceRecord
+			if err := decodeJSONUseNumber(string(content), &record); err != nil {
+				return nil, nil, "", artifactContractError(fmt.Sprintf("experience shard line %d is not valid JSON", lineNumber+1), ref)
+			}
+			recordedAt, commandErr := validateBacktestExperience(record, ref)
 			if commandErr != nil {
 				return nil, nil, "", commandErr
 			}
@@ -1034,12 +1133,48 @@ func loadBacktestExperiences(root string) ([]backtestExperience, []string, strin
 				SourceLine: lineNumber + 1,
 			})
 		}
+		digestParts = append(digestParts, rel+"\x00"+sha256String(strings.Join(shardDigestLines, "\n")))
 	}
 	if len(records) == 0 {
 		return nil, nil, "", artifactContractError("backtest found no experience records in .relia/experiences", ".relia/experiences")
 	}
 	sort.Strings(digestParts)
 	return records, sourceArtifacts, sha256String(strings.Join(digestParts, "\x00")), nil
+}
+
+func experienceDigestLine(event map[string]any) string {
+	normalized, _ := cloneJSONValue(event).(map[string]any)
+	if normalized == nil {
+		normalized = map[string]any{}
+	}
+	if metadata, ok := normalized["metadata"].(map[string]any); ok {
+		delete(metadata, badgeMetadataLastIngest)
+		delete(metadata, badgeMetadataMergedPRs)
+	}
+	encoded, err := json.Marshal(normalized)
+	if err != nil {
+		return "{}"
+	}
+	return string(encoded)
+}
+
+func cloneJSONValue(value any) any {
+	switch typed := value.(type) {
+	case map[string]any:
+		clone := make(map[string]any, len(typed))
+		for key, item := range typed {
+			clone[key] = cloneJSONValue(item)
+		}
+		return clone
+	case []any:
+		clone := make([]any, len(typed))
+		for index, item := range typed {
+			clone[index] = cloneJSONValue(item)
+		}
+		return clone
+	default:
+		return typed
+	}
 }
 
 func loadDistillExperiences(root string, config yamlDocument, options distillOptions) ([]backtestExperience, []string, string, *CommandError) {
@@ -1119,6 +1254,9 @@ func loadDistillExperiences(root string, config yamlDocument, options distillOpt
 func canonicalDistillInputExperienceRecord(event map[string]any, ref string) (experienceRecord, bool, *CommandError) {
 	if stringField(event, "object_type") != "relia.experience_record" {
 		return experienceRecord{}, false, nil
+	}
+	if commandErr := validateEventMemorySource(event, ref); commandErr != nil {
+		return experienceRecord{}, true, commandErr
 	}
 	if commandErr := validateCanonicalDistillInputCompleteness(event, ref); commandErr != nil {
 		return experienceRecord{}, true, commandErr
@@ -1232,6 +1370,9 @@ func validateBacktestExperience(record experienceRecord, ref string) (time.Time,
 			return time.Time{}, provenanceIntegrityError("backtest experience pull request provenance URL must match action.pr", ref)
 		}
 	}
+	if commandErr := validateExperienceRecordMemorySource(record, ref); commandErr != nil {
+		return time.Time{}, commandErr
+	}
 	return recordedAt.UTC(), nil
 }
 
@@ -1258,12 +1399,24 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 	flakes := []backtestFlakeDiscount{}
 	uncertain := []backtestUncertain{}
 	citationMap := map[int]backtestCitation{}
+	prsAnalyzed := map[int]bool{}
+	agentAttributedPRs := map[int]bool{}
+	agentAttributedExperiences := 0
+	agentFailuresByOutcomeKind := map[string]int{}
 	summary := recurrenceSummary{
 		ExperienceCount:       len(records),
 		WindowExperienceCount: len(windowRecords),
 	}
 	for _, current := range windowRecords {
 		record := current.Record
+		prsAnalyzed[record.Action.PR] = true
+		if record.Attribution.ActorKind == "agent" {
+			agentAttributedPRs[record.Action.PR] = true
+			agentAttributedExperiences++
+			if isFailureOutcome(record.Outcome.Kind) {
+				agentFailuresByOutcomeKind[record.Outcome.Kind]++
+			}
+		}
 		if record.Attribution.ActorKind == "uncertain" {
 			summary.AttributionUncertainCount++
 			uncertain = append(uncertain, backtestUncertain{
@@ -1332,6 +1485,20 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 		summary.HeadlineERR = roundFloat(float64(summary.ConfirmedRecurrenceCount)/float64(summary.AgentFailureDenominator), 4)
 	}
 	summary.HeadlineERRPercent = fmt.Sprintf("%.1f%%", summary.HeadlineERR*100)
+	metrics := recurrenceMetrics{
+		PRsAnalyzed:                len(prsAnalyzed),
+		AgentAttributedPRs:         len(agentAttributedPRs),
+		AgentAttributedExperiences: agentAttributedExperiences,
+		AgentFailuresByOutcomeKind: agentFailuresByOutcomeKind,
+		ErrorRecurrenceRate:        summary.HeadlineERR,
+		ConfirmedRecurrences:       summary.ConfirmedRecurrenceCount,
+		PossibleRecurrences:        summary.PossibleRecurrenceCount,
+		FlakeDiscountedCount:       summary.FlakeDiscountedCount,
+		AttributionUncertainCount:  summary.AttributionUncertainCount,
+	}
+	if metrics.AgentFailuresByOutcomeKind == nil {
+		metrics.AgentFailuresByOutcomeKind = map[string]int{}
+	}
 	window := recurrenceWindow{
 		Start: windowStart.Format(time.RFC3339),
 		End:   windowEnd.Format(time.RFC3339),
@@ -1341,32 +1508,45 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 		return recurrenceReport{}, commandErr
 	}
 	gate := backtestGate(config, summary.HeadlineERR)
+	repoID := recurrenceReportRepoID(windowRecords)
+	metadata := map[string]any{
+		"repo_id":                                repoID,
+		"window_days":                            windowDays,
+		"source_artifact_digest":                 sourceDigest,
+		"possible_excluded_from_err":             true,
+		"flake_discount_excluded_from_numerator": true,
+		"flake_discount_retained_in_denominator": true,
+		"deterministic_window_anchor":            "latest_recorded_at_in_source_artifacts",
+		"network_required":                       false,
+		"redaction_status":                       "customer_safe",
+		"repo_relative_paths_only":               true,
+		"baseline_gate_enabled_default":          false,
+	}
+	if lastIngestAt, mergedSinceIngest, hasLastIngestAt, hasMergedSinceIngest := reportIngestFreshnessMetadata(records); hasLastIngestAt {
+		metadata[badgeMetadataLastIngest] = lastIngestAt.Format(time.RFC3339)
+		if hasMergedSinceIngest {
+			metadata[badgeMetadataMergedPRs] = mergedSinceIngest
+		}
+	}
 	report := recurrenceReport{
 		ObjectType:           "relia.recurrence_report",
 		SchemaVersion:        commandSchemaVersion,
 		SourceArtifacts:      append([]string(nil), sourceArtifacts...),
 		Window:               window,
 		Summary:              summary,
+		Metrics:              metrics,
 		HeadlineERR:          summary.HeadlineERR,
 		ConfirmedRecurrences: confirmed,
 		PossibleRecurrences:  possible,
+		TopRepeatedMistakes:  buildTopRepeatedMistakes(confirmed),
 		FlakeDiscounts:       flakes,
 		AttributionUncertain: uncertain,
 		Baseline:             baseline,
 		Gate:                 gate,
 		Citations:            citations,
-		Metadata: map[string]any{
-			"window_days":                            windowDays,
-			"source_artifact_digest":                 sourceDigest,
-			"possible_excluded_from_err":             true,
-			"flake_discount_excluded_from_numerator": true,
-			"flake_discount_retained_in_denominator": true,
-			"deterministic_window_anchor":            "latest_recorded_at_in_source_artifacts",
-			"network_required":                       false,
-			"redaction_status":                       "customer_safe",
-			"repo_relative_paths_only":               true,
-			"baseline_gate_enabled_default":          false,
-		},
+		Diagnostics:          buildReportDiagnostics(summary, baseline, sourceArtifacts),
+		OperatorFeedback:     buildReportOperatorFeedback(summary),
+		Metadata:             metadata,
 	}
 	report.ReportID = "backtest_" + shortHash(strings.Join([]string{
 		report.Window.Start,
@@ -1376,7 +1556,275 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 		strconv.Itoa(summary.ConfirmedRecurrenceCount),
 		strconv.Itoa(summary.PossibleRecurrenceCount),
 	}, "\x00"))
+	report.Badge = buildReportBadge(report)
 	return report, nil
+}
+
+func recurrenceReportRepoID(records []backtestExperience) string {
+	if len(records) == 0 {
+		return ""
+	}
+	repo := records[0].Record.Repo
+	if repo.Owner == "" || repo.Name == "" {
+		return ""
+	}
+	return repo.Owner + "/" + repo.Name
+}
+
+func reportIngestFreshnessMetadata(records []backtestExperience) (time.Time, int, bool, bool) {
+	var latestIngestAt time.Time
+	mergedSinceIngest := 0
+	hasLastIngestAt := false
+	hasMergedSinceIngest := false
+	for _, record := range records {
+		ingestedAt, ok := metadataTime(record.Record.Metadata, badgeMetadataLastIngest)
+		if !ok {
+			continue
+		}
+		if !hasLastIngestAt || ingestedAt.After(latestIngestAt) {
+			latestIngestAt = ingestedAt
+			mergedSinceIngest = 0
+			hasLastIngestAt = true
+			hasMergedSinceIngest = false
+		}
+		if !ingestedAt.Equal(latestIngestAt) {
+			continue
+		}
+		if value, ok := metadataInt(record.Record.Metadata, badgeMetadataMergedPRs); ok {
+			if !hasMergedSinceIngest || value > mergedSinceIngest {
+				mergedSinceIngest = value
+			}
+			hasMergedSinceIngest = true
+		}
+	}
+	return latestIngestAt, mergedSinceIngest, hasLastIngestAt, hasMergedSinceIngest
+}
+
+func buildTopRepeatedMistakes(pairs []recurrencePair) []topRepeatedMistake {
+	type aggregate struct {
+		signatureID   string
+		repeatCount   int
+		prs           []int
+		urls          []string
+		experienceIDs []string
+		refs          []string
+	}
+	bySignature := map[string]*aggregate{}
+	for _, pair := range pairs {
+		key := pair.SignatureID
+		if pair.MatchedSignatureID != "" {
+			key = pair.MatchedSignatureID
+		}
+		if key == "" {
+			continue
+		}
+		item := bySignature[key]
+		if item == nil {
+			item = &aggregate{signatureID: key}
+			bySignature[key] = item
+		}
+		item.repeatCount++
+		item.prs = append(item.prs, pair.PriorPR, pair.CurrentPR)
+		item.urls = append(item.urls, pair.PriorURL, pair.CurrentURL)
+		item.experienceIDs = append(item.experienceIDs, pair.PriorExperienceID, pair.CurrentExperienceID)
+		item.refs = append(item.refs, pair.Refs...)
+	}
+	aggregates := make([]*aggregate, 0, len(bySignature))
+	for _, item := range bySignature {
+		item.prs = uniqueInts(item.prs)
+		item.urls = uniqueStrings(item.urls)
+		item.experienceIDs = uniqueStrings(item.experienceIDs)
+		item.refs = uniqueStrings(item.refs)
+		sort.Ints(item.prs)
+		sort.Strings(item.urls)
+		sort.Strings(item.experienceIDs)
+		sort.Strings(item.refs)
+		aggregates = append(aggregates, item)
+	}
+	sort.Slice(aggregates, func(i, j int) bool {
+		if aggregates[i].repeatCount == aggregates[j].repeatCount {
+			return aggregates[i].signatureID < aggregates[j].signatureID
+		}
+		return aggregates[i].repeatCount > aggregates[j].repeatCount
+	})
+	result := make([]topRepeatedMistake, 0, len(aggregates))
+	for index, item := range aggregates {
+		result = append(result, topRepeatedMistake{
+			Rank:          index + 1,
+			SignatureID:   item.signatureID,
+			RepeatCount:   item.repeatCount,
+			PRs:           item.prs,
+			URLs:          item.urls,
+			ExperienceIDs: item.experienceIDs,
+			Refs:          item.refs,
+		})
+	}
+	return result
+}
+
+func buildReportDiagnostics(summary recurrenceSummary, baseline baselineComparison, sourceArtifacts []string) []reportDiagnostic {
+	ref := "schemas/experience-record.schema.json"
+	if len(sourceArtifacts) > 0 {
+		ref = sourceArtifacts[0]
+	}
+	diagnostics := []reportDiagnostic{
+		{
+			Type:    "memory_source_verified",
+			Status:  "pass",
+			Message: "Backtest, distill, and memory outputs are derived from canonical experience records; agent self-reports and reflections are rejected before persistence.",
+			Ref:     ref,
+		},
+	}
+	if summary.PossibleRecurrenceCount > 0 {
+		diagnostics = append(diagnostics, reportDiagnostic{
+			Type:    "possible_recurrences_excluded",
+			Status:  "info",
+			Message: "Possible recurrences are reported separately and excluded from headline ERR.",
+			Ref:     "schemas/recurrence-report.schema.json",
+		})
+	}
+	if summary.FlakeDiscountedCount > 0 {
+		diagnostics = append(diagnostics, reportDiagnostic{
+			Type:    "flake_discounts_visible",
+			Status:  "info",
+			Message: "Flake-discounted failures remain visible and are excluded from the recurrence numerator.",
+			Ref:     "schemas/recurrence-report.schema.json",
+		})
+	}
+	if summary.AttributionUncertainCount > 0 {
+		diagnostics = append(diagnostics, reportDiagnostic{
+			Type:    "uncertain_attribution_excluded",
+			Status:  "info",
+			Message: "Uncertain attribution is excluded from headline ERR by default.",
+			Ref:     "relia.yaml",
+		})
+	}
+	if baseline.Stale {
+		diagnostics = append(diagnostics, reportDiagnostic{
+			Type:    "stale_baseline",
+			Status:  "warn",
+			Message: baseline.Reason,
+			Ref:     baseline.Path,
+		})
+	}
+	return diagnostics
+}
+
+func buildReportOperatorFeedback(summary recurrenceSummary) reportOperatorFeedback {
+	nextCommand := "relia ingest --input <outcomes.jsonl>"
+	if summary.AgentFailureDenominator > 0 {
+		nextCommand = "relia distill --format json"
+	}
+	return reportOperatorFeedback{
+		Summary: fmt.Sprintf("%s ERR from %d confirmed recurrences across %d agent-attributed failures.",
+			summary.HeadlineERRPercent,
+			summary.ConfirmedRecurrenceCount,
+			summary.AgentFailureDenominator),
+		ConservativeMatchingNote: "Headline ERR counts confirmed recurrences only; possible recurrences, flake discounts, and uncertain attribution are visible but excluded from the headline.",
+		NextCommand:              nextCommand,
+	}
+}
+
+func buildReportBadge(report recurrenceReport) reportBadge {
+	return buildReportBadgeAt(report, time.Now().UTC())
+}
+
+func buildReportBadgeAt(report recurrenceReport, now time.Time) reportBadge {
+	color := "brightgreen"
+	switch {
+	case report.HeadlineERR >= 0.3:
+		color = "orange"
+	case report.HeadlineERR >= 0.1:
+		color = "yellow"
+	}
+
+	status := "current"
+	message := "ERR " + report.Summary.HeadlineERRPercent
+	stale, reason := reportBadgeStaleness(report, now)
+	if stale {
+		status = "stale"
+		message += " stale"
+		color = "lightgrey"
+	}
+
+	return reportBadge{
+		Label:          "Relia",
+		Message:        message,
+		Status:         status,
+		Stale:          stale,
+		Color:          color,
+		Reason:         reason,
+		SourceReportID: report.ReportID,
+	}
+}
+
+func reportBadgeStaleness(report recurrenceReport, now time.Time) (bool, string) {
+	if now.IsZero() {
+		now = time.Now().UTC()
+	}
+	lastIngestAt, hasLastIngestAt := metadataTime(report.Metadata, badgeMetadataLastIngest)
+	if !hasLastIngestAt {
+		return true, "Ingest freshness is unavailable; rerun relia ingest before publishing the README badge."
+	}
+	if now.UTC().Sub(lastIngestAt.UTC()) > time.Duration(badgeStaleAfterDays)*24*time.Hour {
+		return true, fmt.Sprintf("Last ingest exceeds the %d-day freshness window; rerun relia ingest and backtest before publishing the README badge.", badgeStaleAfterDays)
+	}
+	mergedSinceIngest, hasMergedSinceIngest := metadataInt(report.Metadata, badgeMetadataMergedPRs)
+	if !hasMergedSinceIngest {
+		return true, "Merged PR activity freshness is unavailable; provide merged_prs_since_last_ingest metadata before publishing the README badge."
+	}
+	if mergedSinceIngest > badgeStaleAfterMergedPRs {
+		return true, fmt.Sprintf("More than %d PRs have merged since the last ingest; rerun relia ingest and backtest before publishing the README badge.", badgeStaleAfterMergedPRs)
+	}
+	return false, fmt.Sprintf("Generated from ingest metadata within the %d-day freshness window and %d merged PRs since ingest.", badgeStaleAfterDays, mergedSinceIngest)
+}
+
+func metadataInt(metadata map[string]any, key string) (int, bool) {
+	value, ok := metadata[key]
+	if !ok {
+		return 0, false
+	}
+	switch typed := value.(type) {
+	case int:
+		if typed < 0 {
+			return 0, false
+		}
+		return typed, true
+	case int64:
+		if typed < 0 {
+			return 0, false
+		}
+		return int64ToInt(typed)
+	case float64:
+		if math.IsNaN(typed) || math.IsInf(typed, 0) || typed < 0 || typed != math.Trunc(typed) {
+			return 0, false
+		}
+		return int64ToInt(int64(typed))
+	case json.Number:
+		number, err := typed.Int64()
+		if err != nil || number < 0 {
+			return 0, false
+		}
+		return int64ToInt(number)
+	default:
+		return 0, false
+	}
+}
+
+func metadataTime(metadata map[string]any, key string) (time.Time, bool) {
+	value, ok := metadata[key]
+	if !ok {
+		return time.Time{}, false
+	}
+	text := strings.TrimSpace(stringFromAny(value))
+	if text == "" {
+		return time.Time{}, false
+	}
+	parsed, err := time.Parse(time.RFC3339, text)
+	if err != nil {
+		return time.Time{}, false
+	}
+	return parsed.UTC(), true
 }
 
 func isFailureOutcome(kind string) bool {
@@ -1408,6 +1856,43 @@ func recurrenceSignatureKeys(record experienceRecord) []string {
 		keys = append(keys, strings.Join([]string{"id", record.Outcome.Signature.SignatureID}, "\x00"))
 	}
 	return keys
+}
+
+func matchedRecurrenceSignatureID(left experienceRecord, right experienceRecord) string {
+	leftSignatureID := strings.TrimSpace(left.Outcome.Signature.SignatureID)
+	rightSignatureID := strings.TrimSpace(right.Outcome.Signature.SignatureID)
+	rightKeys := map[string]bool{}
+	for _, key := range recurrenceSignatureKeys(right) {
+		rightKeys[key] = true
+	}
+	for _, key := range recurrenceSignatureKeys(left) {
+		if rightKeys[key] {
+			return displayRecurrenceSignatureKey(key, rightSignatureID)
+		}
+	}
+	if leftSignatureID != "" && leftSignatureID == rightSignatureID {
+		return rightSignatureID
+	}
+	if rightSignatureID != "" {
+		return rightSignatureID
+	}
+	return leftSignatureID
+}
+
+func displayRecurrenceSignatureKey(key string, fallback string) string {
+	parts := strings.Split(key, "\x00")
+	switch {
+	case len(parts) == 3 && parts[0] == "class_key":
+		return strings.Join([]string{"class_key", parts[1], parts[2]}, ":")
+	case len(parts) == 2 && parts[0] == "message":
+		return "message:" + parts[1]
+	case len(parts) == 2 && parts[0] == "id":
+		return parts[1]
+	case fallback != "":
+		return fallback
+	default:
+		return strings.ReplaceAll(key, "\x00", ":")
+	}
 }
 
 func appendRecurrencePrior(priorBySignature map[string][]backtestExperience, keys []string, current backtestExperience) {
@@ -1510,6 +1995,7 @@ func buildRecurrencePair(prior backtestExperience, current backtestExperience) r
 		CurrentURL:          primaryProvenanceURL(current.Record),
 		PriorURL:            primaryProvenanceURL(prior.Record),
 		SignatureID:         current.Record.Outcome.Signature.SignatureID,
+		MatchedSignatureID:  matchedRecurrenceSignatureID(prior.Record, current.Record),
 		Refs:                []string{sourceLineRef(prior), sourceLineRef(current)},
 	}
 }
@@ -1956,6 +2442,22 @@ func renderBacktestHTML(report recurrenceReport) string {
 		html.EscapeString(report.Summary.HeadlineERRPercent),
 		report.Summary.ConfirmedRecurrenceCount,
 		report.Summary.AgentFailureDenominator))
+	builder.WriteString("<p>")
+	builder.WriteString(html.EscapeString(report.OperatorFeedback.Summary))
+	builder.WriteString("</p>\n")
+	builder.WriteString(fmt.Sprintf("<p>PRs analyzed: %d (agent-attributed: %d)</p>\n",
+		report.Metrics.PRsAnalyzed,
+		report.Metrics.AgentAttributedPRs))
+	builder.WriteString("<p>Badge: ")
+	builder.WriteString(html.EscapeString(report.Badge.Label + " " + report.Badge.Message))
+	builder.WriteString("</p>\n")
+	builder.WriteString("<h2>Top Repeated Mistakes</h2>\n<ol>\n")
+	for _, mistake := range report.TopRepeatedMistakes {
+		builder.WriteString("<li>")
+		builder.WriteString(html.EscapeString(fmt.Sprintf("%s repeated %dx across PRs %s", mistake.SignatureID, mistake.RepeatCount, joinInts(mistake.PRs, ", "))))
+		builder.WriteString("</li>\n")
+	}
+	builder.WriteString("</ol>\n")
 	builder.WriteString("<h2>Confirmed Recurrences</h2>\n<ul>\n")
 	for _, pair := range report.ConfirmedRecurrences {
 		builder.WriteString("<li>")
@@ -1982,6 +2484,12 @@ func renderBacktestHTML(report recurrenceReport) string {
 	for _, flake := range report.FlakeDiscounts {
 		builder.WriteString("<li>")
 		builder.WriteString(html.EscapeString(fmt.Sprintf("PR #%d %s: %s", flake.PR, flake.SignatureID, flake.Reason)))
+		builder.WriteString("</li>\n")
+	}
+	builder.WriteString("</ul>\n<h2>Diagnostics</h2>\n<ul>\n")
+	for _, diagnostic := range report.Diagnostics {
+		builder.WriteString("<li>")
+		builder.WriteString(html.EscapeString(fmt.Sprintf("%s: %s (%s)", diagnostic.Status, diagnostic.Message, diagnostic.Ref)))
 		builder.WriteString("</li>\n")
 	}
 	builder.WriteString("</ul>\n</body></html>\n")
@@ -2941,6 +3449,9 @@ func buildDistilledRule(root string, kind string, cluster distillCluster, eviden
 	metadata.EmbeddingMode = embeddingMode
 	metadata.ReviewRequired = reviewRequired
 	metadata.DeterministicFallback = provider == "none" && embeddingMode == "signature"
+	metadata.MemorySource = "verified_outcome_events"
+	metadata.SourceRecordType = "relia.experience_record"
+	metadata.ExcludedMemorySources = []string{"agent_self_report", "agent_reflection"}
 	id := distilledRuleID(kind, cluster)
 	return distilledRule{
 		ID:              id,
@@ -3340,6 +3851,9 @@ func renderDistilledRuleYAML(rule distilledRule) string {
 	builder.WriteString("  embedding_mode: " + yamlScalarForWrite(rule.Metadata.EmbeddingMode) + "\n")
 	builder.WriteString("  review_required: " + strconv.FormatBool(rule.Metadata.ReviewRequired) + "\n")
 	builder.WriteString("  deterministic_fallback: " + strconv.FormatBool(rule.Metadata.DeterministicFallback) + "\n")
+	builder.WriteString("  memory_source: " + yamlScalarForWrite(rule.Metadata.MemorySource) + "\n")
+	builder.WriteString("  source_record_type: " + yamlScalarForWrite(rule.Metadata.SourceRecordType) + "\n")
+	writeYAMLStringList(&builder, "excluded_memory_sources", rule.Metadata.ExcludedMemorySources, 2)
 	builder.WriteString("  generated_by: relia distill\n")
 	builder.WriteString("  redaction_status: applied\n")
 	return builder.String()
@@ -4767,6 +5281,9 @@ func ingestEventsFromArray(values []any, ref string) ([]map[string]any, *Command
 }
 
 func normalizeExperienceRecord(config yamlDocument, event map[string]any, index int, ref string) (experienceRecord, bool, *CommandError) {
+	if commandErr := validateEventMemorySource(event, ref); commandErr != nil {
+		return experienceRecord{}, false, commandErr
+	}
 	repo, commandErr := normalizeExperienceRepo(event, ref)
 	if commandErr != nil {
 		return experienceRecord{}, false, commandErr
@@ -4818,6 +5335,7 @@ func normalizeExperienceRecord(config yamlDocument, event map[string]any, index 
 	metadata := metadataField(event)
 	metadata["source_input_index"] = index
 	metadata["source_kind"] = "local_input"
+	metadata["memory_source"] = "verified_outcome_event"
 	metadata["signature"] = signatureMetadata
 	experienceID := stringField(event, "experience_id")
 	if experienceID == "" {
@@ -4840,6 +5358,103 @@ func normalizeExperienceRecord(config yamlDocument, event map[string]any, index 
 		RedactionStatus: "applied",
 		Metadata:        metadata,
 	}, false, nil
+}
+
+func validateEventMemorySource(event map[string]any, ref string) *CommandError {
+	for _, path := range []string{
+		"object_type",
+		"event_type",
+		"event_kind",
+		"type",
+		"kind",
+		"source",
+		"source_kind",
+		"source.object_type",
+		"source.type",
+		"source.kind",
+		"source.memory_source",
+		"memory_source",
+		"metadata.source",
+		"metadata.source_kind",
+		"metadata.source_type",
+		"metadata.object_type",
+		"metadata.event_type",
+		"metadata.event_kind",
+		"metadata.type",
+		"metadata.kind",
+		"metadata.source.object_type",
+		"metadata.source.type",
+		"metadata.source.kind",
+		"metadata.source.memory_source",
+		"metadata.memory_source",
+	} {
+		if unverifiedMemorySourceKind(stringField(event, path)) {
+			return unverifiedMemorySourceError(ref)
+		}
+	}
+	return nil
+}
+
+func validateExperienceRecordMemorySource(record experienceRecord, ref string) *CommandError {
+	for _, path := range []string{
+		"source",
+		"source_kind",
+		"source_type",
+		"memory_source",
+		"object_type",
+		"event_type",
+		"event_kind",
+		"type",
+		"kind",
+		"source.object_type",
+		"source.kind",
+		"source.type",
+		"source.memory_source",
+	} {
+		if unverifiedMemorySourceKind(metadataStringField(record.Metadata, path)) {
+			return unverifiedMemorySourceError(ref)
+		}
+	}
+	return nil
+}
+
+func metadataStringField(metadata map[string]any, paths ...string) string {
+	if metadata == nil {
+		return ""
+	}
+	for _, path := range paths {
+		if value, ok := nestedField(metadata, path); ok {
+			if converted := stringFromAny(value); converted != "" {
+				return converted
+			}
+		}
+	}
+	return ""
+}
+
+func unverifiedMemorySourceKind(value string) bool {
+	normalized := strings.ToLower(strings.TrimSpace(value))
+	normalized = strings.ReplaceAll(normalized, "-", "_")
+	normalized = strings.ReplaceAll(normalized, " ", "_")
+	compact := strings.ReplaceAll(normalized, "_", "")
+	switch normalized {
+	case "agent_self_report", "self_report", "self_reported", "agent_reflection", "reflection", "agent_observation", "agent_note":
+		return true
+	default:
+		switch compact {
+		case "agentselfreport", "selfreport", "selfreported", "agentreflection", "reflection", "agentobservation", "agentnote":
+			return true
+		default:
+			return strings.Contains(normalized, "self_report") ||
+				strings.Contains(normalized, "reflection") ||
+				strings.Contains(compact, "selfreport") ||
+				strings.Contains(compact, "reflection")
+		}
+	}
+}
+
+func unverifiedMemorySourceError(ref string) *CommandError {
+	return artifactContractError("agent self-reports and reflections cannot become Relia experience records or memory sources in the MVP", ref)
 }
 
 func generatedExperienceID(action experienceAction, recordedAt time.Time, outcome experienceOutcome, signatureMetadata map[string]any, provenance experienceProvenance) string {
@@ -6104,6 +6719,30 @@ func uniqueStrings(values []string) []string {
 	return result
 }
 
+func uniqueInts(values []int) []int {
+	seen := map[int]struct{}{}
+	var result []int
+	for _, value := range values {
+		if value == 0 {
+			continue
+		}
+		if _, ok := seen[value]; ok {
+			continue
+		}
+		seen[value] = struct{}{}
+		result = append(result, value)
+	}
+	return result
+}
+
+func joinInts(values []int, sep string) string {
+	parts := make([]string, 0, len(values))
+	for _, value := range values {
+		parts = append(parts, strconv.Itoa(value))
+	}
+	return strings.Join(parts, sep)
+}
+
 func displayPath(root string, path string) string {
 	if rel, err := filepath.Rel(root, path); err == nil && rel != "." && !strings.HasPrefix(filepath.ToSlash(rel), "../") {
 		return filepath.ToSlash(rel)
@@ -6306,11 +6945,99 @@ func writeHuman(stdout io.Writer, stderr io.Writer, result CommandResult) error 
 	if _, err := fmt.Fprintf(writer, "%s %s: %s\n", result.Status, result.Command, message); err != nil {
 		return err
 	}
+	if result.Command == "backtest" {
+		if err := writeBacktestHumanDetails(writer, result); err != nil {
+			return err
+		}
+	}
 	if len(result.EvidenceRefs) == 0 {
 		return nil
 	}
 	_, err := fmt.Fprintf(writer, "evidence: %s\n", strings.Join(result.EvidenceRefs, ", "))
 	return err
+}
+
+func writeBacktestHumanDetails(writer io.Writer, result CommandResult) error {
+	report, ok := result.Data["report"].(recurrenceReport)
+	if !ok {
+		return nil
+	}
+	if _, err := fmt.Fprintf(writer, "  PRs analyzed: %d (agent-attributed: %d)\n", report.Metrics.PRsAnalyzed, report.Metrics.AgentAttributedPRs); err != nil {
+		return err
+	}
+	if _, err := fmt.Fprintf(writer, "  Agent failures: %d (%s)\n",
+		report.Summary.AgentFailureDenominator,
+		formatOutcomeKindCounts(report.Metrics.AgentFailuresByOutcomeKind)); err != nil {
+		return err
+	}
+	if _, err := fmt.Fprintf(writer, "  Confirmed recurrences: %d (%s of agent failures)\n",
+		report.Summary.ConfirmedRecurrenceCount,
+		report.Summary.HeadlineERRPercent); err != nil {
+		return err
+	}
+	if _, err := fmt.Fprintf(writer, "  Possible recurrences: %d (excluded from headline)\n", report.Summary.PossibleRecurrenceCount); err != nil {
+		return err
+	}
+	if _, err := fmt.Fprintln(writer, "  Top repeated mistakes:"); err != nil {
+		return err
+	}
+	if len(report.TopRepeatedMistakes) == 0 {
+		if _, err := fmt.Fprintln(writer, "   none"); err != nil {
+			return err
+		}
+	} else {
+		for _, mistake := range report.TopRepeatedMistakes {
+			if _, err := fmt.Fprintf(writer, "   %d. %s %dx (PR #%s)\n",
+				mistake.Rank,
+				mistake.SignatureID,
+				mistake.RepeatCount,
+				joinInts(mistake.PRs, ", #")); err != nil {
+				return err
+			}
+		}
+	}
+	reportPath, _ := result.Data["report_path"].(string)
+	if reportPath == "" {
+		reportPath, _ = result.Data["html_report_path"].(string)
+	}
+	if _, err := fmt.Fprintf(writer, "  Error recurrence rate: %s\n", report.Summary.HeadlineERRPercent); err != nil {
+		return err
+	}
+	if reportPath != "" {
+		if _, err := fmt.Fprintf(writer, "  Report: %s\n", reportPath); err != nil {
+			return err
+		}
+	}
+	if _, err := fmt.Fprintf(writer, "  Badge: %s %s\n", report.Badge.Label, report.Badge.Message); err != nil {
+		return err
+	}
+	if len(report.Diagnostics) > 0 {
+		if _, err := fmt.Fprintln(writer, "  Diagnostics:"); err != nil {
+			return err
+		}
+		for _, diagnostic := range report.Diagnostics {
+			if _, err := fmt.Fprintf(writer, "   - %s: %s (%s)\n", diagnostic.Status, diagnostic.Message, diagnostic.Ref); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func formatOutcomeKindCounts(counts map[string]int) string {
+	if len(counts) == 0 {
+		return "none"
+	}
+	keys := make([]string, 0, len(counts))
+	for key := range counts {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	parts := make([]string, 0, len(keys))
+	for _, key := range keys {
+		parts = append(parts, fmt.Sprintf("%s: %d", key, counts[key]))
+	}
+	return strings.Join(parts, ", ")
 }
 
 func stdoutIsTerminal(file *os.File) bool {

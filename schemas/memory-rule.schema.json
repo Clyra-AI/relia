@@ -230,6 +230,18 @@
         },
         "deterministic_fallback": {
           "type": "boolean"
+        },
+        "memory_source": {
+          "enum": ["verified_outcome_events"]
+        },
+        "source_record_type": {
+          "const": "relia.experience_record"
+        },
+        "excluded_memory_sources": {
+          "type": "array",
+          "items": {
+            "enum": ["agent_self_report", "agent_reflection"]
+          }
         }
       }
     }

@@ -1,0 +1,184 @@
+{
+  "acceptance_item_ids": [
+    "FR1-OUTCOMES-AS-THE-ONLY-MEMORY-SOURCE-001"
+  ],
+  "artifact_type": "proof-of-behavior-scorecard",
+  "evidence_refs": [
+    ".factory/artifacts/task-runs/T8/work-proof-marker.json",
+    ".factory/artifacts/task-runs/T8/validation-report.json"
+  ],
+  "operator_visible_feedback_refs": [
+    "cmd/relia/main.go",
+    "README.md",
+    "docs/dev/dev_guides.md"
+  ],
+  "produced_at": "2026-06-30T14:43:22Z",
+  "redaction_posture": {
+    "classification": "customer_safe",
+    "notes": "No customer data, live credentials, network calls, or unredacted machine-local paths were introduced.",
+    "status": "pass"
+  },
+  "repair_task_id": "20260630T113048.990974000Z-relia-T8-review-14-repair",
+  "required_proof_level": "user_visible_behavior",
+  "schema_version": "1.0",
+  "scorecard": [
+    {
+      "behavior": "Raw outcome input marked as an agent self-report fails before persistence.",
+      "proof_refs": [
+        "cmd/relia/main_test.go",
+        "TestIngestRejectsAgentSelfReportsBeforePersistence"
+      ],
+      "status": "pass"
+    },
+    {
+      "behavior": "Nested source metadata marked as an agent self-report or reflection fails before persistence.",
+      "proof_refs": [
+        "cmd/relia/main_test.go",
+        "TestIngestRejectsNestedSourceMetadataBeforePersistence"
+      ],
+      "status": "pass"
+    },
+    {
+      "behavior": "Top-level object_type and event_type markers marked as agent self-reports or reflections fail before persistence.",
+      "proof_refs": [
+        "cmd/relia/main_test.go",
+        "TestIngestRejectsNestedSourceMetadataBeforePersistence"
+      ],
+      "status": "pass"
+    },
+    {
+      "behavior": "Canonical experience input marked as an agent reflection fails before distill can write memory rules.",
+      "proof_refs": [
+        "cmd/relia/main_test.go",
+        "TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite"
+      ],
+      "status": "pass"
+    },
+    {
+      "behavior": "Canonical distill --input records with top-level self-report or reflection markers fail before memory-rule writes.",
+      "proof_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        "TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite"
+      ],
+      "status": "pass"
+    },
+    {
+      "behavior": "Metadata-level object, event, type, kind, and nested source.object_type markers marked as self-reports or reflections fail before ingest persistence or canonical distill memory-rule writes.",
+      "proof_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        "TestIngestRejectsNestedSourceMetadataBeforePersistence",
+        "TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite"
+      ],
+      "status": "pass"
+    },
+    {
+      "behavior": "Separatorless and camelCase self-report markers such as agentSelfReport and selfReported fail before ingest persistence or canonical distill memory-rule writes.",
+      "proof_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        "TestIngestRejectsNestedSourceMetadataBeforePersistence",
+        "TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite"
+      ],
+      "status": "pass"
+    },
+    {
+      "behavior": "Backtest and shard-backed distill reject existing experience shard lines marked with top-level self-report or reflection markers before struct decoding.",
+      "proof_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go",
+        "TestShardConsumersRejectSelfReportMarkersBeforeStructDecode"
+      ],
+      "status": "pass"
+    },
+    {
+      "behavior": "Generated memory rules identify verified outcome events as the memory source and list self-report/reflection exclusions.",
+      "proof_refs": [
+        "cmd/relia/main_test.go",
+        "TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage",
+        "schemas/memory-rule.schema.json"
+      ],
+      "status": "pass"
+    },
+    {
+      "behavior": "Backtest JSON and HTML reports expose metrics, top repeated mistakes, diagnostics, operator feedback, and badge-ready data derived from canonical experience records.",
+      "proof_refs": [
+        "cmd/relia/main_test.go",
+        "TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline",
+        "schemas/recurrence-report.schema.json"
+      ],
+      "status": "pass"
+    },
+    {
+      "behavior": "Backtest command-result metrics count agent-attributed experience records separately from unique agent-attributed PRs.",
+      "proof_refs": [
+        "cmd/relia/main_test.go",
+        "TestBacktestCommandResultCountsAgentAttributedExperiencesSeparatelyFromPRs",
+        "schemas/recurrence-report.schema.json"
+      ],
+      "status": "pass"
+    },
+    {
+      "behavior": "Backtest --save-baseline reports saved baseline state without carrying stale-baseline diagnostics from the pre-save comparison.",
+      "proof_refs": [
+        "cmd/relia/main_test.go",
+        "TestBacktestSaveBaselineReportsFreshCurrentValues"
+      ],
+      "status": "pass"
+    },
+    {
+      "behavior": "Top repeated mistakes aggregate by the canonical recurrence key when generated signature IDs are reused and later regenerated across the same class/key cluster.",
+      "proof_refs": [
+        "cmd/relia/main_test.go",
+        "TestBacktestTopRepeatedMistakesAggregateByMatchedSignature",
+        "schemas/recurrence-report.schema.json"
+      ],
+      "status": "pass"
+    },
+    {
+      "behavior": "Recurrence report schema_version 1.0 keeps newly emitted T8 metrics, repeated-mistake, diagnostics, feedback, and badge fields optional for backward compatibility.",
+      "proof_refs": [
+        "cmd/relia/main_test.go",
+        "TestRecurrenceReportSchemaKeepsT8FieldsOptionalForV1",
+        "schemas/recurrence-report.schema.json"
+      ],
+      "status": "pass"
+    },
+    {
+      "behavior": "Interactive backtest output shows operator-visible report summary, top repeated mistakes, report path, diagnostics, and badge text while non-interactive output remains JSON.",
+      "proof_refs": [
+        "cmd/relia/main_test.go",
+        "TestBacktestInteractiveOutputShowsOperatorSummaryAndBadge",
+        "README.md"
+      ],
+      "status": "pass"
+    },
+    {
+      "behavior": "README badge fields render stale from explicit last_ingest_at metadata and merged-PR activity metadata, while freshly ingested historical records remain current until ingest freshness or merged-PR thresholds expire and negative activity metadata fails closed.",
+      "proof_refs": [
+        "cmd/relia/main_test.go",
+        "TestIngestPersistsCanonicalExperienceWithRedactionAndProvenance",
+        "TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline",
+        "TestBuildReportBadgeComputesFreshness",
+        "TestBuildReportBadgeComputesActivityStaleness",
+        "schemas/recurrence-report.schema.json"
+      ],
+      "status": "pass"
+    },
+    {
+      "behavior": "Saved ERR baselines remain current when only volatile ingest freshness metadata changes in otherwise identical experience shards.",
+      "proof_refs": [
+        "cmd/relia/main_test.go",
+        "TestBacktestBaselineDigestIgnoresIngestFreshnessMetadata",
+        "cmd/relia/main.go"
+      ],
+      "status": "pass"
+    }
+  ],
+  "status": "pass",
+  "task_id": "T8",
+  "validation_refs": [
+    ".factory/artifacts/task-runs/T8/validation-report.json"
+  ]
+}
