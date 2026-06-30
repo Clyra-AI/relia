@@ -1446,7 +1446,7 @@ func TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline(t *te
 		t.Fatalf("gate = %#v, want off by default", report.Gate)
 	}
 	if len(report.TopRepeatedMistakes) != 1 ||
-		report.TopRepeatedMistakes[0].SignatureID != "sig_time_freeze" ||
+		report.TopRepeatedMistakes[0].SignatureID != "class_key:test_failure:tests/billing/test_invoice.py::test_clock" ||
 		report.TopRepeatedMistakes[0].RepeatCount != 1 ||
 		!stringSlicesEqual(report.TopRepeatedMistakes[0].ExperienceIDs, []string{"exp_0001", "exp_0002"}) {
 		t.Fatalf("top repeated mistakes = %#v", report.TopRepeatedMistakes)
@@ -2318,8 +2318,8 @@ func TestBacktestTopRepeatedMistakesAggregateByMatchedSignature(t *testing.T) {
 	t.Chdir(tempDir)
 	inputPath := filepath.Join(tempDir, "fixtures", "outcomes.jsonl")
 	writeFileForTest(t, inputPath, strings.Join([]string{
-		`{"experience_id":"exp_0001","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-01T10:00:00Z","pr":101,"commit":"abc001","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_generated_pytest","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/101"]}`,
-		`{"experience_id":"exp_0002","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-10T10:00:00Z","pr":102,"commit":"abc002","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_generated_go_test","signature_class":"test_failure","check_name":"go-test-rerun","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/102"]}`,
+		`{"experience_id":"exp_0001","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-01T10:00:00Z","pr":101,"commit":"abc001","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_generated_clock","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/101"]}`,
+		`{"experience_id":"exp_0002","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-10T10:00:00Z","pr":102,"commit":"abc002","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_generated_clock","signature_class":"test_failure","check_name":"go-test-rerun","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/102"]}`,
 		`{"experience_id":"exp_0003","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-20T10:00:00Z","pr":103,"commit":"abc003","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_generated_rspec","signature_class":"test_failure","check_name":"rspec-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/103"]}`,
 	}, "\n")+"\n")
 

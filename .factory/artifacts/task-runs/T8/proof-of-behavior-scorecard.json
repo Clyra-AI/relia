@@ -12,13 +12,13 @@
     "README.md",
     "docs/dev/dev_guides.md"
   ],
-  "produced_at": "2026-06-30T12:39:50Z",
+  "produced_at": "2026-06-30T12:54:20Z",
   "redaction_posture": {
     "classification": "customer_safe",
     "notes": "No customer data, live credentials, network calls, or unredacted machine-local paths were introduced.",
     "status": "pass"
   },
-  "repair_task_id": "20260630T113048.990974000Z-relia-T8-review-4-repair",
+  "repair_task_id": "20260630T113048.990974000Z-relia-T8-review-5-repair",
   "required_proof_level": "user_visible_behavior",
   "schema_version": "1.0",
   "scorecard": [
@@ -90,7 +90,7 @@
       "status": "pass"
     },
     {
-      "behavior": "Top repeated mistakes aggregate by the matched recurrence signature when generated signature IDs differ across the same canonical class/key cluster.",
+      "behavior": "Top repeated mistakes aggregate by the canonical recurrence key when generated signature IDs are reused and later regenerated across the same class/key cluster.",
       "proof_refs": [
         "cmd/relia/main_test.go",
         "TestBacktestTopRepeatedMistakesAggregateByMatchedSignature",

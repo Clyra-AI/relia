@@ -1677,9 +1677,6 @@ func recurrenceSignatureKeys(record experienceRecord) []string {
 func matchedRecurrenceSignatureID(left experienceRecord, right experienceRecord) string {
 	leftSignatureID := strings.TrimSpace(left.Outcome.Signature.SignatureID)
 	rightSignatureID := strings.TrimSpace(right.Outcome.Signature.SignatureID)
-	if leftSignatureID != "" && leftSignatureID == rightSignatureID {
-		return rightSignatureID
-	}
 	rightKeys := map[string]bool{}
 	for _, key := range recurrenceSignatureKeys(right) {
 		rightKeys[key] = true
@@ -1688,6 +1685,9 @@ func matchedRecurrenceSignatureID(left experienceRecord, right experienceRecord)
 		if rightKeys[key] {
 			return displayRecurrenceSignatureKey(key, rightSignatureID)
 		}
+	}
+	if leftSignatureID != "" && leftSignatureID == rightSignatureID {
+		return rightSignatureID
 	}
 	if rightSignatureID != "" {
 		return rightSignatureID

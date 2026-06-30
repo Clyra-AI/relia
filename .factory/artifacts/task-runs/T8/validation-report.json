@@ -56,7 +56,12 @@
     "python3 -m json.tool schemas/recurrence-report.schema.json",
     "gofmt -w cmd/relia/main_test.go",
     "go test ./cmd/relia -run 'TestRecurrenceReportSchemaKeepsT8FieldsOptionalForV1|TestIngestRejectsNestedSourceMetadataBeforePersistence'",
-    "python3 -m json.tool schemas/recurrence-report.schema.json"
+    "python3 -m json.tool schemas/recurrence-report.schema.json",
+    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
+    "go test ./cmd/relia -run 'TestBacktestTopRepeatedMistakesAggregateByMatchedSignature|TestBacktestGroupsEquivalentCanonicalSignatureFields|TestBacktestGroupsEquivalentMessageFingerprint'",
+    "make prepush-full",
+    "gofmt -w cmd/relia/main_test.go",
+    "go test ./cmd/relia -run 'TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline|TestBacktestTopRepeatedMistakesAggregateByMatchedSignature|TestBacktestGroupsEquivalentCanonicalSignatureFields|TestBacktestGroupsEquivalentMessageFingerprint'"
   ],
   "docs_sync_result": {
     "status": "pass",
@@ -118,6 +123,16 @@
       "command": "go test ./cmd/relia -run 'TestRecurrenceReportSchemaKeepsT8FieldsOptionalForV1|TestIngestRejectsNestedSourceMetadataBeforePersistence'",
       "exit_code": 0,
       "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestBacktestTopRepeatedMistakesAggregateByMatchedSignature|TestBacktestGroupsEquivalentCanonicalSignatureFields|TestBacktestGroupsEquivalentMessageFingerprint'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline|TestBacktestTopRepeatedMistakesAggregateByMatchedSignature|TestBacktestGroupsEquivalentCanonicalSignatureFields|TestBacktestGroupsEquivalentMessageFingerprint'",
+      "exit_code": 0,
+      "status": "pass"
     }
   ],
   "green_evidence": [
@@ -138,6 +153,16 @@
     },
     {
       "command": "go test ./cmd/relia -run 'TestRecurrenceReportSchemaKeepsT8FieldsOptionalForV1|TestIngestRejectsNestedSourceMetadataBeforePersistence'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestBacktestTopRepeatedMistakesAggregateByMatchedSignature|TestBacktestGroupsEquivalentCanonicalSignatureFields|TestBacktestGroupsEquivalentMessageFingerprint'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline|TestBacktestTopRepeatedMistakesAggregateByMatchedSignature|TestBacktestGroupsEquivalentCanonicalSignatureFields|TestBacktestGroupsEquivalentMessageFingerprint'",
       "exit_code": 0,
       "status": "pass"
     },
@@ -183,7 +208,7 @@
     "notes": "Resolved the Codex review repair findings inside the T8 reporting-and-evidence slice without changing lifecycle state, PR state, runtime pins, provider posture, or Factory daemon state.",
     "status": "pass"
   },
-  "produced_at": "2026-06-30T12:39:50Z",
+  "produced_at": "2026-06-30T12:54:20Z",
   "red_evidence": [
     {
       "command": "go test ./cmd/relia",
@@ -193,7 +218,7 @@
       "status": "expected_fail"
     }
   ],
-  "repair_task_id": "20260630T113048.990974000Z-relia-T8-review-4-repair",
+  "repair_task_id": "20260630T113048.990974000Z-relia-T8-review-5-repair",
   "residual_risks": [
     "Lifecycle evidence remains assigned to factoryd workers after local validation."
   ],

@@ -29,10 +29,11 @@
     "Rebuilt report diagnostics and badge fields after --save-baseline replaces stale baseline comparison state.",
     "Aggregated top repeated mistakes by matched recurrence signature while preserving the current record signature_id on recurrence pairs.",
     "Rejected top-level object_type and event_type self-report/reflection markers before ingest persistence.",
-    "Kept newly emitted T8 recurrence-report fields optional for schema_version 1.0 while continuing to emit them from new reports."
+    "Kept newly emitted T8 recurrence-report fields optional for schema_version 1.0 while continuing to emit them from new reports.",
+    "Preferred canonical recurrence keys over raw generated signature IDs when aggregating top repeated mistakes across regenerated signatures."
   ],
-  "produced_at": "2026-06-30T12:39:50Z",
-  "repair_task_id": "20260630T113048.990974000Z-relia-T8-review-4-repair",
+  "produced_at": "2026-06-30T12:54:20Z",
+  "repair_task_id": "20260630T113048.990974000Z-relia-T8-review-5-repair",
   "schema_version": "1.0",
   "status": "implemented",
   "task_id": "T8"
