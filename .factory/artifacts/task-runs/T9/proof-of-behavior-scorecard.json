@@ -3,7 +3,7 @@
   "schema_version": "1.0",
   "task_id": "T9",
   "status": "pass",
-  "updated_at": "2026-06-30T21:01:33Z",
+  "updated_at": "2026-06-30T21:12:39Z",
   "required_proof_level": "user_visible_behavior",
   "scenarios": [
     {
@@ -105,6 +105,11 @@
       "scenario": "The advisory planner preserves the prior commented fingerprint and timestamp when a changed diff is skipped by the reassessment debounce window.",
       "status": "pass",
       "evidence": "TestAdviseDebouncesChangedDiffWhenPriorMarkerIsFresh"
+    },
+    {
+      "scenario": "The advisory planner clears an existing high-confidence advisory marker when the current diff falls below advise.min_confidence, then skips the already-cleared same diff.",
+      "status": "pass",
+      "evidence": "TestAdviseClearsExistingAdvisoryWhenConfidenceDropsBelowMinimum"
     }
   ],
   "commands_run": [

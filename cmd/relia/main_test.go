@@ -4532,6 +4532,95 @@ metadata: {}
 	}
 }
 
+func TestAdviseClearsExistingAdvisoryWhenConfidenceDropsBelowMinimum(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "billing-low-confidence.yaml"), `object_type: relia.memory_rule
+schema_version: "1.0"
+id: billing-low-confidence-fixture
+kind: avoid
+status: active
+statement: Low confidence billing changes should not keep stale advisories visible.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.55
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_0142
+provenance:
+  - pr: 142
+    outcome: ci_failure
+    url: https://github.com/acme/billing-service/pull/142
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`)
+	diffContent := `diff --git a/packages/billing/invoice.py b/packages/billing/invoice.py
+--- a/packages/billing/invoice.py
++++ b/packages/billing/invoice.py
+@@ -1,2 +1,3 @@
+ def rollover_day():
+-    return "2026-01-01"
++    return maybe_safe_billing_clock().strftime("%Y-%m-%d")
+`
+	writeFileForTest(t, filepath.Join(tempDir, "change.diff"), diffContent)
+	writeFileForTest(t, filepath.Join(tempDir, ".relia", "reports", "advisory-state.json"), fmt.Sprintf(`{
+  "object_type": "relia.advisory_state",
+  "schema_version": "1.0",
+  "diff_fingerprint": "sha256:previous",
+  "metadata": {
+    "generated_at": %q,
+    "risk_level": "match_high"
+  }
+}
+`, time.Now().UTC().Add(-time.Hour).Format(time.RFC3339)))
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "advise", "--input", "change.diff", "--format", "json"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("advise below-min clear exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Data["should_comment"] != true || result.Data["skip_reason"] != "below_min_confidence" {
+		t.Fatalf("advise result = %#v", result.Data)
+	}
+	comment, err := os.ReadFile(filepath.Join(tempDir, ".relia", "reports", "advisory-comment.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	commentText := string(comment)
+	for _, want := range []string{"risk_level=below_min_confidence", "below the advisory confidence threshold", "Prior advisory cleared", "billing-low-confidence-fixture"} {
+		if !strings.Contains(commentText, want) {
+			t.Fatalf("below-min clear comment missing %q:\n%s", want, commentText)
+		}
+	}
+	stateContent, err := os.ReadFile(filepath.Join(tempDir, ".relia", "reports", "advisory-state.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var state map[string]any
+	if err := json.Unmarshal(stateContent, &state); err != nil {
+		t.Fatalf("decode advisory state: %v\n%s", err, stateContent)
+	}
+	metadata := state["metadata"].(map[string]any)
+	if metadata["risk_level"] != "below_min_confidence" {
+		t.Fatalf("state metadata risk_level = %#v, state = %#v", metadata["risk_level"], state)
+	}
+
+	stdout, stderr, code = runForTest(t, []string{"--json", "advise", "--input", "change.diff", "--format", "json"}, false)
+	if code != ExitSuccess {
+		t.Fatalf("second advise below-min exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result = decodeResult(t, stdout)
+	if result.Data["should_comment"] != false || result.Data["skip_reason"] != "unchanged_diff_fingerprint" {
+		t.Fatalf("second advise result = %#v", result.Data)
+	}
+}
+
 func TestAdviseStaysSilentForCoveredCleanAssessment(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)

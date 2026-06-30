@@ -188,11 +188,19 @@
       ],
       "review_finding": "Preserve prior fingerprint on debounce skips",
       "status": "implemented"
+    },
+    {
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go"
+      ],
+      "review_finding": "Clear stale advisories when confidence drops below the cap",
+      "status": "implemented"
     }
   ],
   "schema_version": "1.0",
   "status": "implemented",
-  "summary": "Repaired actionable Codex review and CI feedback by keeping GitHub credentials out of Relia execution, running advisory planning from trusted base-branch code and memory rules under pull_request_target, rejecting provider base URLs with embedded user-info credentials, seeding unchanged-diff advisory state only from bot-authored hidden-marker comments across paginated comment results, honoring advise.max_comments_per_pr: 0 and advise.reassess_debounce_minutes, preserving the prior commented fingerprint on debounce skips, clearing stale advisory comments when a later diff or rule state is covered clean, rendering PR-controlled touched paths as safe Markdown code spans, validating and filtering served rule citations to clean or held evidence where required, publishing advisory comments without sourcing planner-controlled shell environment text, and keeping advisory workflow Python heredocs parseable.",
+  "summary": "Repaired actionable Codex review and CI feedback by keeping GitHub credentials out of Relia execution, running advisory planning from trusted base-branch code and memory rules under pull_request_target, rejecting provider base URLs with embedded user-info credentials, seeding unchanged-diff advisory state only from bot-authored hidden-marker comments across paginated comment results, honoring advise.max_comments_per_pr: 0 and advise.reassess_debounce_minutes, preserving the prior commented fingerprint on debounce skips, clearing stale advisory comments when a later diff or rule state is covered clean or below the advisory confidence threshold, rendering PR-controlled touched paths as safe Markdown code spans, validating and filtering served rule citations to clean or held evidence where required, publishing advisory comments without sourcing planner-controlled shell environment text, and keeping advisory workflow Python heredocs parseable.",
   "task_id": "T9",
-  "updated_at": "2026-06-30T21:01:33Z"
+  "updated_at": "2026-06-30T21:12:39Z"
 }
