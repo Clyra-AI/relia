@@ -4176,6 +4176,85 @@ metadata: {}
 	}
 }
 
+func TestAdviseHonorsZeroCommentCap(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	replaceInFile(t, filepath.Join(tempDir, "relia.yaml"), "  max_comments_per_pr: 1", "  max_comments_per_pr: 0")
+	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "billing-time.yaml"), `object_type: relia.memory_rule
+schema_version: "1.0"
+id: billing-time-fixture
+kind: avoid
+status: active
+statement: Use the billing clock fixture instead of direct UTC calls.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.86
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_0142
+provenance:
+  - pr: 142
+    outcome: ci_failure
+    url: https://github.com/acme/billing-service/pull/142
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`)
+	writeFileForTest(t, filepath.Join(tempDir, "change.diff"), `diff --git a/packages/billing/invoice.py b/packages/billing/invoice.py
+--- a/packages/billing/invoice.py
++++ b/packages/billing/invoice.py
+@@ -1,2 +1,3 @@
+ def rollover_day():
+-    return "2026-01-01"
++    return datetime.utcnow().strftime("%Y-%m-%d")
+`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "advise", "--input", "change.diff", "--format", "json"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("advise exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Data["should_comment"] != false || result.Data["skip_reason"] != "comment_cap_zero" {
+		t.Fatalf("advise result = %#v", result.Data)
+	}
+	if result.Data["comment_strategy"].(map[string]any)["max_comments_per_pr"].(float64) != 0 {
+		t.Fatalf("comment_strategy = %#v", result.Data["comment_strategy"])
+	}
+	if _, err := os.Stat(filepath.Join(tempDir, ".relia", "reports", "advisory-comment.md")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("advisory comment should not be written when max_comments_per_pr is 0, stat err = %v", err)
+	}
+}
+
+func TestAdvisoryWorkflowKeepsTokenOutOfReliaBuildAndSeedsState(t *testing.T) {
+	sourceRoot := findRepoRootForTest(t)
+	contentBytes, err := os.ReadFile(filepath.Join(sourceRoot, ".github", "workflows", "relia-advisory.yml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	content := string(contentBytes)
+	prepareBlock := workflowStepBlock(content, "Prepare advisory inputs")
+	if !strings.Contains(prepareBlock, "GH_TOKEN: ${{ github.token }}") {
+		t.Fatalf("prepare step must own GitHub token for API reads:\n%s", prepareBlock)
+	}
+	for _, want := range []string{".relia/reports/github-comments.json", "advisory-state.json", "diff_fingerprint"} {
+		if !strings.Contains(prepareBlock, want) {
+			t.Fatalf("prepare step missing %q:\n%s", want, prepareBlock)
+		}
+	}
+	buildBlock := workflowStepBlock(content, "Build PR advisory")
+	if strings.Contains(buildBlock, "GH_TOKEN") || strings.Contains(buildBlock, "github.token") {
+		t.Fatalf("build step must run relia without a GitHub write token:\n%s", buildBlock)
+	}
+	if !strings.Contains(buildBlock, "go run ./cmd/relia --json advise") {
+		t.Fatalf("build step missing relia advise invocation:\n%s", buildBlock)
+	}
+}
+
 func TestAdviseStaysSilentForCoveredCleanAssessment(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
@@ -4221,6 +4300,20 @@ metadata: {}
 	if result.Data["should_comment"] != false || result.Data["skip_reason"] != "covered_clean" {
 		t.Fatalf("advise result = %#v", result.Data)
 	}
+}
+
+func workflowStepBlock(content string, name string) string {
+	marker := "- name: " + name
+	start := strings.Index(content, marker)
+	if start < 0 {
+		return ""
+	}
+	rest := content[start+len(marker):]
+	next := strings.Index(rest, "\n      - name: ")
+	if next < 0 {
+		return content[start:]
+	}
+	return content[start : start+len(marker)+next]
 }
 
 func TestDemoAssessReportsCoveredCleanForAcceptedPlaybookRule(t *testing.T) {

@@ -3294,6 +3294,9 @@ func advisoryCommentDecision(settings adviseSettings, assessment riskAssessment,
 	if !settings.Enabled {
 		return false, "advise_disabled"
 	}
+	if settings.MaxCommentsPerPR == 0 {
+		return false, "comment_cap_zero"
+	}
 	if previousFingerprint != "" && previousFingerprint == diffFingerprint {
 		return false, "unchanged_diff_fingerprint"
 	}

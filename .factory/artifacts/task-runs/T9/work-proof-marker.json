@@ -19,8 +19,35 @@
     ".factory/artifacts/task-runs/T9/proof-of-behavior-scorecard.json"
   ],
   "implementation_performed": true,
+  "repair_results": [
+    {
+      "evidence_refs": [
+        ".github/workflows/relia-advisory.yml",
+        "cmd/relia/main_test.go"
+      ],
+      "review_finding": "Keep the write token out of PR-supplied code",
+      "status": "implemented"
+    },
+    {
+      "evidence_refs": [
+        ".github/workflows/relia-advisory.yml",
+        "cmd/relia/main_test.go"
+      ],
+      "review_finding": "Seed unchanged-diff state before planning comments",
+      "status": "implemented"
+    },
+    {
+      "evidence_refs": [
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go"
+      ],
+      "review_finding": "Honor a zero advisory comment cap",
+      "status": "implemented"
+    }
+  ],
   "schema_version": "1.0",
   "status": "implemented",
-  "summary": "Implemented offline provider adapter planning and cost caps, local serve capability output, PR advisory planning, and an advisory GitHub workflow behind explicit approval boundaries.",
-  "task_id": "T9"
+  "summary": "Repaired actionable Codex review feedback by keeping the GitHub write token out of the relia build step, seeding unchanged-diff advisory state from an existing hidden-marker comment, and honoring advise.max_comments_per_pr: 0.",
+  "task_id": "T9",
+  "updated_at": "2026-06-30T19:26:53Z"
 }

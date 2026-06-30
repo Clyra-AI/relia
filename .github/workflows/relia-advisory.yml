@@ -26,14 +26,45 @@ jobs:
           go-version-file: go.mod
           check-latest: false
           cache: true
-      - name: Build PR advisory
+      - name: Prepare advisory inputs
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
         run: |
           set -euo pipefail
           mkdir -p .relia/reports
           gh pr diff "$PR_NUMBER" --patch > .relia/pr.diff
+          comments_json=.relia/reports/github-comments.json
+          gh api "repos/${REPOSITORY}/issues/${PR_NUMBER}/comments?per_page=100" > "$comments_json"
+          python3 - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+
+          comments = json.loads(Path(".relia/reports/github-comments.json").read_text() or "[]")
+          marker = "<!-- relia-advisory:v1"
+          fingerprint = ""
+          pattern = re.compile(r"<!--\s*relia-advisory:v1\s+diff_fingerprint=([^ >]+)\s*-->")
+          for comment in comments:
+              body = comment.get("body") or ""
+              if marker not in body:
+                  continue
+              match = pattern.search(body)
+              if match:
+                  fingerprint = match.group(1)
+                  break
+          if fingerprint:
+              Path(".relia/reports/advisory-state.json").write_text(json.dumps({
+                  "object_type": "relia.advisory_state",
+                  "schema_version": "1.0",
+                  "diff_fingerprint": fingerprint,
+                  "metadata": {"source": "existing_github_comment_marker"}
+              }, indent=2, sort_keys=True) + "\n")
+          PY
+      - name: Build PR advisory
+        run: |
+          set -euo pipefail
           go run ./cmd/relia --json advise --input .relia/pr.diff --format json > .relia/reports/advisory-result.json
       - name: Publish one advisory comment
         env:
@@ -59,7 +90,6 @@ jobs:
             exit 0
           fi
           comments_json=.relia/reports/github-comments.json
-          gh api "repos/${REPOSITORY}/issues/${PR_NUMBER}/comments?per_page=100" > "$comments_json"
           comment_id="$(python3 - <<'PY'
           import json
           from pathlib import Path

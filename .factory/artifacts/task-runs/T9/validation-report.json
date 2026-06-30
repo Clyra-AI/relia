@@ -4,8 +4,7 @@
       "acceptance_item_id": "FR2-REPO-NATIVE-LOCAL-FIRST-OPERATION-001",
       "evidence_refs": [
         ".factory/artifacts/task-runs/T9/proof-of-behavior-scorecard.json",
-        "README.md",
-        "relia.yaml"
+        "README.md"
       ],
       "status": "implemented"
     },
@@ -20,33 +19,28 @@
     {
       "acceptance_item_id": "FR23-PROVIDER-ADAPTERS-AND-NO-LLM-MODE-001",
       "evidence_refs": [
-        "cmd/relia/main.go",
-        "cmd/relia/main_test.go",
-        "docs/architecture/decision-0004-provider-advisory-boundary.md"
+        ".factory/artifacts/task-runs/T9/proof-of-behavior-scorecard.json"
       ],
       "status": "implemented"
     },
     {
       "acceptance_item_id": "MVP-IN-SCOPE-010",
       "evidence_refs": [
-        "cmd/relia/main.go",
-        "cmd/relia/main_test.go"
+        ".factory/artifacts/task-runs/T9/proof-of-behavior-scorecard.json"
       ],
       "status": "implemented"
     },
     {
       "acceptance_item_id": "MVP-IN-SCOPE-011",
       "evidence_refs": [
-        "cmd/relia/main.go",
-        "cmd/relia/main_test.go"
+        ".factory/artifacts/task-runs/T9/proof-of-behavior-scorecard.json"
       ],
       "status": "implemented"
     },
     {
       "acceptance_item_id": "FR24-COST-VISIBILITY-001",
       "evidence_refs": [
-        "cmd/relia/main.go",
-        "cmd/relia/main_test.go"
+        ".factory/artifacts/task-runs/T9/proof-of-behavior-scorecard.json"
       ],
       "status": "implemented"
     },
@@ -62,7 +56,6 @@
     {
       "acceptance_item_id": "NFR10-COST-VISIBILITY-001",
       "evidence_refs": [
-        "cmd/relia/main_test.go",
         ".factory/artifacts/task-runs/T9/proof-of-behavior-scorecard.json"
       ],
       "status": "implemented"
@@ -71,14 +64,15 @@
       "acceptance_item_id": "MVP-IN-SCOPE-019",
       "evidence_refs": [
         ".github/workflows/relia-advisory.yml",
-        "cmd/relia/main.go"
+        "cmd/relia/main.go",
+        "cmd/relia/main_test.go"
       ],
       "status": "implemented"
     },
     {
       "acceptance_item_id": "DISTILL-REVIEW-MEMORY-PAGE-ACCEPTANCE-TESTS-010",
       "evidence_refs": [
-        "cmd/relia/main_test.go"
+        ".factory/artifacts/task-runs/T9/proof-of-behavior-scorecard.json"
       ],
       "status": "implemented"
     },
@@ -92,18 +86,6 @@
     }
   ],
   "artifact_type": "validation_report",
-  "baseline_evidence": [
-    {
-      "command": "make lint-fast",
-      "exit_code": 0,
-      "status": "pass"
-    },
-    {
-      "command": "make test-fast",
-      "exit_code": 0,
-      "status": "pass"
-    }
-  ],
   "blockers": [],
   "changed_paths": [
     ".factory/artifacts/task-runs/T9/proof-of-behavior-scorecard.json",
@@ -119,20 +101,9 @@
     "docs/dev/dev_guides.md",
     "relia.yaml"
   ],
-  "changelog_result": {
-    "refs": [
-      "README.md",
-      "docs/dev/dev_guides.md",
-      "docs/architecture/architecture_guides.md"
-    ],
-    "status": "applied_to_docs"
-  },
   "commands_run": [
-    "make lint-fast",
-    "make test-fast",
-    "go test ./cmd/relia -count=1 -run 'Test(CheckDisclosesOpenAICompatibleProviderBoundary|DistillProviderPlan|ServeExposesLocalMCPCapabilityManifest|Advise)'",
-    "go test ./... -count=1",
-    "make test-contracts",
+    "go test ./cmd/relia -run 'TestAdvise|TestAdvisoryWorkflow'",
+    "git diff --check",
     "make prepush-full",
     "python3 -m json.tool .factory/artifacts/task-runs/T9/work-proof-marker.json",
     "python3 -m json.tool .factory/artifacts/task-runs/T9/validation-report.json",
@@ -142,67 +113,76 @@
     "refs": [
       "README.md",
       "docs/dev/dev_guides.md",
-      "docs/architecture/architecture_guides.md",
-      "docs/architecture/decision-0004-provider-advisory-boundary.md"
+      "docs/architecture/architecture_guides.md"
     ],
     "status": "pass"
   },
   "final_validation_evidence": [
     {
       "command": "make prepush-full",
-      "coverage": "79.7% of statements, minimum 75.0%",
+      "coverage": "79.8% of statements, minimum 75.0%",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "python3 -m json.tool .factory/artifacts/task-runs/T9/work-proof-marker.json",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "python3 -m json.tool .factory/artifacts/task-runs/T9/validation-report.json",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "python3 -m json.tool .factory/artifacts/task-runs/T9/proof-of-behavior-scorecard.json",
       "exit_code": 0,
       "status": "pass"
     }
   ],
   "green_evidence": [
     {
-      "command": "go test ./cmd/relia -count=1 -run 'Test(CheckDisclosesOpenAICompatibleProviderBoundary|DistillProviderPlan|ServeExposesLocalMCPCapabilityManifest|Advise)'",
+      "command": "go test ./cmd/relia -run 'TestAdvise|TestAdvisoryWorkflow'",
+      "evidence": "Focused advisory planner and workflow repair tests passed.",
       "exit_code": 0,
       "status": "pass"
     },
     {
-      "command": "go test ./... -count=1",
-      "exit_code": 0,
-      "status": "pass"
-    },
-    {
-      "command": "make test-contracts",
-      "exit_code": 0,
-      "status": "pass"
-    },
-    {
-      "command": "python3 -m json.tool .factory/artifacts/task-runs/T9/work-proof-marker.json \u0026\u0026 python3 -m json.tool .factory/artifacts/task-runs/T9/validation-report.json \u0026\u0026 python3 -m json.tool .factory/artifacts/task-runs/T9/proof-of-behavior-scorecard.json",
+      "command": "git diff --check",
+      "evidence": "No whitespace errors in the repair diff.",
       "exit_code": 0,
       "status": "pass"
     }
   ],
-  "migration_result": {
-    "notes": "New relia.yaml keys have local-safe defaults; older configs use parser defaults for advise and provider none.",
-    "status": "no_migration_required"
-  },
   "path_policy_result": {
     "allowed_paths_only": true,
+    "changed_paths": [
+      ".factory/artifacts/task-runs/T9/proof-of-behavior-scorecard.json",
+      ".factory/artifacts/task-runs/T9/validation-report.json",
+      ".factory/artifacts/task-runs/T9/work-proof-marker.json",
+      ".github/action-ref-exceptions.yaml",
+      ".github/workflows/relia-advisory.yml",
+      "README.md",
+      "cmd/relia/main.go",
+      "cmd/relia/main_test.go",
+      "docs/architecture/architecture_guides.md",
+      "docs/architecture/decision-0004-provider-advisory-boundary.md",
+      "docs/dev/dev_guides.md",
+      "relia.yaml"
+    ],
     "forbidden_paths_changed": false,
     "status": "pass"
   },
   "plan_drift_result": {
-    "notes": "Implemented T9 provider, network/API, webhook/advisory, and hosted-service boundaries without live provider or network calls in local validation.",
-    "status": "pass"
-  },
-  "red_evidence": {
-    "command": "make test-fast",
-    "exit_code": 0,
-    "note": "The packet's red-first command was run before edits and was already green; focused provider, serve, and advisory tests were then added before implementation and passed after implementation.",
+    "notes": "Repair stayed within T9 advisory provider/network boundary scope and did not attempt live credentials, live GitHub publishing, network work, or model provider endpoints.",
     "status": "pass"
   },
   "residual_risks": [
-    "Live provider calls and live GitHub comment publishing were not attempted because this worker has no model_provider_endpoint or live network approval; the implementation validates deterministic plans and fail-closed boundaries locally."
+    "Live GitHub comment publishing was not attempted by this worker because network and credential work require explicit approval; workflow behavior is covered by static regression tests and local validation."
   ],
   "schema_version": "1.0",
   "status": "pass",
   "task_id": "T9",
-  "versioning_result": {
-    "status": "pre_1_0_no_version_bump"
-  }
+  "test_first_skipped_reason": "Codex review supplied the failing behavioral evidence for this repair. The repair encoded the three review findings as focused regression coverage and then ran the focused Go test and final repository validation.",
+  "updated_at": "2026-06-30T19:26:53Z"
 }
