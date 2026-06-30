@@ -1198,6 +1198,9 @@ func canonicalDistillInputExperienceRecord(event map[string]any, ref string) (ex
 	if stringField(event, "object_type") != "relia.experience_record" {
 		return experienceRecord{}, false, nil
 	}
+	if commandErr := validateEventMemorySource(event, ref); commandErr != nil {
+		return experienceRecord{}, true, commandErr
+	}
 	if commandErr := validateCanonicalDistillInputCompleteness(event, ref); commandErr != nil {
 		return experienceRecord{}, true, commandErr
 	}

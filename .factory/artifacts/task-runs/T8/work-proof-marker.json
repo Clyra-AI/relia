@@ -31,10 +31,11 @@
     "Rejected top-level object_type and event_type self-report/reflection markers before ingest persistence.",
     "Kept newly emitted T8 recurrence-report fields optional for schema_version 1.0 while continuing to emit them from new reports.",
     "Preferred canonical recurrence keys over raw generated signature IDs when aggregating top repeated mistakes across regenerated signatures.",
-    "Computed README badge staleness from source-window age and merged-PR activity metadata, treating missing activity metadata as stale before badge publication."
+    "Computed README badge staleness from source-window age and merged-PR activity metadata, treating missing activity metadata as stale before badge publication.",
+    "Rejected top-level self-report and reflection markers on canonical distill --input experience records before memory-rule writes."
   ],
-  "produced_at": "2026-06-30T13:10:04Z",
-  "repair_task_id": "20260630T113048.990974000Z-relia-T8-review-6-repair",
+  "produced_at": "2026-06-30T13:18:58Z",
+  "repair_task_id": "20260630T113048.990974000Z-relia-T8-review-7-repair",
   "schema_version": "1.0",
   "status": "implemented",
   "task_id": "T8"

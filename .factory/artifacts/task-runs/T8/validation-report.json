@@ -65,6 +65,10 @@
     "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
     "python3 -m json.tool schemas/recurrence-report.schema.json",
     "go test ./cmd/relia -run 'TestBuildReportBadgeComputes(Freshness|ActivityStaleness)|TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline|TestBacktestInteractiveOutputShowsOperatorSummaryAndBadge|TestRecurrenceReportSchemaKeepsT8FieldsOptionalForV1'",
+    "make prepush-full",
+    "gofmt -w cmd/relia/main.go cmd/relia/main_test.go",
+    "python3 -m json.tool schemas/recurrence-report.schema.json",
+    "go test ./cmd/relia -run 'TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite|TestIngestRejectsNestedSourceMetadataBeforePersistence|TestBuildReportBadgeComputes(Freshness|ActivityStaleness)|TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline|TestBacktestInteractiveOutputShowsOperatorSummaryAndBadge|TestRecurrenceReportSchemaKeepsT8FieldsOptionalForV1'",
     "make prepush-full"
   ],
   "docs_sync_result": {
@@ -143,6 +147,11 @@
       "command": "go test ./cmd/relia -run 'TestBuildReportBadgeComputes(Freshness|ActivityStaleness)|TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline|TestBacktestInteractiveOutputShowsOperatorSummaryAndBadge|TestRecurrenceReportSchemaKeepsT8FieldsOptionalForV1'",
       "exit_code": 0,
       "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite|TestIngestRejectsNestedSourceMetadataBeforePersistence|TestBuildReportBadgeComputes(Freshness|ActivityStaleness)|TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline|TestBacktestInteractiveOutputShowsOperatorSummaryAndBadge|TestRecurrenceReportSchemaKeepsT8FieldsOptionalForV1'",
+      "exit_code": 0,
+      "status": "pass"
     }
   ],
   "green_evidence": [
@@ -178,6 +187,11 @@
     },
     {
       "command": "go test ./cmd/relia -run 'TestBuildReportBadgeComputes(Freshness|ActivityStaleness)|TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline|TestBacktestInteractiveOutputShowsOperatorSummaryAndBadge|TestRecurrenceReportSchemaKeepsT8FieldsOptionalForV1'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite|TestIngestRejectsNestedSourceMetadataBeforePersistence|TestBuildReportBadgeComputes(Freshness|ActivityStaleness)|TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline|TestBacktestInteractiveOutputShowsOperatorSummaryAndBadge|TestRecurrenceReportSchemaKeepsT8FieldsOptionalForV1'",
       "exit_code": 0,
       "status": "pass"
     },
@@ -223,7 +237,7 @@
     "notes": "Resolved the Codex review repair findings inside the T8 reporting-and-evidence slice without changing lifecycle state, PR state, runtime pins, provider posture, or Factory daemon state.",
     "status": "pass"
   },
-  "produced_at": "2026-06-30T13:10:04Z",
+  "produced_at": "2026-06-30T13:18:58Z",
   "red_evidence": [
     {
       "command": "go test ./cmd/relia",
@@ -233,7 +247,7 @@
       "status": "expected_fail"
     }
   ],
-  "repair_task_id": "20260630T113048.990974000Z-relia-T8-review-6-repair",
+  "repair_task_id": "20260630T113048.990974000Z-relia-T8-review-7-repair",
   "residual_risks": [
     "Lifecycle evidence remains assigned to factoryd workers after local validation."
   ],

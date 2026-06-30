@@ -2745,31 +2745,62 @@ func TestDistillInputDraftsAvoidRuleFromPlantedRecurrenceCluster(t *testing.T) {
 }
 
 func TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite(t *testing.T) {
-	tempDir := setupContractRepo(t)
-	t.Chdir(tempDir)
-	writeFileForTest(t, filepath.Join(tempDir, "packages", "billing", "invoice.py"), "def total():\n    return 1\n")
-	inputRel := filepath.ToSlash(filepath.Join("fixtures", "self-report-experience-records.jsonl"))
-	inputPath := filepath.Join(tempDir, filepath.FromSlash(inputRel))
-	writeFileForTest(t, inputPath, strings.Join([]string{
-		`{"object_type":"relia.experience_record","schema_version":"1.0","experience_id":"exp_self_report_001","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-04-01T10:00:00Z","attribution":{"actor_kind":"agent","method":"manual","confidence":1},"context":{"paths":["packages/billing/invoice.py"],"diff_fingerprint":"sha256:canonical-a"},"action":{"pr":521,"commit":"abc521"},"outcome":{"kind":"ci_failure","terminal_state":"failed","signature":{"signature_id":"sig_self_report","extraction_confidence":"structured"}},"provenance":{"urls":["https://github.com/acme/billing-service/pull/521"]},"flake_discount":0,"org_eligible":false,"share_scope":"private","redaction_status":"applied","metadata":{"signature":{"class":"test_failure","check_name":"pytest-billing","key":"tests/billing/test_invoice.py::test_clock","extraction_method":"structured"},"source_kind":"agent_reflection"}}`,
-	}, "\n")+"\n")
+	for _, tc := range []struct {
+		name   string
+		mutate func(map[string]any)
+	}{
+		{
+			name: "metadata_source_kind",
+			mutate: func(record map[string]any) {
+				metadata := record["metadata"].(map[string]any)
+				metadata["source_kind"] = "agent_reflection"
+			},
+		},
+		{
+			name: "top_level_event_type",
+			mutate: func(record map[string]any) {
+				record["event_type"] = "agent_reflection"
+			},
+		},
+		{
+			name: "top_level_source_kind",
+			mutate: func(record map[string]any) {
+				record["source_kind"] = "agent_self_report"
+			},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			tempDir := setupContractRepo(t)
+			t.Chdir(tempDir)
+			writeFileForTest(t, filepath.Join(tempDir, "packages", "billing", "invoice.py"), "def total():\n    return 1\n")
+			inputRel := filepath.ToSlash(filepath.Join("fixtures", "self-report-experience-records.jsonl"))
+			inputPath := filepath.Join(tempDir, filepath.FromSlash(inputRel))
+			record := canonicalExperienceRecordMapForTest("exp_self_report_001", 521)
+			tc.mutate(record)
+			content, err := json.Marshal(record)
+			if err != nil {
+				t.Fatal(err)
+			}
+			writeFileForTest(t, inputPath, string(content)+"\n")
 
-	stdout, stderr, code := runForTest(t, []string{"--json", "distill", "--input", inputRel, "--format", "json"}, false)
+			stdout, stderr, code := runForTest(t, []string{"--json", "distill", "--input", inputRel, "--format", "json"}, false)
 
-	if code != ExitValidation {
-		t.Fatalf("distill exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
-	}
-	result := decodeResult(t, stdout)
-	if result.Errors[0].Type != "artifact_contract_validation_failed" ||
-		!strings.Contains(result.Errors[0].Message, "self-reports") {
-		t.Fatalf("errors = %#v", result.Errors)
-	}
-	matches, err := filepath.Glob(filepath.Join(tempDir, "memory", "rules", "*.yaml"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(matches) != 0 {
-		t.Fatalf("distill wrote memory rules from an agent self-report: %#v", matches)
+			if code != ExitValidation {
+				t.Fatalf("distill exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+			}
+			result := decodeResult(t, stdout)
+			if result.Errors[0].Type != "artifact_contract_validation_failed" ||
+				!strings.Contains(result.Errors[0].Message, "self-reports") {
+				t.Fatalf("errors = %#v", result.Errors)
+			}
+			matches, err := filepath.Glob(filepath.Join(tempDir, "memory", "rules", "*.yaml"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(matches) != 0 {
+				t.Fatalf("distill wrote memory rules from an agent self-report: %#v", matches)
+			}
+		})
 	}
 }
 
