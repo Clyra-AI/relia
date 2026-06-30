@@ -4253,12 +4253,28 @@ func TestAdvisoryWorkflowKeepsTokenOutOfReliaBuildAndSeedsState(t *testing.T) {
 			t.Fatalf("prepare step missing %q:\n%s", want, prepareBlock)
 		}
 	}
+	for _, want := range []string{"gh api --paginate --slurp", "flatten_comments"} {
+		if !strings.Contains(prepareBlock, want) {
+			t.Fatalf("prepare step must paginate and flatten advisory comments; missing %q:\n%s", want, prepareBlock)
+		}
+	}
 	buildBlock := workflowStepBlock(content, "Build PR advisory")
 	if strings.Contains(buildBlock, "GH_TOKEN") || strings.Contains(buildBlock, "github.token") {
 		t.Fatalf("build step must run relia without a GitHub write token:\n%s", buildBlock)
 	}
 	if !strings.Contains(buildBlock, "go run ./cmd/relia --json advise") {
 		t.Fatalf("build step missing relia advise invocation:\n%s", buildBlock)
+	}
+	publishBlock := workflowStepBlock(content, "Publish one advisory comment")
+	for _, forbidden := range []string{"advisory-env", ". .relia/reports", "source .relia/reports"} {
+		if strings.Contains(publishBlock, forbidden) {
+			t.Fatalf("publish step must not source PR-controlled shell env; found %q:\n%s", forbidden, publishBlock)
+		}
+	}
+	for _, want := range []string{"advisory-result.json", "flatten_comments", "subprocess.run(command", "advisory-body.json"} {
+		if !strings.Contains(publishBlock, want) {
+			t.Fatalf("publish step must parse advisory JSON and invoke gh without shell; missing %q:\n%s", want, publishBlock)
+		}
 	}
 }
 
