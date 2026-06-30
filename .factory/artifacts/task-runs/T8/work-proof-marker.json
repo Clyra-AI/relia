@@ -35,10 +35,11 @@
     "Rejected top-level self-report and reflection markers on canonical distill --input experience records before memory-rule writes.",
     "Rejected metadata-level object, event, type, kind, and nested source.object_type self-report/reflection markers before ingest persistence and canonical distill memory-rule writes.",
     "Validated existing experience shard JSON objects for self-report/reflection markers before decoding into the canonical experienceRecord struct.",
-    "Stamped relia ingest runs with last_ingest_at and merged_prs_since_last_ingest metadata so freshly ingested historical records do not inherit stale badge status from old outcome windows."
+    "Stamped relia ingest runs with last_ingest_at and merged_prs_since_last_ingest metadata so freshly ingested historical records do not inherit stale badge status from old outcome windows.",
+    "Excluded volatile badge freshness metadata from source_artifact_digest calculation so baseline freshness reflects recurrence input drift rather than ingest timestamp churn."
   ],
-  "produced_at": "2026-06-30T14:08:44Z",
-  "repair_task_id": "20260630T113048.990974000Z-relia-T8-review-11-repair",
+  "produced_at": "2026-06-30T14:17:34Z",
+  "repair_task_id": "20260630T113048.990974000Z-relia-T8-review-12-repair",
   "schema_version": "1.0",
   "status": "implemented",
   "task_id": "T8"

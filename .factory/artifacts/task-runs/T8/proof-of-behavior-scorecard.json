@@ -12,13 +12,13 @@
     "README.md",
     "docs/dev/dev_guides.md"
   ],
-  "produced_at": "2026-06-30T14:08:44Z",
+  "produced_at": "2026-06-30T14:17:34Z",
   "redaction_posture": {
     "classification": "customer_safe",
     "notes": "No customer data, live credentials, network calls, or unredacted machine-local paths were introduced.",
     "status": "pass"
   },
-  "repair_task_id": "20260630T113048.990974000Z-relia-T8-review-11-repair",
+  "repair_task_id": "20260630T113048.990974000Z-relia-T8-review-12-repair",
   "required_proof_level": "user_visible_behavior",
   "schema_version": "1.0",
   "scorecard": [
@@ -153,6 +153,15 @@
         "TestBuildReportBadgeComputesFreshness",
         "TestBuildReportBadgeComputesActivityStaleness",
         "schemas/recurrence-report.schema.json"
+      ],
+      "status": "pass"
+    },
+    {
+      "behavior": "Saved ERR baselines remain current when only volatile ingest freshness metadata changes in otherwise identical experience shards.",
+      "proof_refs": [
+        "cmd/relia/main_test.go",
+        "TestBacktestBaselineDigestIgnoresIngestFreshnessMetadata",
+        "cmd/relia/main.go"
       ],
       "status": "pass"
     }

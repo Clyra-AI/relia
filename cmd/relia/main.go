@@ -1100,7 +1100,7 @@ func loadBacktestExperiences(root string) ([]backtestExperience, []string, strin
 			return nil, nil, "", internalError("could not read experience shard "+rel, err)
 		}
 		sourceArtifacts = append(sourceArtifacts, rel)
-		digestParts = append(digestParts, rel+"\x00"+sha256String(string(content)))
+		shardDigestLines := []string{}
 		for lineNumber, line := range strings.Split(string(content), "\n") {
 			if strings.TrimSpace(line) == "" {
 				continue
@@ -1110,6 +1110,7 @@ func loadBacktestExperiences(root string) ([]backtestExperience, []string, strin
 			if err := decodeJSONUseNumber(line, &event); err != nil {
 				return nil, nil, "", artifactContractError(fmt.Sprintf("experience shard line %d is not valid JSON", lineNumber+1), fmt.Sprintf("%s:%d", rel, lineNumber+1))
 			}
+			shardDigestLines = append(shardDigestLines, experienceDigestLine(event))
 			if commandErr := validateEventMemorySource(event, ref); commandErr != nil {
 				return nil, nil, "", commandErr
 			}
@@ -1132,12 +1133,48 @@ func loadBacktestExperiences(root string) ([]backtestExperience, []string, strin
 				SourceLine: lineNumber + 1,
 			})
 		}
+		digestParts = append(digestParts, rel+"\x00"+sha256String(strings.Join(shardDigestLines, "\n")))
 	}
 	if len(records) == 0 {
 		return nil, nil, "", artifactContractError("backtest found no experience records in .relia/experiences", ".relia/experiences")
 	}
 	sort.Strings(digestParts)
 	return records, sourceArtifacts, sha256String(strings.Join(digestParts, "\x00")), nil
+}
+
+func experienceDigestLine(event map[string]any) string {
+	normalized, _ := cloneJSONValue(event).(map[string]any)
+	if normalized == nil {
+		normalized = map[string]any{}
+	}
+	if metadata, ok := normalized["metadata"].(map[string]any); ok {
+		delete(metadata, badgeMetadataLastIngest)
+		delete(metadata, badgeMetadataMergedPRs)
+	}
+	encoded, err := json.Marshal(normalized)
+	if err != nil {
+		return "{}"
+	}
+	return string(encoded)
+}
+
+func cloneJSONValue(value any) any {
+	switch typed := value.(type) {
+	case map[string]any:
+		clone := make(map[string]any, len(typed))
+		for key, item := range typed {
+			clone[key] = cloneJSONValue(item)
+		}
+		return clone
+	case []any:
+		clone := make([]any, len(typed))
+		for index, item := range typed {
+			clone[index] = cloneJSONValue(item)
+		}
+		return clone
+	default:
+		return typed
+	}
 }
 
 func loadDistillExperiences(root string, config yamlDocument, options distillOptions) ([]backtestExperience, []string, string, *CommandError) {

@@ -1906,6 +1906,61 @@ func TestBacktestSaveBaselineReportsFreshCurrentValues(t *testing.T) {
 	}
 }
 
+func TestBacktestBaselineDigestIgnoresIngestFreshnessMetadata(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	inputPath := filepath.Join(tempDir, "fixtures", "outcomes.jsonl")
+	writeFileForTest(t, inputPath, strings.Join([]string{
+		`{"experience_id":"exp_0001","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-01T10:00:00Z","pr":101,"commit":"abc001","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_time_freeze","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/101"]}`,
+		`{"experience_id":"exp_0002","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-10T10:00:00Z","pr":102,"commit":"abc002","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_time_freeze","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/102"]}`,
+	}, "\n")+"\n")
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+	if code != ExitSuccess {
+		t.Fatalf("ingest exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	stdout, stderr, code = runForTest(t, []string{"--json", "backtest", "--window", "180d", "--save-baseline"}, false)
+	if code != ExitSuccess {
+		t.Fatalf("save baseline exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	savedReport := decodeBacktestReportFromResult(t, decodeResult(t, stdout))
+	savedDigest := stringFromAny(savedReport.Metadata["source_artifact_digest"])
+	if savedDigest == "" {
+		t.Fatalf("saved report missing source digest: %#v", savedReport.Metadata)
+	}
+
+	shardPath := filepath.Join(tempDir, ".relia", "experiences", "2026-01.jsonl")
+	shardContent, err := os.ReadFile(shardPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	records := decodeJSONLines(t, string(shardContent))
+	lines := make([]string, 0, len(records))
+	for _, record := range records {
+		metadata := record["metadata"].(map[string]any)
+		metadata["last_ingest_at"] = "2026-06-30T14:15:00Z"
+		metadata["merged_prs_since_last_ingest"] = float64(7)
+		encoded, err := json.Marshal(record)
+		if err != nil {
+			t.Fatal(err)
+		}
+		lines = append(lines, string(encoded))
+	}
+	writeFileForTest(t, shardPath, strings.Join(lines, "\n")+"\n")
+
+	stdout, stderr, code = runForTest(t, []string{"--json", "backtest", "--window", "180d"}, false)
+	if code != ExitSuccess {
+		t.Fatalf("backtest exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	report := decodeBacktestReportFromResult(t, decodeResult(t, stdout))
+	if got := stringFromAny(report.Metadata["source_artifact_digest"]); got != savedDigest {
+		t.Fatalf("source digest = %q, want unchanged %q", got, savedDigest)
+	}
+	if report.Baseline.Status != "current" || report.Baseline.Stale {
+		t.Fatalf("baseline = %#v, want current after freshness-only metadata change", report.Baseline)
+	}
+}
+
 func TestBacktestRollsBackBaselineWhenReportWriteFails(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
