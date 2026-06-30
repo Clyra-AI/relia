@@ -300,12 +300,14 @@ offline default:
 - `relia advise --input <diff>` reuses the assessment engine and writes
   `.relia/reports/advisory-state.json` plus, when appropriate,
   `.relia/reports/advisory-comment.md`. The planner is silent for
-  `covered_clean`, below `advise.min_confidence`, disabled advise config, and
-  unchanged diff fingerprints.
+  `covered_clean`, below `advise.min_confidence`, disabled advise config,
+  `advise.max_comments_per_pr: 0`, and unchanged diff fingerprints.
 - `.github/workflows/relia-advisory.yml` wraps the planner on pull requests and
-  uses the explicit GitHub Actions token only in the publish step to create or
-  update one hidden-marker Relia comment. The workflow is advisory-only by
-  default and is not part of the required-check manifest.
+  uses the explicit GitHub Actions token only in GitHub API steps, never while
+  executing checked-out Relia code. The input step fetches the PR diff and seeds
+  local advisory state from any existing hidden-marker comment before the
+  token-free planner runs. The workflow is advisory-only by default and is not
+  part of the required-check manifest.
 
 ## Structured Data, Proof, Budgets, And Redaction
 

@@ -176,13 +176,15 @@ network or credential use without a complete `model_provider_endpoint` grant.
 `relia serve --format json` exposes a local MCP capability manifest for
 `recall`, `assess`, and `coverage` over active accepted rules only; hosted or
 network transports fail closed. `relia advise` reuses the assessment engine to
-write one-comment advisory artifacts, and the GitHub Action uses the explicit
-Actions token only to create or update one hidden-marker PR comment. The blast
-radius is limited to CLI output, local `.relia/reports` advisory artifacts,
-provider config validation, and optional PR comments. Rollback is removal of the
-T9 command paths, workflow, docs, and generated `.relia/reports/advisory-*`
-files; repository memory artifacts remain portable and useful without any
-hosted Relia account.
+write one-comment advisory artifacts while respecting disabled advise config,
+unchanged diff fingerprints, and a zero comment cap. The GitHub Action uses the
+explicit Actions token only in GitHub API steps, seeds local state from any
+existing hidden-marker PR comment, and runs checked-out Relia code without the
+token. The blast radius is limited to CLI output, local `.relia/reports`
+advisory artifacts, provider config validation, and optional PR comments.
+Rollback is removal of the T9 command paths, workflow, docs, and generated
+`.relia/reports/advisory-*` files; repository memory artifacts remain portable
+and useful without any hosted Relia account.
 
 ## Systems Thinking Map
 
