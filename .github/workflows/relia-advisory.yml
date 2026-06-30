@@ -122,7 +122,7 @@ jobs:
                   "--input", ".relia/reports/advisory-body.json",
               ]
               failure_action = "update the existing comment"
-          else
+          else:
               command = [
                   "gh", "api", "--method", "POST",
                   f"repos/{repository}/issues/{pr_number}/comments",

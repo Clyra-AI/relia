@@ -4276,6 +4276,15 @@ func TestAdvisoryWorkflowKeepsTokenOutOfReliaBuildAndSeedsState(t *testing.T) {
 			t.Fatalf("publish step must parse advisory JSON and invoke gh without shell; missing %q:\n%s", want, publishBlock)
 		}
 	}
+	if strings.Contains(publishBlock, "\n          else\n") || !strings.Contains(publishBlock, "\n          else:") {
+		t.Fatalf("publish step Python branch must use valid else syntax:\n%s", publishBlock)
+	}
+	publishScript := workflowPythonHeredocForTest(t, publishBlock)
+	cmd := exec.Command("python3", "-c", "import ast, sys; ast.parse(sys.stdin.read())")
+	cmd.Stdin = strings.NewReader(publishScript)
+	if output, err := cmd.CombinedOutput(); err != nil {
+		t.Fatalf("publish step Python heredoc must parse, err = %v, output = %s\n%s", err, output, publishScript)
+	}
 }
 
 func TestAdviseClearsExistingAdvisoryForCoveredCleanAssessment(t *testing.T) {
@@ -4408,6 +4417,28 @@ func workflowStepBlock(content string, name string) string {
 		return content[start:]
 	}
 	return content[start : start+len(marker)+next]
+}
+
+func workflowPythonHeredocForTest(t *testing.T, block string) string {
+	t.Helper()
+	marker := "python3 - <<'PY'"
+	start := strings.Index(block, marker)
+	if start < 0 {
+		t.Fatalf("workflow step missing Python heredoc:\n%s", block)
+	}
+	lines := strings.Split(block[start+len(marker):], "\n")
+	var script []string
+	for _, line := range lines {
+		if strings.TrimSpace(line) == "PY" {
+			if len(script) == 0 {
+				t.Fatalf("workflow Python heredoc is empty:\n%s", block)
+			}
+			return strings.Join(script, "\n") + "\n"
+		}
+		script = append(script, strings.TrimPrefix(line, "          "))
+	}
+	t.Fatalf("workflow Python heredoc is unterminated:\n%s", block)
+	return ""
 }
 
 func TestDemoAssessReportsCoveredCleanForAcceptedPlaybookRule(t *testing.T) {
