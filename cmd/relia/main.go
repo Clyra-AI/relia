@@ -3034,11 +3034,15 @@ func serveResult(args []string, start time.Time) CommandResult {
 	if commandErr != nil {
 		return withFormat(errorResult("serve", "serve", commandErr, start))
 	}
+	servedRules, commandErr := servedRuleData(rules)
+	if commandErr != nil {
+		return withFormat(errorResult("serve", "serve", commandErr, start))
+	}
 	result := passResult("serve", "serve", "exposed local MCP capability manifest for active memory rules", start, map[string]any{
 		"format":                  options.Format,
 		"mcp":                     map[string]any{"transport": "stdio", "tools": []string{"recall", "assess", "coverage"}},
 		"active_rule_count":       len(rules),
-		"served_rules":            servedRuleData(rules),
+		"served_rules":            servedRules,
 		"hosted_service_required": false,
 		"live_network_required":   false,
 		"advisory_only":           true,
@@ -3075,19 +3079,27 @@ func parseServeArgs(args []string) (serveOptions, *CommandError) {
 	return options, nil
 }
 
-func servedRuleData(rules []assessmentRule) []map[string]any {
+func servedRuleData(rules []assessmentRule) ([]map[string]any, *CommandError) {
 	data := make([]map[string]any, 0, len(rules))
 	for _, rule := range rules {
+		servedCitationRefs := servedAssessmentRuleCitations(rule)
+		servedCitations := assessmentRuleCitationURLs(servedCitationRefs)
+		if len(servedCitations) == 0 {
+			return nil, provenanceIntegrityError("served active memory rule must include citation URLs", rule.Path)
+		}
+		if commandErr := validateServedAssessmentRuleCitations(rule, servedCitationRefs); commandErr != nil {
+			return nil, commandErr
+		}
 		data = append(data, map[string]any{
 			"rule_id":     rule.ID,
 			"kind":        rule.Kind,
 			"confidence":  rule.Confidence,
 			"scope_paths": append([]string(nil), rule.ScopePaths...),
-			"citations":   servedAssessmentRuleCitationURLs(rule),
+			"citations":   servedCitations,
 			"path":        rule.Path,
 		})
 	}
-	return data
+	return data, nil
 }
 
 func adviseResult(args []string, start time.Time) CommandResult {
@@ -3155,23 +3167,35 @@ func adviseResult(args []string, start time.Time) CommandResult {
 		}
 	}
 	generatedAt := start.UTC().Format(time.RFC3339)
+	stateDiffFingerprint := diffFingerprint
+	stateGeneratedAt := generatedAt
+	stateMetadata := map[string]any{
+		"generated_by":              "relia advise",
+		"generated_at":              stateGeneratedAt,
+		"hosted_service_required":   false,
+		"github_api_required_later": shouldComment,
+	}
+	if skipReason == "reassess_debounce_window" && previousState.DiffFingerprint != "" {
+		stateDiffFingerprint = previousState.DiffFingerprint
+		if !previousState.GeneratedAt.IsZero() {
+			stateGeneratedAt = previousState.GeneratedAt.UTC().Format(time.RFC3339)
+			stateMetadata["generated_at"] = stateGeneratedAt
+		}
+		stateMetadata["debounced_diff_fingerprint"] = diffFingerprint
+		stateMetadata["debounced_at"] = generatedAt
+	}
 	state := map[string]any{
 		"object_type":               "relia.advisory_state",
 		"schema_version":            commandSchemaVersion,
 		"input_path":                displayPath(root, inputPath),
-		"diff_fingerprint":          diffFingerprint,
+		"diff_fingerprint":          stateDiffFingerprint,
 		"previous_diff_fingerprint": previousState.DiffFingerprint,
 		"should_comment":            shouldComment,
 		"skip_reason":               skipReason,
 		"assessment":                assessment,
 		"comment_strategy":          advisoryCommentStrategy(settings),
 		"comment_marker":            "relia-advisory:v1",
-		"metadata": map[string]any{
-			"generated_by":              "relia advise",
-			"generated_at":              generatedAt,
-			"hosted_service_required":   false,
-			"github_api_required_later": shouldComment,
-		},
+		"metadata":                  stateMetadata,
 	}
 	encodedState, err := json.MarshalIndent(state, "", "  ")
 	if err != nil {
