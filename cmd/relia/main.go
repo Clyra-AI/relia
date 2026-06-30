@@ -1786,20 +1786,26 @@ func metadataInt(metadata map[string]any, key string) (int, bool) {
 	}
 	switch typed := value.(type) {
 	case int:
+		if typed < 0 {
+			return 0, false
+		}
 		return typed, true
 	case int64:
-		return int(typed), true
-	case float64:
-		if typed != math.Trunc(typed) {
+		if typed < 0 {
 			return 0, false
 		}
-		return int(typed), true
+		return int64ToInt(typed)
+	case float64:
+		if math.IsNaN(typed) || math.IsInf(typed, 0) || typed < 0 || typed != math.Trunc(typed) {
+			return 0, false
+		}
+		return int64ToInt(int64(typed))
 	case json.Number:
 		number, err := typed.Int64()
-		if err != nil {
+		if err != nil || number < 0 {
 			return 0, false
 		}
-		return int(number), true
+		return int64ToInt(number)
 	default:
 		return 0, false
 	}

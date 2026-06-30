@@ -1629,6 +1629,18 @@ func TestBuildReportBadgeComputesActivityStaleness(t *testing.T) {
 	if !strings.Contains(badge.Reason, "activity freshness is unavailable") {
 		t.Fatalf("missing activity badge reason = %q", badge.Reason)
 	}
+
+	report.Metadata = map[string]any{
+		"last_ingest_at":               "2026-06-20T00:00:00Z",
+		"merged_prs_since_last_ingest": json.Number("-1"),
+	}
+	badge = buildReportBadgeAt(report, now)
+	if badge.Status != "stale" || !badge.Stale {
+		t.Fatalf("negative activity badge = %#v, want stale", badge)
+	}
+	if !strings.Contains(badge.Reason, "activity freshness is unavailable") {
+		t.Fatalf("negative activity badge reason = %q", badge.Reason)
+	}
 }
 
 func TestBacktestCommandResultCountsAgentAttributedExperiencesSeparatelyFromPRs(t *testing.T) {
