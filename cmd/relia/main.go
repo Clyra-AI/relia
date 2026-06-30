@@ -3142,24 +3142,25 @@ func adviseResult(args []string, start time.Time) CommandResult {
 		return withFormat(errorResult("advise", "advise", commandErr, start))
 	}
 	diffFingerprint := sha256String(string(inputContent))
-	previousFingerprint, commandErr := advisoryPreviousDiffFingerprint(root, options.StatePath)
+	previousState, commandErr := advisoryPreviousState(root, options.StatePath)
 	if commandErr != nil {
 		return withFormat(errorResult("advise", "advise", commandErr, start))
 	}
-	shouldComment, skipReason := advisoryCommentDecision(settings, assessment, diffFingerprint, previousFingerprint)
+	shouldComment, skipReason := advisoryCommentDecision(settings, assessment, diffFingerprint, previousState, start)
 	body := ""
 	if shouldComment {
-		body = renderAdvisoryComment(assessment, touchedPaths, diffFingerprint)
+		body = renderAdvisoryComment(assessment, touchedPaths, diffFingerprint, start)
 		if commandErr := writeRepoRelativeFile(root, options.CommentPath, []byte(body), "advisory comment"); commandErr != nil {
 			return withFormat(errorResult("advise", "advise", commandErr, start))
 		}
 	}
+	generatedAt := start.UTC().Format(time.RFC3339)
 	state := map[string]any{
 		"object_type":               "relia.advisory_state",
 		"schema_version":            commandSchemaVersion,
 		"input_path":                displayPath(root, inputPath),
 		"diff_fingerprint":          diffFingerprint,
-		"previous_diff_fingerprint": previousFingerprint,
+		"previous_diff_fingerprint": previousState.DiffFingerprint,
 		"should_comment":            shouldComment,
 		"skip_reason":               skipReason,
 		"assessment":                assessment,
@@ -3167,6 +3168,7 @@ func adviseResult(args []string, start time.Time) CommandResult {
 		"comment_marker":            "relia-advisory:v1",
 		"metadata": map[string]any{
 			"generated_by":              "relia advise",
+			"generated_at":              generatedAt,
 			"hosted_service_required":   false,
 			"github_api_required_later": shouldComment,
 		},
@@ -3270,35 +3272,56 @@ func parseAdviseArgs(args []string) (adviseOptions, *CommandError) {
 	return options, nil
 }
 
-func advisoryPreviousDiffFingerprint(root string, statePath string) (string, *CommandError) {
+type advisoryPriorState struct {
+	DiffFingerprint string
+	GeneratedAt     time.Time
+}
+
+func advisoryPreviousState(root string, statePath string) (advisoryPriorState, *CommandError) {
 	clean, ok := cleanRepoPath(statePath)
 	if !ok {
-		return "", usageError("advise --state must be repo-relative")
+		return advisoryPriorState{}, usageError("advise --state must be repo-relative")
 	}
 	content, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(filepath.ToSlash(clean))))
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			return "", nil
+			return advisoryPriorState{}, nil
 		}
-		return "", internalError("could not read prior advisory state", err)
+		return advisoryPriorState{}, internalError("could not read prior advisory state", err)
 	}
 	var state map[string]any
 	if err := json.Unmarshal(content, &state); err != nil {
-		return "", artifactContractError("prior advisory state is not valid JSON", filepath.ToSlash(clean))
+		return advisoryPriorState{}, artifactContractError("prior advisory state is not valid JSON", filepath.ToSlash(clean))
 	}
+	prior := advisoryPriorState{}
 	fingerprint, _ := state["diff_fingerprint"].(string)
-	return fingerprint, nil
+	prior.DiffFingerprint = fingerprint
+	if metadata, ok := state["metadata"].(map[string]any); ok {
+		if generatedAt, _ := metadata["generated_at"].(string); generatedAt != "" {
+			if parsed, err := time.Parse(time.RFC3339, generatedAt); err == nil {
+				prior.GeneratedAt = parsed
+			}
+		}
+	}
+	return prior, nil
 }
 
-func advisoryCommentDecision(settings adviseSettings, assessment riskAssessment, diffFingerprint string, previousFingerprint string) (bool, string) {
+func advisoryCommentDecision(settings adviseSettings, assessment riskAssessment, diffFingerprint string, previousState advisoryPriorState, now time.Time) (bool, string) {
 	if !settings.Enabled {
 		return false, "advise_disabled"
 	}
 	if settings.MaxCommentsPerPR == 0 {
 		return false, "comment_cap_zero"
 	}
+	previousFingerprint := previousState.DiffFingerprint
 	if previousFingerprint != "" && previousFingerprint == diffFingerprint {
 		return false, "unchanged_diff_fingerprint"
+	}
+	if previousFingerprint != "" && settings.ReassessDebounceMinutes > 0 && !previousState.GeneratedAt.IsZero() {
+		debounceWindow := time.Duration(settings.ReassessDebounceMinutes) * time.Minute
+		if now.Sub(previousState.GeneratedAt) < debounceWindow {
+			return false, "reassess_debounce_window"
+		}
 	}
 	if assessment.RiskLevel == "covered_clean" {
 		if previousFingerprint != "" {
@@ -3333,9 +3356,9 @@ func advisoryCommentStrategy(settings adviseSettings) map[string]any {
 	}
 }
 
-func renderAdvisoryComment(assessment riskAssessment, touchedPaths []string, diffFingerprint string) string {
+func renderAdvisoryComment(assessment riskAssessment, touchedPaths []string, diffFingerprint string, generatedAt time.Time) string {
 	var builder strings.Builder
-	builder.WriteString("<!-- relia-advisory:v1 diff_fingerprint=" + diffFingerprint + " -->\n")
+	builder.WriteString("<!-- relia-advisory:v1 diff_fingerprint=" + diffFingerprint + " generated_at=" + generatedAt.UTC().Format(time.RFC3339) + " -->\n")
 	switch assessment.RiskLevel {
 	case "no_coverage":
 		builder.WriteString("Relia advisory - no prior active memory covers ")

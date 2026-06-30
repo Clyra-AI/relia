@@ -1,7 +1,7 @@
 name: relia advisory
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, synchronize, reopened, ready_for_review]
 
 permissions:
@@ -56,7 +56,8 @@ jobs:
           comments = flatten_comments(json.loads(Path(".relia/reports/github-comments.json").read_text() or "[]"))
           marker = "<!-- relia-advisory:v1"
           fingerprint = ""
-          pattern = re.compile(r"<!--\s*relia-advisory:v1\s+diff_fingerprint=([^ >]+)\s*-->")
+          generated_at = ""
+          pattern = re.compile(r"<!--\s*relia-advisory:v1\s+diff_fingerprint=([^ >]+)(?:\s+generated_at=([^ >]+))?\s*-->")
           for comment in comments:
               author = ((comment.get("user") or {}).get("login") or "")
               if author not in trusted_marker_authors:
@@ -67,13 +68,17 @@ jobs:
               match = pattern.search(body)
               if match:
                   fingerprint = match.group(1)
+                  generated_at = match.group(2) or ""
                   break
           if fingerprint:
+              metadata = {"source": "existing_github_comment_marker"}
+              if generated_at:
+                  metadata["generated_at"] = generated_at
               Path(".relia/reports/advisory-state.json").write_text(json.dumps({
                   "object_type": "relia.advisory_state",
                   "schema_version": "1.0",
                   "diff_fingerprint": fingerprint,
-                  "metadata": {"source": "existing_github_comment_marker"}
+                  "metadata": metadata
               }, indent=2, sort_keys=True) + "\n")
           PY
       - name: Build PR advisory

@@ -4240,6 +4240,9 @@ func TestAdvisoryWorkflowKeepsTokenOutOfReliaBuildAndSeedsState(t *testing.T) {
 		t.Fatal(err)
 	}
 	content := string(contentBytes)
+	if !strings.Contains(content, "\n  pull_request_target:") || strings.Contains(content, "\n  pull_request:") {
+		t.Fatalf("advisory workflow must use pull_request_target with trusted base checkout:\n%s", content)
+	}
 	prepareBlock := workflowStepBlock(content, "Prepare advisory inputs")
 	if !strings.Contains(prepareBlock, "GH_TOKEN: ${{ github.token }}") {
 		t.Fatalf("prepare step must own GitHub token for API reads:\n%s", prepareBlock)
@@ -4251,7 +4254,7 @@ func TestAdvisoryWorkflowKeepsTokenOutOfReliaBuildAndSeedsState(t *testing.T) {
 	if !strings.Contains(checkoutBlock, "persist-credentials: false") {
 		t.Fatalf("checkout must not persist the GitHub token for later PR-code execution:\n%s", checkoutBlock)
 	}
-	for _, want := range []string{".relia/reports/github-comments.json", "advisory-state.json", "diff_fingerprint"} {
+	for _, want := range []string{".relia/reports/github-comments.json", "advisory-state.json", "diff_fingerprint", "generated_at"} {
 		if !strings.Contains(prepareBlock, want) {
 			t.Fatalf("prepare step missing %q:\n%s", want, prepareBlock)
 		}
@@ -4427,6 +4430,42 @@ metadata: {}
 	result := decodeResult(t, stdout)
 	if result.Data["should_comment"] != false || result.Data["skip_reason"] != "covered_clean" {
 		t.Fatalf("advise result = %#v", result.Data)
+	}
+}
+
+func TestAdviseDebouncesChangedDiffWhenPriorMarkerIsFresh(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, ".relia", "reports", "advisory-state.json"), fmt.Sprintf(`{
+  "object_type": "relia.advisory_state",
+  "schema_version": "1.0",
+  "diff_fingerprint": "sha256:previous",
+  "metadata": {
+    "generated_at": %q,
+    "source": "existing_github_comment_marker"
+  }
+}
+`, time.Now().UTC().Format(time.RFC3339)))
+	writeFileForTest(t, filepath.Join(tempDir, "change.diff"), `diff --git a/packages/new/path.py b/packages/new/path.py
+--- a/packages/new/path.py
++++ b/packages/new/path.py
+@@ -1,2 +1,3 @@
+ def work():
+-    return "old"
++    return "new"
+`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "advise", "--input", "change.diff", "--format", "json"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("advise debounce exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Data["should_comment"] != false || result.Data["skip_reason"] != "reassess_debounce_window" {
+		t.Fatalf("advise result = %#v", result.Data)
+	}
+	if _, err := os.Stat(filepath.Join(tempDir, ".relia", "reports", "advisory-comment.md")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("advisory comment should not be written inside debounce window, stat err = %v", err)
 	}
 }
 
