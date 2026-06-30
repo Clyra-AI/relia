@@ -4175,6 +4175,45 @@ metadata: {}
 	}
 }
 
+func TestServeFailsClosedForInvalidRuleCitationURL(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "billing-time.yaml"), `object_type: relia.memory_rule
+schema_version: "1.0"
+id: billing-time-fixture
+kind: avoid
+status: active
+statement: Use the billing clock fixture instead of direct UTC calls.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.86
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_0142
+provenance:
+  - pr: 142
+    outcome: ci_failure
+    url: https://example.com/not-a-pr
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "serve", "--format", "json"}, false)
+
+	if code == ExitSuccess {
+		t.Fatalf("serve should fail closed for invalid citation URL, stderr = %q, stdout = %q", stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if len(result.Errors) == 0 || !strings.Contains(result.Errors[0].Message, "citation URL") {
+		t.Fatalf("serve error = %#v", result.Errors)
+	}
+}
+
 func TestAdviseWritesOneAdvisoryCommentPlanAndSkipsUnchangedDiff(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
@@ -4543,6 +4582,7 @@ metadata: {}
 func TestAdviseDebouncesChangedDiffWhenPriorMarkerIsFresh(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
+	priorGeneratedAt := time.Now().UTC().Format(time.RFC3339)
 	writeFileForTest(t, filepath.Join(tempDir, ".relia", "reports", "advisory-state.json"), fmt.Sprintf(`{
   "object_type": "relia.advisory_state",
   "schema_version": "1.0",
@@ -4552,7 +4592,7 @@ func TestAdviseDebouncesChangedDiffWhenPriorMarkerIsFresh(t *testing.T) {
     "source": "existing_github_comment_marker"
   }
 }
-`, time.Now().UTC().Format(time.RFC3339)))
+`, priorGeneratedAt))
 	writeFileForTest(t, filepath.Join(tempDir, "change.diff"), `diff --git a/packages/new/path.py b/packages/new/path.py
 --- a/packages/new/path.py
 +++ b/packages/new/path.py
@@ -4573,6 +4613,24 @@ func TestAdviseDebouncesChangedDiffWhenPriorMarkerIsFresh(t *testing.T) {
 	}
 	if _, err := os.Stat(filepath.Join(tempDir, ".relia", "reports", "advisory-comment.md")); !errors.Is(err, os.ErrNotExist) {
 		t.Fatalf("advisory comment should not be written inside debounce window, stat err = %v", err)
+	}
+	stateContent, err := os.ReadFile(filepath.Join(tempDir, ".relia", "reports", "advisory-state.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var state map[string]any
+	if err := json.Unmarshal(stateContent, &state); err != nil {
+		t.Fatalf("decode advisory state: %v\n%s", err, stateContent)
+	}
+	if state["diff_fingerprint"] != "sha256:previous" {
+		t.Fatalf("debounce state diff_fingerprint = %#v, want prior fingerprint; state = %#v", state["diff_fingerprint"], state)
+	}
+	metadata := state["metadata"].(map[string]any)
+	if metadata["generated_at"] != priorGeneratedAt {
+		t.Fatalf("debounce state generated_at = %#v, want prior generated_at %q", metadata["generated_at"], priorGeneratedAt)
+	}
+	if metadata["debounced_diff_fingerprint"] != result.Data["diff_fingerprint"] {
+		t.Fatalf("debounced_diff_fingerprint = %#v, want current diff %q", metadata["debounced_diff_fingerprint"], result.Data["diff_fingerprint"])
 	}
 }
 

@@ -3,7 +3,7 @@
   "schema_version": "1.0",
   "task_id": "T9",
   "status": "pass",
-  "updated_at": "2026-06-30T20:50:56Z",
+  "updated_at": "2026-06-30T21:01:33Z",
   "required_proof_level": "user_visible_behavior",
   "scenarios": [
     {
@@ -95,6 +95,16 @@
       "scenario": "The local MCP serve manifest exposes playbook citations only for fix_held or merged_clean evidence when a playbook also has failure provenance.",
       "status": "pass",
       "evidence": "TestServeFiltersPlaybookCitationsToCleanEvidence"
+    },
+    {
+      "scenario": "The local MCP serve manifest fails closed before serving an active rule with an invalid provenance citation URL.",
+      "status": "pass",
+      "evidence": "TestServeFailsClosedForInvalidRuleCitationURL"
+    },
+    {
+      "scenario": "The advisory planner preserves the prior commented fingerprint and timestamp when a changed diff is skipped by the reassessment debounce window.",
+      "status": "pass",
+      "evidence": "TestAdviseDebouncesChangedDiffWhenPriorMarkerIsFresh"
     }
   ],
   "commands_run": [
