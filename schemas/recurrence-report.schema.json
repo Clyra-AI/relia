@@ -110,6 +110,12 @@
     },
     "metadata": {
       "type": "object",
+      "properties": {
+        "merged_prs_since_last_ingest": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
       "additionalProperties": true
     }
   },

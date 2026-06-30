@@ -46,8 +46,11 @@ output contract:
   command result expose operator-ready metrics, including agent-attributed
   experience counts distinct from unique agent-attributed PR counts, top
   repeated mistakes, diagnostics, feedback text, and badge-ready fields
-  generated from the JSON command result. The recurrence gate is available
-  through `relia.yaml` but remains off by default.
+  generated from the JSON command result. Badge fields render as stale when
+  the latest source window is older than 30 days or artifact metadata reports
+  more than 20 merged PRs since ingest; missing activity metadata is also
+  treated as stale before publishing a README badge. The recurrence gate is
+  available through `relia.yaml` but remains off by default.
 - `relia distill --format json` reads local redacted experience shards, or
   `relia distill --input <json-or-jsonl> --format json` reads one local
   redacted outcome file without persisting shards. It clusters canonical

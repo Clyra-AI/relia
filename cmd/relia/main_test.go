@@ -1457,9 +1457,11 @@ func TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline(t *te
 		t.Fatalf("operator feedback = %#v", report.OperatorFeedback)
 	}
 	if report.Badge.Label != "Relia" ||
-		report.Badge.Message != "ERR 16.7%" ||
-		report.Badge.Status != "current" ||
-		report.Badge.Stale {
+		report.Badge.Message != "ERR 16.7% stale" ||
+		report.Badge.Status != "stale" ||
+		!report.Badge.Stale ||
+		report.Badge.Color != "lightgrey" ||
+		!strings.Contains(report.Badge.Reason, "30-day freshness window") {
 		t.Fatalf("badge = %#v", report.Badge)
 	}
 	assertReportDiagnosticTypes(t, report.Diagnostics, []string{
@@ -1493,8 +1495,67 @@ func TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline(t *te
 		t.Fatalf("html report missing possible recurrence section:\n%s", htmlContent)
 	}
 	if !bytes.Contains(htmlContent, []byte("Top Repeated Mistakes")) ||
-		!bytes.Contains(htmlContent, []byte("Badge: Relia ERR 16.7%")) {
+		!bytes.Contains(htmlContent, []byte("Badge: Relia ERR 16.7% stale")) {
 		t.Fatalf("html report missing operator summary and badge:\n%s", htmlContent)
+	}
+}
+
+func TestBuildReportBadgeComputesFreshness(t *testing.T) {
+	report := recurrenceReport{
+		ReportID:    "backtest_fresh",
+		Window:      recurrenceWindow{End: "2026-06-20T00:00:00Z"},
+		Summary:     recurrenceSummary{HeadlineERRPercent: "4.1%"},
+		HeadlineERR: 0.041,
+		Metadata: map[string]any{
+			"merged_prs_since_last_ingest": 0,
+		},
+	}
+	now := time.Date(2026, 6, 30, 0, 0, 0, 0, time.UTC)
+
+	badge := buildReportBadgeAt(report, now)
+	if badge.Status != "current" || badge.Stale || badge.Message != "ERR 4.1%" || badge.Color != "brightgreen" {
+		t.Fatalf("fresh badge = %#v, want current", badge)
+	}
+	if !strings.Contains(badge.Reason, "30-day freshness window") {
+		t.Fatalf("fresh badge reason = %q", badge.Reason)
+	}
+
+	report.Window.End = "2026-05-29T00:00:00Z"
+	badge = buildReportBadgeAt(report, now)
+	if badge.Status != "stale" || !badge.Stale || badge.Message != "ERR 4.1% stale" || badge.Color != "lightgrey" {
+		t.Fatalf("old badge = %#v, want stale", badge)
+	}
+	if !strings.Contains(badge.Reason, "30-day freshness window") {
+		t.Fatalf("old badge reason = %q", badge.Reason)
+	}
+}
+
+func TestBuildReportBadgeComputesActivityStaleness(t *testing.T) {
+	report := recurrenceReport{
+		ReportID: "backtest_activity",
+		Window:   recurrenceWindow{End: "2026-06-20T00:00:00Z"},
+		Summary:  recurrenceSummary{HeadlineERRPercent: "4.1%"},
+		Metadata: map[string]any{
+			"merged_prs_since_last_ingest": float64(21),
+		},
+	}
+	now := time.Date(2026, 6, 21, 0, 0, 0, 0, time.UTC)
+
+	badge := buildReportBadgeAt(report, now)
+	if badge.Status != "stale" || !badge.Stale || badge.Message != "ERR 4.1% stale" {
+		t.Fatalf("activity badge = %#v, want stale", badge)
+	}
+	if !strings.Contains(badge.Reason, "20 PRs") {
+		t.Fatalf("activity badge reason = %q", badge.Reason)
+	}
+
+	report.Metadata = nil
+	badge = buildReportBadgeAt(report, now)
+	if badge.Status != "stale" || !badge.Stale {
+		t.Fatalf("missing activity badge = %#v, want stale", badge)
+	}
+	if !strings.Contains(badge.Reason, "activity freshness is unavailable") {
+		t.Fatalf("missing activity badge reason = %q", badge.Reason)
 	}
 }
 
@@ -1554,7 +1615,7 @@ func TestBacktestInteractiveOutputShowsOperatorSummaryAndBadge(t *testing.T) {
 		"Confirmed recurrences: 1",
 		"Top repeated mistakes:",
 		"Error recurrence rate: 50.0%",
-		"Badge: Relia ERR 50.0%",
+		"Badge: Relia ERR 50.0% stale",
 		"Report: .relia/reports/",
 	} {
 		if !strings.Contains(stdout, want) {

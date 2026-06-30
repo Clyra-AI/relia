@@ -12,13 +12,13 @@
     "README.md",
     "docs/dev/dev_guides.md"
   ],
-  "produced_at": "2026-06-30T12:54:20Z",
+  "produced_at": "2026-06-30T13:10:04Z",
   "redaction_posture": {
     "classification": "customer_safe",
     "notes": "No customer data, live credentials, network calls, or unredacted machine-local paths were introduced.",
     "status": "pass"
   },
-  "repair_task_id": "20260630T113048.990974000Z-relia-T8-review-5-repair",
+  "repair_task_id": "20260630T113048.990974000Z-relia-T8-review-6-repair",
   "required_proof_level": "user_visible_behavior",
   "schema_version": "1.0",
   "scorecard": [
@@ -113,6 +113,16 @@
         "cmd/relia/main_test.go",
         "TestBacktestInteractiveOutputShowsOperatorSummaryAndBadge",
         "README.md"
+      ],
+      "status": "pass"
+    },
+    {
+      "behavior": "README badge fields render stale when source data exceeds 30 days, merged-PR activity exceeds 20 PRs, or merged-PR activity metadata is unavailable.",
+      "proof_refs": [
+        "cmd/relia/main_test.go",
+        "TestBuildReportBadgeComputesFreshness",
+        "TestBuildReportBadgeComputesActivityStaleness",
+        "schemas/recurrence-report.schema.json"
       ],
       "status": "pass"
     }

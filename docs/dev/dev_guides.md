@@ -272,7 +272,11 @@ T8 adds report/evidence feedback on top of the local artifact path:
   operator feedback, and badge-ready fields in
   `schemas/recurrence-report.schema.json` and the command result envelope.
   The command result `experiences_agent_attributed` metric counts canonical
-  experience records, while `agent_attributed_prs` counts unique PRs.
+  experience records, while `agent_attributed_prs` counts unique PRs. Badge
+  freshness is computed from the source window age and optional
+  `merged_prs_since_last_ingest` artifact metadata without adding network
+  access to the offline backtest command; missing activity metadata renders the
+  badge stale before README publication.
 - Interactive `relia backtest` output renders those same operator-facing
   details, while non-interactive output remains machine-readable JSON.
 - Generated memory rules record

@@ -40,6 +40,11 @@ const (
 	defaultConfigFile       = "relia.yaml"
 )
 
+const (
+	badgeStaleAfterDays      = 30
+	badgeStaleAfterMergedPRs = 20
+)
+
 var requiredCheckFiles = []string{
 	"AGENTS.md",
 	"WORKFLOW.md",
@@ -1625,6 +1630,10 @@ func buildReportOperatorFeedback(summary recurrenceSummary) reportOperatorFeedba
 }
 
 func buildReportBadge(report recurrenceReport) reportBadge {
+	return buildReportBadgeAt(report, time.Now().UTC())
+}
+
+func buildReportBadgeAt(report recurrenceReport, now time.Time) reportBadge {
 	color := "brightgreen"
 	switch {
 	case report.HeadlineERR >= 0.3:
@@ -1632,14 +1641,75 @@ func buildReportBadge(report recurrenceReport) reportBadge {
 	case report.HeadlineERR >= 0.1:
 		color = "yellow"
 	}
+
+	status := "current"
+	message := "ERR " + report.Summary.HeadlineERRPercent
+	stale, reason := reportBadgeStaleness(report, now)
+	if stale {
+		status = "stale"
+		message += " stale"
+		color = "lightgrey"
+	}
+
 	return reportBadge{
 		Label:          "Relia",
-		Message:        "ERR " + report.Summary.HeadlineERRPercent,
-		Status:         "current",
-		Stale:          false,
+		Message:        message,
+		Status:         status,
+		Stale:          stale,
 		Color:          color,
-		Reason:         "Generated from the current backtest command result.",
+		Reason:         reason,
 		SourceReportID: report.ReportID,
+	}
+}
+
+func reportBadgeStaleness(report recurrenceReport, now time.Time) (bool, string) {
+	mergedSinceIngest, hasMergedSinceIngest := metadataInt(report.Metadata, "merged_prs_since_last_ingest")
+	if hasMergedSinceIngest && mergedSinceIngest > badgeStaleAfterMergedPRs {
+		return true, fmt.Sprintf("More than %d PRs have merged since the last ingest; rerun relia ingest and backtest before publishing the README badge.", badgeStaleAfterMergedPRs)
+	}
+	if now.IsZero() {
+		now = time.Now().UTC()
+	}
+	windowEndText := strings.TrimSpace(report.Window.End)
+	if windowEndText == "" {
+		return true, "Report window end is unavailable; rerun relia ingest and backtest before publishing the README badge."
+	}
+	windowEnd, err := time.Parse(time.RFC3339, windowEndText)
+	if err != nil {
+		return true, "Report window end is invalid; rerun relia ingest and backtest before publishing the README badge."
+	}
+	if now.UTC().Sub(windowEnd.UTC()) > time.Duration(badgeStaleAfterDays)*24*time.Hour {
+		return true, fmt.Sprintf("Source experience data exceeds the %d-day freshness window; rerun relia ingest and backtest before publishing the README badge.", badgeStaleAfterDays)
+	}
+	if !hasMergedSinceIngest {
+		return true, "Merged PR activity freshness is unavailable; provide merged_prs_since_last_ingest metadata before publishing the README badge."
+	}
+	return false, fmt.Sprintf("Generated from source experience data within the %d-day freshness window and %d merged PRs since ingest.", badgeStaleAfterDays, mergedSinceIngest)
+}
+
+func metadataInt(metadata map[string]any, key string) (int, bool) {
+	value, ok := metadata[key]
+	if !ok {
+		return 0, false
+	}
+	switch typed := value.(type) {
+	case int:
+		return typed, true
+	case int64:
+		return int(typed), true
+	case float64:
+		if typed != math.Trunc(typed) {
+			return 0, false
+		}
+		return int(typed), true
+	case json.Number:
+		number, err := typed.Int64()
+		if err != nil {
+			return 0, false
+		}
+		return int(number), true
+	default:
+		return 0, false
 	}
 }
 
