@@ -48,3 +48,17 @@ exceptions:
     scope: CodeQL analysis only
     expires: 2026-09-30
     review_command: python3 scripts/validate_repo_pack.py
+  - workflow: .github/workflows/relia-advisory.yml
+    action: actions/checkout@v6.0.2
+    owner: delivery-infra
+    reason: audited checkout action reused for the advisory workflow until SHA pin refresh automation lands
+    scope: Relia advisory workflow checkout only
+    expires: 2026-09-30
+    review_command: python3 scripts/validate_repo_pack.py
+  - workflow: .github/workflows/relia-advisory.yml
+    action: actions/setup-go@v6.3.0
+    owner: delivery-infra
+    reason: audited Go setup action reused for the advisory workflow until SHA pin refresh automation lands
+    scope: Relia advisory workflow Go setup only
+    expires: 2026-09-30
+    review_command: python3 scripts/validate_repo_pack.py

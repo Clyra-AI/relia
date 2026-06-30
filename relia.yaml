@@ -41,6 +41,12 @@ redaction:
 distill:
   embeddings: signature
   provider: none
+  model: ""
+  base_url: ""
+  credential_env: ""
+  max_cost_usd_per_run: 0
+  input_cost_usd_per_1k_tokens: 0
+  output_cost_usd_per_1k_tokens: 0
   review_required: true
 
 models:
@@ -48,6 +54,13 @@ models:
 
 serve:
   advisory_only: true
+
+advise:
+  enabled: true
+  max_comments_per_pr: 1
+  update_in_place: true
+  reassess_debounce_minutes: 10
+  min_confidence: 0.6
 
 gate:
   enabled: false

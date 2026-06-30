@@ -163,6 +163,27 @@ report fields, tests, docs, and generated `.relia/reports` or `memory/rules`
 files; canonical
 experience shards remain the source of truth for regeneration.
 
+T9 adds provider, advisory, and local serve integration boundaries while
+preserving the offline trust posture. The state owner remains `cmd/relia`, with
+provider plans in command-result JSON, advisory planner artifacts under
+`.relia/reports`, active rules under `memory/rules`, and the optional advisory
+workflow under `.github/workflows/relia-advisory.yml`. Feedback sources are
+provider/advisory unit tests, workflow metadata, `make prepush-full`, and
+Factory task-run evidence. Provider-backed distill validates OpenAI-compatible
+and Anthropic adapter config, estimates tokens and cost from redacted local
+records, enforces `distill.max_cost_usd_per_run`, and fails closed before
+network or credential use without a complete `model_provider_endpoint` grant.
+`relia serve --format json` exposes a local MCP capability manifest for
+`recall`, `assess`, and `coverage` over active accepted rules only; hosted or
+network transports fail closed. `relia advise` reuses the assessment engine to
+write one-comment advisory artifacts, and the GitHub Action uses the explicit
+Actions token only to create or update one hidden-marker PR comment. The blast
+radius is limited to CLI output, local `.relia/reports` advisory artifacts,
+provider config validation, and optional PR comments. Rollback is removal of the
+T9 command paths, workflow, docs, and generated `.relia/reports/advisory-*`
+files; repository memory artifacts remain portable and useful without any
+hosted Relia account.
+
 ## Systems Thinking Map
 
 - State lives in repo-local config, generated artifacts, source files, and Factory evidence.

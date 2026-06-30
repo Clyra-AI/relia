@@ -17,10 +17,10 @@ FACTORY_REPO=/path/to/factory factoryd run --config .factory/factoryd.autoship.e
 
 ## CLI Baseline
 
-The T1/T2/T3/T4.3/T5/T6/T7/T8 command surface establishes the lifecycle
+The T1/T2/T3/T4.3/T5/T6/T7/T8/T9 command surface establishes the lifecycle
 skeleton, configuration contract, assessment fixture slice, recurrence
-backtest, deterministic distillation, reporting evidence, and agent-native
-output contract:
+backtest, deterministic distillation, reporting evidence, provider/advisory
+approval boundaries, and agent-native output contract:
 
 - `relia init` creates `relia.yaml` if it is missing and is idempotent when the
   file already exists. It also creates the repo-native artifact skeleton under
@@ -69,6 +69,10 @@ output contract:
   written.
   Deleted scoped paths produce `stale` rules, and contradictory clean or held
   evidence produces `contradicted` rules.
+  Provider-backed mode supports OpenAI-compatible and Anthropic adapter plans,
+  but the local runner computes token and cost estimates, enforces
+  `distill.max_cost_usd_per_run`, and fails closed before any provider call
+  unless a complete `model_provider_endpoint` grant exists.
 - `relia models pull --model-id ... --version ... --source-url ... --license
   ... --digest ... --cache-path ... --update-policy ... --rollback-policy ...`
   records the local embedding artifact manifest for an already-present local
@@ -84,10 +88,17 @@ output contract:
   statement, confidence, lifecycle status, review label, and clickable PR
   provenance, separating active accepted rules as strong memory from candidate,
   stale, contradicted, and retired weak memory.
+- `relia serve --format json` exposes the local MCP capability manifest for
+  `recall`, `assess`, and `coverage` over active accepted rules only. Hosted or
+  network transports fail closed unless explicitly approved.
 - `relia assess --input <diff>` reads a local unified diff, compares touched
   paths with active local `memory/rules/*.yaml` rules, and emits a
   `relia.risk_assessment` payload with `match_high`, `match_medium`, or
   `no_coverage`.
+- `relia advise --input <diff>` runs the same assessment engine and writes one
+  advisory comment plan under `.relia/reports/`, including a stable hidden
+  marker and diff fingerprint so the GitHub Action can edit one living comment
+  or skip unchanged pushes.
 - `--json` always emits the stable command result envelope.
 - piped or non-interactive stdout defaults to JSON.
 - interactive `relia backtest` output prints the operator summary, top repeated
@@ -138,8 +149,9 @@ window anchor and produce the same report ID and artifact paths.
 The live distill command is also deterministic for the same local experience
 shards or explicit `--input` file and config. The default path is signature-only
 and offline; local embedding mode fails closed unless a recorded manifest and
-matching local artifact are present, and provider drafting fails closed unless a
-future approved `model_provider_endpoint` gate is present.
+matching local artifact are present. Provider drafting and provider embeddings
+produce an adapter/cost plan and fail closed unless an approved
+`model_provider_endpoint` gate is present.
 
 The config in `relia.yaml` is local-only by default: code, diffs, logs, and
 experience records are not sent anywhere; share scope is `private`; redaction
@@ -163,6 +175,12 @@ grant naming provider, model, endpoint or `base_url`, credential environment,
 budget posture, redaction posture, and allowlist. Local embedding artifact pulls
 require a separate `model_artifact_pull` grant. Generic network or credential
 approval does not satisfy either model-specific gate.
+
+The advisory workflow is `.github/workflows/relia-advisory.yml`. It runs on pull
+requests, builds a local diff assessment, and uses the explicit GitHub Actions
+token only in the publish step to create or update one Relia advisory comment.
+The workflow is advisory-only and exits successfully when the local planner
+skips comments for `covered_clean`, low-confidence, or unchanged-diff cases.
 
 ## Post-PRD audit or review findings
 
