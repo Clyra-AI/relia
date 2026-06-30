@@ -3,7 +3,7 @@
   "schema_version": "1.0",
   "task_id": "T9",
   "status": "pass",
-  "updated_at": "2026-06-30T19:50:11Z",
+  "updated_at": "2026-06-30T19:53:38Z",
   "required_proof_level": "user_visible_behavior",
   "scenarios": [
     {
@@ -33,6 +33,11 @@
     },
     {
       "scenario": "The GitHub advisory workflow publish step parses planner JSON directly and invokes gh without sourcing planner-controlled shell environment text while the Actions token is present.",
+      "status": "pass",
+      "evidence": "TestAdvisoryWorkflowKeepsTokenOutOfReliaBuildAndSeedsState"
+    },
+    {
+      "scenario": "The GitHub advisory workflow publish step keeps a parseable Python heredoc for both update and create advisory comment paths.",
       "status": "pass",
       "evidence": "TestAdvisoryWorkflowKeepsTokenOutOfReliaBuildAndSeedsState"
     },
