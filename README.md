@@ -179,12 +179,13 @@ approval does not satisfy either model-specific gate.
 The advisory workflow is `.github/workflows/relia-advisory.yml`. It runs on pull
 requests, builds a local diff assessment, and uses the explicit GitHub Actions
 token only in GitHub API steps, never while executing checked-out Relia code, to
-create or update one Relia advisory comment. The checkout disables persisted
-GitHub credentials before checked-out Relia code runs, and the workflow seeds
-the local advisory state from all existing hidden-marker comment pages so reruns
-can skip unchanged diff fingerprints. The publish step parses planner JSON
-directly and invokes `gh` without sourcing planner-produced shell environment
-text while the Actions token is present. It is advisory-only and exits successfully
+create or update one Relia advisory comment. The checkout pins trusted
+base-branch code and memory rules, disables persisted GitHub credentials before
+Relia code runs, and the workflow seeds the local advisory state only from
+bot-authored hidden-marker comments across all issue-comment pages so reruns can
+skip unchanged diff fingerprints. The publish step parses planner JSON directly
+and invokes `gh` without sourcing planner-produced shell environment text while
+the Actions token is present. It is advisory-only and exits successfully
 when the local planner skips comments for new `covered_clean`, low-confidence,
 unchanged-diff, disabled-advise, or `max_comments_per_pr: 0` cases; when an
 existing marker is present and a later diff is `covered_clean`, it updates that

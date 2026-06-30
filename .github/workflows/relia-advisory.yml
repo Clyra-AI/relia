@@ -21,6 +21,7 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v6.0.2
         with:
+          ref: ${{ github.event.pull_request.base.sha }}
           persist-credentials: false
       - name: Set up Go
         uses: actions/setup-go@v6.3.0
@@ -51,11 +52,15 @@ jobs:
                   return payload
               return []
 
+          trusted_marker_authors = {"github-actions[bot]"}
           comments = flatten_comments(json.loads(Path(".relia/reports/github-comments.json").read_text() or "[]"))
           marker = "<!-- relia-advisory:v1"
           fingerprint = ""
           pattern = re.compile(r"<!--\s*relia-advisory:v1\s+diff_fingerprint=([^ >]+)\s*-->")
           for comment in comments:
+              author = ((comment.get("user") or {}).get("login") or "")
+              if author not in trusted_marker_authors:
+                  continue
               body = comment.get("body") or ""
               if marker not in body:
                   continue
@@ -74,7 +79,35 @@ jobs:
       - name: Build PR advisory
         run: |
           set -euo pipefail
-          go run ./cmd/relia --json advise --input .relia/pr.diff --format json > .relia/reports/advisory-result.json
+          if go run ./cmd/relia --json advise --input .relia/pr.diff --format json > .relia/reports/advisory-result.json; then
+            exit 0
+          fi
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          result_path = Path(".relia/reports/advisory-result.json")
+          try:
+              result = json.loads(result_path.read_text() or "{}")
+          except json.JSONDecodeError:
+              raise SystemExit(1)
+
+          messages = " ".join(str(error.get("message") or "") for error in (result.get("errors") or []))
+          if "unknown command" not in messages and "not implemented" not in messages:
+              raise SystemExit(1)
+
+          result_path.write_text(json.dumps({
+              "object_type": "relia.command_result",
+              "schema_version": "1.0",
+              "command": "advise",
+              "status": "pass",
+              "exit_code": 0,
+              "data": {
+                  "should_comment": False,
+                  "skip_reason": "trusted_base_advisory_unavailable"
+              }
+          }, indent=2, sort_keys=True) + "\n")
+          PY
       - name: Publish one advisory comment
         env:
           GH_TOKEN: ${{ github.token }}
@@ -102,8 +135,12 @@ jobs:
               raise SystemExit(0)
 
           comments = flatten_comments(json.loads(Path(".relia/reports/github-comments.json").read_text() or "[]"))
+          trusted_marker_authors = {"github-actions[bot]"}
           comment_id = ""
           for comment in comments:
+              author = ((comment.get("user") or {}).get("login") or "")
+              if author not in trusted_marker_authors:
+                  continue
               body = comment.get("body") or ""
               if "<!-- relia-advisory:v1" in body:
                   comment_id = str(comment["id"])

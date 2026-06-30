@@ -92,11 +92,33 @@
       ],
       "review_finding": "Repair advisory publish workflow Python syntax",
       "status": "implemented"
+    },
+    {
+      "evidence_refs": [
+        ".github/workflows/relia-advisory.yml",
+        "cmd/relia/main_test.go",
+        "README.md",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md"
+      ],
+      "review_finding": "Run the advisory from trusted base code",
+      "status": "implemented"
+    },
+    {
+      "evidence_refs": [
+        ".github/workflows/relia-advisory.yml",
+        "cmd/relia/main_test.go",
+        "README.md",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md"
+      ],
+      "review_finding": "Authenticate the marker before skipping advisories",
+      "status": "implemented"
     }
   ],
   "schema_version": "1.0",
   "status": "implemented",
-  "summary": "Repaired actionable Codex review and CI feedback by keeping GitHub credentials out of checked-out Relia execution, seeding unchanged-diff advisory state from hidden-marker comments across paginated comment results, honoring advise.max_comments_per_pr: 0, clearing stale advisory comments when a later diff is covered clean, publishing advisory comments without sourcing planner-controlled shell environment text, and keeping the advisory publish Python heredoc parseable.",
+  "summary": "Repaired actionable Codex review and CI feedback by keeping GitHub credentials out of Relia execution, running advisory planning from trusted base-branch code and memory rules, seeding unchanged-diff advisory state only from bot-authored hidden-marker comments across paginated comment results, honoring advise.max_comments_per_pr: 0, clearing stale advisory comments when a later diff is covered clean, publishing advisory comments without sourcing planner-controlled shell environment text, and keeping advisory workflow Python heredocs parseable.",
   "task_id": "T9",
-  "updated_at": "2026-06-30T19:53:38Z"
+  "updated_at": "2026-06-30T20:06:09Z"
 }

@@ -4245,6 +4245,9 @@ func TestAdvisoryWorkflowKeepsTokenOutOfReliaBuildAndSeedsState(t *testing.T) {
 		t.Fatalf("prepare step must own GitHub token for API reads:\n%s", prepareBlock)
 	}
 	checkoutBlock := workflowStepBlock(content, "Check out repository")
+	if !strings.Contains(checkoutBlock, "ref: ${{ github.event.pull_request.base.sha }}") {
+		t.Fatalf("checkout must run trusted base-revision Relia code and rules:\n%s", checkoutBlock)
+	}
 	if !strings.Contains(checkoutBlock, "persist-credentials: false") {
 		t.Fatalf("checkout must not persist the GitHub token for later PR-code execution:\n%s", checkoutBlock)
 	}
@@ -4258,6 +4261,12 @@ func TestAdvisoryWorkflowKeepsTokenOutOfReliaBuildAndSeedsState(t *testing.T) {
 			t.Fatalf("prepare step must paginate and flatten advisory comments; missing %q:\n%s", want, prepareBlock)
 		}
 	}
+	for _, want := range []string{"trusted_marker_authors", "github-actions[bot]", ".get(\"user\")"} {
+		if !strings.Contains(prepareBlock, want) {
+			t.Fatalf("prepare step must trust only bot-authored advisory markers; missing %q:\n%s", want, prepareBlock)
+		}
+	}
+	assertWorkflowPythonHeredocParses(t, prepareBlock, "prepare")
 	buildBlock := workflowStepBlock(content, "Build PR advisory")
 	if strings.Contains(buildBlock, "GH_TOKEN") || strings.Contains(buildBlock, "github.token") {
 		t.Fatalf("build step must run relia without a GitHub write token:\n%s", buildBlock)
@@ -4265,6 +4274,12 @@ func TestAdvisoryWorkflowKeepsTokenOutOfReliaBuildAndSeedsState(t *testing.T) {
 	if !strings.Contains(buildBlock, "go run ./cmd/relia --json advise") {
 		t.Fatalf("build step missing relia advise invocation:\n%s", buildBlock)
 	}
+	for _, want := range []string{"trusted_base_advisory_unavailable", "unknown command"} {
+		if !strings.Contains(buildBlock, want) {
+			t.Fatalf("build step must skip advisory-only publish when trusted base lacks advise; missing %q:\n%s", want, buildBlock)
+		}
+	}
+	assertWorkflowPythonHeredocParses(t, buildBlock, "build")
 	publishBlock := workflowStepBlock(content, "Publish one advisory comment")
 	for _, forbidden := range []string{"advisory-env", ". .relia/reports", "source .relia/reports"} {
 		if strings.Contains(publishBlock, forbidden) {
@@ -4276,14 +4291,24 @@ func TestAdvisoryWorkflowKeepsTokenOutOfReliaBuildAndSeedsState(t *testing.T) {
 			t.Fatalf("publish step must parse advisory JSON and invoke gh without shell; missing %q:\n%s", want, publishBlock)
 		}
 	}
+	for _, want := range []string{"trusted_marker_authors", "github-actions[bot]", ".get(\"user\")"} {
+		if !strings.Contains(publishBlock, want) {
+			t.Fatalf("publish step must update only bot-authored advisory markers; missing %q:\n%s", want, publishBlock)
+		}
+	}
 	if strings.Contains(publishBlock, "\n          else\n") || !strings.Contains(publishBlock, "\n          else:") {
 		t.Fatalf("publish step Python branch must use valid else syntax:\n%s", publishBlock)
 	}
-	publishScript := workflowPythonHeredocForTest(t, publishBlock)
+	assertWorkflowPythonHeredocParses(t, publishBlock, "publish")
+}
+
+func assertWorkflowPythonHeredocParses(t *testing.T, block string, label string) {
+	t.Helper()
+	publishScript := workflowPythonHeredocForTest(t, block)
 	cmd := exec.Command("python3", "-c", "import ast, sys; ast.parse(sys.stdin.read())")
 	cmd.Stdin = strings.NewReader(publishScript)
 	if output, err := cmd.CombinedOutput(); err != nil {
-		t.Fatalf("publish step Python heredoc must parse, err = %v, output = %s\n%s", err, output, publishScript)
+		t.Fatalf("%s step Python heredoc must parse, err = %v, output = %s\n%s", label, err, output, publishScript)
 	}
 }
 

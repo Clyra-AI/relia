@@ -3,7 +3,7 @@
   "schema_version": "1.0",
   "task_id": "T9",
   "status": "pass",
-  "updated_at": "2026-06-30T19:53:38Z",
+  "updated_at": "2026-06-30T20:06:09Z",
   "required_proof_level": "user_visible_behavior",
   "scenarios": [
     {
@@ -23,6 +23,16 @@
     },
     {
       "scenario": "The GitHub advisory workflow seeds local advisory state from an existing hidden-marker comment before running the token-free planner.",
+      "status": "pass",
+      "evidence": "TestAdvisoryWorkflowKeepsTokenOutOfReliaBuildAndSeedsState"
+    },
+    {
+      "scenario": "The GitHub advisory workflow runs trusted base-branch Relia code and memory rules against the PR diff instead of executing PR-controlled planner code.",
+      "status": "pass",
+      "evidence": "TestAdvisoryWorkflowKeepsTokenOutOfReliaBuildAndSeedsState"
+    },
+    {
+      "scenario": "The GitHub advisory workflow authenticates hidden advisory markers by the expected bot author before using a prior fingerprint or updating an existing comment.",
       "status": "pass",
       "evidence": "TestAdvisoryWorkflowKeepsTokenOutOfReliaBuildAndSeedsState"
     },
