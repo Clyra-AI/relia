@@ -7406,6 +7406,15 @@
         ],
         "required_grant": "model_provider_endpoint"
       },
+      "model_route": {
+        "allowed_route_aliases": [
+          "org-model/coding-agent"
+        ],
+        "model_routing_required": true,
+        "role": "worker",
+        "route_class": "execution",
+        "selected_route_alias": "org-model/coding-agent"
+      },
       "objective": "Implement PRD-defined provider, network, API, webhook, and hosted-service integrations behind explicit deterministic and approval boundaries.",
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
       "proof_scorecard_artifact": "proof-of-behavior-scorecard",
