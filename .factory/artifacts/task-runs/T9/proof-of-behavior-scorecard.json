@@ -3,7 +3,7 @@
   "schema_version": "1.0",
   "task_id": "T9",
   "status": "pass",
-  "updated_at": "2026-06-30T20:43:01Z",
+  "updated_at": "2026-06-30T20:50:56Z",
   "required_proof_level": "user_visible_behavior",
   "scenarios": [
     {
@@ -90,6 +90,11 @@
       "scenario": "The advisory planner renders PR-controlled touched paths as safe Markdown code spans before publishing bot comments.",
       "status": "pass",
       "evidence": "TestAdviseEscapesTouchedPathsInAdvisoryComment"
+    },
+    {
+      "scenario": "The local MCP serve manifest exposes playbook citations only for fix_held or merged_clean evidence when a playbook also has failure provenance.",
+      "status": "pass",
+      "evidence": "TestServeFiltersPlaybookCitationsToCleanEvidence"
     }
   ],
   "commands_run": [

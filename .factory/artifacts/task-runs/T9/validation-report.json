@@ -194,6 +194,12 @@
       "evidence": "Eighth focused repair coverage passed for Markdown-safe rendering of PR-controlled advisory paths.",
       "exit_code": 0,
       "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -count=1 -run 'TestAdvise|TestAdvisoryWorkflow|TestCheckRejectsProviderBaseURLUserInfo|TestServe'",
+      "evidence": "Ninth focused repair coverage passed for filtering served playbook citations to clean or held evidence.",
+      "exit_code": 0,
+      "status": "pass"
     }
   ],
   "path_policy_result": {
@@ -226,5 +232,5 @@
   "status": "pass",
   "task_id": "T9",
   "test_first_skipped_reason": "Codex review supplied the failing behavioral evidence for this repair. The repair encoded the review findings as focused regression coverage and then ran the focused Go test and final repository validation.",
-  "updated_at": "2026-06-30T20:43:01Z"
+  "updated_at": "2026-06-30T20:50:56Z"
 }
