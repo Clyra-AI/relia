@@ -264,6 +264,19 @@ T6 adds deterministic offline distillation, review, and memory-page rendering:
   provenance. The renderer separates strong active memory from weak candidate,
   stale, contradicted, and retired memory.
 
+T8 adds report/evidence feedback on top of the local artifact path:
+
+- `relia ingest` and canonical experience consumers reject inputs marked as
+  agent self-reports or reflections before persistence or memory-rule writes.
+- `relia backtest` reports metrics, top repeated mistakes, diagnostics,
+  operator feedback, and badge-ready fields in
+  `schemas/recurrence-report.schema.json` and the command result envelope.
+- Interactive `relia backtest` output renders those same operator-facing
+  details, while non-interactive output remains machine-readable JSON.
+- Generated memory rules record
+  `metadata.memory_source: verified_outcome_events` and the excluded
+  self-report/reflection source classes.
+
 ## Structured Data, Proof, Budgets, And Redaction
 
 - PR, check-run, experience, memory, MCP, assessment, report, and config data

@@ -1,0 +1,185 @@
+{
+  "acceptance_results": [
+    {
+      "acceptance_item_id": "FR1-OUTCOMES-AS-THE-ONLY-MEMORY-SOURCE-001",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T8/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T8/proof-of-behavior-scorecard.json",
+        "cmd/relia/main_test.go"
+      ],
+      "evidence_summary": "Self-report/reflection sources are rejected before ingest persistence and before canonical distill input can write memory rules; generated memory rules disclose verified outcome source metadata.",
+      "status": "implemented"
+    }
+  ],
+  "artifact_type": "validation_report",
+  "baseline_evidence": [
+    {
+      "command": "make lint-fast",
+      "exit_code": 0,
+      "phase": "pre_edit",
+      "status": "pass"
+    },
+    {
+      "command": "make test-fast",
+      "exit_code": 0,
+      "phase": "pre_edit",
+      "status": "pass"
+    }
+  ],
+  "blockers": [],
+  "changed_paths": [
+    ".factory/artifacts/task-runs/T8/proof-of-behavior-scorecard.json",
+    ".factory/artifacts/task-runs/T8/validation-report.json",
+    ".factory/artifacts/task-runs/T8/work-proof-marker.json",
+    "README.md",
+    "cmd/relia/main.go",
+    "cmd/relia/main_test.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/dev/dev_guides.md",
+    "schemas/memory-rule.schema.json",
+    "schemas/recurrence-report.schema.json"
+  ],
+  "changelog_result": {
+    "notes": "No changelog file exists inside the task allowed paths; user-facing behavior was documented in README.md and repo guides per docs_sync_refs.",
+    "status": "not_applicable"
+  },
+  "commands_run": [
+    "make lint-fast",
+    "make test-fast",
+    "make test-fast",
+    "python3 -m json.tool schemas/recurrence-report.schema.json \u003e/tmp/recurrence-report.schema.pretty.json",
+    "python3 -m json.tool schemas/memory-rule.schema.json \u003e/tmp/memory-rule.schema.pretty.json",
+    "make test-contracts",
+    "make prepush-full",
+    "python3 -m json.tool .factory/artifacts/task-runs/T8/work-proof-marker.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T8/validation-report.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T8/proof-of-behavior-scorecard.json",
+    "python3 - \u003c\u003c'PY' (verify worker-owned evidence top-level statuses)"
+  ],
+  "docs_sync_result": {
+    "status": "pass",
+    "updated_refs": [
+      "README.md",
+      "docs/dev/dev_guides.md",
+      "docs/architecture/architecture_guides.md"
+    ]
+  },
+  "evidence_status_checks": [
+    {
+      "blocking": false,
+      "path": ".factory/artifacts/task-runs/T8/work-proof-marker.json",
+      "status": "implemented"
+    },
+    {
+      "blocking": false,
+      "path": ".factory/artifacts/task-runs/T8/validation-report.json",
+      "status": "pass"
+    },
+    {
+      "blocking": false,
+      "path": ".factory/artifacts/task-runs/T8/proof-of-behavior-scorecard.json",
+      "status": "pass"
+    }
+  ],
+  "final_validation_evidence": [
+    {
+      "command": "make prepush-full",
+      "evidence_summary": "go test ./... passed; coverage 80.3% against 75.0% minimum; repo pack and demo contracts passed.",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "python3 -m json.tool schemas/recurrence-report.schema.json \u003e/tmp/recurrence-report.schema.pretty.json",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "python3 -m json.tool schemas/memory-rule.schema.json \u003e/tmp/memory-rule.schema.pretty.json",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "python3 -m json.tool .factory/artifacts/task-runs/T8/work-proof-marker.json \u003e/tmp/work-proof-marker.pretty.json",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "python3 -m json.tool .factory/artifacts/task-runs/T8/validation-report.json \u003e/tmp/validation-report.pretty.json",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "python3 -m json.tool .factory/artifacts/task-runs/T8/proof-of-behavior-scorecard.json \u003e/tmp/proof-scorecard.pretty.json",
+      "exit_code": 0,
+      "status": "pass"
+    }
+  ],
+  "green_evidence": [
+    {
+      "command": "make test-fast",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "make test-contracts",
+      "exit_code": 0,
+      "status": "pass"
+    }
+  ],
+  "lifecycle_evidence_note": {
+    "lifecycle_evidence_required": [
+      "scope_closure_report",
+      "pr_lifecycle_report",
+      "factoryd_run_once_report"
+    ],
+    "notes": "Lifecycle evidence is factoryd-owned and was not authored by this worker.",
+    "status": "not_worker_owned"
+  },
+  "migration_result": {
+    "notes": "Generated recurrence reports now include additional required fields under the same pre-1.0 schema version; no persisted user-authored migration is required.",
+    "status": "pass"
+  },
+  "path_policy_result": {
+    "changed_paths": [
+      ".factory/artifacts/task-runs/T8/proof-of-behavior-scorecard.json",
+      ".factory/artifacts/task-runs/T8/validation-report.json",
+      ".factory/artifacts/task-runs/T8/work-proof-marker.json",
+      "README.md",
+      "cmd/relia/main.go",
+      "cmd/relia/main_test.go",
+      "docs/architecture/architecture_guides.md",
+      "docs/dev/dev_guides.md",
+      "schemas/memory-rule.schema.json",
+      "schemas/recurrence-report.schema.json"
+    ],
+    "forbidden_path_diff": false,
+    "notes": [
+      ".factory/tmp/ appears only as an ignored validation cache produced by make prepush-full; it is not in the worker diff."
+    ],
+    "status": "pass"
+  },
+  "plan_drift_result": {
+    "notes": "Implemented reporting-and-evidence behavior for the T8 acceptance item without changing lifecycle state, PR state, runtime pins, provider posture, or release-slice README badge mutation.",
+    "status": "pass"
+  },
+  "produced_at": "2026-06-30T11:46:42Z",
+  "red_evidence": [
+    {
+      "command": "make test-fast",
+      "evidence_summary": "New T8 tests failed to compile because recurrence report metrics/diagnostics/badge fields and reportDiagnostic did not exist yet.",
+      "exit_code": 2,
+      "phase": "after_red_tests_before_implementation",
+      "status": "expected_fail"
+    }
+  ],
+  "residual_risks": [
+    "README badge file mutation and release/demo product-signal acceptance remain assigned to later lifecycle/release slices; this task only emits badge-ready report data."
+  ],
+  "schema_version": "1.0",
+  "status": "pass",
+  "task_id": "T8",
+  "versioning_result": {
+    "notes": "Pre-1.0 schema evolution; recurrence-report schema and memory-rule metadata documentation were updated in place.",
+    "status": "pass"
+  }
+}

@@ -712,6 +712,46 @@ func TestIngestRejectsExperienceWithoutProvenance(t *testing.T) {
 	}
 }
 
+func TestIngestRejectsAgentSelfReportsBeforePersistence(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	inputPath := filepath.Join(tempDir, "fixtures", "self-report-outcomes.json")
+	writeFileForTest(t, inputPath, `[
+  {
+    "experience_id": "exp_self_report",
+    "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},
+    "recorded_at": "2026-04-04T18:21:00Z",
+    "pr": 144,
+    "commit": "abc9999",
+    "paths": ["packages/billing/invoice.py"],
+    "actor_kind": "agent",
+    "attribution_method": "manual",
+    "outcome_kind": "ci_failure",
+    "terminal_state": "failed",
+    "signature_class": "test_failure",
+    "check_name": "pytest-billing",
+    "signature_key": "tests/test_invoice.py::test_tz_rollover",
+    "extraction_confidence": "structured",
+    "provenance_urls": ["https://github.com/acme/billing-service/pull/144"],
+    "metadata": {"source_kind": "agent_self_report"}
+  }
+]`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+
+	if code != ExitValidation {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "artifact_contract_validation_failed" ||
+		!strings.Contains(result.Errors[0].Message, "self-reports") {
+		t.Fatalf("errors = %#v", result.Errors)
+	}
+	if _, err := os.Stat(filepath.Join(tempDir, ".relia", "experiences", "2026-04.jsonl")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("agent self-report should not be persisted: %v", err)
+	}
+}
+
 func TestIngestInfersAttributionAndUpsertsIdempotently(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
@@ -1296,6 +1336,12 @@ func TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline(t *te
 	if report.ObjectType != "relia.recurrence_report" || report.SchemaVersion != commandSchemaVersion {
 		t.Fatalf("report contract = %#v", report)
 	}
+	if report.Metrics.PRsAnalyzed != 6 || report.Metrics.AgentAttributedPRs != 6 {
+		t.Fatalf("metrics = %#v, want six analyzed and agent-attributed PRs", report.Metrics)
+	}
+	if report.Metrics.AgentFailuresByOutcomeKind["ci_failure"] != 6 {
+		t.Fatalf("agent failure breakdown = %#v", report.Metrics.AgentFailuresByOutcomeKind)
+	}
 	if report.Summary.AgentFailureDenominator != 6 {
 		t.Fatalf("denominator = %d, want 6 total agent-attributed failures including flake-discounted rows", report.Summary.AgentFailureDenominator)
 	}
@@ -1326,10 +1372,38 @@ func TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline(t *te
 	if report.Gate.Enabled || report.Gate.Status != "off" {
 		t.Fatalf("gate = %#v, want off by default", report.Gate)
 	}
+	if len(report.TopRepeatedMistakes) != 1 ||
+		report.TopRepeatedMistakes[0].SignatureID != "sig_time_freeze" ||
+		report.TopRepeatedMistakes[0].RepeatCount != 1 ||
+		!stringSlicesEqual(report.TopRepeatedMistakes[0].ExperienceIDs, []string{"exp_0001", "exp_0002"}) {
+		t.Fatalf("top repeated mistakes = %#v", report.TopRepeatedMistakes)
+	}
+	if report.OperatorFeedback.Summary == "" ||
+		!strings.Contains(report.OperatorFeedback.ConservativeMatchingNote, "confirmed") ||
+		report.OperatorFeedback.NextCommand != "relia distill --format json" {
+		t.Fatalf("operator feedback = %#v", report.OperatorFeedback)
+	}
+	if report.Badge.Label != "Relia" ||
+		report.Badge.Message != "ERR 16.7%" ||
+		report.Badge.Status != "current" ||
+		report.Badge.Stale {
+		t.Fatalf("badge = %#v", report.Badge)
+	}
+	assertReportDiagnosticTypes(t, report.Diagnostics, []string{
+		"memory_source_verified",
+		"possible_recurrences_excluded",
+		"flake_discounts_visible",
+		"stale_baseline",
+	})
 	jsonPath, _ := result.Data["json_report_path"].(string)
 	htmlPath, _ := result.Data["html_report_path"].(string)
 	if jsonPath == "" || htmlPath == "" {
 		t.Fatalf("report artifact paths missing from result data: %#v", result.Data)
+	}
+	if result.Data["report_path"] != htmlPath ||
+		result.Data["error_recurrence_rate"] != report.HeadlineERR ||
+		result.Data["baseline_ref"] != ".relia/baselines/error-recurrence-baseline.json" {
+		t.Fatalf("result data did not expose report metrics and refs: %#v", result.Data)
 	}
 	jsonContent, err := os.ReadFile(filepath.Join(tempDir, filepath.FromSlash(jsonPath)))
 	if err != nil {
@@ -1344,6 +1418,45 @@ func TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline(t *te
 	}
 	if !bytes.Contains(htmlContent, []byte("Possible Recurrences")) {
 		t.Fatalf("html report missing possible recurrence section:\n%s", htmlContent)
+	}
+	if !bytes.Contains(htmlContent, []byte("Top Repeated Mistakes")) ||
+		!bytes.Contains(htmlContent, []byte("Badge: Relia ERR 16.7%")) {
+		t.Fatalf("html report missing operator summary and badge:\n%s", htmlContent)
+	}
+}
+
+func TestBacktestInteractiveOutputShowsOperatorSummaryAndBadge(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	inputPath := filepath.Join(tempDir, "fixtures", "outcomes.jsonl")
+	writeFileForTest(t, inputPath, strings.Join([]string{
+		`{"experience_id":"exp_0001","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-01T10:00:00Z","pr":101,"commit":"abc001","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_time_freeze","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/101"]}`,
+		`{"experience_id":"exp_0002","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-01-10T10:00:00Z","pr":102,"commit":"abc002","paths":["packages/billing/invoice.py"],"actor_kind":"agent","attribution_method":"manual","outcome_kind":"ci_failure","terminal_state":"failed","signature_id":"sig_time_freeze","signature_class":"test_failure","check_name":"pytest-billing","signature_key":"tests/billing/test_invoice.py::test_clock","extraction_confidence":"structured","provenance_urls":["https://github.com/acme/billing-service/pull/102"]}`,
+	}, "\n")+"\n")
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--input", inputPath}, false)
+	if code != ExitSuccess {
+		t.Fatalf("ingest exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+
+	stdout, stderr, code = runForTest(t, []string{"backtest", "--window", "180d"}, true)
+
+	if code != ExitSuccess {
+		t.Fatalf("backtest exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	if json.Valid([]byte(stdout)) {
+		t.Fatalf("interactive backtest output should be human-readable, got JSON: %s", stdout)
+	}
+	for _, want := range []string{
+		"PRs analyzed: 2",
+		"Confirmed recurrences: 1",
+		"Top repeated mistakes:",
+		"Error recurrence rate: 50.0%",
+		"Badge: Relia ERR 50.0%",
+		"Report: .relia/reports/",
+	} {
+		if !strings.Contains(stdout, want) {
+			t.Fatalf("interactive backtest output missing %q:\n%s", want, stdout)
+		}
 	}
 }
 
@@ -2288,6 +2401,13 @@ func TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage(t *testing.
 		avoid.Scalars["metadata.decay.half_life_days"].Value != "90" {
 		t.Fatalf("avoid confidence metadata = %#v", avoid.Scalars)
 	}
+	if avoid.Scalars["metadata.memory_source"].Value != "verified_outcome_events" ||
+		avoid.Scalars["metadata.source_record_type"].Value != "relia.experience_record" {
+		t.Fatalf("avoid memory source metadata = %#v", avoid.Scalars)
+	}
+	if got := yamlScalarValuesForTest(avoid.Lists["metadata.excluded_memory_sources"]); !stringSlicesEqual(got, []string{"agent_self_report", "agent_reflection"}) {
+		t.Fatalf("excluded memory sources = %#v", got)
+	}
 	if !assessmentRuleHasPositivePlaybookEvidence(playbook) {
 		t.Fatalf("playbook rule did not cite held or clean evidence: %#v", playbook.ListMaps["provenance"])
 	}
@@ -2402,6 +2522,35 @@ func TestDistillInputDraftsAvoidRuleFromPlantedRecurrenceCluster(t *testing.T) {
 	}
 	if len(wantCitations) != 0 {
 		t.Fatalf("missing planted recurrence citations: %#v", wantCitations)
+	}
+}
+
+func TestDistillRejectsCanonicalSelfReportBeforeMemoryWrite(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "packages", "billing", "invoice.py"), "def total():\n    return 1\n")
+	inputRel := filepath.ToSlash(filepath.Join("fixtures", "self-report-experience-records.jsonl"))
+	inputPath := filepath.Join(tempDir, filepath.FromSlash(inputRel))
+	writeFileForTest(t, inputPath, strings.Join([]string{
+		`{"object_type":"relia.experience_record","schema_version":"1.0","experience_id":"exp_self_report_001","repo":{"provider":"github","owner":"acme","name":"billing-service"},"recorded_at":"2026-04-01T10:00:00Z","attribution":{"actor_kind":"agent","method":"manual","confidence":1},"context":{"paths":["packages/billing/invoice.py"],"diff_fingerprint":"sha256:canonical-a"},"action":{"pr":521,"commit":"abc521"},"outcome":{"kind":"ci_failure","terminal_state":"failed","signature":{"signature_id":"sig_self_report","extraction_confidence":"structured"}},"provenance":{"urls":["https://github.com/acme/billing-service/pull/521"]},"flake_discount":0,"org_eligible":false,"share_scope":"private","redaction_status":"applied","metadata":{"signature":{"class":"test_failure","check_name":"pytest-billing","key":"tests/billing/test_invoice.py::test_clock","extraction_method":"structured"},"source_kind":"agent_reflection"}}`,
+	}, "\n")+"\n")
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "distill", "--input", inputRel, "--format", "json"}, false)
+
+	if code != ExitValidation {
+		t.Fatalf("distill exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "artifact_contract_validation_failed" ||
+		!strings.Contains(result.Errors[0].Message, "self-reports") {
+		t.Fatalf("errors = %#v", result.Errors)
+	}
+	matches, err := filepath.Glob(filepath.Join(tempDir, "memory", "rules", "*.yaml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(matches) != 0 {
+		t.Fatalf("distill wrote memory rules from an agent self-report: %#v", matches)
 	}
 }
 
@@ -6033,6 +6182,22 @@ func stringSlicesEqual(left []string, right []string) bool {
 		}
 	}
 	return true
+}
+
+func assertReportDiagnosticTypes(t *testing.T, diagnostics []reportDiagnostic, wantTypes []string) {
+	t.Helper()
+	seen := map[string]bool{}
+	for _, diagnostic := range diagnostics {
+		seen[diagnostic.Type] = true
+		if diagnostic.Status == "" || diagnostic.Message == "" || diagnostic.Ref == "" {
+			t.Fatalf("diagnostic missing operator-visible details: %#v", diagnostic)
+		}
+	}
+	for _, want := range wantTypes {
+		if !seen[want] {
+			t.Fatalf("diagnostics missing %q: %#v", want, diagnostics)
+		}
+	}
 }
 
 func loadRuleDocsByScalarForTest(t *testing.T, root string, scalar string) map[string]yamlDocument {

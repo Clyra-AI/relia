@@ -17,9 +17,10 @@ FACTORY_REPO=/path/to/factory factoryd run --config .factory/factoryd.autoship.e
 
 ## CLI Baseline
 
-The T1/T2/T3/T4.3/T5/T6/T7 command surface establishes the lifecycle skeleton,
-configuration contract, assessment fixture slice, recurrence backtest,
-deterministic distillation, and agent-native output contract:
+The T1/T2/T3/T4.3/T5/T6/T7/T8 command surface establishes the lifecycle
+skeleton, configuration contract, assessment fixture slice, recurrence
+backtest, deterministic distillation, reporting evidence, and agent-native
+output contract:
 
 - `relia init` creates `relia.yaml` if it is missing and is idempotent when the
   file already exists. It also creates the repo-native artifact skeleton under
@@ -33,15 +34,19 @@ deterministic distillation, and agent-native output contract:
   redacts and entropy-scans them before persistence, normalizes canonical
   experience records, and upserts monthly shards under `.relia/experiences/`.
   This task slice is offline only; live GitHub intake remains behind future
-  credential and network gates.
+  credential and network gates. Events marked as agent self-reports or
+  reflections fail before persistence.
 - `relia backtest --window 180d` reads local `.relia/experiences/*.jsonl`
   shards, extracts deterministic signatures, pairs confirmed recurrences
   separately from possible recurrences, discounts flakes, and writes JSON plus
   HTML reports under `.relia/reports/`. Possible recurrences and discounted
   flakes are excluded from the headline ERR. A saved ERR baseline under
   `.relia/baselines/error-recurrence-baseline.json` is compared when present
-  and labeled stale when the source artifact digest differs. The recurrence
-  gate is available through `relia.yaml` but remains off by default.
+  and labeled stale when the source artifact digest differs. The report and
+  command result expose operator-ready metrics, top repeated mistakes,
+  diagnostics, feedback text, and badge-ready fields generated from the JSON
+  command result. The recurrence gate is available through `relia.yaml` but
+  remains off by default.
 - `relia distill --format json` reads local redacted experience shards, or
   `relia distill --input <json-or-jsonl> --format json` reads one local
   redacted outcome file without persisting shards. It clusters canonical
@@ -54,7 +59,10 @@ deterministic distillation, and agent-native output contract:
   `llm_drafted` rules must carry their confidence-input and decay metadata. With
   the default `distill.review_required: true`, drafted rules are not active
   until reviewed; setting it to `false` is surfaced but does not auto-accept
-  drafts in the MVP.
+  drafts in the MVP. Generated rules disclose
+  `metadata.memory_source: verified_outcome_events`; canonical inputs marked
+  as agent self-reports or reflections are rejected before rule files are
+  written.
   Deleted scoped paths produce `stale` rules, and contradictory clean or held
   evidence produces `contradicted` rules.
 - `relia models pull --model-id ... --version ... --source-url ... --license
@@ -78,6 +86,9 @@ deterministic distillation, and agent-native output contract:
   `no_coverage`.
 - `--json` always emits the stable command result envelope.
 - piped or non-interactive stdout defaults to JSON.
+- interactive `relia backtest` output prints the operator summary, top repeated
+  mistakes, report path, diagnostics, and badge text; the same data remains in
+  the JSON envelope for automation.
 - `--quiet` and `--compact` emit compact JSON while preserving status,
   evidence refs, typed errors, and exit codes.
 

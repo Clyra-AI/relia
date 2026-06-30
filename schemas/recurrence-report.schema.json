@@ -12,14 +12,19 @@
     "source_artifacts",
     "window",
     "summary",
+    "metrics",
     "headline_err",
     "confirmed_recurrences",
     "possible_recurrences",
+    "top_repeated_mistakes",
     "flake_discounts",
     "attribution_uncertain",
     "baseline",
     "gate",
     "citations",
+    "diagnostics",
+    "operator_feedback",
+    "badge",
     "metadata"
   ],
   "properties": {
@@ -46,6 +51,9 @@
     "summary": {
       "$ref": "#/$defs/summary"
     },
+    "metrics": {
+      "$ref": "#/$defs/metrics"
+    },
     "headline_err": {
       "type": "number",
       "minimum": 0,
@@ -61,6 +69,12 @@
       "type": "array",
       "items": {
         "$ref": "#/$defs/recurrence_pair"
+      }
+    },
+    "top_repeated_mistakes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/top_repeated_mistake"
       }
     },
     "flake_discounts": {
@@ -86,6 +100,18 @@
       "items": {
         "$ref": "#/$defs/citation"
       }
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/diagnostic"
+      }
+    },
+    "operator_feedback": {
+      "$ref": "#/$defs/operator_feedback"
+    },
+    "badge": {
+      "$ref": "#/$defs/badge"
     },
     "metadata": {
       "type": "object",
@@ -171,6 +197,58 @@
         }
       }
     },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "prs_analyzed",
+        "agent_attributed_prs",
+        "agent_failures_by_outcome_kind",
+        "error_recurrence_rate",
+        "confirmed_recurrences",
+        "possible_recurrences",
+        "flake_discounted_count",
+        "attribution_uncertain_count"
+      ],
+      "properties": {
+        "prs_analyzed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "agent_attributed_prs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "agent_failures_by_outcome_kind": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "error_recurrence_rate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "confirmed_recurrences": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "possible_recurrences": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "flake_discounted_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "attribution_uncertain_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
     "recurrence_pair": {
       "type": "object",
       "additionalProperties": false,
@@ -219,6 +297,60 @@
         "reason": {
           "type": "string",
           "minLength": 1
+        },
+        "refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "top_repeated_mistake": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rank",
+        "signature_id",
+        "repeat_count",
+        "prs",
+        "urls",
+        "experience_ids",
+        "refs"
+      ],
+      "properties": {
+        "rank": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "signature_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "repeat_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "prs": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "urls": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "experience_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
         },
         "refs": {
           "type": "array",
@@ -324,6 +456,80 @@
           "minLength": 1
         },
         "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "diagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "status", "message", "ref"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": ["pass", "info", "warn", "fail"]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "operator_feedback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary", "conservative_matching_note", "next_command"],
+      "properties": {
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "conservative_matching_note": {
+          "type": "string",
+          "minLength": 1
+        },
+        "next_command": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "badge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label", "message", "status", "stale", "color", "reason", "source_report_id"],
+      "properties": {
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": ["current", "stale"]
+        },
+        "stale": {
+          "type": "boolean"
+        },
+        "color": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_report_id": {
           "type": "string",
           "minLength": 1
         }
