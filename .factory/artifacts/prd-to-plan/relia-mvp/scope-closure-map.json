@@ -516,30 +516,43 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "FR1-OUTCOMES-AS-THE-ONLY-MEMORY-SOURCE-001",
-          "evidence_refs": [],
+          "evidence_refs": [
+            ".factory/artifacts/task-runs/T8/work-proof-marker.json",
+            ".factory/artifacts/task-runs/T8/proof-of-behavior-scorecard.json",
+            "cmd/relia/main_test.go",
+            ".factory/artifacts/task-runs/T8/validation-report.json",
+            ".factory/artifacts/task-runs/T8/scope-closure-map.json",
+            ".factory/artifacts/task-runs/T8/scope-closure-report.json",
+            "https://github.com/Clyra-AI/relia/pull/54",
+            "refs/remotes/origin/main@a90fb416c2d0756935baa567525f6a59553bd34c"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "reporting-and-evidence"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T8/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T8/validation-report.json",
+        ".factory/artifacts/task-runs/T8/work-proof-marker.json"
+      ],
       "group_id": "fr1-outcomes-as-the-only-memory-source",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T8"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence.",
         "Sprint 4 remapped this item to smaller task slices or bounded learning-loop follow-up evidence.",
         "Sprint 4 optional post-MVP learning tasks are excluded from MVP closure blockers."
       ],
-      "remaining_task_refs": [
-        "T8"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "Memory writes must originate from verified outcome events. Agent self-reports and reflections must not enter memory in the MVP.",
       "scope_item_id": "FR1-OUTCOMES-AS-THE-ONLY-MEMORY-SOURCE-001",
       "source_ref": "docs/product/prd.md#fr1-outcomes-as-the-only-memory-source",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T8"
       ]
@@ -942,7 +955,7 @@
     },
     {
       "acceptance_criteria": [
-        "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence \u2014 never from the drafting model."
+        "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence — never from the drafting model."
       ],
       "acceptance_item_ids": [
         "FR11-CALIBRATED-CONFIDENCE-001"
@@ -989,7 +1002,7 @@
       ],
       "remaining_task_refs": [],
       "requires_human_approval": false,
-      "scope_item": "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence \u2014 never from the drafting model.",
+      "scope_item": "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence — never from the drafting model.",
       "scope_item_id": "FR11-CALIBRATED-CONFIDENCE-001",
       "source_ref": "docs/product/prd.md#fr11-calibrated-confidence",
       "status": "implemented",
@@ -5936,7 +5949,7 @@
       ]
     }
   ],
-  "last_updated_at": "2026-06-29T18:09:40Z",
+  "last_updated_at": "2026-06-30T14:55:49Z",
   "schema_version": "0.1",
   "source_prd_ref": "docs/product/prd.md"
 }
