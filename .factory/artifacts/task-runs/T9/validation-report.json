@@ -188,6 +188,12 @@
       "evidence": "Seventh focused repair coverage passed for provider base URL user-info rejection and covered-clean clearing before unchanged-diff skips.",
       "exit_code": 0,
       "status": "pass"
+    },
+    {
+      "command": "go test ./cmd/relia -count=1 -run 'TestAdvise|TestAdvisoryWorkflow|TestCheckRejectsProviderBaseURLUserInfo'",
+      "evidence": "Eighth focused repair coverage passed for Markdown-safe rendering of PR-controlled advisory paths.",
+      "exit_code": 0,
+      "status": "pass"
     }
   ],
   "path_policy_result": {
@@ -220,5 +226,5 @@
   "status": "pass",
   "task_id": "T9",
   "test_first_skipped_reason": "Codex review supplied the failing behavioral evidence for this repair. The repair encoded the review findings as focused regression coverage and then ran the focused Go test and final repository validation.",
-  "updated_at": "2026-06-30T20:28:26Z"
+  "updated_at": "2026-06-30T20:43:01Z"
 }

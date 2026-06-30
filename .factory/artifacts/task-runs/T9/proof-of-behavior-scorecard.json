@@ -3,7 +3,7 @@
   "schema_version": "1.0",
   "task_id": "T9",
   "status": "pass",
-  "updated_at": "2026-06-30T20:28:26Z",
+  "updated_at": "2026-06-30T20:43:01Z",
   "required_proof_level": "user_visible_behavior",
   "scenarios": [
     {
@@ -85,6 +85,11 @@
       "scenario": "The advisory planner clears a stale warning when the same diff fingerprint is now covered clean, then records risk_level=covered_clean so subsequent unchanged runs skip.",
       "status": "pass",
       "evidence": "TestAdviseClearsExistingAdvisoryForCoveredCleanAssessment"
+    },
+    {
+      "scenario": "The advisory planner renders PR-controlled touched paths as safe Markdown code spans before publishing bot comments.",
+      "status": "pass",
+      "evidence": "TestAdviseEscapesTouchedPathsInAdvisoryComment"
     }
   ],
   "commands_run": [
