@@ -27,13 +27,25 @@
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#fr1-outcomes-as-the-only-memory-source",
       "source_text": "Memory writes must originate from verified outcome events. Agent self-reports and reflections must not enter memory in the MVP.",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T8"
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/10/validation_commands"
-      ]
+      ],
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T8/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T8/proof-of-behavior-scorecard.json",
+        "cmd/relia/main_test.go",
+        ".factory/artifacts/task-runs/T8/validation-report.json",
+        ".factory/artifacts/task-runs/T8/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T8/scope-closure-report.json",
+        "https://github.com/Clyra-AI/relia/pull/54",
+        "refs/remotes/origin/main@a90fb416c2d0756935baa567525f6a59553bd34c"
+      ],
+      "recorded_by": "factoryd sync-task-closure",
+      "recorded_at": "2026-06-30T14:55:49Z"
     },
     {
       "acceptance_item_id": "FR2-REPO-NATIVE-LOCAL-FIRST-OPERATION-001",
@@ -3043,7 +3055,7 @@
       ]
     }
   ],
-  "last_updated_at": "2026-06-29T18:09:40Z",
+  "last_updated_at": "2026-06-30T14:55:49Z",
   "schema_version": "1.0",
   "source_prd_ref": "docs/product/prd.md",
   "source_ref": "docs/product/prd.md"

@@ -1,0 +1,25 @@
+{
+  "acceptance_results": [
+    {
+      "acceptance_item_id": "FR1-OUTCOMES-AS-THE-ONLY-MEMORY-SOURCE-001",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T8/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T8/proof-of-behavior-scorecard.json",
+        "cmd/relia/main_test.go",
+        ".factory/artifacts/task-runs/T8/validation-report.json",
+        ".factory/artifacts/task-runs/T8/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T8/scope-closure-report.json",
+        "https://github.com/Clyra-AI/relia/pull/54",
+        "refs/remotes/origin/main@a90fb416c2d0756935baa567525f6a59553bd34c"
+      ],
+      "status": "implemented",
+      "summary": ""
+    }
+  ],
+  "artifact_type": "task_scope_closure_map",
+  "canonical_scope_closure_map_modified": false,
+  "canonical_scope_closure_map_ref": ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+  "schema_version": "1.0",
+  "task_id": "T8",
+  "work_item_id": "relia-mvp-t8"
+}
