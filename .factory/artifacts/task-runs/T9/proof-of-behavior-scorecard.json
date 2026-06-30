@@ -3,7 +3,7 @@
   "schema_version": "1.0",
   "task_id": "T9",
   "status": "pass",
-  "updated_at": "2026-06-30T21:12:39Z",
+  "updated_at": "2026-06-30T21:21:24Z",
   "required_proof_level": "user_visible_behavior",
   "scenarios": [
     {
@@ -110,6 +110,11 @@
       "scenario": "The advisory planner clears an existing high-confidence advisory marker when the current diff falls below advise.min_confidence, then skips the already-cleared same diff.",
       "status": "pass",
       "evidence": "TestAdviseClearsExistingAdvisoryWhenConfidenceDropsBelowMinimum"
+    },
+    {
+      "scenario": "The advisory planner republishes a warning for an unchanged diff when the prior published marker was clear but current trusted rules classify the same diff as warning-worthy.",
+      "status": "pass",
+      "evidence": "TestAdviseRewarnsUnchangedDiffWhenPriorMarkerWasClear"
     }
   ],
   "commands_run": [
