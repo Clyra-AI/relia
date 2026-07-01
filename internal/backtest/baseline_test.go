@@ -81,6 +81,11 @@ func TestCompareBaselineJSONRejectsInvalidPayload(t *testing.T) {
 		t.Fatalf("invalid JSON error = %v, want ErrInvalidBaselineJSON", err)
 	}
 
+	_, err = CompareBaselineJSON([]byte(`{"headline_err": 0.25}{}`), ".relia/baselines/error-recurrence-baseline.json", 0.5, "sha256:baseline", window)
+	if !errors.Is(err, ErrInvalidBaselineJSON) {
+		t.Fatalf("trailing JSON error = %v, want ErrInvalidBaselineJSON", err)
+	}
+
 	_, err = CompareBaselineJSON([]byte(`{"headline_err": 2}`), ".relia/baselines/error-recurrence-baseline.json", 0.5, "sha256:baseline", window)
 	if !errors.Is(err, ErrInvalidBaselineHeadlineERR) {
 		t.Fatalf("invalid headline error = %v, want ErrInvalidBaselineHeadlineERR", err)
