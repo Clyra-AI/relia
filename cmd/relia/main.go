@@ -17,6 +17,7 @@ import (
 	"strings"
 	"time"
 
+	advisedoc "github.com/Clyra-AI/relia/internal/advise"
 	assessdoc "github.com/Clyra-AI/relia/internal/assess"
 	configdoc "github.com/Clyra-AI/relia/internal/config"
 	"github.com/Clyra-AI/relia/internal/diffparse"
@@ -2885,16 +2886,16 @@ func adviseResult(args []string, start time.Time) CommandResult {
 	if commandErr != nil {
 		return withFormat(errorResult("advise", "advise", commandErr, start))
 	}
-	shouldComment, skipReason := advisoryCommentDecision(settings, assessment, diffFingerprint, previousState, start)
+	shouldComment, skipReason := advisedoc.CommentDecision(settings, assessment, diffFingerprint, previousState, start)
 	body := ""
 	if shouldComment {
-		body = renderAdvisoryComment(assessment, touchedPaths, diffFingerprint, start, skipReason)
+		body = advisedoc.RenderComment(assessment, touchedPaths, diffFingerprint, start, skipReason)
 		if commandErr := writeRepoRelativeFile(root, options.CommentPath, []byte(body), "advisory comment"); commandErr != nil {
 			return withFormat(errorResult("advise", "advise", commandErr, start))
 		}
 	}
 	generatedAt := start.UTC().Format(time.RFC3339)
-	publishedRiskLevel := advisoryPublishedRiskLevel(assessment, skipReason)
+	publishedRiskLevel := advisedoc.PublishedRiskLevel(assessment, skipReason)
 	stateDiffFingerprint := diffFingerprint
 	stateGeneratedAt := generatedAt
 	stateMetadata := map[string]any{
@@ -2922,7 +2923,7 @@ func adviseResult(args []string, start time.Time) CommandResult {
 		"should_comment":            shouldComment,
 		"skip_reason":               skipReason,
 		"assessment":                assessment,
-		"comment_strategy":          advisoryCommentStrategy(settings),
+		"comment_strategy":          advisedoc.CommentStrategy(settings),
 		"comment_marker":            "relia-advisory:v1",
 		"metadata":                  stateMetadata,
 	}
@@ -2945,7 +2946,7 @@ func adviseResult(args []string, start time.Time) CommandResult {
 		"skip_reason":        skipReason,
 		"comment_path":       options.CommentPath,
 		"state_path":         options.StatePath,
-		"comment_strategy":   advisoryCommentStrategy(settings),
+		"comment_strategy":   advisedoc.CommentStrategy(settings),
 	})
 	result.Warnings = append(result.Warnings, warnings...)
 	result.EvidenceRefs = append(result.EvidenceRefs,
@@ -3025,12 +3026,7 @@ func parseAdviseArgs(args []string) (adviseOptions, *CommandError) {
 	return options, nil
 }
 
-type advisoryPriorState struct {
-	DiffFingerprint string
-	GeneratedAt     time.Time
-	RiskLevel       string
-	SkipReason      string
-}
+type advisoryPriorState = advisedoc.PriorState
 
 func advisoryPreviousState(root string, statePath string) (advisoryPriorState, *CommandError) {
 	clean, ok := cleanRepoPath(statePath)
@@ -3066,190 +3062,6 @@ func advisoryPreviousState(root string, statePath string) (advisoryPriorState, *
 		}
 	}
 	return prior, nil
-}
-
-func advisoryCommentDecision(settings adviseSettings, assessment riskAssessment, diffFingerprint string, previousState advisoryPriorState, now time.Time) (bool, string) {
-	if !settings.Enabled {
-		return false, "advise_disabled"
-	}
-	if settings.MaxCommentsPerPR == 0 {
-		return false, "comment_cap_zero"
-	}
-	previousFingerprint := previousState.DiffFingerprint
-	if assessment.RiskLevel == "covered_clean" {
-		if previousFingerprint != "" {
-			if previousFingerprint == diffFingerprint && previousState.RiskLevel == "covered_clean" {
-				return false, "unchanged_diff_fingerprint"
-			}
-			return true, ""
-		}
-		return false, "covered_clean"
-	}
-	if advisoryBelowMinConfidence(settings, assessment) {
-		if previousFingerprint != "" {
-			if previousFingerprint == diffFingerprint && previousState.RiskLevel == "below_min_confidence" {
-				return false, "unchanged_diff_fingerprint"
-			}
-			return true, "below_min_confidence"
-		}
-		return false, "below_min_confidence"
-	}
-	if previousFingerprint != "" && previousFingerprint == diffFingerprint {
-		currentRiskLevel := advisoryPublishedRiskLevel(assessment, "")
-		if previousState.RiskLevel == "" || previousState.RiskLevel == currentRiskLevel {
-			return false, "unchanged_diff_fingerprint"
-		}
-	}
-	if previousFingerprint != "" && settings.ReassessDebounceMinutes > 0 && !previousState.GeneratedAt.IsZero() {
-		debounceWindow := time.Duration(settings.ReassessDebounceMinutes) * time.Minute
-		if now.Sub(previousState.GeneratedAt) < debounceWindow {
-			return false, "reassess_debounce_window"
-		}
-	}
-	return true, ""
-}
-
-func advisoryBelowMinConfidence(settings adviseSettings, assessment riskAssessment) bool {
-	return assessment.RiskLevel != "no_coverage" &&
-		assessment.RiskLevel != "covered_clean" &&
-		advisoryRiskConfidence(assessment) < settings.MinConfidence
-}
-
-func advisoryRiskConfidence(assessment riskAssessment) float64 {
-	if value, ok := assessment.Metadata["max_avoid_confidence"].(float64); ok {
-		return value
-	}
-	return advisoryMaxConfidence(assessment)
-}
-
-func advisoryMaxConfidence(assessment riskAssessment) float64 {
-	maxConfidence := 0.0
-	for _, match := range assessment.Matches {
-		if match.Confidence > maxConfidence {
-			maxConfidence = match.Confidence
-		}
-	}
-	return maxConfidence
-}
-
-func advisoryCommentStrategy(settings adviseSettings) map[string]any {
-	return map[string]any{
-		"max_comments_per_pr":         settings.MaxCommentsPerPR,
-		"update_in_place":             settings.UpdateInPlace,
-		"reassess_debounce_minutes":   settings.ReassessDebounceMinutes,
-		"min_confidence":              settings.MinConfidence,
-		"comment_marker":              "relia-advisory:v1",
-		"unchanged_diff_skip_enabled": true,
-	}
-}
-
-func advisoryPublishedRiskLevel(assessment riskAssessment, skipReason string) string {
-	if skipReason == "below_min_confidence" {
-		return "below_min_confidence"
-	}
-	return assessment.RiskLevel
-}
-
-func renderAdvisoryComment(assessment riskAssessment, touchedPaths []string, diffFingerprint string, generatedAt time.Time, skipReason string) string {
-	var builder strings.Builder
-	builder.WriteString("<!-- relia-advisory:v1 diff_fingerprint=" + diffFingerprint + " generated_at=" + generatedAt.UTC().Format(time.RFC3339) + " risk_level=" + advisoryPublishedRiskLevel(assessment, skipReason) + " -->\n")
-	if skipReason == "below_min_confidence" {
-		builder.WriteString("Relia advisory - current diff is below the advisory confidence threshold. Prior advisory cleared.")
-		if len(assessment.Matches) > 0 {
-			builder.WriteString(" Matched ")
-			for index, match := range assessment.Matches {
-				if index > 0 {
-					builder.WriteString(", ")
-				}
-				builder.WriteString("`" + match.RuleID + "`")
-				builder.WriteString(" (confidence " + yamlFloat(match.Confidence) + ")")
-			}
-		}
-		builder.WriteString(".\n")
-		return builder.String()
-	}
-	switch assessment.RiskLevel {
-	case "no_coverage":
-		builder.WriteString("Relia advisory - no prior active memory covers ")
-		builder.WriteString(markdownInlineList(touchedPaths, 3))
-		builder.WriteString(". Suggest closer review.\n")
-	case "covered_clean":
-		builder.WriteString("Relia advisory - current diff is covered by active memory. Prior advisory cleared.")
-		if len(assessment.Matches) > 0 {
-			builder.WriteString(" Matched ")
-			for index, match := range assessment.Matches {
-				if index > 0 {
-					builder.WriteString(", ")
-				}
-				builder.WriteString("`" + match.RuleID + "`")
-				builder.WriteString(" (confidence " + yamlFloat(match.Confidence) + ")")
-			}
-		}
-		if len(assessment.Citations) > 0 {
-			builder.WriteString(". Evidence: ")
-			for index, citation := range assessment.Citations {
-				if index > 0 {
-					builder.WriteString(", ")
-				}
-				builder.WriteString(citation)
-			}
-		}
-		builder.WriteString(".\n")
-	default:
-		builder.WriteString("Relia advisory - this change matches ")
-		for index, match := range assessment.Matches {
-			if index > 0 {
-				builder.WriteString(", ")
-			}
-			builder.WriteString("`" + match.RuleID + "`")
-			builder.WriteString(" (confidence " + yamlFloat(match.Confidence) + ")")
-		}
-		if len(assessment.Citations) > 0 {
-			builder.WriteString(". Evidence: ")
-			for index, citation := range assessment.Citations {
-				if index > 0 {
-					builder.WriteString(", ")
-				}
-				builder.WriteString(citation)
-			}
-		}
-		builder.WriteString(".\n")
-	}
-	return builder.String()
-}
-
-func markdownInlineList(values []string, limit int) string {
-	if len(values) == 0 {
-		return markdownCodeSpan("this change")
-	}
-	if limit > 0 && len(values) > limit {
-		values = values[:limit]
-	}
-	parts := make([]string, 0, len(values))
-	for _, value := range values {
-		parts = append(parts, markdownCodeSpan(value))
-	}
-	return strings.Join(parts, ", ")
-}
-
-func markdownCodeSpan(value string) string {
-	cleaned := strings.Map(func(r rune) rune {
-		if r == '\n' || r == '\r' || r == '\t' || r < 0x20 || r == 0x7f {
-			return ' '
-		}
-		return r
-	}, value)
-	if cleaned == "" {
-		cleaned = " "
-	}
-	delimiter := "`"
-	for strings.Contains(cleaned, delimiter) {
-		delimiter += "`"
-	}
-	if strings.Contains(cleaned, "`") || strings.HasPrefix(cleaned, " ") || strings.HasSuffix(cleaned, " ") {
-		return delimiter + " " + cleaned + " " + delimiter
-	}
-	return delimiter + cleaned + delimiter
 }
 
 func writeRepoRelativeFile(root string, rel string, content []byte, label string) *CommandError {
