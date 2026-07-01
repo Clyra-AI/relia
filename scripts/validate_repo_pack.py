@@ -106,6 +106,17 @@ ARCHITECTURE_BUDGET_EXCEPTION_LINE_CEILINGS = {
     "cmd/relia/main_test.go": 7786,
 }
 EXPECTED_ARCHITECTURE_BUDGET_EXTENSIONS = [".go", ".py", ".ts", ".tsx", ".js", ".jsx"]
+EXPECTED_ARCHITECTURE_BUDGET_EXCLUDED_DIRS = [
+    ".git",
+    ".factoryd",
+    ".factory/tmp",
+    ".venv",
+    "__pycache__",
+    "build",
+    "dist",
+    "node_modules",
+    "vendor",
+]
 
 def fail(message):
     print(message, file=sys.stderr)
@@ -305,9 +316,8 @@ def validate_architecture_budget_policy(repo, label):
     if sorted(extensions or []) != sorted(EXPECTED_ARCHITECTURE_BUDGET_EXTENSIONS):
         fail(f"{label}.architecture_budget.source_extensions must be {EXPECTED_ARCHITECTURE_BUDGET_EXTENSIONS!r}")
     excluded = budget.get("excluded_dirs")
-    for expected in [".git", ".factoryd", ".factory/tmp", "node_modules", "vendor", "dist"]:
-        if not isinstance(excluded, list) or expected not in excluded:
-            fail(f"{label}.architecture_budget.excluded_dirs must include {expected}")
+    if sorted(excluded or []) != sorted(EXPECTED_ARCHITECTURE_BUDGET_EXCLUDED_DIRS):
+        fail(f"{label}.architecture_budget.excluded_dirs must be {EXPECTED_ARCHITECTURE_BUDGET_EXCLUDED_DIRS!r}")
     exception_refs = budget.get("exception_refs")
     if sorted(exception_refs or []) != sorted(ARCHITECTURE_BUDGET_EXCEPTION_REFS):
         fail(f"{label}.architecture_budget.exception_refs must be {ARCHITECTURE_BUDGET_EXCEPTION_REFS!r}")
