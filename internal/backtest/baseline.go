@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"io"
 	"math"
 	"strconv"
 	"strings"
@@ -19,6 +20,10 @@ func CompareBaselineJSON(content []byte, path string, headlineERR float64, sourc
 	decoder := json.NewDecoder(bytes.NewReader(content))
 	decoder.UseNumber()
 	if err := decoder.Decode(&payload); err != nil {
+		return BaselineComparison{}, ErrInvalidBaselineJSON
+	}
+	var trailing any
+	if err := decoder.Decode(&trailing); err != io.EOF {
 		return BaselineComparison{}, ErrInvalidBaselineJSON
 	}
 	return CompareBaselinePayload(payload, path, headlineERR, sourceDigest, window)
