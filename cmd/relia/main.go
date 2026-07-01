@@ -1009,7 +1009,7 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 		return recurrenceReport{}, commandErr
 	}
 	gate := backtestGate(config, summary.HeadlineERR)
-	repoID := recurrenceReportRepoID(windowRecords)
+	repoID := backtestdoc.ReportRepoID(windowRecords)
 	metadata := map[string]any{
 		"repo_id":                                repoID,
 		"window_days":                            windowDays,
@@ -1023,7 +1023,7 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 		"repo_relative_paths_only":               true,
 		"baseline_gate_enabled_default":          false,
 	}
-	if lastIngestAt, mergedSinceIngest, hasLastIngestAt, hasMergedSinceIngest := reportIngestFreshnessMetadata(records); hasLastIngestAt {
+	if lastIngestAt, mergedSinceIngest, hasLastIngestAt, hasMergedSinceIngest := backtestdoc.ReportIngestFreshnessMetadata(records); hasLastIngestAt {
 		metadata[badgeMetadataLastIngest] = lastIngestAt.Format(time.RFC3339)
 		if hasMergedSinceIngest {
 			metadata[badgeMetadataMergedPRs] = mergedSinceIngest
@@ -1059,94 +1059,6 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 	}, "\x00"))
 	report.Badge = backtestdoc.BuildReportBadge(report)
 	return report, nil
-}
-
-func recurrenceReportRepoID(records []backtestExperience) string {
-	if len(records) == 0 {
-		return ""
-	}
-	repo := records[0].Record.Repo
-	if repo.Owner == "" || repo.Name == "" {
-		return ""
-	}
-	return repo.Owner + "/" + repo.Name
-}
-
-func reportIngestFreshnessMetadata(records []backtestExperience) (time.Time, int, bool, bool) {
-	var latestIngestAt time.Time
-	mergedSinceIngest := 0
-	hasLastIngestAt := false
-	hasMergedSinceIngest := false
-	for _, record := range records {
-		ingestedAt, ok := metadataTime(record.Record.Metadata, badgeMetadataLastIngest)
-		if !ok {
-			continue
-		}
-		if !hasLastIngestAt || ingestedAt.After(latestIngestAt) {
-			latestIngestAt = ingestedAt
-			mergedSinceIngest = 0
-			hasLastIngestAt = true
-			hasMergedSinceIngest = false
-		}
-		if !ingestedAt.Equal(latestIngestAt) {
-			continue
-		}
-		if value, ok := metadataInt(record.Record.Metadata, badgeMetadataMergedPRs); ok {
-			if !hasMergedSinceIngest || value > mergedSinceIngest {
-				mergedSinceIngest = value
-			}
-			hasMergedSinceIngest = true
-		}
-	}
-	return latestIngestAt, mergedSinceIngest, hasLastIngestAt, hasMergedSinceIngest
-}
-
-func metadataInt(metadata map[string]any, key string) (int, bool) {
-	value, ok := metadata[key]
-	if !ok {
-		return 0, false
-	}
-	switch typed := value.(type) {
-	case int:
-		if typed < 0 {
-			return 0, false
-		}
-		return typed, true
-	case int64:
-		if typed < 0 {
-			return 0, false
-		}
-		return int64ToInt(typed)
-	case float64:
-		if math.IsNaN(typed) || math.IsInf(typed, 0) || typed < 0 || typed != math.Trunc(typed) {
-			return 0, false
-		}
-		return int64ToInt(int64(typed))
-	case json.Number:
-		number, err := typed.Int64()
-		if err != nil || number < 0 {
-			return 0, false
-		}
-		return int64ToInt(number)
-	default:
-		return 0, false
-	}
-}
-
-func metadataTime(metadata map[string]any, key string) (time.Time, bool) {
-	value, ok := metadata[key]
-	if !ok {
-		return time.Time{}, false
-	}
-	text := strings.TrimSpace(stringFromAny(value))
-	if text == "" {
-		return time.Time{}, false
-	}
-	parsed, err := time.Parse(time.RFC3339, text)
-	if err != nil {
-		return time.Time{}, false
-	}
-	return parsed.UTC(), true
 }
 
 func isFailureOutcome(kind string) bool {

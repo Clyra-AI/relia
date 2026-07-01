@@ -4,7 +4,89 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	ingestdoc "github.com/Clyra-AI/relia/internal/ingest"
 )
+
+func TestReportRepoIDUsesFirstCompleteRepo(t *testing.T) {
+	id := ReportRepoID([]Experience{
+		{Record: ingestdoc.Record{Repo: ingestdoc.Repo{Owner: "acme", Name: "billing"}}},
+	})
+
+	if id != "acme/billing" {
+		t.Fatalf("repo id = %q, want acme/billing", id)
+	}
+	if id := ReportRepoID(nil); id != "" {
+		t.Fatalf("empty repo id = %q, want empty", id)
+	}
+	if id := ReportRepoID([]Experience{{Record: ingestdoc.Record{Repo: ingestdoc.Repo{Owner: "acme"}}}}); id != "" {
+		t.Fatalf("incomplete repo id = %q, want empty", id)
+	}
+}
+
+func TestReportIngestFreshnessMetadataUsesLatestIngestAndMaxMergedPRs(t *testing.T) {
+	records := []Experience{
+		{Record: ingestdoc.Record{Metadata: map[string]any{
+			"last_ingest_at":               "2026-06-01T00:00:00Z",
+			"merged_prs_since_last_ingest": 7,
+		}}},
+		{Record: ingestdoc.Record{Metadata: map[string]any{
+			"last_ingest_at":               "2026-06-20T00:00:00Z",
+			"merged_prs_since_last_ingest": 3,
+		}}},
+		{Record: ingestdoc.Record{Metadata: map[string]any{
+			"last_ingest_at":               "2026-06-20T00:00:00Z",
+			"merged_prs_since_last_ingest": 5,
+		}}},
+	}
+
+	ingestedAt, mergedSinceIngest, hasIngest, hasMerged := ReportIngestFreshnessMetadata(records)
+
+	if !hasIngest || !hasMerged {
+		t.Fatalf("freshness presence = ingest:%v merged:%v, want both", hasIngest, hasMerged)
+	}
+	if ingestedAt.Format(time.RFC3339) != "2026-06-20T00:00:00Z" {
+		t.Fatalf("ingestedAt = %s, want latest timestamp", ingestedAt.Format(time.RFC3339))
+	}
+	if mergedSinceIngest != 5 {
+		t.Fatalf("mergedSinceIngest = %d, want max for latest timestamp", mergedSinceIngest)
+	}
+}
+
+func TestReportIngestFreshnessMetadataReportsMissingMergedCount(t *testing.T) {
+	records := []Experience{
+		{Record: ingestdoc.Record{Metadata: map[string]any{
+			"last_ingest_at": "2026-06-20T00:00:00Z",
+		}}},
+	}
+
+	ingestedAt, mergedSinceIngest, hasIngest, hasMerged := ReportIngestFreshnessMetadata(records)
+
+	if !hasIngest || hasMerged {
+		t.Fatalf("freshness presence = ingest:%v merged:%v, want ingest only", hasIngest, hasMerged)
+	}
+	if ingestedAt.Format(time.RFC3339) != "2026-06-20T00:00:00Z" || mergedSinceIngest != 0 {
+		t.Fatalf("freshness = %s/%d, want timestamp and zero merged count", ingestedAt.Format(time.RFC3339), mergedSinceIngest)
+	}
+}
+
+func TestReportIngestFreshnessMetadataIgnoresInvalidValues(t *testing.T) {
+	records := []Experience{
+		{Record: ingestdoc.Record{Metadata: map[string]any{
+			"last_ingest_at":               "not-time",
+			"merged_prs_since_last_ingest": 99,
+		}}},
+		{Record: ingestdoc.Record{Metadata: map[string]any{
+			"merged_prs_since_last_ingest": 2,
+		}}},
+	}
+
+	_, _, hasIngest, hasMerged := ReportIngestFreshnessMetadata(records)
+
+	if hasIngest || hasMerged {
+		t.Fatalf("freshness presence = ingest:%v merged:%v, want neither", hasIngest, hasMerged)
+	}
+}
 
 func TestBuildTopRepeatedMistakesAggregatesByMatchedSignature(t *testing.T) {
 	mistakes := BuildTopRepeatedMistakes([]RecurrencePair{
