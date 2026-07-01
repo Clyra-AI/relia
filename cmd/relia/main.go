@@ -1516,64 +1516,21 @@ func compareBacktestBaseline(root string, baselinePath string, headlineERR float
 	content, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(rel)))
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			return baselineComparison{
-				Status: "missing",
-				Path:   rel,
-				Stale:  false,
-				Reason: "No saved ERR baseline exists yet; use --save-baseline after reviewing the report to create one.",
-			}, nil
+			return backtestdoc.MissingBaselineComparison(rel), nil
 		}
 		return baselineComparison{}, internalError("could not read ERR baseline", err)
 	}
-	var payload map[string]any
-	if err := decodeJSONUseNumber(string(content), &payload); err != nil {
+	baseline, err := backtestdoc.CompareBaselineJSON(content, rel, headlineERR, sourceDigest, window)
+	if errors.Is(err, backtestdoc.ErrInvalidBaselineJSON) {
 		return baselineComparison{}, artifactContractError("ERR baseline is not valid JSON", rel)
 	}
-	baselineERR, ok := numericValue(payload["headline_err"])
-	if !ok {
-		if summary, summaryOK := payload["summary"].(map[string]any); summaryOK {
-			if summaryERR, headlineOK := numericValue(summary["headline_err"]); headlineOK {
-				baselineERR = summaryERR
-				ok = true
-			}
-		}
-	}
-	if !ok || baselineERR < 0 || baselineERR > 1 {
+	if errors.Is(err, backtestdoc.ErrInvalidBaselineHeadlineERR) {
 		return baselineComparison{}, artifactContractError("ERR baseline missing numeric headline_err", rel)
 	}
-	baselineDigest := ""
-	if metadata, ok := payload["metadata"].(map[string]any); ok {
-		baselineDigest = stringFromAny(metadata["source_artifact_digest"])
+	if err != nil {
+		return baselineComparison{}, internalError("could not compare ERR baseline", err)
 	}
-	status := "current"
-	reason := "Saved baseline was computed from the same source artifact digest."
-	stale := false
-	if baselineDigest == "" || baselineDigest != sourceDigest {
-		status = "stale"
-		stale = true
-		reason = "Saved baseline source artifact digest differs from the current backtest inputs."
-	} else if !baselineWindowMatches(payload, window) {
-		status = "stale"
-		stale = true
-		reason = "Saved baseline window differs from the current backtest window."
-	}
-	return baselineComparison{
-		Status:      status,
-		Path:        rel,
-		HeadlineERR: roundFloat(baselineERR, 4),
-		Delta:       roundFloat(headlineERR-baselineERR, 4),
-		Stale:       stale,
-		Reason:      reason,
-	}, nil
-}
-
-func baselineWindowMatches(payload map[string]any, window recurrenceWindow) bool {
-	baselineWindow, ok := payload["window"].(map[string]any)
-	if !ok {
-		return false
-	}
-	return stringFromAny(baselineWindow["start"]) == window.Start &&
-		stringFromAny(baselineWindow["end"]) == window.End
+	return baseline, nil
 }
 
 func backtestGate(config yamlDocument, headlineERR float64) backtestGateResult {
@@ -1792,14 +1749,7 @@ func savedBacktestBaselineComparison(baselinePath string, headlineERR float64) (
 	if !ok {
 		return baselineComparison{}, usageError("backtest baseline path must be repo-relative")
 	}
-	return baselineComparison{
-		Status:      "saved",
-		Path:        filepath.ToSlash(clean),
-		HeadlineERR: roundFloat(headlineERR, 4),
-		Delta:       0,
-		Stale:       false,
-		Reason:      "Saved current headline ERR as the comparison baseline.",
-	}, nil
+	return backtestdoc.SavedBaselineComparison(filepath.ToSlash(clean), headlineERR), nil
 }
 
 func distillResult(args []string, start time.Time) CommandResult {
