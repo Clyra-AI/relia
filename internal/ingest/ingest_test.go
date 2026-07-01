@@ -1,6 +1,8 @@
 package ingest
 
 import (
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -117,5 +119,108 @@ func TestValidGitHubProvenanceURLShape(t *testing.T) {
 		if ValidGitHubProvenanceURLShape(value) {
 			t.Fatalf("URL %q should not be canonical", value)
 		}
+	}
+}
+
+func TestPersistRecordsWritesSortedMonthlyShardAndUpserts(t *testing.T) {
+	root := t.TempDir()
+	records := []Record{
+		{
+			ObjectType:      "relia.experience_record",
+			SchemaVersion:   "1.0",
+			ExperienceID:    "exp_0002",
+			Repo:            Repo{Provider: "github", Owner: "acme", Name: "billing"},
+			RecordedAt:      "2026-04-02T10:00:00Z",
+			Action:          Action{PR: 2, Commit: "abc2"},
+			Outcome:         Outcome{Kind: "ci_failure", TerminalState: "failed", Signature: Signature{SignatureID: "sig_b", ExtractionConfidence: "structured"}},
+			Provenance:      Provenance{URLs: []string{"https://github.com/acme/billing/pull/2"}},
+			RedactionStatus: "applied",
+			ShareScope:      "private",
+			Metadata:        map[string]any{"value": "new"},
+		},
+		{
+			ObjectType:      "relia.experience_record",
+			SchemaVersion:   "1.0",
+			ExperienceID:    "exp_0001",
+			Repo:            Repo{Provider: "github", Owner: "acme", Name: "billing"},
+			RecordedAt:      "2026-04-01T10:00:00Z",
+			Action:          Action{PR: 1, Commit: "abc1"},
+			Outcome:         Outcome{Kind: "ci_failure", TerminalState: "failed", Signature: Signature{SignatureID: "sig_a", ExtractionConfidence: "structured"}},
+			Provenance:      Provenance{URLs: []string{"https://github.com/acme/billing/pull/1"}},
+			RedactionStatus: "applied",
+			ShareScope:      "private",
+			Metadata:        map[string]any{"value": "new"},
+		},
+	}
+
+	shards, err := PersistRecords(root, records)
+	if err != nil {
+		t.Fatalf("PersistRecords error: %v", err)
+	}
+	if len(shards) != 1 || shards[0] != ".relia/experiences/2026-04.jsonl" {
+		t.Fatalf("shards = %#v", shards)
+	}
+
+	content, readErr := os.ReadFile(filepath.Join(root, ".relia", "experiences", "2026-04.jsonl"))
+	if readErr != nil {
+		t.Fatal(readErr)
+	}
+	if !strings.Contains(string(content), `"experience_id":"exp_0001"`) ||
+		!strings.Contains(string(content), `"experience_id":"exp_0002"`) {
+		t.Fatalf("content missing records:\n%s", content)
+	}
+	if strings.Index(string(content), `"experience_id":"exp_0001"`) < strings.Index(string(content), `"experience_id":"exp_0002"`) {
+		t.Fatalf("records were not preserved in write order:\n%s", content)
+	}
+
+	records[0].Metadata["value"] = "updated"
+	if _, err := PersistRecords(root, records[:1]); err != nil {
+		t.Fatalf("second PersistRecords error: %v", err)
+	}
+	updated, readErr := os.ReadFile(filepath.Join(root, ".relia", "experiences", "2026-04.jsonl"))
+	if readErr != nil {
+		t.Fatal(readErr)
+	}
+	if !strings.Contains(string(updated), `"value":"updated"`) {
+		t.Fatalf("existing record was not upserted:\n%s", updated)
+	}
+}
+
+func TestPersistRecordsReportsCorruptShardAsProvenance(t *testing.T) {
+	root := t.TempDir()
+	shardPath := filepath.Join(root, ".relia", "experiences", "2026-04.jsonl")
+	if err := os.MkdirAll(filepath.Dir(shardPath), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(shardPath, []byte("{not-json}\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := PersistRecords(root, []Record{{ExperienceID: "exp_0001", RecordedAt: "2026-04-01T10:00:00Z"}})
+	if err == nil || err.Kind != ErrorProvenance {
+		t.Fatalf("error = %#v, want provenance", err)
+	}
+}
+
+func TestGitHubPullRequestHelpers(t *testing.T) {
+	record := Record{
+		Repo:   Repo{Owner: "acme", Name: "billing"},
+		Action: Action{PR: 142},
+	}
+
+	if !GitHubProvenanceURLRepoMatchesRecord("https://github.com/acme/billing/actions/runs/1", record) {
+		t.Fatal("expected repo match")
+	}
+	if number, ok := GitHubPullRequestURLPathNumber("https://github.com/acme/billing/pull/142/files"); !ok || number != 142 {
+		t.Fatalf("path PR = %d/%v", number, ok)
+	}
+	if number, ok := GitHubPullRequestURLNumber("https://github.com/acme/billing/pull/142"); !ok || number != 142 {
+		t.Fatalf("PR = %d/%v", number, ok)
+	}
+	if !GitHubPullRequestURLMatchesRecord("https://github.com/acme/billing/pull/142", record) {
+		t.Fatal("expected PR URL to match record")
+	}
+	if got := GitHubPullRequestURLForRecord(record); got != "https://github.com/acme/billing/pull/142" {
+		t.Fatalf("URL = %q", got)
 	}
 }

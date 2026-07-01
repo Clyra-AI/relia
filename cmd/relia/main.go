@@ -8,7 +8,6 @@ import (
 	"html"
 	"io"
 	"math"
-	"net/url"
 	"os"
 	"os/exec"
 	"path"
@@ -210,60 +209,14 @@ type assessmentRuleCitation struct {
 	Outcome string
 }
 
-type experienceRecord struct {
-	ObjectType      string                `json:"object_type"`
-	SchemaVersion   string                `json:"schema_version"`
-	ExperienceID    string                `json:"experience_id"`
-	Repo            experienceRepo        `json:"repo"`
-	RecordedAt      string                `json:"recorded_at"`
-	Attribution     experienceAttribution `json:"attribution"`
-	Context         experienceContext     `json:"context"`
-	Action          experienceAction      `json:"action"`
-	Outcome         experienceOutcome     `json:"outcome"`
-	Provenance      experienceProvenance  `json:"provenance"`
-	FlakeDiscount   float64               `json:"flake_discount"`
-	OrgEligible     bool                  `json:"org_eligible"`
-	ShareScope      string                `json:"share_scope"`
-	RedactionStatus string                `json:"redaction_status"`
-	Metadata        map[string]any        `json:"metadata"`
-}
-
-type experienceRepo struct {
-	Provider string `json:"provider"`
-	Owner    string `json:"owner"`
-	Name     string `json:"name"`
-}
-
-type experienceAttribution struct {
-	ActorKind  string  `json:"actor_kind"`
-	Method     string  `json:"method"`
-	Confidence float64 `json:"confidence"`
-}
-
-type experienceContext struct {
-	Paths           []string `json:"paths"`
-	DiffFingerprint string   `json:"diff_fingerprint"`
-}
-
-type experienceAction struct {
-	PR     int    `json:"pr"`
-	Commit string `json:"commit"`
-}
-
-type experienceOutcome struct {
-	Kind          string              `json:"kind"`
-	TerminalState string              `json:"terminal_state"`
-	Signature     experienceSignature `json:"signature"`
-}
-
-type experienceSignature struct {
-	SignatureID          string `json:"signature_id"`
-	ExtractionConfidence string `json:"extraction_confidence"`
-}
-
-type experienceProvenance struct {
-	URLs []string `json:"urls"`
-}
+type experienceRecord = ingestdoc.Record
+type experienceRepo = ingestdoc.Repo
+type experienceAttribution = ingestdoc.Attribution
+type experienceContext = ingestdoc.Context
+type experienceAction = ingestdoc.Action
+type experienceOutcome = ingestdoc.Outcome
+type experienceSignature = ingestdoc.Signature
+type experienceProvenance = ingestdoc.Provenance
 
 type backtestExperience struct {
 	Record     experienceRecord
@@ -5972,116 +5925,8 @@ func normalizeExperienceProvenance(event map[string]any, ref string) (experience
 }
 
 func persistExperienceRecords(root string, records []experienceRecord) ([]string, *CommandError) {
-	if len(records) == 0 {
-		return []string{}, nil
-	}
-	grouped := map[string][]experienceRecord{}
-	for _, record := range records {
-		recordedAt, err := time.Parse(time.RFC3339, record.RecordedAt)
-		if err != nil {
-			return nil, artifactContractError("experience recorded_at must remain RFC3339 before persistence", record.ExperienceID)
-		}
-		shard := filepath.ToSlash(filepath.Join(".relia", "experiences", recordedAt.UTC().Format("2006-01")+".jsonl"))
-		grouped[shard] = append(grouped[shard], record)
-	}
-	shards := make([]string, 0, len(grouped))
-	for shard := range grouped {
-		shards = append(shards, shard)
-	}
-	sort.Strings(shards)
-	plans := make([]experienceShardWritePlan, 0, len(shards))
-	for _, shard := range shards {
-		plan, commandErr := prepareExperienceShardWrite(filepath.Join(root, filepath.FromSlash(shard)), grouped[shard])
-		if commandErr != nil {
-			return nil, commandErr
-		}
-		plans = append(plans, plan)
-	}
-	for _, plan := range plans {
-		if commandErr := writeExperienceShard(plan); commandErr != nil {
-			return nil, commandErr
-		}
-	}
-	return shards, nil
-}
-
-type experienceShardWritePlan struct {
-	Path    string
-	Content []byte
-}
-
-func prepareExperienceShardWrite(path string, records []experienceRecord) (experienceShardWritePlan, *CommandError) {
-	order := []string{}
-	byID := map[string]json.RawMessage{}
-	content, err := os.ReadFile(path)
-	if err != nil && !errors.Is(err, os.ErrNotExist) {
-		return experienceShardWritePlan{}, internalError("could not read existing experience shard", err)
-	}
-	for lineNumber, line := range strings.Split(strings.TrimSpace(string(content)), "\n") {
-		if strings.TrimSpace(line) == "" {
-			continue
-		}
-		var existing map[string]any
-		if err := json.Unmarshal([]byte(line), &existing); err != nil {
-			return experienceShardWritePlan{}, provenanceIntegrityError(fmt.Sprintf("existing experience shard line %d is not valid JSON", lineNumber+1), filepath.ToSlash(path))
-		}
-		experienceID := stringFromAny(existing["experience_id"])
-		if experienceID == "" {
-			return experienceShardWritePlan{}, provenanceIntegrityError(fmt.Sprintf("existing experience shard line %d missing experience_id", lineNumber+1), filepath.ToSlash(path))
-		}
-		if _, ok := byID[experienceID]; !ok {
-			order = append(order, experienceID)
-		}
-		byID[experienceID] = append(json.RawMessage(nil), []byte(line)...)
-	}
-	for _, record := range records {
-		content, err := json.Marshal(record)
-		if err != nil {
-			return experienceShardWritePlan{}, internalError("could not encode experience record", err)
-		}
-		if _, ok := byID[record.ExperienceID]; !ok {
-			order = append(order, record.ExperienceID)
-		}
-		byID[record.ExperienceID] = content
-	}
-	var builder strings.Builder
-	for _, experienceID := range order {
-		builder.Write(byID[experienceID])
-		builder.WriteByte('\n')
-	}
-	return experienceShardWritePlan{Path: path, Content: []byte(builder.String())}, nil
-}
-
-func writeExperienceShard(plan experienceShardWritePlan) *CommandError {
-	if err := os.MkdirAll(filepath.Dir(plan.Path), 0o755); err != nil {
-		return internalError("could not create experience shard directory", err)
-	}
-	tempFile, err := os.CreateTemp(filepath.Dir(plan.Path), "."+filepath.Base(plan.Path)+".tmp-*")
-	if err != nil {
-		return internalError("could not create temporary experience shard", err)
-	}
-	tempPath := tempFile.Name()
-	cleanup := true
-	defer func() {
-		if cleanup {
-			_ = os.Remove(tempPath)
-		}
-	}()
-	if _, err := tempFile.Write(plan.Content); err != nil {
-		_ = tempFile.Close()
-		return internalError("could not write temporary experience shard", err)
-	}
-	if err := tempFile.Close(); err != nil {
-		return internalError("could not close temporary experience shard", err)
-	}
-	if err := os.Chmod(tempPath, 0o644); err != nil {
-		return internalError("could not set temporary experience shard permissions", err)
-	}
-	if err := os.Rename(tempPath, plan.Path); err != nil {
-		return internalError("could not write experience shard", err)
-	}
-	cleanup = false
-	return nil
+	shards, ingestErr := ingestdoc.PersistRecords(root, records)
+	return shards, commandErrorFromIngest(ingestErr)
 }
 
 func redactForPersistence(event map[string]any, ref string) (any, *CommandError) {
@@ -6094,89 +5939,23 @@ func validGitHubProvenanceURLShape(value string) bool {
 }
 
 func gitHubProvenanceURLRepoMatchesExperience(value string, record experienceRecord) bool {
-	parsed, err := url.Parse(strings.TrimSpace(value))
-	if err != nil {
-		return false
-	}
-	parts := strings.Split(strings.Trim(parsed.Path, "/"), "/")
-	return len(parts) >= 2 &&
-		strings.EqualFold(parts[0], record.Repo.Owner) &&
-		strings.EqualFold(parts[1], record.Repo.Name)
+	return ingestdoc.GitHubProvenanceURLRepoMatchesRecord(value, record)
 }
 
 func gitHubPullRequestURLPathNumber(value string) (int, bool) {
-	parsed, err := url.Parse(strings.TrimSpace(value))
-	if err != nil {
-		return 0, false
-	}
-	if parsed.Scheme != "https" ||
-		!strings.EqualFold(parsed.Host, "github.com") ||
-		parsed.User != nil ||
-		parsed.RawQuery != "" ||
-		parsed.Fragment != "" {
-		return 0, false
-	}
-	parts := strings.Split(strings.Trim(parsed.Path, "/"), "/")
-	if len(parts) < 4 || parts[2] != "pull" {
-		return 0, false
-	}
-	number, err := strconv.Atoi(parts[3])
-	return number, err == nil && number > 0
+	return ingestdoc.GitHubPullRequestURLPathNumber(value)
 }
 
 func gitHubPullRequestURLNumber(value string) (int, bool) {
-	parsed, err := url.Parse(strings.TrimSpace(value))
-	if err != nil {
-		return 0, false
-	}
-	if parsed.Scheme != "https" ||
-		!strings.EqualFold(parsed.Host, "github.com") ||
-		parsed.User != nil ||
-		parsed.RawQuery != "" ||
-		parsed.Fragment != "" {
-		return 0, false
-	}
-	parts := strings.Split(strings.Trim(parsed.Path, "/"), "/")
-	if len(parts) != 4 || parts[2] != "pull" {
-		return 0, false
-	}
-	if parts[0] == "" || parts[1] == "" {
-		return 0, false
-	}
-	number, err := strconv.Atoi(parts[3])
-	return number, err == nil && number > 0
+	return ingestdoc.GitHubPullRequestURLNumber(value)
 }
 
 func gitHubPullRequestURLMatchesExperience(value string, record experienceRecord) bool {
-	parsed, err := url.Parse(strings.TrimSpace(value))
-	if err != nil {
-		return false
-	}
-	if parsed.Scheme != "https" ||
-		!strings.EqualFold(parsed.Host, "github.com") ||
-		parsed.User != nil ||
-		parsed.RawQuery != "" ||
-		parsed.Fragment != "" {
-		return false
-	}
-	parts := strings.Split(strings.Trim(parsed.Path, "/"), "/")
-	if len(parts) != 4 || parts[2] != "pull" {
-		return false
-	}
-	number, err := strconv.Atoi(parts[3])
-	return err == nil &&
-		number == record.Action.PR &&
-		strings.EqualFold(parts[0], record.Repo.Owner) &&
-		strings.EqualFold(parts[1], record.Repo.Name)
+	return ingestdoc.GitHubPullRequestURLMatchesRecord(value, record)
 }
 
 func gitHubPullRequestURLForExperience(record experienceRecord) string {
-	owner := strings.Trim(strings.TrimSpace(record.Repo.Owner), "/")
-	name := strings.Trim(strings.TrimSpace(record.Repo.Name), "/")
-	if owner == "" || name == "" || record.Action.PR < 1 {
-		return ""
-	}
-	return fmt.Sprintf("https://github.com/%s/%s/pull/%d", owner, name, record.Action.PR)
+	return ingestdoc.GitHubPullRequestURLForRecord(record)
 }
 
 func nestedField(event map[string]any, path string) (any, bool) {
@@ -6638,6 +6417,10 @@ func commandErrorFromIngest(ingestErr *ingestdoc.Error) *CommandError {
 	switch ingestErr.Kind {
 	case ingestdoc.ErrorArtifactContract:
 		return artifactContractError(ingestErr.Message, ingestErr.Ref)
+	case ingestdoc.ErrorInternal:
+		return internalError(ingestErr.Message, nil)
+	case ingestdoc.ErrorProvenance:
+		return provenanceIntegrityError(ingestErr.Message, ingestErr.Ref)
 	case ingestdoc.ErrorRedactionSafety:
 		return redactionSafetyError(ingestErr.Message, ingestErr.Ref)
 	default:

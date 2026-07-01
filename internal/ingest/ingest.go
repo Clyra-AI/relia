@@ -2,13 +2,18 @@ package ingest
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"math"
 	"net/url"
+	"os"
+	"path/filepath"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var knownSecretPatterns = []*regexp.Regexp{
@@ -22,6 +27,8 @@ type ErrorKind string
 
 const (
 	ErrorArtifactContract ErrorKind = "artifact_contract"
+	ErrorInternal         ErrorKind = "internal"
+	ErrorProvenance       ErrorKind = "provenance_integrity"
 	ErrorRedactionSafety  ErrorKind = "redaction_safety"
 )
 
@@ -39,6 +46,61 @@ func (e *Error) Error() string {
 		return e.Message
 	}
 	return e.Message + " (" + e.Ref + ")"
+}
+
+type Record struct {
+	ObjectType      string         `json:"object_type"`
+	SchemaVersion   string         `json:"schema_version"`
+	ExperienceID    string         `json:"experience_id"`
+	Repo            Repo           `json:"repo"`
+	RecordedAt      string         `json:"recorded_at"`
+	Attribution     Attribution    `json:"attribution"`
+	Context         Context        `json:"context"`
+	Action          Action         `json:"action"`
+	Outcome         Outcome        `json:"outcome"`
+	Provenance      Provenance     `json:"provenance"`
+	FlakeDiscount   float64        `json:"flake_discount"`
+	OrgEligible     bool           `json:"org_eligible"`
+	ShareScope      string         `json:"share_scope"`
+	RedactionStatus string         `json:"redaction_status"`
+	Metadata        map[string]any `json:"metadata"`
+}
+
+type Repo struct {
+	Provider string `json:"provider"`
+	Owner    string `json:"owner"`
+	Name     string `json:"name"`
+}
+
+type Attribution struct {
+	ActorKind  string  `json:"actor_kind"`
+	Method     string  `json:"method"`
+	Confidence float64 `json:"confidence"`
+}
+
+type Context struct {
+	Paths           []string `json:"paths"`
+	DiffFingerprint string   `json:"diff_fingerprint"`
+}
+
+type Action struct {
+	PR     int    `json:"pr"`
+	Commit string `json:"commit"`
+}
+
+type Outcome struct {
+	Kind          string    `json:"kind"`
+	TerminalState string    `json:"terminal_state"`
+	Signature     Signature `json:"signature"`
+}
+
+type Signature struct {
+	SignatureID          string `json:"signature_id"`
+	ExtractionConfidence string `json:"extraction_confidence"`
+}
+
+type Provenance struct {
+	URLs []string `json:"urls"`
 }
 
 func ParseEvents(content []byte, ref string) ([]map[string]any, *Error) {
@@ -108,6 +170,205 @@ func ContainsStandardSecretTokenShape(value string) bool {
 		}
 	}
 	return false
+}
+
+func PersistRecords(root string, records []Record) ([]string, *Error) {
+	if len(records) == 0 {
+		return []string{}, nil
+	}
+	grouped := map[string][]Record{}
+	for _, record := range records {
+		recordedAt, err := time.Parse(time.RFC3339, record.RecordedAt)
+		if err != nil {
+			return nil, artifactContractError("experience recorded_at must remain RFC3339 before persistence", record.ExperienceID)
+		}
+		shard := filepath.ToSlash(filepath.Join(".relia", "experiences", recordedAt.UTC().Format("2006-01")+".jsonl"))
+		grouped[shard] = append(grouped[shard], record)
+	}
+	shards := make([]string, 0, len(grouped))
+	for shard := range grouped {
+		shards = append(shards, shard)
+	}
+	sort.Strings(shards)
+	plans := make([]shardWritePlan, 0, len(shards))
+	for _, shard := range shards {
+		plan, commandErr := prepareShardWrite(filepath.Join(root, filepath.FromSlash(shard)), grouped[shard])
+		if commandErr != nil {
+			return nil, commandErr
+		}
+		plans = append(plans, plan)
+	}
+	for _, plan := range plans {
+		if commandErr := writeShard(plan); commandErr != nil {
+			return nil, commandErr
+		}
+	}
+	return shards, nil
+}
+
+func GitHubProvenanceURLRepoMatchesRecord(value string, record Record) bool {
+	parsed, err := url.Parse(strings.TrimSpace(value))
+	if err != nil {
+		return false
+	}
+	parts := strings.Split(strings.Trim(parsed.Path, "/"), "/")
+	return len(parts) >= 2 &&
+		strings.EqualFold(parts[0], record.Repo.Owner) &&
+		strings.EqualFold(parts[1], record.Repo.Name)
+}
+
+func GitHubPullRequestURLPathNumber(value string) (int, bool) {
+	parsed, err := url.Parse(strings.TrimSpace(value))
+	if err != nil {
+		return 0, false
+	}
+	if parsed.Scheme != "https" ||
+		!strings.EqualFold(parsed.Host, "github.com") ||
+		parsed.User != nil ||
+		parsed.RawQuery != "" ||
+		parsed.Fragment != "" {
+		return 0, false
+	}
+	parts := strings.Split(strings.Trim(parsed.Path, "/"), "/")
+	if len(parts) < 4 || parts[2] != "pull" {
+		return 0, false
+	}
+	number, err := strconv.Atoi(parts[3])
+	return number, err == nil && number > 0
+}
+
+func GitHubPullRequestURLNumber(value string) (int, bool) {
+	parsed, err := url.Parse(strings.TrimSpace(value))
+	if err != nil {
+		return 0, false
+	}
+	if parsed.Scheme != "https" ||
+		!strings.EqualFold(parsed.Host, "github.com") ||
+		parsed.User != nil ||
+		parsed.RawQuery != "" ||
+		parsed.Fragment != "" {
+		return 0, false
+	}
+	parts := strings.Split(strings.Trim(parsed.Path, "/"), "/")
+	if len(parts) != 4 || parts[2] != "pull" {
+		return 0, false
+	}
+	if parts[0] == "" || parts[1] == "" {
+		return 0, false
+	}
+	number, err := strconv.Atoi(parts[3])
+	return number, err == nil && number > 0
+}
+
+func GitHubPullRequestURLMatchesRecord(value string, record Record) bool {
+	parsed, err := url.Parse(strings.TrimSpace(value))
+	if err != nil {
+		return false
+	}
+	if parsed.Scheme != "https" ||
+		!strings.EqualFold(parsed.Host, "github.com") ||
+		parsed.User != nil ||
+		parsed.RawQuery != "" ||
+		parsed.Fragment != "" {
+		return false
+	}
+	parts := strings.Split(strings.Trim(parsed.Path, "/"), "/")
+	if len(parts) != 4 || parts[2] != "pull" {
+		return false
+	}
+	number, err := strconv.Atoi(parts[3])
+	return err == nil &&
+		number == record.Action.PR &&
+		strings.EqualFold(parts[0], record.Repo.Owner) &&
+		strings.EqualFold(parts[1], record.Repo.Name)
+}
+
+func GitHubPullRequestURLForRecord(record Record) string {
+	owner := strings.Trim(strings.TrimSpace(record.Repo.Owner), "/")
+	name := strings.Trim(strings.TrimSpace(record.Repo.Name), "/")
+	if owner == "" || name == "" || record.Action.PR < 1 {
+		return ""
+	}
+	return fmt.Sprintf("https://github.com/%s/%s/pull/%d", owner, name, record.Action.PR)
+}
+
+type shardWritePlan struct {
+	Path    string
+	Content []byte
+}
+
+func prepareShardWrite(path string, records []Record) (shardWritePlan, *Error) {
+	order := []string{}
+	byID := map[string]json.RawMessage{}
+	content, err := os.ReadFile(path)
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
+		return shardWritePlan{}, internalError("could not read existing experience shard", err)
+	}
+	for lineNumber, line := range strings.Split(strings.TrimSpace(string(content)), "\n") {
+		if strings.TrimSpace(line) == "" {
+			continue
+		}
+		var existing map[string]any
+		if err := json.Unmarshal([]byte(line), &existing); err != nil {
+			return shardWritePlan{}, provenanceIntegrityError(fmt.Sprintf("existing experience shard line %d is not valid JSON", lineNumber+1), filepath.ToSlash(path))
+		}
+		experienceID := stringFromAny(existing["experience_id"])
+		if experienceID == "" {
+			return shardWritePlan{}, provenanceIntegrityError(fmt.Sprintf("existing experience shard line %d missing experience_id", lineNumber+1), filepath.ToSlash(path))
+		}
+		if _, ok := byID[experienceID]; !ok {
+			order = append(order, experienceID)
+		}
+		byID[experienceID] = append(json.RawMessage(nil), []byte(line)...)
+	}
+	for _, record := range records {
+		content, err := json.Marshal(record)
+		if err != nil {
+			return shardWritePlan{}, internalError("could not encode experience record", err)
+		}
+		if _, ok := byID[record.ExperienceID]; !ok {
+			order = append(order, record.ExperienceID)
+		}
+		byID[record.ExperienceID] = content
+	}
+	var builder strings.Builder
+	for _, experienceID := range order {
+		builder.Write(byID[experienceID])
+		builder.WriteByte('\n')
+	}
+	return shardWritePlan{Path: path, Content: []byte(builder.String())}, nil
+}
+
+func writeShard(plan shardWritePlan) *Error {
+	if err := os.MkdirAll(filepath.Dir(plan.Path), 0o755); err != nil {
+		return internalError("could not create experience shard directory", err)
+	}
+	tempFile, err := os.CreateTemp(filepath.Dir(plan.Path), "."+filepath.Base(plan.Path)+".tmp-*")
+	if err != nil {
+		return internalError("could not create temporary experience shard", err)
+	}
+	tempPath := tempFile.Name()
+	cleanup := true
+	defer func() {
+		if cleanup {
+			_ = os.Remove(tempPath)
+		}
+	}()
+	if _, err := tempFile.Write(plan.Content); err != nil {
+		_ = tempFile.Close()
+		return internalError("could not write temporary experience shard", err)
+	}
+	if err := tempFile.Close(); err != nil {
+		return internalError("could not close temporary experience shard", err)
+	}
+	if err := os.Chmod(tempPath, 0o644); err != nil {
+		return internalError("could not set temporary experience shard permissions", err)
+	}
+	if err := os.Rename(tempPath, plan.Path); err != nil {
+		return internalError("could not write experience shard", err)
+	}
+	cleanup = false
+	return nil
 }
 
 func eventsFromJSON(value any, ref string) ([]map[string]any, *Error) {
@@ -623,6 +884,28 @@ func artifactContractError(message string, ref string) *Error {
 	return &Error{Kind: ErrorArtifactContract, Message: message, Ref: ref}
 }
 
+func internalError(message string, err error) *Error {
+	if err != nil {
+		message += ": " + err.Error()
+	}
+	return &Error{Kind: ErrorInternal, Message: message}
+}
+
+func provenanceIntegrityError(message string, ref string) *Error {
+	return &Error{Kind: ErrorProvenance, Message: message, Ref: ref}
+}
+
 func redactionSafetyError(message string, ref string) *Error {
 	return &Error{Kind: ErrorRedactionSafety, Message: message, Ref: ref}
+}
+
+func stringFromAny(value any) string {
+	switch typed := value.(type) {
+	case string:
+		return strings.TrimSpace(typed)
+	case fmt.Stringer:
+		return strings.TrimSpace(typed.String())
+	default:
+		return ""
+	}
 }
