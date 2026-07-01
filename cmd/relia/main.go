@@ -21,6 +21,7 @@ import (
 	assessdoc "github.com/Clyra-AI/relia/internal/assess"
 	configdoc "github.com/Clyra-AI/relia/internal/config"
 	"github.com/Clyra-AI/relia/internal/diffparse"
+	distilldoc "github.com/Clyra-AI/relia/internal/distill"
 	ingestdoc "github.com/Clyra-AI/relia/internal/ingest"
 	modelpulldoc "github.com/Clyra-AI/relia/internal/modelpull"
 	resultdoc "github.com/Clyra-AI/relia/internal/result"
@@ -429,26 +430,6 @@ type distillCluster struct {
 	Signal  string
 	Records []backtestExperience
 }
-
-type distillProviderConfig = configdoc.ProviderConfig
-
-type distillProviderCostEstimate struct {
-	InputTokensEstimated  int     `json:"input_tokens_estimated"`
-	OutputTokensEstimated int     `json:"output_tokens_estimated"`
-	TotalTokensEstimated  int     `json:"total_tokens_estimated"`
-	EstimatedCostUSD      float64 `json:"estimated_cost_usd"`
-	MaxCostUSDPerRun      float64 `json:"max_cost_usd_per_run"`
-	CapStatus             string  `json:"cap_status"`
-}
-
-type distillProviderAdapter interface {
-	Provider() string
-	Surface() string
-	RequestShape(distillProviderConfig) map[string]any
-}
-
-type openAICompatibleAdapter struct{}
-type anthropicMessagesAdapter struct{}
 
 type adviseSettings = configdoc.AdviseSettings
 
@@ -2372,23 +2353,27 @@ func distillResult(args []string, start time.Time) CommandResult {
 	if commandErr != nil {
 		return withFormat(errorResult("distill", "distill", commandErr, start))
 	}
-	providerConfig, commandErr := distillProviderConfigFromYAML(config)
-	if commandErr != nil {
-		return withFormat(errorResult("distill", "distill", commandErr, start))
+	providerConfig, configErr := configdoc.ProviderConfigFromYAML(config)
+	if configErr != nil {
+		return withFormat(errorResult("distill", "distill", commandErrorFromConfig(configErr), start))
 	}
-	embeddingMode := effectiveDistillEmbeddingMode(config, options)
+	embeddingMode := distilldoc.EffectiveEmbeddingMode(config, options.Embeddings)
 	records, sourceArtifacts, sourceDigest, commandErr := loadDistillExperiences(root, config, options)
 	if commandErr != nil {
 		return withFormat(errorResult("distill", "distill", commandErr, start))
 	}
 	if providerConfig.Provider != "none" || embeddingMode == "provider" {
-		providerPlan, commandErr := buildDistillProviderPlan(providerConfig, records, embeddingMode, sourceArtifacts, sourceDigest)
-		if commandErr != nil {
-			return withFormat(errorResultWithData("distill", "distill", commandErr, start, map[string]any{
+		providerRecords := make([]ingestdoc.Record, 0, len(records))
+		for _, record := range records {
+			providerRecords = append(providerRecords, record.Record)
+		}
+		providerPlan, configErr := distilldoc.BuildProviderPlan(providerConfig, providerRecords, embeddingMode, sourceArtifacts, sourceDigest)
+		if configErr != nil {
+			return withFormat(errorResultWithData("distill", "distill", commandErrorFromConfig(configErr), start, map[string]any{
 				"provider_plan": providerPlan,
 			}))
 		}
-		cost := providerPlan["cost"].(distillProviderCostEstimate)
+		cost := providerPlan["cost"].(distilldoc.CostEstimate)
 		if cost.CapStatus == "exceeded" {
 			return withFormat(errorResultWithData("distill", "distill", dependencyError("provider-backed distill estimated cost exceeds distill.max_cost_usd_per_run; no provider call was attempted", providerConfig.ProviderRef), start, map[string]any{
 				"provider_plan": providerPlan,
@@ -2423,11 +2408,11 @@ func distillResult(args []string, start time.Time) CommandResult {
 		"retired_rules":              statusCounts["retired"],
 		"provider":                   providerConfig.Provider,
 		"embedding_mode":             embeddingMode,
-		"review_required":            distillReviewRequired(config),
+		"review_required":            distilldoc.ReviewRequired(config),
 		"deterministic_fallback":     providerConfig.Provider == "none" && embeddingMode == "signature",
 		"confidence_model":           "evidence_count+recency_half_life+contradictions+flake_discount+extraction_confidence",
 		"drafting_model_confidence":  0,
-		"provider_cost":              deterministicNoProviderCost(),
+		"provider_cost":              distilldoc.NoProviderCost(),
 		"decay_half_life_days":       options.HalfLifeDays,
 		"source_artifacts":           sourceArtifacts,
 		"source_artifact_digest":     sourceDigest,
@@ -3146,159 +3131,6 @@ func modelsResult(args []string, start time.Time) CommandResult {
 	return result
 }
 
-func distillProvider(config yamlDocument) (string, string) {
-	return configdoc.DistillProvider(config)
-}
-
-func normalizeDistillProvider(value string) string {
-	return configdoc.NormalizeDistillProvider(value)
-}
-
-func distillProviderConfigFromYAML(config yamlDocument) (distillProviderConfig, *CommandError) {
-	cfg, configErr := configdoc.ProviderConfigFromYAML(config)
-	return cfg, commandErrorFromConfig(configErr)
-}
-
-func distillProviderAdapterFor(provider string) (distillProviderAdapter, bool) {
-	switch normalizeDistillProvider(provider) {
-	case "openai_compatible":
-		return openAICompatibleAdapter{}, true
-	case "anthropic":
-		return anthropicMessagesAdapter{}, true
-	default:
-		return nil, false
-	}
-}
-
-func (openAICompatibleAdapter) Provider() string { return "openai_compatible" }
-
-func (openAICompatibleAdapter) Surface() string { return "openai_compatible_chat_completions_http" }
-
-func (openAICompatibleAdapter) RequestShape(config distillProviderConfig) map[string]any {
-	return map[string]any{
-		"method":            "POST",
-		"url":               strings.TrimRight(config.BaseURL, "/") + "/chat/completions",
-		"credential_header": "Authorization: Bearer ${" + config.CredentialEnv + "}",
-		"redaction_posture": "redacted_experience_records_only",
-		"response_contract": "draft rule statements only; evidence, scope, and confidence remain deterministic",
-		"network_attempted": false,
-	}
-}
-
-func (anthropicMessagesAdapter) Provider() string { return "anthropic" }
-
-func (anthropicMessagesAdapter) Surface() string { return "anthropic_messages_http" }
-
-func (anthropicMessagesAdapter) RequestShape(config distillProviderConfig) map[string]any {
-	return map[string]any{
-		"method":            "POST",
-		"url":               strings.TrimRight(config.BaseURL, "/") + "/v1/messages",
-		"credential_header": "x-api-key: ${" + config.CredentialEnv + "}",
-		"redaction_posture": "redacted_experience_records_only",
-		"response_contract": "draft rule statements only; evidence, scope, and confidence remain deterministic",
-		"network_attempted": false,
-	}
-}
-
-func buildDistillProviderPlan(config distillProviderConfig, records []backtestExperience, embeddingMode string, sourceArtifacts []string, sourceDigest string) (map[string]any, *CommandError) {
-	if config.Provider == "none" {
-		return map[string]any{
-			"provider":                "none",
-			"provider_call_attempted": false,
-		}, dependencyError("provider embeddings require distill.provider to be configured", defaultConfigFile)
-	}
-	adapter, ok := distillProviderAdapterFor(config.Provider)
-	if !ok {
-		return map[string]any{"provider": config.Provider}, configErrorAt("unsupported distill.provider "+config.Provider, config.ProviderRef)
-	}
-	cost := estimateDistillProviderCost(config, records)
-	return map[string]any{
-		"provider":                config.Provider,
-		"adapter":                 adapter.Surface(),
-		"model":                   config.Model,
-		"base_url":                config.BaseURL,
-		"credential_env":          config.CredentialEnv,
-		"embedding_mode":          embeddingMode,
-		"cost":                    cost,
-		"request_shape":           adapter.RequestShape(config),
-		"source_artifacts":        sourceArtifacts,
-		"source_artifact_digest":  sourceDigest,
-		"redacted_records_only":   true,
-		"provider_call_attempted": false,
-		"approval_required":       "model_provider_endpoint",
-	}, nil
-}
-
-func estimateDistillProviderCost(config distillProviderConfig, records []backtestExperience) distillProviderCostEstimate {
-	inputTokens := 0
-	for _, record := range records {
-		encoded, err := json.Marshal(record.Record)
-		if err != nil {
-			inputTokens += 1
-			continue
-		}
-		inputTokens += estimatedTokensForBytes(len(encoded))
-	}
-	outputTokens := 96
-	if len(records) > 0 {
-		outputTokens += len(records) * 64
-	}
-	total := inputTokens + outputTokens
-	estimate := (float64(inputTokens)/1000.0)*config.InputCostUSDPer1KTokens +
-		(float64(outputTokens)/1000.0)*config.OutputCostUSDPer1KTokens
-	estimate = roundFloat(estimate, 6)
-	capStatus := "within_cap"
-	if estimate > config.MaxCostUSDPerRun {
-		capStatus = "exceeded"
-	}
-	return distillProviderCostEstimate{
-		InputTokensEstimated:  inputTokens,
-		OutputTokensEstimated: outputTokens,
-		TotalTokensEstimated:  total,
-		EstimatedCostUSD:      estimate,
-		MaxCostUSDPerRun:      config.MaxCostUSDPerRun,
-		CapStatus:             capStatus,
-	}
-}
-
-func estimatedTokensForBytes(length int) int {
-	if length <= 0 {
-		return 0
-	}
-	return int(math.Ceil(float64(length) / 4.0))
-}
-
-func deterministicNoProviderCost() map[string]any {
-	return map[string]any{
-		"input_tokens_estimated":  0,
-		"output_tokens_estimated": 0,
-		"total_tokens_estimated":  0,
-		"estimated_cost_usd":      0,
-		"cap_status":              "not_applicable",
-	}
-}
-
-func distillEmbeddingMode(config yamlDocument) string {
-	if scalar, ok := config.Scalars["distill.embeddings"]; ok {
-		return scalar.Value
-	}
-	return "signature"
-}
-
-func effectiveDistillEmbeddingMode(config yamlDocument, options distillOptions) string {
-	if options.Embeddings != "" {
-		return options.Embeddings
-	}
-	return distillEmbeddingMode(config)
-}
-
-func distillReviewRequired(config yamlDocument) bool {
-	if scalar, ok := config.Scalars["distill.review_required"]; ok {
-		return scalar.Value != "false"
-	}
-	return true
-}
-
 func buildDistilledRules(root string, config yamlDocument, records []backtestExperience, sourceArtifacts []string, sourceDigest string, embeddingMode string, options distillOptions) ([]distilledRule, *CommandError) {
 	if len(records) == 0 {
 		return nil, artifactContractError("distill found no experience records in .relia/experiences", ".relia/experiences")
@@ -3312,8 +3144,8 @@ func buildDistilledRules(root string, config yamlDocument, records []backtestExp
 	anchor := records[len(records)-1].RecordedAt.UTC()
 	clusters := buildDistillClusters(records)
 	flakeHeuristics := autoFlakeDiscountedExperiences(records)
-	provider, _ := distillProvider(config)
-	reviewRequired := distillReviewRequired(config)
+	provider, _ := distilldoc.Provider(config)
+	reviewRequired := distilldoc.ReviewRequired(config)
 
 	var rules []distilledRule
 	for _, cluster := range clusters {
