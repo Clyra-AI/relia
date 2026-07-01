@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from pathlib import Path
+from datetime import datetime, timezone
 import json
 import os
 import re
@@ -121,6 +122,29 @@ def load_json_file(path):
         fail(f"{path.relative_to(ROOT)} must contain a JSON object")
     return payload
 
+def parse_rfc3339_timestamp(value, label):
+    if not isinstance(value, str) or not value.strip():
+        fail(f"{label} must be a non-empty RFC3339 timestamp")
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError as exc:
+        fail(f"{label} must be RFC3339: {exc}")
+    if parsed.tzinfo is None:
+        fail(f"{label} must include a timezone")
+    return parsed.astimezone(timezone.utc)
+
+def architecture_debt_exception_expiry_error(ref, exception, now=None):
+    expires_at = parse_rfc3339_timestamp(exception.get("expires_at"), f"{ref}.expires_at")
+    reference_time = now or datetime.now(timezone.utc)
+    if expires_at <= reference_time.astimezone(timezone.utc):
+        return f"{ref}.expires_at must be in the future"
+    return None
+
+def validate_architecture_debt_exception_expiry(ref, exception, now=None):
+    error = architecture_debt_exception_expiry_error(ref, exception, now)
+    if error:
+        fail(error)
+
 def factoryd_config_capability_grants():
     grants = []
     if not FACTORYD_ACTIVE_CONFIG.exists():
@@ -162,6 +186,7 @@ def validate_architecture_debt_exception(ref):
     paths = scope.get("paths")
     if sorted(paths or []) != sorted(ARCHITECTURE_BUDGET_EXCEPTION_PATHS):
         fail(f"{ref}.scope.paths must be {ARCHITECTURE_BUDGET_EXCEPTION_PATHS!r}")
+    validate_architecture_debt_exception_expiry(ref, exception)
     if not isinstance(exception.get("compensating_validation"), list) or "make prepush-full" not in exception["compensating_validation"]:
         fail(f"{ref}.compensating_validation must include make prepush-full")
     if not exception.get("follow_up_refs"):
@@ -280,7 +305,7 @@ def validate_architecture_budget_policy(repo, label):
     if sorted(extensions or []) != sorted(EXPECTED_ARCHITECTURE_BUDGET_EXTENSIONS):
         fail(f"{label}.architecture_budget.source_extensions must be {EXPECTED_ARCHITECTURE_BUDGET_EXTENSIONS!r}")
     excluded = budget.get("excluded_dirs")
-    for expected in [".git", ".factoryd", "node_modules", "vendor", "dist"]:
+    for expected in [".git", ".factoryd", ".factory/tmp", "node_modules", "vendor", "dist"]:
         if not isinstance(excluded, list) or expected not in excluded:
             fail(f"{label}.architecture_budget.excluded_dirs must include {expected}")
     exception_refs = budget.get("exception_refs")
@@ -1073,12 +1098,17 @@ def self_test():
         oversized.write_text("line\n" * 2501)
         sample_budget = {
             "source_extensions": [".go"],
-            "excluded_dirs": [".git", ".factoryd"],
+            "excluded_dirs": [".git", ".factoryd", ".factory/tmp"],
             "fail_line_threshold": 2500,
         }
         failures = architecture_budget_unexcepted_failures(temp_root, sample_budget, set(), {})
         if not failures or "cmd/demo/main.go" not in failures[0]:
             fail("architecture budget self-test expected unexcepted oversized source to fail")
+        scratch = temp_root / ".factory" / "tmp" / "scratch.go"
+        scratch.parent.mkdir(parents=True)
+        scratch.write_text("line\n" * 2501)
+        if any(".factory/tmp/scratch.go" in failure for failure in architecture_budget_unexcepted_failures(temp_root, sample_budget, set(), {})):
+            fail("architecture budget self-test expected .factory/tmp scratch to be excluded")
         if architecture_budget_unexcepted_failures(temp_root, sample_budget, {"cmd/demo/main.go"}, {"cmd/demo/main.go": 2501}):
             fail("architecture budget self-test expected exception-scoped source to pass")
         ceiling_failures = architecture_budget_unexcepted_failures(
@@ -1089,6 +1119,17 @@ def self_test():
         )
         if not ceiling_failures or "approved ceiling" not in ceiling_failures[0]:
             fail("architecture budget self-test expected exception growth over ceiling to fail")
+    validate_architecture_debt_exception_expiry(
+        "self-test-valid",
+        {"expires_at": "2099-01-01T00:00:00Z"},
+        datetime(2026, 7, 1, tzinfo=timezone.utc),
+    )
+    if not architecture_debt_exception_expiry_error(
+        "self-test-expired",
+        {"expires_at": "2026-06-30T00:00:00Z"},
+        datetime(2026, 7, 1, tzinfo=timezone.utc),
+    ):
+        fail("architecture debt exception self-test expected expired evidence to fail")
     if duplicate_values(["T1", "T2", "T1", "T2", "T3"]) != ["T1", "T2"]:
         fail("duplicate_values must preserve duplicate ids in first duplicate order")
     if "FR23-PROVIDER-ADAPTERS-AND-NO-LLM-MODE-001" not in PROVIDER_ACCEPTANCE_IDS:
