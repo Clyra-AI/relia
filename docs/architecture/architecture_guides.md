@@ -227,8 +227,11 @@ rule documents; `internal/config` owns default config document rendering,
 config document references, config loading and validation, provider/advisory
 configuration parsing, and local model-manifest dependency validation;
 `internal/result` owns the command-result envelope and generic pass/error
-constructors. `cmd/relia` keeps command wiring, command-specific
-CommandError translation, and human/JSON rendering for those surfaces.
+constructors; `internal/ingest` owns ingest input parsing, fail-closed
+redaction, and standard secret/provenance URL token-shape checks.
+`cmd/relia` keeps command wiring, command-specific CommandError translation,
+experience-record normalization, persistence coordination, and human/JSON
+rendering for those surfaces.
 
 ## TDD And Red-First Expectations
 
