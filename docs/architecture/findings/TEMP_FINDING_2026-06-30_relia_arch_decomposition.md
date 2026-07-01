@@ -63,6 +63,10 @@ Current progress:
   `cmd/relia/ingest_security_test.go` and
   `cmd/relia/ingest_contract_test.go`, continuing to shrink
   `cmd/relia/main_test.go` without changing command behavior.
+- Backtest report and integrity coverage now lives in
+  `cmd/relia/backtest_report_test.go` and
+  `cmd/relia/backtest_integrity_test.go`, keeping the extracted test files
+  below the architecture warning budget.
 
 ## Candidate Package Boundaries
 
