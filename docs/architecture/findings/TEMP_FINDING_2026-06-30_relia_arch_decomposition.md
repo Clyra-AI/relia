@@ -53,7 +53,8 @@ repair blast radius, and merge risk.
 ## Candidate Package Boundaries
 
 - `internal/result`: command-result envelope and helpers.
-- `internal/config`: config loading and repo-relative path policy.
+- `internal/config`: default config rendering, config document references,
+  config loading, and repo-relative path policy.
 - `internal/ingest`: event ingestion, redaction, and provenance checks.
 - `internal/backtest`: recurrence metrics and backtest report generation.
 - `internal/distill`: rule drafting and lifecycle state.
