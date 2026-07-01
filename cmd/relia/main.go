@@ -147,11 +147,7 @@ type backtestOptions struct {
 	SaveBaseline   bool
 }
 
-type assessOptions struct {
-	InputPath      string
-	Format         string
-	FormatExplicit bool
-}
+type assessOptions = assessdoc.CLIOptions
 
 type distillOptions = distilldoc.Options
 
@@ -4163,15 +4159,15 @@ func memoryProvenanceLinks(provenance []distilledRuleProvenance) []string {
 }
 
 func assessResult(args []string, start time.Time) CommandResult {
-	options, commandErr := parseAssessArgs(args)
+	options, parseErr := assessdoc.ParseArgs(args)
 	withFormat := func(result CommandResult) CommandResult {
 		if options.Format == "json" {
 			result.MachineReadable = true
 		}
 		return result
 	}
-	if commandErr != nil {
-		return withFormat(errorResult("assess", "assess", commandErr, start))
+	if parseErr != nil {
+		return withFormat(errorResult("assess", "assess", usageError(parseErr.Message), start))
 	}
 	wd, err := os.Getwd()
 	if err != nil {
@@ -4226,37 +4222,6 @@ func assessResult(args []string, start time.Time) CommandResult {
 		result.EvidenceRefs = append(result.EvidenceRefs, rule.Path)
 	}
 	return withFormat(result)
-}
-
-func parseAssessArgs(args []string) (assessOptions, *CommandError) {
-	options := assessOptions{Format: "json"}
-	for index := 0; index < len(args); index++ {
-		arg := args[index]
-		switch arg {
-		case "--input", "--diff", "-i":
-			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
-				return options, usageError("assess requires a path after " + arg)
-			}
-			options.InputPath = args[index+1]
-			index++
-		case "--format":
-			options.FormatExplicit = true
-			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
-				return options, usageError("assess requires a value after --format")
-			}
-			options.Format = args[index+1]
-			index++
-		default:
-			return options, usageError(fmt.Sprintf("unknown assess argument %q", arg))
-		}
-	}
-	if strings.TrimSpace(options.InputPath) == "" {
-		return options, usageError("assess requires --input <diff> in offline mode")
-	}
-	if options.Format != "json" {
-		return options, usageError("assess only supports --format json in this task slice")
-	}
-	return options, nil
 }
 
 func parseUnifiedDiffTouchedPaths(content []byte, ref string) ([]string, *CommandError) {

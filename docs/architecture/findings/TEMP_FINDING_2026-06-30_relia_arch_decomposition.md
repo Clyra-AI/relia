@@ -91,6 +91,9 @@ Current progress:
 - `internal/serve` now owns `relia serve` argument parsing and hosted transport
   dependency gating with direct package tests, while rule loading, served-rule
   data assembly, and MCP manifest rendering remain in `cmd/relia`.
+- `internal/assess` now owns `relia assess` argument parsing with direct
+  package tests, while diff reads, rule loading, risk assessment invocation,
+  and command-result rendering remain in `cmd/relia`.
 
 ## Candidate Package Boundaries
 
@@ -112,9 +115,9 @@ Current progress:
 - `internal/demo`: deterministic demo fixture behavior.
 - `internal/diffparse`: unified-diff touched-path parsing for assess and
   advise.
-- `internal/assess`: active memory rule serving projections, citation serving
-  filters, repo-relative scope matching, and deterministic risk assessment
-  construction for assess, serve, and advise.
+- `internal/assess`: assess command argument parsing, active memory rule
+  serving projections, citation serving filters, repo-relative scope matching,
+  and deterministic risk assessment construction for assess, serve, and advise.
 - `internal/advise`: advisory comment decision, strategy, markdown rendering,
   confidence threshold handling, and prior-state comparison helpers.
 - `internal/modelpull`: local model artifact pull argument parsing and
