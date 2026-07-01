@@ -243,9 +243,9 @@ constructors; `internal/ingest` owns ingest input parsing, the
 experience-record data model, canonical distill input decoding, record
 validation, shard persistence, fail-closed redaction, standard
 secret/provenance URL token-shape checks, and record/provenance URL helpers;
-`internal/assess` owns active memory rule serving projections, citation
-serving filters, repo-relative scope matching, and deterministic risk
-assessment construction for `assess`, `serve`, and `advise`;
+`internal/assess` owns assess argument parsing, active memory rule serving
+projections, citation serving filters, repo-relative scope matching, and
+deterministic risk assessment construction for `assess`, `serve`, and `advise`;
 `internal/advise` owns advisory comment decision, strategy, markdown rendering,
 confidence threshold handling, and prior-state comparison helpers;
 `internal/modelpull` owns local model artifact pull argument parsing and
