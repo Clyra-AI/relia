@@ -56,7 +56,7 @@ Current progress:
   `internal/result`, `internal/ingest`, and `internal/assess` now own bounded
   implementation slices extracted from the original CLI monolith.
 - Unified-diff assessment parser coverage now lives in
-  `cmd/relia/diffparse_test.go`, and initial advisory command coverage now
+  `cmd/relia/diffparse_test.go`, and advisory command/workflow coverage now
   lives in `cmd/relia/advise_test.go`, leaving the tests in package `main` for
   unexported helper access while shrinking `cmd/relia/main_test.go`.
 

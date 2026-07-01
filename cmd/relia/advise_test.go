@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -167,4 +168,122 @@ func TestAdviseEscapesTouchedPathsInAdvisoryComment(t *testing.T) {
 	if !strings.Contains(commentText, "`` packages/weird/`@here.py ``") {
 		t.Fatalf("comment missing escaped path code span:\n%s", commentText)
 	}
+}
+
+func TestAdvisoryWorkflowKeepsTokenOutOfReliaBuildAndSeedsState(t *testing.T) {
+	sourceRoot := findRepoRootForTest(t)
+	contentBytes, err := os.ReadFile(filepath.Join(sourceRoot, ".github", "workflows", "relia-advisory.yml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	content := string(contentBytes)
+	if !strings.Contains(content, "\n  pull_request_target:") || strings.Contains(content, "\n  pull_request:") {
+		t.Fatalf("advisory workflow must use pull_request_target with trusted base checkout:\n%s", content)
+	}
+	prepareBlock := workflowStepBlock(content, "Prepare advisory inputs")
+	if !strings.Contains(prepareBlock, "GH_TOKEN: ${{ github.token }}") {
+		t.Fatalf("prepare step must own GitHub token for API reads:\n%s", prepareBlock)
+	}
+	checkoutBlock := workflowStepBlock(content, "Check out repository")
+	if !strings.Contains(checkoutBlock, "ref: ${{ github.event.pull_request.base.sha }}") {
+		t.Fatalf("checkout must run trusted base-revision Relia code and rules:\n%s", checkoutBlock)
+	}
+	if !strings.Contains(checkoutBlock, "persist-credentials: false") {
+		t.Fatalf("checkout must not persist the GitHub token for later PR-code execution:\n%s", checkoutBlock)
+	}
+	for _, want := range []string{".relia/reports/github-comments.json", "advisory-state.json", "diff_fingerprint", "generated_at", "risk_level"} {
+		if !strings.Contains(prepareBlock, want) {
+			t.Fatalf("prepare step missing %q:\n%s", want, prepareBlock)
+		}
+	}
+	for _, want := range []string{"gh api --paginate --slurp", "flatten_comments"} {
+		if !strings.Contains(prepareBlock, want) {
+			t.Fatalf("prepare step must paginate and flatten advisory comments; missing %q:\n%s", want, prepareBlock)
+		}
+	}
+	for _, want := range []string{"trusted_marker_authors", "github-actions[bot]", ".get(\"user\")"} {
+		if !strings.Contains(prepareBlock, want) {
+			t.Fatalf("prepare step must trust only bot-authored advisory markers; missing %q:\n%s", want, prepareBlock)
+		}
+	}
+	assertWorkflowPythonHeredocParses(t, prepareBlock, "prepare")
+	buildBlock := workflowStepBlock(content, "Build PR advisory")
+	if strings.Contains(buildBlock, "GH_TOKEN") || strings.Contains(buildBlock, "github.token") {
+		t.Fatalf("build step must run relia without a GitHub write token:\n%s", buildBlock)
+	}
+	if !strings.Contains(buildBlock, "go run ./cmd/relia --json advise") {
+		t.Fatalf("build step missing relia advise invocation:\n%s", buildBlock)
+	}
+	for _, want := range []string{"trusted_base_advisory_unavailable", "unknown command"} {
+		if !strings.Contains(buildBlock, want) {
+			t.Fatalf("build step must skip advisory-only publish when trusted base lacks advise; missing %q:\n%s", want, buildBlock)
+		}
+	}
+	assertWorkflowPythonHeredocParses(t, buildBlock, "build")
+	publishBlock := workflowStepBlock(content, "Publish one advisory comment")
+	for _, forbidden := range []string{"advisory-env", ". .relia/reports", "source .relia/reports"} {
+		if strings.Contains(publishBlock, forbidden) {
+			t.Fatalf("publish step must not source PR-controlled shell env; found %q:\n%s", forbidden, publishBlock)
+		}
+	}
+	for _, want := range []string{"advisory-result.json", "flatten_comments", "subprocess.run(command", "advisory-body.json"} {
+		if !strings.Contains(publishBlock, want) {
+			t.Fatalf("publish step must parse advisory JSON and invoke gh without shell; missing %q:\n%s", want, publishBlock)
+		}
+	}
+	for _, want := range []string{"trusted_marker_authors", "github-actions[bot]", ".get(\"user\")"} {
+		if !strings.Contains(publishBlock, want) {
+			t.Fatalf("publish step must update only bot-authored advisory markers; missing %q:\n%s", want, publishBlock)
+		}
+	}
+	if strings.Contains(publishBlock, "\n          else\n") || !strings.Contains(publishBlock, "\n          else:") {
+		t.Fatalf("publish step Python branch must use valid else syntax:\n%s", publishBlock)
+	}
+	assertWorkflowPythonHeredocParses(t, publishBlock, "publish")
+}
+
+func assertWorkflowPythonHeredocParses(t *testing.T, block string, label string) {
+	t.Helper()
+	publishScript := workflowPythonHeredocForTest(t, block)
+	cmd := exec.Command("python3", "-c", "import ast, sys; ast.parse(sys.stdin.read())")
+	cmd.Stdin = strings.NewReader(publishScript)
+	if output, err := cmd.CombinedOutput(); err != nil {
+		t.Fatalf("%s step Python heredoc must parse, err = %v, output = %s\n%s", label, err, output, publishScript)
+	}
+}
+
+func workflowStepBlock(content string, name string) string {
+	marker := "- name: " + name
+	start := strings.Index(content, marker)
+	if start < 0 {
+		return ""
+	}
+	rest := content[start+len(marker):]
+	next := strings.Index(rest, "\n      - name: ")
+	if next < 0 {
+		return content[start:]
+	}
+	return content[start : start+len(marker)+next]
+}
+
+func workflowPythonHeredocForTest(t *testing.T, block string) string {
+	t.Helper()
+	marker := "python3 - <<'PY'"
+	start := strings.Index(block, marker)
+	if start < 0 {
+		t.Fatalf("workflow step missing Python heredoc:\n%s", block)
+	}
+	lines := strings.Split(block[start+len(marker):], "\n")
+	var script []string
+	for _, line := range lines {
+		if strings.TrimSpace(line) == "PY" {
+			if len(script) == 0 {
+				t.Fatalf("workflow Python heredoc is empty:\n%s", block)
+			}
+			return strings.Join(script, "\n") + "\n"
+		}
+		script = append(script, strings.TrimPrefix(line, "          "))
+	}
+	t.Fatalf("workflow Python heredoc is unterminated:\n%s", block)
+	return ""
 }
