@@ -58,7 +58,10 @@ repair blast radius, and merge risk.
 - `internal/config`: default config rendering, config document references,
   config loading and validation, provider/advisory configuration parsing,
   local model-manifest dependency validation, and repo-relative path policy.
-- `internal/ingest`: event ingestion, redaction, and provenance checks.
+- `internal/ingest`: ingest input parsing, fail-closed redaction, standard
+  secret-token scanning, and provenance URL token-shape checks extracted;
+  experience-record normalization and persistence coordination still live in
+  `cmd/relia`.
 - `internal/backtest`: recurrence metrics and backtest report generation.
 - `internal/distill`: rule drafting and lifecycle state.
 - `internal/serve`: advisory serving snapshot behavior.

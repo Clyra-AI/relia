@@ -12,6 +12,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	ingestdoc "github.com/Clyra-AI/relia/internal/ingest"
 )
 
 type demoRepoRef struct {
@@ -1501,9 +1503,7 @@ func assertCustomerSafeDemoContent(t *testing.T, path string, content string) {
 			t.Fatalf("%s contains forbidden customer-unsafe token %q", path, forbidden)
 		}
 	}
-	for _, pattern := range knownSecretPatterns {
-		if pattern.MatchString(content) {
-			t.Fatalf("%s contains a standard secret token shape", path)
-		}
+	if ingestdoc.ContainsStandardSecretTokenShape(content) {
+		t.Fatalf("%s contains a standard secret token shape", path)
 	}
 }
