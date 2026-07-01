@@ -219,6 +219,11 @@ into `internal/`, or record why the change is shrink-neutral with compensating
 validation. New feature work must not add fresh product domains to the CLI
 entrypoint.
 
+Decomposition starts with cohesive pure behavior that can move without changing
+the CLI contract. `internal/diffparse` owns unified-diff touched-path parsing
+for `assess` and `advise`; `cmd/relia` keeps only command wiring and
+CommandError translation for that surface.
+
 ## TDD And Red-First Expectations
 
 - Behavior changes should add or update a failing test, fixture, schema example, or validator expectation before implementation when practical.
