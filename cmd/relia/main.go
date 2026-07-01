@@ -21,6 +21,7 @@ import (
 
 	configdoc "github.com/Clyra-AI/relia/internal/config"
 	"github.com/Clyra-AI/relia/internal/diffparse"
+	resultdoc "github.com/Clyra-AI/relia/internal/result"
 	"github.com/Clyra-AI/relia/internal/yamlmini"
 )
 
@@ -38,10 +39,9 @@ const (
 )
 
 const (
-	commandResultObjectType = "relia.command_result"
-	commandSchemaVersion    = "1.0"
-	reliaVersion            = "0.0.0-dev"
-	defaultConfigFile       = configdoc.DefaultFile
+	commandSchemaVersion = "1.0"
+	reliaVersion         = "0.0.0-dev"
+	defaultConfigFile    = configdoc.DefaultFile
 )
 
 const (
@@ -113,38 +113,10 @@ var knownSecretPatterns = []*regexp.Regexp{
 	regexp.MustCompile(`(?i)\bBearer\s+[A-Za-z0-9._~+/=-]{20,}\b`),
 }
 
-type CommandResult struct {
-	ObjectType      string         `json:"object_type"`
-	SchemaVersion   string         `json:"schema_version"`
-	Command         string         `json:"command"`
-	Status          string         `json:"status"`
-	Mode            string         `json:"mode"`
-	ExitCode        int            `json:"exit_code"`
-	Warnings        []Finding      `json:"warnings"`
-	Errors          []CommandError `json:"errors"`
-	Artifacts       []ArtifactRef  `json:"artifacts"`
-	EvidenceRefs    []string       `json:"evidence_refs"`
-	DurationMS      int64          `json:"duration_ms"`
-	RedactionStatus string         `json:"redaction_status"`
-	Metadata        map[string]any `json:"metadata"`
-	Data            map[string]any `json:"data,omitempty"`
-	MachineReadable bool           `json:"-"`
-}
-
-type Finding = configdoc.Finding
-
-type CommandError struct {
-	Type        string `json:"type"`
-	Message     string `json:"message"`
-	ExitCode    int    `json:"exit_code"`
-	Remediation string `json:"remediation,omitempty"`
-	Ref         string `json:"ref,omitempty"`
-}
-
-type ArtifactRef struct {
-	Kind string `json:"kind"`
-	Path string `json:"path"`
-}
+type CommandResult = resultdoc.CommandResult
+type Finding = resultdoc.Finding
+type CommandError = resultdoc.CommandError
+type ArtifactRef = resultdoc.ArtifactRef
 
 type yamlScalar = yamlmini.Scalar
 type yamlDocument = yamlmini.Document
@@ -7138,11 +7110,7 @@ func helpResult(start time.Time) CommandResult {
 }
 
 func passResult(command string, mode string, message string, start time.Time, data map[string]any) CommandResult {
-	if data == nil {
-		data = map[string]any{}
-	}
-	data["message"] = message
-	return baseResult(command, mode, "pass", ExitSuccess, start, data)
+	return resultdoc.Pass(command, mode, message, start, data, commandResultBuildOptions())
 }
 
 func notImplementedResult(command string, start time.Time) CommandResult {
@@ -7156,44 +7124,19 @@ func notImplementedResult(command string, start time.Time) CommandResult {
 }
 
 func errorResult(command string, mode string, commandErr *CommandError, start time.Time) CommandResult {
-	result := baseResult(command, mode, "error", commandErr.ExitCode, start, nil)
-	result.Errors = append(result.Errors, *commandErr)
-	if commandErr.ExitCode == ExitRedactionSafety {
-		result.RedactionStatus = "failed_closed"
-	}
-	return result
+	return resultdoc.Error(command, mode, commandErr, start, commandResultBuildOptions())
 }
 
 func errorResultWithData(command string, mode string, commandErr *CommandError, start time.Time, data map[string]any) CommandResult {
-	result := errorResult(command, mode, commandErr, start)
-	result.Data = data
-	return result
+	return resultdoc.ErrorWithData(command, mode, commandErr, start, data, commandResultBuildOptions())
 }
 
-func baseResult(command string, mode string, status string, exitCode int, start time.Time, data map[string]any) CommandResult {
-	return CommandResult{
-		ObjectType:    commandResultObjectType,
-		SchemaVersion: commandSchemaVersion,
-		Command:       command,
-		Status:        status,
-		Mode:          mode,
-		ExitCode:      exitCode,
-		Warnings:      []Finding{},
-		Errors:        []CommandError{},
-		Artifacts:     []ArtifactRef{},
-		EvidenceRefs: []string{
-			"docs/product/prd.md#command-model",
-			"docs/dev/dev_guides.md#agent-native-cli-policy",
-			"schemas/command-result.schema.json",
-		},
-		DurationMS:      time.Since(start).Milliseconds(),
-		RedactionStatus: "not_applicable",
-		Metadata: map[string]any{
-			"relia_version":  reliaVersion,
-			"schema_ref":     "schemas/command-result.schema.json",
-			"schema_version": commandSchemaVersion,
-		},
-		Data: data,
+func commandResultBuildOptions() resultdoc.BuildOptions {
+	return resultdoc.BuildOptions{
+		SchemaVersion:           commandSchemaVersion,
+		ReliaVersion:            reliaVersion,
+		SuccessExitCode:         ExitSuccess,
+		RedactionSafetyExitCode: ExitRedactionSafety,
 	}
 }
 

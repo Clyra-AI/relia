@@ -225,9 +225,10 @@ for `assess` and `advise`; `internal/yamlmini` owns Relia's minimal
 repo-local YAML parsing and line-reference inventory for config and memory
 rule documents; `internal/config` owns default config document rendering,
 config document references, config loading and validation, provider/advisory
-configuration parsing, and local model-manifest dependency validation.
-`cmd/relia` keeps command wiring and CommandError translation for those
-surfaces.
+configuration parsing, and local model-manifest dependency validation;
+`internal/result` owns the command-result envelope and generic pass/error
+constructors. `cmd/relia` keeps command wiring, command-specific
+CommandError translation, and human/JSON rendering for those surfaces.
 
 ## TDD And Red-First Expectations
 
