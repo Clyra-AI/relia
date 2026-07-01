@@ -23,6 +23,7 @@ import (
 	"github.com/Clyra-AI/relia/internal/diffparse"
 	distilldoc "github.com/Clyra-AI/relia/internal/distill"
 	ingestdoc "github.com/Clyra-AI/relia/internal/ingest"
+	memorydoc "github.com/Clyra-AI/relia/internal/memory"
 	modelpulldoc "github.com/Clyra-AI/relia/internal/modelpull"
 	resultdoc "github.com/Clyra-AI/relia/internal/result"
 	reviewdoc "github.com/Clyra-AI/relia/internal/review"
@@ -166,10 +167,7 @@ type adviseOptions struct {
 
 type reviewOptions = reviewdoc.Options
 
-type memoryOptions struct {
-	Format     string
-	OutputPath string
-}
+type memoryOptions = memorydoc.Options
 
 type riskAssessment = assessdoc.RiskAssessment
 type riskAssessmentMatch = assessdoc.RiskAssessmentMatch
@@ -2481,15 +2479,15 @@ func reviewResult(args []string, start time.Time) CommandResult {
 }
 
 func memoryResult(args []string, start time.Time) CommandResult {
-	options, commandErr := parseMemoryArgs(args)
+	options, parseErr := memorydoc.ParseArgs(args)
 	withFormat := func(result CommandResult) CommandResult {
 		if options.Format == "json" {
 			result.MachineReadable = true
 		}
 		return result
 	}
-	if commandErr != nil {
-		return withFormat(errorResult("memory", "memory", commandErr, start))
+	if parseErr != nil {
+		return withFormat(errorResult("memory", "memory", usageError(parseErr.Message), start))
 	}
 	wd, err := os.Getwd()
 	if err != nil {
@@ -2529,36 +2527,6 @@ func memoryResult(args []string, start time.Time) CommandResult {
 		result.Artifacts = append(result.Artifacts, ArtifactRef{Kind: "memory_rule", Path: rule.Path})
 	}
 	return withFormat(result)
-}
-
-func parseMemoryArgs(args []string) (memoryOptions, *CommandError) {
-	options := memoryOptions{Format: "json", OutputPath: "memory/MEMORY.md"}
-	for index := 0; index < len(args); index++ {
-		arg := args[index]
-		switch arg {
-		case "--format":
-			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
-				return options, usageError("memory requires a value after --format")
-			}
-			options.Format = args[index+1]
-			index++
-		case "--output":
-			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
-				return options, usageError("memory requires a repo-relative path after --output")
-			}
-			options.OutputPath = args[index+1]
-			index++
-		default:
-			return options, usageError(fmt.Sprintf("unknown memory argument %q", arg))
-		}
-	}
-	if options.Format != "json" {
-		return options, usageError("memory only supports --format json in this task slice")
-	}
-	if _, ok := cleanRepoPath(options.OutputPath); !ok {
-		return options, usageError("memory --output must be a repo-relative path")
-	}
-	return options, nil
 }
 
 func serveResult(args []string, start time.Time) CommandResult {
