@@ -110,6 +110,8 @@ EXPECTED_ARCHITECTURE_BUDGET_EXCLUDED_DIRS = [
     ".git",
     ".factoryd",
     ".factory/tmp",
+    ".relia",
+    "workspaces",
     ".venv",
     "__pycache__",
     "build",
@@ -1108,7 +1110,7 @@ def self_test():
         oversized.write_text("line\n" * 2501)
         sample_budget = {
             "source_extensions": [".go"],
-            "excluded_dirs": [".git", ".factoryd", ".factory/tmp"],
+            "excluded_dirs": [".git", ".factoryd", ".factory/tmp", ".relia", "workspaces"],
             "fail_line_threshold": 2500,
         }
         failures = architecture_budget_unexcepted_failures(temp_root, sample_budget, set(), {})
@@ -1119,6 +1121,11 @@ def self_test():
         scratch.write_text("line\n" * 2501)
         if any(".factory/tmp/scratch.go" in failure for failure in architecture_budget_unexcepted_failures(temp_root, sample_budget, set(), {})):
             fail("architecture budget self-test expected .factory/tmp scratch to be excluded")
+        generated = temp_root / ".relia" / "models" / "generated.go"
+        generated.parent.mkdir(parents=True)
+        generated.write_text("line\n" * 2501)
+        if any(".relia/models/generated.go" in failure for failure in architecture_budget_unexcepted_failures(temp_root, sample_budget, set(), {})):
+            fail("architecture budget self-test expected .relia generated state to be excluded")
         if architecture_budget_unexcepted_failures(temp_root, sample_budget, {"cmd/demo/main.go"}, {"cmd/demo/main.go": 2501}):
             fail("architecture budget self-test expected exception-scoped source to pass")
         ceiling_failures = architecture_budget_unexcepted_failures(
