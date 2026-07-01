@@ -17,6 +17,7 @@ import (
 	"strings"
 	"time"
 
+	assessdoc "github.com/Clyra-AI/relia/internal/assess"
 	configdoc "github.com/Clyra-AI/relia/internal/config"
 	"github.com/Clyra-AI/relia/internal/diffparse"
 	ingestdoc "github.com/Clyra-AI/relia/internal/ingest"
@@ -179,35 +180,10 @@ type memoryOptions struct {
 	OutputPath string
 }
 
-type riskAssessment struct {
-	ObjectType    string                `json:"object_type"`
-	SchemaVersion string                `json:"schema_version"`
-	AssessmentID  string                `json:"assessment_id"`
-	RiskLevel     string                `json:"risk_level"`
-	Matches       []riskAssessmentMatch `json:"matches"`
-	Citations     []string              `json:"citations"`
-	Metadata      map[string]any        `json:"metadata"`
-}
-
-type riskAssessmentMatch struct {
-	RuleID     string  `json:"rule_id"`
-	Confidence float64 `json:"confidence"`
-}
-
-type assessmentRule struct {
-	ID         string
-	Kind       string
-	Path       string
-	Confidence float64
-	ScopePaths []string
-	Citations  []assessmentRuleCitation
-}
-
-type assessmentRuleCitation struct {
-	URL     string
-	PR      int
-	Outcome string
-}
+type riskAssessment = assessdoc.RiskAssessment
+type riskAssessmentMatch = assessdoc.RiskAssessmentMatch
+type assessmentRule = assessdoc.Rule
+type assessmentRuleCitation = assessdoc.RuleCitation
 
 type experienceRecord = ingestdoc.Record
 type experienceRepo = ingestdoc.Repo
@@ -2850,26 +2826,7 @@ func parseServeArgs(args []string) (serveOptions, *CommandError) {
 }
 
 func servedRuleData(rules []assessmentRule) ([]map[string]any, *CommandError) {
-	data := make([]map[string]any, 0, len(rules))
-	for _, rule := range rules {
-		servedCitationRefs := servedAssessmentRuleCitations(rule)
-		servedCitations := assessmentRuleCitationURLs(servedCitationRefs)
-		if len(servedCitations) == 0 {
-			return nil, provenanceIntegrityError("served active memory rule must include citation URLs", rule.Path)
-		}
-		if commandErr := validateServedAssessmentRuleCitations(rule, servedCitationRefs); commandErr != nil {
-			return nil, commandErr
-		}
-		data = append(data, map[string]any{
-			"rule_id":     rule.ID,
-			"kind":        rule.Kind,
-			"confidence":  rule.Confidence,
-			"scope_paths": append([]string(nil), rule.ScopePaths...),
-			"citations":   servedCitations,
-			"path":        rule.Path,
-		})
-	}
-	return data, nil
+	return assessdoc.ServedRuleData(rules, assessmentBuildOptions())
 }
 
 func adviseResult(args []string, start time.Time) CommandResult {
@@ -5161,224 +5118,51 @@ func validateActiveAssessmentRuleIdentity(root string, document yamlDocument, re
 }
 
 func assessmentRuleHasPositivePlaybookEvidence(document yamlDocument) bool {
-	for _, provenance := range document.ListMaps["provenance"] {
-		outcome, ok := provenance["outcome"]
-		if !ok {
-			continue
-		}
-		if outcome.Value == "fix_held" || outcome.Value == "merged_clean" {
-			return true
-		}
-	}
-	return false
+	return assessdoc.HasPositivePlaybookEvidence(document)
 }
 
 func assessmentRuleCitations(document yamlDocument) []assessmentRuleCitation {
-	var citations []assessmentRuleCitation
-	for _, provenance := range document.ListMaps["provenance"] {
-		url, ok := provenance["url"]
-		if !ok || strings.TrimSpace(url.Value) == "" {
-			continue
-		}
-		prNumber := 0
-		if pr, ok := provenance["pr"]; ok {
-			prNumber, _ = strconv.Atoi(pr.Value)
-		}
-		outcome := ""
-		if value, ok := provenance["outcome"]; ok {
-			outcome = value.Value
-		}
-		citations = append(citations, assessmentRuleCitation{
-			URL:     url.Value,
-			PR:      prNumber,
-			Outcome: outcome,
-		})
-	}
-	return uniqueAssessmentRuleCitations(citations)
+	return assessdoc.RuleCitations(document)
 }
 
 func uniqueAssessmentRuleCitations(citations []assessmentRuleCitation) []assessmentRuleCitation {
-	seen := map[string]bool{}
-	var unique []assessmentRuleCitation
-	for _, citation := range citations {
-		key := fmt.Sprintf("%s\x00%d\x00%s", citation.URL, citation.PR, citation.Outcome)
-		if seen[key] {
-			continue
-		}
-		seen[key] = true
-		unique = append(unique, citation)
-	}
-	return unique
+	return assessdoc.UniqueRuleCitations(citations)
 }
 
 func buildRiskAssessment(root string, inputRef string, content []byte, touchedPaths []string, rules []assessmentRule) (riskAssessment, *CommandError) {
-	matches := []riskAssessmentMatch{}
-	citations := []string{}
-	highestAvoidConfidence := -1.0
-	hasPlaybookCoverage := false
-	for _, rule := range rules {
-		if !assessmentRuleMatchesTouchedPath(root, rule, touchedPaths) {
-			continue
-		}
-		if strings.TrimSpace(rule.ID) == "" {
-			return riskAssessment{}, provenanceIntegrityError("matched active memory rule id must be non-empty for assessment", rule.Path)
-		}
-		servedCitationRefs := servedAssessmentRuleCitations(rule)
-		servedCitations := assessmentRuleCitationURLs(servedCitationRefs)
-		if len(servedCitations) == 0 {
-			return riskAssessment{}, provenanceIntegrityError("matched active memory rule must include citation URLs for assessment", rule.Path)
-		}
-		if math.IsNaN(rule.Confidence) || math.IsInf(rule.Confidence, 0) || rule.Confidence < 0 || rule.Confidence > 1 {
-			return riskAssessment{}, provenanceIntegrityError("matched active memory rule confidence must be between 0 and 1 for assessment", rule.Path)
-		}
-		if commandErr := validateServedAssessmentRuleCitations(rule, servedCitationRefs); commandErr != nil {
-			return riskAssessment{}, commandErr
-		}
-		matches = append(matches, riskAssessmentMatch{
-			RuleID:     rule.ID,
-			Confidence: rule.Confidence,
-		})
-		citations = append(citations, servedCitations...)
-		if rule.Kind == "playbook" {
-			hasPlaybookCoverage = true
-		} else if rule.Confidence > highestAvoidConfidence {
-			highestAvoidConfidence = rule.Confidence
-		}
-	}
-	sort.Slice(matches, func(i, j int) bool {
-		if matches[i].Confidence == matches[j].Confidence {
-			return matches[i].RuleID < matches[j].RuleID
-		}
-		return matches[i].Confidence > matches[j].Confidence
-	})
-	citations = uniqueStrings(citations)
-	if citations == nil {
-		citations = []string{}
-	}
-	riskLevel := "no_coverage"
-	if highestAvoidConfidence >= 0.75 {
-		riskLevel = "match_high"
-	} else if highestAvoidConfidence >= 0 {
-		riskLevel = "match_medium"
-	} else if hasPlaybookCoverage {
-		riskLevel = "covered_clean"
-	}
-	metadata := map[string]any{
-		"input_path":               inputRef,
-		"diff_fingerprint":         sha256String(string(content)),
-		"touched_paths":            touchedPaths,
-		"repo_relative_paths_only": true,
-		"redaction_status":         "customer_safe",
-	}
-	if highestAvoidConfidence >= 0 {
-		metadata["max_avoid_confidence"] = highestAvoidConfidence
-	}
-	return riskAssessment{
-		ObjectType:    "relia.risk_assessment",
-		SchemaVersion: commandSchemaVersion,
-		AssessmentID:  "assess_" + shortHash(inputRef+"|"+sha256String(string(content))+"|"+strings.Join(touchedPaths, "\x00")),
-		RiskLevel:     riskLevel,
-		Matches:       matches,
-		Citations:     citations,
-		Metadata:      metadata,
-	}, nil
+	return assessdoc.BuildRiskAssessment(root, inputRef, content, touchedPaths, rules, assessmentBuildOptions())
 }
 
 func validateServedAssessmentRuleCitations(rule assessmentRule, servedCitationRefs []assessmentRuleCitation) *CommandError {
-	for _, citation := range servedCitationRefs {
-		prNumber, ok := gitHubPullRequestURLNumber(citation.URL)
-		if !ok {
-			return provenanceIntegrityError("matched active memory rule citation URL must be an https://github.com/<owner>/<repo>/pull/<number> URL", rule.Path)
-		}
-		if citation.PR <= 0 || prNumber != citation.PR {
-			return provenanceIntegrityError("matched active memory rule citation URL pull number must match provenance pr", rule.Path)
-		}
-	}
-	return nil
+	return assessdoc.ValidateServedRuleCitations(rule, servedCitationRefs, assessmentBuildOptions())
 }
 
 func servedAssessmentRuleCitationURLs(rule assessmentRule) []string {
-	return assessmentRuleCitationURLs(servedAssessmentRuleCitations(rule))
+	return assessdoc.ServedRuleCitationURLs(rule)
 }
 
 func servedAssessmentRuleCitations(rule assessmentRule) []assessmentRuleCitation {
-	var refs []assessmentRuleCitation
-	for _, citation := range rule.Citations {
-		if rule.Kind == "playbook" && citation.Outcome != "fix_held" && citation.Outcome != "merged_clean" {
-			continue
-		}
-		refs = append(refs, citation)
-	}
-	return uniqueAssessmentRuleCitations(refs)
+	return assessdoc.ServedRuleCitations(rule)
 }
 
 func assessmentRuleCitationURLs(refs []assessmentRuleCitation) []string {
-	var citations []string
-	for _, citation := range refs {
-		citations = append(citations, citation.URL)
-	}
-	return uniqueStrings(citations)
+	return assessdoc.RuleCitationURLs(refs)
 }
 
 func assessmentRuleMatchesTouchedPath(root string, rule assessmentRule, touchedPaths []string) bool {
-	for _, rawScopePath := range rule.ScopePaths {
-		scopePath, directoryScope, ok := normalizeAssessmentScopePath(root, rawScopePath)
-		if !ok {
-			continue
-		}
-		for _, touchedPath := range touchedPaths {
-			touchedPath = filepath.ToSlash(filepath.Clean(filepath.FromSlash(touchedPath)))
-			if scopePatternMatches(scopePath, touchedPath) || scopePath == touchedPath || directoryScopeMatches(scopePath, touchedPath, directoryScope) {
-				return true
-			}
-		}
-	}
-	return false
+	return assessdoc.RuleMatchesTouchedPath(root, rule, touchedPaths)
 }
 
 func normalizeAssessmentScopePath(root string, raw string) (string, bool, bool) {
-	trimmed := strings.TrimSpace(raw)
-	if trimmed == "" {
-		return "", false, false
-	}
-	slashPath := filepath.ToSlash(trimmed)
-	directoryScope := strings.HasSuffix(slashPath, "/") && !hasGlobMagic(slashPath)
-	clean, ok := cleanRepoPath(slashPath)
-	if !ok {
-		return "", false, false
-	}
-	scopePath := filepath.ToSlash(clean)
-	if !directoryScope && !hasGlobMagic(scopePath) {
-		info, err := os.Stat(filepath.Join(root, filepath.FromSlash(scopePath)))
-		if err == nil {
-			directoryScope = info.IsDir()
-		} else if historicalDirectoryScope(root, scopePath) {
-			directoryScope = true
-		}
-	}
-	return scopePath, directoryScope, true
+	return assessdoc.NormalizeScopePath(root, raw)
 }
 
 func directoryScopeMatches(scopePath string, touchedPath string, directoryScope bool) bool {
-	if !directoryScope {
-		return false
-	}
-	return touchedPath == scopePath || strings.HasPrefix(touchedPath, scopePath+"/")
+	return assessdoc.DirectoryScopeMatches(scopePath, touchedPath, directoryScope)
 }
 
 func historicalDirectoryScope(root string, scopePath string) bool {
-	output, err := exec.Command("git", "-C", root, "log", "--all", "--name-only", "--format=", "--", scopePath).Output()
-	if err != nil {
-		return false
-	}
-	prefix := strings.TrimSuffix(scopePath, "/") + "/"
-	for _, line := range strings.Split(string(output), "\n") {
-		clean, ok := cleanRepoPath(line)
-		if ok && strings.HasPrefix(filepath.ToSlash(clean), prefix) {
-			return true
-		}
-	}
-	return false
+	return assessdoc.HistoricalDirectoryScope(root, scopePath)
 }
 
 func readReliaConfig(root string) (yamlDocument, *CommandError) {
@@ -6150,6 +5934,13 @@ func commandResultBuildOptions() resultdoc.BuildOptions {
 		ReliaVersion:            reliaVersion,
 		SuccessExitCode:         ExitSuccess,
 		RedactionSafetyExitCode: ExitRedactionSafety,
+	}
+}
+
+func assessmentBuildOptions() assessdoc.Options {
+	return assessdoc.Options{
+		SchemaVersion:            commandSchemaVersion,
+		ProvenanceIntegrityError: provenanceIntegrityError,
 	}
 }
 
