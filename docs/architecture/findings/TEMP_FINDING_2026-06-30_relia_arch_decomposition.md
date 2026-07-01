@@ -99,9 +99,10 @@ Current progress:
   command-result rendering remain in `cmd/relia`.
 - `internal/backtest` now owns `relia backtest` argument parsing, recurrence
   window duration validation, recurrence report model, diagnostics/operator
-  feedback/badge helpers, and top repeated mistake aggregation with direct
-  package tests, while experience loading, report metric assembly, baseline
-  mutation, and command-result rendering remain in `cmd/relia`.
+  feedback/badge helpers, top repeated mistake aggregation, and HTML report
+  rendering with direct package tests, while experience loading, report metric
+  assembly, baseline mutation, filesystem writes, and command-result rendering
+  remain in `cmd/relia`.
 
 ## Candidate Package Boundaries
 
@@ -119,8 +120,9 @@ Current progress:
   `cmd/relia`.
 - `internal/backtest`: backtest command argument parsing, recurrence window
   validation, recurrence report model, report diagnostics/operator
-  feedback/badge helpers, and top repeated mistake aggregation extracted;
-  recurrence metrics and report generation remain candidates.
+  feedback/badge helpers, top repeated mistake aggregation, and HTML report
+  rendering extracted; recurrence metrics, JSON/baseline persistence, and
+  report generation orchestration remain candidates.
 - `internal/distill`: rule drafting and lifecycle state.
 - `internal/serve`: advisory serving snapshot behavior.
 - `internal/demo`: deterministic demo fixture behavior.
