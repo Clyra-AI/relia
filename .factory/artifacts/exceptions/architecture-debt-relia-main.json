@@ -1,0 +1,36 @@
+{
+  "artifact_type": "architecture_debt_exception",
+  "schema_version": "0.1",
+  "exception_id": "ARCH-DEBT-2026-07-01-relia-main",
+  "repo": "relia",
+  "scope": {
+    "paths": [
+      "cmd/relia/main.go",
+      "cmd/relia/main_test.go"
+    ],
+    "line_ceilings": {
+      "cmd/relia/main.go": 8994,
+      "cmd/relia/main_test.go": 7786
+    },
+    "budget": {
+      "warn_line_threshold": 1200,
+      "fail_line_threshold": 2500
+    }
+  },
+  "reason": "Relia currently concentrates product behavior and command tests in cmd/relia/main.go and cmd/relia/main_test.go while the repo transitions to bounded internal packages. The exception prevents autoship from hiding the existing monolith and blocks silent removal of the decomposition follow-up.",
+  "owner": "relia-maintainers",
+  "approved_by": "architecture-review",
+  "approved_at": "2026-07-01T00:00:00Z",
+  "expires_at": "2026-09-01T00:00:00Z",
+  "compensating_validation": [
+    "make prepush-full",
+    "factoryd doctor emits architecture_budget_report with cmd/relia/main.go and cmd/relia/main_test.go marked exception_approved",
+    "tasks touching cmd/relia/main.go or cmd/relia/main_test.go must avoid net line growth unless they are shrink-only decomposition work"
+  ],
+  "follow_up_refs": [
+    "docs/architecture/findings/TEMP_FINDING_2026-06-30_relia_arch_decomposition.md"
+  ],
+  "evidence_refs": [
+    "docs/architecture/findings/TEMP_FINDING_2026-06-30_relia_arch_decomposition.md"
+  ]
+}
