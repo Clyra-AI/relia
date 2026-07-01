@@ -100,9 +100,9 @@ Current progress:
 - `internal/backtest` now owns `relia backtest` argument parsing, recurrence
   window duration validation, recurrence report model, diagnostics/operator
   feedback/badge helpers, top repeated mistake aggregation, and HTML report
-  rendering with direct package tests, while experience loading, report metric
-  assembly, baseline mutation, filesystem writes, and command-result rendering
-  remain in `cmd/relia`.
+  rendering with direct package tests, while experience loading, baseline
+  mutation, filesystem writes, and command-result rendering remain in
+  `cmd/relia`.
 - `internal/backtest` now also owns ERR baseline JSON comparison and freshly
   saved baseline status shaping with direct package tests, while repo-relative
   path validation and baseline/report file writes remain in `cmd/relia`.
@@ -112,6 +112,10 @@ Current progress:
 - `internal/backtest` now also owns recurrence report ID generation with direct
   package tests, while report assembly and filesystem persistence remain in
   `cmd/relia`.
+- `internal/backtest` now also owns report windowing, recurrence metrics
+  assembly, and report metadata assembly with direct package tests, while the
+  CLI keeps recurrence orchestration, baseline mutation, filesystem
+  persistence, and command-result rendering.
 
 ## Candidate Package Boundaries
 
@@ -131,8 +135,9 @@ Current progress:
   validation, recurrence report model, report diagnostics/operator
   feedback/badge helpers, top repeated mistake aggregation, HTML report
   rendering, ERR baseline comparison, report repo ID derivation, and ingest
-  freshness metadata selection, and recurrence report ID generation extracted;
-  recurrence metrics, baseline/report file persistence, and report generation
+  freshness metadata selection, recurrence report ID generation, report
+  windowing, recurrence metrics assembly, and report metadata assembly
+  extracted; baseline/report file persistence and report generation
   orchestration remain candidates.
 - `internal/distill`: rule drafting and lifecycle state.
 - `internal/serve`: advisory serving snapshot behavior.
