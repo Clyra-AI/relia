@@ -61,6 +61,8 @@ repair blast radius, and merge risk.
 - `internal/demo`: deterministic demo fixture behavior.
 - `internal/diffparse`: unified-diff touched-path parsing for assess and
   advise.
+- `internal/yamlmini`: minimal repo-local YAML parsing and line-reference
+  inventory for config and memory rule documents.
 
 ## Required Promotion
 
