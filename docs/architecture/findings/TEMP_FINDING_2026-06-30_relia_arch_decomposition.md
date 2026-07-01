@@ -52,7 +52,9 @@ repair blast radius, and merge risk.
 
 ## Candidate Package Boundaries
 
-- `internal/result`: command-result envelope and helpers.
+- `internal/result`: command-result envelope and generic pass/error helpers
+  extracted; command-specific error translation and rendering still live in
+  `cmd/relia`.
 - `internal/config`: default config rendering, config document references,
   config loading and validation, provider/advisory configuration parsing,
   local model-manifest dependency validation, and repo-relative path policy.
