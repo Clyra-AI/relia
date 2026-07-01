@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from pathlib import Path
 import json
+import os
 import re
 import sys
 from tempfile import TemporaryDirectory
@@ -161,6 +162,90 @@ def validate_architecture_debt_exception(ref):
     if not exception.get("follow_up_refs"):
         fail(f"{ref}.follow_up_refs must be non-empty")
 
+def normalize_architecture_budget_path(value):
+    path = str(value).strip().replace("\\", "/")
+    while path.startswith("./"):
+        path = path[2:]
+    return path.strip("/")
+
+def architecture_budget_path_excluded(rel, excluded_dirs):
+    rel = normalize_architecture_budget_path(rel)
+    if not rel:
+        return False
+    parts = [part for part in rel.split("/") if part]
+    for index, part in enumerate(parts):
+        prefix = "/".join(parts[: index + 1])
+        if prefix in excluded_dirs or part in excluded_dirs:
+            return True
+    return False
+
+def architecture_budget_exception_paths(root):
+    approved = set()
+    for ref in ARCHITECTURE_BUDGET_EXCEPTION_REFS:
+        exception = load_json_file(root / ref)
+        scope = exception.get("scope") or {}
+        for path in scope.get("paths") or []:
+            normalized = normalize_architecture_budget_path(path)
+            if normalized:
+                approved.add(normalized)
+    return approved
+
+def count_file_lines(path):
+    count = 0
+    last = b""
+    with path.open("rb") as handle:
+        while True:
+            chunk = handle.read(1024 * 1024)
+            if not chunk:
+                break
+            count += chunk.count(b"\n")
+            last = chunk[-1:]
+    if last and last != b"\n":
+        count += 1
+    return count
+
+def architecture_budget_unexcepted_failures(root, budget, exception_paths):
+    extensions = {
+        str(ext).strip().lower()
+        for ext in budget.get("source_extensions") or []
+        if str(ext).strip()
+    }
+    excluded_dirs = {
+        normalize_architecture_budget_path(path)
+        for path in budget.get("excluded_dirs") or []
+        if normalize_architecture_budget_path(path)
+    }
+    fail_threshold = int(budget.get("fail_line_threshold") or 0)
+    failures = []
+    for dirpath, dirnames, filenames in os.walk(root):
+        rel_dir = Path(dirpath).relative_to(root).as_posix()
+        rel_dir = "" if rel_dir == "." else rel_dir
+        dirnames[:] = [
+            dirname
+            for dirname in dirnames
+            if not architecture_budget_path_excluded(str(Path(rel_dir) / dirname), excluded_dirs)
+        ]
+        for filename in filenames:
+            path = Path(dirpath) / filename
+            rel = path.relative_to(root).as_posix()
+            if architecture_budget_path_excluded(rel, excluded_dirs):
+                continue
+            if path.suffix.lower() not in extensions:
+                continue
+            try:
+                line_count = count_file_lines(path)
+            except OSError as exc:
+                failures.append(f"{rel} (unreadable: {exc})")
+                continue
+            if line_count >= fail_threshold and rel not in exception_paths:
+                failures.append(f"{rel} ({line_count} lines >= {fail_threshold})")
+    return sorted(failures)
+
+def validate_architecture_budget_inventory(budget, label):
+    failures = architecture_budget_unexcepted_failures(ROOT, budget, architecture_budget_exception_paths(ROOT))
+    if failures:
+        fail(f"{label}.architecture_budget has unexcepted over-budget source files: {', '.join(failures)}")
+
 def validate_architecture_budget_policy(repo, label):
     budget = repo.get("architecture_budget")
     if not isinstance(budget, dict):
@@ -185,6 +270,7 @@ def validate_architecture_budget_policy(repo, label):
         fail(f"{label}.architecture_budget.exception_refs must be {ARCHITECTURE_BUDGET_EXCEPTION_REFS!r}")
     for ref in ARCHITECTURE_BUDGET_EXCEPTION_REFS:
         validate_architecture_debt_exception(ref)
+    validate_architecture_budget_inventory(budget, label)
 
 def profile_visibility_from_text(profile_text):
     for line in profile_text.splitlines():
@@ -962,6 +1048,21 @@ def self_test():
         fail("repo root resolution selected scripts/ instead of repository root")
     if not (ROOT / "scripts" / "validate_repo_pack.py").exists():
         fail("repo root resolution must be relative to this validator file")
+    with TemporaryDirectory() as temp_dir:
+        temp_root = Path(temp_dir)
+        oversized = temp_root / "cmd" / "demo" / "main.go"
+        oversized.parent.mkdir(parents=True)
+        oversized.write_text("line\n" * 2501)
+        sample_budget = {
+            "source_extensions": [".go"],
+            "excluded_dirs": [".git", ".factoryd"],
+            "fail_line_threshold": 2500,
+        }
+        failures = architecture_budget_unexcepted_failures(temp_root, sample_budget, set())
+        if not failures or "cmd/demo/main.go" not in failures[0]:
+            fail("architecture budget self-test expected unexcepted oversized source to fail")
+        if architecture_budget_unexcepted_failures(temp_root, sample_budget, {"cmd/demo/main.go"}):
+            fail("architecture budget self-test expected exception-scoped source to pass")
     if duplicate_values(["T1", "T2", "T1", "T2", "T3"]) != ["T1", "T2"]:
         fail("duplicate_values must preserve duplicate ids in first duplicate order")
     if "FR23-PROVIDER-ADAPTERS-AND-NO-LLM-MODE-001" not in PROVIDER_ACCEPTANCE_IDS:
