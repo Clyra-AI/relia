@@ -1,12 +1,15 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestAdviseWritesOneAdvisoryCommentPlanAndSkipsUnchangedDiff(t *testing.T) {
@@ -167,6 +170,428 @@ func TestAdviseEscapesTouchedPathsInAdvisoryComment(t *testing.T) {
 	}
 	if !strings.Contains(commentText, "`` packages/weird/`@here.py ``") {
 		t.Fatalf("comment missing escaped path code span:\n%s", commentText)
+	}
+}
+
+func TestAdviseClearsExistingAdvisoryForCoveredCleanAssessment(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "billing-playbook.yaml"), `object_type: relia.memory_rule
+schema_version: "1.0"
+id: billing-playbook-fixture
+kind: playbook
+status: active
+statement: Billing clock changes are covered when they use the approved fixture.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.91
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_0142
+provenance:
+  - pr: 142
+    outcome: merged_clean
+    url: https://github.com/acme/billing-service/pull/142
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`)
+	diffContent := `diff --git a/packages/billing/invoice.py b/packages/billing/invoice.py
+--- a/packages/billing/invoice.py
++++ b/packages/billing/invoice.py
+@@ -1,2 +1,3 @@
+ def rollover_day():
+-    return "2026-01-01"
++    return billing_clock().strftime("%Y-%m-%d")
+`
+	writeFileForTest(t, filepath.Join(tempDir, "change.diff"), diffContent)
+	writeFileForTest(t, filepath.Join(tempDir, ".relia", "reports", "advisory-state.json"), fmt.Sprintf(`{
+  "object_type": "relia.advisory_state",
+  "schema_version": "1.0",
+  "diff_fingerprint": %q,
+  "metadata": {
+    "risk_level": "match_high"
+  }
+}
+`, sha256String(diffContent)))
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "advise", "--input", "change.diff", "--format", "json"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("advise covered clean clear exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Data["should_comment"] != true || result.Data["skip_reason"] != "" {
+		t.Fatalf("advise result = %#v", result.Data)
+	}
+	comment, err := os.ReadFile(filepath.Join(tempDir, ".relia", "reports", "advisory-comment.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{"Prior advisory cleared", "billing-playbook-fixture", "https://github.com/acme/billing-service/pull/142"} {
+		if !strings.Contains(string(comment), want) {
+			t.Fatalf("clear comment missing %q:\n%s", want, comment)
+		}
+	}
+
+	stdout, stderr, code = runForTest(t, []string{"--json", "advise", "--input", "change.diff", "--format", "json"}, false)
+	if code != ExitSuccess {
+		t.Fatalf("second advise covered clean exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result = decodeResult(t, stdout)
+	if result.Data["should_comment"] != false || result.Data["skip_reason"] != "unchanged_diff_fingerprint" {
+		t.Fatalf("second advise result = %#v", result.Data)
+	}
+}
+
+func TestAdviseClearsExistingAdvisoryWhenConfidenceDropsBelowMinimum(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "billing-low-confidence.yaml"), `object_type: relia.memory_rule
+schema_version: "1.0"
+id: billing-low-confidence-fixture
+kind: avoid
+status: active
+statement: Low confidence billing changes should not keep stale advisories visible.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.55
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_0142
+provenance:
+  - pr: 142
+    outcome: ci_failure
+    url: https://github.com/acme/billing-service/pull/142
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`)
+	diffContent := `diff --git a/packages/billing/invoice.py b/packages/billing/invoice.py
+--- a/packages/billing/invoice.py
++++ b/packages/billing/invoice.py
+@@ -1,2 +1,3 @@
+ def rollover_day():
+-    return "2026-01-01"
++    return maybe_safe_billing_clock().strftime("%Y-%m-%d")
+`
+	writeFileForTest(t, filepath.Join(tempDir, "change.diff"), diffContent)
+	writeFileForTest(t, filepath.Join(tempDir, ".relia", "reports", "advisory-state.json"), fmt.Sprintf(`{
+  "object_type": "relia.advisory_state",
+  "schema_version": "1.0",
+  "diff_fingerprint": "sha256:previous",
+  "metadata": {
+    "generated_at": %q,
+    "risk_level": "match_high"
+  }
+}
+`, time.Now().UTC().Add(-time.Hour).Format(time.RFC3339)))
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "advise", "--input", "change.diff", "--format", "json"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("advise below-min clear exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Data["should_comment"] != true || result.Data["skip_reason"] != "below_min_confidence" {
+		t.Fatalf("advise result = %#v", result.Data)
+	}
+	comment, err := os.ReadFile(filepath.Join(tempDir, ".relia", "reports", "advisory-comment.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	commentText := string(comment)
+	for _, want := range []string{"risk_level=below_min_confidence", "below the advisory confidence threshold", "Prior advisory cleared", "billing-low-confidence-fixture"} {
+		if !strings.Contains(commentText, want) {
+			t.Fatalf("below-min clear comment missing %q:\n%s", want, commentText)
+		}
+	}
+	stateContent, err := os.ReadFile(filepath.Join(tempDir, ".relia", "reports", "advisory-state.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var state map[string]any
+	if err := json.Unmarshal(stateContent, &state); err != nil {
+		t.Fatalf("decode advisory state: %v\n%s", err, stateContent)
+	}
+	metadata := state["metadata"].(map[string]any)
+	if metadata["risk_level"] != "below_min_confidence" {
+		t.Fatalf("state metadata risk_level = %#v, state = %#v", metadata["risk_level"], state)
+	}
+
+	stdout, stderr, code = runForTest(t, []string{"--json", "advise", "--input", "change.diff", "--format", "json"}, false)
+	if code != ExitSuccess {
+		t.Fatalf("second advise below-min exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result = decodeResult(t, stdout)
+	if result.Data["should_comment"] != false || result.Data["skip_reason"] != "unchanged_diff_fingerprint" {
+		t.Fatalf("second advise result = %#v", result.Data)
+	}
+}
+
+func TestAdviseIgnoresPlaybookConfidenceForCommentThreshold(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "billing-low-confidence.yaml"), `object_type: relia.memory_rule
+schema_version: "1.0"
+id: billing-low-confidence-fixture
+kind: avoid
+status: active
+statement: Low confidence billing changes should not publish advisory comments.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.55
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_0142
+provenance:
+  - pr: 142
+    outcome: ci_failure
+    url: https://github.com/acme/billing-service/pull/142
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`)
+	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "billing-playbook.yaml"), `object_type: relia.memory_rule
+schema_version: "1.0"
+id: billing-playbook-fixture
+kind: playbook
+status: active
+statement: Billing clock changes are covered when they use the approved fixture.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.91
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_0143
+provenance:
+  - pr: 143
+    outcome: merged_clean
+    url: https://github.com/acme/billing-service/pull/143
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`)
+	writeFileForTest(t, filepath.Join(tempDir, "change.diff"), `diff --git a/packages/billing/invoice.py b/packages/billing/invoice.py
+--- a/packages/billing/invoice.py
++++ b/packages/billing/invoice.py
+@@ -1,2 +1,3 @@
+ def rollover_day():
+-    return "2026-01-01"
++    return maybe_safe_billing_clock().strftime("%Y-%m-%d")
+`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "advise", "--input", "change.diff", "--format", "json"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("advise mixed confidence exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Data["should_comment"] != false || result.Data["skip_reason"] != "below_min_confidence" {
+		t.Fatalf("advise result = %#v", result.Data)
+	}
+	assessment := result.Data["assessment"].(map[string]any)
+	metadata := assessment["metadata"].(map[string]any)
+	if metadata["max_avoid_confidence"] != float64(0.55) {
+		t.Fatalf("max_avoid_confidence = %#v, metadata = %#v", metadata["max_avoid_confidence"], metadata)
+	}
+	if _, err := os.Stat(filepath.Join(tempDir, ".relia", "reports", "advisory-comment.md")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("advisory comment should not be written for low-confidence avoid match, stat err = %v", err)
+	}
+}
+
+func TestAdviseRewarnsUnchangedDiffWhenPriorMarkerWasClear(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "billing-time.yaml"), `object_type: relia.memory_rule
+schema_version: "1.0"
+id: billing-time-fixture
+kind: avoid
+status: active
+statement: Use the billing clock fixture instead of direct UTC calls.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.86
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_0142
+provenance:
+  - pr: 142
+    outcome: ci_failure
+    url: https://github.com/acme/billing-service/pull/142
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`)
+	diffContent := `diff --git a/packages/billing/invoice.py b/packages/billing/invoice.py
+--- a/packages/billing/invoice.py
++++ b/packages/billing/invoice.py
+@@ -1,2 +1,3 @@
+ def rollover_day():
+-    return "2026-01-01"
++    return datetime.utcnow().strftime("%Y-%m-%d")
+`
+	writeFileForTest(t, filepath.Join(tempDir, "change.diff"), diffContent)
+	writeFileForTest(t, filepath.Join(tempDir, ".relia", "reports", "advisory-state.json"), fmt.Sprintf(`{
+  "object_type": "relia.advisory_state",
+  "schema_version": "1.0",
+  "diff_fingerprint": %q,
+  "metadata": {
+    "generated_at": %q,
+    "risk_level": "covered_clean"
+  }
+}
+`, sha256String(diffContent), time.Now().UTC().Add(-time.Hour).Format(time.RFC3339)))
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "advise", "--input", "change.diff", "--format", "json"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("advise rewarn exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Data["should_comment"] != true || result.Data["skip_reason"] != "" {
+		t.Fatalf("advise result = %#v", result.Data)
+	}
+	comment, err := os.ReadFile(filepath.Join(tempDir, ".relia", "reports", "advisory-comment.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	commentText := string(comment)
+	for _, want := range []string{"risk_level=match_high", "billing-time-fixture", "https://github.com/acme/billing-service/pull/142"} {
+		if !strings.Contains(commentText, want) {
+			t.Fatalf("rewarn comment missing %q:\n%s", want, commentText)
+		}
+	}
+
+	stdout, stderr, code = runForTest(t, []string{"--json", "advise", "--input", "change.diff", "--format", "json"}, false)
+	if code != ExitSuccess {
+		t.Fatalf("second advise rewarn exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result = decodeResult(t, stdout)
+	if result.Data["should_comment"] != false || result.Data["skip_reason"] != "unchanged_diff_fingerprint" {
+		t.Fatalf("second advise result = %#v", result.Data)
+	}
+}
+
+func TestAdviseStaysSilentForCoveredCleanAssessment(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "billing-playbook.yaml"), `object_type: relia.memory_rule
+schema_version: "1.0"
+id: billing-playbook-fixture
+kind: playbook
+status: active
+statement: Billing clock changes are covered when they use the approved fixture.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.91
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_0142
+provenance:
+  - pr: 142
+    outcome: merged_clean
+    url: https://github.com/acme/billing-service/pull/142
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`)
+	writeFileForTest(t, filepath.Join(tempDir, "change.diff"), `diff --git a/packages/billing/invoice.py b/packages/billing/invoice.py
+--- a/packages/billing/invoice.py
++++ b/packages/billing/invoice.py
+@@ -1,2 +1,3 @@
+ def rollover_day():
+-    return "2026-01-01"
++    return billing_clock().strftime("%Y-%m-%d")
+`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "advise", "--input", "change.diff", "--format", "json"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("advise covered clean exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Data["should_comment"] != false || result.Data["skip_reason"] != "covered_clean" {
+		t.Fatalf("advise result = %#v", result.Data)
+	}
+}
+
+func TestAdviseDebouncesChangedDiffWhenPriorMarkerIsFresh(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	priorGeneratedAt := time.Now().UTC().Format(time.RFC3339)
+	writeFileForTest(t, filepath.Join(tempDir, ".relia", "reports", "advisory-state.json"), fmt.Sprintf(`{
+  "object_type": "relia.advisory_state",
+  "schema_version": "1.0",
+  "diff_fingerprint": "sha256:previous",
+  "metadata": {
+    "generated_at": %q,
+    "source": "existing_github_comment_marker"
+  }
+}
+`, priorGeneratedAt))
+	writeFileForTest(t, filepath.Join(tempDir, "change.diff"), `diff --git a/packages/new/path.py b/packages/new/path.py
+--- a/packages/new/path.py
++++ b/packages/new/path.py
+@@ -1,2 +1,3 @@
+ def work():
+-    return "old"
++    return "new"
+`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "advise", "--input", "change.diff", "--format", "json"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("advise debounce exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Data["should_comment"] != false || result.Data["skip_reason"] != "reassess_debounce_window" {
+		t.Fatalf("advise result = %#v", result.Data)
+	}
+	if _, err := os.Stat(filepath.Join(tempDir, ".relia", "reports", "advisory-comment.md")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("advisory comment should not be written inside debounce window, stat err = %v", err)
+	}
+	stateContent, err := os.ReadFile(filepath.Join(tempDir, ".relia", "reports", "advisory-state.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var state map[string]any
+	if err := json.Unmarshal(stateContent, &state); err != nil {
+		t.Fatalf("decode advisory state: %v\n%s", err, stateContent)
+	}
+	if state["diff_fingerprint"] != "sha256:previous" {
+		t.Fatalf("debounce state diff_fingerprint = %#v, want prior fingerprint; state = %#v", state["diff_fingerprint"], state)
+	}
+	metadata := state["metadata"].(map[string]any)
+	if metadata["generated_at"] != priorGeneratedAt {
+		t.Fatalf("debounce state generated_at = %#v, want prior generated_at %q", metadata["generated_at"], priorGeneratedAt)
+	}
+	if metadata["debounced_diff_fingerprint"] != result.Data["diff_fingerprint"] {
+		t.Fatalf("debounced_diff_fingerprint = %#v, want current diff %q", metadata["debounced_diff_fingerprint"], result.Data["diff_fingerprint"])
 	}
 }
 
