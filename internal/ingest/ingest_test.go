@@ -224,3 +224,117 @@ func TestGitHubPullRequestHelpers(t *testing.T) {
 		t.Fatalf("URL = %q", got)
 	}
 }
+
+func TestValidateRecordAcceptsCanonicalPrivateRecord(t *testing.T) {
+	record := validRecordForTest()
+
+	recordedAt, err := ValidateRecord(record, ".relia/experiences/2026-04.jsonl:1", "1.0")
+	if err != nil {
+		t.Fatalf("ValidateRecord error: %v", err)
+	}
+	if got := recordedAt.Format("2006-01-02T15:04:05Z"); got != "2026-04-02T18:21:00Z" {
+		t.Fatalf("recordedAt = %s", got)
+	}
+}
+
+func TestValidateRecordRejectsProvenanceRepoMismatch(t *testing.T) {
+	record := validRecordForTest()
+	record.Provenance.URLs = []string{"https://github.com/other/repo/pull/142"}
+
+	_, err := ValidateRecord(record, "input.json:1", "1.0")
+	if err == nil || err.Kind != ErrorProvenance || !strings.Contains(err.Message, "repo must match") {
+		t.Fatalf("error = %#v, want provenance mismatch", err)
+	}
+}
+
+func TestValidateRecordRejectsUnverifiedMetadataSource(t *testing.T) {
+	record := validRecordForTest()
+	record.Metadata = map[string]any{"source": "agent_reflection"}
+
+	_, err := ValidateRecord(record, "input.json:1", "1.0")
+	if err == nil || err.Kind != ErrorArtifactContract || !strings.Contains(err.Message, "self-reports") {
+		t.Fatalf("error = %#v, want self-report rejection", err)
+	}
+}
+
+func TestCanonicalDistillInputRecord(t *testing.T) {
+	event := map[string]any{
+		"object_type":      "relia.experience_record",
+		"schema_version":   "1.0",
+		"experience_id":    "exp_0142",
+		"repo":             map[string]any{"provider": "github", "owner": "acme", "name": "billing"},
+		"recorded_at":      "2026-04-02T18:21:00Z",
+		"attribution":      map[string]any{"actor_kind": "agent", "method": "manual", "confidence": 1.0},
+		"context":          map[string]any{"paths": []any{"cmd/relia/main.go"}, "diff_fingerprint": "abc123"},
+		"action":           map[string]any{"pr": 142, "commit": "abc1234"},
+		"outcome":          map[string]any{"kind": "ci_failure", "terminal_state": "failed", "signature": map[string]any{"signature_id": "sig_abc123", "extraction_confidence": "structured"}},
+		"provenance":       map[string]any{"urls": []any{"https://github.com/acme/billing/pull/142"}},
+		"flake_discount":   0.0,
+		"org_eligible":     false,
+		"share_scope":      "private",
+		"redaction_status": "applied",
+		"metadata":         map[string]any{},
+	}
+
+	record, canonical, err := CanonicalDistillInputRecord(event, "input.json:1")
+	if err != nil {
+		t.Fatalf("CanonicalDistillInputRecord error: %v", err)
+	}
+	if !canonical || record.ExperienceID != "exp_0142" || record.Action.PR != 142 {
+		t.Fatalf("record = %#v canonical=%v", record, canonical)
+	}
+}
+
+func TestCanonicalDistillInputRecordRejectsIncompleteCanonicalRecord(t *testing.T) {
+	event := map[string]any{
+		"object_type": "relia.experience_record",
+		"action":      map[string]any{"commit": "abc1234"},
+		"attribution": map[string]any{"method": "manual"},
+		"context":     map[string]any{},
+	}
+
+	_, canonical, err := CanonicalDistillInputRecord(event, "input.json:1")
+	if !canonical {
+		t.Fatal("expected canonical input")
+	}
+	if err == nil || err.Kind != ErrorArtifactContract || !strings.Contains(err.Message, "context.diff_fingerprint") {
+		t.Fatalf("error = %#v, want missing diff fingerprint", err)
+	}
+}
+
+func validRecordForTest() Record {
+	return Record{
+		ObjectType:    "relia.experience_record",
+		SchemaVersion: "1.0",
+		ExperienceID:  "exp_0142",
+		Repo:          Repo{Provider: "github", Owner: "acme", Name: "billing"},
+		RecordedAt:    "2026-04-02T18:21:00Z",
+		Attribution: Attribution{
+			ActorKind:  "agent",
+			Method:     "manual",
+			Confidence: 1,
+		},
+		Context: Context{
+			Paths:           []string{"cmd/relia/main.go"},
+			DiffFingerprint: "abc123",
+		},
+		Action: Action{
+			PR:     142,
+			Commit: "abc1234",
+		},
+		Outcome: Outcome{
+			Kind:          "ci_failure",
+			TerminalState: "failed",
+			Signature: Signature{
+				SignatureID:          "sig_abc123",
+				ExtractionConfidence: "structured",
+			},
+		},
+		Provenance:      Provenance{URLs: []string{"https://github.com/acme/billing/pull/142"}},
+		FlakeDiscount:   0,
+		OrgEligible:     false,
+		ShareScope:      "private",
+		RedactionStatus: "applied",
+		Metadata:        map[string]any{},
+	}
+}
