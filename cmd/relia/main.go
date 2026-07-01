@@ -627,8 +627,8 @@ func backtestResult(args []string, start time.Time) CommandResult {
 		if commandErr != nil {
 			return withFormat(errorResult("backtest", "backtest", commandErr, start))
 		}
-		report.Diagnostics = buildReportDiagnostics(report.Summary, report.Baseline, report.SourceArtifacts)
-		report.Badge = buildReportBadge(report)
+		report.Diagnostics = backtestdoc.BuildReportDiagnostics(report.Summary, report.Baseline, report.SourceArtifacts)
+		report.Badge = backtestdoc.BuildReportBadge(report)
 	}
 	jsonReportPath, htmlReportPath, commandErr := writeBacktestReports(root, report, options.ReportDir)
 	if commandErr != nil {
@@ -1040,14 +1040,14 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 		HeadlineERR:          summary.HeadlineERR,
 		ConfirmedRecurrences: confirmed,
 		PossibleRecurrences:  possible,
-		TopRepeatedMistakes:  buildTopRepeatedMistakes(confirmed),
+		TopRepeatedMistakes:  backtestdoc.BuildTopRepeatedMistakes(confirmed),
 		FlakeDiscounts:       flakes,
 		AttributionUncertain: uncertain,
 		Baseline:             baseline,
 		Gate:                 gate,
 		Citations:            citations,
-		Diagnostics:          buildReportDiagnostics(summary, baseline, sourceArtifacts),
-		OperatorFeedback:     buildReportOperatorFeedback(summary),
+		Diagnostics:          backtestdoc.BuildReportDiagnostics(summary, baseline, sourceArtifacts),
+		OperatorFeedback:     backtestdoc.BuildReportOperatorFeedback(summary),
 		Metadata:             metadata,
 	}
 	report.ReportID = "backtest_" + shortHash(strings.Join([]string{
@@ -1058,7 +1058,7 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 		strconv.Itoa(summary.ConfirmedRecurrenceCount),
 		strconv.Itoa(summary.PossibleRecurrenceCount),
 	}, "\x00"))
-	report.Badge = buildReportBadge(report)
+	report.Badge = backtestdoc.BuildReportBadge(report)
 	return report, nil
 }
 
@@ -1100,185 +1100,6 @@ func reportIngestFreshnessMetadata(records []backtestExperience) (time.Time, int
 		}
 	}
 	return latestIngestAt, mergedSinceIngest, hasLastIngestAt, hasMergedSinceIngest
-}
-
-func buildTopRepeatedMistakes(pairs []recurrencePair) []topRepeatedMistake {
-	type aggregate struct {
-		signatureID   string
-		repeatCount   int
-		prs           []int
-		urls          []string
-		experienceIDs []string
-		refs          []string
-	}
-	bySignature := map[string]*aggregate{}
-	for _, pair := range pairs {
-		key := pair.SignatureID
-		if pair.MatchedSignatureID != "" {
-			key = pair.MatchedSignatureID
-		}
-		if key == "" {
-			continue
-		}
-		item := bySignature[key]
-		if item == nil {
-			item = &aggregate{signatureID: key}
-			bySignature[key] = item
-		}
-		item.repeatCount++
-		item.prs = append(item.prs, pair.PriorPR, pair.CurrentPR)
-		item.urls = append(item.urls, pair.PriorURL, pair.CurrentURL)
-		item.experienceIDs = append(item.experienceIDs, pair.PriorExperienceID, pair.CurrentExperienceID)
-		item.refs = append(item.refs, pair.Refs...)
-	}
-	aggregates := make([]*aggregate, 0, len(bySignature))
-	for _, item := range bySignature {
-		item.prs = uniqueInts(item.prs)
-		item.urls = uniqueStrings(item.urls)
-		item.experienceIDs = uniqueStrings(item.experienceIDs)
-		item.refs = uniqueStrings(item.refs)
-		sort.Ints(item.prs)
-		sort.Strings(item.urls)
-		sort.Strings(item.experienceIDs)
-		sort.Strings(item.refs)
-		aggregates = append(aggregates, item)
-	}
-	sort.Slice(aggregates, func(i, j int) bool {
-		if aggregates[i].repeatCount == aggregates[j].repeatCount {
-			return aggregates[i].signatureID < aggregates[j].signatureID
-		}
-		return aggregates[i].repeatCount > aggregates[j].repeatCount
-	})
-	result := make([]topRepeatedMistake, 0, len(aggregates))
-	for index, item := range aggregates {
-		result = append(result, topRepeatedMistake{
-			Rank:          index + 1,
-			SignatureID:   item.signatureID,
-			RepeatCount:   item.repeatCount,
-			PRs:           item.prs,
-			URLs:          item.urls,
-			ExperienceIDs: item.experienceIDs,
-			Refs:          item.refs,
-		})
-	}
-	return result
-}
-
-func buildReportDiagnostics(summary recurrenceSummary, baseline baselineComparison, sourceArtifacts []string) []reportDiagnostic {
-	ref := "schemas/experience-record.schema.json"
-	if len(sourceArtifacts) > 0 {
-		ref = sourceArtifacts[0]
-	}
-	diagnostics := []reportDiagnostic{
-		{
-			Type:    "memory_source_verified",
-			Status:  "pass",
-			Message: "Backtest, distill, and memory outputs are derived from canonical experience records; agent self-reports and reflections are rejected before persistence.",
-			Ref:     ref,
-		},
-	}
-	if summary.PossibleRecurrenceCount > 0 {
-		diagnostics = append(diagnostics, reportDiagnostic{
-			Type:    "possible_recurrences_excluded",
-			Status:  "info",
-			Message: "Possible recurrences are reported separately and excluded from headline ERR.",
-			Ref:     "schemas/recurrence-report.schema.json",
-		})
-	}
-	if summary.FlakeDiscountedCount > 0 {
-		diagnostics = append(diagnostics, reportDiagnostic{
-			Type:    "flake_discounts_visible",
-			Status:  "info",
-			Message: "Flake-discounted failures remain visible and are excluded from the recurrence numerator.",
-			Ref:     "schemas/recurrence-report.schema.json",
-		})
-	}
-	if summary.AttributionUncertainCount > 0 {
-		diagnostics = append(diagnostics, reportDiagnostic{
-			Type:    "uncertain_attribution_excluded",
-			Status:  "info",
-			Message: "Uncertain attribution is excluded from headline ERR by default.",
-			Ref:     "relia.yaml",
-		})
-	}
-	if baseline.Stale {
-		diagnostics = append(diagnostics, reportDiagnostic{
-			Type:    "stale_baseline",
-			Status:  "warn",
-			Message: baseline.Reason,
-			Ref:     baseline.Path,
-		})
-	}
-	return diagnostics
-}
-
-func buildReportOperatorFeedback(summary recurrenceSummary) reportOperatorFeedback {
-	nextCommand := "relia ingest --input <outcomes.jsonl>"
-	if summary.AgentFailureDenominator > 0 {
-		nextCommand = "relia distill --format json"
-	}
-	return reportOperatorFeedback{
-		Summary: fmt.Sprintf("%s ERR from %d confirmed recurrences across %d agent-attributed failures.",
-			summary.HeadlineERRPercent,
-			summary.ConfirmedRecurrenceCount,
-			summary.AgentFailureDenominator),
-		ConservativeMatchingNote: "Headline ERR counts confirmed recurrences only; possible recurrences, flake discounts, and uncertain attribution are visible but excluded from the headline.",
-		NextCommand:              nextCommand,
-	}
-}
-
-func buildReportBadge(report recurrenceReport) reportBadge {
-	return buildReportBadgeAt(report, time.Now().UTC())
-}
-
-func buildReportBadgeAt(report recurrenceReport, now time.Time) reportBadge {
-	color := "brightgreen"
-	switch {
-	case report.HeadlineERR >= 0.3:
-		color = "orange"
-	case report.HeadlineERR >= 0.1:
-		color = "yellow"
-	}
-
-	status := "current"
-	message := "ERR " + report.Summary.HeadlineERRPercent
-	stale, reason := reportBadgeStaleness(report, now)
-	if stale {
-		status = "stale"
-		message += " stale"
-		color = "lightgrey"
-	}
-
-	return reportBadge{
-		Label:          "Relia",
-		Message:        message,
-		Status:         status,
-		Stale:          stale,
-		Color:          color,
-		Reason:         reason,
-		SourceReportID: report.ReportID,
-	}
-}
-
-func reportBadgeStaleness(report recurrenceReport, now time.Time) (bool, string) {
-	if now.IsZero() {
-		now = time.Now().UTC()
-	}
-	lastIngestAt, hasLastIngestAt := metadataTime(report.Metadata, badgeMetadataLastIngest)
-	if !hasLastIngestAt {
-		return true, "Ingest freshness is unavailable; rerun relia ingest before publishing the README badge."
-	}
-	if now.UTC().Sub(lastIngestAt.UTC()) > time.Duration(badgeStaleAfterDays)*24*time.Hour {
-		return true, fmt.Sprintf("Last ingest exceeds the %d-day freshness window; rerun relia ingest and backtest before publishing the README badge.", badgeStaleAfterDays)
-	}
-	mergedSinceIngest, hasMergedSinceIngest := metadataInt(report.Metadata, badgeMetadataMergedPRs)
-	if !hasMergedSinceIngest {
-		return true, "Merged PR activity freshness is unavailable; provide merged_prs_since_last_ingest metadata before publishing the README badge."
-	}
-	if mergedSinceIngest > badgeStaleAfterMergedPRs {
-		return true, fmt.Sprintf("More than %d PRs have merged since the last ingest; rerun relia ingest and backtest before publishing the README badge.", badgeStaleAfterMergedPRs)
-	}
-	return false, fmt.Sprintf("Generated from ingest metadata within the %d-day freshness window and %d merged PRs since ingest.", badgeStaleAfterDays, mergedSinceIngest)
 }
 
 func metadataInt(metadata map[string]any, key string) (int, bool) {

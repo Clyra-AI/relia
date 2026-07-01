@@ -247,7 +247,8 @@ secret/provenance URL token-shape checks, and record/provenance URL helpers;
 projections, citation serving filters, repo-relative scope matching, and
 deterministic risk assessment construction for `assess`, `serve`, and `advise`;
 `internal/backtest` owns backtest argument parsing, recurrence window duration
-validation, and the recurrence report data model;
+validation, recurrence report data model, diagnostics/operator feedback/badge
+helpers, and top repeated mistake aggregation;
 `internal/advise` owns advisory comment decision, strategy, markdown rendering,
 confidence threshold handling, and prior-state comparison helpers;
 `internal/modelpull` owns local model artifact pull argument parsing and
