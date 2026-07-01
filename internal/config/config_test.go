@@ -1,6 +1,8 @@
 package config
 
 import (
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -64,5 +66,60 @@ advise:
 	}
 	if got := PathRef(DefaultFile, document, "missing.path"); got != DefaultFile {
 		t.Fatalf("missing PathRef = %q", got)
+	}
+}
+
+func TestValidateDefaultYAMLPasses(t *testing.T) {
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, DefaultFile), []byte(DefaultYAML("1.0", "0.0.0-dev")), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	warnings, configErr := Validate(root, ValidationOptions{
+		SchemaVersion: "1.0",
+		ReliaVersion:  "0.0.0-dev",
+	})
+	if configErr != nil {
+		t.Fatalf("Validate returned error: %v", configErr)
+	}
+	if len(warnings) != 0 {
+		t.Fatalf("warnings = %#v", warnings)
+	}
+}
+
+func TestValidateRejectsProviderBaseURLUserInfo(t *testing.T) {
+	content := strings.Replace(DefaultYAML("1.0", "0.0.0-dev"), `distill:
+  embeddings: signature
+  provider: none
+  model: ""
+  base_url: ""
+  credential_env: ""
+  max_cost_usd_per_run: 0
+  input_cost_usd_per_1k_tokens: 0
+  output_cost_usd_per_1k_tokens: 0
+  review_required: true`, `distill:
+  embeddings: signature
+  provider: openai_compatible
+  model: gpt-test
+  base_url: https://user:secret@example.test
+  credential_env: OPENAI_API_KEY
+  max_cost_usd_per_run: 1
+  input_cost_usd_per_1k_tokens: 0.01
+  output_cost_usd_per_1k_tokens: 0.02
+  review_required: true`, 1)
+	document, err := yamlmini.ParseDocument(content)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, configErr := ValidateDocument(t.TempDir(), document, ValidationOptions{
+		SchemaVersion: "1.0",
+		ReliaVersion:  "0.0.0-dev",
+	})
+	if configErr == nil {
+		t.Fatal("expected provider base URL error")
+	}
+	if configErr.Kind != ErrorConfig || !strings.Contains(configErr.Message, "user info") {
+		t.Fatalf("config error = %#v", configErr)
 	}
 }

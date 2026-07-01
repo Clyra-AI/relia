@@ -54,7 +54,8 @@ repair blast radius, and merge risk.
 
 - `internal/result`: command-result envelope and helpers.
 - `internal/config`: default config rendering, config document references,
-  config loading, and repo-relative path policy.
+  config loading and validation, provider/advisory configuration parsing,
+  local model-manifest dependency validation, and repo-relative path policy.
 - `internal/ingest`: event ingestion, redaction, and provenance checks.
 - `internal/backtest`: recurrence metrics and backtest report generation.
 - `internal/distill`: rule drafting and lifecycle state.

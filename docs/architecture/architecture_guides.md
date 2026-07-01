@@ -223,9 +223,11 @@ Decomposition starts with cohesive pure behavior that can move without changing
 the CLI contract. `internal/diffparse` owns unified-diff touched-path parsing
 for `assess` and `advise`; `internal/yamlmini` owns Relia's minimal
 repo-local YAML parsing and line-reference inventory for config and memory
-rule documents; `internal/config` owns default config document rendering and
-config document reference helpers. `cmd/relia` keeps command wiring and
-CommandError translation for those surfaces.
+rule documents; `internal/config` owns default config document rendering,
+config document references, config loading and validation, provider/advisory
+configuration parsing, and local model-manifest dependency validation.
+`cmd/relia` keeps command wiring and CommandError translation for those
+surfaces.
 
 ## TDD And Red-First Expectations
 
