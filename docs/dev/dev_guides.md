@@ -50,6 +50,17 @@ runtime behavior, schemas, CLI output, or package boundaries must cite
 `coverage_policy_refs` or record an approved coverage exception with
 compensating validation evidence.
 
+## Architecture Budget Gate
+
+Relia uses the Factory default architecture budget: warn at `1200` source lines
+and fail at `2500` source lines for `.go`, `.py`, `.ts`, `.tsx`, `.js`, and
+`.jsx` files, excluding generated runtime, dependency, cache, and build
+directories. `factoryd doctor` must emit an `architecture_budget_report` before
+daemon work. The current `cmd/relia/main.go` and `cmd/relia/main_test.go`
+monoliths are temporary debt covered by
+`.factory/artifacts/exceptions/architecture-debt-relia-main.json`; work that
+touches them must avoid net growth unless it is shrink-only decomposition.
+
 ## CI And PR Lifecycle
 
 - GitHub Actions workflow: .github/workflows/validate.yml.

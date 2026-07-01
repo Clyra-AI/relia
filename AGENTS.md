@@ -49,6 +49,12 @@ Before PR or merge, run:
 - docs/dev/: repo-local development guide.
 - docs/architecture/: repo-local architecture guide.
 - .factory/artifacts/: Factory planning, validation, and closure artifacts.
+- Architecture budget: source files warn at 1200 lines and fail at 2500 lines
+  by default. Existing Relia monolith debt in `cmd/relia/main.go` and
+  `cmd/relia/main_test.go` is allowed only through
+  `.factory/artifacts/exceptions/architecture-debt-relia-main.json`; tasks that
+  touch those files must shrink them, split behavior into `internal/`, or keep
+  the exception current with compensating validation.
 
 ## 5. Runner Readiness
 

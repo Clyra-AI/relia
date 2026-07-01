@@ -92,6 +92,13 @@ REQUIRED = [
     ".github/workflows/codeql.yml",
     "scripts/check_go_coverage.py",
 ]
+ARCHITECTURE_BUDGET_EXCEPTION_REFS = [
+    ".factory/artifacts/exceptions/architecture-debt-relia-main.json",
+]
+ARCHITECTURE_BUDGET_EXCEPTION_PATHS = [
+    "cmd/relia/main.go",
+    "cmd/relia/main_test.go",
+]
 
 def fail(message):
     print(message, file=sys.stderr)
@@ -121,6 +128,63 @@ def factoryd_config_capability_grants():
     elif isinstance(config.get("capability_grants"), list):
         grants.extend(grant for grant in config["capability_grants"] if isinstance(grant, dict))
     return grants
+
+def validate_architecture_debt_exception(ref):
+    exception = load_json_file(ROOT / ref)
+    if exception.get("artifact_type") != "architecture_debt_exception":
+        fail(f"{ref} artifact_type must be architecture_debt_exception")
+    for key in [
+        "exception_id",
+        "repo",
+        "scope",
+        "reason",
+        "owner",
+        "approved_by",
+        "approved_at",
+        "expires_at",
+        "compensating_validation",
+        "follow_up_refs",
+        "evidence_refs",
+    ]:
+        if key not in exception:
+            fail(f"{ref} missing {key}")
+    if exception.get("repo") != FACTORYD_REPO_KEY:
+        fail(f"{ref}.repo must be {FACTORYD_REPO_KEY}")
+    scope = exception.get("scope")
+    if not isinstance(scope, dict):
+        fail(f"{ref}.scope must be an object")
+    paths = scope.get("paths")
+    if sorted(paths or []) != sorted(ARCHITECTURE_BUDGET_EXCEPTION_PATHS):
+        fail(f"{ref}.scope.paths must be {ARCHITECTURE_BUDGET_EXCEPTION_PATHS!r}")
+    if not isinstance(exception.get("compensating_validation"), list) or "make prepush-full" not in exception["compensating_validation"]:
+        fail(f"{ref}.compensating_validation must include make prepush-full")
+    if not exception.get("follow_up_refs"):
+        fail(f"{ref}.follow_up_refs must be non-empty")
+
+def validate_architecture_budget_policy(repo, label):
+    budget = repo.get("architecture_budget")
+    if not isinstance(budget, dict):
+        fail(f"{label}.architecture_budget must be an object")
+    if budget.get("enabled") is not True:
+        fail(f"{label}.architecture_budget.enabled must be true")
+    if budget.get("warn_line_threshold") != 1200:
+        fail(f"{label}.architecture_budget.warn_line_threshold must be 1200")
+    if budget.get("fail_line_threshold") != 2500:
+        fail(f"{label}.architecture_budget.fail_line_threshold must be 2500")
+    if "architecture-fitness-standard.md#default-budget" not in str(budget.get("policy_ref", "")):
+        fail(f"{label}.architecture_budget.policy_ref must cite the Factory architecture fitness default budget")
+    extensions = budget.get("source_extensions")
+    if not isinstance(extensions, list) or ".go" not in extensions:
+        fail(f"{label}.architecture_budget.source_extensions must include .go")
+    excluded = budget.get("excluded_dirs")
+    for expected in [".git", ".factoryd", "node_modules", "vendor", "dist"]:
+        if not isinstance(excluded, list) or expected not in excluded:
+            fail(f"{label}.architecture_budget.excluded_dirs must include {expected}")
+    exception_refs = budget.get("exception_refs")
+    if sorted(exception_refs or []) != sorted(ARCHITECTURE_BUDGET_EXCEPTION_REFS):
+        fail(f"{label}.architecture_budget.exception_refs must be {ARCHITECTURE_BUDGET_EXCEPTION_REFS!r}")
+    for ref in ARCHITECTURE_BUDGET_EXCEPTION_REFS:
+        validate_architecture_debt_exception(ref)
 
 def profile_visibility_from_text(profile_text):
     for line in profile_text.splitlines():
@@ -1594,6 +1658,8 @@ def main():
             fail(f"factoryd config missing {key}")
     if "capability_grants" not in repo or not isinstance(repo["capability_grants"], list):
         fail("factoryd config must declare capability_grants as a list")
+    validate_architecture_budget_policy(repo, "factoryd config")
+    validate_architecture_budget_policy(autoship_repo, "autoship config")
     for rel in [repo["acceptance_ledger"], repo["task_packets"], repo["scope_closure_map"], repo["validation_contract"]]:
         if not (root / rel).exists():
             fail(f"factoryd config references missing file: {rel}")

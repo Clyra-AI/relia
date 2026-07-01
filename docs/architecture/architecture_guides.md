@@ -203,6 +203,22 @@ and useful without any hosted Relia account.
 - Deleting Factory artifacts breaks governed closure; deleting dev/architecture guides breaks task propagation.
 - Deleting required-check metadata, CODEOWNERS, action-ref exceptions, or CI workflows breaks public-repo delivery controls.
 
+## Architecture Budget And Decomposition
+
+Relia follows the Factory architecture budget gate: source files warn at `1200`
+lines and fail at `2500` lines. The inventory excludes daemon state,
+dependencies, caches, and build output, but it does include product source and
+tests. The only approved over-budget source surfaces are `cmd/relia/main.go`
+and `cmd/relia/main_test.go`, recorded in
+`.factory/artifacts/exceptions/architecture-debt-relia-main.json` and backed by
+`docs/architecture/findings/TEMP_FINDING_2026-06-30_relia_arch_decomposition.md`.
+
+Until that exception is closed, product work that touches `cmd/relia/main.go`
+or `cmd/relia/main_test.go` must either reduce size, move coherent behavior
+into `internal/`, or record why the change is shrink-neutral with compensating
+validation. New feature work must not add fresh product domains to the CLI
+entrypoint.
+
 ## TDD And Red-First Expectations
 
 - Behavior changes should add or update a failing test, fixture, schema example, or validator expectation before implementation when practical.
