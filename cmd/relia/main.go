@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/Clyra-AI/relia/internal/diffparse"
+	"github.com/Clyra-AI/relia/internal/yamlmini"
 )
 
 const (
@@ -148,24 +149,8 @@ type ArtifactRef struct {
 	Path string `json:"path"`
 }
 
-type yamlScalar struct {
-	Value string
-	Line  int
-}
-
-type yamlDocument struct {
-	Scalars    map[string]yamlScalar
-	Lists      map[string][]yamlScalar
-	ListMaps   map[string][]map[string]yamlScalar
-	Containers map[string]yamlScalar
-}
-
-type yamlContext struct {
-	Path       string
-	ListItem   bool
-	ListParent string
-	ListIndex  int
-}
+type yamlScalar = yamlmini.Scalar
+type yamlDocument = yamlmini.Document
 
 type globalFlags struct {
 	json    bool
@@ -7101,28 +7086,11 @@ func stringFromAny(value any) string {
 }
 
 func yamlListValues(document yamlDocument, path string) []string {
-	scalars := document.Lists[path]
-	values := make([]string, 0, len(scalars))
-	for _, scalar := range scalars {
-		if strings.TrimSpace(scalar.Value) != "" {
-			values = append(values, scalar.Value)
-		}
-	}
-	return values
+	return yamlmini.ListValues(document, path)
 }
 
 func yamlListValuesWithMapFields(document yamlDocument, path string, fields ...string) []string {
-	values := yamlListValues(document, path)
-	for _, mapping := range document.ListMaps[path] {
-		for _, field := range fields {
-			scalar, ok := mapping[field]
-			if !ok || strings.TrimSpace(scalar.Value) == "" {
-				continue
-			}
-			values = append(values, scalar.Value)
-		}
-	}
-	return uniqueStrings(values)
+	return yamlmini.ListValuesWithMapFields(document, path, fields...)
 }
 
 func overlaps(left []string, right []string) bool {
@@ -8366,216 +8334,15 @@ func scopePatternMatches(pattern string, rel string) bool {
 }
 
 func parseYAMLDocument(content string) (yamlDocument, error) {
-	document := yamlDocument{
-		Scalars:    map[string]yamlScalar{},
-		Lists:      map[string][]yamlScalar{},
-		ListMaps:   map[string][]map[string]yamlScalar{},
-		Containers: map[string]yamlScalar{},
-	}
-	var stack []yamlContext
-	blockScalarIndent := -1
-	lines := strings.Split(content, "\n")
-	for index, raw := range lines {
-		lineNumber := index + 1
-		if strings.TrimSpace(raw) == "" || strings.HasPrefix(strings.TrimSpace(raw), "#") {
-			continue
-		}
-		indent := leadingSpaces(raw)
-		if blockScalarIndent >= 0 {
-			if indent > blockScalarIndent {
-				continue
-			}
-			blockScalarIndent = -1
-		}
-		if indent%2 != 0 {
-			return document, fmt.Errorf("invalid YAML indentation at line %d", lineNumber)
-		}
-		depth := indent / 2
-		trimmed := stripInlineComment(strings.TrimSpace(raw))
-		if strings.TrimSpace(trimmed) == "" {
-			continue
-		}
-		if trimmed == "-" || strings.HasPrefix(trimmed, "- ") {
-			if depth > len(stack) {
-				return document, fmt.Errorf("list item without parent at line %d", lineNumber)
-			}
-			parent := yamlParentPath(stack, depth)
-			if parent == "" {
-				return document, fmt.Errorf("top-level lists are not supported at line %d", lineNumber)
-			}
-			itemValue := ""
-			if strings.HasPrefix(trimmed, "- ") {
-				itemValue = strings.TrimSpace(strings.TrimPrefix(trimmed, "- "))
-			}
-			document.Lists[parent] = append(document.Lists[parent], yamlScalar{
-				Value: itemValue,
-				Line:  lineNumber,
-			})
-			itemIndex := len(document.Lists[parent]) - 1
-			stack = append(stack[:depth], yamlContext{
-				Path:       fmt.Sprintf("%s[%d]", parent, itemIndex),
-				ListItem:   true,
-				ListParent: parent,
-				ListIndex:  itemIndex,
-			})
-			if key, value, ok := cutYAMLMapping(itemValue); ok {
-				scalarValue := unquoteScalar(value)
-				recordListMapScalar(document, parent, itemIndex, key, yamlScalar{Value: scalarValue, Line: lineNumber})
-				if scalarValue == ">" || scalarValue == "|" {
-					blockScalarIndent = indent
-				}
-			}
-			continue
-		}
-		key, value, ok := cutYAMLMapping(trimmed)
-		if !ok {
-			return document, fmt.Errorf("expected key/value pair at line %d", lineNumber)
-		}
-		if key == "" {
-			return document, fmt.Errorf("empty key at line %d", lineNumber)
-		}
-		if depth > len(stack) {
-			return document, fmt.Errorf("missing parent for %s at line %d", key, lineNumber)
-		}
-		path := key
-		if parent := yamlParentPath(stack, depth); parent != "" {
-			path = parent + "." + key
-		}
-		stack = append(stack[:depth], yamlContext{Path: path})
-		if value == "" {
-			document.Containers[path] = yamlScalar{Line: lineNumber}
-			if listParent, listIndex, itemPath, ok := nearestListItem(stack[:depth]); ok {
-				field := strings.TrimPrefix(path, itemPath+".")
-				recordListMapScalar(document, listParent, listIndex, field, yamlScalar{Line: lineNumber})
-			}
-			continue
-		}
-		scalarValue := unquoteScalar(value)
-		document.Scalars[path] = yamlScalar{Value: scalarValue, Line: lineNumber}
-		if listParent, listIndex, itemPath, ok := nearestListItem(stack[:depth]); ok {
-			field := strings.TrimPrefix(path, itemPath+".")
-			recordListMapScalar(document, listParent, listIndex, field, yamlScalar{Value: scalarValue, Line: lineNumber})
-		}
-		if scalarValue == ">" || scalarValue == "|" {
-			blockScalarIndent = indent
-		}
-	}
-	return document, nil
-}
-
-func yamlParentPath(stack []yamlContext, depth int) string {
-	if depth <= 0 {
-		return ""
-	}
-	return stack[depth-1].Path
-}
-
-func cutYAMLMapping(value string) (string, string, bool) {
-	key, rest, ok := strings.Cut(value, ":")
-	if !ok {
-		return "", "", false
-	}
-	if rest != "" && rest[0] != ' ' && rest[0] != '\t' {
-		return "", "", false
-	}
-	key = strings.TrimSpace(key)
-	if key == "" {
-		return "", "", false
-	}
-	return key, strings.TrimSpace(rest), true
-}
-
-func nearestListItem(stack []yamlContext) (string, int, string, bool) {
-	for index := len(stack) - 1; index >= 0; index-- {
-		context := stack[index]
-		if context.ListItem {
-			return context.ListParent, context.ListIndex, context.Path, true
-		}
-	}
-	return "", 0, "", false
-}
-
-func recordListMapScalar(document yamlDocument, parent string, index int, key string, scalar yamlScalar) {
-	for len(document.ListMaps[parent]) <= index {
-		document.ListMaps[parent] = append(document.ListMaps[parent], map[string]yamlScalar{})
-	}
-	document.ListMaps[parent][index][key] = scalar
+	return yamlmini.ParseDocument(content)
 }
 
 func hasYAMLPath(document yamlDocument, path string) bool {
-	if _, ok := document.Scalars[path]; ok {
-		return true
-	}
-	if _, ok := document.Containers[path]; ok {
-		return true
-	}
-	if _, ok := document.Lists[path]; ok {
-		return true
-	}
-	if _, ok := document.ListMaps[path]; ok {
-		return true
-	}
-	prefix := path + "."
-	indexedPrefix := path + "["
-	for key := range document.Scalars {
-		if strings.HasPrefix(key, prefix) || strings.HasPrefix(key, indexedPrefix) {
-			return true
-		}
-	}
-	for key := range document.Containers {
-		if strings.HasPrefix(key, prefix) || strings.HasPrefix(key, indexedPrefix) {
-			return true
-		}
-	}
-	for key := range document.Lists {
-		if strings.HasPrefix(key, prefix) || strings.HasPrefix(key, indexedPrefix) {
-			return true
-		}
-	}
-	return false
+	return yamlmini.HasPath(document, path)
 }
 
 func leadingSpaces(value string) int {
-	count := 0
-	for _, r := range value {
-		if r != ' ' {
-			return count
-		}
-		count++
-	}
-	return count
-}
-
-func stripInlineComment(value string) string {
-	inSingle := false
-	inDouble := false
-	for index, r := range value {
-		switch r {
-		case '\'':
-			if !inDouble {
-				inSingle = !inSingle
-			}
-		case '"':
-			if !inSingle {
-				inDouble = !inDouble
-			}
-		case '#':
-			if !inSingle && !inDouble && (index == 0 || value[index-1] == ' ' || value[index-1] == '\t') {
-				return strings.TrimSpace(value[:index])
-			}
-		}
-	}
-	return value
-}
-
-func unquoteScalar(value string) string {
-	value = strings.TrimSpace(value)
-	if len(value) >= 2 {
-		if (value[0] == '"' && value[len(value)-1] == '"') || (value[0] == '\'' && value[len(value)-1] == '\'') {
-			return value[1 : len(value)-1]
-		}
-	}
-	return value
+	return yamlmini.LeadingSpaces(value)
 }
 
 func containsString(values []any, want string) bool {
