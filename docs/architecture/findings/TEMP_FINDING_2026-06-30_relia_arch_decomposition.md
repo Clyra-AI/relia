@@ -59,9 +59,10 @@ repair blast radius, and merge risk.
   config loading and validation, provider/advisory configuration parsing,
   local model-manifest dependency validation, and repo-relative path policy.
 - `internal/ingest`: ingest input parsing, fail-closed redaction, standard
-  secret-token scanning, and provenance URL token-shape checks extracted;
-  experience-record normalization and persistence coordination still live in
-  `cmd/relia`.
+  secret-token scanning, provenance URL token-shape checks, the
+  experience-record data model, shard persistence, and record/provenance URL
+  helpers extracted; experience-record normalization and ingest result assembly
+  still live in `cmd/relia`.
 - `internal/backtest`: recurrence metrics and backtest report generation.
 - `internal/distill`: rule drafting and lifecycle state.
 - `internal/serve`: advisory serving snapshot behavior.
