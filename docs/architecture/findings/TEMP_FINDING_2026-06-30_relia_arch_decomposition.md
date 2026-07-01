@@ -1,8 +1,17 @@
-# TEMP Task Plan: Relia Architecture Budget And Decomposition
+# TEMP Finding: Relia Architecture Budget And Decomposition
 
 Date: 2026-06-30
-Status: queued after Factory/factoryd architecture budget contracts
+Status: source finding; not dispatchable
 Repo: Relia
+
+## Boundary
+
+This file is repo-local source evidence for future Factory/factoryd planning.
+It is not a generated execution contract, task packet, acceptance ledger, or
+scope-closure artifact. Before implementation starts, this finding must be
+ingested or promoted through the governed Factory path so runner-ready task
+packets, validation commands, lifecycle evidence, and acceptance refs are
+materialized.
 
 ## Objective
 
@@ -39,7 +48,7 @@ repair blast radius, and merge risk.
 3. Split tests by package responsibility.
 4. Preserve command-result JSON, exit-code, schema, and artifact compatibility.
 5. Keep Factory artifacts and closure evidence untouched except for
-   task-scoped evidence required by the decomposition task.
+   task-scoped evidence required by the future decomposition task.
 
 ## Candidate Package Boundaries
 
@@ -51,19 +60,11 @@ repair blast radius, and merge risk.
 - `internal/serve`: advisory serving snapshot behavior.
 - `internal/demo`: deterministic demo fixture behavior.
 
-## Validation
+## Required Promotion
 
-- `make lint-fast`
-- `make test-fast`
-- `make test-contracts`
-- targeted command tests for moved behavior
-- `make prepush-full`
-
-## Acceptance Criteria
-
-- `cmd/relia/main.go` becomes a thin command entrypoint.
-- Product logic is no longer concentrated in one file.
-- Existing CLI behavior and artifact outputs remain compatible.
-- Future feature tasks cannot grow the old monolith without explicit
-  architecture-debt approval.
+- Source kind: review finding / architecture finding.
+- Candidate mission: `systemic-architecture-budget`.
+- Required command before implementation: `factoryd ingest --kind review` or
+  the equivalent governed Factory planning path.
+- Required validation after materialization: `make prepush-full`.
 
