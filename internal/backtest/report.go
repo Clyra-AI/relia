@@ -1,6 +1,7 @@
 package backtest
 
 import (
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"math"
@@ -181,6 +182,18 @@ func ReportIngestFreshnessMetadata(records []Experience) (time.Time, int, bool, 
 	return latestIngestAt, mergedSinceIngest, hasLastIngestAt, hasMergedSinceIngest
 }
 
+func BuildReportID(window RecurrenceWindow, sourceDigest string, summary RecurrenceSummary) string {
+	parts := []string{
+		window.Start,
+		window.End,
+		sourceDigest,
+		fmt.Sprint(summary.AgentFailureDenominator),
+		fmt.Sprint(summary.ConfirmedRecurrenceCount),
+		fmt.Sprint(summary.PossibleRecurrenceCount),
+	}
+	return "backtest_" + shortHash(strings.Join(parts, "\x00"))
+}
+
 func BuildReportBadge(report RecurrenceReport) ReportBadge {
 	return BuildReportBadgeAt(report, time.Now().UTC())
 }
@@ -323,6 +336,11 @@ func int64ToInt(value int64) (int, bool) {
 		return 0, false
 	}
 	return int(value), true
+}
+
+func shortHash(value string) string {
+	digest := sha256.Sum256([]byte(value))
+	return fmt.Sprintf("%x", digest)[:12]
 }
 
 func stringFromAny(value any) string {

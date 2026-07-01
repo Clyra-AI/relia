@@ -1049,14 +1049,7 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 		OperatorFeedback:     backtestdoc.BuildReportOperatorFeedback(summary),
 		Metadata:             metadata,
 	}
-	report.ReportID = "backtest_" + shortHash(strings.Join([]string{
-		report.Window.Start,
-		report.Window.End,
-		sourceDigest,
-		strconv.Itoa(summary.AgentFailureDenominator),
-		strconv.Itoa(summary.ConfirmedRecurrenceCount),
-		strconv.Itoa(summary.PossibleRecurrenceCount),
-	}, "\x00"))
+	report.ReportID = backtestdoc.BuildReportID(report.Window, sourceDigest, summary)
 	report.Badge = backtestdoc.BuildReportBadge(report)
 	return report, nil
 }

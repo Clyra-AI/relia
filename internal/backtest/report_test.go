@@ -1,6 +1,8 @@
 package backtest
 
 import (
+	"crypto/sha256"
+	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -85,6 +87,39 @@ func TestReportIngestFreshnessMetadataIgnoresInvalidValues(t *testing.T) {
 
 	if hasIngest || hasMerged {
 		t.Fatalf("freshness presence = ingest:%v merged:%v, want neither", hasIngest, hasMerged)
+	}
+}
+
+func TestBuildReportIDUsesStableWindowDigestAndSummaryInputs(t *testing.T) {
+	window := RecurrenceWindow{
+		Start: "2026-01-01T00:00:00Z",
+		End:   "2026-01-31T00:00:00Z",
+	}
+	sourceDigest := "sha256:source"
+	summary := RecurrenceSummary{
+		AgentFailureDenominator:  7,
+		ConfirmedRecurrenceCount: 2,
+		PossibleRecurrenceCount:  3,
+	}
+	digestInput := strings.Join([]string{
+		window.Start,
+		window.End,
+		sourceDigest,
+		"7",
+		"2",
+		"3",
+	}, "\x00")
+	digest := sha256.Sum256([]byte(digestInput))
+	expected := "backtest_" + fmt.Sprintf("%x", digest)[:12]
+
+	if id := BuildReportID(window, sourceDigest, summary); id != expected {
+		t.Fatalf("report id = %q, want %q", id, expected)
+	}
+
+	changed := summary
+	changed.PossibleRecurrenceCount = 4
+	if BuildReportID(window, sourceDigest, changed) == expected {
+		t.Fatal("report id did not change after summary input changed")
 	}
 }
 

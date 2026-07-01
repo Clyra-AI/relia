@@ -109,6 +109,9 @@ Current progress:
 - `internal/backtest` now also owns report repo ID derivation and ingest
   freshness metadata selection with direct package tests, while command-result
   metadata assembly remains in `cmd/relia`.
+- `internal/backtest` now also owns recurrence report ID generation with direct
+  package tests, while report assembly and filesystem persistence remain in
+  `cmd/relia`.
 
 ## Candidate Package Boundaries
 
@@ -128,8 +131,9 @@ Current progress:
   validation, recurrence report model, report diagnostics/operator
   feedback/badge helpers, top repeated mistake aggregation, HTML report
   rendering, ERR baseline comparison, report repo ID derivation, and ingest
-  freshness metadata selection extracted; recurrence metrics, baseline/report
-  file persistence, and report generation orchestration remain candidates.
+  freshness metadata selection, and recurrence report ID generation extracted;
+  recurrence metrics, baseline/report file persistence, and report generation
+  orchestration remain candidates.
 - `internal/distill`: rule drafting and lifecycle state.
 - `internal/serve`: advisory serving snapshot behavior.
 - `internal/demo`: deterministic demo fixture behavior.
