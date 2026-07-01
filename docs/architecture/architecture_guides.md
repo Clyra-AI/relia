@@ -219,6 +219,13 @@ into `internal/`, or record why the change is shrink-neutral with compensating
 validation. New feature work must not add fresh product domains to the CLI
 entrypoint.
 
+The first test-side decomposition slice moves unified-diff assessment parser
+coverage into `cmd/relia/diffparse_test.go`. That file remains in package
+`main` so it can exercise the current unexported CLI helper while reducing the
+legacy `cmd/relia/main_test.go` debt surface. Future slices should continue
+moving cohesive command-test groups into responsibility-named test files before
+changing command behavior.
+
 Decomposition starts with cohesive pure behavior that can move without changing
 the CLI contract. `internal/diffparse` owns unified-diff touched-path parsing
 for `assess` and `advise`; `internal/yamlmini` owns Relia's minimal

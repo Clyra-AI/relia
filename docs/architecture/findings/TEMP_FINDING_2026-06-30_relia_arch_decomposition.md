@@ -50,6 +50,15 @@ repair blast radius, and merge risk.
 5. Keep Factory artifacts and closure evidence untouched except for
    task-scoped evidence required by the future decomposition task.
 
+Current progress:
+
+- `internal/diffparse`, `internal/yamlmini`, `internal/config`,
+  `internal/result`, `internal/ingest`, and `internal/assess` now own bounded
+  implementation slices extracted from the original CLI monolith.
+- Unified-diff assessment parser coverage now lives in
+  `cmd/relia/diffparse_test.go`, leaving the tests in package `main` for
+  unexported helper access while shrinking `cmd/relia/main_test.go`.
+
 ## Candidate Package Boundaries
 
 - `internal/result`: command-result envelope and generic pass/error helpers
