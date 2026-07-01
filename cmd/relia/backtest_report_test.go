@@ -8,6 +8,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	backtestdoc "github.com/Clyra-AI/relia/internal/backtest"
 )
 
 func TestBacktestComputesConservativeERRWithFlakesPossibleAndStaleBaseline(t *testing.T) {
@@ -156,7 +158,7 @@ func TestBuildReportBadgeComputesFreshness(t *testing.T) {
 	}
 	now := time.Date(2026, 6, 30, 0, 0, 0, 0, time.UTC)
 
-	badge := buildReportBadgeAt(report, now)
+	badge := backtestdoc.BuildReportBadgeAt(report, now)
 	if badge.Status != "current" || badge.Stale || badge.Message != "ERR 4.1%" || badge.Color != "brightgreen" {
 		t.Fatalf("fresh badge = %#v, want current", badge)
 	}
@@ -165,7 +167,7 @@ func TestBuildReportBadgeComputesFreshness(t *testing.T) {
 	}
 
 	report.Metadata["last_ingest_at"] = "2026-05-29T00:00:00Z"
-	badge = buildReportBadgeAt(report, now)
+	badge = backtestdoc.BuildReportBadgeAt(report, now)
 	if badge.Status != "stale" || !badge.Stale || badge.Message != "ERR 4.1% stale" || badge.Color != "lightgrey" {
 		t.Fatalf("old badge = %#v, want stale", badge)
 	}
@@ -176,7 +178,7 @@ func TestBuildReportBadgeComputesFreshness(t *testing.T) {
 	report.Metadata = map[string]any{
 		"merged_prs_since_last_ingest": 0,
 	}
-	badge = buildReportBadgeAt(report, now)
+	badge = backtestdoc.BuildReportBadgeAt(report, now)
 	if badge.Status != "stale" || !badge.Stale {
 		t.Fatalf("missing ingest badge = %#v, want stale", badge)
 	}
@@ -197,7 +199,7 @@ func TestBuildReportBadgeComputesActivityStaleness(t *testing.T) {
 	}
 	now := time.Date(2026, 6, 21, 0, 0, 0, 0, time.UTC)
 
-	badge := buildReportBadgeAt(report, now)
+	badge := backtestdoc.BuildReportBadgeAt(report, now)
 	if badge.Status != "stale" || !badge.Stale || badge.Message != "ERR 4.1% stale" {
 		t.Fatalf("activity badge = %#v, want stale", badge)
 	}
@@ -208,7 +210,7 @@ func TestBuildReportBadgeComputesActivityStaleness(t *testing.T) {
 	report.Metadata = map[string]any{
 		"last_ingest_at": "2026-06-20T00:00:00Z",
 	}
-	badge = buildReportBadgeAt(report, now)
+	badge = backtestdoc.BuildReportBadgeAt(report, now)
 	if badge.Status != "stale" || !badge.Stale {
 		t.Fatalf("missing activity badge = %#v, want stale", badge)
 	}
@@ -220,7 +222,7 @@ func TestBuildReportBadgeComputesActivityStaleness(t *testing.T) {
 		"last_ingest_at":               "2026-06-20T00:00:00Z",
 		"merged_prs_since_last_ingest": json.Number("-1"),
 	}
-	badge = buildReportBadgeAt(report, now)
+	badge = backtestdoc.BuildReportBadgeAt(report, now)
 	if badge.Status != "stale" || !badge.Stale {
 		t.Fatalf("negative activity badge = %#v, want stale", badge)
 	}

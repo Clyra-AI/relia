@@ -98,7 +98,8 @@ Current progress:
   package tests, while input file reads, event normalization, shard writes, and
   command-result rendering remain in `cmd/relia`.
 - `internal/backtest` now owns `relia backtest` argument parsing, recurrence
-  window duration validation, and the recurrence report data model with direct
+  window duration validation, recurrence report model, diagnostics/operator
+  feedback/badge helpers, and top repeated mistake aggregation with direct
   package tests, while experience loading, report metric assembly, baseline
   mutation, and command-result rendering remain in `cmd/relia`.
 
@@ -117,8 +118,9 @@ Current progress:
   experience-record normalization and ingest result assembly still live in
   `cmd/relia`.
 - `internal/backtest`: backtest command argument parsing, recurrence window
-  validation, recurrence report model extracted; recurrence metrics and report
-  generation remain candidates.
+  validation, recurrence report model, report diagnostics/operator
+  feedback/badge helpers, and top repeated mistake aggregation extracted;
+  recurrence metrics and report generation remain candidates.
 - `internal/distill`: rule drafting and lifecycle state.
 - `internal/serve`: advisory serving snapshot behavior.
 - `internal/demo`: deterministic demo fixture behavior.
