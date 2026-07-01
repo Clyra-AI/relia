@@ -19,6 +19,7 @@ import (
 
 	advisedoc "github.com/Clyra-AI/relia/internal/advise"
 	assessdoc "github.com/Clyra-AI/relia/internal/assess"
+	backtestdoc "github.com/Clyra-AI/relia/internal/backtest"
 	configdoc "github.com/Clyra-AI/relia/internal/config"
 	"github.com/Clyra-AI/relia/internal/diffparse"
 	distilldoc "github.com/Clyra-AI/relia/internal/distill"
@@ -136,14 +137,7 @@ type parsedArgs struct {
 
 type ingestOptions = ingestdoc.CLIOptions
 
-type backtestOptions struct {
-	Window         string
-	Format         string
-	FormatExplicit bool
-	BaselinePath   string
-	ReportDir      string
-	SaveBaseline   bool
-}
+type backtestOptions = backtestdoc.Options
 
 type assessOptions = assessdoc.CLIOptions
 
@@ -741,15 +735,15 @@ func ingestResult(args []string, start time.Time) CommandResult {
 }
 
 func backtestResult(args []string, start time.Time) CommandResult {
-	options, commandErr := parseBacktestArgs(args)
+	options, parseErr := backtestdoc.ParseArgs(args)
 	withFormat := func(result CommandResult) CommandResult {
 		if options.FormatExplicit && options.Format == "json" {
 			result.MachineReadable = true
 		}
 		return result
 	}
-	if commandErr != nil {
-		return withFormat(errorResult("backtest", "backtest", commandErr, start))
+	if parseErr != nil {
+		return withFormat(errorResult("backtest", "backtest", usageError(parseErr.Message), start))
 	}
 	wd, err := os.Getwd()
 	if err != nil {
@@ -771,10 +765,7 @@ func backtestResult(args []string, start time.Time) CommandResult {
 	if commandErr != nil {
 		return withFormat(errorResult("backtest", "backtest", commandErr, start))
 	}
-	windowDays, commandErr := parseBacktestWindowDays(options.Window)
-	if commandErr != nil {
-		return withFormat(errorResult("backtest", "backtest", commandErr, start))
-	}
+	windowDays, _ := backtestdoc.ParseWindowDays(options.Window)
 	report, commandErr := buildRecurrenceReport(root, config, records, sourceArtifacts, sourceDigest, options, windowDays)
 	if commandErr != nil {
 		return withFormat(errorResult("backtest", "backtest", commandErr, start))
@@ -864,74 +855,6 @@ func backtestResult(args []string, start time.Time) CommandResult {
 		})
 	}
 	return withFormat(result)
-}
-
-func parseBacktestArgs(args []string) (backtestOptions, *CommandError) {
-	options := backtestOptions{
-		Window:       "180d",
-		Format:       "json",
-		BaselinePath: ".relia/baselines/error-recurrence-baseline.json",
-		ReportDir:    ".relia/reports",
-	}
-	for index := 0; index < len(args); index++ {
-		arg := args[index]
-		switch arg {
-		case "--window":
-			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
-				return options, usageError("backtest requires a value after --window")
-			}
-			options.Window = args[index+1]
-			index++
-		case "--format":
-			options.FormatExplicit = true
-			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
-				return options, usageError("backtest requires a value after --format")
-			}
-			options.Format = args[index+1]
-			index++
-		case "--baseline":
-			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
-				return options, usageError("backtest requires a repo-relative path after --baseline")
-			}
-			options.BaselinePath = args[index+1]
-			index++
-		case "--report-dir":
-			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
-				return options, usageError("backtest requires a repo-relative path after --report-dir")
-			}
-			options.ReportDir = args[index+1]
-			index++
-		case "--save-baseline":
-			options.SaveBaseline = true
-		default:
-			return options, usageError(fmt.Sprintf("unknown backtest argument %q", arg))
-		}
-	}
-	if options.Format != "json" {
-		return options, usageError("backtest only supports --format json in this task slice")
-	}
-	if _, commandErr := parseBacktestWindowDays(options.Window); commandErr != nil {
-		return options, commandErr
-	}
-	if _, ok := cleanRepoPath(options.BaselinePath); !ok {
-		return options, usageError("backtest --baseline must be a repo-relative path")
-	}
-	if _, ok := cleanRepoPath(options.ReportDir); !ok {
-		return options, usageError("backtest --report-dir must be a repo-relative path")
-	}
-	return options, nil
-}
-
-func parseBacktestWindowDays(value string) (int, *CommandError) {
-	trimmed := strings.TrimSpace(strings.ToLower(value))
-	if !strings.HasSuffix(trimmed, "d") {
-		return 0, usageError("backtest --window must use a day duration such as 180d")
-	}
-	days, err := strconv.Atoi(strings.TrimSuffix(trimmed, "d"))
-	if err != nil || days <= 0 {
-		return 0, usageError("backtest --window must be a positive day duration such as 180d")
-	}
-	return days, nil
 }
 
 func loadBacktestExperiences(root string) ([]backtestExperience, []string, string, *CommandError) {
