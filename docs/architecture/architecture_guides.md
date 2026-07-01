@@ -221,10 +221,12 @@ entrypoint.
 
 The first test-side decomposition slices move unified-diff assessment parser
 coverage into `cmd/relia/diffparse_test.go` and advisory command, workflow, and
-state coverage into `cmd/relia/advise_test.go`. These files remain in package
-`main` so they can exercise the current unexported CLI helpers while reducing
-the legacy `cmd/relia/main_test.go` debt surface. Future slices should continue
-moving cohesive command-test groups into responsibility-named test files before
+state coverage into `cmd/relia/advise_test.go`. Ingest command safety and
+contract coverage now lives in `cmd/relia/ingest_security_test.go` and
+`cmd/relia/ingest_contract_test.go`. These files remain in package `main` so
+they can exercise the current unexported CLI helpers while reducing the legacy
+`cmd/relia/main_test.go` debt surface. Future slices should continue moving
+cohesive command-test groups into responsibility-named test files before
 changing command behavior.
 
 Decomposition starts with cohesive pure behavior that can move without changing
