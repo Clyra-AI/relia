@@ -141,6 +141,46 @@ func BuildReportOperatorFeedback(summary RecurrenceSummary) OperatorFeedback {
 	}
 }
 
+func ReportRepoID(records []Experience) string {
+	if len(records) == 0 {
+		return ""
+	}
+	repo := records[0].Record.Repo
+	if repo.Owner == "" || repo.Name == "" {
+		return ""
+	}
+	return repo.Owner + "/" + repo.Name
+}
+
+func ReportIngestFreshnessMetadata(records []Experience) (time.Time, int, bool, bool) {
+	var latestIngestAt time.Time
+	mergedSinceIngest := 0
+	hasLastIngestAt := false
+	hasMergedSinceIngest := false
+	for _, record := range records {
+		ingestedAt, ok := metadataTime(record.Record.Metadata, badgeMetadataLastIngest)
+		if !ok {
+			continue
+		}
+		if !hasLastIngestAt || ingestedAt.After(latestIngestAt) {
+			latestIngestAt = ingestedAt
+			mergedSinceIngest = 0
+			hasLastIngestAt = true
+			hasMergedSinceIngest = false
+		}
+		if !ingestedAt.Equal(latestIngestAt) {
+			continue
+		}
+		if value, ok := metadataInt(record.Record.Metadata, badgeMetadataMergedPRs); ok {
+			if !hasMergedSinceIngest || value > mergedSinceIngest {
+				mergedSinceIngest = value
+			}
+			hasMergedSinceIngest = true
+		}
+	}
+	return latestIngestAt, mergedSinceIngest, hasLastIngestAt, hasMergedSinceIngest
+}
+
 func BuildReportBadge(report RecurrenceReport) ReportBadge {
 	return BuildReportBadgeAt(report, time.Now().UTC())
 }
