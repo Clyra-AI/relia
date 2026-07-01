@@ -84,6 +84,10 @@ Current progress:
   repo-relative scope-path validation with direct package tests, while memory
   rule lookup, lifecycle file updates, validation, and command-result rendering
   remain in `cmd/relia`.
+- `internal/memory` now owns `relia memory` argument parsing and
+  repo-relative output-path validation with direct package tests, while memory
+  rule summary loading, Markdown rendering, artifact writes, and command-result
+  assembly remain in `cmd/relia`.
 
 ## Candidate Package Boundaries
 
@@ -118,6 +122,9 @@ Current progress:
 - `internal/review`: review command argument parsing, review action defaults,
   label validation, and edit scope-path validation before CLI-owned memory-rule
   lookup and artifact mutation.
+- `internal/memory`: memory command argument parsing, default MEMORY.md output
+  selection, format validation, and output path validation before CLI-owned
+  memory-page rendering and artifact writes.
 - `internal/yamlmini`: minimal repo-local YAML parsing and line-reference
   inventory for config and memory rule documents.
 

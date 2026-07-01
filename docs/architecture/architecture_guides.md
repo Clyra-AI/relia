@@ -253,7 +253,8 @@ manifest construction before config-owned validation and CLI-owned writes;
 `internal/distill` owns distill argument parsing, provider plan construction,
 request-shape description, cost estimation, embedding-mode helpers, and review
 gate helpers; `internal/review` owns review command argument parsing and
-repo-relative scope-path validation.
+repo-relative scope-path validation; `internal/memory` owns memory command
+argument parsing and repo-relative output-path validation.
 `cmd/relia` keeps command wiring, command-specific CommandError translation,
 experience-record normalization, ingest result assembly, and human/JSON
 rendering for those surfaces.
