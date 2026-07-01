@@ -59,6 +59,8 @@ repair blast radius, and merge risk.
 - `internal/distill`: rule drafting and lifecycle state.
 - `internal/serve`: advisory serving snapshot behavior.
 - `internal/demo`: deterministic demo fixture behavior.
+- `internal/diffparse`: unified-diff touched-path parsing for assess and
+  advise.
 
 ## Required Promotion
 
@@ -67,4 +69,3 @@ repair blast radius, and merge risk.
 - Required command before implementation: `factoryd ingest --kind review` or
   the equivalent governed Factory planning path.
 - Required validation after materialization: `make prepush-full`.
-
