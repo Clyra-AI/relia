@@ -8,6 +8,10 @@
       "cmd/relia/main.go",
       "cmd/relia/main_test.go"
     ],
+    "line_ceilings": {
+      "cmd/relia/main.go": 8994,
+      "cmd/relia/main_test.go": 7786
+    },
     "budget": {
       "warn_line_threshold": 1200,
       "fail_line_threshold": 2500
