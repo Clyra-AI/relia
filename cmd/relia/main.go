@@ -25,6 +25,7 @@ import (
 	ingestdoc "github.com/Clyra-AI/relia/internal/ingest"
 	modelpulldoc "github.com/Clyra-AI/relia/internal/modelpull"
 	resultdoc "github.com/Clyra-AI/relia/internal/result"
+	reviewdoc "github.com/Clyra-AI/relia/internal/review"
 	"github.com/Clyra-AI/relia/internal/yamlmini"
 )
 
@@ -163,14 +164,7 @@ type adviseOptions struct {
 	CommentPath string
 }
 
-type reviewOptions struct {
-	Action     string
-	Rule       string
-	Label      string
-	Statement  string
-	Reason     string
-	ScopePaths []string
-}
+type reviewOptions = reviewdoc.Options
 
 type memoryOptions struct {
 	Format     string
@@ -2448,9 +2442,9 @@ func distillInputPathMetadata(options distillOptions, sourceArtifacts []string) 
 }
 
 func reviewResult(args []string, start time.Time) CommandResult {
-	options, commandErr := parseReviewArgs(args)
-	if commandErr != nil {
-		return errorResult("review", "review", commandErr, start)
+	options, parseErr := reviewdoc.ParseArgs(args)
+	if parseErr != nil {
+		return errorResult("review", "review", usageError(parseErr.Message), start)
 	}
 	wd, err := os.Getwd()
 	if err != nil {
@@ -2484,109 +2478,6 @@ func reviewResult(args []string, start time.Time) CommandResult {
 	result.EvidenceRefs = append(result.EvidenceRefs, "schemas/memory-rule.schema.json", rel)
 	result.Artifacts = append(result.Artifacts, ArtifactRef{Kind: "memory_rule", Path: rel})
 	return result
-}
-
-func parseReviewArgs(args []string) (reviewOptions, *CommandError) {
-	var options reviewOptions
-	if len(args) > 0 {
-		switch args[0] {
-		case "approve", "edit", "reject":
-			options.Action = args[0]
-			args = args[1:]
-		}
-	}
-	for index := 0; index < len(args); index++ {
-		arg := args[index]
-		switch arg {
-		case "--rule":
-			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
-				return options, usageError("review requires a rule id or path after --rule")
-			}
-			options.Rule = args[index+1]
-			index++
-		case "--label":
-			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
-				return options, usageError("review requires accepted, suggested, or needs_user_input after --label")
-			}
-			options.Label = args[index+1]
-			index++
-		case "--statement":
-			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
-				return options, usageError("review edit requires a statement after --statement")
-			}
-			options.Statement = args[index+1]
-			index++
-		case "--reason":
-			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
-				return options, usageError("review reject requires a reason after --reason")
-			}
-			options.Reason = args[index+1]
-			index++
-		case "--scope-path":
-			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
-				return options, usageError("review edit requires a repo-relative path after --scope-path")
-			}
-			options.ScopePaths = append(options.ScopePaths, args[index+1])
-			index++
-		default:
-			return options, usageError(fmt.Sprintf("unknown review argument %q", arg))
-		}
-	}
-	if options.Action == "" {
-		options.Action = "label"
-	}
-	if strings.TrimSpace(options.Rule) == "" {
-		return options, usageError("review requires --rule <id-or-path>")
-	}
-	hasEditInput := strings.TrimSpace(options.Statement) != "" || len(options.ScopePaths) > 0
-	if options.Action != "edit" && hasEditInput {
-		return options, usageError("review --statement and --scope-path require review edit")
-	}
-	if options.Action != "reject" && strings.TrimSpace(options.Reason) != "" {
-		return options, usageError("review --reason requires review reject")
-	}
-	switch options.Action {
-	case "approve":
-		if options.Label != "" && options.Label != "accepted" {
-			return options, usageError("review approve can only use review label accepted")
-		}
-		options.Label = "accepted"
-	case "reject":
-		if strings.TrimSpace(options.Reason) == "" {
-			return options, usageError("review reject requires --reason <text>")
-		}
-		if options.Label != "" && options.Label != "needs_user_input" {
-			return options, usageError("review reject can only use review label needs_user_input")
-		}
-		options.Label = "needs_user_input"
-	case "edit":
-		if strings.TrimSpace(options.Statement) == "" && len(options.ScopePaths) == 0 {
-			return options, usageError("review edit requires --statement or --scope-path")
-		}
-		if options.Label == "" {
-			options.Label = "suggested"
-		}
-		if options.Label == "accepted" {
-			return options, usageError("review edit keeps a rule candidate; run review approve after editing")
-		}
-	case "label":
-		if options.Label == "" {
-			options.Label = "accepted"
-		}
-	default:
-		return options, usageError("review action must be approve, edit, reject, or omitted for --label")
-	}
-	switch options.Label {
-	case "accepted", "suggested", "needs_user_input":
-	default:
-		return options, usageError("review --label must be accepted, suggested, or needs_user_input")
-	}
-	for _, scopePath := range options.ScopePaths {
-		if _, ok := cleanRepoPath(scopePath); !ok {
-			return options, usageError("review --scope-path must be repo-relative")
-		}
-	}
-	return options, nil
 }
 
 func memoryResult(args []string, start time.Time) CommandResult {

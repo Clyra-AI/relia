@@ -245,7 +245,15 @@ validation, shard persistence, fail-closed redaction, standard
 secret/provenance URL token-shape checks, and record/provenance URL helpers;
 `internal/assess` owns active memory rule serving projections, citation
 serving filters, repo-relative scope matching, and deterministic risk
-assessment construction for `assess`, `serve`, and `advise`.
+assessment construction for `assess`, `serve`, and `advise`;
+`internal/advise` owns advisory comment decision, strategy, markdown rendering,
+confidence threshold handling, and prior-state comparison helpers;
+`internal/modelpull` owns local model artifact pull argument parsing and
+manifest construction before config-owned validation and CLI-owned writes;
+`internal/distill` owns distill argument parsing, provider plan construction,
+request-shape description, cost estimation, embedding-mode helpers, and review
+gate helpers; `internal/review` owns review command argument parsing and
+repo-relative scope-path validation.
 `cmd/relia` keeps command wiring, command-specific CommandError translation,
 experience-record normalization, ingest result assembly, and human/JSON
 rendering for those surfaces.
