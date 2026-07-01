@@ -103,6 +103,9 @@ Current progress:
   rendering with direct package tests, while experience loading, report metric
   assembly, baseline mutation, filesystem writes, and command-result rendering
   remain in `cmd/relia`.
+- `internal/backtest` now also owns ERR baseline JSON comparison and freshly
+  saved baseline status shaping with direct package tests, while repo-relative
+  path validation and baseline/report file writes remain in `cmd/relia`.
 
 ## Candidate Package Boundaries
 
@@ -120,9 +123,10 @@ Current progress:
   `cmd/relia`.
 - `internal/backtest`: backtest command argument parsing, recurrence window
   validation, recurrence report model, report diagnostics/operator
-  feedback/badge helpers, top repeated mistake aggregation, and HTML report
-  rendering extracted; recurrence metrics, JSON/baseline persistence, and
-  report generation orchestration remain candidates.
+  feedback/badge helpers, top repeated mistake aggregation, HTML report
+  rendering, and ERR baseline comparison extracted; recurrence metrics,
+  baseline/report file persistence, and report generation orchestration remain
+  candidates.
 - `internal/distill`: rule drafting and lifecycle state.
 - `internal/serve`: advisory serving snapshot behavior.
 - `internal/demo`: deterministic demo fixture behavior.
