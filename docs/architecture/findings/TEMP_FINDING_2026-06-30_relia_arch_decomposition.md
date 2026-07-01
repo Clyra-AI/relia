@@ -58,8 +58,11 @@ Current progress:
 - Unified-diff assessment parser coverage now lives in
   `cmd/relia/diffparse_test.go`, and advisory command, workflow, and state
   coverage now lives in `cmd/relia/advise_test.go`, leaving the tests in
-  package `main` for unexported helper access while shrinking
-  `cmd/relia/main_test.go`.
+  package `main` for unexported helper access.
+- Ingest command safety and contract coverage now lives in
+  `cmd/relia/ingest_security_test.go` and
+  `cmd/relia/ingest_contract_test.go`, continuing to shrink
+  `cmd/relia/main_test.go` without changing command behavior.
 
 ## Candidate Package Boundaries
 

@@ -10,7 +10,7 @@
     ],
     "line_ceilings": {
       "cmd/relia/main.go": 6737,
-      "cmd/relia/main_test.go": 6747
+      "cmd/relia/main_test.go": 5480
     },
     "budget": {
       "warn_line_threshold": 1200,
@@ -33,6 +33,8 @@
   "evidence_refs": [
     "cmd/relia/advise_test.go",
     "cmd/relia/diffparse_test.go",
+    "cmd/relia/ingest_contract_test.go",
+    "cmd/relia/ingest_security_test.go",
     "docs/architecture/findings/TEMP_FINDING_2026-06-30_relia_arch_decomposition.md"
   ],
   "last_reduced_at": "2026-07-01T00:00:00Z"
