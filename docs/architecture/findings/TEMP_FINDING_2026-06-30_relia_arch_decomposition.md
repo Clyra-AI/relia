@@ -73,6 +73,10 @@ Current progress:
 - `internal/modelpull` now owns `relia models pull` argument parsing and local
   model manifest construction with direct package tests, while command I/O and
   repository writes remain in `cmd/relia`.
+- `internal/distill` now owns provider-backed distill planning, adapter request
+  shapes, cost estimation, and distill settings helpers with direct package
+  tests, while CLI orchestration and provider-gate error rendering remain in
+  `cmd/relia`.
 
 ## Candidate Package Boundaries
 
@@ -101,6 +105,8 @@ Current progress:
   confidence threshold handling, and prior-state comparison helpers.
 - `internal/modelpull`: local model artifact pull argument parsing and
   manifest construction before config-owned validation and CLI-owned writes.
+- `internal/distill`: provider plan construction, request-shape description,
+  cost estimation, embedding-mode helpers, and distill review-gate helpers.
 - `internal/yamlmini`: minimal repo-local YAML parsing and line-reference
   inventory for config and memory rule documents.
 
