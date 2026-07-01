@@ -100,6 +100,11 @@ ARCHITECTURE_BUDGET_EXCEPTION_PATHS = [
     "cmd/relia/main.go",
     "cmd/relia/main_test.go",
 ]
+ARCHITECTURE_BUDGET_EXCEPTION_LINE_CEILINGS = {
+    "cmd/relia/main.go": 8994,
+    "cmd/relia/main_test.go": 7786,
+}
+EXPECTED_ARCHITECTURE_BUDGET_EXTENSIONS = [".go", ".py", ".ts", ".tsx", ".js", ".jsx"]
 
 def fail(message):
     print(message, file=sys.stderr)
@@ -204,7 +209,7 @@ def count_file_lines(path):
         count += 1
     return count
 
-def architecture_budget_unexcepted_failures(root, budget, exception_paths):
+def architecture_budget_unexcepted_failures(root, budget, exception_paths, exception_line_ceilings):
     extensions = {
         str(ext).strip().lower()
         for ext in budget.get("source_extensions") or []
@@ -237,12 +242,25 @@ def architecture_budget_unexcepted_failures(root, budget, exception_paths):
             except OSError as exc:
                 failures.append(f"{rel} (unreadable: {exc})")
                 continue
-            if line_count >= fail_threshold and rel not in exception_paths:
-                failures.append(f"{rel} ({line_count} lines >= {fail_threshold})")
+            if line_count < fail_threshold:
+                continue
+            if rel in exception_paths:
+                ceiling = exception_line_ceilings.get(rel)
+                if ceiling is None:
+                    failures.append(f"{rel} is excepted but has no approved line ceiling")
+                elif line_count > ceiling:
+                    failures.append(f"{rel} ({line_count} lines > approved ceiling {ceiling})")
+                continue
+            failures.append(f"{rel} ({line_count} lines >= {fail_threshold})")
     return sorted(failures)
 
 def validate_architecture_budget_inventory(budget, label):
-    failures = architecture_budget_unexcepted_failures(ROOT, budget, architecture_budget_exception_paths(ROOT))
+    failures = architecture_budget_unexcepted_failures(
+        ROOT,
+        budget,
+        architecture_budget_exception_paths(ROOT),
+        ARCHITECTURE_BUDGET_EXCEPTION_LINE_CEILINGS,
+    )
     if failures:
         fail(f"{label}.architecture_budget has unexcepted over-budget source files: {', '.join(failures)}")
 
@@ -259,8 +277,8 @@ def validate_architecture_budget_policy(repo, label):
     if "architecture-fitness-standard.md#default-budget" not in str(budget.get("policy_ref", "")):
         fail(f"{label}.architecture_budget.policy_ref must cite the Factory architecture fitness default budget")
     extensions = budget.get("source_extensions")
-    if not isinstance(extensions, list) or ".go" not in extensions:
-        fail(f"{label}.architecture_budget.source_extensions must include .go")
+    if sorted(extensions or []) != sorted(EXPECTED_ARCHITECTURE_BUDGET_EXTENSIONS):
+        fail(f"{label}.architecture_budget.source_extensions must be {EXPECTED_ARCHITECTURE_BUDGET_EXTENSIONS!r}")
     excluded = budget.get("excluded_dirs")
     for expected in [".git", ".factoryd", "node_modules", "vendor", "dist"]:
         if not isinstance(excluded, list) or expected not in excluded:
@@ -1058,11 +1076,19 @@ def self_test():
             "excluded_dirs": [".git", ".factoryd"],
             "fail_line_threshold": 2500,
         }
-        failures = architecture_budget_unexcepted_failures(temp_root, sample_budget, set())
+        failures = architecture_budget_unexcepted_failures(temp_root, sample_budget, set(), {})
         if not failures or "cmd/demo/main.go" not in failures[0]:
             fail("architecture budget self-test expected unexcepted oversized source to fail")
-        if architecture_budget_unexcepted_failures(temp_root, sample_budget, {"cmd/demo/main.go"}):
+        if architecture_budget_unexcepted_failures(temp_root, sample_budget, {"cmd/demo/main.go"}, {"cmd/demo/main.go": 2501}):
             fail("architecture budget self-test expected exception-scoped source to pass")
+        ceiling_failures = architecture_budget_unexcepted_failures(
+            temp_root,
+            sample_budget,
+            {"cmd/demo/main.go"},
+            {"cmd/demo/main.go": 2500},
+        )
+        if not ceiling_failures or "approved ceiling" not in ceiling_failures[0]:
+            fail("architecture budget self-test expected exception growth over ceiling to fail")
     if duplicate_values(["T1", "T2", "T1", "T2", "T3"]) != ["T1", "T2"]:
         fail("duplicate_values must preserve duplicate ids in first duplicate order")
     if "FR23-PROVIDER-ADAPTERS-AND-NO-LLM-MODE-001" not in PROVIDER_ACCEPTANCE_IDS:
