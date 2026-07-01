@@ -115,6 +115,14 @@ EXPECTED_ARCHITECTURE_BUDGET_EXCLUDED_DIRS = [
     "node_modules",
     "vendor",
 ]
+ARCHITECTURE_BUDGET_COMPONENT_EXCLUDED_DIRS = {
+    ".git",
+    ".factoryd",
+    ".venv",
+    "__pycache__",
+    "node_modules",
+    "vendor",
+}
 
 def fail(message):
     print(message, file=sys.stderr)
@@ -248,6 +256,9 @@ def architecture_budget_path_excluded(rel, excluded_dirs):
     rel = normalize_architecture_budget_path(rel)
     if not rel:
         return False
+    for part in rel.split("/"):
+        if part in excluded_dirs and part in ARCHITECTURE_BUDGET_COMPONENT_EXCLUDED_DIRS:
+            return True
     for excluded in excluded_dirs:
         if rel == excluded or rel.startswith(f"{excluded}/"):
             return True
@@ -1178,12 +1189,17 @@ def self_test():
         generated_build = prefix_root / "build" / "generated.go"
         generated_build.parent.mkdir(parents=True)
         generated_build.write_text("line\n" * 2501)
-        prefix_budget = {**sample_budget, "excluded_dirs": [*sample_budget["excluded_dirs"], "build"]}
+        nested_dependency = prefix_root / "packages" / "web" / "node_modules" / "dep" / "generated.go"
+        nested_dependency.parent.mkdir(parents=True)
+        nested_dependency.write_text("line\n" * 2501)
+        prefix_budget = {**sample_budget, "excluded_dirs": [*sample_budget["excluded_dirs"], "build", "node_modules"]}
         prefix_failures = architecture_budget_unexcepted_failures(prefix_root, prefix_budget, set(), {})
         if not any("internal/build/big.go" in failure for failure in prefix_failures):
             fail("architecture budget self-test expected first-party internal/build source to fail")
         if any("build/generated.go" in failure for failure in prefix_failures):
             fail("architecture budget self-test expected root build output to be excluded")
+        if any("node_modules/dep/generated.go" in failure for failure in prefix_failures):
+            fail("architecture budget self-test expected nested node_modules dependency to be excluded")
     validate_architecture_debt_exception_expiry(
         "self-test-valid",
         {"expires_at": "2099-01-01T00:00:00Z"},
