@@ -88,6 +88,9 @@ Current progress:
   repo-relative output-path validation with direct package tests, while memory
   rule summary loading, Markdown rendering, artifact writes, and command-result
   assembly remain in `cmd/relia`.
+- `internal/serve` now owns `relia serve` argument parsing and hosted transport
+  dependency gating with direct package tests, while rule loading, served-rule
+  data assembly, and MCP manifest rendering remain in `cmd/relia`.
 
 ## Candidate Package Boundaries
 
@@ -125,6 +128,9 @@ Current progress:
 - `internal/memory`: memory command argument parsing, default MEMORY.md output
   selection, format validation, and output path validation before CLI-owned
   memory-page rendering and artifact writes.
+- `internal/serve`: serve command argument parsing, JSON format validation, and
+  hosted/network transport dependency gating before CLI-owned rule loading and
+  MCP manifest rendering.
 - `internal/yamlmini`: minimal repo-local YAML parsing and line-reference
   inventory for config and memory rule documents.
 

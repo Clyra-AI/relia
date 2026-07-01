@@ -9,7 +9,7 @@
       "cmd/relia/main_test.go"
     ],
     "line_ceilings": {
-      "cmd/relia/main.go": 6055,
+      "cmd/relia/main.go": 6035,
       "cmd/relia/main_test.go": 4200
     },
     "budget": {
@@ -43,6 +43,8 @@
     "internal/modelpull/modelpull_test.go",
     "internal/review/args.go",
     "internal/review/args_test.go",
+    "internal/serve/args.go",
+    "internal/serve/args_test.go",
     "cmd/relia/backtest_integrity_test.go",
     "cmd/relia/backtest_report_test.go",
     "cmd/relia/advise_test.go",
