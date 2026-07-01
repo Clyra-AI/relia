@@ -150,13 +150,7 @@ type assessOptions struct {
 	FormatExplicit bool
 }
 
-type distillOptions struct {
-	Format       string
-	RuleDir      string
-	HalfLifeDays int
-	Embeddings   string
-	InputPath    string
-}
+type distillOptions = distilldoc.Options
 
 type serveOptions struct {
 	Format string
@@ -2327,15 +2321,15 @@ func savedBacktestBaselineComparison(baselinePath string, headlineERR float64) (
 }
 
 func distillResult(args []string, start time.Time) CommandResult {
-	options, commandErr := parseDistillArgs(args)
+	options, parseErr := distilldoc.ParseArgs(args)
 	withFormat := func(result CommandResult) CommandResult {
 		if options.Format == "json" {
 			result.MachineReadable = true
 		}
 		return result
 	}
-	if commandErr != nil {
-		return withFormat(errorResult("distill", "distill", commandErr, start))
+	if parseErr != nil {
+		return withFormat(errorResult("distill", "distill", usageError(parseErr.Message), start))
 	}
 	wd, err := os.Getwd()
 	if err != nil {
@@ -2441,70 +2435,6 @@ func distillResult(args []string, start time.Time) CommandResult {
 	}
 	result.RedactionStatus = "applied"
 	return withFormat(result)
-}
-
-func parseDistillArgs(args []string) (distillOptions, *CommandError) {
-	options := distillOptions{
-		Format:       "json",
-		RuleDir:      "memory/rules",
-		HalfLifeDays: 90,
-	}
-	for index := 0; index < len(args); index++ {
-		arg := args[index]
-		switch arg {
-		case "--format":
-			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
-				return options, usageError("distill requires a value after --format")
-			}
-			options.Format = args[index+1]
-			index++
-		case "--input", "-i":
-			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
-				return options, usageError("distill requires a path after --input")
-			}
-			if strings.TrimSpace(args[index+1]) == "" {
-				return options, usageError("distill --input must be a non-empty path")
-			}
-			options.InputPath = args[index+1]
-			index++
-		case "--rule-dir":
-			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
-				return options, usageError("distill requires a repo-relative path after --rule-dir")
-			}
-			options.RuleDir = args[index+1]
-			index++
-		case "--half-life-days":
-			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
-				return options, usageError("distill requires a positive integer after --half-life-days")
-			}
-			parsed, err := strconv.Atoi(args[index+1])
-			if err != nil || parsed <= 0 {
-				return options, usageError("distill --half-life-days must be a positive integer")
-			}
-			options.HalfLifeDays = parsed
-			index++
-		case "--embeddings":
-			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
-				return options, usageError("distill requires signature, local, or provider after --embeddings")
-			}
-			options.Embeddings = args[index+1]
-			index++
-		default:
-			return options, usageError(fmt.Sprintf("unknown distill argument %q", arg))
-		}
-	}
-	if options.Format != "json" {
-		return options, usageError("distill only supports --format json in this task slice")
-	}
-	if _, ok := cleanRepoPath(options.RuleDir); !ok {
-		return options, usageError("distill --rule-dir must be a repo-relative path")
-	}
-	switch options.Embeddings {
-	case "", "signature", "local", "provider":
-	default:
-		return options, usageError("distill --embeddings must be signature, local, or provider")
-	}
-	return options, nil
 }
 
 func distillInputPathMetadata(options distillOptions, sourceArtifacts []string) string {
