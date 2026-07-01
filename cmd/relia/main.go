@@ -27,6 +27,7 @@ import (
 	modelpulldoc "github.com/Clyra-AI/relia/internal/modelpull"
 	resultdoc "github.com/Clyra-AI/relia/internal/result"
 	reviewdoc "github.com/Clyra-AI/relia/internal/review"
+	servedoc "github.com/Clyra-AI/relia/internal/serve"
 	"github.com/Clyra-AI/relia/internal/yamlmini"
 )
 
@@ -154,9 +155,7 @@ type assessOptions struct {
 
 type distillOptions = distilldoc.Options
 
-type serveOptions struct {
-	Format string
-}
+type serveOptions = servedoc.Options
 
 type adviseOptions struct {
 	InputPath   string
@@ -2530,14 +2529,18 @@ func memoryResult(args []string, start time.Time) CommandResult {
 }
 
 func serveResult(args []string, start time.Time) CommandResult {
-	options, commandErr := parseServeArgs(args)
+	options, parseErr := servedoc.ParseArgs(args)
 	withFormat := func(result CommandResult) CommandResult {
 		if options.Format == "json" {
 			result.MachineReadable = true
 		}
 		return result
 	}
-	if commandErr != nil {
+	if parseErr != nil {
+		commandErr := usageError(parseErr.Message)
+		if parseErr.Kind == servedoc.ErrorKindDependency {
+			commandErr = dependencyError(parseErr.Message, parseErr.Reference)
+		}
 		return withFormat(errorResult("serve", "serve", commandErr, start))
 	}
 	wd, err := os.Getwd()
@@ -2576,29 +2579,6 @@ func serveResult(args []string, start time.Time) CommandResult {
 		result.EvidenceRefs = append(result.EvidenceRefs, rule.Path)
 	}
 	return withFormat(result)
-}
-
-func parseServeArgs(args []string) (serveOptions, *CommandError) {
-	options := serveOptions{Format: "json"}
-	for index := 0; index < len(args); index++ {
-		arg := args[index]
-		switch arg {
-		case "--format":
-			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
-				return options, usageError("serve requires a value after --format")
-			}
-			options.Format = args[index+1]
-			index++
-		case "--listen", "--http", "--hosted":
-			return options, dependencyError("hosted or network serve transports are outside the MVP default and require explicit network approval", "docs/product/prd.md#serve-and-advise")
-		default:
-			return options, usageError(fmt.Sprintf("unknown serve argument %q", arg))
-		}
-	}
-	if options.Format != "json" {
-		return options, usageError("serve only supports --format json in this task slice")
-	}
-	return options, nil
 }
 
 func servedRuleData(rules []assessmentRule) ([]map[string]any, *CommandError) {

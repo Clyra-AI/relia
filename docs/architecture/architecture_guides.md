@@ -254,7 +254,8 @@ manifest construction before config-owned validation and CLI-owned writes;
 request-shape description, cost estimation, embedding-mode helpers, and review
 gate helpers; `internal/review` owns review command argument parsing and
 repo-relative scope-path validation; `internal/memory` owns memory command
-argument parsing and repo-relative output-path validation.
+argument parsing and repo-relative output-path validation; `internal/serve`
+owns serve command argument parsing and hosted transport dependency gating.
 `cmd/relia` keeps command wiring, command-specific CommandError translation,
 experience-record normalization, ingest result assembly, and human/JSON
 rendering for those surfaces.
