@@ -219,9 +219,10 @@ into `internal/`, or record why the change is shrink-neutral with compensating
 validation. New feature work must not add fresh product domains to the CLI
 entrypoint.
 
-The first test-side decomposition slice moves unified-diff assessment parser
-coverage into `cmd/relia/diffparse_test.go`. That file remains in package
-`main` so it can exercise the current unexported CLI helper while reducing the
+The first test-side decomposition slices move unified-diff assessment parser
+coverage into `cmd/relia/diffparse_test.go` and initial advisory command
+coverage into `cmd/relia/advise_test.go`. These files remain in package `main`
+so they can exercise the current unexported CLI helpers while reducing the
 legacy `cmd/relia/main_test.go` debt surface. Future slices should continue
 moving cohesive command-test groups into responsibility-named test files before
 changing command behavior.
