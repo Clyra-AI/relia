@@ -90,6 +90,80 @@ func TestReportIngestFreshnessMetadataIgnoresInvalidValues(t *testing.T) {
 	}
 }
 
+func TestSortAndWindowRecordsUseStableRecordedAtBounds(t *testing.T) {
+	old := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	mid := time.Date(2026, 1, 15, 0, 0, 0, 0, time.UTC)
+	end := time.Date(2026, 1, 31, 0, 0, 0, 0, time.UTC)
+	records := []Experience{
+		{RecordedAt: end, Record: ingestdoc.Record{ExperienceID: "exp-c"}},
+		{RecordedAt: old, Record: ingestdoc.Record{ExperienceID: "exp-a"}},
+		{RecordedAt: mid, Record: ingestdoc.Record{ExperienceID: "exp-b"}},
+	}
+
+	SortExperiences(records)
+	window, windowRecords := WindowRecords(records, 20)
+
+	if records[0].Record.ExperienceID != "exp-a" || records[2].Record.ExperienceID != "exp-c" {
+		t.Fatalf("records sorted = %#v", records)
+	}
+	if window.Start != "2026-01-11T00:00:00Z" || window.End != "2026-01-31T00:00:00Z" {
+		t.Fatalf("window = %#v", window)
+	}
+	if len(windowRecords) != 2 || windowRecords[0].Record.ExperienceID != "exp-b" || windowRecords[1].Record.ExperienceID != "exp-c" {
+		t.Fatalf("window records = %#v", windowRecords)
+	}
+}
+
+func TestBuildReportMetricsCopiesSummaryCountsAndDefaultsOutcomeMap(t *testing.T) {
+	metrics := BuildReportMetrics(
+		RecurrenceSummary{
+			HeadlineERR:               0.25,
+			ConfirmedRecurrenceCount:  2,
+			PossibleRecurrenceCount:   1,
+			FlakeDiscountedCount:      3,
+			AttributionUncertainCount: 4,
+		},
+		map[int]bool{11: true, 12: true},
+		map[int]bool{12: true},
+		5,
+		nil,
+	)
+
+	if metrics.PRsAnalyzed != 2 || metrics.AgentAttributedPRs != 1 || metrics.AgentAttributedExperiences != 5 {
+		t.Fatalf("metric counts = %#v", metrics)
+	}
+	if metrics.ErrorRecurrenceRate != 0.25 || metrics.ConfirmedRecurrences != 2 || metrics.PossibleRecurrences != 1 {
+		t.Fatalf("recurrence metrics = %#v", metrics)
+	}
+	if metrics.AgentFailuresByOutcomeKind == nil {
+		t.Fatal("failure outcome map is nil")
+	}
+}
+
+func TestBuildReportMetadataIncludesRepoDigestAndFreshness(t *testing.T) {
+	records := []Experience{
+		{Record: ingestdoc.Record{Metadata: map[string]any{
+			"last_ingest_at":               "2026-06-20T00:00:00Z",
+			"merged_prs_since_last_ingest": 6,
+		}}},
+	}
+	windowRecords := []Experience{
+		{Record: ingestdoc.Record{Repo: ingestdoc.Repo{Owner: "Clyra-AI", Name: "relia"}}},
+	}
+
+	metadata := BuildReportMetadata(records, windowRecords, 180, "sha256:source")
+
+	if metadata["repo_id"] != "Clyra-AI/relia" || metadata["window_days"] != 180 || metadata["source_artifact_digest"] != "sha256:source" {
+		t.Fatalf("metadata basics = %#v", metadata)
+	}
+	if metadata["last_ingest_at"] != "2026-06-20T00:00:00Z" || metadata["merged_prs_since_last_ingest"] != 6 {
+		t.Fatalf("freshness metadata = %#v", metadata)
+	}
+	if metadata["network_required"] != false || metadata["repo_relative_paths_only"] != true {
+		t.Fatalf("safety metadata = %#v", metadata)
+	}
+}
+
 func TestBuildReportIDUsesStableWindowDigestAndSummaryInputs(t *testing.T) {
 	window := RecurrenceWindow{
 		Start: "2026-01-01T00:00:00Z",

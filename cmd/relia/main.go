@@ -878,21 +878,8 @@ func validateBacktestExperience(record experienceRecord, ref string) (time.Time,
 }
 
 func buildRecurrenceReport(root string, config yamlDocument, records []backtestExperience, sourceArtifacts []string, sourceDigest string, options backtestOptions, windowDays int) (recurrenceReport, *CommandError) {
-	sort.Slice(records, func(i, j int) bool {
-		if records[i].RecordedAt.Equal(records[j].RecordedAt) {
-			return records[i].Record.ExperienceID < records[j].Record.ExperienceID
-		}
-		return records[i].RecordedAt.Before(records[j].RecordedAt)
-	})
-	windowEnd := records[len(records)-1].RecordedAt.UTC()
-	windowStart := windowEnd.AddDate(0, 0, -windowDays)
-	windowRecords := make([]backtestExperience, 0, len(records))
-	for _, record := range records {
-		if record.RecordedAt.Before(windowStart) || record.RecordedAt.After(windowEnd) {
-			continue
-		}
-		windowRecords = append(windowRecords, record)
-	}
+	backtestdoc.SortExperiences(records)
+	window, windowRecords := backtestdoc.WindowRecords(records, windowDays)
 	flakeHeuristics := autoFlakeDiscountedExperiences(windowRecords)
 	priorBySignature := map[string][]backtestExperience{}
 	confirmed := []recurrencePair{}
@@ -986,49 +973,13 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 		summary.HeadlineERR = roundFloat(float64(summary.ConfirmedRecurrenceCount)/float64(summary.AgentFailureDenominator), 4)
 	}
 	summary.HeadlineERRPercent = fmt.Sprintf("%.1f%%", summary.HeadlineERR*100)
-	metrics := recurrenceMetrics{
-		PRsAnalyzed:                len(prsAnalyzed),
-		AgentAttributedPRs:         len(agentAttributedPRs),
-		AgentAttributedExperiences: agentAttributedExperiences,
-		AgentFailuresByOutcomeKind: agentFailuresByOutcomeKind,
-		ErrorRecurrenceRate:        summary.HeadlineERR,
-		ConfirmedRecurrences:       summary.ConfirmedRecurrenceCount,
-		PossibleRecurrences:        summary.PossibleRecurrenceCount,
-		FlakeDiscountedCount:       summary.FlakeDiscountedCount,
-		AttributionUncertainCount:  summary.AttributionUncertainCount,
-	}
-	if metrics.AgentFailuresByOutcomeKind == nil {
-		metrics.AgentFailuresByOutcomeKind = map[string]int{}
-	}
-	window := recurrenceWindow{
-		Start: windowStart.Format(time.RFC3339),
-		End:   windowEnd.Format(time.RFC3339),
-	}
+	metrics := backtestdoc.BuildReportMetrics(summary, prsAnalyzed, agentAttributedPRs, agentAttributedExperiences, agentFailuresByOutcomeKind)
 	baseline, commandErr := compareBacktestBaseline(root, options.BaselinePath, summary.HeadlineERR, sourceDigest, window)
 	if commandErr != nil {
 		return recurrenceReport{}, commandErr
 	}
 	gate := backtestGate(config, summary.HeadlineERR)
-	repoID := backtestdoc.ReportRepoID(windowRecords)
-	metadata := map[string]any{
-		"repo_id":                                repoID,
-		"window_days":                            windowDays,
-		"source_artifact_digest":                 sourceDigest,
-		"possible_excluded_from_err":             true,
-		"flake_discount_excluded_from_numerator": true,
-		"flake_discount_retained_in_denominator": true,
-		"deterministic_window_anchor":            "latest_recorded_at_in_source_artifacts",
-		"network_required":                       false,
-		"redaction_status":                       "customer_safe",
-		"repo_relative_paths_only":               true,
-		"baseline_gate_enabled_default":          false,
-	}
-	if lastIngestAt, mergedSinceIngest, hasLastIngestAt, hasMergedSinceIngest := backtestdoc.ReportIngestFreshnessMetadata(records); hasLastIngestAt {
-		metadata[badgeMetadataLastIngest] = lastIngestAt.Format(time.RFC3339)
-		if hasMergedSinceIngest {
-			metadata[badgeMetadataMergedPRs] = mergedSinceIngest
-		}
-	}
+	metadata := backtestdoc.BuildReportMetadata(records, windowRecords, windowDays, sourceDigest)
 	report := recurrenceReport{
 		ObjectType:           "relia.recurrence_report",
 		SchemaVersion:        commandSchemaVersion,

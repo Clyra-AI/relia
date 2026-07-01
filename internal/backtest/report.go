@@ -182,6 +182,75 @@ func ReportIngestFreshnessMetadata(records []Experience) (time.Time, int, bool, 
 	return latestIngestAt, mergedSinceIngest, hasLastIngestAt, hasMergedSinceIngest
 }
 
+func SortExperiences(records []Experience) {
+	sort.Slice(records, func(i, j int) bool {
+		if records[i].RecordedAt.Equal(records[j].RecordedAt) {
+			return records[i].Record.ExperienceID < records[j].Record.ExperienceID
+		}
+		return records[i].RecordedAt.Before(records[j].RecordedAt)
+	})
+}
+
+func WindowRecords(records []Experience, windowDays int) (RecurrenceWindow, []Experience) {
+	if len(records) == 0 {
+		return RecurrenceWindow{}, nil
+	}
+	windowEnd := records[len(records)-1].RecordedAt.UTC()
+	windowStart := windowEnd.AddDate(0, 0, -windowDays)
+	windowRecords := make([]Experience, 0, len(records))
+	for _, record := range records {
+		if record.RecordedAt.Before(windowStart) || record.RecordedAt.After(windowEnd) {
+			continue
+		}
+		windowRecords = append(windowRecords, record)
+	}
+	return RecurrenceWindow{
+		Start: windowStart.Format(time.RFC3339),
+		End:   windowEnd.Format(time.RFC3339),
+	}, windowRecords
+}
+
+func BuildReportMetrics(summary RecurrenceSummary, prsAnalyzed map[int]bool, agentAttributedPRs map[int]bool, agentAttributedExperiences int, agentFailuresByOutcomeKind map[string]int) RecurrenceMetrics {
+	metrics := RecurrenceMetrics{
+		PRsAnalyzed:                len(prsAnalyzed),
+		AgentAttributedPRs:         len(agentAttributedPRs),
+		AgentAttributedExperiences: agentAttributedExperiences,
+		AgentFailuresByOutcomeKind: agentFailuresByOutcomeKind,
+		ErrorRecurrenceRate:        summary.HeadlineERR,
+		ConfirmedRecurrences:       summary.ConfirmedRecurrenceCount,
+		PossibleRecurrences:        summary.PossibleRecurrenceCount,
+		FlakeDiscountedCount:       summary.FlakeDiscountedCount,
+		AttributionUncertainCount:  summary.AttributionUncertainCount,
+	}
+	if metrics.AgentFailuresByOutcomeKind == nil {
+		metrics.AgentFailuresByOutcomeKind = map[string]int{}
+	}
+	return metrics
+}
+
+func BuildReportMetadata(records []Experience, windowRecords []Experience, windowDays int, sourceDigest string) map[string]any {
+	metadata := map[string]any{
+		"repo_id":                                ReportRepoID(windowRecords),
+		"window_days":                            windowDays,
+		"source_artifact_digest":                 sourceDigest,
+		"possible_excluded_from_err":             true,
+		"flake_discount_excluded_from_numerator": true,
+		"flake_discount_retained_in_denominator": true,
+		"deterministic_window_anchor":            "latest_recorded_at_in_source_artifacts",
+		"network_required":                       false,
+		"redaction_status":                       "customer_safe",
+		"repo_relative_paths_only":               true,
+		"baseline_gate_enabled_default":          false,
+	}
+	if lastIngestAt, mergedSinceIngest, hasLastIngestAt, hasMergedSinceIngest := ReportIngestFreshnessMetadata(records); hasLastIngestAt {
+		metadata[badgeMetadataLastIngest] = lastIngestAt.Format(time.RFC3339)
+		if hasMergedSinceIngest {
+			metadata[badgeMetadataMergedPRs] = mergedSinceIngest
+		}
+	}
+	return metadata
+}
+
 func BuildReportID(window RecurrenceWindow, sourceDigest string, summary RecurrenceSummary) string {
 	parts := []string{
 		window.Start,
