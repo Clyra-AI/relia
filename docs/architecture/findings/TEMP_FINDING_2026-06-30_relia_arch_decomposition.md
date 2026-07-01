@@ -70,6 +70,9 @@ Current progress:
 - `internal/advise` now owns advisory comment decision, strategy, and rendering
   helpers with direct package tests, shrinking `cmd/relia/main.go` while
   keeping CLI I/O and state-file handling in the command layer.
+- `internal/modelpull` now owns `relia models pull` argument parsing and local
+  model manifest construction with direct package tests, while command I/O and
+  repository writes remain in `cmd/relia`.
 
 ## Candidate Package Boundaries
 
@@ -96,6 +99,8 @@ Current progress:
   construction for assess, serve, and advise.
 - `internal/advise`: advisory comment decision, strategy, markdown rendering,
   confidence threshold handling, and prior-state comparison helpers.
+- `internal/modelpull`: local model artifact pull argument parsing and
+  manifest construction before config-owned validation and CLI-owned writes.
 - `internal/yamlmini`: minimal repo-local YAML parsing and line-reference
   inventory for config and memory rule documents.
 

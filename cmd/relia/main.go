@@ -22,6 +22,7 @@ import (
 	configdoc "github.com/Clyra-AI/relia/internal/config"
 	"github.com/Clyra-AI/relia/internal/diffparse"
 	ingestdoc "github.com/Clyra-AI/relia/internal/ingest"
+	modelpulldoc "github.com/Clyra-AI/relia/internal/modelpull"
 	resultdoc "github.com/Clyra-AI/relia/internal/result"
 	"github.com/Clyra-AI/relia/internal/yamlmini"
 )
@@ -3076,9 +3077,9 @@ func modelsResult(args []string, start time.Time) CommandResult {
 	if len(args) == 0 || args[0] != "pull" {
 		return errorResult("models", "models", usageError("expected subcommand: pull"), start)
 	}
-	options, commandErr := parseModelsPullArgs(args[1:])
-	if commandErr != nil {
-		return errorResult("models pull", "models", commandErr, start)
+	options, parseErr := modelpulldoc.ParseArgs(args[1:])
+	if parseErr != nil {
+		return errorResult("models pull", "models", usageError(parseErr.Message), start)
 	}
 	wd, err := os.Getwd()
 	if err != nil {
@@ -3109,17 +3110,7 @@ func modelsResult(args []string, start time.Time) CommandResult {
 	if cachePath == manifestDisplayPath {
 		return errorResult("models pull", "models", usageError("models pull --cache-path must not equal the local model manifest path"), start)
 	}
-	manifest := localModelManifest{
-		ModelID:        options.ModelID,
-		Version:        options.Version,
-		SourceURL:      options.SourceURL,
-		License:        options.License,
-		Digest:         canonicalModelDigest(options.Digest),
-		CachePath:      cachePath,
-		UpdatePolicy:   options.UpdatePolicy,
-		RollbackPolicy: options.RollbackPolicy,
-		Status:         "ready",
-	}
+	manifest := modelpulldoc.Manifest(options, cachePath)
 	if commandErr := validateLocalModelManifestPayload(root, manifest, manifestRel); commandErr != nil {
 		return errorResult("models pull", "models", commandErr, start)
 	}
@@ -3153,95 +3144,6 @@ func modelsResult(args []string, start time.Time) CommandResult {
 		ArtifactRef{Kind: "local_model_artifact", Path: manifest.CachePath},
 	)
 	return result
-}
-
-func parseModelsPullArgs(args []string) (modelsPullOptions, *CommandError) {
-	var options modelsPullOptions
-	for index := 0; index < len(args); index++ {
-		arg := args[index]
-		needValue := func(message string) (string, bool) {
-			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
-				return message, false
-			}
-			return args[index+1], true
-		}
-		switch arg {
-		case "--model-id":
-			value, ok := needValue("models pull requires a value after --model-id")
-			if !ok {
-				return options, usageError(value)
-			}
-			options.ModelID = value
-			index++
-		case "--version":
-			value, ok := needValue("models pull requires a value after --version")
-			if !ok {
-				return options, usageError(value)
-			}
-			options.Version = value
-			index++
-		case "--source-url":
-			value, ok := needValue("models pull requires a value after --source-url")
-			if !ok {
-				return options, usageError(value)
-			}
-			options.SourceURL = value
-			index++
-		case "--license":
-			value, ok := needValue("models pull requires a value after --license")
-			if !ok {
-				return options, usageError(value)
-			}
-			options.License = value
-			index++
-		case "--digest":
-			value, ok := needValue("models pull requires a value after --digest")
-			if !ok {
-				return options, usageError(value)
-			}
-			options.Digest = value
-			index++
-		case "--cache-path":
-			value, ok := needValue("models pull requires a repo-relative path after --cache-path")
-			if !ok {
-				return options, usageError(value)
-			}
-			options.CachePath = value
-			index++
-		case "--update-policy":
-			value, ok := needValue("models pull requires a value after --update-policy")
-			if !ok {
-				return options, usageError(value)
-			}
-			options.UpdatePolicy = value
-			index++
-		case "--rollback-policy":
-			value, ok := needValue("models pull requires a value after --rollback-policy")
-			if !ok {
-				return options, usageError(value)
-			}
-			options.RollbackPolicy = value
-			index++
-		default:
-			return options, usageError(fmt.Sprintf("unknown models pull argument %q", arg))
-		}
-	}
-	required := map[string]string{
-		"--model-id":        options.ModelID,
-		"--version":         options.Version,
-		"--source-url":      options.SourceURL,
-		"--license":         options.License,
-		"--digest":          options.Digest,
-		"--cache-path":      options.CachePath,
-		"--update-policy":   options.UpdatePolicy,
-		"--rollback-policy": options.RollbackPolicy,
-	}
-	for flag, value := range required {
-		if strings.TrimSpace(value) == "" {
-			return options, usageError("models pull requires " + flag)
-		}
-	}
-	return options, nil
 }
 
 func distillProvider(config yamlDocument) (string, string) {
@@ -6102,29 +6004,12 @@ func adviseSettingsFromConfig(document yamlDocument) (adviseSettings, *CommandEr
 	return settings, commandErrorFromConfig(configErr)
 }
 
-type localModelManifest = configdoc.LocalModelManifest
-
-type modelsPullOptions struct {
-	ModelID        string
-	Version        string
-	SourceURL      string
-	License        string
-	Digest         string
-	CachePath      string
-	UpdatePolicy   string
-	RollbackPolicy string
-}
-
 func validateLocalModelManifest(root string, manifestScalar yamlScalar) *CommandError {
 	return commandErrorFromConfig(configdoc.ValidateLocalModelManifest(root, manifestScalar))
 }
 
-func validateLocalModelManifestPayload(root string, manifest localModelManifest, ref string) *CommandError {
+func validateLocalModelManifestPayload(root string, manifest configdoc.LocalModelManifest, ref string) *CommandError {
 	return commandErrorFromConfig(configdoc.ValidateLocalModelManifestPayload(root, manifest, ref))
-}
-
-func canonicalModelDigest(value string) string {
-	return configdoc.CanonicalModelDigest(value)
 }
 
 func validateSchemaContracts(root string) *CommandError {
