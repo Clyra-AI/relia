@@ -134,9 +134,7 @@ type parsedArgs struct {
 	commandArgs []string
 }
 
-type ingestOptions struct {
-	InputPath string
-}
+type ingestOptions = ingestdoc.CLIOptions
 
 type backtestOptions struct {
 	Window         string
@@ -645,9 +643,9 @@ func checkResult(args []string, start time.Time) CommandResult {
 }
 
 func ingestResult(args []string, start time.Time) CommandResult {
-	options, commandErr := parseIngestArgs(args)
-	if commandErr != nil {
-		return errorResult("ingest", "ingest", commandErr, start)
+	options, parseErr := ingestdoc.ParseArgs(args)
+	if parseErr != nil {
+		return errorResult("ingest", "ingest", usageError(parseErr.Message), start)
 	}
 	wd, err := os.Getwd()
 	if err != nil {
@@ -740,27 +738,6 @@ func ingestResult(args []string, start time.Time) CommandResult {
 		result.Artifacts = append(result.Artifacts, ArtifactRef{Kind: "experience_shard", Path: shard})
 	}
 	return result
-}
-
-func parseIngestArgs(args []string) (ingestOptions, *CommandError) {
-	var options ingestOptions
-	for index := 0; index < len(args); index++ {
-		arg := args[index]
-		switch arg {
-		case "--input", "-i":
-			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
-				return options, usageError("ingest requires a path after --input")
-			}
-			options.InputPath = args[index+1]
-			index++
-		default:
-			return options, usageError(fmt.Sprintf("unknown ingest argument %q", arg))
-		}
-	}
-	if strings.TrimSpace(options.InputPath) == "" {
-		return options, usageError("ingest requires --input <json-or-jsonl> in offline mode")
-	}
-	return options, nil
 }
 
 func backtestResult(args []string, start time.Time) CommandResult {

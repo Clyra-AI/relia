@@ -94,6 +94,9 @@ Current progress:
 - `internal/assess` now owns `relia assess` argument parsing with direct
   package tests, while diff reads, rule loading, risk assessment invocation,
   and command-result rendering remain in `cmd/relia`.
+- `internal/ingest` now owns `relia ingest` argument parsing with direct
+  package tests, while input file reads, event normalization, shard writes, and
+  command-result rendering remain in `cmd/relia`.
 
 ## Candidate Package Boundaries
 
