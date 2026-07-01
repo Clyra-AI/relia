@@ -67,6 +67,9 @@ Current progress:
   `cmd/relia/backtest_report_test.go` and
   `cmd/relia/backtest_integrity_test.go`, keeping the extracted test files
   below the architecture warning budget.
+- `internal/advise` now owns advisory comment decision, strategy, and rendering
+  helpers with direct package tests, shrinking `cmd/relia/main.go` while
+  keeping CLI I/O and state-file handling in the command layer.
 
 ## Candidate Package Boundaries
 
@@ -91,6 +94,8 @@ Current progress:
 - `internal/assess`: active memory rule serving projections, citation serving
   filters, repo-relative scope matching, and deterministic risk assessment
   construction for assess, serve, and advise.
+- `internal/advise`: advisory comment decision, strategy, markdown rendering,
+  confidence threshold handling, and prior-state comparison helpers.
 - `internal/yamlmini`: minimal repo-local YAML parsing and line-reference
   inventory for config and memory rule documents.
 
