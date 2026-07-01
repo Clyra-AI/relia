@@ -101,6 +101,7 @@ ARCHITECTURE_BUDGET_EXCEPTION_PATHS = [
     "cmd/relia/main.go",
     "cmd/relia/main_test.go",
 ]
+FACTORY_ARCHITECTURE_BUDGET_POLICY_REF = "https://github.com/Clyra-AI/factory/blob/main/docs/standards/architecture-fitness-standard.md#default-budget"
 EXPECTED_ARCHITECTURE_BUDGET_EXTENSIONS = [".go", ".py", ".ts", ".tsx", ".js", ".jsx"]
 EXPECTED_ARCHITECTURE_BUDGET_EXCLUDED_DIRS = [
     ".git",
@@ -165,15 +166,34 @@ def validate_architecture_debt_exception_expiry(ref, exception, now=None):
 def architecture_debt_exception_repo_ref_error(root, ref, key, values):
     if not isinstance(values, list) or not values:
         return f"{ref}.{key} must be a non-empty list"
+    resolved_root = root.resolve()
     for index, value in enumerate(values):
         if not isinstance(value, str):
             return f"{ref}.{key}[{index}] must be a repo-local path string"
+        if Path(value.strip()).is_absolute():
+            return f"{ref}.{key}[{index}] must be a repo-local path"
         normalized = normalize_architecture_budget_path(value)
         if not normalized or normalized == ".." or normalized.startswith("../"):
             return f"{ref}.{key}[{index}] must be a repo-local path"
-        if not (root / normalized).exists():
+        resolved = (root / normalized).resolve()
+        try:
+            resolved.relative_to(resolved_root)
+        except ValueError:
+            return f"{ref}.{key}[{index}] must stay inside the repository"
+        if not resolved.exists():
             return f"{ref}.{key}[{index}] points to missing repo path {normalized}"
     return None
+
+def architecture_budget_policy_ref_error(root, value, label):
+    if not isinstance(value, str) or not value.strip():
+        return f"{label}.architecture_budget.policy_ref must be a non-empty string"
+    policy_ref = value.strip()
+    if policy_ref == FACTORY_ARCHITECTURE_BUDGET_POLICY_REF:
+        return None
+    if "#default-budget" not in policy_ref:
+        return f"{label}.architecture_budget.policy_ref must cite the Factory architecture fitness default budget"
+    path_ref = policy_ref.split("#", 1)[0]
+    return architecture_debt_exception_repo_ref_error(root, label, "architecture_budget.policy_ref", [path_ref])
 
 def architecture_debt_exception_line_ceiling_error(root, ref, scope):
     line_ceilings = scope.get("line_ceilings")
@@ -358,8 +378,9 @@ def validate_architecture_budget_policy(repo, label):
         fail(f"{label}.architecture_budget.warn_line_threshold must be 1200")
     if budget.get("fail_line_threshold") != 2500:
         fail(f"{label}.architecture_budget.fail_line_threshold must be 2500")
-    if "architecture-fitness-standard.md#default-budget" not in str(budget.get("policy_ref", "")):
-        fail(f"{label}.architecture_budget.policy_ref must cite the Factory architecture fitness default budget")
+    policy_ref_error = architecture_budget_policy_ref_error(ROOT, budget.get("policy_ref"), label)
+    if policy_ref_error:
+        fail(policy_ref_error)
     extensions = budget.get("source_extensions")
     if sorted(extensions or []) != sorted(EXPECTED_ARCHITECTURE_BUDGET_EXTENSIONS):
         fail(f"{label}.architecture_budget.source_extensions must be {EXPECTED_ARCHITECTURE_BUDGET_EXTENSIONS!r}")
