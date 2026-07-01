@@ -220,10 +220,10 @@ validation. New feature work must not add fresh product domains to the CLI
 entrypoint.
 
 The first test-side decomposition slices move unified-diff assessment parser
-coverage into `cmd/relia/diffparse_test.go` and advisory command/workflow
-coverage into `cmd/relia/advise_test.go`. These files remain in package `main`
-so they can exercise the current unexported CLI helpers while reducing the
-legacy `cmd/relia/main_test.go` debt surface. Future slices should continue
+coverage into `cmd/relia/diffparse_test.go` and advisory command, workflow, and
+state coverage into `cmd/relia/advise_test.go`. These files remain in package
+`main` so they can exercise the current unexported CLI helpers while reducing
+the legacy `cmd/relia/main_test.go` debt surface. Future slices should continue
 moving cohesive command-test groups into responsibility-named test files before
 changing command behavior.
 
