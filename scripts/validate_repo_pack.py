@@ -215,10 +215,8 @@ def architecture_budget_path_excluded(rel, excluded_dirs):
     rel = normalize_architecture_budget_path(rel)
     if not rel:
         return False
-    parts = [part for part in rel.split("/") if part]
-    for index, part in enumerate(parts):
-        prefix = "/".join(parts[: index + 1])
-        if prefix in excluded_dirs or part in excluded_dirs:
+    for excluded in excluded_dirs:
+        if rel == excluded or rel.startswith(f"{excluded}/"):
             return True
     return False
 
@@ -1136,6 +1134,19 @@ def self_test():
         )
         if not ceiling_failures or "approved ceiling" not in ceiling_failures[0]:
             fail("architecture budget self-test expected exception growth over ceiling to fail")
+        prefix_root = temp_root / "prefix-check"
+        first_party_build = prefix_root / "internal" / "build" / "big.go"
+        first_party_build.parent.mkdir(parents=True)
+        first_party_build.write_text("line\n" * 2501)
+        generated_build = prefix_root / "build" / "generated.go"
+        generated_build.parent.mkdir(parents=True)
+        generated_build.write_text("line\n" * 2501)
+        prefix_budget = {**sample_budget, "excluded_dirs": [*sample_budget["excluded_dirs"], "build"]}
+        prefix_failures = architecture_budget_unexcepted_failures(prefix_root, prefix_budget, set(), {})
+        if not any("internal/build/big.go" in failure for failure in prefix_failures):
+            fail("architecture budget self-test expected first-party internal/build source to fail")
+        if any("build/generated.go" in failure for failure in prefix_failures):
+            fail("architecture budget self-test expected root build output to be excluded")
     validate_architecture_debt_exception_expiry(
         "self-test-valid",
         {"expires_at": "2099-01-01T00:00:00Z"},
