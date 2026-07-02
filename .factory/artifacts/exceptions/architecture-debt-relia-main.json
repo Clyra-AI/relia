@@ -9,7 +9,7 @@
       "cmd/relia/main_test.go"
     ],
     "line_ceilings": {
-      "cmd/relia/main.go": 3827,
+      "cmd/relia/main.go": 3722,
       "cmd/relia/main_test.go": 1957
     },
     "budget": {
@@ -61,6 +61,10 @@
     "internal/distill/provenance_test.go",
     "internal/distill/rule.go",
     "internal/distill/rule_test.go",
+    "internal/distill/scope.go",
+    "internal/distill/scope_test.go",
+    "internal/distill/summary.go",
+    "internal/distill/summary_test.go",
     "internal/ingest/args.go",
     "internal/ingest/args_test.go",
     "internal/ingest/ingest.go",

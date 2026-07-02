@@ -1134,9 +1134,9 @@ func autoFlakeDiscountedExperiences(records []backtestExperience) map[string]str
 func groupHasUnrelatedNonTestDiffs(group []backtestExperience) bool {
 	seen := map[string]bool{}
 	for _, record := range group {
-		paths := nonTestPaths(record.Record.Context.Paths)
+		paths := distilldoc.NonTestPaths(record.Record.Context.Paths)
 		if len(paths) == 0 {
-			paths = normalizedRepoPaths(record.Record.Context.Paths)
+			paths = distilldoc.NormalizedRepoPaths(record.Record.Context.Paths)
 		}
 		for _, path := range paths {
 			if seen[path] {
@@ -1146,30 +1146,6 @@ func groupHasUnrelatedNonTestDiffs(group []backtestExperience) bool {
 		}
 	}
 	return len(seen) >= len(group)
-}
-
-func nonTestPaths(paths []string) []string {
-	var result []string
-	for _, clean := range normalizedRepoPaths(paths) {
-		base := path.Base(clean)
-		if strings.HasPrefix(clean, "tests/") || strings.Contains(clean, "/tests/") || strings.HasPrefix(base, "test_") || strings.HasSuffix(base, "_test.go") {
-			continue
-		}
-		result = append(result, clean)
-	}
-	return result
-}
-
-func normalizedRepoPaths(paths []string) []string {
-	var result []string
-	for _, value := range paths {
-		if clean, ok := cleanRepoPath(value); ok {
-			result = append(result, filepath.ToSlash(clean))
-		}
-	}
-	result = uniqueStrings(result)
-	sort.Strings(result)
-	return result
 }
 
 func isBacktestFlakeDiscounted(record backtestExperience, heuristics map[string]string) bool {
@@ -1590,7 +1566,11 @@ func distillResult(args []string, start time.Time) CommandResult {
 		return withFormat(errorResult("distill", "distill", commandErr, start))
 	}
 
-	statusCounts := distillStatusCounts(rules)
+	statusCounts := distilldoc.StatusCounts(rules)
+	ruleArtifactPaths := make([]string, 0, len(ruleArtifacts))
+	for _, artifact := range ruleArtifacts {
+		ruleArtifactPaths = append(ruleArtifactPaths, artifact.Path)
+	}
 	result := passResult("distill", "distill", "drafted deterministic memory rules from local experience records", start, map[string]any{
 		"format":                     options.Format,
 		"input_path":                 distillInputPathMetadata(options, sourceArtifacts),
@@ -1611,7 +1591,7 @@ func distillResult(args []string, start time.Time) CommandResult {
 		"decay_half_life_days":       options.HalfLifeDays,
 		"source_artifacts":           sourceArtifacts,
 		"source_artifact_digest":     sourceDigest,
-		"drafted_rules":              distilledRuleData(rules, ruleArtifacts),
+		"drafted_rules":              distilldoc.DraftedRuleData(rules, ruleArtifactPaths),
 		"provider_data_disclosure":   "none; provider is none and no network call was attempted",
 		"redacted_records_only":      true,
 		"local_privacy_default":      true,
@@ -2174,8 +2154,8 @@ func distillClusterProvenance(embeddingMode string) string {
 }
 
 func buildDistilledRule(root string, kind string, cluster distillCluster, evidence []backtestExperience, contradictions int, anchor time.Time, sourceArtifacts []string, sourceDigest string, provider string, embeddingMode string, reviewRequired bool, options distillOptions, flakeHeuristics map[string]string) (distilledRule, bool) {
-	scopePaths := distillScopePaths(evidence)
-	scopeSignals := distillScopeSignals(cluster, evidence)
+	scopePaths := distilldoc.ScopePaths(evidence)
+	scopeSignals := distilldoc.ScopeSignals(cluster, evidence)
 	if len(scopePaths) == 0 && len(scopeSignals) == 0 {
 		return distilledRule{}, false
 	}
@@ -2211,62 +2191,6 @@ func buildDistilledRule(root string, kind string, cluster distillCluster, eviden
 		StatementOrigin: "cluster_summary",
 		Metadata:        metadata,
 	}, true
-}
-
-func distillScopePaths(records []backtestExperience) []string {
-	counts := map[string]int{}
-	for _, record := range records {
-		paths := nonTestPaths(record.Record.Context.Paths)
-		if len(paths) == 0 {
-			paths = normalizedRepoPaths(record.Record.Context.Paths)
-		}
-		for _, path := range paths {
-			counts[path]++
-		}
-	}
-	return topCountedStrings(counts, 3)
-}
-
-func distillScopeSignals(cluster distillCluster, records []backtestExperience) []string {
-	counts := map[string]int{}
-	if cluster.Signal != "" {
-		counts[cluster.Signal]++
-	}
-	for _, record := range records {
-		signal := distilldoc.RecordSignal(record.Record)
-		if signal != "" {
-			counts[signal]++
-		}
-	}
-	return topCountedStrings(counts, 3)
-}
-
-func topCountedStrings(counts map[string]int, limit int) []string {
-	type counted struct {
-		Value string
-		Count int
-	}
-	var values []counted
-	for value, count := range counts {
-		if strings.TrimSpace(value) == "" {
-			continue
-		}
-		values = append(values, counted{Value: value, Count: count})
-	}
-	sort.Slice(values, func(i, j int) bool {
-		if values[i].Count == values[j].Count {
-			return values[i].Value < values[j].Value
-		}
-		return values[i].Count > values[j].Count
-	})
-	if limit > 0 && len(values) > limit {
-		values = values[:limit]
-	}
-	result := make([]string, 0, len(values))
-	for _, value := range values {
-		result = append(result, value.Value)
-	}
-	return result
 }
 
 func distilledRuleStatus(root string, kind string, scopePaths []string, evidenceCount int, contradictions int, reviewRequired bool) (string, string) {
@@ -2379,35 +2303,6 @@ func writeAtomicRepoFile(path string, content []byte, label string) *CommandErro
 	}
 	cleanup = false
 	return nil
-}
-
-func distillStatusCounts(rules []distilledRule) map[string]int {
-	counts := map[string]int{}
-	for _, rule := range rules {
-		counts[rule.Status]++
-	}
-	return counts
-}
-
-func distilledRuleData(rules []distilledRule, artifacts []ArtifactRef) []map[string]any {
-	pathsByID := map[string]string{}
-	for _, artifact := range artifacts {
-		id := strings.TrimSuffix(filepath.Base(artifact.Path), filepath.Ext(artifact.Path))
-		pathsByID[id] = artifact.Path
-	}
-	data := make([]map[string]any, 0, len(rules))
-	for _, rule := range rules {
-		data = append(data, map[string]any{
-			"id":               rule.ID,
-			"kind":             rule.Kind,
-			"status":           rule.Status,
-			"review_label":     rule.ReviewLabel,
-			"confidence":       rule.Confidence,
-			"confidence_label": rule.Metadata.ConfidenceLabel,
-			"path":             pathsByID[rule.ID],
-		})
-	}
-	return data
 }
 
 func writeMemoryPage(root string, outputPath string, rules []memorydoc.RuleSummary) (string, *CommandError) {
