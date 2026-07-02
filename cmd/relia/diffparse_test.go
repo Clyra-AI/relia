@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	assessdoc "github.com/Clyra-AI/relia/internal/assess"
 )
 
 func TestParseUnifiedDiffTouchedPathsPreservesNoPrefixTopLevelABRename(t *testing.T) {
@@ -327,7 +329,7 @@ func TestNormalizeAssessmentScopePathDoesNotScanHistoryForExistingFile(t *testin
 	}
 	t.Setenv("PATH", binDir+string(os.PathListSeparator)+os.Getenv("PATH"))
 
-	scopePath, directoryScope, ok := normalizeAssessmentScopePath(tempDir, "packages/billing/invoice.py")
+	scopePath, directoryScope, ok := assessdoc.NormalizeScopePath(tempDir, "packages/billing/invoice.py")
 
 	if !ok {
 		t.Fatalf("scope path was rejected")

@@ -107,6 +107,9 @@ Current progress:
 - `internal/assess` now owns `relia assess` argument parsing with direct
   package tests, while diff reads, rule loading, risk assessment invocation,
   and command-result rendering remain in `cmd/relia`.
+- `internal/assess` now also owns active memory rule loading and active-rule
+  validation with direct package tests, while CLI commands keep repository
+  discovery, diff reads, command-result rendering, and error presentation.
 - `internal/ingest` now owns `relia ingest` argument parsing with direct
   package tests, while input file reads, event normalization, shard writes, and
   command-result rendering remain in `cmd/relia`.
@@ -158,8 +161,9 @@ Current progress:
 - `internal/diffparse`: unified-diff touched-path parsing for assess and
   advise.
 - `internal/assess`: assess command argument parsing, active memory rule
-  serving projections, citation serving filters, repo-relative scope matching,
-  and deterministic risk assessment construction for assess, serve, and advise.
+  loading and validation, active memory rule serving projections, citation
+  serving filters, repo-relative scope matching, and deterministic risk
+  assessment construction for assess, serve, and advise.
 - `internal/advise`: advisory comment decision, strategy, markdown rendering,
   confidence threshold handling, and prior-state comparison helpers.
 - `internal/modelpull`: local model artifact pull argument parsing and

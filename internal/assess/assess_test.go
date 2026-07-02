@@ -87,6 +87,115 @@ func TestServedRuleDataRejectsPlaybookWithoutPositiveCitation(t *testing.T) {
 	}
 }
 
+func TestLoadRulesReturnsOnlyActiveAcceptedRules(t *testing.T) {
+	root := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(root, "packages", "billing"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Join(root, "memory", "rules"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "packages", "billing", "invoice.py"), []byte("def rollover_day(): pass\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	writeRuleForTest(t, root, "active.yaml", `object_type: relia.memory_rule
+schema_version: "1.0"
+id: billing-active
+kind: avoid
+status: active
+statement: Use the billing clock fixture instead of direct UTC calls.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.86
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_0142
+provenance:
+  - pr: 142
+    outcome: ci_failure
+    url: https://github.com/acme/billing-service/pull/142
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`)
+	writeRuleForTest(t, root, "candidate.yaml", `object_type: relia.memory_rule
+schema_version: "1.0"
+id: billing-candidate
+kind: avoid
+status: candidate
+statement: Candidate rules must not be served.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.76
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_0143
+provenance:
+  - pr: 143
+    outcome: ci_failure
+review:
+  label: suggested
+  statement_origin: human_authored
+metadata: {}
+`)
+
+	rules, commandErr := LoadRules(root, testOptions())
+
+	if commandErr != nil {
+		t.Fatal(commandErr)
+	}
+	if len(rules) != 1 || rules[0].ID != "billing-active" {
+		t.Fatalf("rules = %#v", rules)
+	}
+}
+
+func TestLoadRulesRejectsInvalidActiveRule(t *testing.T) {
+	root := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(root, "memory", "rules"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	writeRuleForTest(t, root, "active.yaml", `object_type: relia.memory_rule
+schema_version: "1.0"
+id: billing-active
+kind: avoid
+status: active
+statement: Use the billing clock fixture instead of direct UTC calls.
+scope:
+  paths:
+    - packages/missing/
+confidence: 0.86
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_0142
+provenance:
+  - pr: 142
+    outcome: ci_failure
+    url: https://github.com/acme/billing-service/pull/142
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`)
+
+	_, commandErr := LoadRules(root, testOptions())
+
+	if commandErr == nil {
+		t.Fatalf("expected artifact contract error")
+	}
+	if commandErr.Type != "artifact_contract_validation_failed" || !strings.Contains(commandErr.Message, "scope path does not exist") {
+		t.Fatalf("error = %#v", commandErr)
+	}
+}
+
 func TestRuleCitationURLsTrimAndDeduplicateWhitespace(t *testing.T) {
 	urls := RuleCitationURLs([]RuleCitation{
 		{URL: " https://github.com/acme/billing-service/pull/142 ", PR: 142, Outcome: "ci_failure"},
@@ -101,8 +210,24 @@ func TestRuleCitationURLsTrimAndDeduplicateWhitespace(t *testing.T) {
 func testOptions() Options {
 	return Options{
 		SchemaVersion: "1.0",
+		ArtifactContractError: func(message string, ref string) *resultdoc.CommandError {
+			return &resultdoc.CommandError{Type: "artifact_contract_validation_failed", Message: message, ExitCode: 4, Ref: ref}
+		},
+		InternalError: func(message string, err error) *resultdoc.CommandError {
+			if err != nil {
+				message += ": " + err.Error()
+			}
+			return &resultdoc.CommandError{Type: "internal", Message: message, ExitCode: 1}
+		},
 		ProvenanceIntegrityError: func(message string, ref string) *resultdoc.CommandError {
 			return &resultdoc.CommandError{Type: "provenance_integrity_failed", Message: message, ExitCode: 9, Ref: ref}
 		},
+	}
+}
+
+func writeRuleForTest(t *testing.T, root string, name string, content string) {
+	t.Helper()
+	if err := os.WriteFile(filepath.Join(root, "memory", "rules", name), []byte(content), 0o644); err != nil {
+		t.Fatal(err)
 	}
 }
