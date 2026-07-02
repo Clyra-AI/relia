@@ -89,6 +89,10 @@ Current progress:
 - `internal/modelpull` now owns `relia models pull` argument parsing and local
   model manifest construction with direct package tests, while command I/O and
   repository writes remain in `cmd/relia`.
+- `internal/modelpull` now also owns model manifest path selection, cache-path
+  normalization, path collision checks, and command result payload shaping with
+  direct package tests, while manifest validation and artifact writes remain
+  in `cmd/relia`.
 - `internal/config` now also owns schema contract envelope validation, repo-root
   discovery, repo-relative path policy, scope matching, and init artifact
   skeleton and `.gitignore` helpers with direct package tests, while the CLI
@@ -227,8 +231,9 @@ Current progress:
   decision, strategy, markdown rendering, confidence threshold handling, and
   prior-state loading, parsing, comparison, and advisory-state document
   helpers.
-- `internal/modelpull`: local model artifact pull argument parsing and
-  manifest construction before config-owned validation and CLI-owned writes.
+- `internal/modelpull`: local model artifact pull argument parsing, manifest
+  construction, path normalization, collision checks, and result payload
+  shaping before config-owned validation and CLI-owned writes.
 - `internal/distill`: distill argument parsing, provider plan construction,
   request-shape description, cost estimation, embedding-mode helpers, distill
   clustering/review-gate helpers, deterministic memory-rule ID/statement

@@ -1550,24 +1550,11 @@ func modelsResult(args []string, start time.Time) CommandResult {
 	if commandErr != nil {
 		return errorResult("models pull", "models", commandErr, start)
 	}
-	manifestRel := ".relia/models/manifest.json"
-	if scalar, ok := config.Scalars["models.local_manifest"]; ok {
-		manifestRel = scalar.Value
+	manifestRel := modelpulldoc.ConfiguredManifestPath(config.Scalars)
+	manifest, manifestDisplayPath, pathErr := modelpulldoc.PrepareManifest(options, manifestRel, defaultConfigFile)
+	if pathErr != nil {
+		return errorResult("models pull", "models", commandErrorFromModelPullPath(pathErr), start)
 	}
-	cleanManifestRel, ok := configdoc.CleanRepoPath(manifestRel)
-	if !ok {
-		return errorResult("models pull", "models", dependencyError("local model manifest path must be repo-relative", defaultConfigFile), start)
-	}
-	manifestDisplayPath := filepath.ToSlash(filepath.Clean(cleanManifestRel))
-	cleanCachePath, ok := configdoc.CleanRepoPath(options.CachePath)
-	if !ok {
-		return errorResult("models pull", "models", usageError("models pull --cache-path must be repo-relative"), start)
-	}
-	cachePath := filepath.ToSlash(filepath.Clean(cleanCachePath))
-	if cachePath == manifestDisplayPath {
-		return errorResult("models pull", "models", usageError("models pull --cache-path must not equal the local model manifest path"), start)
-	}
-	manifest := modelpulldoc.Manifest(options, cachePath)
 	if commandErr := validateLocalModelManifestPayload(root, manifest, manifestRel); commandErr != nil {
 		return errorResult("models pull", "models", commandErr, start)
 	}
@@ -1579,19 +1566,7 @@ func modelsResult(args []string, start time.Time) CommandResult {
 	if commandErr := writeAtomicRepoFile(manifestPath, append(encoded, '\n'), "local model manifest"); commandErr != nil {
 		return errorResult("models pull", "models", commandErr, start)
 	}
-	result := passResult("models pull", "models", "recorded local embedding model artifact manifest", start, map[string]any{
-		"model_id":        manifest.ModelID,
-		"version":         manifest.Version,
-		"source_url":      manifest.SourceURL,
-		"license":         manifest.License,
-		"digest":          manifest.Digest,
-		"cache_path":      manifest.CachePath,
-		"update_policy":   manifest.UpdatePolicy,
-		"rollback_policy": manifest.RollbackPolicy,
-		"manifest_path":   manifestDisplayPath,
-		"network_used":    false,
-		"status":          manifest.Status,
-	})
+	result := passResult("models pull", "models", "recorded local embedding model artifact manifest", start, modelpulldoc.ResultData(manifest, manifestDisplayPath))
 	result.EvidenceRefs = append(result.EvidenceRefs,
 		"docs/dev/dev_guides.md#model-provider-and-artifact-policy",
 		manifestDisplayPath,
@@ -2762,6 +2737,20 @@ func commandErrorFromAdviseState(stateErr *advisedoc.StateError) *CommandError {
 		return internalError(stateErr.Message, stateErr.Err)
 	default:
 		return internalError(stateErr.Message, stateErr.Err)
+	}
+}
+
+func commandErrorFromModelPullPath(pathErr *modelpulldoc.PathError) *CommandError {
+	if pathErr == nil {
+		return nil
+	}
+	switch pathErr.Kind {
+	case modelpulldoc.PathErrorDependency:
+		return dependencyError(pathErr.Message, pathErr.Reference)
+	case modelpulldoc.PathErrorUsage:
+		return usageError(pathErr.Message)
+	default:
+		return internalError(pathErr.Message, nil)
 	}
 }
 
