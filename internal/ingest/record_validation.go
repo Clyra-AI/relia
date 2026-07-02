@@ -134,6 +134,70 @@ func NormalizeContext(event map[string]any, action Action, ref string) (Context,
 	return context, nil
 }
 
+func NormalizeOutcome(event map[string]any, action Action, paths []string, ref string) (Outcome, map[string]any, *Error) {
+	kind := stringField(event, "outcome_kind", "outcome.kind")
+	if !validOutcomeKind(kind) {
+		return Outcome{}, nil, artifactContractError("outcome kind is invalid", ref)
+	}
+	terminalState := stringField(event, "terminal_state", "terminal", "outcome.terminal_state", "outcome.terminal")
+	if terminalState == "" {
+		terminalState = terminalStateForOutcome(kind)
+	}
+	if !validTerminalState(terminalState) {
+		return Outcome{}, nil, artifactContractError("outcome terminal_state is invalid", ref)
+	}
+	signatureClass := stringField(event, "signature_class", "outcome.signature.class")
+	if signatureClass == "" {
+		signatureClass = signatureClassForOutcome(kind)
+	}
+	checkName := stringField(event, "check_name", "outcome.signature.check", "outcome.signature.check_name")
+	if checkName == "" {
+		checkName = kind
+	}
+	signatureKey := stringField(event, "signature_key", "outcome.signature.key")
+	if signatureKey == "" && len(paths) > 0 {
+		signatureKey = paths[0]
+	}
+	if signatureKey == "" {
+		signatureKey = action.Commit
+	}
+	extractionConfidence := stringField(event, "extraction_confidence", "outcome.signature.extraction_confidence")
+	if extractionConfidence == "" {
+		extractionConfidence = "structured"
+	}
+	if !validExtractionConfidence(extractionConfidence) {
+		return Outcome{}, nil, artifactContractError("signature extraction_confidence is invalid", ref)
+	}
+	messageFingerprint := stringField(event, "message_fingerprint", "outcome.signature.message_fingerprint")
+	if messageFingerprint == "" {
+		message := stringField(event, "message", "log", "outcome.message")
+		if message != "" {
+			messageFingerprint = sha256String(strings.TrimSpace(message))
+		}
+	}
+	signatureID := stringField(event, "signature_id", "outcome.signature.signature_id")
+	if signatureID == "" {
+		signatureID = "sig_" + shortHash(signatureClass+"|"+checkName+"|"+signatureKey)
+	}
+	metadata := map[string]any{
+		"class":             signatureClass,
+		"check_name":        checkName,
+		"key":               signatureKey,
+		"extraction_method": extractionMethodForConfidence(extractionConfidence),
+	}
+	if messageFingerprint != "" {
+		metadata["message_fingerprint"] = messageFingerprint
+	}
+	return Outcome{
+		Kind:          kind,
+		TerminalState: terminalState,
+		Signature: Signature{
+			SignatureID:          signatureID,
+			ExtractionConfidence: extractionConfidence,
+		},
+	}, metadata, nil
+}
+
 func CanonicalDistillInputRecord(event map[string]any, ref string) (Record, bool, *Error) {
 	if stringField(event, "object_type") != "relia.experience_record" {
 		return Record{}, false, nil
@@ -445,6 +509,11 @@ func sha256String(value string) string {
 	return "sha256:" + fmt.Sprintf("%x", digest)
 }
 
+func shortHash(value string) string {
+	digest := sha256.Sum256([]byte(value))
+	return fmt.Sprintf("%x", digest)[:12]
+}
+
 func numericValue(value any) (float64, bool) {
 	switch typed := value.(type) {
 	case float64:
@@ -481,6 +550,23 @@ func validOutcomeKind(kind string) bool {
 	}
 }
 
+func terminalStateForOutcome(kind string) string {
+	switch kind {
+	case "merged_clean":
+		return "passed"
+	case "ci_failure":
+		return "failed"
+	case "revert":
+		return "reverted"
+	case "review_correction":
+		return "corrected"
+	case "fix_held":
+		return "held"
+	default:
+		return ""
+	}
+}
+
 func validTerminalState(value string) bool {
 	switch value {
 	case "passed", "failed", "reverted", "corrected", "held":
@@ -490,12 +576,36 @@ func validTerminalState(value string) bool {
 	}
 }
 
+func signatureClassForOutcome(kind string) string {
+	switch kind {
+	case "revert":
+		return "revert"
+	case "review_correction":
+		return "review_correction"
+	case "ci_failure":
+		return "test_failure"
+	default:
+		return "unknown"
+	}
+}
+
 func validExtractionConfidence(value string) bool {
 	switch value {
 	case "structured", "log_parsed_high", "log_parsed_low", "unknown":
 		return true
 	default:
 		return false
+	}
+}
+
+func extractionMethodForConfidence(value string) string {
+	switch value {
+	case "log_parsed_high", "log_parsed_low":
+		return "log_parse"
+	case "unknown":
+		return "revert_metadata"
+	default:
+		return "structured_check_run"
 	}
 }
 

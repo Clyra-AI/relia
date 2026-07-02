@@ -134,6 +134,9 @@ Current progress:
 - `internal/ingest` now also owns experience context normalization and
   deterministic fallback diff-fingerprint generation with direct package tests,
   while full experience-record assembly remains in `cmd/relia`.
+- `internal/ingest` now also owns experience outcome normalization, signature
+  defaulting, and signature metadata assembly with direct package tests, while
+  full experience-record assembly remains in `cmd/relia`.
 - `internal/distill` now also owns distill scope path/signal selection and
   drafted-rule summary metadata with direct package tests, while the CLI keeps
   filesystem writes and command-result assembly.
@@ -214,8 +217,8 @@ Current progress:
 - `internal/ingest`: ingest input parsing, fail-closed redaction, standard
   secret-token scanning, provenance URL token-shape checks, the
   experience-record data model, canonical distill input decoding, record
-  validation, repo, action, context, and provenance normalization, shard
-  persistence, and record/provenance URL helpers extracted;
+  validation, repo, action, context, outcome, and provenance normalization,
+  shard persistence, and record/provenance URL helpers extracted;
   experience-record assembly and ingest result assembly still live in
   `cmd/relia`.
 - `internal/backtest`: backtest command argument parsing, recurrence window

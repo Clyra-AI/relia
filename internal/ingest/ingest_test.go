@@ -323,6 +323,80 @@ func TestNormalizeContextRejectsMissingPaths(t *testing.T) {
 	}
 }
 
+func TestNormalizeOutcomeDefaultsSignatureFields(t *testing.T) {
+	got, metadata, ingestErr := NormalizeOutcome(map[string]any{
+		"outcome_kind": "ci_failure",
+		"message":      "unit test failed",
+	}, Action{PR: 125, Commit: "abc123"}, []string{"cmd/relia/main.go"}, "input.json")
+
+	if ingestErr != nil {
+		t.Fatalf("NormalizeOutcome error: %v", ingestErr)
+	}
+	if got.Kind != "ci_failure" || got.TerminalState != "failed" {
+		t.Fatalf("outcome = %#v", got)
+	}
+	wantSignatureID := "sig_" + shortHash("test_failure|ci_failure|cmd/relia/main.go")
+	if got.Signature.SignatureID != wantSignatureID || got.Signature.ExtractionConfidence != "structured" {
+		t.Fatalf("signature = %#v, want id %q structured", got.Signature, wantSignatureID)
+	}
+	if metadata["class"] != "test_failure" ||
+		metadata["check_name"] != "ci_failure" ||
+		metadata["key"] != "cmd/relia/main.go" ||
+		metadata["extraction_method"] != "structured_check_run" {
+		t.Fatalf("metadata = %#v", metadata)
+	}
+	if metadata["message_fingerprint"] != sha256String("unit test failed") {
+		t.Fatalf("message_fingerprint = %#v", metadata["message_fingerprint"])
+	}
+}
+
+func TestNormalizeOutcomeAcceptsExplicitFields(t *testing.T) {
+	got, metadata, ingestErr := NormalizeOutcome(map[string]any{
+		"outcome": map[string]any{
+			"kind":           "review_correction",
+			"terminal_state": "corrected",
+			"signature": map[string]any{
+				"class":                 "review_correction",
+				"check_name":            "codex",
+				"key":                   "internal/ingest/record_validation.go",
+				"signature_id":          "sig_explicit",
+				"extraction_confidence": "log_parsed_low",
+				"message_fingerprint":   "sha256:explicit",
+			},
+		},
+	}, Action{PR: 125, Commit: "abc123"}, nil, "input.json")
+
+	if ingestErr != nil {
+		t.Fatalf("NormalizeOutcome error: %v", ingestErr)
+	}
+	if got.Signature.SignatureID != "sig_explicit" || got.Signature.ExtractionConfidence != "log_parsed_low" {
+		t.Fatalf("signature = %#v", got.Signature)
+	}
+	if metadata["extraction_method"] != "log_parse" || metadata["message_fingerprint"] != "sha256:explicit" {
+		t.Fatalf("metadata = %#v", metadata)
+	}
+}
+
+func TestNormalizeOutcomeRejectsInvalidFields(t *testing.T) {
+	cases := []struct {
+		name  string
+		event map[string]any
+		want  string
+	}{
+		{name: "kind", event: map[string]any{"outcome_kind": "bad"}, want: "outcome kind is invalid"},
+		{name: "terminal", event: map[string]any{"outcome_kind": "ci_failure", "terminal_state": "bad"}, want: "outcome terminal_state is invalid"},
+		{name: "confidence", event: map[string]any{"outcome_kind": "ci_failure", "extraction_confidence": "bad"}, want: "signature extraction_confidence is invalid"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			_, _, ingestErr := NormalizeOutcome(tc.event, Action{PR: 125, Commit: "abc123"}, nil, "input.json")
+			if ingestErr == nil || ingestErr.Kind != ErrorArtifactContract || ingestErr.Message != tc.want {
+				t.Fatalf("error = %#v, want %q", ingestErr, tc.want)
+			}
+		})
+	}
+}
+
 func TestPersistRecordsWritesSortedMonthlyShardAndUpserts(t *testing.T) {
 	root := t.TempDir()
 	records := []Record{
