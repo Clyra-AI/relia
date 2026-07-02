@@ -27,6 +27,53 @@ func TestIsFlakeDiscountedUsesExplicitAndHeuristicDiscounts(t *testing.T) {
 	}
 }
 
+func TestAutomaticFlakeDiscountsRequiresUnrelatedAgentFailures(t *testing.T) {
+	first := recurrenceExperienceForTest("exp-1", 10, "sig-a", []string{"cmd/a.go"}, time.Time{})
+	second := recurrenceExperienceForTest("exp-2", 20, "sig-a", []string{"cmd/b.go"}, time.Time{})
+	third := recurrenceExperienceForTest("exp-3", 30, "sig-a", []string{"cmd/c.go"}, time.Time{})
+	explicit := recurrenceExperienceForTest("exp-explicit", 40, "sig-a", []string{"cmd/d.go"}, time.Time{})
+	explicit.Record.FlakeDiscount = 0.25
+	human := recurrenceExperienceForTest("exp-human", 50, "sig-a", []string{"cmd/e.go"}, time.Time{})
+	human.Record.Attribution.ActorKind = "human"
+
+	got := AutomaticFlakeDiscounts([]Experience{first, second, third, explicit, human})
+
+	want := map[string]string{
+		"exp-1": automaticFlakeDiscountReason,
+		"exp-2": automaticFlakeDiscountReason,
+		"exp-3": automaticFlakeDiscountReason,
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("AutomaticFlakeDiscounts = %#v, want %#v", got, want)
+	}
+}
+
+func TestAutomaticFlakeDiscountsRejectsRelatedOrTooSmallGroups(t *testing.T) {
+	relatedA := recurrenceExperienceForTest("exp-1", 10, "sig-a", []string{"cmd/a.go"}, time.Time{})
+	relatedB := recurrenceExperienceForTest("exp-2", 20, "sig-a", []string{"cmd/a.go"}, time.Time{})
+	relatedC := recurrenceExperienceForTest("exp-3", 30, "sig-a", []string{"cmd/c.go"}, time.Time{})
+	smallA := recurrenceExperienceForTest("exp-4", 40, "sig-b", []string{"cmd/d.go"}, time.Time{})
+	smallB := recurrenceExperienceForTest("exp-5", 50, "sig-b", []string{"cmd/e.go"}, time.Time{})
+
+	got := AutomaticFlakeDiscounts([]Experience{relatedA, relatedB, relatedC, smallA, smallB})
+
+	if len(got) != 0 {
+		t.Fatalf("AutomaticFlakeDiscounts = %#v, want no discounts for related or too-small groups", got)
+	}
+}
+
+func TestAutomaticFlakeDiscountsFallsBackToTestPaths(t *testing.T) {
+	first := recurrenceExperienceForTest("exp-1", 10, "sig-a", []string{"cmd/a_test.go"}, time.Time{})
+	second := recurrenceExperienceForTest("exp-2", 20, "sig-a", []string{"cmd/b_test.go"}, time.Time{})
+	third := recurrenceExperienceForTest("exp-3", 30, "sig-a", []string{"tests/c_test.go"}, time.Time{})
+
+	got := AutomaticFlakeDiscounts([]Experience{first, second, third})
+
+	if len(got) != 3 {
+		t.Fatalf("AutomaticFlakeDiscounts = %#v, want fallback test-path discounts", got)
+	}
+}
+
 func TestBuildFlakeDiscountShapesHeuristicEvidence(t *testing.T) {
 	record := recurrenceExperienceForTest("exp-3", 30, "sig-a", []string{"cmd/app.go"}, time.Time{})
 	prior := recurrenceExperienceForTest("exp-1", 10, "sig-a", []string{"cmd/app.go"}, time.Time{})
