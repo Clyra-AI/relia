@@ -1098,8 +1098,8 @@ func buildRecurrencePair(prior backtestExperience, current backtestExperience) r
 		PriorExperienceID:   prior.Record.ExperienceID,
 		CurrentPR:           current.Record.Action.PR,
 		PriorPR:             prior.Record.Action.PR,
-		CurrentURL:          primaryProvenanceURL(current.Record),
-		PriorURL:            primaryProvenanceURL(prior.Record),
+		CurrentURL:          ingestdoc.PrimaryProvenanceURL(current.Record),
+		PriorURL:            ingestdoc.PrimaryProvenanceURL(prior.Record),
 		SignatureID:         current.Record.Outcome.Signature.SignatureID,
 		MatchedSignatureID:  matchedRecurrenceSignatureID(prior.Record, current.Record),
 		Refs:                []string{sourceLineRef(prior), sourceLineRef(current)},
@@ -1215,7 +1215,7 @@ func buildBacktestFlakeDiscount(record backtestExperience, records []backtestExp
 }
 
 func addBacktestCitation(citations map[int]backtestCitation, record backtestExperience) {
-	url := primaryProvenanceURL(record.Record)
+	url := ingestdoc.PrimaryProvenanceURL(record.Record)
 	if url == "" {
 		return
 	}
@@ -1224,21 +1224,6 @@ func addBacktestCitation(citations map[int]backtestCitation, record backtestExpe
 		URL:          url,
 		ExperienceID: record.Record.ExperienceID,
 	}
-}
-
-func primaryProvenanceURL(record experienceRecord) string {
-	for _, value := range record.Provenance.URLs {
-		if gitHubPullRequestURLMatchesExperience(value, record) {
-			return value
-		}
-	}
-	if derived := gitHubPullRequestURLForExperience(record); derived != "" {
-		return derived
-	}
-	if len(record.Provenance.URLs) > 0 {
-		return record.Provenance.URLs[0]
-	}
-	return ""
 }
 
 func sourceLineRef(record backtestExperience) string {
@@ -2220,9 +2205,9 @@ func buildDistilledRule(root string, kind string, cluster distillCluster, eviden
 		Confidence:      confidence,
 		EvidenceCount:   len(evidence),
 		Contradictions:  contradictions,
-		Experiences:     distillExperienceIDs(evidence),
-		Provenance:      distilledProvenance(evidence),
-		ReviewLabel:     distilledReviewLabel(status, confidence),
+		Experiences:     distilldoc.RuleExperienceIDs(evidence),
+		Provenance:      distilldoc.RuleProvenanceRefs(evidence),
+		ReviewLabel:     distilldoc.ReviewLabel(status, confidence),
 		StatementOrigin: "cluster_summary",
 		Metadata:        metadata,
 	}, true
@@ -2311,56 +2296,6 @@ func allScopePathsMissing(root string, scopePaths []string) bool {
 		}
 	}
 	return true
-}
-
-func distilledReviewLabel(status string, confidence float64) string {
-	switch status {
-	case "active":
-		return "accepted"
-	case "stale", "contradicted", "retired":
-		return "needs_user_input"
-	default:
-		if confidence < 0.55 {
-			return "needs_user_input"
-		}
-		return "suggested"
-	}
-}
-
-func distillExperienceIDs(records []backtestExperience) []string {
-	var ids []string
-	for _, record := range records {
-		if strings.TrimSpace(record.Record.ExperienceID) != "" {
-			ids = append(ids, record.Record.ExperienceID)
-		}
-	}
-	return uniqueStrings(ids)
-}
-
-func distilledProvenance(records []backtestExperience) []distilledRuleProvenance {
-	seen := map[string]bool{}
-	var refs []distilledRuleProvenance
-	for _, record := range records {
-		url := primaryProvenanceURL(record.Record)
-		key := fmt.Sprintf("%d\x00%s\x00%s", record.Record.Action.PR, record.Record.Outcome.Kind, url)
-		if seen[key] {
-			continue
-		}
-		seen[key] = true
-		refs = append(refs, distilledRuleProvenance{
-			PR:           record.Record.Action.PR,
-			Outcome:      record.Record.Outcome.Kind,
-			URL:          url,
-			ExperienceID: record.Record.ExperienceID,
-		})
-	}
-	sort.Slice(refs, func(i, j int) bool {
-		if refs[i].PR == refs[j].PR {
-			return refs[i].ExperienceID < refs[j].ExperienceID
-		}
-		return refs[i].PR < refs[j].PR
-	})
-	return refs
 }
 
 func writeDistilledRules(root string, ruleDir string, rules []distilledRule) ([]ArtifactRef, *CommandError) {
