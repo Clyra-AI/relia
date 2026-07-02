@@ -83,6 +83,9 @@ Current progress:
 - `internal/advise` now also owns prior advisory state loading and parsing
   with direct package tests, while command-specific error presentation and
   advisory-state writes remain in `cmd/relia`.
+- `internal/advise` now also owns advisory-state document construction with
+  direct package tests, while JSON encoding and artifact writes remain in
+  `cmd/relia`.
 - `internal/modelpull` now owns `relia models pull` argument parsing and local
   model manifest construction with direct package tests, while command I/O and
   repository writes remain in `cmd/relia`.
@@ -222,7 +225,8 @@ Current progress:
   assessment construction for assess, serve, and advise.
 - `internal/advise`: advise command argument parsing, advisory comment
   decision, strategy, markdown rendering, confidence threshold handling, and
-  prior-state loading, parsing, and comparison helpers.
+  prior-state loading, parsing, comparison, and advisory-state document
+  helpers.
 - `internal/modelpull`: local model artifact pull argument parsing and
   manifest construction before config-owned validation and CLI-owned writes.
 - `internal/distill`: distill argument parsing, provider plan construction,

@@ -258,7 +258,7 @@ helpers, automatic flake discount heuristic/result shaping, top repeated
 mistake aggregation, and HTML report rendering;
 `internal/advise` owns advise command argument parsing, advisory comment
 decision, strategy, markdown rendering, confidence threshold handling, and
-prior-state loading, parsing, and comparison helpers;
+prior-state loading, parsing, comparison, and advisory-state document helpers;
 `internal/modelpull` owns local model artifact pull argument parsing and
 manifest construction before config-owned validation and CLI-owned writes;
 `internal/distill` owns distill argument parsing, provider plan construction,
