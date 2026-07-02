@@ -204,6 +204,9 @@ Current progress:
 - `internal/backtest` now also owns automatic flake discount heuristic grouping
   with direct package tests, while the CLI keeps recurrence report
   orchestration.
+- `cmd/relia/render.go` now owns command-result JSON/human rendering and TTY
+  detection, lowering `cmd/relia/main.go` to 2,312 lines while preserving CLI
+  behavior.
 
 ## Candidate Package Boundaries
 
