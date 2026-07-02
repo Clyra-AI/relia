@@ -88,16 +88,6 @@ var requiredSchemaFiles = []string{
 	"schemas/redaction-config.schema.json",
 }
 
-var artifactSkeletonDirs = []string{
-	".relia/experiences",
-	".relia/signatures",
-	".relia/coverage",
-	".relia/reports",
-	".relia/baselines",
-	"memory/rules",
-	"memory/compiled",
-}
-
 var primaryCommands = []string{
 	"init",
 	"check",
@@ -307,12 +297,13 @@ func initResult(args []string, start time.Time) CommandResult {
 	configPath := filepath.Join(root, defaultConfigFile)
 	artifact := ArtifactRef{Kind: "config", Path: defaultConfigFile}
 	if _, err := os.Stat(configPath); err == nil {
-		if err := ensureArtifactSkeleton(root); err != nil {
+		if err := configdoc.EnsureArtifactSkeleton(root); err != nil {
 			return errorResult("init", "init", internalError("could not write artifact skeleton", err), start)
 		}
-		if err := ensureReliaGitIgnore(root); err != nil {
+		if err := configdoc.EnsureReliaGitIgnore(root); err != nil {
 			return errorResult("init", "init", internalError("could not update .gitignore", err), start)
 		}
+		artifactSkeletonDirs := configdoc.ArtifactSkeletonPaths()
 		result := passResult("init", "init", "relia.yaml already exists", start, map[string]any{
 			"config_path":             defaultConfigFile,
 			"created":                 false,
@@ -330,12 +321,13 @@ func initResult(args []string, start time.Time) CommandResult {
 	if err := os.WriteFile(configPath, []byte(defaultConfigYAML()), 0o644); err != nil {
 		return errorResult("init", "init", internalError("could not write relia.yaml", err), start)
 	}
-	if err := ensureArtifactSkeleton(root); err != nil {
+	if err := configdoc.EnsureArtifactSkeleton(root); err != nil {
 		return errorResult("init", "init", internalError("could not write artifact skeleton", err), start)
 	}
-	if err := ensureReliaGitIgnore(root); err != nil {
+	if err := configdoc.EnsureReliaGitIgnore(root); err != nil {
 		return errorResult("init", "init", internalError("could not update .gitignore", err), start)
 	}
+	artifactSkeletonDirs := configdoc.ArtifactSkeletonPaths()
 	result := passResult("init", "init", "created relia.yaml", start, map[string]any{
 		"config_path":             defaultConfigFile,
 		"created":                 true,
@@ -3375,42 +3367,6 @@ func findRepoRoot(start string) (string, bool) {
 		}
 		current = parent
 	}
-}
-
-func ensureArtifactSkeleton(root string) error {
-	for _, dir := range artifactSkeletonDirs {
-		if err := os.MkdirAll(filepath.Join(root, dir), 0o755); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func ensureReliaGitIgnore(root string) error {
-	path := filepath.Join(root, ".gitignore")
-	content, err := os.ReadFile(path)
-	if err != nil && !errors.Is(err, os.ErrNotExist) {
-		return err
-	}
-	if gitIgnoreContainsRelia(content) {
-		return nil
-	}
-	next := strings.TrimRight(string(content), "\n")
-	if next != "" {
-		next += "\n"
-	}
-	next += ".relia/\n"
-	return os.WriteFile(path, []byte(next), 0o644)
-}
-
-func gitIgnoreContainsRelia(content []byte) bool {
-	for _, line := range strings.Split(string(content), "\n") {
-		switch strings.TrimSpace(line) {
-		case ".relia", ".relia/", ".relia/*":
-			return true
-		}
-	}
-	return false
 }
 
 func validateReliaConfig(root string) ([]Finding, *CommandError) {
