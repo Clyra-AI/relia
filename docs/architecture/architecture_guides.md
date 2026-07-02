@@ -262,8 +262,9 @@ manifest construction before config-owned validation and CLI-owned writes;
 `internal/distill` owns distill argument parsing, provider plan construction,
 request-shape description, cost estimation, embedding-mode helpers, clustering,
 canonical signature-key selection, and review gate helpers; `internal/review`
-owns review command argument parsing and
-repo-relative scope-path validation; `internal/memory` owns memory command
+owns review command argument parsing, review action defaults and validation,
+repo-relative scope-path validation, memory rule lookup, and review lifecycle
+artifact updates; `internal/memory` owns memory command
 argument parsing, repo-relative output-path validation, memory-rule artifact
 validation, drafted rule calibration checks, rule summary provenance ordering,
 status counts, rule summary loading, and MEMORY.md rendering; `internal/serve`

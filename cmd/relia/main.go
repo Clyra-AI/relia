@@ -1728,11 +1728,12 @@ func reviewResult(args []string, start time.Time) CommandResult {
 	if commandErr != nil {
 		return errorResult("review", "review", commandErr, start)
 	}
-	rulePath, commandErr := findMemoryRulePath(root, "memory/rules", options.Rule)
+	updateOptions := reviewUpdateOptions()
+	rulePath, commandErr := reviewdoc.FindRulePath(root, "memory/rules", options.Rule, updateOptions)
 	if commandErr != nil {
 		return errorResult("review", "review", commandErr, start)
 	}
-	status, commandErr := updateMemoryRuleReview(root, rulePath, options)
+	status, commandErr := reviewdoc.UpdateRuleReview(root, rulePath, options, updateOptions)
 	if commandErr != nil {
 		return errorResult("review", "review", commandErr, start)
 	}
@@ -2659,7 +2660,7 @@ func writeDistilledRules(root string, ruleDir string, rules []distilledRule) ([]
 }
 
 func mergeExistingRuleLifecycle(root string, ruleDir string, rule distilledRule) distilledRule {
-	path, commandErr := findMemoryRulePath(root, ruleDir, rule.ID)
+	path, commandErr := reviewdoc.FindRulePath(root, ruleDir, rule.ID, reviewUpdateOptions())
 	if commandErr != nil {
 		return rule
 	}
@@ -2833,260 +2834,6 @@ func distilledRuleData(rules []distilledRule, artifacts []ArtifactRef) []map[str
 		})
 	}
 	return data
-}
-
-func findMemoryRulePath(root string, ruleDir string, rule string) (string, *CommandError) {
-	rule = strings.TrimSpace(rule)
-	if rule == "" {
-		return "", usageError("memory rule id or path must be non-empty")
-	}
-	if clean, ok := cleanRepoPath(rule); ok && (strings.HasSuffix(clean, ".yaml") || strings.HasSuffix(clean, ".yml")) {
-		path := filepath.Join(root, filepath.FromSlash(filepath.ToSlash(clean)))
-		if _, err := os.Stat(path); err == nil {
-			return path, nil
-		}
-	}
-	patterns := []string{
-		filepath.Join(root, filepath.FromSlash(ruleDir), "*.yaml"),
-		filepath.Join(root, filepath.FromSlash(ruleDir), "*.yml"),
-	}
-	for _, pattern := range patterns {
-		paths, err := filepath.Glob(pattern)
-		if err != nil {
-			return "", internalError("could not inspect memory rules", err)
-		}
-		sort.Strings(paths)
-		for _, path := range paths {
-			content, err := os.ReadFile(path)
-			if err != nil {
-				return "", internalError("could not read memory rule artifact", err)
-			}
-			document, parseErr := parseYAMLDocument(string(content))
-			if parseErr != nil {
-				return "", artifactContractError(parseErr.Error(), displayPath(root, path))
-			}
-			if document.Scalars["id"].Value == rule {
-				return path, nil
-			}
-		}
-	}
-	return "", artifactContractError("memory rule was not found", rule)
-}
-
-func updateMemoryRuleReview(root string, rulePath string, options reviewOptions) (string, *CommandError) {
-	if commandErr := validateMemoryRuleArtifact(root, rulePath); commandErr != nil {
-		return "", commandErr
-	}
-	content, err := os.ReadFile(rulePath)
-	if err != nil {
-		return "", internalError("could not read memory rule artifact", err)
-	}
-	rel := displayPath(root, rulePath)
-	document, parseErr := parseYAMLDocument(string(content))
-	if parseErr != nil {
-		return "", artifactContractError(parseErr.Error(), rel)
-	}
-	status := document.Scalars["status"].Value
-	label := options.Label
-	next := string(content)
-	switch options.Action {
-	case "approve":
-		switch status {
-		case "stale", "contradicted", "retired":
-			return "", artifactContractError("cannot mark "+status+" memory rule accepted without fresh distill evidence", rel)
-		}
-		status = "active"
-		label = "accepted"
-		next = replaceOrAddNestedYAMLScalar(next, "metadata", "lifecycle_reason", "approved by human review")
-	case "reject":
-		status = "retired"
-		label = "needs_user_input"
-		next = replaceOrAddNestedYAMLScalar(next, "metadata", "lifecycle_reason", "rejected by human review: "+strings.TrimSpace(options.Reason))
-	case "edit":
-		switch status {
-		case "stale", "contradicted", "retired":
-			return "", artifactContractError("cannot edit "+status+" memory rule without fresh distill evidence", rel)
-		}
-		status = "candidate"
-		if strings.TrimSpace(options.Statement) != "" {
-			next = replaceTopLevelYAMLScalar(next, "statement", strings.TrimSpace(options.Statement))
-			next = replaceNestedYAMLScalar(next, "review", "statement_origin", "human_authored")
-		}
-		if len(options.ScopePaths) > 0 {
-			scopePaths := normalizedRepoPaths(options.ScopePaths)
-			for _, scopePath := range scopePaths {
-				if !repoPathExists(root, scopePath) {
-					return "", artifactContractError("memory rule scope path does not exist in the repo", rel)
-				}
-			}
-			next = replaceNestedYAMLStringList(next, "scope", "paths", scopePaths)
-		}
-		next = replaceOrAddNestedYAMLScalar(next, "metadata", "lifecycle_reason", "edited by human review; pending approval")
-	case "label":
-		if label == "accepted" {
-			switch status {
-			case "stale", "contradicted", "retired":
-				return "", artifactContractError("cannot mark "+status+" memory rule accepted without fresh distill evidence", rel)
-			}
-			status = "active"
-			next = replaceOrAddNestedYAMLScalar(next, "metadata", "lifecycle_reason", "approved by human review")
-		} else if status == "active" {
-			status = "candidate"
-			next = replaceOrAddNestedYAMLScalar(next, "metadata", "lifecycle_reason", "returned to candidate review")
-		}
-	default:
-		return "", usageError("review action must be approve, edit, reject, or omitted for --label")
-	}
-	next = replaceTopLevelYAMLScalar(next, "status", status)
-	next = replaceNestedYAMLScalar(next, "review", "label", label)
-	if next == string(content) {
-		return "", artifactContractError("memory rule review fields were not updated", rel)
-	}
-	if commandErr := writeAtomicRepoFile(rulePath, []byte(next), "memory rule"); commandErr != nil {
-		return "", commandErr
-	}
-	if commandErr := validateMemoryRuleArtifact(root, rulePath); commandErr != nil {
-		return "", commandErr
-	}
-	return status, nil
-}
-
-func replaceTopLevelYAMLScalar(content string, key string, value string) string {
-	lines := strings.Split(content, "\n")
-	prefix := key + ":"
-	for index, line := range lines {
-		if leadingSpaces(line) == 0 && strings.HasPrefix(strings.TrimSpace(line), prefix) {
-			lines[index] = key + ": " + yamlScalarForWrite(value)
-			break
-		}
-	}
-	return strings.Join(lines, "\n")
-}
-
-func replaceNestedYAMLScalar(content string, parent string, key string, value string) string {
-	lines := strings.Split(content, "\n")
-	inParent := false
-	parentPrefix := parent + ":"
-	keyPrefix := key + ":"
-	for index, line := range lines {
-		indent := leadingSpaces(line)
-		trimmed := strings.TrimSpace(line)
-		if indent == 0 {
-			inParent = strings.HasPrefix(trimmed, parentPrefix)
-			continue
-		}
-		if inParent && indent == 2 && strings.HasPrefix(trimmed, keyPrefix) {
-			lines[index] = "  " + key + ": " + yamlScalarForWrite(value)
-			break
-		}
-	}
-	return strings.Join(lines, "\n")
-}
-
-func replaceOrAddNestedYAMLScalar(content string, parent string, key string, value string) string {
-	lines := strings.Split(content, "\n")
-	parentPrefix := parent + ":"
-	keyPrefix := key + ":"
-	parentIndex := -1
-	insertIndex := len(lines)
-	inParent := false
-	for index, line := range lines {
-		indent := leadingSpaces(line)
-		trimmed := strings.TrimSpace(line)
-		if indent == 0 {
-			if inParent {
-				insertIndex = index
-				break
-			}
-			inParent = strings.HasPrefix(trimmed, parentPrefix)
-			if inParent {
-				parentIndex = index
-				insertIndex = index + 1
-			}
-			continue
-		}
-		if inParent {
-			insertIndex = index + 1
-			if indent == 2 && strings.HasPrefix(trimmed, keyPrefix) {
-				lines[index] = "  " + key + ": " + yamlScalarForWrite(value)
-				return strings.Join(lines, "\n")
-			}
-		}
-	}
-	newLine := "  " + key + ": " + yamlScalarForWrite(value)
-	if parentIndex == -1 {
-		if len(lines) > 0 && lines[len(lines)-1] == "" {
-			lines[len(lines)-1] = parentPrefix
-			lines = append(lines, newLine, "")
-			return strings.Join(lines, "\n")
-		}
-		lines = append(lines, parentPrefix, newLine)
-		return strings.Join(lines, "\n")
-	}
-	next := append([]string{}, lines[:insertIndex]...)
-	next = append(next, newLine)
-	next = append(next, lines[insertIndex:]...)
-	return strings.Join(next, "\n")
-}
-
-func replaceNestedYAMLStringList(content string, parent string, key string, values []string) string {
-	lines := strings.Split(content, "\n")
-	parentPrefix := parent + ":"
-	keyPrefix := key + ":"
-	inParent := false
-	parentIndex := -1
-	insertStart := -1
-	insertEnd := -1
-	for index, line := range lines {
-		indent := leadingSpaces(line)
-		trimmed := strings.TrimSpace(line)
-		if indent == 0 {
-			if inParent {
-				if insertStart < 0 {
-					insertStart = index
-					insertEnd = index
-				}
-				break
-			}
-			inParent = strings.HasPrefix(trimmed, parentPrefix)
-			if inParent {
-				parentIndex = index
-			}
-			continue
-		}
-		if !inParent {
-			continue
-		}
-		if indent == 2 && strings.HasPrefix(trimmed, keyPrefix) {
-			insertStart = index
-			insertEnd = index + 1
-			for insertEnd < len(lines) {
-				nextLine := lines[insertEnd]
-				nextIndent := leadingSpaces(nextLine)
-				nextTrimmed := strings.TrimSpace(nextLine)
-				if nextTrimmed != "" && nextIndent <= 2 {
-					break
-				}
-				insertEnd++
-			}
-			break
-		}
-	}
-	replacement := []string{"  " + key + ":"}
-	for _, value := range values {
-		replacement = append(replacement, "    - "+yamlScalarForWrite(value))
-	}
-	if insertStart == -1 {
-		if parentIndex == -1 {
-			return content
-		}
-		insertStart = parentIndex + 1
-		insertEnd = insertStart
-	}
-	next := append([]string{}, lines[:insertStart]...)
-	next = append(next, replacement...)
-	next = append(next, lines[insertEnd:]...)
-	return strings.Join(next, "\n")
 }
 
 func writeMemoryPage(root string, outputPath string, rules []memorydoc.RuleSummary) (string, *CommandError) {
@@ -4366,6 +4113,17 @@ func validateMemoryRuleArtifact(root string, path string) *CommandError {
 
 func validateDraftedMemoryRuleCalibration(document yamlDocument, rel string, confidence float64, evidenceCount int, contradictions int) *CommandError {
 	return memorydoc.ValidateDraftedRuleCalibration(document, rel, confidence, evidenceCount, contradictions, memoryValidationOptions())
+}
+
+func reviewUpdateOptions() reviewdoc.UpdateOptions {
+	return reviewdoc.UpdateOptions{
+		SchemaVersion:         commandSchemaVersion,
+		UsageError:            usageError,
+		ArtifactContractError: artifactContractError,
+		InternalError:         internalError,
+		RepoPathExists:        repoPathExists,
+		YAMLFloat:             yamlFloat,
+	}
 }
 
 func memoryValidationOptions() memorydoc.ValidationOptions {

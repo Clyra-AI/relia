@@ -90,10 +90,10 @@ Current progress:
 - `internal/distill` now owns distill clustering and canonical signature-key
   selection with direct package tests, while rule assembly and artifact writes
   remain in `cmd/relia`.
-- `internal/review` now owns `relia review` argument parsing and
-  repo-relative scope-path validation with direct package tests, while memory
-  rule lookup, lifecycle file updates, validation, and command-result rendering
-  remain in `cmd/relia`.
+- `internal/review` now owns `relia review` argument parsing, repo-relative
+  scope-path validation, memory rule lookup, lifecycle file updates, and
+  review update validation with direct package tests, while command-result
+  rendering remains in `cmd/relia`.
 - `internal/memory` now owns `relia memory` argument parsing and
   repo-relative output-path validation with direct package tests, while memory
   rule summary loading, Markdown rendering, artifact writes, and command-result
@@ -176,8 +176,9 @@ Current progress:
   request-shape description, cost estimation, embedding-mode helpers, and
   distill clustering/review-gate helpers.
 - `internal/review`: review command argument parsing, review action defaults,
-  label validation, and edit scope-path validation before CLI-owned memory-rule
-  lookup and artifact mutation.
+  label validation, edit scope-path validation, memory-rule lookup, lifecycle
+  artifact mutation, and review update validation before CLI-owned
+  command-result rendering.
 - `internal/memory`: memory command argument parsing, default MEMORY.md output
   selection, format validation, output path validation, memory-rule artifact
   validation, drafted rule calibration checks, rule summary loading,
