@@ -292,6 +292,21 @@ func GitHubPullRequestURLForRecord(record Record) string {
 	return fmt.Sprintf("https://github.com/%s/%s/pull/%d", owner, name, record.Action.PR)
 }
 
+func PrimaryProvenanceURL(record Record) string {
+	for _, value := range record.Provenance.URLs {
+		if GitHubPullRequestURLMatchesRecord(value, record) {
+			return value
+		}
+	}
+	if derived := GitHubPullRequestURLForRecord(record); derived != "" {
+		return derived
+	}
+	if len(record.Provenance.URLs) > 0 {
+		return record.Provenance.URLs[0]
+	}
+	return ""
+}
+
 type shardWritePlan struct {
 	Path    string
 	Content []byte

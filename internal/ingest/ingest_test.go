@@ -223,6 +223,21 @@ func TestGitHubPullRequestHelpers(t *testing.T) {
 	if got := GitHubPullRequestURLForRecord(record); got != "https://github.com/acme/billing/pull/142" {
 		t.Fatalf("URL = %q", got)
 	}
+	record.Provenance.URLs = []string{
+		"https://github.com/acme/billing/actions/runs/99",
+		"https://github.com/acme/billing/pull/142",
+	}
+	if got := PrimaryProvenanceURL(record); got != "https://github.com/acme/billing/pull/142" {
+		t.Fatalf("primary URL = %q, want matching pull URL", got)
+	}
+	record.Provenance.URLs = []string{"https://github.com/acme/billing/actions/runs/99"}
+	if got := PrimaryProvenanceURL(record); got != "https://github.com/acme/billing/pull/142" {
+		t.Fatalf("primary URL = %q, want derived pull URL", got)
+	}
+	record.Action.PR = 0
+	if got := PrimaryProvenanceURL(record); got != "https://github.com/acme/billing/actions/runs/99" {
+		t.Fatalf("primary URL = %q, want first provenance URL fallback", got)
+	}
 }
 
 func TestValidateRecordAcceptsCanonicalPrivateRecord(t *testing.T) {
