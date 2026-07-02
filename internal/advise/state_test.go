@@ -5,6 +5,9 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+
+	assessdoc "github.com/Clyra-AI/relia/internal/assess"
+	configdoc "github.com/Clyra-AI/relia/internal/config"
 )
 
 func TestLoadPriorStateMissingFileReturnsZeroState(t *testing.T) {
@@ -106,6 +109,69 @@ func TestLoadPriorStateRejectsInvalidJSON(t *testing.T) {
 	}
 	if stateErr.Ref != ".relia/reports/advisory-state.json" {
 		t.Fatalf("Ref = %q", stateErr.Ref)
+	}
+}
+
+func TestStateDocumentBuildsAdvisoryState(t *testing.T) {
+	generatedAt := time.Date(2026, 7, 2, 8, 0, 0, 0, time.UTC)
+	assessment := assessdoc.RiskAssessment{
+		ObjectType:    "relia.risk_assessment",
+		SchemaVersion: "1.0",
+		RiskLevel:     "no_coverage",
+		Metadata:      map[string]any{},
+	}
+	settings := configdoc.AdviseSettings{
+		Enabled:                 true,
+		MaxCommentsPerPR:        1,
+		UpdateInPlace:           true,
+		ReassessDebounceMinutes: 15,
+		MinConfidence:           0.7,
+	}
+
+	got := StateDocument("1.0", "changes.diff", assessment, settings, "sha256:current", PriorState{}, true, "", generatedAt)
+
+	if got["object_type"] != "relia.advisory_state" {
+		t.Fatalf("object_type = %q", got["object_type"])
+	}
+	if got["schema_version"] != "1.0" || got["input_path"] != "changes.diff" {
+		t.Fatalf("schema/input = %#v", got)
+	}
+	if got["diff_fingerprint"] != "sha256:current" || got["previous_diff_fingerprint"] != "" {
+		t.Fatalf("fingerprints = %#v/%#v", got["diff_fingerprint"], got["previous_diff_fingerprint"])
+	}
+	metadata := got["metadata"].(map[string]any)
+	if metadata["generated_at"] != "2026-07-02T08:00:00Z" {
+		t.Fatalf("metadata.generated_at = %#v", metadata["generated_at"])
+	}
+	if metadata["github_api_required_later"] != true || metadata["risk_level"] != "no_coverage" {
+		t.Fatalf("metadata = %#v", metadata)
+	}
+	strategy := got["comment_strategy"].(map[string]any)
+	if strategy["comment_marker"] != "relia-advisory:v1" || strategy["max_comments_per_pr"] != 1 {
+		t.Fatalf("comment_strategy = %#v", strategy)
+	}
+}
+
+func TestStateDocumentPreservesPriorFingerprintDuringDebounce(t *testing.T) {
+	generatedAt := time.Date(2026, 7, 2, 8, 30, 0, 0, time.UTC)
+	previousAt := time.Date(2026, 7, 2, 8, 0, 0, 0, time.UTC)
+	assessment := assessdoc.RiskAssessment{RiskLevel: "match_high", Metadata: map[string]any{}}
+
+	got := StateDocument("1.0", "changes.diff", assessment, configdoc.AdviseSettings{}, "sha256:current", PriorState{
+		DiffFingerprint: "sha256:previous",
+		GeneratedAt:     previousAt,
+		RiskLevel:       "match_high",
+	}, false, "reassess_debounce_window", generatedAt)
+
+	if got["diff_fingerprint"] != "sha256:previous" {
+		t.Fatalf("diff_fingerprint = %#v", got["diff_fingerprint"])
+	}
+	metadata := got["metadata"].(map[string]any)
+	if metadata["generated_at"] != "2026-07-02T08:00:00Z" {
+		t.Fatalf("metadata.generated_at = %#v", metadata["generated_at"])
+	}
+	if metadata["debounced_diff_fingerprint"] != "sha256:current" || metadata["debounced_at"] != "2026-07-02T08:30:00Z" {
+		t.Fatalf("debounce metadata = %#v", metadata)
 	}
 }
 

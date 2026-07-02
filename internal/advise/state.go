@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
+	assessdoc "github.com/Clyra-AI/relia/internal/assess"
 	configdoc "github.com/Clyra-AI/relia/internal/config"
 )
 
@@ -72,4 +73,47 @@ func LoadPriorState(root string, statePath string) (PriorState, *StateError) {
 		}
 	}
 	return prior, nil
+}
+
+func StateDocument(
+	schemaVersion string,
+	inputPath string,
+	assessment assessdoc.RiskAssessment,
+	settings configdoc.AdviseSettings,
+	diffFingerprint string,
+	previousState PriorState,
+	shouldComment bool,
+	skipReason string,
+	generatedAt time.Time,
+) map[string]any {
+	generatedAtValue := generatedAt.UTC().Format(time.RFC3339)
+	stateDiffFingerprint := diffFingerprint
+	stateMetadata := map[string]any{
+		"generated_by":              "relia advise",
+		"generated_at":              generatedAtValue,
+		"hosted_service_required":   false,
+		"github_api_required_later": shouldComment,
+		"risk_level":                PublishedRiskLevel(assessment, skipReason),
+	}
+	if skipReason == "reassess_debounce_window" && previousState.DiffFingerprint != "" {
+		stateDiffFingerprint = previousState.DiffFingerprint
+		if !previousState.GeneratedAt.IsZero() {
+			stateMetadata["generated_at"] = previousState.GeneratedAt.UTC().Format(time.RFC3339)
+		}
+		stateMetadata["debounced_diff_fingerprint"] = diffFingerprint
+		stateMetadata["debounced_at"] = generatedAtValue
+	}
+	return map[string]any{
+		"object_type":               "relia.advisory_state",
+		"schema_version":            schemaVersion,
+		"input_path":                inputPath,
+		"diff_fingerprint":          stateDiffFingerprint,
+		"previous_diff_fingerprint": previousState.DiffFingerprint,
+		"should_comment":            shouldComment,
+		"skip_reason":               skipReason,
+		"assessment":                assessment,
+		"comment_strategy":          CommentStrategy(settings),
+		"comment_marker":            commentMarker,
+		"metadata":                  stateMetadata,
+	}
 }

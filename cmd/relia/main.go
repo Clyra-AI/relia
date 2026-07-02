@@ -1469,39 +1469,17 @@ func adviseResult(args []string, start time.Time) CommandResult {
 			return withFormat(errorResult("advise", "advise", commandErr, start))
 		}
 	}
-	generatedAt := start.UTC().Format(time.RFC3339)
-	publishedRiskLevel := advisedoc.PublishedRiskLevel(assessment, skipReason)
-	stateDiffFingerprint := diffFingerprint
-	stateGeneratedAt := generatedAt
-	stateMetadata := map[string]any{
-		"generated_by":              "relia advise",
-		"generated_at":              stateGeneratedAt,
-		"hosted_service_required":   false,
-		"github_api_required_later": shouldComment,
-		"risk_level":                publishedRiskLevel,
-	}
-	if skipReason == "reassess_debounce_window" && previousState.DiffFingerprint != "" {
-		stateDiffFingerprint = previousState.DiffFingerprint
-		if !previousState.GeneratedAt.IsZero() {
-			stateGeneratedAt = previousState.GeneratedAt.UTC().Format(time.RFC3339)
-			stateMetadata["generated_at"] = stateGeneratedAt
-		}
-		stateMetadata["debounced_diff_fingerprint"] = diffFingerprint
-		stateMetadata["debounced_at"] = generatedAt
-	}
-	state := map[string]any{
-		"object_type":               "relia.advisory_state",
-		"schema_version":            commandSchemaVersion,
-		"input_path":                displayPath(root, inputPath),
-		"diff_fingerprint":          stateDiffFingerprint,
-		"previous_diff_fingerprint": previousState.DiffFingerprint,
-		"should_comment":            shouldComment,
-		"skip_reason":               skipReason,
-		"assessment":                assessment,
-		"comment_strategy":          advisedoc.CommentStrategy(settings),
-		"comment_marker":            "relia-advisory:v1",
-		"metadata":                  stateMetadata,
-	}
+	state := advisedoc.StateDocument(
+		commandSchemaVersion,
+		displayPath(root, inputPath),
+		assessment,
+		settings,
+		diffFingerprint,
+		previousState,
+		shouldComment,
+		skipReason,
+		start,
+	)
 	encodedState, err := json.MarshalIndent(state, "", "  ")
 	if err != nil {
 		return withFormat(errorResult("advise", "advise", internalError("could not encode advisory state", err), start))
