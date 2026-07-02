@@ -107,6 +107,9 @@ Current progress:
   rule orchestration remains in `cmd/relia`.
 - `internal/ingest` now also owns primary provenance URL selection for
   experience records, reusing its canonical GitHub URL helpers.
+- `internal/distill` now also owns distill scope path/signal selection and
+  drafted-rule summary metadata with direct package tests, while the CLI keeps
+  filesystem writes and command-result assembly.
 - `internal/review` now owns `relia review` argument parsing, repo-relative
   scope-path validation, memory rule lookup, lifecycle file updates, and
   review update validation with direct package tests, while command-result
@@ -195,7 +198,8 @@ Current progress:
   formatting, memory-rule YAML rendering, evidence classification, flake
   discount handling, contradiction counting, confidence scoring, confidence
   metadata assembly, review-label selection, evidence ID selection, and rule
-  provenance assembly.
+  provenance assembly, scope selection, status counts, and drafted-rule
+  summary metadata.
 - `internal/review`: review command argument parsing, review action defaults,
   label validation, edit scope-path validation, memory-rule lookup, lifecycle
   artifact mutation, and review update validation before CLI-owned
