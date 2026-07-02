@@ -10,21 +10,21 @@
     ],
     "line_ceilings": {
       "cmd/relia/main.go": 1093,
-      "cmd/relia/main_test.go": 1957
+      "cmd/relia/main_test.go": 999
     },
     "budget": {
       "warn_line_threshold": 1200,
       "fail_line_threshold": 2500
     }
   },
-  "reason": "Relia currently concentrates product behavior and command tests in cmd/relia/main.go and cmd/relia/main_test.go while the repo transitions to bounded internal packages. The exception prevents autoship from hiding the existing monolith and blocks silent removal of the decomposition follow-up.",
+  "reason": "Relia formerly concentrated product behavior and command tests in cmd/relia/main.go and cmd/relia/main_test.go while the repo transitioned to bounded internal packages. Both files are now below the warning threshold; the exception remains as a shrink-only cap until the follow-up finding is closed.",
   "owner": "relia-maintainers",
   "approved_by": "architecture-review",
   "approved_at": "2026-07-01T00:00:00Z",
   "expires_at": "2026-09-01T00:00:00Z",
   "compensating_validation": [
     "make prepush-full",
-    "factoryd doctor emits architecture_budget_report with cmd/relia/main.go and cmd/relia/main_test.go marked exception_approved",
+    "factoryd doctor emits architecture_budget_report with cmd/relia/main.go and cmd/relia/main_test.go at or below their recorded shrink-only ceilings",
     "tasks touching cmd/relia/main.go or cmd/relia/main_test.go must avoid net line growth unless they are shrink-only decomposition work"
   ],
   "follow_up_refs": [
@@ -124,7 +124,8 @@
     "cmd/relia/ingest_command.go",
     "cmd/relia/backtest_command.go",
     "cmd/relia/distill_command.go",
-    "docs/architecture/findings/TEMP_FINDING_2026-06-30_relia_arch_decomposition.md"
+    "docs/architecture/findings/TEMP_FINDING_2026-06-30_relia_arch_decomposition.md",
+    "cmd/relia/distill_review_command_test.go"
   ],
   "last_reduced_at": "2026-07-02T00:00:00Z"
 }
