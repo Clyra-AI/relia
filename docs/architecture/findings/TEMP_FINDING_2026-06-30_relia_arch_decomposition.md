@@ -219,6 +219,8 @@ Current progress:
 - `cmd/relia/repo_helpers.go` now owns repo path, atomic write, digest, and
   ingest adapter helpers, lowering `cmd/relia/main.go` to 1,828 lines while
   preserving CLI behavior.
+- `cmd/relia/models_command.go` now owns the `models pull` command handler,
+  lowering `cmd/relia/main.go` to 1,779 lines while preserving CLI behavior.
 
 ## Candidate Package Boundaries
 
