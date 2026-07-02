@@ -9,7 +9,7 @@
       "cmd/relia/main_test.go"
     ],
     "line_ceilings": {
-      "cmd/relia/main.go": 1993,
+      "cmd/relia/main.go": 1828,
       "cmd/relia/main_test.go": 1957
     },
     "budget": {
@@ -114,6 +114,7 @@
     "cmd/relia/errors.go",
     "cmd/relia/render.go",
     "cmd/relia/result_helpers.go",
+    "cmd/relia/repo_helpers.go",
     "docs/architecture/findings/TEMP_FINDING_2026-06-30_relia_arch_decomposition.md"
   ],
   "last_reduced_at": "2026-07-02T00:00:00Z"

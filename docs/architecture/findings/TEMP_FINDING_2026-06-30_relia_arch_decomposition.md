@@ -216,6 +216,9 @@ Current progress:
 - `cmd/relia/result_helpers.go` now owns help, pass, not-implemented, and
   error command-result builders, lowering `cmd/relia/main.go` to 1,993 lines
   while preserving CLI behavior.
+- `cmd/relia/repo_helpers.go` now owns repo path, atomic write, digest, and
+  ingest adapter helpers, lowering `cmd/relia/main.go` to 1,828 lines while
+  preserving CLI behavior.
 
 ## Candidate Package Boundaries
 
