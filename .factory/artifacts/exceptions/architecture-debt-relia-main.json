@@ -9,7 +9,7 @@
       "cmd/relia/main_test.go"
     ],
     "line_ceilings": {
-      "cmd/relia/main.go": 3638,
+      "cmd/relia/main.go": 3593,
       "cmd/relia/main_test.go": 1957
     },
     "budget": {
@@ -49,6 +49,8 @@
     "internal/backtest/model_test.go",
     "internal/backtest/report.go",
     "internal/backtest/report_test.go",
+    "internal/config/schema_contracts.go",
+    "internal/config/schema_contracts_test.go",
     "internal/distill/args.go",
     "internal/distill/args_test.go",
     "internal/distill/cluster.go",
