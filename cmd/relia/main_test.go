@@ -1205,7 +1205,7 @@ func TestInitCreatesBaselineConfig(t *testing.T) {
 			t.Fatalf("relia.yaml missing %q:\n%s", token, content)
 		}
 	}
-	for _, dir := range artifactSkeletonDirs {
+	for _, dir := range []string{".relia/experiences", ".relia/signatures", ".relia/coverage", ".relia/reports", ".relia/baselines", "memory/rules", "memory/compiled"} {
 		if info, err := os.Stat(filepath.Join(tempDir, dir)); err != nil || !info.IsDir() {
 			t.Fatalf("expected artifact skeleton dir %s: info=%#v err=%v", dir, info, err)
 		}

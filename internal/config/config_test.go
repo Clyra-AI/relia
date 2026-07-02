@@ -31,6 +31,60 @@ func TestDefaultYAMLUsesVersionPinsAndParses(t *testing.T) {
 	}
 }
 
+func TestArtifactSkeletonPathsReturnsCopy(t *testing.T) {
+	paths := ArtifactSkeletonPaths()
+	if len(paths) == 0 {
+		t.Fatal("expected artifact skeleton paths")
+	}
+	paths[0] = "mutated"
+	if got := ArtifactSkeletonPaths()[0]; got == "mutated" {
+		t.Fatal("ArtifactSkeletonPaths returned mutable package storage")
+	}
+}
+
+func TestEnsureArtifactSkeletonCreatesDirectories(t *testing.T) {
+	root := t.TempDir()
+
+	if err := EnsureArtifactSkeleton(root); err != nil {
+		t.Fatalf("EnsureArtifactSkeleton returned error: %v", err)
+	}
+
+	for _, dir := range ArtifactSkeletonPaths() {
+		if info, err := os.Stat(filepath.Join(root, dir)); err != nil || !info.IsDir() {
+			t.Fatalf("expected artifact skeleton dir %s: info=%#v err=%v", dir, info, err)
+		}
+	}
+}
+
+func TestEnsureReliaGitIgnoreCreatesAndPreservesEntries(t *testing.T) {
+	root := t.TempDir()
+
+	if err := EnsureReliaGitIgnore(root); err != nil {
+		t.Fatalf("EnsureReliaGitIgnore returned error: %v", err)
+	}
+	content, err := os.ReadFile(filepath.Join(root, ".gitignore"))
+	if err != nil {
+		t.Fatalf("expected .gitignore: %v", err)
+	}
+	if got := string(content); got != ".relia/\n" {
+		t.Fatalf(".gitignore = %q", got)
+	}
+
+	if err := os.WriteFile(filepath.Join(root, ".gitignore"), []byte("build/\n.relia/*\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := EnsureReliaGitIgnore(root); err != nil {
+		t.Fatalf("EnsureReliaGitIgnore returned error for existing entry: %v", err)
+	}
+	content, err = os.ReadFile(filepath.Join(root, ".gitignore"))
+	if err != nil {
+		t.Fatalf("expected .gitignore: %v", err)
+	}
+	if got := string(content); got != "build/\n.relia/*\n" {
+		t.Fatalf(".gitignore changed despite existing Relia entry: %q", got)
+	}
+}
+
 func TestRefHelpersUseLineNumbers(t *testing.T) {
 	if got := Ref(DefaultFile, yamlmini.Scalar{}); got != DefaultFile {
 		t.Fatalf("Ref without line = %q", got)
