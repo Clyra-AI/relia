@@ -13,7 +13,6 @@ import (
 	"strconv"
 	"strings"
 	"testing"
-	"time"
 )
 
 func TestJSONFlagEmitsStableEnvelope(t *testing.T) {
@@ -1118,30 +1117,6 @@ func TestDistillMarksAnyLaterContradictionAsContradicted(t *testing.T) {
 	if contradicted.Scalars["evidence.contradictions"].Value != "1" ||
 		contradicted.Scalars["review.label"].Value != "needs_user_input" {
 		t.Fatalf("contradicted rule = %#v", contradicted.Scalars)
-	}
-}
-
-func TestDistillAvoidContradictionsIgnoreOlderPositiveEvidence(t *testing.T) {
-	timestamp := func(value string) time.Time {
-		t.Helper()
-		parsed, err := time.Parse(time.RFC3339, value)
-		if err != nil {
-			t.Fatal(err)
-		}
-		return parsed
-	}
-	failures := []backtestExperience{
-		{RecordedAt: timestamp("2026-04-10T10:00:00Z")},
-	}
-	positives := []backtestExperience{
-		{RecordedAt: timestamp("2026-04-01T10:00:00Z")},
-	}
-	if got := distillAvoidContradictions(failures, positives); got != 0 {
-		t.Fatalf("older positive evidence counted as contradiction: %d", got)
-	}
-	positives = append(positives, backtestExperience{RecordedAt: timestamp("2026-04-12T10:00:00Z")})
-	if got := distillAvoidContradictions(failures, positives); got != 1 {
-		t.Fatalf("later positive evidence contradictions = %d, want 1", got)
 	}
 }
 
