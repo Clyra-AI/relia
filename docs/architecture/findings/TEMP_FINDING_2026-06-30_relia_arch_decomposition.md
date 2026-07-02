@@ -210,6 +210,9 @@ Current progress:
 - `cmd/relia/errors.go` now owns command error constructors and adapter-error
   mapping helpers, lowering `cmd/relia/main.go` to 2,153 lines while
   preserving CLI behavior.
+- `cmd/relia/config_helpers.go` now owns CLI config validation, review/memory
+  option builders, command-result build options, and YAML reference helpers,
+  lowering `cmd/relia/main.go` to 2,033 lines while preserving CLI behavior.
 
 ## Candidate Package Boundaries
 
