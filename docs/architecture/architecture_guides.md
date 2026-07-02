@@ -226,11 +226,15 @@ contract coverage now lives in `cmd/relia/ingest_security_test.go` and
 `cmd/relia/ingest_contract_test.go`. Backtest report and integrity coverage
 now lives in `cmd/relia/backtest_report_test.go` and
 `cmd/relia/backtest_integrity_test.go`. Memory-rule validation coverage now
-lives in `cmd/relia/memory_validation_test.go`. These files remain in package
-`main` so they can exercise the current unexported CLI helpers while reducing
-the legacy `cmd/relia/main_test.go` debt surface. Future slices should
-continue moving cohesive command-test groups into responsibility-named test
-files before changing command behavior.
+lives in `cmd/relia/memory_validation_test.go`. Serve/assess command coverage
+and assessment rule validation coverage now live in
+`cmd/relia/assess_command_test.go` and
+`cmd/relia/assessment_rule_validation_test.go`, bringing
+`cmd/relia/main_test.go` below the fail threshold. These files remain in
+package `main` so they can exercise the current unexported CLI helpers while
+reducing the legacy `cmd/relia/main_test.go` debt surface. Future slices
+should continue moving cohesive command-test groups into responsibility-named
+test files before changing command behavior.
 
 Decomposition starts with cohesive pure behavior that can move without changing
 the CLI contract. `internal/diffparse` owns unified-diff touched-path parsing

@@ -10,7 +10,7 @@
     ],
     "line_ceilings": {
       "cmd/relia/main.go": 4902,
-      "cmd/relia/main_test.go": 3585
+      "cmd/relia/main_test.go": 1996
     },
     "budget": {
       "warn_line_threshold": 1200,
@@ -66,6 +66,8 @@
     "cmd/relia/backtest_integrity_test.go",
     "cmd/relia/backtest_report_test.go",
     "cmd/relia/advise_test.go",
+    "cmd/relia/assess_command_test.go",
+    "cmd/relia/assessment_rule_validation_test.go",
     "cmd/relia/diffparse_test.go",
     "cmd/relia/ingest_contract_test.go",
     "cmd/relia/ingest_security_test.go",
