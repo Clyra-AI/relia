@@ -70,6 +70,10 @@ Current progress:
 - Memory-rule validation coverage now lives in
   `cmd/relia/memory_validation_test.go`, continuing to shrink
   `cmd/relia/main_test.go` without changing command behavior.
+- Serve/assess command coverage and assessment rule validation coverage now
+  live in `cmd/relia/assess_command_test.go` and
+  `cmd/relia/assessment_rule_validation_test.go`, bringing
+  `cmd/relia/main_test.go` below the fail threshold.
 - `internal/advise` now owns advisory comment decision, strategy, and rendering
   helpers with direct package tests, shrinking `cmd/relia/main.go` while
   keeping CLI I/O and state-file handling in the command layer.
