@@ -9,7 +9,7 @@
       "cmd/relia/main_test.go"
     ],
     "line_ceilings": {
-      "cmd/relia/main.go": 2979,
+      "cmd/relia/main.go": 2951,
       "cmd/relia/main_test.go": 1957
     },
     "budget": {
@@ -86,6 +86,7 @@
     "internal/ingest/args_test.go",
     "internal/ingest/ingest.go",
     "internal/ingest/ingest_test.go",
+    "internal/ingest/record_validation.go",
     "internal/memory/args.go",
     "internal/memory/args_test.go",
     "internal/memory/summary.go",

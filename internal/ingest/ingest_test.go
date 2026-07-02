@@ -122,6 +122,57 @@ func TestValidGitHubProvenanceURLShape(t *testing.T) {
 	}
 }
 
+func TestNormalizeRepoAcceptsStringAndFallbackFields(t *testing.T) {
+	repo, ingestErr := NormalizeRepo(map[string]any{
+		"repo": "Clyra-AI/relia",
+	}, "input.json")
+	if ingestErr != nil {
+		t.Fatalf("NormalizeRepo returned error: %v", ingestErr)
+	}
+	if repo.Provider != "github" || repo.Owner != "Clyra-AI" || repo.Name != "relia" {
+		t.Fatalf("repo = %#v", repo)
+	}
+
+	repo, ingestErr = NormalizeRepo(map[string]any{
+		"repo_owner": "Clyra-AI",
+		"repo_name":  "relia",
+	}, "input.json")
+	if ingestErr != nil {
+		t.Fatalf("NormalizeRepo fallback returned error: %v", ingestErr)
+	}
+	if repo.Owner != "Clyra-AI" || repo.Name != "relia" {
+		t.Fatalf("fallback repo = %#v", repo)
+	}
+}
+
+func TestNormalizeRepoRejectsUnsupportedProvider(t *testing.T) {
+	_, ingestErr := NormalizeRepo(map[string]any{
+		"repo": map[string]any{
+			"provider": "gitlab",
+			"owner":    "Clyra-AI",
+			"name":     "relia",
+		},
+	}, "input.json")
+
+	if ingestErr == nil {
+		t.Fatal("expected provider error")
+	}
+	if ingestErr.Message != "experience repo.provider must be github" {
+		t.Fatalf("Message = %q", ingestErr.Message)
+	}
+}
+
+func TestNormalizeRepoRequiresOwnerAndName(t *testing.T) {
+	_, ingestErr := NormalizeRepo(map[string]any{"repo": "Clyra-AI"}, "input.json")
+
+	if ingestErr == nil {
+		t.Fatal("expected missing owner/name error")
+	}
+	if ingestErr.Message != "experience repo must include owner and name" {
+		t.Fatalf("Message = %q", ingestErr.Message)
+	}
+}
+
 func TestPersistRecordsWritesSortedMonthlyShardAndUpserts(t *testing.T) {
 	root := t.TempDir()
 	records := []Record{
