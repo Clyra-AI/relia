@@ -207,6 +207,9 @@ Current progress:
 - `cmd/relia/render.go` now owns command-result JSON/human rendering and TTY
   detection, lowering `cmd/relia/main.go` to 2,312 lines while preserving CLI
   behavior.
+- `cmd/relia/errors.go` now owns command error constructors and adapter-error
+  mapping helpers, lowering `cmd/relia/main.go` to 2,153 lines while
+  preserving CLI behavior.
 
 ## Candidate Package Boundaries
 
