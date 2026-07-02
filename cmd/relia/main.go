@@ -818,7 +818,7 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 		if record.Attribution.ActorKind == "agent" {
 			agentAttributedPRs[record.Action.PR] = true
 			agentAttributedExperiences++
-			if isFailureOutcome(record.Outcome.Kind) {
+			if backtestdoc.IsFailureOutcome(record.Outcome.Kind) {
 				agentFailuresByOutcomeKind[record.Outcome.Kind]++
 			}
 		}
@@ -831,40 +831,40 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 				AttributionMethod:     record.Attribution.Method,
 				AttributionConfidence: record.Attribution.Confidence,
 				ExcludedFromERR:       true,
-				Ref:                   sourceLineRef(current),
+				Ref:                   backtestdoc.SourceLineRef(current),
 				Reason:                "Excluded from headline ERR because attribution was ambiguous and the default policy is uncertain: exclude.",
 			})
-			addBacktestCitation(citationMap, current)
+			backtestdoc.AddCitation(citationMap, current)
 			continue
 		}
-		if !isFailureOutcome(record.Outcome.Kind) {
+		if !backtestdoc.IsFailureOutcome(record.Outcome.Kind) {
 			summary.NonFailureOutcomeCount++
 			continue
 		}
-		signatureKeys := recurrenceSignatureKeys(record)
+		signatureKeys := backtestdoc.RecurrenceSignatureKeys(record)
 		if record.Attribution.ActorKind != "agent" {
 			summary.HumanFailureExcludedCount++
 			if record.FlakeDiscount > 0 {
-				addBacktestCitation(citationMap, current)
+				backtestdoc.AddCitation(citationMap, current)
 				continue
 			}
-			appendRecurrencePrior(priorBySignature, signatureKeys, current)
+			backtestdoc.AppendRecurrencePrior(priorBySignature, signatureKeys, current)
 			continue
 		}
 		summary.AgentFailureDenominator++
 		if isBacktestFlakeDiscounted(current, flakeHeuristics) {
 			summary.FlakeDiscountedCount++
 			flakes = append(flakes, buildBacktestFlakeDiscount(current, windowRecords, flakeHeuristics))
-			addBacktestCitation(citationMap, current)
+			backtestdoc.AddCitation(citationMap, current)
 			continue
 		}
-		if priors := recurrencePriorCandidates(priorBySignature, signatureKeys); len(priors) > 0 {
-			prior, confidence, ok := selectRecurrencePrior(priors, current)
+		if priors := backtestdoc.RecurrencePriorCandidates(priorBySignature, signatureKeys); len(priors) > 0 {
+			prior, confidence, ok := backtestdoc.SelectRecurrencePrior(priors, current)
 			if !ok {
-				appendRecurrencePrior(priorBySignature, signatureKeys, current)
+				backtestdoc.AppendRecurrencePrior(priorBySignature, signatureKeys, current)
 				continue
 			}
-			pair := buildRecurrencePair(prior, current)
+			pair := backtestdoc.BuildRecurrencePair(prior, current)
 			if confidence == "confirmed" {
 				pair.Confidence = "confirmed"
 				pair.Reason = "Exact reliable signature repeated with overlapping paths."
@@ -874,16 +874,16 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 				pair.Reason = "Exact signature repeated, but extraction confidence or path overlap was insufficient; excluded from the headline ERR."
 				possible = append(possible, pair)
 			}
-			addBacktestCitation(citationMap, prior)
-			addBacktestCitation(citationMap, current)
+			backtestdoc.AddCitation(citationMap, prior)
+			backtestdoc.AddCitation(citationMap, current)
 		}
-		appendRecurrencePrior(priorBySignature, signatureKeys, current)
+		backtestdoc.AppendRecurrencePrior(priorBySignature, signatureKeys, current)
 	}
-	sortRecurrencePairs(confirmed)
-	sortRecurrencePairs(possible)
-	sortBacktestFlakes(flakes)
-	sortBacktestUncertain(uncertain)
-	citations := backtestCitations(citationMap)
+	backtestdoc.SortRecurrencePairs(confirmed)
+	backtestdoc.SortRecurrencePairs(possible)
+	backtestdoc.SortFlakeDiscounts(flakes)
+	backtestdoc.SortUncertain(uncertain)
+	citations := backtestdoc.Citations(citationMap)
 	summary.ConfirmedRecurrenceCount = len(confirmed)
 	summary.PossibleRecurrenceCount = len(possible)
 	if summary.AgentFailureDenominator > 0 {
@@ -922,186 +922,13 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 	return report, nil
 }
 
-func isFailureOutcome(kind string) bool {
-	switch kind {
-	case "ci_failure", "revert", "review_correction":
-		return true
-	default:
-		return false
-	}
-}
-
-func reliableSignatureExtraction(value string) bool {
-	return value == "structured" || value == "log_parsed_high"
-}
-
-func recurrenceSignatureKeys(record experienceRecord) []string {
-	signatureMetadata, _ := record.Metadata["signature"].(map[string]any)
-	signatureClass := strings.TrimSpace(stringFromAny(signatureMetadata["class"]))
-	signatureKey := strings.TrimSpace(stringFromAny(signatureMetadata["key"]))
-	messageFingerprint := strings.TrimSpace(stringFromAny(signatureMetadata["message_fingerprint"]))
-	keys := []string{}
-	if signatureClass != "" && signatureKey != "" {
-		keys = append(keys, strings.Join([]string{"class_key", signatureClass, signatureKey}, "\x00"))
-	}
-	if messageFingerprint != "" {
-		keys = append(keys, strings.Join([]string{"message", messageFingerprint}, "\x00"))
-	}
-	if len(keys) == 0 {
-		keys = append(keys, strings.Join([]string{"id", record.Outcome.Signature.SignatureID}, "\x00"))
-	}
-	return keys
-}
-
-func matchedRecurrenceSignatureID(left experienceRecord, right experienceRecord) string {
-	leftSignatureID := strings.TrimSpace(left.Outcome.Signature.SignatureID)
-	rightSignatureID := strings.TrimSpace(right.Outcome.Signature.SignatureID)
-	rightKeys := map[string]bool{}
-	for _, key := range recurrenceSignatureKeys(right) {
-		rightKeys[key] = true
-	}
-	for _, key := range recurrenceSignatureKeys(left) {
-		if rightKeys[key] {
-			return displayRecurrenceSignatureKey(key, rightSignatureID)
-		}
-	}
-	if leftSignatureID != "" && leftSignatureID == rightSignatureID {
-		return rightSignatureID
-	}
-	if rightSignatureID != "" {
-		return rightSignatureID
-	}
-	return leftSignatureID
-}
-
-func displayRecurrenceSignatureKey(key string, fallback string) string {
-	parts := strings.Split(key, "\x00")
-	switch {
-	case len(parts) == 3 && parts[0] == "class_key":
-		return strings.Join([]string{"class_key", parts[1], parts[2]}, ":")
-	case len(parts) == 2 && parts[0] == "message":
-		return "message:" + parts[1]
-	case len(parts) == 2 && parts[0] == "id":
-		return parts[1]
-	case fallback != "":
-		return fallback
-	default:
-		return strings.ReplaceAll(key, "\x00", ":")
-	}
-}
-
-func appendRecurrencePrior(priorBySignature map[string][]backtestExperience, keys []string, current backtestExperience) {
-	for _, key := range keys {
-		priorBySignature[key] = append(priorBySignature[key], current)
-	}
-}
-
-func recurrencePriorCandidates(priorBySignature map[string][]backtestExperience, keys []string) []backtestExperience {
-	seen := map[string]bool{}
-	priors := []backtestExperience{}
-	for _, key := range keys {
-		for _, prior := range priorBySignature[key] {
-			experienceID := prior.Record.ExperienceID
-			if experienceID == "" {
-				experienceID = sourceLineRef(prior)
-			}
-			if seen[experienceID] {
-				continue
-			}
-			seen[experienceID] = true
-			priors = append(priors, prior)
-		}
-	}
-	sort.Slice(priors, func(i, j int) bool {
-		if priors[i].RecordedAt.Equal(priors[j].RecordedAt) {
-			return priors[i].Record.ExperienceID < priors[j].Record.ExperienceID
-		}
-		return priors[i].RecordedAt.Before(priors[j].RecordedAt)
-	})
-	return priors
-}
-
-func recordsShareRecurrenceSignature(left experienceRecord, right experienceRecord) bool {
-	rightKeys := map[string]bool{}
-	for _, key := range recurrenceSignatureKeys(right) {
-		rightKeys[key] = true
-	}
-	for _, key := range recurrenceSignatureKeys(left) {
-		if rightKeys[key] {
-			return true
-		}
-	}
-	return false
-}
-
-func confirmedRecurrence(prior backtestExperience, current backtestExperience) bool {
-	if prior.Record.Action.PR == current.Record.Action.PR {
-		return false
-	}
-	if prior.Record.Outcome.Signature.SignatureID == "" ||
-		!recordsShareRecurrenceSignature(prior.Record, current.Record) {
-		return false
-	}
-	if !reliableSignatureExtraction(prior.Record.Outcome.Signature.ExtractionConfidence) ||
-		!reliableSignatureExtraction(current.Record.Outcome.Signature.ExtractionConfidence) {
-		return false
-	}
-	return pathSetsOverlap(prior.Record.Context.Paths, current.Record.Context.Paths)
-}
-
-func selectRecurrencePrior(priors []backtestExperience, current backtestExperience) (backtestExperience, string, bool) {
-	for index := len(priors) - 1; index >= 0; index-- {
-		if priors[index].Record.Action.PR == current.Record.Action.PR {
-			continue
-		}
-		if confirmedRecurrence(priors[index], current) {
-			return priors[index], "confirmed", true
-		}
-	}
-	for index := len(priors) - 1; index >= 0; index-- {
-		if priors[index].Record.Action.PR != current.Record.Action.PR {
-			return priors[index], "possible", true
-		}
-	}
-	return backtestExperience{}, "", false
-}
-
-func pathSetsOverlap(left []string, right []string) bool {
-	leftSet := map[string]bool{}
-	for _, value := range left {
-		if clean, ok := configdoc.CleanRepoPath(value); ok {
-			leftSet[filepath.ToSlash(clean)] = true
-		}
-	}
-	for _, value := range right {
-		if clean, ok := configdoc.CleanRepoPath(value); ok && leftSet[filepath.ToSlash(clean)] {
-			return true
-		}
-	}
-	return false
-}
-
-func buildRecurrencePair(prior backtestExperience, current backtestExperience) recurrencePair {
-	return recurrencePair{
-		CurrentExperienceID: current.Record.ExperienceID,
-		PriorExperienceID:   prior.Record.ExperienceID,
-		CurrentPR:           current.Record.Action.PR,
-		PriorPR:             prior.Record.Action.PR,
-		CurrentURL:          ingestdoc.PrimaryProvenanceURL(current.Record),
-		PriorURL:            ingestdoc.PrimaryProvenanceURL(prior.Record),
-		SignatureID:         current.Record.Outcome.Signature.SignatureID,
-		MatchedSignatureID:  matchedRecurrenceSignatureID(prior.Record, current.Record),
-		Refs:                []string{sourceLineRef(prior), sourceLineRef(current)},
-	}
-}
-
 func autoFlakeDiscountedExperiences(records []backtestExperience) map[string]string {
 	bySignature := map[string][]backtestExperience{}
 	for _, record := range records {
-		if record.Record.Attribution.ActorKind != "agent" || !isFailureOutcome(record.Record.Outcome.Kind) {
+		if record.Record.Attribution.ActorKind != "agent" || !backtestdoc.IsFailureOutcome(record.Record.Outcome.Kind) {
 			continue
 		}
-		for _, key := range recurrenceSignatureKeys(record.Record) {
+		for _, key := range backtestdoc.RecurrenceSignatureKeys(record.Record) {
 			bySignature[key] = append(bySignature[key], record)
 		}
 	}
@@ -1148,14 +975,14 @@ func buildBacktestFlakeDiscount(record backtestExperience, records []backtestExp
 		if candidate.Record.ExperienceID == record.Record.ExperienceID {
 			continue
 		}
-		if !recordsShareRecurrenceSignature(candidate.Record, record.Record) {
+		if !backtestdoc.RecordsShareRecurrenceSignature(candidate.Record, record.Record) {
 			continue
 		}
-		if candidate.Record.Attribution.ActorKind != "agent" || !isFailureOutcome(candidate.Record.Outcome.Kind) {
+		if candidate.Record.Attribution.ActorKind != "agent" || !backtestdoc.IsFailureOutcome(candidate.Record.Outcome.Kind) {
 			continue
 		}
 		supportingPRs = append(supportingPRs, candidate.Record.Action.PR)
-		supportingRefs = append(supportingRefs, sourceLineRef(candidate))
+		supportingRefs = append(supportingRefs, backtestdoc.SourceLineRef(candidate))
 	}
 	sort.Ints(supportingPRs)
 	supportingRefs = uniqueStrings(supportingRefs)
@@ -1177,60 +1004,6 @@ func buildBacktestFlakeDiscount(record backtestExperience, records []backtestExp
 		Reason:          reason,
 		ExcludedFromERR: true,
 	}
-}
-
-func addBacktestCitation(citations map[int]backtestCitation, record backtestExperience) {
-	url := ingestdoc.PrimaryProvenanceURL(record.Record)
-	if url == "" {
-		return
-	}
-	citations[record.Record.Action.PR] = backtestCitation{
-		PR:           record.Record.Action.PR,
-		URL:          url,
-		ExperienceID: record.Record.ExperienceID,
-	}
-}
-
-func sourceLineRef(record backtestExperience) string {
-	return fmt.Sprintf("%s:%d", record.SourcePath, record.SourceLine)
-}
-
-func sortRecurrencePairs(pairs []recurrencePair) {
-	sort.Slice(pairs, func(i, j int) bool {
-		if pairs[i].CurrentPR == pairs[j].CurrentPR {
-			return pairs[i].CurrentExperienceID < pairs[j].CurrentExperienceID
-		}
-		return pairs[i].CurrentPR < pairs[j].CurrentPR
-	})
-}
-
-func sortBacktestFlakes(flakes []backtestFlakeDiscount) {
-	sort.Slice(flakes, func(i, j int) bool {
-		if flakes[i].PR == flakes[j].PR {
-			return flakes[i].ExperienceID < flakes[j].ExperienceID
-		}
-		return flakes[i].PR < flakes[j].PR
-	})
-}
-
-func sortBacktestUncertain(uncertain []backtestUncertain) {
-	sort.Slice(uncertain, func(i, j int) bool {
-		if uncertain[i].PR == uncertain[j].PR {
-			return uncertain[i].ExperienceID < uncertain[j].ExperienceID
-		}
-		return uncertain[i].PR < uncertain[j].PR
-	})
-}
-
-func backtestCitations(citationMap map[int]backtestCitation) []backtestCitation {
-	citations := make([]backtestCitation, 0, len(citationMap))
-	for _, citation := range citationMap {
-		citations = append(citations, citation)
-	}
-	sort.Slice(citations, func(i, j int) bool {
-		return citations[i].PR < citations[j].PR
-	})
-	return citations
 }
 
 func roundFloat(value float64, places int) float64 {
