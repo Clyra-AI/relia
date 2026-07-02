@@ -1927,18 +1927,11 @@ func normalizeExperienceRecord(config yamlDocument, event map[string]any, index 
 	if commandErr != nil || skipped {
 		return experienceRecord{}, skipped, commandErr
 	}
-	paths := stringListField(event, "paths", "context.paths")
-	if len(paths) == 0 {
-		return experienceRecord{}, false, artifactContractError("experience record must include at least one context path", ref)
+	context, commandErr := normalizeExperienceContext(event, action, ref)
+	if commandErr != nil {
+		return experienceRecord{}, false, commandErr
 	}
-	context := experienceContext{
-		Paths:           paths,
-		DiffFingerprint: stringField(event, "diff_fingerprint", "context.diff_fingerprint"),
-	}
-	if context.DiffFingerprint == "" {
-		context.DiffFingerprint = sha256String(fmt.Sprintf("%d|%s|%s", action.PR, action.Commit, strings.Join(paths, "|")))
-	}
-	outcome, signatureMetadata, commandErr := normalizeExperienceOutcome(event, action, paths, ref)
+	outcome, signatureMetadata, commandErr := normalizeExperienceOutcome(event, action, context.Paths, ref)
 	if commandErr != nil {
 		return experienceRecord{}, false, commandErr
 	}
@@ -2015,6 +2008,11 @@ func normalizeExperienceRepo(event map[string]any, ref string) (experienceRepo, 
 func normalizeExperienceAction(event map[string]any, ref string) (experienceAction, *CommandError) {
 	action, ingestErr := ingestdoc.NormalizeAction(event, ref)
 	return action, commandErrorFromIngest(ingestErr)
+}
+
+func normalizeExperienceContext(event map[string]any, action experienceAction, ref string) (experienceContext, *CommandError) {
+	context, ingestErr := ingestdoc.NormalizeContext(event, action, ref)
+	return context, commandErrorFromIngest(ingestErr)
 }
 
 func normalizeExperienceAttribution(config yamlDocument, event map[string]any, ref string) (experienceAttribution, bool, *CommandError) {
