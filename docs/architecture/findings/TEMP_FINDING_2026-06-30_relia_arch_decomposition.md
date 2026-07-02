@@ -233,6 +233,8 @@ Current progress:
   lowering `cmd/relia/main.go` to 1,435 lines while preserving CLI behavior.
 - `cmd/relia/ingest_command.go` now owns the `ingest` command handler,
   lowering `cmd/relia/main.go` to 1,337 lines while preserving CLI behavior.
+- `cmd/relia/backtest_command.go` now owns the `backtest` command handler,
+  lowering `cmd/relia/main.go` to 1,214 lines while preserving CLI behavior.
 
 ## Candidate Package Boundaries
 
