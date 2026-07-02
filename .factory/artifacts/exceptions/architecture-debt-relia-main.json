@@ -9,7 +9,7 @@
       "cmd/relia/main_test.go"
     ],
     "line_ceilings": {
-      "cmd/relia/main.go": 3180,
+      "cmd/relia/main.go": 3138,
       "cmd/relia/main_test.go": 1957
     },
     "budget": {
@@ -43,6 +43,8 @@
     "internal/backtest/baseline_test.go",
     "internal/backtest/gate.go",
     "internal/backtest/gate_test.go",
+    "internal/backtest/flake.go",
+    "internal/backtest/flake_test.go",
     "internal/backtest/html.go",
     "internal/backtest/html_test.go",
     "internal/backtest/human.go",

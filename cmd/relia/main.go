@@ -852,9 +852,9 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 			continue
 		}
 		summary.AgentFailureDenominator++
-		if isBacktestFlakeDiscounted(current, flakeHeuristics) {
+		if backtestdoc.IsFlakeDiscounted(current, flakeHeuristics) {
 			summary.FlakeDiscountedCount++
-			flakes = append(flakes, buildBacktestFlakeDiscount(current, windowRecords, flakeHeuristics))
+			flakes = append(flakes, backtestdoc.BuildFlakeDiscount(current, windowRecords, flakeHeuristics))
 			backtestdoc.AddCitation(citationMap, current)
 			continue
 		}
@@ -962,48 +962,6 @@ func groupHasUnrelatedNonTestDiffs(group []backtestExperience) bool {
 		}
 	}
 	return len(seen) >= len(group)
-}
-
-func isBacktestFlakeDiscounted(record backtestExperience, heuristics map[string]string) bool {
-	return record.Record.FlakeDiscount > 0 || heuristics[record.Record.ExperienceID] != ""
-}
-
-func buildBacktestFlakeDiscount(record backtestExperience, records []backtestExperience, heuristics map[string]string) backtestFlakeDiscount {
-	supportingPRs := []int{}
-	supportingRefs := []string{}
-	for _, candidate := range records {
-		if candidate.Record.ExperienceID == record.Record.ExperienceID {
-			continue
-		}
-		if !backtestdoc.RecordsShareRecurrenceSignature(candidate.Record, record.Record) {
-			continue
-		}
-		if candidate.Record.Attribution.ActorKind != "agent" || !backtestdoc.IsFailureOutcome(candidate.Record.Outcome.Kind) {
-			continue
-		}
-		supportingPRs = append(supportingPRs, candidate.Record.Action.PR)
-		supportingRefs = append(supportingRefs, backtestdoc.SourceLineRef(candidate))
-	}
-	sort.Ints(supportingPRs)
-	supportingRefs = uniqueStrings(supportingRefs)
-	reason := heuristics[record.Record.ExperienceID]
-	flakeDiscount := record.Record.FlakeDiscount
-	if reason == "" {
-		reason = "Discounted as flaky because the experience record carries an explicit flake_discount."
-	}
-	if flakeDiscount == 0 {
-		flakeDiscount = 1
-	}
-	return backtestFlakeDiscount{
-		ExperienceID:    record.Record.ExperienceID,
-		PR:              record.Record.Action.PR,
-		SignatureID:     record.Record.Outcome.Signature.SignatureID,
-		FlakeDiscount:   roundFloat(flakeDiscount, 4),
-		SupportingPRs:   supportingPRs,
-		SupportingRefs:  supportingRefs,
-		Reason:          reason,
-		ExcludedFromERR: true,
-	}
 }
 
 func roundFloat(value float64, places int) float64 {
