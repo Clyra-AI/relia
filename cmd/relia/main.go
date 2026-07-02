@@ -3103,14 +3103,6 @@ func uniqueInts(values []int) []int {
 	return result
 }
 
-func joinInts(values []int, sep string) string {
-	parts := make([]string, 0, len(values))
-	for _, value := range values {
-		parts = append(parts, strconv.Itoa(value))
-	}
-	return strings.Join(parts, sep)
-}
-
 func displayPath(root string, path string) string {
 	if rel, err := filepath.Rel(root, path); err == nil && rel != "." && !strings.HasPrefix(filepath.ToSlash(rel), "../") {
 		return filepath.ToSlash(rel)
@@ -3343,8 +3335,15 @@ func writeHuman(stdout io.Writer, stderr io.Writer, result CommandResult) error 
 		return err
 	}
 	if result.Command == "backtest" {
-		if err := writeBacktestHumanDetails(writer, result); err != nil {
-			return err
+		report, ok := result.Data["report"].(recurrenceReport)
+		if ok {
+			reportPath, _ := result.Data["report_path"].(string)
+			if reportPath == "" {
+				reportPath, _ = result.Data["html_report_path"].(string)
+			}
+			if err := backtestdoc.WriteHumanDetails(writer, report, reportPath); err != nil {
+				return err
+			}
 		}
 	}
 	if len(result.EvidenceRefs) == 0 {
@@ -3352,89 +3351,6 @@ func writeHuman(stdout io.Writer, stderr io.Writer, result CommandResult) error 
 	}
 	_, err := fmt.Fprintf(writer, "evidence: %s\n", strings.Join(result.EvidenceRefs, ", "))
 	return err
-}
-
-func writeBacktestHumanDetails(writer io.Writer, result CommandResult) error {
-	report, ok := result.Data["report"].(recurrenceReport)
-	if !ok {
-		return nil
-	}
-	if _, err := fmt.Fprintf(writer, "  PRs analyzed: %d (agent-attributed: %d)\n", report.Metrics.PRsAnalyzed, report.Metrics.AgentAttributedPRs); err != nil {
-		return err
-	}
-	if _, err := fmt.Fprintf(writer, "  Agent failures: %d (%s)\n",
-		report.Summary.AgentFailureDenominator,
-		formatOutcomeKindCounts(report.Metrics.AgentFailuresByOutcomeKind)); err != nil {
-		return err
-	}
-	if _, err := fmt.Fprintf(writer, "  Confirmed recurrences: %d (%s of agent failures)\n",
-		report.Summary.ConfirmedRecurrenceCount,
-		report.Summary.HeadlineERRPercent); err != nil {
-		return err
-	}
-	if _, err := fmt.Fprintf(writer, "  Possible recurrences: %d (excluded from headline)\n", report.Summary.PossibleRecurrenceCount); err != nil {
-		return err
-	}
-	if _, err := fmt.Fprintln(writer, "  Top repeated mistakes:"); err != nil {
-		return err
-	}
-	if len(report.TopRepeatedMistakes) == 0 {
-		if _, err := fmt.Fprintln(writer, "   none"); err != nil {
-			return err
-		}
-	} else {
-		for _, mistake := range report.TopRepeatedMistakes {
-			if _, err := fmt.Fprintf(writer, "   %d. %s %dx (PR #%s)\n",
-				mistake.Rank,
-				mistake.SignatureID,
-				mistake.RepeatCount,
-				joinInts(mistake.PRs, ", #")); err != nil {
-				return err
-			}
-		}
-	}
-	reportPath, _ := result.Data["report_path"].(string)
-	if reportPath == "" {
-		reportPath, _ = result.Data["html_report_path"].(string)
-	}
-	if _, err := fmt.Fprintf(writer, "  Error recurrence rate: %s\n", report.Summary.HeadlineERRPercent); err != nil {
-		return err
-	}
-	if reportPath != "" {
-		if _, err := fmt.Fprintf(writer, "  Report: %s\n", reportPath); err != nil {
-			return err
-		}
-	}
-	if _, err := fmt.Fprintf(writer, "  Badge: %s %s\n", report.Badge.Label, report.Badge.Message); err != nil {
-		return err
-	}
-	if len(report.Diagnostics) > 0 {
-		if _, err := fmt.Fprintln(writer, "  Diagnostics:"); err != nil {
-			return err
-		}
-		for _, diagnostic := range report.Diagnostics {
-			if _, err := fmt.Fprintf(writer, "   - %s: %s (%s)\n", diagnostic.Status, diagnostic.Message, diagnostic.Ref); err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
-
-func formatOutcomeKindCounts(counts map[string]int) string {
-	if len(counts) == 0 {
-		return "none"
-	}
-	keys := make([]string, 0, len(counts))
-	for key := range counts {
-		keys = append(keys, key)
-	}
-	sort.Strings(keys)
-	parts := make([]string, 0, len(keys))
-	for _, key := range keys {
-		parts = append(parts, fmt.Sprintf("%s: %d", key, counts[key]))
-	}
-	return strings.Join(parts, ", ")
 }
 
 func stdoutIsTerminal(file *os.File) bool {

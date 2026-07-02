@@ -156,6 +156,9 @@ Current progress:
   assembly, and report metadata assembly with direct package tests, while the
   CLI keeps recurrence orchestration, baseline mutation, filesystem
   persistence, and command-result rendering.
+- `internal/backtest` now also owns interactive backtest human-output detail
+  rendering with direct package tests, while the CLI keeps terminal selection
+  and generic command-result envelope rendering.
 
 ## Candidate Package Boundaries
 
@@ -174,11 +177,11 @@ Current progress:
 - `internal/backtest`: backtest command argument parsing, recurrence window
   validation, recurrence report model, report diagnostics/operator
   feedback/badge helpers, top repeated mistake aggregation, HTML report
-  rendering, ERR baseline comparison, report repo ID derivation, and ingest
-  freshness metadata selection, recurrence report ID generation, report
-  windowing, recurrence metrics assembly, and report metadata assembly
-  extracted; baseline/report file persistence and report generation
-  orchestration remain candidates.
+  rendering, human-output detail rendering, ERR baseline comparison, report
+  repo ID derivation, and ingest freshness metadata selection, recurrence
+  report ID generation, report windowing, recurrence metrics assembly, and
+  report metadata assembly extracted; baseline/report file persistence and
+  report generation orchestration remain candidates.
 - `internal/distill`: rule drafting and lifecycle state.
 - `internal/serve`: advisory serving snapshot behavior.
 - `internal/demo`: deterministic demo fixture behavior.
