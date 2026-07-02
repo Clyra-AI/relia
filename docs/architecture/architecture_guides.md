@@ -246,7 +246,7 @@ configuration parsing, and local model-manifest dependency validation;
 `internal/result` owns the command-result envelope and generic pass/error
 constructors; `internal/ingest` owns ingest input parsing, the
 experience-record data model, canonical distill input decoding, record
-validation, repo normalization, shard persistence, fail-closed redaction,
+validation, repo and action normalization, shard persistence, fail-closed redaction,
 standard secret/provenance URL token-shape checks, and record/provenance URL
 helpers;
 `internal/assess` owns assess argument parsing, active memory rule loading and
@@ -275,7 +275,7 @@ validation, drafted rule calibration checks, rule summary provenance ordering,
 status counts, rule summary loading, and MEMORY.md rendering; `internal/serve`
 owns serve command argument parsing and hosted transport dependency gating.
 `cmd/relia` keeps command wiring, command-specific CommandError translation,
-experience-record normalization, ingest result assembly, and human/JSON
+experience-record assembly, ingest result assembly, and human/JSON
 rendering for those surfaces.
 
 ## TDD And Red-First Expectations

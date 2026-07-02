@@ -77,6 +77,27 @@ func NormalizeRepo(event map[string]any, ref string) (Repo, *Error) {
 	return repo, nil
 }
 
+func NormalizeAction(event map[string]any, ref string) (Action, *Error) {
+	pr, commandErr := requiredPositiveIntField(event, ref, "experience record PR number", "pr", "action.pr")
+	if commandErr != nil {
+		return Action{}, commandErr
+	}
+	action := Action{
+		PR:     pr,
+		Commit: stringField(event, "commit", "action.commit"),
+	}
+	if action.Commit == "" {
+		commits := stringListField(event, "commits", "action.commits")
+		if len(commits) > 0 {
+			action.Commit = commits[0]
+		}
+	}
+	if action.Commit == "" {
+		return action, artifactContractError("experience record must include commit", ref)
+	}
+	return action, nil
+}
+
 func CanonicalDistillInputRecord(event map[string]any, ref string) (Record, bool, *Error) {
 	if stringField(event, "object_type") != "relia.experience_record" {
 		return Record{}, false, nil
@@ -289,6 +310,81 @@ func stringField(event map[string]any, paths ...string) string {
 		}
 	}
 	return ""
+}
+
+func requiredPositiveIntField(event map[string]any, ref string, fieldDescription string, paths ...string) (int, *Error) {
+	for _, path := range paths {
+		value, ok := nestedField(event, path)
+		if !ok {
+			continue
+		}
+		converted, ok := intFromAny(value)
+		if !ok || converted < 1 {
+			return 0, provenanceIntegrityError(fieldDescription+" must be a positive integer", ref)
+		}
+		return converted, nil
+	}
+	return 0, provenanceIntegrityError(fieldDescription+" must be provided", ref)
+}
+
+func intFromAny(value any) (int, bool) {
+	switch typed := value.(type) {
+	case float64:
+		if math.IsNaN(typed) || math.IsInf(typed, 0) || typed != math.Trunc(typed) {
+			return 0, false
+		}
+		return int64ToInt(int64(typed))
+	case int:
+		return typed, true
+	case json.Number:
+		converted, err := typed.Int64()
+		if err == nil {
+			return int64ToInt(converted)
+		}
+	case string:
+		converted, err := strconv.Atoi(strings.TrimSpace(typed))
+		if err == nil {
+			return converted, true
+		}
+	}
+	return 0, false
+}
+
+func int64ToInt(value int64) (int, bool) {
+	maxInt := int64(^uint(0) >> 1)
+	minInt := -maxInt - 1
+	if value < minInt || value > maxInt {
+		return 0, false
+	}
+	return int(value), true
+}
+
+func stringListField(event map[string]any, paths ...string) []string {
+	for _, path := range paths {
+		if value, ok := nestedField(event, path); ok {
+			switch typed := value.(type) {
+			case []any:
+				var result []string
+				for _, item := range typed {
+					if converted := stringFromAny(item); converted != "" {
+						result = append(result, converted)
+					}
+				}
+				if len(result) > 0 {
+					return result
+				}
+			case []string:
+				if len(typed) > 0 {
+					return typed
+				}
+			case string:
+				if strings.TrimSpace(typed) != "" {
+					return []string{strings.TrimSpace(typed)}
+				}
+			}
+		}
+	}
+	return nil
 }
 
 func numericValue(value any) (float64, bool) {
