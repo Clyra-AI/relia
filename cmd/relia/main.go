@@ -235,21 +235,6 @@ type distillCluster = distilldoc.Cluster
 
 type adviseSettings = configdoc.AdviseSettings
 
-type memoryRuleSummary struct {
-	ID              string
-	Kind            string
-	Status          string
-	Statement       string
-	Confidence      string
-	ConfidenceLabel string
-	EvidenceCount   string
-	Contradictions  string
-	ReviewLabel     string
-	StatementOrigin string
-	Path            string
-	Provenance      []distilledRuleProvenance
-}
-
 func main() {
 	os.Exit(run(os.Args[1:], os.Stdout, os.Stderr, stdoutIsTerminal(os.Stdout)))
 }
@@ -1796,7 +1781,7 @@ func memoryResult(args []string, start time.Time) CommandResult {
 	if commandErr != nil {
 		return withFormat(errorResult("memory", "memory", commandErr, start))
 	}
-	statusCounts := memoryStatusCounts(rules)
+	statusCounts := memorydoc.StatusCounts(rules)
 	result := passResult("memory", "memory", "rendered MEMORY.md with rule receipts", start, map[string]any{
 		"format":           options.Format,
 		"memory_page_path": outputPath,
@@ -3104,7 +3089,7 @@ func replaceNestedYAMLStringList(content string, parent string, key string, valu
 	return strings.Join(next, "\n")
 }
 
-func loadMemoryRuleSummaries(root string) ([]memoryRuleSummary, *CommandError) {
+func loadMemoryRuleSummaries(root string) ([]memorydoc.RuleSummary, *CommandError) {
 	patterns := []string{
 		filepath.Join(root, "memory", "rules", "*.yaml"),
 		filepath.Join(root, "memory", "rules", "*.yml"),
@@ -3118,7 +3103,7 @@ func loadMemoryRuleSummaries(root string) ([]memoryRuleSummary, *CommandError) {
 		paths = append(paths, matches...)
 	}
 	sort.Strings(paths)
-	var summaries []memoryRuleSummary
+	var summaries []memorydoc.RuleSummary
 	for _, path := range paths {
 		if commandErr := validateMemoryRuleArtifact(root, path); commandErr != nil {
 			return nil, commandErr
@@ -3131,7 +3116,7 @@ func loadMemoryRuleSummaries(root string) ([]memoryRuleSummary, *CommandError) {
 		if parseErr != nil {
 			return nil, artifactContractError(parseErr.Error(), displayPath(root, path))
 		}
-		summaries = append(summaries, memoryRuleSummary{
+		summaries = append(summaries, memorydoc.RuleSummary{
 			ID:              document.Scalars["id"].Value,
 			Kind:            document.Scalars["kind"].Value,
 			Status:          document.Scalars["status"].Value,
@@ -3143,12 +3128,12 @@ func loadMemoryRuleSummaries(root string) ([]memoryRuleSummary, *CommandError) {
 			ReviewLabel:     document.Scalars["review.label"].Value,
 			StatementOrigin: document.Scalars["review.statement_origin"].Value,
 			Path:            displayPath(root, path),
-			Provenance:      memoryRuleProvenance(document),
+			Provenance:      memorydoc.RuleProvenanceEntries(document),
 		})
 	}
 	sort.Slice(summaries, func(i, j int) bool {
-		left := memoryStatusRank(summaries[i].Status)
-		right := memoryStatusRank(summaries[j].Status)
+		left := memorydoc.StatusRank(summaries[i].Status)
+		right := memorydoc.StatusRank(summaries[j].Status)
 		if left == right {
 			return summaries[i].ID < summaries[j].ID
 		}
@@ -3157,145 +3142,17 @@ func loadMemoryRuleSummaries(root string) ([]memoryRuleSummary, *CommandError) {
 	return summaries, nil
 }
 
-func memoryRuleProvenance(document yamlDocument) []distilledRuleProvenance {
-	var provenance []distilledRuleProvenance
-	for _, entry := range document.ListMaps["provenance"] {
-		pr := 0
-		if scalar, ok := entry["pr"]; ok {
-			pr, _ = strconv.Atoi(scalar.Value)
-		}
-		provenance = append(provenance, distilledRuleProvenance{
-			PR:           pr,
-			Outcome:      entry["outcome"].Value,
-			URL:          entry["url"].Value,
-			ExperienceID: entry["experience_id"].Value,
-		})
-	}
-	sort.Slice(provenance, func(i, j int) bool {
-		if provenance[i].PR == provenance[j].PR {
-			return provenance[i].ExperienceID < provenance[j].ExperienceID
-		}
-		return provenance[i].PR < provenance[j].PR
-	})
-	return provenance
-}
-
-func memoryStatusRank(status string) int {
-	switch status {
-	case "active":
-		return 0
-	case "candidate":
-		return 1
-	case "contradicted":
-		return 2
-	case "stale":
-		return 3
-	case "retired":
-		return 4
-	default:
-		return 5
-	}
-}
-
-func memoryStatusCounts(rules []memoryRuleSummary) map[string]int {
-	counts := map[string]int{}
-	for _, rule := range rules {
-		counts[rule.Status]++
-	}
-	return counts
-}
-
-func writeMemoryPage(root string, outputPath string, rules []memoryRuleSummary) (string, *CommandError) {
+func writeMemoryPage(root string, outputPath string, rules []memorydoc.RuleSummary) (string, *CommandError) {
 	clean, ok := cleanRepoPath(outputPath)
 	if !ok {
 		return "", usageError("memory output path must be repo-relative")
 	}
 	rel := filepath.ToSlash(clean)
 	path := filepath.Join(root, filepath.FromSlash(rel))
-	if commandErr := writeAtomicRepoFile(path, []byte(renderMemoryMarkdown(rules)), "memory page"); commandErr != nil {
+	if commandErr := writeAtomicRepoFile(path, []byte(memorydoc.RenderMarkdown(rules)), "memory page"); commandErr != nil {
 		return "", commandErr
 	}
 	return rel, nil
-}
-
-func renderMemoryMarkdown(rules []memoryRuleSummary) string {
-	var builder strings.Builder
-	builder.WriteString("# Relia Memory\n\n")
-	builder.WriteString("Generated by `relia memory` from reviewed local memory rule artifacts.\n\n")
-	if len(rules) == 0 {
-		builder.WriteString("No memory rules found.\n")
-		return builder.String()
-	}
-	builder.WriteString("## Strong Memory\n\n")
-	builder.WriteString("Active accepted rules are eligible for serving and assessment.\n\n")
-	activeRules := filterMemoryRulesByActiveStatus(rules, true)
-	if len(activeRules) == 0 {
-		builder.WriteString("No active accepted rules.\n\n")
-	} else {
-		renderMemoryRulesByStatus(&builder, activeRules)
-	}
-	builder.WriteString("## Weak Memory\n\n")
-	builder.WriteString("Candidate, stale, contradicted, and retired rules are visible for review but are not served as active memory.\n\n")
-	weakRules := filterMemoryRulesByActiveStatus(rules, false)
-	if len(weakRules) == 0 {
-		builder.WriteString("No weak memory rules.\n")
-		return builder.String()
-	}
-	renderMemoryRulesByStatus(&builder, weakRules)
-	return builder.String()
-}
-
-func filterMemoryRulesByActiveStatus(rules []memoryRuleSummary, active bool) []memoryRuleSummary {
-	filtered := make([]memoryRuleSummary, 0, len(rules))
-	for _, rule := range rules {
-		if (rule.Status == "active") == active {
-			filtered = append(filtered, rule)
-		}
-	}
-	return filtered
-}
-
-func renderMemoryRulesByStatus(builder *strings.Builder, rules []memoryRuleSummary) {
-	currentStatus := ""
-	for _, rule := range rules {
-		if rule.Status != currentStatus {
-			currentStatus = rule.Status
-			builder.WriteString("### " + titleCaseStatus(currentStatus) + "\n\n")
-		}
-		builder.WriteString("#### " + rule.ID + "\n\n")
-		builder.WriteString("- kind: `" + rule.Kind + "`\n")
-		builder.WriteString("- status: `" + rule.Status + "`\n")
-		confidence := rule.Confidence
-		if rule.ConfidenceLabel != "" {
-			confidence += " (" + rule.ConfidenceLabel + ")"
-		}
-		builder.WriteString("- confidence: " + confidence + "\n")
-		builder.WriteString("- review: `" + rule.ReviewLabel + "` from `" + rule.StatementOrigin + "`\n")
-		builder.WriteString("- evidence: " + rule.EvidenceCount + " experiences, " + rule.Contradictions + " contradictions\n")
-		builder.WriteString("- statement: " + rule.Statement + "\n")
-		if len(rule.Provenance) > 0 {
-			builder.WriteString("- provenance: " + strings.Join(memoryProvenanceLinks(rule.Provenance), ", ") + "\n")
-		}
-		builder.WriteString("- artifact: `" + rule.Path + "`\n\n")
-	}
-}
-
-func titleCaseStatus(status string) string {
-	if status == "" {
-		return "Unknown"
-	}
-	return strings.ToUpper(status[:1]) + strings.ReplaceAll(status[1:], "_", " ")
-}
-
-func memoryProvenanceLinks(provenance []distilledRuleProvenance) []string {
-	var links []string
-	for _, ref := range provenance {
-		if ref.URL == "" || ref.PR <= 0 {
-			continue
-		}
-		links = append(links, fmt.Sprintf("[PR #%d](%s)", ref.PR, ref.URL))
-	}
-	return uniqueStrings(links)
 }
 
 func assessResult(args []string, start time.Time) CommandResult {
