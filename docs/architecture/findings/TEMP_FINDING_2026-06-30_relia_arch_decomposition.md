@@ -77,6 +77,9 @@ Current progress:
 - `internal/advise` now owns advisory comment decision, strategy, and rendering
   helpers with direct package tests, shrinking `cmd/relia/main.go` while
   keeping CLI I/O and state-file handling in the command layer.
+- `internal/advise` now also owns `relia advise` argument parsing with direct
+  package tests, while diff reads, rule loading, advisory-state writes, and
+  command-result rendering remain in `cmd/relia`.
 - `internal/modelpull` now owns `relia models pull` argument parsing and local
   model manifest construction with direct package tests, while command I/O and
   repository writes remain in `cmd/relia`.
@@ -214,8 +217,9 @@ Current progress:
   loading and validation, active memory rule serving projections, citation
   serving filters, repo-relative scope matching, and deterministic risk
   assessment construction for assess, serve, and advise.
-- `internal/advise`: advisory comment decision, strategy, markdown rendering,
-  confidence threshold handling, and prior-state comparison helpers.
+- `internal/advise`: advise command argument parsing, advisory comment
+  decision, strategy, markdown rendering, confidence threshold handling, and
+  prior-state comparison helpers.
 - `internal/modelpull`: local model artifact pull argument parsing and
   manifest construction before config-owned validation and CLI-owned writes.
 - `internal/distill`: distill argument parsing, provider plan construction,

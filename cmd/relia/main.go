@@ -132,12 +132,7 @@ type distillOptions = distilldoc.Options
 
 type serveOptions = servedoc.Options
 
-type adviseOptions struct {
-	InputPath   string
-	Format      string
-	StatePath   string
-	CommentPath string
-}
+type adviseOptions = advisedoc.Options
 
 type reviewOptions = reviewdoc.Options
 
@@ -1411,15 +1406,15 @@ func servedRuleData(rules []assessdoc.Rule) ([]map[string]any, *CommandError) {
 }
 
 func adviseResult(args []string, start time.Time) CommandResult {
-	options, commandErr := parseAdviseArgs(args)
+	options, parseErr := advisedoc.ParseArgs(args)
 	withFormat := func(result CommandResult) CommandResult {
 		if options.Format == "json" {
 			result.MachineReadable = true
 		}
 		return result
 	}
-	if commandErr != nil {
-		return withFormat(errorResult("advise", "advise", commandErr, start))
+	if parseErr != nil {
+		return withFormat(errorResult("advise", "advise", usageError(parseErr.Message), start))
 	}
 	wd, err := os.Getwd()
 	if err != nil {
@@ -1547,63 +1542,6 @@ func adviseResult(args []string, start time.Time) CommandResult {
 		result.EvidenceRefs = append(result.EvidenceRefs, rule.Path)
 	}
 	return withFormat(result)
-}
-
-func parseAdviseArgs(args []string) (adviseOptions, *CommandError) {
-	options := adviseOptions{
-		Format:      "json",
-		StatePath:   ".relia/reports/advisory-state.json",
-		CommentPath: ".relia/reports/advisory-comment.md",
-	}
-	for index := 0; index < len(args); index++ {
-		arg := args[index]
-		switch arg {
-		case "--input", "--diff", "-i":
-			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
-				return options, usageError("advise requires a path after " + arg)
-			}
-			options.InputPath = args[index+1]
-			index++
-		case "--format":
-			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
-				return options, usageError("advise requires a value after --format")
-			}
-			options.Format = args[index+1]
-			index++
-		case "--state":
-			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
-				return options, usageError("advise requires a repo-relative path after --state")
-			}
-			options.StatePath = args[index+1]
-			index++
-		case "--comment":
-			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
-				return options, usageError("advise requires a repo-relative path after --comment")
-			}
-			options.CommentPath = args[index+1]
-			index++
-		default:
-			return options, usageError(fmt.Sprintf("unknown advise argument %q", arg))
-		}
-	}
-	if strings.TrimSpace(options.InputPath) == "" {
-		return options, usageError("advise requires --input <diff> in offline mode")
-	}
-	if options.Format != "json" {
-		return options, usageError("advise only supports --format json in this task slice")
-	}
-	for _, item := range []struct {
-		label string
-		path  string
-	}{
-		{"advise --state", options.StatePath},
-		{"advise --comment", options.CommentPath},
-	} {
-		if _, ok := configdoc.CleanRepoPath(item.path); !ok {
-			return options, usageError(item.label + " must be repo-relative")
-		}
-	}
-	return options, nil
 }
 
 type advisoryPriorState = advisedoc.PriorState
