@@ -98,6 +98,25 @@ func NormalizeAction(event map[string]any, ref string) (Action, *Error) {
 	return action, nil
 }
 
+func NormalizeProvenance(event map[string]any, ref string) (Provenance, *Error) {
+	urls := stringListField(event, "provenance_urls", "provenance.urls")
+	for _, key := range []string{"pr_url", "check_run_url", "revert_url", "review_url"} {
+		if value := stringField(event, key, "provenance."+key); value != "" {
+			urls = append(urls, value)
+		}
+	}
+	urls = uniqueStrings(urls)
+	if len(urls) == 0 {
+		return Provenance{}, provenanceIntegrityError("experience record must include at least one provenance URL", ref)
+	}
+	for _, value := range urls {
+		if !ValidGitHubProvenanceURLShape(value) {
+			return Provenance{}, provenanceIntegrityError("experience provenance URL must be a canonical https://github.com/ URL", ref)
+		}
+	}
+	return Provenance{URLs: urls}, nil
+}
+
 func CanonicalDistillInputRecord(event map[string]any, ref string) (Record, bool, *Error) {
 	if stringField(event, "object_type") != "relia.experience_record" {
 		return Record{}, false, nil
@@ -385,6 +404,23 @@ func stringListField(event map[string]any, paths ...string) []string {
 		}
 	}
 	return nil
+}
+
+func uniqueStrings(values []string) []string {
+	seen := map[string]struct{}{}
+	var result []string
+	for _, value := range values {
+		value = strings.TrimSpace(value)
+		if value == "" {
+			continue
+		}
+		if _, ok := seen[value]; ok {
+			continue
+		}
+		seen[value] = struct{}{}
+		result = append(result, value)
+	}
+	return result
 }
 
 func numericValue(value any) (float64, bool) {
