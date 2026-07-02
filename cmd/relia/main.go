@@ -290,7 +290,7 @@ func initResult(args []string, start time.Time) CommandResult {
 	if err != nil {
 		return errorResult("init", "init", internalError("could not inspect working directory", err), start)
 	}
-	root, ok := findRepoRoot(wd)
+	root, ok := configdoc.FindRepoRoot(wd)
 	if !ok {
 		root = wd
 	}
@@ -349,7 +349,7 @@ func checkResult(args []string, start time.Time) CommandResult {
 	if err != nil {
 		return errorResult("check", "check", internalError("could not inspect working directory", err), start)
 	}
-	root, ok := findRepoRoot(wd)
+	root, ok := configdoc.FindRepoRoot(wd)
 	if !ok {
 		return errorResult("check", "check", configError("could not locate repository root from current directory"), start)
 	}
@@ -403,7 +403,7 @@ func ingestResult(args []string, start time.Time) CommandResult {
 	if err != nil {
 		return errorResult("ingest", "ingest", internalError("could not inspect working directory", err), start)
 	}
-	root, ok := findRepoRoot(wd)
+	root, ok := configdoc.FindRepoRoot(wd)
 	if !ok {
 		return errorResult("ingest", "ingest", configError("could not locate repository root from current directory"), start)
 	}
@@ -507,7 +507,7 @@ func backtestResult(args []string, start time.Time) CommandResult {
 	if err != nil {
 		return withFormat(errorResult("backtest", "backtest", internalError("could not inspect working directory", err), start))
 	}
-	root, ok := findRepoRoot(wd)
+	root, ok := configdoc.FindRepoRoot(wd)
 	if !ok {
 		return withFormat(errorResult("backtest", "backtest", configError("could not locate repository root from current directory"), start))
 	}
@@ -1504,7 +1504,7 @@ func distillResult(args []string, start time.Time) CommandResult {
 	if err != nil {
 		return withFormat(errorResult("distill", "distill", internalError("could not inspect working directory", err), start))
 	}
-	root, ok := findRepoRoot(wd)
+	root, ok := configdoc.FindRepoRoot(wd)
 	if !ok {
 		return withFormat(errorResult("distill", "distill", configError("could not locate repository root from current directory"), start))
 	}
@@ -1629,7 +1629,7 @@ func reviewResult(args []string, start time.Time) CommandResult {
 	if err != nil {
 		return errorResult("review", "review", internalError("could not inspect working directory", err), start)
 	}
-	root, ok := findRepoRoot(wd)
+	root, ok := configdoc.FindRepoRoot(wd)
 	if !ok {
 		return errorResult("review", "review", configError("could not locate repository root from current directory"), start)
 	}
@@ -1675,7 +1675,7 @@ func memoryResult(args []string, start time.Time) CommandResult {
 	if err != nil {
 		return withFormat(errorResult("memory", "memory", internalError("could not inspect working directory", err), start))
 	}
-	root, ok := findRepoRoot(wd)
+	root, ok := configdoc.FindRepoRoot(wd)
 	if !ok {
 		return withFormat(errorResult("memory", "memory", configError("could not locate repository root from current directory"), start))
 	}
@@ -1730,7 +1730,7 @@ func serveResult(args []string, start time.Time) CommandResult {
 	if err != nil {
 		return withFormat(errorResult("serve", "serve", internalError("could not inspect working directory", err), start))
 	}
-	root, ok := findRepoRoot(wd)
+	root, ok := configdoc.FindRepoRoot(wd)
 	if !ok {
 		return withFormat(errorResult("serve", "serve", configError("could not locate repository root from current directory"), start))
 	}
@@ -1783,7 +1783,7 @@ func adviseResult(args []string, start time.Time) CommandResult {
 	if err != nil {
 		return withFormat(errorResult("advise", "advise", internalError("could not inspect working directory", err), start))
 	}
-	root, ok := findRepoRoot(wd)
+	root, ok := configdoc.FindRepoRoot(wd)
 	if !ok {
 		return withFormat(errorResult("advise", "advise", configError("could not locate repository root from current directory"), start))
 	}
@@ -2022,7 +2022,7 @@ func modelsResult(args []string, start time.Time) CommandResult {
 	if err != nil {
 		return errorResult("models pull", "models", internalError("could not inspect working directory", err), start)
 	}
-	root, ok := findRepoRoot(wd)
+	root, ok := configdoc.FindRepoRoot(wd)
 	if !ok {
 		return errorResult("models pull", "models", configError("could not locate repository root from current directory"), start)
 	}
@@ -2325,7 +2325,7 @@ func assessResult(args []string, start time.Time) CommandResult {
 	if err != nil {
 		return withFormat(errorResult("assess", "assess", internalError("could not inspect working directory", err), start))
 	}
-	root, ok := findRepoRoot(wd)
+	root, ok := configdoc.FindRepoRoot(wd)
 	if !ok {
 		return withFormat(errorResult("assess", "assess", configError("could not locate repository root from current directory"), start))
 	}
@@ -3351,22 +3351,6 @@ func stdoutIsTerminal(file *os.File) bool {
 		return false
 	}
 	return info.Mode()&os.ModeCharDevice != 0
-}
-
-func findRepoRoot(start string) (string, bool) {
-	current := filepath.Clean(start)
-	for {
-		goMod := filepath.Join(current, "go.mod")
-		content, err := os.ReadFile(goMod)
-		if err == nil && strings.Contains(string(content), "module github.com/Clyra-AI/relia") {
-			return current, true
-		}
-		parent := filepath.Dir(current)
-		if parent == current {
-			return "", false
-		}
-		current = parent
-	}
 }
 
 func validateReliaConfig(root string) ([]Finding, *CommandError) {

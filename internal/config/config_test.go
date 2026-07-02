@@ -85,6 +85,36 @@ func TestEnsureReliaGitIgnoreCreatesAndPreservesEntries(t *testing.T) {
 	}
 }
 
+func TestFindRepoRootFindsReliaModuleFromNestedDirectory(t *testing.T) {
+	root := t.TempDir()
+	nested := filepath.Join(root, "nested", "child")
+	if err := os.MkdirAll(nested, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "go.mod"), []byte("module github.com/Clyra-AI/relia\n\ngo 1.26.4\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	got, ok := FindRepoRoot(nested)
+	if !ok {
+		t.Fatal("FindRepoRoot did not find module root")
+	}
+	if got != root {
+		t.Fatalf("FindRepoRoot = %q, want %q", got, root)
+	}
+}
+
+func TestFindRepoRootRejectsDifferentModule(t *testing.T) {
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "go.mod"), []byte("module example.test/other\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, ok := FindRepoRoot(root); ok || got != "" {
+		t.Fatalf("FindRepoRoot = %q, %v; want no root", got, ok)
+	}
+}
+
 func TestRefHelpersUseLineNumbers(t *testing.T) {
 	if got := Ref(DefaultFile, yamlmini.Scalar{}); got != DefaultFile {
 		t.Fatalf("Ref without line = %q", got)

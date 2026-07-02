@@ -13,6 +13,8 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+
+	configdoc "github.com/Clyra-AI/relia/internal/config"
 )
 
 func TestJSONFlagEmitsStableEnvelope(t *testing.T) {
@@ -1846,17 +1848,15 @@ func parseRuleDocForTest(t *testing.T, content string) yamlDocument {
 }
 
 func findRepoRootForTest(t *testing.T) string {
-	t.Helper()
-
 	wd, err := os.Getwd()
 	if err != nil {
 		t.Fatal(err)
 	}
-	root, ok := findRepoRoot(wd)
-	if !ok {
-		t.Fatalf("could not find repo root from %s", wd)
+	if root, ok := configdoc.FindRepoRoot(wd); ok {
+		return root
 	}
-	return root
+	t.Fatalf("could not find repo root from %s", wd)
+	return ""
 }
 
 func setupContractRepo(t *testing.T) string {
