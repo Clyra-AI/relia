@@ -221,6 +221,8 @@ Current progress:
   preserving CLI behavior.
 - `cmd/relia/models_command.go` now owns the `models pull` command handler,
   lowering `cmd/relia/main.go` to 1,779 lines while preserving CLI behavior.
+- `cmd/relia/memory_command.go` now owns the `memory` command handler,
+  lowering `cmd/relia/main.go` to 1,728 lines while preserving CLI behavior.
 
 ## Candidate Package Boundaries
 
