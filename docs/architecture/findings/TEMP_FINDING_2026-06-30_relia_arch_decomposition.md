@@ -80,6 +80,9 @@ Current progress:
 - `internal/modelpull` now owns `relia models pull` argument parsing and local
   model manifest construction with direct package tests, while command I/O and
   repository writes remain in `cmd/relia`.
+- `internal/config` now also owns schema contract envelope validation with
+  direct package tests, while the CLI keeps only command-specific error
+  presentation.
 - `internal/distill` now owns provider-backed distill planning, adapter request
   shapes, cost estimation, and distill settings helpers with direct package
   tests, while CLI orchestration and provider-gate error rendering remain in
@@ -166,8 +169,9 @@ Current progress:
   extracted; command-specific error translation and rendering still live in
   `cmd/relia`.
 - `internal/config`: default config rendering, config document references,
-  config loading and validation, provider/advisory configuration parsing,
-  local model-manifest dependency validation, and repo-relative path policy.
+  config loading and validation, schema contract envelope validation,
+  provider/advisory configuration parsing, local model-manifest dependency
+  validation, and repo-relative path policy.
 - `internal/ingest`: ingest input parsing, fail-closed redaction, standard
   secret-token scanning, provenance URL token-shape checks, the
   experience-record data model, canonical distill input decoding, record
