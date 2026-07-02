@@ -2338,12 +2338,12 @@ func buildDistilledRule(root string, kind string, cluster distillCluster, eviden
 	metadata.MemorySource = "verified_outcome_events"
 	metadata.SourceRecordType = "relia.experience_record"
 	metadata.ExcludedMemorySources = []string{"agent_self_report", "agent_reflection"}
-	id := distilledRuleID(kind, cluster)
+	id := distilldoc.RuleID(kind, cluster)
 	return distilledRule{
 		ID:              id,
 		Kind:            kind,
 		Status:          status,
-		Statement:       distilledRuleStatement(kind, cluster, scopePaths),
+		Statement:       distilldoc.RuleStatement(kind, cluster, scopePaths),
 		ScopePaths:      scopePaths,
 		ScopeSignals:    scopeSignals,
 		Confidence:      confidence,
@@ -2549,54 +2549,6 @@ func distilledReviewLabel(status string, confidence float64) string {
 		}
 		return "suggested"
 	}
-}
-
-func distilledRuleID(kind string, cluster distillCluster) string {
-	slug := slugifyRuleIDPart(cluster.Signal)
-	if slug == "" {
-		slug = "signature"
-	}
-	return fmt.Sprintf("%s-%s-%s", kind, slug, shortHash(kind+"\x00"+cluster.Key))
-}
-
-func slugifyRuleIDPart(value string) string {
-	value = strings.ToLower(strings.TrimSpace(value))
-	var builder strings.Builder
-	lastDash := false
-	for _, r := range value {
-		keep := false
-		switch {
-		case r >= 'a' && r <= 'z':
-			keep = true
-		case r >= '0' && r <= '9':
-			keep = true
-		}
-		if keep {
-			builder.WriteRune(r)
-			lastDash = false
-			continue
-		}
-		if !lastDash && builder.Len() > 0 {
-			builder.WriteByte('-')
-			lastDash = true
-		}
-	}
-	return strings.Trim(builder.String(), "-")
-}
-
-func distilledRuleStatement(kind string, cluster distillCluster, scopePaths []string) string {
-	scope := "this scope"
-	if len(scopePaths) > 0 {
-		scope = strings.Join(scopePaths, ", ")
-	}
-	signal := cluster.Signal
-	if signal == "" {
-		signal = "the clustered signature"
-	}
-	if kind == "playbook" {
-		return fmt.Sprintf("Prefer the held %s pattern in %s when this signature appears.", signal, scope)
-	}
-	return fmt.Sprintf("Avoid repeating %s in %s without addressing the prior failure evidence.", signal, scope)
 }
 
 func distillExperienceIDs(records []backtestExperience) []string {

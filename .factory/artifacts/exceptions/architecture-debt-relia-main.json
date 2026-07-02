@@ -9,7 +9,7 @@
       "cmd/relia/main_test.go"
     ],
     "line_ceilings": {
-      "cmd/relia/main.go": 4253,
+      "cmd/relia/main.go": 4205,
       "cmd/relia/main_test.go": 1993
     },
     "budget": {
@@ -53,6 +53,8 @@
     "internal/distill/cluster_test.go",
     "internal/distill/provider.go",
     "internal/distill/provider_test.go",
+    "internal/distill/rule.go",
+    "internal/distill/rule_test.go",
     "internal/ingest/args.go",
     "internal/ingest/args_test.go",
     "internal/memory/args.go",
