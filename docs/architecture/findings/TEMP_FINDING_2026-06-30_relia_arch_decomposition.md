@@ -235,6 +235,9 @@ Current progress:
   lowering `cmd/relia/main.go` to 1,337 lines while preserving CLI behavior.
 - `cmd/relia/backtest_command.go` now owns the `backtest` command handler,
   lowering `cmd/relia/main.go` to 1,214 lines while preserving CLI behavior.
+- `cmd/relia/distill_command.go` now owns the `distill` command handler,
+  lowering `cmd/relia/main.go` to 1,093 lines, below the architecture warning
+  threshold, while preserving CLI behavior.
 
 ## Candidate Package Boundaries
 
