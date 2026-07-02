@@ -155,11 +155,6 @@ type reviewOptions = reviewdoc.Options
 
 type memoryOptions = memorydoc.Options
 
-type riskAssessment = assessdoc.RiskAssessment
-type riskAssessmentMatch = assessdoc.RiskAssessmentMatch
-type assessmentRule = assessdoc.Rule
-type assessmentRuleCitation = assessdoc.RuleCitation
-
 type experienceRecord = ingestdoc.Record
 type experienceRepo = ingestdoc.Repo
 type experienceAttribution = ingestdoc.Attribution
@@ -1848,7 +1843,7 @@ func serveResult(args []string, start time.Time) CommandResult {
 	if commandErr != nil {
 		return withFormat(errorResult("serve", "serve", commandErr, start))
 	}
-	rules, commandErr := loadAssessmentRules(root)
+	rules, commandErr := assessdoc.LoadRules(root, assessmentBuildOptions())
 	if commandErr != nil {
 		return withFormat(errorResult("serve", "serve", commandErr, start))
 	}
@@ -1874,7 +1869,7 @@ func serveResult(args []string, start time.Time) CommandResult {
 	return withFormat(result)
 }
 
-func servedRuleData(rules []assessmentRule) ([]map[string]any, *CommandError) {
+func servedRuleData(rules []assessdoc.Rule) ([]map[string]any, *CommandError) {
 	return assessdoc.ServedRuleData(rules, assessmentBuildOptions())
 }
 
@@ -1921,11 +1916,11 @@ func adviseResult(args []string, start time.Time) CommandResult {
 	if commandErr != nil {
 		return withFormat(errorResult("advise", "advise", commandErr, start))
 	}
-	rules, commandErr := loadAssessmentRules(root)
+	rules, commandErr := assessdoc.LoadRules(root, assessmentBuildOptions())
 	if commandErr != nil {
 		return withFormat(errorResult("advise", "advise", commandErr, start))
 	}
-	assessment, commandErr := buildRiskAssessment(root, displayPath(root, inputPath), inputContent, touchedPaths, rules)
+	assessment, commandErr := assessdoc.BuildRiskAssessment(root, displayPath(root, inputPath), inputContent, touchedPaths, rules, assessmentBuildOptions())
 	if commandErr != nil {
 		return withFormat(errorResult("advise", "advise", commandErr, start))
 	}
@@ -3339,11 +3334,11 @@ func assessResult(args []string, start time.Time) CommandResult {
 	if commandErr != nil {
 		return withFormat(errorResult("assess", "assess", commandErr, start))
 	}
-	rules, commandErr := loadAssessmentRules(root)
+	rules, commandErr := assessdoc.LoadRules(root, assessmentBuildOptions())
 	if commandErr != nil {
 		return withFormat(errorResult("assess", "assess", commandErr, start))
 	}
-	assessment, commandErr := buildRiskAssessment(root, displayPath(root, inputPath), inputContent, touchedPaths, rules)
+	assessment, commandErr := assessdoc.BuildRiskAssessment(root, displayPath(root, inputPath), inputContent, touchedPaths, rules, assessmentBuildOptions())
 	if commandErr != nil {
 		return withFormat(errorResult("assess", "assess", commandErr, start))
 	}
@@ -3378,216 +3373,6 @@ func parseUnifiedDiffTouchedPaths(content []byte, ref string) ([]string, *Comman
 		return nil, artifactContractError("assess input diff contains no repo-relative paths", ref)
 	}
 	return nil, internalError("could not parse assess input diff", err)
-}
-
-func loadAssessmentRules(root string) ([]assessmentRule, *CommandError) {
-	patterns := []string{
-		filepath.Join(root, "memory", "rules", "*.yaml"),
-		filepath.Join(root, "memory", "rules", "*.yml"),
-	}
-	var paths []string
-	for _, pattern := range patterns {
-		matches, err := filepath.Glob(pattern)
-		if err != nil {
-			return nil, internalError("could not inspect memory rule artifacts", err)
-		}
-		paths = append(paths, matches...)
-	}
-	sort.Strings(paths)
-
-	var rules []assessmentRule
-	for _, rulePath := range paths {
-		rule, active, commandErr := readAssessmentRule(root, rulePath)
-		if commandErr != nil {
-			return nil, commandErr
-		}
-		if active {
-			rules = append(rules, rule)
-		}
-	}
-	return rules, nil
-}
-
-func readAssessmentRule(root string, rulePath string) (assessmentRule, bool, *CommandError) {
-	content, err := os.ReadFile(rulePath)
-	if err != nil {
-		return assessmentRule{}, false, internalError("could not read memory rule artifact", err)
-	}
-	rel, err := filepath.Rel(root, rulePath)
-	if err != nil {
-		rel = rulePath
-	}
-	rel = filepath.ToSlash(rel)
-	document, parseErr := parseYAMLDocument(string(content))
-	if parseErr != nil {
-		return assessmentRule{}, false, artifactContractError(parseErr.Error(), rel)
-	}
-	if document.Scalars["status"].Value != "active" {
-		return assessmentRule{}, false, nil
-	}
-	if commandErr := validateActiveAssessmentRuleIdentity(root, document, rel); commandErr != nil {
-		return assessmentRule{}, false, commandErr
-	}
-	confidence, err := strconv.ParseFloat(document.Scalars["confidence"].Value, 64)
-	if err != nil {
-		return assessmentRule{}, false, artifactContractError("memory rule confidence must be numeric", rel)
-	}
-	return assessmentRule{
-		ID:         document.Scalars["id"].Value,
-		Kind:       document.Scalars["kind"].Value,
-		Path:       rel,
-		Confidence: confidence,
-		ScopePaths: yamlListValues(document, "scope.paths"),
-		Citations:  assessmentRuleCitations(document),
-	}, true, nil
-}
-
-func validateActiveAssessmentRuleIdentity(root string, document yamlDocument, rel string) *CommandError {
-	required := []string{"object_type", "schema_version", "id", "kind", "status", "statement", "scope", "confidence", "evidence", "provenance", "review", "metadata"}
-	for _, key := range required {
-		if !hasYAMLPath(document, key) {
-			return artifactContractError("memory rule missing required key "+key, rel)
-		}
-	}
-	if document.Scalars["object_type"].Value != "relia.memory_rule" {
-		return artifactContractError("memory rule object_type must be relia.memory_rule", configRefWithPath(rel, document.Scalars["object_type"]))
-	}
-	if document.Scalars["schema_version"].Value != commandSchemaVersion {
-		return artifactContractError("memory rule schema_version must be "+commandSchemaVersion, rel)
-	}
-	kind := document.Scalars["kind"].Value
-	if kind != "avoid" && kind != "playbook" {
-		return artifactContractError("memory rule kind must be avoid or playbook", configRefWithPath(rel, document.Scalars["kind"]))
-	}
-	if kind == "playbook" && !assessmentRuleHasPositivePlaybookEvidence(document) {
-		return artifactContractError("playbook memory rule must cite at least one fix_held or merged_clean provenance outcome", rel)
-	}
-	if len(document.Lists["scope.paths"]) == 0 && len(document.Lists["scope.signals"]) == 0 {
-		return artifactContractError("memory rule must declare at least one scope path or signal", rel)
-	}
-	for _, scopePath := range document.Lists["scope.paths"] {
-		if !repoPathExists(root, scopePath.Value) {
-			return artifactContractError("memory rule scope path does not exist in the repo", configRefWithPath(rel, scopePath))
-		}
-	}
-	confidence, err := strconv.ParseFloat(document.Scalars["confidence"].Value, 64)
-	if err != nil {
-		return artifactContractError("memory rule confidence must be numeric", configRefWithPath(rel, document.Scalars["confidence"]))
-	}
-	reviewLabel, ok := document.Scalars["review.label"]
-	if !ok {
-		return artifactContractError("memory rule missing required key review.label", rel)
-	}
-	if reviewLabel.Value != "accepted" {
-		return artifactContractError("active memory rule review.label must be accepted", configRefWithPath(rel, reviewLabel))
-	}
-	statementOrigin, ok := document.Scalars["review.statement_origin"]
-	if !ok {
-		return artifactContractError("memory rule missing required key review.statement_origin", rel)
-	}
-	switch statementOrigin.Value {
-	case "llm_drafted", "cluster_summary", "human_authored":
-	default:
-		return artifactContractError("memory rule review.statement_origin is invalid", configRefWithPath(rel, statementOrigin))
-	}
-	if len(document.Lists["evidence.experiences"]) == 0 {
-		return artifactContractError("memory rule must cite at least one experience", rel)
-	}
-	evidenceCount, ok := document.Scalars["evidence.count"]
-	if !ok {
-		return artifactContractError("memory rule missing required key evidence.count", rel)
-	}
-	count, err := strconv.Atoi(evidenceCount.Value)
-	if err != nil || count < 1 {
-		return artifactContractError("memory rule evidence.count must be at least 1", configRefWithPath(rel, evidenceCount))
-	}
-	contradictionsScalar, ok := document.Scalars["evidence.contradictions"]
-	if !ok {
-		return artifactContractError("memory rule missing required key evidence.contradictions", rel)
-	}
-	contradictions, err := strconv.Atoi(contradictionsScalar.Value)
-	if err != nil || contradictions < 0 {
-		return artifactContractError("memory rule evidence.contradictions must be at least 0", configRefWithPath(rel, contradictionsScalar))
-	}
-	provenanceEntries := document.Lists["provenance"]
-	if len(provenanceEntries) == 0 {
-		return artifactContractError("memory rule must include at least one provenance entry", rel)
-	}
-	provenanceMaps := document.ListMaps["provenance"]
-	if len(provenanceMaps) != len(provenanceEntries) {
-		return artifactContractError("memory rule provenance entries must include pr and outcome", rel)
-	}
-	for _, provenance := range provenanceMaps {
-		pr, ok := provenance["pr"]
-		if !ok {
-			return artifactContractError("memory rule provenance entry missing pr", rel)
-		}
-		prNumber, err := strconv.Atoi(pr.Value)
-		if err != nil || prNumber < 1 {
-			return artifactContractError("memory rule provenance pr must be at least 1", configRefWithPath(rel, pr))
-		}
-		outcome, ok := provenance["outcome"]
-		if !ok {
-			return artifactContractError("memory rule provenance entry missing outcome", rel)
-		}
-		switch outcome.Value {
-		case "ci_failure", "revert", "review_correction", "fix_held", "merged_clean":
-		default:
-			return artifactContractError("memory rule provenance outcome is invalid", configRefWithPath(rel, outcome))
-		}
-	}
-	if commandErr := validateDraftedMemoryRuleCalibration(document, rel, confidence, count, contradictions); commandErr != nil {
-		return commandErr
-	}
-	return nil
-}
-
-func assessmentRuleHasPositivePlaybookEvidence(document yamlDocument) bool {
-	return assessdoc.HasPositivePlaybookEvidence(document)
-}
-
-func assessmentRuleCitations(document yamlDocument) []assessmentRuleCitation {
-	return assessdoc.RuleCitations(document)
-}
-
-func uniqueAssessmentRuleCitations(citations []assessmentRuleCitation) []assessmentRuleCitation {
-	return assessdoc.UniqueRuleCitations(citations)
-}
-
-func buildRiskAssessment(root string, inputRef string, content []byte, touchedPaths []string, rules []assessmentRule) (riskAssessment, *CommandError) {
-	return assessdoc.BuildRiskAssessment(root, inputRef, content, touchedPaths, rules, assessmentBuildOptions())
-}
-
-func validateServedAssessmentRuleCitations(rule assessmentRule, servedCitationRefs []assessmentRuleCitation) *CommandError {
-	return assessdoc.ValidateServedRuleCitations(rule, servedCitationRefs, assessmentBuildOptions())
-}
-
-func servedAssessmentRuleCitationURLs(rule assessmentRule) []string {
-	return assessdoc.ServedRuleCitationURLs(rule)
-}
-
-func servedAssessmentRuleCitations(rule assessmentRule) []assessmentRuleCitation {
-	return assessdoc.ServedRuleCitations(rule)
-}
-
-func assessmentRuleCitationURLs(refs []assessmentRuleCitation) []string {
-	return assessdoc.RuleCitationURLs(refs)
-}
-
-func assessmentRuleMatchesTouchedPath(root string, rule assessmentRule, touchedPaths []string) bool {
-	return assessdoc.RuleMatchesTouchedPath(root, rule, touchedPaths)
-}
-
-func normalizeAssessmentScopePath(root string, raw string) (string, bool, bool) {
-	return assessdoc.NormalizeScopePath(root, raw)
-}
-
-func directoryScopeMatches(scopePath string, touchedPath string, directoryScope bool) bool {
-	return assessdoc.DirectoryScopeMatches(scopePath, touchedPath, directoryScope)
-}
-
-func historicalDirectoryScope(root string, scopePath string) bool {
-	return assessdoc.HistoricalDirectoryScope(root, scopePath)
 }
 
 func readReliaConfig(root string) (yamlDocument, *CommandError) {
@@ -4365,7 +4150,11 @@ func commandResultBuildOptions() resultdoc.BuildOptions {
 func assessmentBuildOptions() assessdoc.Options {
 	return assessdoc.Options{
 		SchemaVersion:            commandSchemaVersion,
+		ArtifactContractError:    artifactContractError,
+		InternalError:            internalError,
 		ProvenanceIntegrityError: provenanceIntegrityError,
+		RepoPathExists:           repoPathExists,
+		YAMLFloat:                yamlFloat,
 	}
 }
 

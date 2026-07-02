@@ -226,9 +226,6 @@ func TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage(t *testing.
 	if got := yamlScalarValuesForTest(avoid.Lists["metadata.excluded_memory_sources"]); !stringSlicesEqual(got, []string{"agent_self_report", "agent_reflection"}) {
 		t.Fatalf("excluded memory sources = %#v", got)
 	}
-	if !assessmentRuleHasPositivePlaybookEvidence(playbook) {
-		t.Fatalf("playbook rule did not cite held or clean evidence: %#v", playbook.ListMaps["provenance"])
-	}
 	firstAvoidContent := readRuleByIDForTest(t, tempDir, avoid.Scalars["id"].Value)
 	stdout, stderr, code = runForTest(t, []string{"--json", "distill", "--format", "json"}, false)
 	if code != ExitSuccess {

@@ -2,6 +2,7 @@ package assess
 
 import (
 	"crypto/sha256"
+	"errors"
 	"fmt"
 	"math"
 	"os"
@@ -12,7 +13,9 @@ import (
 	"strconv"
 	"strings"
 
+	configdoc "github.com/Clyra-AI/relia/internal/config"
 	ingestdoc "github.com/Clyra-AI/relia/internal/ingest"
+	memorydoc "github.com/Clyra-AI/relia/internal/memory"
 	resultdoc "github.com/Clyra-AI/relia/internal/result"
 	"github.com/Clyra-AI/relia/internal/yamlmini"
 )
@@ -21,7 +24,11 @@ const objectType = "relia.risk_assessment"
 
 type Options struct {
 	SchemaVersion            string
+	ArtifactContractError    func(string, string) *resultdoc.CommandError
+	InternalError            func(string, error) *resultdoc.CommandError
 	ProvenanceIntegrityError func(string, string) *resultdoc.CommandError
+	RepoPathExists           func(string, string) bool
+	YAMLFloat                func(float64) string
 }
 
 type RiskAssessment struct {
@@ -52,6 +59,168 @@ type RuleCitation struct {
 	URL     string
 	PR      int
 	Outcome string
+}
+
+func LoadRules(root string, options Options) ([]Rule, *resultdoc.CommandError) {
+	patterns := []string{
+		filepath.Join(root, "memory", "rules", "*.yaml"),
+		filepath.Join(root, "memory", "rules", "*.yml"),
+	}
+	var paths []string
+	for _, pattern := range patterns {
+		matches, err := filepath.Glob(pattern)
+		if err != nil {
+			return nil, internalError(options, "could not inspect memory rule artifacts", err)
+		}
+		paths = append(paths, matches...)
+	}
+	sort.Strings(paths)
+
+	var rules []Rule
+	for _, rulePath := range paths {
+		rule, active, commandErr := ReadRule(root, rulePath, options)
+		if commandErr != nil {
+			return nil, commandErr
+		}
+		if active {
+			rules = append(rules, rule)
+		}
+	}
+	return rules, nil
+}
+
+func ReadRule(root string, rulePath string, options Options) (Rule, bool, *resultdoc.CommandError) {
+	content, err := os.ReadFile(rulePath)
+	if err != nil {
+		return Rule{}, false, internalError(options, "could not read memory rule artifact", err)
+	}
+	rel, err := filepath.Rel(root, rulePath)
+	if err != nil {
+		rel = rulePath
+	}
+	rel = filepath.ToSlash(rel)
+	document, parseErr := yamlmini.ParseDocument(string(content))
+	if parseErr != nil {
+		return Rule{}, false, artifactError(options, parseErr.Error(), rel)
+	}
+	if document.Scalars["status"].Value != "active" {
+		return Rule{}, false, nil
+	}
+	if commandErr := ValidateActiveRuleIdentity(root, document, rel, options); commandErr != nil {
+		return Rule{}, false, commandErr
+	}
+	confidence, err := strconv.ParseFloat(document.Scalars["confidence"].Value, 64)
+	if err != nil {
+		return Rule{}, false, artifactError(options, "memory rule confidence must be numeric", rel)
+	}
+	return Rule{
+		ID:         document.Scalars["id"].Value,
+		Kind:       document.Scalars["kind"].Value,
+		Path:       rel,
+		Confidence: confidence,
+		ScopePaths: yamlmini.ListValues(document, "scope.paths"),
+		Citations:  RuleCitations(document),
+	}, true, nil
+}
+
+func ValidateActiveRuleIdentity(root string, document yamlmini.Document, rel string, options Options) *resultdoc.CommandError {
+	required := []string{"object_type", "schema_version", "id", "kind", "status", "statement", "scope", "confidence", "evidence", "provenance", "review", "metadata"}
+	for _, key := range required {
+		if !yamlmini.HasPath(document, key) {
+			return artifactError(options, "memory rule missing required key "+key, rel)
+		}
+	}
+	if document.Scalars["object_type"].Value != "relia.memory_rule" {
+		return artifactError(options, "memory rule object_type must be relia.memory_rule", configdoc.RefWithPath(rel, document.Scalars["object_type"]))
+	}
+	if document.Scalars["schema_version"].Value != options.SchemaVersion {
+		return artifactError(options, "memory rule schema_version must be "+options.SchemaVersion, rel)
+	}
+	kind := document.Scalars["kind"].Value
+	if kind != "avoid" && kind != "playbook" {
+		return artifactError(options, "memory rule kind must be avoid or playbook", configdoc.RefWithPath(rel, document.Scalars["kind"]))
+	}
+	if kind == "playbook" && !HasPositivePlaybookEvidence(document) {
+		return artifactError(options, "playbook memory rule must cite at least one fix_held or merged_clean provenance outcome", rel)
+	}
+	if len(document.Lists["scope.paths"]) == 0 && len(document.Lists["scope.signals"]) == 0 {
+		return artifactError(options, "memory rule must declare at least one scope path or signal", rel)
+	}
+	for _, scopePath := range document.Lists["scope.paths"] {
+		if !repoPathExists(options, root, scopePath.Value) {
+			return artifactError(options, "memory rule scope path does not exist in the repo", configdoc.RefWithPath(rel, scopePath))
+		}
+	}
+	confidence, err := strconv.ParseFloat(document.Scalars["confidence"].Value, 64)
+	if err != nil {
+		return artifactError(options, "memory rule confidence must be numeric", configdoc.RefWithPath(rel, document.Scalars["confidence"]))
+	}
+	reviewLabel, ok := document.Scalars["review.label"]
+	if !ok {
+		return artifactError(options, "memory rule missing required key review.label", rel)
+	}
+	if reviewLabel.Value != "accepted" {
+		return artifactError(options, "active memory rule review.label must be accepted", configdoc.RefWithPath(rel, reviewLabel))
+	}
+	statementOrigin, ok := document.Scalars["review.statement_origin"]
+	if !ok {
+		return artifactError(options, "memory rule missing required key review.statement_origin", rel)
+	}
+	switch statementOrigin.Value {
+	case "llm_drafted", "cluster_summary", "human_authored":
+	default:
+		return artifactError(options, "memory rule review.statement_origin is invalid", configdoc.RefWithPath(rel, statementOrigin))
+	}
+	if len(document.Lists["evidence.experiences"]) == 0 {
+		return artifactError(options, "memory rule must cite at least one experience", rel)
+	}
+	evidenceCount, ok := document.Scalars["evidence.count"]
+	if !ok {
+		return artifactError(options, "memory rule missing required key evidence.count", rel)
+	}
+	count, err := strconv.Atoi(evidenceCount.Value)
+	if err != nil || count < 1 {
+		return artifactError(options, "memory rule evidence.count must be at least 1", configdoc.RefWithPath(rel, evidenceCount))
+	}
+	contradictionsScalar, ok := document.Scalars["evidence.contradictions"]
+	if !ok {
+		return artifactError(options, "memory rule missing required key evidence.contradictions", rel)
+	}
+	contradictions, err := strconv.Atoi(contradictionsScalar.Value)
+	if err != nil || contradictions < 0 {
+		return artifactError(options, "memory rule evidence.contradictions must be at least 0", configdoc.RefWithPath(rel, contradictionsScalar))
+	}
+	provenanceEntries := document.Lists["provenance"]
+	if len(provenanceEntries) == 0 {
+		return artifactError(options, "memory rule must include at least one provenance entry", rel)
+	}
+	provenanceMaps := document.ListMaps["provenance"]
+	if len(provenanceMaps) != len(provenanceEntries) {
+		return artifactError(options, "memory rule provenance entries must include pr and outcome", rel)
+	}
+	for _, provenance := range provenanceMaps {
+		pr, ok := provenance["pr"]
+		if !ok {
+			return artifactError(options, "memory rule provenance entry missing pr", rel)
+		}
+		prNumber, err := strconv.Atoi(pr.Value)
+		if err != nil || prNumber < 1 {
+			return artifactError(options, "memory rule provenance pr must be at least 1", configdoc.RefWithPath(rel, pr))
+		}
+		outcome, ok := provenance["outcome"]
+		if !ok {
+			return artifactError(options, "memory rule provenance entry missing outcome", rel)
+		}
+		switch outcome.Value {
+		case "ci_failure", "revert", "review_correction", "fix_held", "merged_clean":
+		default:
+			return artifactError(options, "memory rule provenance outcome is invalid", configdoc.RefWithPath(rel, outcome))
+		}
+	}
+	if commandErr := memorydoc.ValidateDraftedRuleCalibration(document, rel, confidence, count, contradictions, memoryValidationOptions(options)); commandErr != nil {
+		return commandErr
+	}
+	return nil
 }
 
 func ServedRuleData(rules []Rule, options Options) ([]map[string]any, *resultdoc.CommandError) {
@@ -351,6 +520,41 @@ func sha256String(value string) string {
 func shortHash(value string) string {
 	digest := sha256.Sum256([]byte(value))
 	return fmt.Sprintf("%x", digest[:6])
+}
+
+func memoryValidationOptions(options Options) memorydoc.ValidationOptions {
+	return memorydoc.ValidationOptions{
+		SchemaVersion:         options.SchemaVersion,
+		ArtifactContractError: options.ArtifactContractError,
+		InternalError:         options.InternalError,
+		RepoPathExists:        options.RepoPathExists,
+		YAMLFloat:             options.YAMLFloat,
+	}
+}
+
+func repoPathExists(options Options, root string, rel string) bool {
+	if options.RepoPathExists != nil {
+		return options.RepoPathExists(root, rel)
+	}
+	_, err := os.Stat(filepath.Join(root, rel))
+	return err == nil
+}
+
+func artifactError(options Options, message string, ref string) *resultdoc.CommandError {
+	if options.ArtifactContractError != nil {
+		return options.ArtifactContractError(message, ref)
+	}
+	return &resultdoc.CommandError{Type: "artifact_contract_validation_failed", Message: message, Ref: ref}
+}
+
+func internalError(options Options, message string, err error) *resultdoc.CommandError {
+	if options.InternalError != nil {
+		return options.InternalError(message, err)
+	}
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
+		message += ": " + err.Error()
+	}
+	return &resultdoc.CommandError{Type: "internal", Message: message}
 }
 
 func provenanceError(options Options, message string, ref string) *resultdoc.CommandError {

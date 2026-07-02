@@ -9,8 +9,8 @@
       "cmd/relia/main_test.go"
     ],
     "line_ceilings": {
-      "cmd/relia/main.go": 4902,
-      "cmd/relia/main_test.go": 1996
+      "cmd/relia/main.go": 4691,
+      "cmd/relia/main_test.go": 1993
     },
     "budget": {
       "warn_line_threshold": 1200,
@@ -35,6 +35,8 @@
     "internal/advise/advise_test.go",
     "internal/assess/args.go",
     "internal/assess/args_test.go",
+    "internal/assess/assess.go",
+    "internal/assess/assess_test.go",
     "internal/backtest/args.go",
     "internal/backtest/args_test.go",
     "internal/backtest/baseline.go",
