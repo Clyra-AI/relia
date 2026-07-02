@@ -266,8 +266,8 @@ owns review command argument parsing and
 repo-relative scope-path validation; `internal/memory` owns memory command
 argument parsing, repo-relative output-path validation, memory-rule artifact
 validation, drafted rule calibration checks, rule summary provenance ordering,
-status counts, and MEMORY.md rendering; `internal/serve` owns serve command
-argument parsing and hosted transport dependency gating.
+status counts, rule summary loading, and MEMORY.md rendering; `internal/serve`
+owns serve command argument parsing and hosted transport dependency gating.
 `cmd/relia` keeps command wiring, command-specific CommandError translation,
 experience-record normalization, ingest result assembly, and human/JSON
 rendering for those surfaces.

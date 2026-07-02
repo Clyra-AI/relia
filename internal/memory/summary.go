@@ -2,10 +2,13 @@ package memory
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
 
+	resultdoc "github.com/Clyra-AI/relia/internal/result"
 	"github.com/Clyra-AI/relia/internal/yamlmini"
 )
 
@@ -29,6 +32,64 @@ type RuleProvenance struct {
 	Outcome      string
 	URL          string
 	ExperienceID string
+}
+
+func LoadRuleSummaries(root string, options ValidationOptions) ([]RuleSummary, *resultdoc.CommandError) {
+	patterns := []string{
+		filepath.Join(root, "memory", "rules", "*.yaml"),
+		filepath.Join(root, "memory", "rules", "*.yml"),
+	}
+	var paths []string
+	for _, pattern := range patterns {
+		matches, err := filepath.Glob(pattern)
+		if err != nil {
+			return nil, internalError(options, "could not inspect memory rule artifacts", err)
+		}
+		paths = append(paths, matches...)
+	}
+	sort.Strings(paths)
+	var summaries []RuleSummary
+	for _, path := range paths {
+		if commandErr := ValidateRuleArtifact(root, path, options); commandErr != nil {
+			return nil, commandErr
+		}
+		content, err := os.ReadFile(path)
+		if err != nil {
+			return nil, internalError(options, "could not read memory rule artifact", err)
+		}
+		rel, err := filepath.Rel(root, path)
+		if err != nil {
+			rel = path
+		}
+		rel = filepath.ToSlash(rel)
+		document, parseErr := yamlmini.ParseDocument(string(content))
+		if parseErr != nil {
+			return nil, artifactContractError(options, parseErr.Error(), rel)
+		}
+		summaries = append(summaries, RuleSummary{
+			ID:              document.Scalars["id"].Value,
+			Kind:            document.Scalars["kind"].Value,
+			Status:          document.Scalars["status"].Value,
+			Statement:       document.Scalars["statement"].Value,
+			Confidence:      document.Scalars["confidence"].Value,
+			ConfidenceLabel: document.Scalars["metadata.confidence_label"].Value,
+			EvidenceCount:   document.Scalars["evidence.count"].Value,
+			Contradictions:  document.Scalars["evidence.contradictions"].Value,
+			ReviewLabel:     document.Scalars["review.label"].Value,
+			StatementOrigin: document.Scalars["review.statement_origin"].Value,
+			Path:            rel,
+			Provenance:      RuleProvenanceEntries(document),
+		})
+	}
+	sort.Slice(summaries, func(i, j int) bool {
+		left := StatusRank(summaries[i].Status)
+		right := StatusRank(summaries[j].Status)
+		if left == right {
+			return summaries[i].ID < summaries[j].ID
+		}
+		return left < right
+	})
+	return summaries, nil
 }
 
 func RuleProvenanceEntries(document yamlmini.Document) []RuleProvenance {

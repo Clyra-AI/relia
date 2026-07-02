@@ -1773,7 +1773,7 @@ func memoryResult(args []string, start time.Time) CommandResult {
 	if commandErr != nil {
 		return withFormat(errorResult("memory", "memory", commandErr, start))
 	}
-	rules, commandErr := loadMemoryRuleSummaries(root)
+	rules, commandErr := memorydoc.LoadRuleSummaries(root, memoryValidationOptions())
 	if commandErr != nil {
 		return withFormat(errorResult("memory", "memory", commandErr, start))
 	}
@@ -3087,59 +3087,6 @@ func replaceNestedYAMLStringList(content string, parent string, key string, valu
 	next = append(next, replacement...)
 	next = append(next, lines[insertEnd:]...)
 	return strings.Join(next, "\n")
-}
-
-func loadMemoryRuleSummaries(root string) ([]memorydoc.RuleSummary, *CommandError) {
-	patterns := []string{
-		filepath.Join(root, "memory", "rules", "*.yaml"),
-		filepath.Join(root, "memory", "rules", "*.yml"),
-	}
-	var paths []string
-	for _, pattern := range patterns {
-		matches, err := filepath.Glob(pattern)
-		if err != nil {
-			return nil, internalError("could not inspect memory rule artifacts", err)
-		}
-		paths = append(paths, matches...)
-	}
-	sort.Strings(paths)
-	var summaries []memorydoc.RuleSummary
-	for _, path := range paths {
-		if commandErr := validateMemoryRuleArtifact(root, path); commandErr != nil {
-			return nil, commandErr
-		}
-		content, err := os.ReadFile(path)
-		if err != nil {
-			return nil, internalError("could not read memory rule artifact", err)
-		}
-		document, parseErr := parseYAMLDocument(string(content))
-		if parseErr != nil {
-			return nil, artifactContractError(parseErr.Error(), displayPath(root, path))
-		}
-		summaries = append(summaries, memorydoc.RuleSummary{
-			ID:              document.Scalars["id"].Value,
-			Kind:            document.Scalars["kind"].Value,
-			Status:          document.Scalars["status"].Value,
-			Statement:       document.Scalars["statement"].Value,
-			Confidence:      document.Scalars["confidence"].Value,
-			ConfidenceLabel: document.Scalars["metadata.confidence_label"].Value,
-			EvidenceCount:   document.Scalars["evidence.count"].Value,
-			Contradictions:  document.Scalars["evidence.contradictions"].Value,
-			ReviewLabel:     document.Scalars["review.label"].Value,
-			StatementOrigin: document.Scalars["review.statement_origin"].Value,
-			Path:            displayPath(root, path),
-			Provenance:      memorydoc.RuleProvenanceEntries(document),
-		})
-	}
-	sort.Slice(summaries, func(i, j int) bool {
-		left := memorydoc.StatusRank(summaries[i].Status)
-		right := memorydoc.StatusRank(summaries[j].Status)
-		if left == right {
-			return summaries[i].ID < summaries[j].ID
-		}
-		return left < right
-	})
-	return summaries, nil
 }
 
 func writeMemoryPage(root string, outputPath string, rules []memorydoc.RuleSummary) (string, *CommandError) {

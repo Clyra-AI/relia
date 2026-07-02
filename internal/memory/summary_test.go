@@ -1,6 +1,8 @@
 package memory
 
 import (
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -33,6 +35,35 @@ func TestRuleProvenanceEntriesSortsByPRAndExperience(t *testing.T) {
 	}
 	if entries[0].PR != 41 || entries[1].ExperienceID != "exp_a" || entries[2].ExperienceID != "exp_b" {
 		t.Fatalf("entries not sorted: %#v", entries)
+	}
+}
+
+func TestLoadRuleSummariesSortsAndLoadsValidatedRules(t *testing.T) {
+	root := t.TempDir()
+	writeValidationFixture(t, root, validMemoryRuleYAML())
+	candidate := strings.Replace(validMemoryRuleYAML(), "id: rule-1", "id: rule-2", 1)
+	candidate = strings.Replace(candidate, "status: active", "status: candidate", 1)
+	candidate = strings.Replace(candidate, "label: accepted", "label: suggested", 1)
+	if err := os.WriteFile(filepath.Join(root, "memory", "rules", "candidate.yaml"), []byte(candidate), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	summaries, commandErr := LoadRuleSummaries(root, testValidationOptions())
+
+	if commandErr != nil {
+		t.Fatal(commandErr)
+	}
+	if len(summaries) != 2 {
+		t.Fatalf("summaries = %#v", summaries)
+	}
+	if summaries[0].ID != "rule-1" || summaries[1].ID != "rule-2" {
+		t.Fatalf("summaries not sorted by status rank: %#v", summaries)
+	}
+	if summaries[0].Path != "memory/rules/rule.yaml" {
+		t.Fatalf("path = %q", summaries[0].Path)
+	}
+	if len(summaries[0].Provenance) != 1 || summaries[0].Provenance[0].PR != 1 {
+		t.Fatalf("provenance = %#v", summaries[0].Provenance)
 	}
 }
 

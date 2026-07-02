@@ -101,10 +101,10 @@ Current progress:
 - `internal/memory` now also owns memory-rule artifact validation and drafted
   rule calibration checks with direct package tests, while CLI-specific
   CommandError construction remains injected by `cmd/relia`.
-- `internal/memory` now also owns rule summary provenance ordering, memory
-  status counts, and MEMORY.md rendering with direct package tests, while
-  `cmd/relia` keeps rule-summary loading, repo-relative output validation,
-  artifact writes, and command-result assembly.
+- `internal/memory` now also owns rule summary loading, provenance ordering,
+  memory status counts, and MEMORY.md rendering with direct package tests,
+  while `cmd/relia` keeps repo-relative output validation, artifact writes,
+  and command-result assembly.
 - `internal/serve` now owns `relia serve` argument parsing and hosted transport
   dependency gating with direct package tests, while rule loading, served-rule
   data assembly, and MCP manifest rendering remain in `cmd/relia`.
@@ -180,9 +180,9 @@ Current progress:
   lookup and artifact mutation.
 - `internal/memory`: memory command argument parsing, default MEMORY.md output
   selection, format validation, output path validation, memory-rule artifact
-  validation, drafted rule calibration checks, rule summary provenance
-  ordering, status counts, and MEMORY.md rendering before CLI-owned
-  rule-summary loading and artifact writes.
+  validation, drafted rule calibration checks, rule summary loading,
+  provenance ordering, status counts, and MEMORY.md rendering before CLI-owned
+  artifact writes.
 - `internal/serve`: serve command argument parsing, JSON format validation, and
   hosted/network transport dependency gating before CLI-owned rule loading and
   MCP manifest rendering.
