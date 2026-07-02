@@ -170,6 +170,9 @@ Current progress:
   selection, recurrence-pair shaping, citations, and stable recurrence output
   ordering with direct package tests, while the CLI keeps report orchestration
   and summary assembly.
+- `internal/backtest` now also owns flake discount predicate and result shaping
+  with direct package tests, while the CLI keeps unrelated-diff heuristic
+  grouping and recurrence report orchestration.
 
 ## Candidate Package Boundaries
 
@@ -195,8 +198,9 @@ Current progress:
   repo ID derivation, and ingest freshness metadata selection, recurrence
   report ID generation, report windowing, recurrence metrics assembly, report
   metadata assembly, recurrence gate policy, recurrence signature matching,
-  recurrence-pair shaping, citations, and stable recurrence output ordering
-  extracted; baseline/report file persistence and report generation
+  recurrence-pair shaping, citations, stable recurrence output ordering, and
+  flake discount predicate/result shaping extracted; baseline/report file
+  persistence, unrelated-diff heuristic grouping, and report generation
   orchestration remain candidates.
 - `internal/distill`: rule drafting and lifecycle state.
 - `internal/serve`: advisory serving snapshot behavior.
