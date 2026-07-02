@@ -246,7 +246,7 @@ configuration parsing, and local model-manifest dependency validation;
 `internal/result` owns the command-result envelope and generic pass/error
 constructors; `internal/ingest` owns ingest input parsing, the
 experience-record data model, canonical distill input decoding, record
-validation, repo, action, context, and provenance normalization, shard
+validation, repo, action, context, outcome, and provenance normalization, shard
 persistence, fail-closed redaction, standard secret/provenance URL token-shape
 checks, and record/provenance URL helpers;
 `internal/assess` owns assess argument parsing, active memory rule loading and
