@@ -227,6 +227,8 @@ Current progress:
   lowering `cmd/relia/main.go` to 1,686 lines while preserving CLI behavior.
 - `cmd/relia/serve_command.go` now owns the `serve` command handler, lowering
   `cmd/relia/main.go` to 1,626 lines while preserving CLI behavior.
+- `cmd/relia/advise_command.go` now owns the `advise` command handler,
+  lowering `cmd/relia/main.go` to 1,504 lines while preserving CLI behavior.
 
 ## Candidate Package Boundaries
 

@@ -9,6 +9,8 @@ import (
 	"github.com/Clyra-AI/relia/internal/yamlmini"
 )
 
+type adviseSettings = configdoc.AdviseSettings
+
 func commandResultBuildOptions() resultdoc.BuildOptions {
 	return resultdoc.BuildOptions{
 		SchemaVersion:           commandSchemaVersion,
