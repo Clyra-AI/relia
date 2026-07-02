@@ -254,8 +254,8 @@ repo-relative scope matching, and deterministic risk assessment construction
 for `assess`, `serve`, and `advise`;
 `internal/backtest` owns backtest argument parsing, recurrence window duration
 validation, recurrence report data model, diagnostics/operator feedback/badge
-helpers, flake discount shaping, top repeated mistake aggregation, and HTML
-report rendering;
+helpers, automatic flake discount heuristic/result shaping, top repeated
+mistake aggregation, and HTML report rendering;
 `internal/advise` owns advisory comment decision, strategy, markdown rendering,
 confidence threshold handling, and prior-state comparison helpers;
 `internal/modelpull` owns local model artifact pull argument parsing and

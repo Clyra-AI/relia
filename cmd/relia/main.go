@@ -797,7 +797,7 @@ func validateBacktestExperience(record experienceRecord, ref string) (time.Time,
 func buildRecurrenceReport(root string, config yamlDocument, records []backtestExperience, sourceArtifacts []string, sourceDigest string, options backtestOptions, windowDays int) (recurrenceReport, *CommandError) {
 	backtestdoc.SortExperiences(records)
 	window, windowRecords := backtestdoc.WindowRecords(records, windowDays)
-	flakeHeuristics := autoFlakeDiscountedExperiences(windowRecords)
+	flakeHeuristics := backtestdoc.AutomaticFlakeDiscounts(windowRecords)
 	priorBySignature := map[string][]backtestExperience{}
 	confirmed := []recurrencePair{}
 	possible := []recurrencePair{}
@@ -920,48 +920,6 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 	report.ReportID = backtestdoc.BuildReportID(report.Window, sourceDigest, summary)
 	report.Badge = backtestdoc.BuildReportBadge(report)
 	return report, nil
-}
-
-func autoFlakeDiscountedExperiences(records []backtestExperience) map[string]string {
-	bySignature := map[string][]backtestExperience{}
-	for _, record := range records {
-		if record.Record.Attribution.ActorKind != "agent" || !backtestdoc.IsFailureOutcome(record.Record.Outcome.Kind) {
-			continue
-		}
-		for _, key := range backtestdoc.RecurrenceSignatureKeys(record.Record) {
-			bySignature[key] = append(bySignature[key], record)
-		}
-	}
-	discounted := map[string]string{}
-	for _, group := range bySignature {
-		if len(group) < 3 || !groupHasUnrelatedNonTestDiffs(group) {
-			continue
-		}
-		reason := "Discounted as flaky because the same failure signature appears at least three times across unrelated non-test diff paths."
-		for _, record := range group {
-			if record.Record.FlakeDiscount == 0 && discounted[record.Record.ExperienceID] == "" {
-				discounted[record.Record.ExperienceID] = reason
-			}
-		}
-	}
-	return discounted
-}
-
-func groupHasUnrelatedNonTestDiffs(group []backtestExperience) bool {
-	seen := map[string]bool{}
-	for _, record := range group {
-		paths := distilldoc.NonTestPaths(record.Record.Context.Paths)
-		if len(paths) == 0 {
-			paths = distilldoc.NormalizedRepoPaths(record.Record.Context.Paths)
-		}
-		for _, path := range paths {
-			if seen[path] {
-				return false
-			}
-			seen[path] = true
-		}
-	}
-	return len(seen) >= len(group)
 }
 
 func roundFloat(value float64, places int) float64 {
@@ -1779,7 +1737,7 @@ func buildDistilledRules(root string, config yamlDocument, records []backtestExp
 	})
 	anchor := records[len(records)-1].RecordedAt.UTC()
 	clusters := distilldoc.BuildClusters(records)
-	flakeHeuristics := autoFlakeDiscountedExperiences(records)
+	flakeHeuristics := backtestdoc.AutomaticFlakeDiscounts(records)
 	provider, _ := distilldoc.Provider(config)
 	reviewRequired := distilldoc.ReviewRequired(config)
 
