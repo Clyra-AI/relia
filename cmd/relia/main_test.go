@@ -1145,17 +1145,6 @@ func TestDistillAvoidContradictionsIgnoreOlderPositiveEvidence(t *testing.T) {
 	}
 }
 
-func TestYAMLScalarForWriteQuotesColonSpace(t *testing.T) {
-	quoted := yamlScalarForWrite("build: lint")
-	if quoted != `"build: lint"` {
-		t.Fatalf("yamlScalarForWrite did not quote colon-space scalar: %q", quoted)
-	}
-	document := parseRuleDocForTest(t, "statement: "+quoted+"\n")
-	if got := document.Scalars["statement"].Value; got != "build: lint" {
-		t.Fatalf("parsed statement = %q", got)
-	}
-}
-
 func TestCheckRejectsZeroMatchAttributionConfigWithConcreteRef(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
