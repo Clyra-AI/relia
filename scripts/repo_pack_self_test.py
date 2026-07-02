@@ -7,7 +7,27 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 import validate_repo_pack as validator
-from validate_repo_pack import *  # noqa: F401,F403 - self-test fixtures exercise validator internals.
+from repo_pack_architecture import (
+    architecture_budget_unexcepted_failures,
+    architecture_debt_exception_expiry_error,
+    validate_architecture_debt_exception_expiry,
+)
+from validate_repo_pack import (
+    FACTORYD_REPO_KEY,
+    PROVIDER_ACCEPTANCE_IDS,
+    ROOT,
+    RUNNER_READY_TASK_FIELDS,
+    duplicate_values,
+    factoryd_config_capability_grants,
+    fail,
+    model_provider_gate_task,
+    public_release_boundary_error,
+    validate_context_brief,
+    validate_lifecycle_path_ownership,
+    validate_model_provider_gate,
+    validate_runner_ready_task_fields,
+    validate_validation_contract_evidence_split,
+)
 
 def self_test_public_release_boundary():
     valid = {
@@ -757,4 +777,3 @@ def self_test():
         globals()["fail"] = original_fail
         validator.fail = original_fail
     print("repo-pack validator self-test passed")
-
