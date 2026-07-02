@@ -99,6 +99,9 @@ Current progress:
 - `internal/distill` now also owns distill evidence classification, flake
   discount handling, and avoid/playbook contradiction counting with direct
   package tests, while rule orchestration remains in `cmd/relia`.
+- `internal/distill` now also owns distill confidence scoring and confidence
+  metadata assembly with direct package tests, while rule orchestration remains
+  in `cmd/relia`.
 - `internal/review` now owns `relia review` argument parsing, repo-relative
   scope-path validation, memory rule lookup, lifecycle file updates, and
   review update validation with direct package tests, while command-result
@@ -185,7 +188,8 @@ Current progress:
   request-shape description, cost estimation, embedding-mode helpers, distill
   clustering/review-gate helpers, deterministic memory-rule ID/statement
   formatting, memory-rule YAML rendering, evidence classification, flake
-  discount handling, and contradiction counting.
+  discount handling, contradiction counting, confidence scoring, and
+  confidence metadata assembly.
 - `internal/review`: review command argument parsing, review action defaults,
   label validation, edit scope-path validation, memory-rule lookup, lifecycle
   artifact mutation, and review update validation before CLI-owned
