@@ -238,6 +238,10 @@ Current progress:
 - `cmd/relia/distill_command.go` now owns the `distill` command handler,
   lowering `cmd/relia/main.go` to 1,093 lines, below the architecture warning
   threshold, while preserving CLI behavior.
+- `cmd/relia/distill_review_command_test.go` now owns distill and review
+  command workflow coverage, lowering `cmd/relia/main_test.go` to 999
+  lines, below the architecture warning threshold, while preserving test
+  behavior.
 
 ## Candidate Package Boundaries
 
