@@ -2008,36 +2008,8 @@ func generatedExperienceID(action experienceAction, recordedAt time.Time, outcom
 }
 
 func normalizeExperienceRepo(event map[string]any, ref string) (experienceRepo, *CommandError) {
-	repo := experienceRepo{Provider: "github"}
-	if value, ok := nestedField(event, "repo"); ok {
-		switch typed := value.(type) {
-		case map[string]any:
-			if provider := stringFromAny(typed["provider"]); provider != "" {
-				repo.Provider = provider
-			}
-			repo.Owner = stringFromAny(typed["owner"])
-			repo.Name = stringFromAny(typed["name"])
-		case string:
-			owner, name, ok := strings.Cut(typed, "/")
-			if ok {
-				repo.Owner = strings.TrimSpace(owner)
-				repo.Name = strings.TrimSpace(name)
-			}
-		}
-	}
-	if repo.Owner == "" {
-		repo.Owner = stringField(event, "repo_owner")
-	}
-	if repo.Name == "" {
-		repo.Name = stringField(event, "repo_name")
-	}
-	if repo.Provider != "github" {
-		return repo, artifactContractError("experience repo.provider must be github", ref)
-	}
-	if repo.Owner == "" || repo.Name == "" {
-		return repo, artifactContractError("experience repo must include owner and name", ref)
-	}
-	return repo, nil
+	repo, ingestErr := ingestdoc.NormalizeRepo(event, ref)
+	return repo, commandErrorFromIngest(ingestErr)
 }
 
 func normalizeExperienceAction(event map[string]any, ref string) (experienceAction, *CommandError) {
