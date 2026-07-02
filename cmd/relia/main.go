@@ -8,8 +8,6 @@ import (
 	"io"
 	"math"
 	"os"
-	"os/exec"
-	"path"
 	"path/filepath"
 	"sort"
 	"strconv"
@@ -1072,12 +1070,12 @@ func selectRecurrencePrior(priors []backtestExperience, current backtestExperien
 func pathSetsOverlap(left []string, right []string) bool {
 	leftSet := map[string]bool{}
 	for _, value := range left {
-		if clean, ok := cleanRepoPath(value); ok {
+		if clean, ok := configdoc.CleanRepoPath(value); ok {
 			leftSet[filepath.ToSlash(clean)] = true
 		}
 	}
 	for _, value := range right {
-		if clean, ok := cleanRepoPath(value); ok && leftSet[filepath.ToSlash(clean)] {
+		if clean, ok := configdoc.CleanRepoPath(value); ok && leftSet[filepath.ToSlash(clean)] {
 			return true
 		}
 	}
@@ -1245,7 +1243,7 @@ func roundFloat(value float64, places int) float64 {
 }
 
 func compareBacktestBaseline(root string, baselinePath string, headlineERR float64, sourceDigest string, window recurrenceWindow) (baselineComparison, *CommandError) {
-	clean, ok := cleanRepoPath(baselinePath)
+	clean, ok := configdoc.CleanRepoPath(baselinePath)
 	if !ok {
 		return baselineComparison{}, usageError("backtest baseline path must be repo-relative")
 	}
@@ -1315,7 +1313,7 @@ func backtestGateThresholdValue(gate backtestGateResult) float64 {
 }
 
 func writeBacktestReports(root string, report recurrenceReport, reportDir string) (string, string, *CommandError) {
-	cleanReportDir, ok := cleanRepoPath(reportDir)
+	cleanReportDir, ok := configdoc.CleanRepoPath(reportDir)
 	if !ok {
 		return "", "", usageError("backtest report directory must be repo-relative")
 	}
@@ -1414,7 +1412,7 @@ type backtestBaselineSnapshot struct {
 }
 
 func snapshotBacktestBaseline(root string, baselinePath string) (backtestBaselineSnapshot, *CommandError) {
-	clean, ok := cleanRepoPath(baselinePath)
+	clean, ok := configdoc.CleanRepoPath(baselinePath)
 	if !ok {
 		return backtestBaselineSnapshot{}, usageError("backtest baseline path must be repo-relative")
 	}
@@ -1449,7 +1447,7 @@ func restoreBacktestBaseline(snapshot backtestBaselineSnapshot) *CommandError {
 }
 
 func saveBacktestBaseline(root string, report recurrenceReport, baselinePath string) *CommandError {
-	clean, ok := cleanRepoPath(baselinePath)
+	clean, ok := configdoc.CleanRepoPath(baselinePath)
 	if !ok {
 		return usageError("backtest baseline path must be repo-relative")
 	}
@@ -1482,7 +1480,7 @@ func saveBacktestBaseline(root string, report recurrenceReport, baselinePath str
 }
 
 func savedBacktestBaselineComparison(baselinePath string, headlineERR float64) (baselineComparison, *CommandError) {
-	clean, ok := cleanRepoPath(baselinePath)
+	clean, ok := configdoc.CleanRepoPath(baselinePath)
 	if !ok {
 		return baselineComparison{}, usageError("backtest baseline path must be repo-relative")
 	}
@@ -1957,7 +1955,7 @@ func parseAdviseArgs(args []string) (adviseOptions, *CommandError) {
 		{"advise --state", options.StatePath},
 		{"advise --comment", options.CommentPath},
 	} {
-		if _, ok := cleanRepoPath(item.path); !ok {
+		if _, ok := configdoc.CleanRepoPath(item.path); !ok {
 			return options, usageError(item.label + " must be repo-relative")
 		}
 	}
@@ -1967,7 +1965,7 @@ func parseAdviseArgs(args []string) (adviseOptions, *CommandError) {
 type advisoryPriorState = advisedoc.PriorState
 
 func advisoryPreviousState(root string, statePath string) (advisoryPriorState, *CommandError) {
-	clean, ok := cleanRepoPath(statePath)
+	clean, ok := configdoc.CleanRepoPath(statePath)
 	if !ok {
 		return advisoryPriorState{}, usageError("advise --state must be repo-relative")
 	}
@@ -2003,7 +2001,7 @@ func advisoryPreviousState(root string, statePath string) (advisoryPriorState, *
 }
 
 func writeRepoRelativeFile(root string, rel string, content []byte, label string) *CommandError {
-	clean, ok := cleanRepoPath(rel)
+	clean, ok := configdoc.CleanRepoPath(rel)
 	if !ok {
 		return usageError(label + " path must be repo-relative")
 	}
@@ -2034,12 +2032,12 @@ func modelsResult(args []string, start time.Time) CommandResult {
 	if scalar, ok := config.Scalars["models.local_manifest"]; ok {
 		manifestRel = scalar.Value
 	}
-	cleanManifestRel, ok := cleanRepoPath(manifestRel)
+	cleanManifestRel, ok := configdoc.CleanRepoPath(manifestRel)
 	if !ok {
 		return errorResult("models pull", "models", dependencyError("local model manifest path must be repo-relative", defaultConfigFile), start)
 	}
 	manifestDisplayPath := filepath.ToSlash(filepath.Clean(cleanManifestRel))
-	cleanCachePath, ok := cleanRepoPath(options.CachePath)
+	cleanCachePath, ok := configdoc.CleanRepoPath(options.CachePath)
 	if !ok {
 		return errorResult("models pull", "models", usageError("models pull --cache-path must be repo-relative"), start)
 	}
@@ -2203,11 +2201,11 @@ func distilledRuleStatus(root string, kind string, scopePaths []string, evidence
 
 func allScopePathsMissing(root string, scopePaths []string) bool {
 	for _, scopePath := range scopePaths {
-		clean, ok := cleanRepoPath(scopePath)
+		clean, ok := configdoc.CleanRepoPath(scopePath)
 		if !ok {
 			continue
 		}
-		if workingTreePathMatches(root, clean) {
+		if configdoc.WorkingTreePathMatches(root, clean) {
 			return false
 		}
 	}
@@ -2215,7 +2213,7 @@ func allScopePathsMissing(root string, scopePaths []string) bool {
 }
 
 func writeDistilledRules(root string, ruleDir string, rules []distilledRule) ([]ArtifactRef, *CommandError) {
-	cleanRuleDir, ok := cleanRepoPath(ruleDir)
+	cleanRuleDir, ok := configdoc.CleanRepoPath(ruleDir)
 	if !ok {
 		return nil, usageError("distill rule directory must be repo-relative")
 	}
@@ -2298,7 +2296,7 @@ func writeAtomicRepoFile(path string, content []byte, label string) *CommandErro
 }
 
 func writeMemoryPage(root string, outputPath string, rules []memorydoc.RuleSummary) (string, *CommandError) {
-	clean, ok := cleanRepoPath(outputPath)
+	clean, ok := configdoc.CleanRepoPath(outputPath)
 	if !ok {
 		return "", usageError("memory output path must be repo-relative")
 	}
@@ -3157,7 +3155,7 @@ func assessmentBuildOptions() assessdoc.Options {
 		ArtifactContractError:    artifactContractError,
 		InternalError:            internalError,
 		ProvenanceIntegrityError: provenanceIntegrityError,
-		RepoPathExists:           repoPathExists,
+		RepoPathExists:           configdoc.RepoPathExists,
 		YAMLFloat:                yamlFloat,
 	}
 }
@@ -3410,7 +3408,7 @@ func reviewUpdateOptions() reviewdoc.UpdateOptions {
 		UsageError:            usageError,
 		ArtifactContractError: artifactContractError,
 		InternalError:         internalError,
-		RepoPathExists:        repoPathExists,
+		RepoPathExists:        configdoc.RepoPathExists,
 		YAMLFloat:             yamlFloat,
 	}
 }
@@ -3420,88 +3418,9 @@ func memoryValidationOptions() memorydoc.ValidationOptions {
 		SchemaVersion:         commandSchemaVersion,
 		ArtifactContractError: artifactContractError,
 		InternalError:         internalError,
-		RepoPathExists:        repoPathExists,
+		RepoPathExists:        configdoc.RepoPathExists,
 		YAMLFloat:             yamlFloat,
 	}
-}
-func repoPathExists(root string, rel string) bool {
-	clean, ok := cleanRepoPath(rel)
-	if !ok {
-		return false
-	}
-	if workingTreePathMatches(root, clean) {
-		return true
-	}
-	if output, err := exec.Command("git", "-C", root, "log", "--all", "--name-only", "--format=", "--", clean).Output(); err == nil {
-		return strings.TrimSpace(string(output)) != ""
-	}
-	return false
-}
-
-func cleanRepoPath(rel string) (string, bool) {
-	trimmed := strings.TrimSpace(rel)
-	if trimmed == "" || filepath.IsAbs(trimmed) {
-		return "", false
-	}
-	clean := filepath.Clean(trimmed)
-	cleanSlash := filepath.ToSlash(clean)
-	if clean == "." || clean == ".." || strings.HasPrefix(cleanSlash, "../") {
-		return "", false
-	}
-	for _, part := range strings.Split(cleanSlash, "/") {
-		if part == ".." {
-			return "", false
-		}
-	}
-	return clean, true
-}
-
-func workingTreePathMatches(root string, scope string) bool {
-	scopeSlash := filepath.ToSlash(scope)
-	if !hasGlobMagic(scopeSlash) {
-		_, err := os.Stat(filepath.Join(root, scope))
-		return err == nil
-	}
-	matched := false
-	_ = filepath.WalkDir(root, func(candidate string, entry os.DirEntry, err error) error {
-		if matched {
-			return filepath.SkipAll
-		}
-		if err != nil {
-			return nil
-		}
-		if entry.IsDir() {
-			switch entry.Name() {
-			case ".git", ".factory", ".factoryd", ".relia":
-				if candidate != root {
-					return filepath.SkipDir
-				}
-			}
-		}
-		rel, err := filepath.Rel(root, candidate)
-		if err != nil || rel == "." {
-			return nil
-		}
-		if scopePatternMatches(scopeSlash, filepath.ToSlash(rel)) {
-			matched = true
-			return filepath.SkipAll
-		}
-		return nil
-	})
-	return matched
-}
-
-func hasGlobMagic(value string) bool {
-	return strings.ContainsAny(value, "*?[")
-}
-
-func scopePatternMatches(pattern string, rel string) bool {
-	if strings.HasSuffix(pattern, "/**") {
-		prefix := strings.TrimSuffix(pattern, "/**")
-		return rel == prefix || strings.HasPrefix(rel, prefix+"/")
-	}
-	matched, err := path.Match(pattern, rel)
-	return err == nil && matched
 }
 
 func parseYAMLDocument(content string) (yamlDocument, error) {
