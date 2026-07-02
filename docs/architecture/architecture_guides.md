@@ -254,8 +254,9 @@ confidence threshold handling, and prior-state comparison helpers;
 `internal/modelpull` owns local model artifact pull argument parsing and
 manifest construction before config-owned validation and CLI-owned writes;
 `internal/distill` owns distill argument parsing, provider plan construction,
-request-shape description, cost estimation, embedding-mode helpers, and review
-gate helpers; `internal/review` owns review command argument parsing and
+request-shape description, cost estimation, embedding-mode helpers, clustering,
+canonical signature-key selection, and review gate helpers; `internal/review`
+owns review command argument parsing and
 repo-relative scope-path validation; `internal/memory` owns memory command
 argument parsing, repo-relative output-path validation, memory-rule artifact
 validation, and drafted rule calibration checks; `internal/serve` owns serve

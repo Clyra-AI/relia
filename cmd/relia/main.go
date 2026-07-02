@@ -236,11 +236,7 @@ type distilledRuleMetadata struct {
 	ExcludedMemorySources []string
 }
 
-type distillCluster struct {
-	Key     string
-	Signal  string
-	Records []backtestExperience
-}
+type distillCluster = distilldoc.Cluster
 
 type adviseSettings = configdoc.AdviseSettings
 
@@ -2208,7 +2204,7 @@ func buildDistilledRules(root string, config yamlDocument, records []backtestExp
 		return records[i].RecordedAt.Before(records[j].RecordedAt)
 	})
 	anchor := records[len(records)-1].RecordedAt.UTC()
-	clusters := buildDistillClusters(records)
+	clusters := distilldoc.BuildClusters(records)
 	flakeHeuristics := autoFlakeDiscountedExperiences(records)
 	provider, _ := distilldoc.Provider(config)
 	reviewRequired := distilldoc.ReviewRequired(config)
@@ -2242,160 +2238,8 @@ func buildDistilledRules(root string, config yamlDocument, records []backtestExp
 	return rules, nil
 }
 
-func buildDistillClusters(records []backtestExperience) []distillCluster {
-	byKey := map[string]*distillCluster{}
-	for _, record := range records {
-		if record.Record.Attribution.ActorKind == "uncertain" {
-			continue
-		}
-		keys := distillClusterKeys(record.Record)
-		if len(keys) == 0 {
-			continue
-		}
-		var cluster *distillCluster
-		var matchedKeys []string
-		for _, key := range keys {
-			existing := byKey[key]
-			if existing == nil {
-				continue
-			}
-			matchedKeys = append(matchedKeys, key)
-			if cluster == nil {
-				cluster = existing
-				continue
-			}
-			if cluster != existing {
-				mergeDistillClusters(byKey, cluster, existing)
-			}
-		}
-		if cluster == nil {
-			cluster = &distillCluster{Key: keys[0]}
-		} else {
-			promoteDistillClusterKeyForMatches(cluster, matchedKeys)
-		}
-		for _, key := range keys {
-			byKey[key] = cluster
-		}
-		cluster.Records = append(cluster.Records, record)
-		if cluster.Signal == "" {
-			cluster.Signal = distillRecordSignal(record.Record)
-		}
-	}
-	clusters := make([]distillCluster, 0, len(byKey))
-	seen := map[*distillCluster]bool{}
-	for _, cluster := range byKey {
-		if seen[cluster] {
-			continue
-		}
-		seen[cluster] = true
-		sort.Slice(cluster.Records, func(i, j int) bool {
-			if cluster.Records[i].RecordedAt.Equal(cluster.Records[j].RecordedAt) {
-				return cluster.Records[i].Record.ExperienceID < cluster.Records[j].Record.ExperienceID
-			}
-			return cluster.Records[i].RecordedAt.Before(cluster.Records[j].RecordedAt)
-		})
-		clusters = append(clusters, *cluster)
-	}
-	sort.Slice(clusters, func(i, j int) bool {
-		return clusters[i].Key < clusters[j].Key
-	})
-	return clusters
-}
-
-func promoteDistillClusterKeyForMatches(cluster *distillCluster, matchedKeys []string) {
-	var messageKey string
-	for _, key := range matchedKeys {
-		if !isDistillMessageKey(key) {
-			return
-		}
-		if messageKey == "" {
-			messageKey = key
-		}
-	}
-	if messageKey != "" {
-		cluster.Key = messageKey
-	}
-}
-
-func isDistillMessageKey(key string) bool {
-	return strings.HasPrefix(key, "message\x00")
-}
-
-func mergeDistillClusters(byKey map[string]*distillCluster, target *distillCluster, source *distillCluster) {
-	target.Records = append(target.Records, source.Records...)
-	if target.Signal == "" {
-		target.Signal = source.Signal
-	}
-	for key, cluster := range byKey {
-		if cluster == source {
-			byKey[key] = target
-		}
-	}
-}
-
 func distillClusterKey(record experienceRecord) string {
-	keys := distillClusterKeys(record)
-	if len(keys) > 0 {
-		return keys[0]
-	}
-	return ""
-}
-
-func distillClusterKeys(record experienceRecord) []string {
-	keys := []string{}
-	if key := distillStableSignatureKey(record); key != "" {
-		keys = append(keys, key)
-	}
-	keys = append(keys, distillCanonicalSignatureKeys(record)...)
-	return keys
-}
-
-func distillStableSignatureKey(record experienceRecord) string {
-	signatureID := strings.TrimSpace(record.Outcome.Signature.SignatureID)
-	if signatureID == "" || strings.HasPrefix(signatureID, "sig_generated") {
-		return ""
-	}
-	signatureMetadata, _ := record.Metadata["signature"].(map[string]any)
-	checkName := strings.TrimSpace(stringFromAny(signatureMetadata["check_name"]))
-	signatureKey := strings.TrimSpace(stringFromAny(signatureMetadata["key"]))
-	if checkName == "" || signatureKey == "" {
-		return ""
-	}
-	return strings.Join([]string{"id_check_key", signatureID, checkName, signatureKey}, "\x00")
-}
-
-func distillCanonicalSignatureKeys(record experienceRecord) []string {
-	signatureMetadata, _ := record.Metadata["signature"].(map[string]any)
-	signatureClass := strings.TrimSpace(stringFromAny(signatureMetadata["class"]))
-	checkName := strings.TrimSpace(stringFromAny(signatureMetadata["check_name"]))
-	signatureKey := strings.TrimSpace(stringFromAny(signatureMetadata["key"]))
-	messageFingerprint := strings.TrimSpace(stringFromAny(signatureMetadata["message_fingerprint"]))
-	keys := []string{}
-	if signatureClass != "" && checkName != "" && signatureKey != "" {
-		keys = append(keys, strings.Join([]string{"class_check_key", signatureClass, checkName, signatureKey}, "\x00"))
-	}
-	if messageFingerprint != "" {
-		keys = append(keys, strings.Join([]string{"message", messageFingerprint}, "\x00"))
-	}
-	if len(keys) == 0 {
-		keys = append(keys, strings.Join([]string{"id", record.Outcome.Signature.SignatureID}, "\x00"))
-	}
-	return keys
-}
-
-func distillRecordSignal(record experienceRecord) string {
-	signatureMetadata, _ := record.Metadata["signature"].(map[string]any)
-	for _, value := range []string{
-		stringFromAny(signatureMetadata["check_name"]),
-		stringFromAny(signatureMetadata["key"]),
-		record.Outcome.Signature.SignatureID,
-		record.Outcome.Kind,
-	} {
-		if strings.TrimSpace(value) != "" {
-			return value
-		}
-	}
-	return "signature"
+	return distilldoc.ClusterKey(record)
 }
 
 func distillClusterProvenance(embeddingMode string) string {
@@ -2552,7 +2396,7 @@ func distillScopeSignals(cluster distillCluster, records []backtestExperience) [
 		counts[cluster.Signal]++
 	}
 	for _, record := range records {
-		signal := distillRecordSignal(record.Record)
+		signal := distilldoc.RecordSignal(record.Record)
 		if signal != "" {
 			counts[signal]++
 		}
