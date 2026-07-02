@@ -1,6 +1,7 @@
 package ingest
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
@@ -170,6 +171,71 @@ func TestNormalizeRepoRequiresOwnerAndName(t *testing.T) {
 	}
 	if ingestErr.Message != "experience repo must include owner and name" {
 		t.Fatalf("Message = %q", ingestErr.Message)
+	}
+}
+
+func TestNormalizeActionAcceptsFlatAndNestedFields(t *testing.T) {
+	cases := []struct {
+		name  string
+		event map[string]any
+		want  Action
+	}{
+		{
+			name: "flat",
+			event: map[string]any{
+				"pr":     122,
+				"commit": "abc123",
+			},
+			want: Action{PR: 122, Commit: "abc123"},
+		},
+		{
+			name: "nested with commits fallback",
+			event: map[string]any{
+				"action": map[string]any{
+					"pr":      json.Number("123"),
+					"commits": []any{"def456", "ignored"},
+				},
+			},
+			want: Action{PR: 123, Commit: "def456"},
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got, ingestErr := NormalizeAction(tc.event, "input.json")
+			if ingestErr != nil {
+				t.Fatalf("NormalizeAction error: %v", ingestErr)
+			}
+			if got != tc.want {
+				t.Fatalf("action = %#v, want %#v", got, tc.want)
+			}
+		})
+	}
+}
+
+func TestNormalizeActionRejectsInvalidPR(t *testing.T) {
+	cases := []struct {
+		name  string
+		event map[string]any
+	}{
+		{name: "missing", event: map[string]any{"commit": "abc123"}},
+		{name: "zero", event: map[string]any{"pr": 0, "commit": "abc123"}},
+		{name: "fractional", event: map[string]any{"pr": 1.5, "commit": "abc123"}},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			_, ingestErr := NormalizeAction(tc.event, "input.json")
+			if ingestErr == nil || ingestErr.Kind != ErrorProvenance || !strings.Contains(ingestErr.Message, "experience record PR number") {
+				t.Fatalf("error = %#v, want provenance PR error", ingestErr)
+			}
+		})
+	}
+}
+
+func TestNormalizeActionRejectsMissingCommit(t *testing.T) {
+	_, ingestErr := NormalizeAction(map[string]any{"pr": 122}, "input.json")
+
+	if ingestErr == nil || ingestErr.Kind != ErrorArtifactContract || ingestErr.Message != "experience record must include commit" {
+		t.Fatalf("error = %#v, want missing commit contract error", ingestErr)
 	}
 }
 
