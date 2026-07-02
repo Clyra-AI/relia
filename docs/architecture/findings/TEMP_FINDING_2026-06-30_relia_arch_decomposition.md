@@ -213,6 +213,9 @@ Current progress:
 - `cmd/relia/config_helpers.go` now owns CLI config validation, review/memory
   option builders, command-result build options, and YAML reference helpers,
   lowering `cmd/relia/main.go` to 2,033 lines while preserving CLI behavior.
+- `cmd/relia/result_helpers.go` now owns help, pass, not-implemented, and
+  error command-result builders, lowering `cmd/relia/main.go` to 1,993 lines
+  while preserving CLI behavior.
 
 ## Candidate Package Boundaries
 
