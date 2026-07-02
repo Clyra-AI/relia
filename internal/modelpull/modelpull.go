@@ -2,9 +2,11 @@ package modelpull
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
 
 	configdoc "github.com/Clyra-AI/relia/internal/config"
+	"github.com/Clyra-AI/relia/internal/yamlmini"
 )
 
 type Options struct {
@@ -23,6 +25,26 @@ type ParseError struct {
 }
 
 func (e ParseError) Error() string {
+	return e.Message
+}
+
+type PathErrorKind string
+
+const (
+	PathErrorUsage      PathErrorKind = "usage"
+	PathErrorDependency PathErrorKind = "dependency"
+)
+
+type PathError struct {
+	Kind      PathErrorKind
+	Message   string
+	Reference string
+}
+
+func (e *PathError) Error() string {
+	if e == nil {
+		return ""
+	}
 	return e.Message
 }
 
@@ -128,5 +150,55 @@ func Manifest(options Options, cachePath string) configdoc.LocalModelManifest {
 		UpdatePolicy:   options.UpdatePolicy,
 		RollbackPolicy: options.RollbackPolicy,
 		Status:         "ready",
+	}
+}
+
+func ConfiguredManifestPath(scalars map[string]yamlmini.Scalar) string {
+	if scalar, ok := scalars["models.local_manifest"]; ok {
+		return scalar.Value
+	}
+	return ".relia/models/manifest.json"
+}
+
+func PrepareManifest(options Options, manifestRel string, configRef string) (configdoc.LocalModelManifest, string, *PathError) {
+	cleanManifestRel, ok := configdoc.CleanRepoPath(manifestRel)
+	if !ok {
+		return configdoc.LocalModelManifest{}, "", &PathError{
+			Kind:      PathErrorDependency,
+			Message:   "local model manifest path must be repo-relative",
+			Reference: configRef,
+		}
+	}
+	manifestDisplayPath := filepath.ToSlash(filepath.Clean(cleanManifestRel))
+	cleanCachePath, ok := configdoc.CleanRepoPath(options.CachePath)
+	if !ok {
+		return configdoc.LocalModelManifest{}, "", &PathError{
+			Kind:    PathErrorUsage,
+			Message: "models pull --cache-path must be repo-relative",
+		}
+	}
+	cachePath := filepath.ToSlash(filepath.Clean(cleanCachePath))
+	if cachePath == manifestDisplayPath {
+		return configdoc.LocalModelManifest{}, "", &PathError{
+			Kind:    PathErrorUsage,
+			Message: "models pull --cache-path must not equal the local model manifest path",
+		}
+	}
+	return Manifest(options, cachePath), manifestDisplayPath, nil
+}
+
+func ResultData(manifest configdoc.LocalModelManifest, manifestDisplayPath string) map[string]any {
+	return map[string]any{
+		"model_id":        manifest.ModelID,
+		"version":         manifest.Version,
+		"source_url":      manifest.SourceURL,
+		"license":         manifest.License,
+		"digest":          manifest.Digest,
+		"cache_path":      manifest.CachePath,
+		"update_policy":   manifest.UpdatePolicy,
+		"rollback_policy": manifest.RollbackPolicy,
+		"manifest_path":   manifestDisplayPath,
+		"network_used":    false,
+		"status":          manifest.Status,
 	}
 }

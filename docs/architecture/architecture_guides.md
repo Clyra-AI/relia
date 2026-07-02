@@ -259,8 +259,9 @@ mistake aggregation, and HTML report rendering;
 `internal/advise` owns advise command argument parsing, advisory comment
 decision, strategy, markdown rendering, confidence threshold handling, and
 prior-state loading, parsing, comparison, and advisory-state document helpers;
-`internal/modelpull` owns local model artifact pull argument parsing and
-manifest construction before config-owned validation and CLI-owned writes;
+`internal/modelpull` owns local model artifact pull argument parsing, manifest
+construction, path normalization, collision checks, and result payload shaping
+before config-owned validation and CLI-owned writes;
 `internal/distill` owns distill argument parsing, provider plan construction,
 request-shape description, cost estimation, embedding-mode helpers, clustering,
 canonical signature-key selection, review gate helpers, and deterministic rule
