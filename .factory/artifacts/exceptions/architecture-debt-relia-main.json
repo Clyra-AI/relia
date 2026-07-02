@@ -9,7 +9,7 @@
       "cmd/relia/main_test.go"
     ],
     "line_ceilings": {
-      "cmd/relia/main.go": 5058,
+      "cmd/relia/main.go": 4902,
       "cmd/relia/main_test.go": 4200
     },
     "budget": {
@@ -47,6 +47,8 @@
     "internal/backtest/report_test.go",
     "internal/distill/args.go",
     "internal/distill/args_test.go",
+    "internal/distill/cluster.go",
+    "internal/distill/cluster_test.go",
     "internal/distill/provider.go",
     "internal/distill/provider_test.go",
     "internal/ingest/args.go",
@@ -69,5 +71,5 @@
     "cmd/relia/ingest_security_test.go",
     "docs/architecture/findings/TEMP_FINDING_2026-06-30_relia_arch_decomposition.md"
   ],
-  "last_reduced_at": "2026-07-01T00:00:00Z"
+  "last_reduced_at": "2026-07-02T00:00:00Z"
 }
