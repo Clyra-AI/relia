@@ -9,7 +9,7 @@
       "cmd/relia/main_test.go"
     ],
     "line_ceilings": {
-      "cmd/relia/main.go": 2842,
+      "cmd/relia/main.go": 2840,
       "cmd/relia/main_test.go": 1957
     },
     "budget": {

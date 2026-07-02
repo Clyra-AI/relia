@@ -282,6 +282,47 @@ func TestNormalizeProvenanceRejectsInvalidURLShape(t *testing.T) {
 	}
 }
 
+func TestNormalizeContextAcceptsExplicitDiffFingerprint(t *testing.T) {
+	got, ingestErr := NormalizeContext(map[string]any{
+		"paths":            []any{"cmd/relia/main.go"},
+		"diff_fingerprint": "sha256:explicit",
+	}, Action{PR: 124, Commit: "abc123"}, "input.json")
+
+	if ingestErr != nil {
+		t.Fatalf("NormalizeContext error: %v", ingestErr)
+	}
+	if len(got.Paths) != 1 || got.Paths[0] != "cmd/relia/main.go" {
+		t.Fatalf("Paths = %#v", got.Paths)
+	}
+	if got.DiffFingerprint != "sha256:explicit" {
+		t.Fatalf("DiffFingerprint = %q", got.DiffFingerprint)
+	}
+}
+
+func TestNormalizeContextGeneratesDiffFingerprint(t *testing.T) {
+	got, ingestErr := NormalizeContext(map[string]any{
+		"context": map[string]any{
+			"paths": []any{"cmd/relia/main.go", "internal/ingest/record_validation.go"},
+		},
+	}, Action{PR: 124, Commit: "abc123"}, "input.json")
+
+	if ingestErr != nil {
+		t.Fatalf("NormalizeContext error: %v", ingestErr)
+	}
+	want := sha256String("124|abc123|cmd/relia/main.go|internal/ingest/record_validation.go")
+	if got.DiffFingerprint != want {
+		t.Fatalf("DiffFingerprint = %q, want %q", got.DiffFingerprint, want)
+	}
+}
+
+func TestNormalizeContextRejectsMissingPaths(t *testing.T) {
+	_, ingestErr := NormalizeContext(map[string]any{}, Action{PR: 124, Commit: "abc123"}, "input.json")
+
+	if ingestErr == nil || ingestErr.Kind != ErrorArtifactContract || ingestErr.Message != "experience record must include at least one context path" {
+		t.Fatalf("error = %#v, want missing context path error", ingestErr)
+	}
+}
+
 func TestPersistRecordsWritesSortedMonthlyShardAndUpserts(t *testing.T) {
 	root := t.TempDir()
 	records := []Record{

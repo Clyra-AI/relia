@@ -1,7 +1,9 @@
 package ingest
 
 import (
+	"crypto/sha256"
 	"encoding/json"
+	"fmt"
 	"math"
 	"path/filepath"
 	"strconv"
@@ -115,6 +117,21 @@ func NormalizeProvenance(event map[string]any, ref string) (Provenance, *Error) 
 		}
 	}
 	return Provenance{URLs: urls}, nil
+}
+
+func NormalizeContext(event map[string]any, action Action, ref string) (Context, *Error) {
+	paths := stringListField(event, "paths", "context.paths")
+	if len(paths) == 0 {
+		return Context{}, artifactContractError("experience record must include at least one context path", ref)
+	}
+	context := Context{
+		Paths:           paths,
+		DiffFingerprint: stringField(event, "diff_fingerprint", "context.diff_fingerprint"),
+	}
+	if context.DiffFingerprint == "" {
+		context.DiffFingerprint = sha256String(fmt.Sprintf("%d|%s|%s", action.PR, action.Commit, strings.Join(paths, "|")))
+	}
+	return context, nil
 }
 
 func CanonicalDistillInputRecord(event map[string]any, ref string) (Record, bool, *Error) {
@@ -421,6 +438,11 @@ func uniqueStrings(values []string) []string {
 		result = append(result, value)
 	}
 	return result
+}
+
+func sha256String(value string) string {
+	digest := sha256.Sum256([]byte(value))
+	return "sha256:" + fmt.Sprintf("%x", digest)
 }
 
 func numericValue(value any) (float64, bool) {
