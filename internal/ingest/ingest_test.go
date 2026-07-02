@@ -323,6 +323,118 @@ func TestNormalizeContextRejectsMissingPaths(t *testing.T) {
 	}
 }
 
+func TestNormalizeAttributionAcceptsExplicitHuman(t *testing.T) {
+	got, skipped, ingestErr := NormalizeAttribution(map[string]any{
+		"attribution": map[string]any{
+			"actor_kind": "human",
+		},
+	}, AttributionPolicy{}, "input.json")
+
+	if ingestErr != nil {
+		t.Fatalf("NormalizeAttribution error: %v", ingestErr)
+	}
+	if skipped {
+		t.Fatal("explicit human attribution should not skip")
+	}
+	if got.ActorKind != "human" || got.Method != "manual" || got.Confidence != 1 {
+		t.Fatalf("attribution = %#v", got)
+	}
+}
+
+func TestNormalizeAttributionInfersAgentFromPolicy(t *testing.T) {
+	cases := []struct {
+		name   string
+		event  map[string]any
+		policy AttributionPolicy
+		method string
+	}{
+		{
+			name: "label",
+			event: map[string]any{
+				"labels": []any{"relia-agent"},
+			},
+			policy: AttributionPolicy{PRLabels: []string{"RELIA-AGENT"}},
+			method: "pr_label",
+		},
+		{
+			name: "coauthor",
+			event: map[string]any{
+				"coauthors": []any{"relia-bot"},
+			},
+			policy: AttributionPolicy{CoauthorTrailers: []string{"relia-bot"}},
+			method: "coauthor_trailer",
+		},
+		{
+			name: "author login",
+			event: map[string]any{
+				"actor": map[string]any{"login": "relia-bot"},
+			},
+			policy: AttributionPolicy{AgentAuthorLogins: []string{"relia-bot"}},
+			method: "bot_login",
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got, skipped, ingestErr := NormalizeAttribution(tc.event, tc.policy, "input.json")
+			if ingestErr != nil {
+				t.Fatalf("NormalizeAttribution error: %v", ingestErr)
+			}
+			if skipped {
+				t.Fatal("agent attribution should not skip")
+			}
+			if got.ActorKind != "agent" || got.Method != tc.method || got.Confidence != 0.9 {
+				t.Fatalf("attribution = %#v, want agent/%s/0.9", got, tc.method)
+			}
+		})
+	}
+}
+
+func TestNormalizeAttributionSkipsUncertainByDefault(t *testing.T) {
+	_, skipped, ingestErr := NormalizeAttribution(map[string]any{}, AttributionPolicy{}, "input.json")
+
+	if ingestErr != nil {
+		t.Fatalf("NormalizeAttribution error: %v", ingestErr)
+	}
+	if !skipped {
+		t.Fatal("uncertain attribution should skip by default")
+	}
+}
+
+func TestNormalizeAttributionIncludesUncertainWhenConfigured(t *testing.T) {
+	got, skipped, ingestErr := NormalizeAttribution(map[string]any{}, AttributionPolicy{Uncertain: "include_flagged"}, "input.json")
+
+	if ingestErr != nil {
+		t.Fatalf("NormalizeAttribution error: %v", ingestErr)
+	}
+	if skipped {
+		t.Fatal("include_flagged uncertain attribution should not skip")
+	}
+	if got.ActorKind != "uncertain" || got.Method != "uncertain" || got.Confidence != 0 {
+		t.Fatalf("attribution = %#v", got)
+	}
+}
+
+func TestNormalizeAttributionRejectsInvalidFields(t *testing.T) {
+	cases := []struct {
+		name  string
+		event map[string]any
+		want  string
+	}{
+		{name: "actor", event: map[string]any{"actor_kind": "service"}, want: "attribution actor_kind must be agent, human, or uncertain"},
+		{name: "method", event: map[string]any{"actor_kind": "agent", "attribution_method": "guess"}, want: "attribution method is invalid"},
+		{name: "confidence type", event: map[string]any{"actor_kind": "agent", "attribution_confidence": "high"}, want: "attribution confidence must be numeric"},
+		{name: "confidence range", event: map[string]any{"actor_kind": "agent", "attribution_confidence": 1.5}, want: "attribution confidence must be between 0 and 1"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			_, _, ingestErr := NormalizeAttribution(tc.event, AttributionPolicy{}, "input.json")
+			if ingestErr == nil || ingestErr.Kind != ErrorArtifactContract || ingestErr.Message != tc.want {
+				t.Fatalf("error = %#v, want %q", ingestErr, tc.want)
+			}
+		})
+	}
+}
+
 func TestNormalizeOutcomeDefaultsSignatureFields(t *testing.T) {
 	got, metadata, ingestErr := NormalizeOutcome(map[string]any{
 		"outcome_kind": "ci_failure",

@@ -134,6 +134,63 @@ func NormalizeContext(event map[string]any, action Action, ref string) (Context,
 	return context, nil
 }
 
+func NormalizeAttribution(event map[string]any, policy AttributionPolicy, ref string) (Attribution, bool, *Error) {
+	confidence := -1.0
+	if parsedConfidence, exists, commandErr := optionalFloatField(event, ref, "attribution confidence", "attribution_confidence", "attribution.confidence"); commandErr != nil {
+		return Attribution{}, false, commandErr
+	} else if exists {
+		confidence = parsedConfidence
+	}
+	attribution := Attribution{
+		ActorKind:  stringField(event, "actor_kind", "attribution.actor_kind"),
+		Method:     stringField(event, "attribution_method", "attribution.method"),
+		Confidence: confidence,
+	}
+	if attribution.ActorKind == "" {
+		switch {
+		case overlaps(stringListField(event, "labels", "pr_labels"), policy.PRLabels):
+			attribution.ActorKind = "agent"
+			attribution.Method = "pr_label"
+		case overlaps(stringListField(event, "coauthors", "coauthor_trailers"), policy.CoauthorTrailers):
+			attribution.ActorKind = "agent"
+			attribution.Method = "coauthor_trailer"
+		case containsStringValue(policy.AgentAuthorLogins, attributionActorLogin(event)):
+			attribution.ActorKind = "agent"
+			attribution.Method = "bot_login"
+		default:
+			attribution.ActorKind = "uncertain"
+			attribution.Method = "uncertain"
+		}
+	}
+	switch attribution.ActorKind {
+	case "agent", "human", "uncertain":
+	default:
+		return attribution, false, artifactContractError("attribution actor_kind must be agent, human, or uncertain", ref)
+	}
+	if attribution.ActorKind == "uncertain" && attributionUncertainPolicy(policy) == "exclude" {
+		return attribution, true, nil
+	}
+	if attribution.Method == "" {
+		if attribution.ActorKind == "human" {
+			attribution.Method = "manual"
+		} else {
+			attribution.Method = "uncertain"
+		}
+	}
+	switch attribution.Method {
+	case "bot_login", "coauthor_trailer", "pr_label", "manual", "uncertain":
+	default:
+		return attribution, false, artifactContractError("attribution method is invalid", ref)
+	}
+	if attribution.Confidence < 0 {
+		attribution.Confidence = defaultAttributionConfidence(attribution.Method)
+	}
+	if attribution.Confidence < 0 || attribution.Confidence > 1 {
+		return attribution, false, artifactContractError("attribution confidence must be between 0 and 1", ref)
+	}
+	return attribution, false, nil
+}
+
 func NormalizeOutcome(event map[string]any, action Action, paths []string, ref string) (Outcome, map[string]any, *Error) {
 	kind := stringField(event, "outcome_kind", "outcome.kind")
 	if !validOutcomeKind(kind) {
@@ -412,6 +469,19 @@ func stringField(event map[string]any, paths ...string) string {
 	return ""
 }
 
+func optionalFloatField(event map[string]any, ref string, label string, paths ...string) (float64, bool, *Error) {
+	for _, path := range paths {
+		if value, ok := nestedField(event, path); ok {
+			converted, valid := numericValue(value)
+			if !valid {
+				return 0, true, artifactContractError(label+" must be numeric", ref)
+			}
+			return converted, true, nil
+		}
+	}
+	return 0, false, nil
+}
+
 func requiredPositiveIntField(event map[string]any, ref string, fieldDescription string, paths ...string) (int, *Error) {
 	for _, path := range paths {
 		value, ok := nestedField(event, path)
@@ -606,6 +676,54 @@ func extractionMethodForConfidence(value string) string {
 		return "revert_metadata"
 	default:
 		return "structured_check_run"
+	}
+}
+
+func attributionActorLogin(event map[string]any) string {
+	return stringField(event, "actor.login", "author.login", "actor", "author")
+}
+
+func attributionUncertainPolicy(policy AttributionPolicy) string {
+	switch policy.Uncertain {
+	case "include_flagged":
+		return "include_flagged"
+	case "exclude":
+		return "exclude"
+	default:
+		return "exclude"
+	}
+}
+
+func overlaps(left []string, right []string) bool {
+	for _, candidate := range left {
+		if containsStringValue(right, candidate) {
+			return true
+		}
+	}
+	return false
+}
+
+func containsStringValue(values []string, want string) bool {
+	want = strings.TrimSpace(strings.ToLower(want))
+	if want == "" {
+		return false
+	}
+	for _, value := range values {
+		if strings.TrimSpace(strings.ToLower(value)) == want {
+			return true
+		}
+	}
+	return false
+}
+
+func defaultAttributionConfidence(method string) float64 {
+	switch method {
+	case "manual":
+		return 1
+	case "pr_label", "coauthor_trailer", "bot_login":
+		return 0.9
+	default:
+		return 0
 	}
 }
 
