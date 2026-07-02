@@ -67,6 +67,9 @@ Current progress:
   `cmd/relia/backtest_report_test.go` and
   `cmd/relia/backtest_integrity_test.go`, keeping the extracted test files
   below the architecture warning budget.
+- Memory-rule validation coverage now lives in
+  `cmd/relia/memory_validation_test.go`, continuing to shrink
+  `cmd/relia/main_test.go` without changing command behavior.
 - `internal/advise` now owns advisory comment decision, strategy, and rendering
   helpers with direct package tests, shrinking `cmd/relia/main.go` while
   keeping CLI I/O and state-file handling in the command layer.
