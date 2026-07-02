@@ -125,21 +125,20 @@ Current progress:
 - `internal/ingest` now also owns primary provenance URL selection for
   experience records, reusing its canonical GitHub URL helpers.
 - `internal/ingest` now also owns experience repo normalization with direct
-  package tests, while full experience-record assembly remains in `cmd/relia`.
+  package tests.
 - `internal/ingest` now also owns experience action normalization with direct
-  package tests, while full experience-record assembly remains in `cmd/relia`.
+  package tests.
 - `internal/ingest` now also owns experience provenance normalization with
-  direct package tests, while full experience-record assembly remains in
-  `cmd/relia`.
+  direct package tests.
 - `internal/ingest` now also owns experience context normalization and
-  deterministic fallback diff-fingerprint generation with direct package tests,
-  while full experience-record assembly remains in `cmd/relia`.
+  deterministic fallback diff-fingerprint generation with direct package tests.
 - `internal/ingest` now also owns experience outcome normalization, signature
-  defaulting, and signature metadata assembly with direct package tests, while
-  full experience-record assembly remains in `cmd/relia`.
+  defaulting, and signature metadata assembly with direct package tests.
 - `internal/ingest` now also owns experience attribution normalization and
-  uncertain-attribution skip policy with direct package tests, while full
-  experience-record assembly remains in `cmd/relia`.
+  uncertain-attribution skip policy with direct package tests.
+- `internal/ingest` now also owns full experience-record assembly and
+  deterministic generated experience IDs with direct package tests, while
+  ingest result assembly remains in `cmd/relia`.
 - `internal/distill` now also owns distill scope path/signal selection and
   drafted-rule summary metadata with direct package tests, while the CLI keeps
   filesystem writes and command-result assembly.
@@ -220,10 +219,9 @@ Current progress:
 - `internal/ingest`: ingest input parsing, fail-closed redaction, standard
   secret-token scanning, provenance URL token-shape checks, the
   experience-record data model, canonical distill input decoding, record
-  validation, repo, action, attribution, context, outcome, and provenance
-  normalization, shard persistence, and record/provenance URL helpers extracted;
-  experience-record assembly and ingest result assembly still live in
-  `cmd/relia`.
+  validation and assembly, repo, action, attribution, context, outcome, and
+  provenance normalization, shard persistence, and record/provenance URL
+  helpers extracted; ingest result assembly still lives in `cmd/relia`.
 - `internal/backtest`: backtest command argument parsing, recurrence window
   validation, recurrence report model, report diagnostics/operator
   feedback/badge helpers, top repeated mistake aggregation, HTML report

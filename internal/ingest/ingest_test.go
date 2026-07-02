@@ -435,6 +435,77 @@ func TestNormalizeAttributionRejectsInvalidFields(t *testing.T) {
 	}
 }
 
+func TestNormalizeRecordBuildsCanonicalRecord(t *testing.T) {
+	got, skipped, ingestErr := NormalizeRecord(map[string]any{
+		"repo": map[string]any{
+			"provider": "github",
+			"owner":    "acme",
+			"name":     "billing-service",
+		},
+		"recorded_at":            "2026-04-02T18:21:00Z",
+		"pr":                     json.Number("142"),
+		"commit":                 "abc1234",
+		"paths":                  []any{"packages/billing/invoice.py"},
+		"actor_kind":             "agent",
+		"attribution_method":     "pr_label",
+		"attribution_confidence": json.Number("0.9"),
+		"outcome_kind":           "ci_failure",
+		"signature_class":        "test_failure",
+		"check_name":             "pytest-billing",
+		"signature_key":          "tests/test_invoice.py::test_tz_rollover",
+		"extraction_confidence":  "structured",
+		"message":                "timezone rollover failed",
+		"provenance_urls":        []any{"https://github.com/acme/billing-service/pull/142"},
+		"flake_discount":         json.Number("0.25"),
+		"metadata":               map[string]any{"source": "fixture"},
+	}, RecordOptions{SchemaVersion: "1.0", SourceIndex: 3}, "input.json:1")
+
+	if ingestErr != nil {
+		t.Fatalf("NormalizeRecord error: %v", ingestErr)
+	}
+	if skipped {
+		t.Fatal("NormalizeRecord skipped explicit agent attribution")
+	}
+	if got.ObjectType != "relia.experience_record" || got.SchemaVersion != "1.0" {
+		t.Fatalf("record envelope = %#v", got)
+	}
+	if !strings.HasPrefix(got.ExperienceID, "exp_0142_") {
+		t.Fatalf("generated experience_id = %q", got.ExperienceID)
+	}
+	if got.RecordedAt != "2026-04-02T18:21:00Z" || got.Action.PR != 142 || got.Action.Commit != "abc1234" {
+		t.Fatalf("record action/time = %#v", got)
+	}
+	if got.FlakeDiscount != 0.25 || got.ShareScope != "private" || got.RedactionStatus != "applied" || got.OrgEligible {
+		t.Fatalf("record safety/defaults = %#v", got)
+	}
+	if got.Metadata["source_input_index"] != 3 || got.Metadata["source_kind"] != "local_input" || got.Metadata["memory_source"] != "verified_outcome_event" {
+		t.Fatalf("record metadata = %#v", got.Metadata)
+	}
+	signature, ok := got.Metadata["signature"].(map[string]any)
+	if !ok || signature["message_fingerprint"] == "" || signature["class"] != "test_failure" {
+		t.Fatalf("signature metadata = %#v", got.Metadata["signature"])
+	}
+}
+
+func TestNormalizeRecordSkipsUncertainAttribution(t *testing.T) {
+	_, skipped, ingestErr := NormalizeRecord(map[string]any{
+		"repo":            "acme/billing-service",
+		"recorded_at":     "2026-04-02T18:21:00Z",
+		"pr":              142,
+		"commit":          "abc1234",
+		"paths":           []any{"packages/billing/invoice.py"},
+		"outcome_kind":    "merged_clean",
+		"provenance_urls": []any{"https://github.com/acme/billing-service/pull/142"},
+	}, RecordOptions{SchemaVersion: "1.0"}, "input.json:1")
+
+	if ingestErr != nil {
+		t.Fatalf("NormalizeRecord error: %v", ingestErr)
+	}
+	if !skipped {
+		t.Fatal("NormalizeRecord should skip uncertain attribution by default")
+	}
+}
+
 func TestNormalizeOutcomeDefaultsSignatureFields(t *testing.T) {
 	got, metadata, ingestErr := NormalizeOutcome(map[string]any{
 		"outcome_kind": "ci_failure",

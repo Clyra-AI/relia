@@ -10,7 +10,6 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
-	"strconv"
 	"strings"
 	"time"
 
@@ -639,8 +638,8 @@ func loadBacktestExperiences(root string) ([]backtestExperience, []string, strin
 				return nil, nil, "", artifactContractError(fmt.Sprintf("experience shard line %d is not valid JSON", lineNumber+1), fmt.Sprintf("%s:%d", rel, lineNumber+1))
 			}
 			shardDigestLines = append(shardDigestLines, experienceDigestLine(event))
-			if commandErr := validateEventMemorySource(event, ref); commandErr != nil {
-				return nil, nil, "", commandErr
+			if ingestErr := ingestdoc.ValidateEventMemorySource(event, ref); ingestErr != nil {
+				return nil, nil, "", commandErrorFromIngest(ingestErr)
 			}
 			content, err := json.Marshal(event)
 			if err != nil {
@@ -1904,120 +1903,12 @@ func decodeJSONUseNumber(input string, target any) error {
 }
 
 func normalizeExperienceRecord(config yamlDocument, event map[string]any, index int, ref string) (experienceRecord, bool, *CommandError) {
-	if commandErr := validateEventMemorySource(event, ref); commandErr != nil {
-		return experienceRecord{}, false, commandErr
-	}
-	repo, commandErr := normalizeExperienceRepo(event, ref)
-	if commandErr != nil {
-		return experienceRecord{}, false, commandErr
-	}
-	recordedAt := stringField(event, "recorded_at")
-	if recordedAt == "" {
-		return experienceRecord{}, false, artifactContractError("experience record missing recorded_at", ref)
-	}
-	parsedRecordedAt, err := time.Parse(time.RFC3339, recordedAt)
-	if err != nil {
-		return experienceRecord{}, false, artifactContractError("experience record recorded_at must be RFC3339", ref)
-	}
-	action, commandErr := normalizeExperienceAction(event, ref)
-	if commandErr != nil {
-		return experienceRecord{}, false, commandErr
-	}
-	attribution, skipped, commandErr := normalizeExperienceAttribution(config, event, ref)
-	if commandErr != nil || skipped {
-		return experienceRecord{}, skipped, commandErr
-	}
-	context, commandErr := normalizeExperienceContext(event, action, ref)
-	if commandErr != nil {
-		return experienceRecord{}, false, commandErr
-	}
-	outcome, signatureMetadata, commandErr := normalizeExperienceOutcome(event, action, context.Paths, ref)
-	if commandErr != nil {
-		return experienceRecord{}, false, commandErr
-	}
-	provenance, commandErr := normalizeExperienceProvenance(event, ref)
-	if commandErr != nil {
-		return experienceRecord{}, false, commandErr
-	}
-	flakeDiscount := 0.0
-	if parsedFlakeDiscount, exists, commandErr := optionalFloatField(event, ref, "flake_discount", "flake_discount"); commandErr != nil {
-		return experienceRecord{}, false, commandErr
-	} else if exists {
-		flakeDiscount = parsedFlakeDiscount
-	}
-	if flakeDiscount < 0 || flakeDiscount > 1 {
-		return experienceRecord{}, false, artifactContractError("flake_discount must be between 0 and 1", ref)
-	}
-	metadata := metadataField(event)
-	metadata["source_input_index"] = index
-	metadata["source_kind"] = "local_input"
-	metadata["memory_source"] = "verified_outcome_event"
-	metadata["signature"] = signatureMetadata
-	experienceID := stringField(event, "experience_id")
-	if experienceID == "" {
-		experienceID = generatedExperienceID(action, parsedRecordedAt, outcome, signatureMetadata, provenance)
-	}
-	return experienceRecord{
-		ObjectType:      "relia.experience_record",
-		SchemaVersion:   commandSchemaVersion,
-		ExperienceID:    experienceID,
-		Repo:            repo,
-		RecordedAt:      parsedRecordedAt.UTC().Format(time.RFC3339),
-		Attribution:     attribution,
-		Context:         context,
-		Action:          action,
-		Outcome:         outcome,
-		Provenance:      provenance,
-		FlakeDiscount:   flakeDiscount,
-		OrgEligible:     false,
-		ShareScope:      "private",
-		RedactionStatus: "applied",
-		Metadata:        metadata,
-	}, false, nil
-}
-
-func validateEventMemorySource(event map[string]any, ref string) *CommandError {
-	return commandErrorFromIngest(ingestdoc.ValidateEventMemorySource(event, ref))
-}
-
-func generatedExperienceID(action experienceAction, recordedAt time.Time, outcome experienceOutcome, signatureMetadata map[string]any, provenance experienceProvenance) string {
-	provenanceURLs := append([]string(nil), provenance.URLs...)
-	sort.Strings(provenanceURLs)
-	identityParts := []string{
-		strconv.Itoa(action.PR),
-		action.Commit,
-		recordedAt.UTC().Format(time.RFC3339),
-		outcome.Kind,
-		outcome.TerminalState,
-		outcome.Signature.SignatureID,
-		outcome.Signature.ExtractionConfidence,
-		stringFromAny(signatureMetadata["class"]),
-		stringFromAny(signatureMetadata["check_name"]),
-		stringFromAny(signatureMetadata["key"]),
-		stringFromAny(signatureMetadata["message_fingerprint"]),
-	}
-	identityParts = append(identityParts, provenanceURLs...)
-	return fmt.Sprintf("exp_%04d_%s", action.PR, shortHash(strings.Join(identityParts, "\x00")))
-}
-
-func normalizeExperienceRepo(event map[string]any, ref string) (experienceRepo, *CommandError) {
-	repo, ingestErr := ingestdoc.NormalizeRepo(event, ref)
-	return repo, commandErrorFromIngest(ingestErr)
-}
-
-func normalizeExperienceAction(event map[string]any, ref string) (experienceAction, *CommandError) {
-	action, ingestErr := ingestdoc.NormalizeAction(event, ref)
-	return action, commandErrorFromIngest(ingestErr)
-}
-
-func normalizeExperienceContext(event map[string]any, action experienceAction, ref string) (experienceContext, *CommandError) {
-	context, ingestErr := ingestdoc.NormalizeContext(event, action, ref)
-	return context, commandErrorFromIngest(ingestErr)
-}
-
-func normalizeExperienceAttribution(config yamlDocument, event map[string]any, ref string) (experienceAttribution, bool, *CommandError) {
-	attribution, skipped, ingestErr := ingestdoc.NormalizeAttribution(event, attributionPolicy(config), ref)
-	return attribution, skipped, commandErrorFromIngest(ingestErr)
+	record, skipped, ingestErr := ingestdoc.NormalizeRecord(event, ingestdoc.RecordOptions{
+		SchemaVersion:     commandSchemaVersion,
+		AttributionPolicy: attributionPolicy(config),
+		SourceIndex:       index,
+	}, ref)
+	return record, skipped, commandErrorFromIngest(ingestErr)
 }
 
 func attributionPolicy(document yamlDocument) ingestdoc.AttributionPolicy {
@@ -2036,16 +1927,6 @@ func attributionPolicy(document yamlDocument) ingestdoc.AttributionPolicy {
 		}
 	}
 	return policy
-}
-
-func normalizeExperienceOutcome(event map[string]any, action experienceAction, paths []string, ref string) (experienceOutcome, map[string]any, *CommandError) {
-	outcome, metadata, ingestErr := ingestdoc.NormalizeOutcome(event, action, paths, ref)
-	return outcome, metadata, commandErrorFromIngest(ingestErr)
-}
-
-func normalizeExperienceProvenance(event map[string]any, ref string) (experienceProvenance, *CommandError) {
-	provenance, ingestErr := ingestdoc.NormalizeProvenance(event, ref)
-	return provenance, commandErrorFromIngest(ingestErr)
 }
 
 func persistExperienceRecords(root string, records []experienceRecord) ([]string, *CommandError) {
@@ -2076,135 +1957,6 @@ func gitHubPullRequestURLMatchesExperience(value string, record experienceRecord
 
 func gitHubPullRequestURLForExperience(record experienceRecord) string {
 	return ingestdoc.GitHubPullRequestURLForRecord(record)
-}
-
-func nestedField(event map[string]any, path string) (any, bool) {
-	parts := strings.Split(path, ".")
-	var current any = event
-	for _, part := range parts {
-		mapping, ok := current.(map[string]any)
-		if !ok {
-			return nil, false
-		}
-		current, ok = mapping[part]
-		if !ok {
-			return nil, false
-		}
-	}
-	return current, true
-}
-
-func stringField(event map[string]any, paths ...string) string {
-	for _, path := range paths {
-		if value, ok := nestedField(event, path); ok {
-			if converted := stringFromAny(value); converted != "" {
-				return converted
-			}
-		}
-	}
-	return ""
-}
-
-func floatField(event map[string]any, fallback float64, paths ...string) float64 {
-	for _, path := range paths {
-		if value, ok := nestedField(event, path); ok {
-			if converted, ok := numericValue(value); ok {
-				return converted
-			}
-		}
-	}
-	return fallback
-}
-
-func optionalFloatField(event map[string]any, ref string, label string, paths ...string) (float64, bool, *CommandError) {
-	for _, path := range paths {
-		if value, ok := nestedField(event, path); ok {
-			converted, valid := numericValue(value)
-			if !valid {
-				return 0, true, artifactContractError(label+" must be numeric", ref)
-			}
-			return converted, true, nil
-		}
-	}
-	return 0, false, nil
-}
-
-func numericValue(value any) (float64, bool) {
-	switch typed := value.(type) {
-	case float64:
-		if math.IsNaN(typed) || math.IsInf(typed, 0) {
-			return 0, false
-		}
-		return typed, true
-	case int:
-		return float64(typed), true
-	case json.Number:
-		converted, err := typed.Float64()
-		if err == nil && !math.IsNaN(converted) && !math.IsInf(converted, 0) {
-			return converted, true
-		}
-	case string:
-		trimmed := strings.TrimSpace(typed)
-		if trimmed == "" {
-			return 0, false
-		}
-		converted, err := strconv.ParseFloat(trimmed, 64)
-		if err == nil && !math.IsNaN(converted) && !math.IsInf(converted, 0) {
-			return converted, true
-		}
-	}
-	return 0, false
-}
-
-func stringListField(event map[string]any, paths ...string) []string {
-	for _, path := range paths {
-		if value, ok := nestedField(event, path); ok {
-			switch typed := value.(type) {
-			case []any:
-				var result []string
-				for _, item := range typed {
-					if converted := stringFromAny(item); converted != "" {
-						result = append(result, converted)
-					}
-				}
-				if len(result) > 0 {
-					return result
-				}
-			case []string:
-				if len(typed) > 0 {
-					return typed
-				}
-			case string:
-				if strings.TrimSpace(typed) != "" {
-					return []string{strings.TrimSpace(typed)}
-				}
-			}
-		}
-	}
-	return nil
-}
-
-func metadataField(event map[string]any) map[string]any {
-	metadata := map[string]any{}
-	if value, ok := nestedField(event, "metadata"); ok {
-		if source, ok := value.(map[string]any); ok {
-			for key, item := range source {
-				metadata[key] = item
-			}
-		}
-	}
-	return metadata
-}
-
-func stringFromAny(value any) string {
-	switch typed := value.(type) {
-	case string:
-		return strings.TrimSpace(typed)
-	case fmt.Stringer:
-		return strings.TrimSpace(typed.String())
-	default:
-		return ""
-	}
 }
 
 func sha256String(value string) string {

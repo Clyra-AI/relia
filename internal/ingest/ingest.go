@@ -66,6 +66,12 @@ type Record struct {
 	Metadata        map[string]any `json:"metadata"`
 }
 
+type RecordOptions struct {
+	SchemaVersion     string
+	AttributionPolicy AttributionPolicy
+	SourceIndex       int
+}
+
 type Repo struct {
 	Provider string `json:"provider"`
 	Owner    string `json:"owner"`

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -255,6 +256,79 @@ func NormalizeOutcome(event map[string]any, action Action, paths []string, ref s
 	}, metadata, nil
 }
 
+func NormalizeRecord(event map[string]any, options RecordOptions, ref string) (Record, bool, *Error) {
+	if commandErr := ValidateEventMemorySource(event, ref); commandErr != nil {
+		return Record{}, false, commandErr
+	}
+	repo, commandErr := NormalizeRepo(event, ref)
+	if commandErr != nil {
+		return Record{}, false, commandErr
+	}
+	recordedAt := stringField(event, "recorded_at")
+	if recordedAt == "" {
+		return Record{}, false, artifactContractError("experience record missing recorded_at", ref)
+	}
+	parsedRecordedAt, err := time.Parse(time.RFC3339, recordedAt)
+	if err != nil {
+		return Record{}, false, artifactContractError("experience record recorded_at must be RFC3339", ref)
+	}
+	action, commandErr := NormalizeAction(event, ref)
+	if commandErr != nil {
+		return Record{}, false, commandErr
+	}
+	attribution, skipped, commandErr := NormalizeAttribution(event, options.AttributionPolicy, ref)
+	if commandErr != nil || skipped {
+		return Record{}, skipped, commandErr
+	}
+	context, commandErr := NormalizeContext(event, action, ref)
+	if commandErr != nil {
+		return Record{}, false, commandErr
+	}
+	outcome, signatureMetadata, commandErr := NormalizeOutcome(event, action, context.Paths, ref)
+	if commandErr != nil {
+		return Record{}, false, commandErr
+	}
+	provenance, commandErr := NormalizeProvenance(event, ref)
+	if commandErr != nil {
+		return Record{}, false, commandErr
+	}
+	flakeDiscount := 0.0
+	if parsedFlakeDiscount, exists, commandErr := optionalFloatField(event, ref, "flake_discount", "flake_discount"); commandErr != nil {
+		return Record{}, false, commandErr
+	} else if exists {
+		flakeDiscount = parsedFlakeDiscount
+	}
+	if flakeDiscount < 0 || flakeDiscount > 1 {
+		return Record{}, false, artifactContractError("flake_discount must be between 0 and 1", ref)
+	}
+	metadata := metadataField(event)
+	metadata["source_input_index"] = options.SourceIndex
+	metadata["source_kind"] = "local_input"
+	metadata["memory_source"] = "verified_outcome_event"
+	metadata["signature"] = signatureMetadata
+	experienceID := stringField(event, "experience_id")
+	if experienceID == "" {
+		experienceID = generatedExperienceID(action, parsedRecordedAt, outcome, signatureMetadata, provenance)
+	}
+	return Record{
+		ObjectType:      "relia.experience_record",
+		SchemaVersion:   options.SchemaVersion,
+		ExperienceID:    experienceID,
+		Repo:            repo,
+		RecordedAt:      parsedRecordedAt.UTC().Format(time.RFC3339),
+		Attribution:     attribution,
+		Context:         context,
+		Action:          action,
+		Outcome:         outcome,
+		Provenance:      provenance,
+		FlakeDiscount:   flakeDiscount,
+		OrgEligible:     false,
+		ShareScope:      "private",
+		RedactionStatus: "applied",
+		Metadata:        metadata,
+	}, false, nil
+}
+
 func CanonicalDistillInputRecord(event map[string]any, ref string) (Record, bool, *Error) {
 	if stringField(event, "object_type") != "relia.experience_record" {
 		return Record{}, false, nil
@@ -401,6 +475,38 @@ func validateRecordMemorySource(record Record, ref string) *Error {
 		}
 	}
 	return nil
+}
+
+func generatedExperienceID(action Action, recordedAt time.Time, outcome Outcome, signatureMetadata map[string]any, provenance Provenance) string {
+	provenanceURLs := append([]string(nil), provenance.URLs...)
+	sort.Strings(provenanceURLs)
+	identityParts := []string{
+		strconv.Itoa(action.PR),
+		action.Commit,
+		recordedAt.UTC().Format(time.RFC3339),
+		outcome.Kind,
+		outcome.TerminalState,
+		outcome.Signature.SignatureID,
+		outcome.Signature.ExtractionConfidence,
+		stringFromAny(signatureMetadata["class"]),
+		stringFromAny(signatureMetadata["check_name"]),
+		stringFromAny(signatureMetadata["key"]),
+		stringFromAny(signatureMetadata["message_fingerprint"]),
+	}
+	identityParts = append(identityParts, provenanceURLs...)
+	return fmt.Sprintf("exp_%04d_%s", action.PR, shortHash(strings.Join(identityParts, "\x00")))
+}
+
+func metadataField(event map[string]any) map[string]any {
+	metadata := map[string]any{}
+	if value, ok := nestedField(event, "metadata"); ok {
+		if source, ok := value.(map[string]any); ok {
+			for key, item := range source {
+				metadata[key] = item
+			}
+		}
+	}
+	return metadata
 }
 
 func metadataStringField(metadata map[string]any, paths ...string) string {
