@@ -162,7 +162,6 @@ type topRepeatedMistake = backtestdoc.TopRepeatedMistake
 type backtestFlakeDiscount = backtestdoc.FlakeDiscount
 type backtestUncertain = backtestdoc.Uncertain
 type baselineComparison = backtestdoc.BaselineComparison
-type backtestGateResult = backtestdoc.GateResult
 type backtestCitation = backtestdoc.Citation
 type reportDiagnostic = backtestdoc.ReportDiagnostic
 type reportOperatorFeedback = backtestdoc.OperatorFeedback
@@ -604,7 +603,7 @@ func backtestResult(args []string, start time.Time) CommandResult {
 		result.ExitCode = ExitGate
 		result.Errors = append(result.Errors, CommandError{
 			Type:        "recurrence_gate_failed",
-			Message:     fmt.Sprintf("headline ERR %.4f exceeds configured gate %.4f", report.HeadlineERR, backtestGateThresholdValue(report.Gate)),
+			Message:     fmt.Sprintf("headline ERR %.4f exceeds configured gate %.4f", report.HeadlineERR, backtestdoc.GateThresholdValue(report.Gate)),
 			ExitCode:    ExitGate,
 			Remediation: "Leave gate.enabled false for advisory-only MVP behavior or raise the explicit threshold after reviewing the recurrence report.",
 			Ref:         report.Gate.Ref,
@@ -896,7 +895,7 @@ func buildRecurrenceReport(root string, config yamlDocument, records []backtestE
 	if commandErr != nil {
 		return recurrenceReport{}, commandErr
 	}
-	gate := backtestGate(config, summary.HeadlineERR)
+	gate := backtestdoc.BuildGate(config, summary.HeadlineERR)
 	metadata := backtestdoc.BuildReportMetadata(records, windowRecords, windowDays, sourceDigest)
 	report := recurrenceReport{
 		ObjectType:           "relia.recurrence_report",
@@ -1266,50 +1265,6 @@ func compareBacktestBaseline(root string, baselinePath string, headlineERR float
 		return baselineComparison{}, internalError("could not compare ERR baseline", err)
 	}
 	return baseline, nil
-}
-
-func backtestGate(config yamlDocument, headlineERR float64) backtestGateResult {
-	enabled := false
-	ref := defaultConfigFile
-	if scalar, ok := config.Scalars["gate.enabled"]; ok {
-		enabled = scalar.Value == "true"
-		ref = configRef(scalar)
-	}
-	if !enabled {
-		return backtestGateResult{
-			Enabled: false,
-			Status:  "off",
-			Reason:  "Recurrence gate is available but disabled by default for advisory-only MVP behavior.",
-			Ref:     ref,
-		}
-	}
-	threshold := 1.0
-	if scalar, ok := config.Scalars["gate.max_error_recurrence_rate"]; ok {
-		if parsed, err := strconv.ParseFloat(scalar.Value, 64); err == nil && parsed >= 0 && parsed <= 1 {
-			threshold = parsed
-			ref = configRef(scalar)
-		}
-	}
-	status := "pass"
-	reason := "Headline ERR is within the configured recurrence gate."
-	if headlineERR > threshold {
-		status = "fail"
-		reason = "Headline ERR exceeds the configured recurrence gate."
-	}
-	return backtestGateResult{
-		Enabled:   true,
-		Status:    status,
-		Threshold: &threshold,
-		Reason:    reason,
-		Ref:       ref,
-	}
-}
-
-func backtestGateThresholdValue(gate backtestGateResult) float64 {
-	if gate.Threshold == nil {
-		return 0
-	}
-	return *gate.Threshold
 }
 
 func writeBacktestReports(root string, report recurrenceReport, reportDir string) (string, string, *CommandError) {

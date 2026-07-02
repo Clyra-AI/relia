@@ -163,6 +163,9 @@ Current progress:
 - `internal/backtest` now also owns interactive backtest human-output detail
   rendering with direct package tests, while the CLI keeps terminal selection
   and generic command-result envelope rendering.
+- `internal/backtest` now also owns recurrence gate policy and threshold
+  projection with direct package tests, while the CLI keeps gate failure
+  presentation and exit-code mapping.
 
 ## Candidate Package Boundaries
 
@@ -186,9 +189,9 @@ Current progress:
   feedback/badge helpers, top repeated mistake aggregation, HTML report
   rendering, human-output detail rendering, ERR baseline comparison, report
   repo ID derivation, and ingest freshness metadata selection, recurrence
-  report ID generation, report windowing, recurrence metrics assembly, and
-  report metadata assembly extracted; baseline/report file persistence and
-  report generation orchestration remain candidates.
+  report ID generation, report windowing, recurrence metrics assembly, report
+  metadata assembly, and recurrence gate policy extracted; baseline/report
+  file persistence and report generation orchestration remain candidates.
 - `internal/distill`: rule drafting and lifecycle state.
 - `internal/serve`: advisory serving snapshot behavior.
 - `internal/demo`: deterministic demo fixture behavior.
