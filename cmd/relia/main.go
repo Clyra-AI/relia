@@ -2144,21 +2144,21 @@ func buildDistilledRules(root string, config yamlDocument, records []backtestExp
 
 	var rules []distilledRule
 	for _, cluster := range clusters {
-		failures := distillFailureEvidence(cluster.Records)
-		positives := distillPositiveEvidence(cluster.Records)
-		if len(failures) > 0 && !allDistillEvidenceDiscounted(failures, flakeHeuristics) {
-			rule, ok := buildDistilledRule(root, "avoid", cluster, failures, distillAvoidContradictions(failures, positives), anchor, sourceArtifacts, sourceDigest, provider, embeddingMode, reviewRequired, options, flakeHeuristics)
+		failures := distilldoc.FailureEvidence(cluster.Records)
+		positives := distilldoc.PositiveEvidence(cluster.Records)
+		if len(failures) > 0 && !distilldoc.AllEvidenceDiscounted(failures, flakeHeuristics) {
+			rule, ok := buildDistilledRule(root, "avoid", cluster, failures, distilldoc.AvoidContradictions(failures, positives), anchor, sourceArtifacts, sourceDigest, provider, embeddingMode, reviewRequired, options, flakeHeuristics)
 			if ok {
 				rules = append(rules, rule)
 			}
 		}
-		held := distillHeldEvidence(cluster.Records)
+		held := distilldoc.HeldEvidence(cluster.Records)
 		if len(held) > 0 {
 			playbookEvidence := positives
 			if len(playbookEvidence) == 0 {
 				playbookEvidence = held
 			}
-			contradictions := distillPlaybookContradictions(playbookEvidence, failures)
+			contradictions := distilldoc.PlaybookContradictions(playbookEvidence, failures)
 			rule, ok := buildDistilledRule(root, "playbook", cluster, playbookEvidence, contradictions, anchor, sourceArtifacts, sourceDigest, provider, embeddingMode, reviewRequired, options, flakeHeuristics)
 			if ok {
 				rules = append(rules, rule)
@@ -2186,87 +2186,6 @@ func distillClusterProvenance(embeddingMode string) string {
 	default:
 		return "unknown"
 	}
-}
-
-func distillFailureEvidence(records []backtestExperience) []backtestExperience {
-	var evidence []backtestExperience
-	for _, record := range records {
-		if isFailureOutcome(record.Record.Outcome.Kind) {
-			evidence = append(evidence, record)
-		}
-	}
-	return evidence
-}
-
-func distillPositiveEvidence(records []backtestExperience) []backtestExperience {
-	var evidence []backtestExperience
-	for _, record := range records {
-		switch record.Record.Outcome.Kind {
-		case "fix_held", "merged_clean":
-			evidence = append(evidence, record)
-		}
-	}
-	return evidence
-}
-
-func distillHeldEvidence(records []backtestExperience) []backtestExperience {
-	var evidence []backtestExperience
-	for _, record := range records {
-		if record.Record.Outcome.Kind == "fix_held" {
-			evidence = append(evidence, record)
-		}
-	}
-	return evidence
-}
-
-func allDistillEvidenceDiscounted(records []backtestExperience, flakeHeuristics map[string]string) bool {
-	if len(records) == 0 {
-		return true
-	}
-	for _, record := range records {
-		if distillFlakeDiscount(record, flakeHeuristics) < 0.75 {
-			return false
-		}
-	}
-	return true
-}
-
-func distillPlaybookContradictions(positives []backtestExperience, failures []backtestExperience) int {
-	if len(positives) == 0 || len(failures) == 0 {
-		return 0
-	}
-	latestPositive := positives[0].RecordedAt
-	for _, record := range positives[1:] {
-		if record.RecordedAt.After(latestPositive) {
-			latestPositive = record.RecordedAt
-		}
-	}
-	contradictions := 0
-	for _, failure := range failures {
-		if failure.RecordedAt.After(latestPositive) {
-			contradictions++
-		}
-	}
-	return contradictions
-}
-
-func distillAvoidContradictions(failures []backtestExperience, positives []backtestExperience) int {
-	if len(failures) == 0 || len(positives) == 0 {
-		return 0
-	}
-	latestFailure := failures[0].RecordedAt
-	for _, failure := range failures[1:] {
-		if failure.RecordedAt.After(latestFailure) {
-			latestFailure = failure.RecordedAt
-		}
-	}
-	contradictions := 0
-	for _, positive := range positives {
-		if positive.RecordedAt.After(latestFailure) {
-			contradictions++
-		}
-	}
-	return contradictions
 }
 
 func buildDistilledRule(root string, kind string, cluster distillCluster, evidence []backtestExperience, contradictions int, anchor time.Time, sourceArtifacts []string, sourceDigest string, provider string, embeddingMode string, reviewRequired bool, options distillOptions, flakeHeuristics map[string]string) (distilledRule, bool) {
@@ -2387,7 +2306,7 @@ func distilledConfidenceMetadata(records []backtestExperience, contradictions in
 		}
 		recencyTotal += math.Pow(0.5, ageDays/float64(halfLifeDays))
 		extractionTotal += extractionConfidenceScore(record.Record.Outcome.Signature.ExtractionConfidence)
-		flakeTotal += distillFlakeDiscount(record, flakeHeuristics)
+		flakeTotal += distilldoc.FlakeDiscount(record, flakeHeuristics)
 	}
 	count := float64(len(records))
 	evidenceScore := math.Sqrt(count) / math.Sqrt(3)
@@ -2433,20 +2352,6 @@ func extractionConfidenceScore(value string) float64 {
 	default:
 		return 0.2
 	}
-}
-
-func distillFlakeDiscount(record backtestExperience, flakeHeuristics map[string]string) float64 {
-	discount := record.Record.FlakeDiscount
-	if flakeHeuristics[record.Record.ExperienceID] != "" && discount < 1 {
-		discount = 1
-	}
-	if discount < 0 {
-		return 0
-	}
-	if discount > 1 {
-		return 1
-	}
-	return discount
 }
 
 func confidenceLabel(confidence float64) string {

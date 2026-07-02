@@ -9,8 +9,8 @@
       "cmd/relia/main_test.go"
     ],
     "line_ceilings": {
-      "cmd/relia/main.go": 4068,
-      "cmd/relia/main_test.go": 1982
+      "cmd/relia/main.go": 3973,
+      "cmd/relia/main_test.go": 1957
     },
     "budget": {
       "warn_line_threshold": 1200,
@@ -51,6 +51,8 @@
     "internal/distill/args_test.go",
     "internal/distill/cluster.go",
     "internal/distill/cluster_test.go",
+    "internal/distill/evidence.go",
+    "internal/distill/evidence_test.go",
     "internal/distill/provider.go",
     "internal/distill/provider_test.go",
     "internal/distill/rule.go",
