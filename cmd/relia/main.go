@@ -1457,9 +1457,9 @@ func adviseResult(args []string, start time.Time) CommandResult {
 		return withFormat(errorResult("advise", "advise", commandErr, start))
 	}
 	diffFingerprint := sha256String(string(inputContent))
-	previousState, commandErr := advisoryPreviousState(root, options.StatePath)
-	if commandErr != nil {
-		return withFormat(errorResult("advise", "advise", commandErr, start))
+	previousState, stateErr := advisedoc.LoadPriorState(root, options.StatePath)
+	if stateErr != nil {
+		return withFormat(errorResult("advise", "advise", commandErrorFromAdviseState(stateErr), start))
 	}
 	shouldComment, skipReason := advisedoc.CommentDecision(settings, assessment, diffFingerprint, previousState, start)
 	body := ""
@@ -1542,44 +1542,6 @@ func adviseResult(args []string, start time.Time) CommandResult {
 		result.EvidenceRefs = append(result.EvidenceRefs, rule.Path)
 	}
 	return withFormat(result)
-}
-
-type advisoryPriorState = advisedoc.PriorState
-
-func advisoryPreviousState(root string, statePath string) (advisoryPriorState, *CommandError) {
-	clean, ok := configdoc.CleanRepoPath(statePath)
-	if !ok {
-		return advisoryPriorState{}, usageError("advise --state must be repo-relative")
-	}
-	content, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(filepath.ToSlash(clean))))
-	if err != nil {
-		if errors.Is(err, os.ErrNotExist) {
-			return advisoryPriorState{}, nil
-		}
-		return advisoryPriorState{}, internalError("could not read prior advisory state", err)
-	}
-	var state map[string]any
-	if err := json.Unmarshal(content, &state); err != nil {
-		return advisoryPriorState{}, artifactContractError("prior advisory state is not valid JSON", filepath.ToSlash(clean))
-	}
-	prior := advisoryPriorState{}
-	fingerprint, _ := state["diff_fingerprint"].(string)
-	prior.DiffFingerprint = fingerprint
-	prior.SkipReason, _ = state["skip_reason"].(string)
-	if metadata, ok := state["metadata"].(map[string]any); ok {
-		if generatedAt, _ := metadata["generated_at"].(string); generatedAt != "" {
-			if parsed, err := time.Parse(time.RFC3339, generatedAt); err == nil {
-				prior.GeneratedAt = parsed
-			}
-		}
-		prior.RiskLevel, _ = metadata["risk_level"].(string)
-	}
-	if assessment, ok := state["assessment"].(map[string]any); ok {
-		if riskLevel, _ := assessment["risk_level"].(string); riskLevel != "" && prior.RiskLevel == "" {
-			prior.RiskLevel = riskLevel
-		}
-	}
-	return prior, nil
 }
 
 func writeRepoRelativeFile(root string, rel string, content []byte, label string) *CommandError {
@@ -2806,6 +2768,22 @@ func commandErrorFromIngest(ingestErr *ingestdoc.Error) *CommandError {
 		return redactionSafetyError(ingestErr.Message, ingestErr.Ref)
 	default:
 		return internalError(ingestErr.Message, nil)
+	}
+}
+
+func commandErrorFromAdviseState(stateErr *advisedoc.StateError) *CommandError {
+	if stateErr == nil {
+		return nil
+	}
+	switch stateErr.Kind {
+	case advisedoc.StateErrorUsage:
+		return usageError(stateErr.Message)
+	case advisedoc.StateErrorArtifactContract:
+		return artifactContractError(stateErr.Message, stateErr.Ref)
+	case advisedoc.StateErrorInternal:
+		return internalError(stateErr.Message, stateErr.Err)
+	default:
+		return internalError(stateErr.Message, stateErr.Err)
 	}
 }
 
