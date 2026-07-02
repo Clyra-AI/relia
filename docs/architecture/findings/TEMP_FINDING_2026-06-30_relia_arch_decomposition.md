@@ -231,6 +231,8 @@ Current progress:
   lowering `cmd/relia/main.go` to 1,504 lines while preserving CLI behavior.
 - `cmd/relia/assess_command.go` now owns the `assess` command handler,
   lowering `cmd/relia/main.go` to 1,435 lines while preserving CLI behavior.
+- `cmd/relia/ingest_command.go` now owns the `ingest` command handler,
+  lowering `cmd/relia/main.go` to 1,337 lines while preserving CLI behavior.
 
 ## Candidate Package Boundaries
 
