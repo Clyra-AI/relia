@@ -239,6 +239,49 @@ func TestNormalizeActionRejectsMissingCommit(t *testing.T) {
 	}
 }
 
+func TestNormalizeProvenanceCollectsAndDeduplicatesURLs(t *testing.T) {
+	got, ingestErr := NormalizeProvenance(map[string]any{
+		"provenance_urls": []any{
+			"https://github.com/acme/billing/pull/122",
+			"https://github.com/acme/billing/pull/122",
+		},
+		"provenance": map[string]any{
+			"check_run_url": "https://github.com/acme/billing/actions/runs/123",
+			"revert_url":    "https://github.com/acme/billing/pull/123",
+		},
+	}, "input.json")
+
+	if ingestErr != nil {
+		t.Fatalf("NormalizeProvenance error: %v", ingestErr)
+	}
+	want := []string{
+		"https://github.com/acme/billing/pull/122",
+		"https://github.com/acme/billing/actions/runs/123",
+		"https://github.com/acme/billing/pull/123",
+	}
+	if strings.Join(got.URLs, "\n") != strings.Join(want, "\n") {
+		t.Fatalf("URLs = %#v, want %#v", got.URLs, want)
+	}
+}
+
+func TestNormalizeProvenanceRejectsMissingURLs(t *testing.T) {
+	_, ingestErr := NormalizeProvenance(map[string]any{}, "input.json")
+
+	if ingestErr == nil || ingestErr.Kind != ErrorProvenance || ingestErr.Message != "experience record must include at least one provenance URL" {
+		t.Fatalf("error = %#v, want missing provenance error", ingestErr)
+	}
+}
+
+func TestNormalizeProvenanceRejectsInvalidURLShape(t *testing.T) {
+	_, ingestErr := NormalizeProvenance(map[string]any{
+		"provenance_urls": []any{"https://github.com/acme/billing/pull/122?token=abc"},
+	}, "input.json")
+
+	if ingestErr == nil || ingestErr.Kind != ErrorProvenance || ingestErr.Message != "experience provenance URL must be a canonical https://github.com/ URL" {
+		t.Fatalf("error = %#v, want invalid URL provenance error", ingestErr)
+	}
+}
+
 func TestPersistRecordsWritesSortedMonthlyShardAndUpserts(t *testing.T) {
 	root := t.TempDir()
 	records := []Record{

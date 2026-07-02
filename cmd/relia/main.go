@@ -2155,22 +2155,8 @@ func normalizeExperienceOutcome(event map[string]any, action experienceAction, p
 }
 
 func normalizeExperienceProvenance(event map[string]any, ref string) (experienceProvenance, *CommandError) {
-	urls := stringListField(event, "provenance_urls", "provenance.urls")
-	for _, key := range []string{"pr_url", "check_run_url", "revert_url", "review_url"} {
-		if value := stringField(event, key, "provenance."+key); value != "" {
-			urls = append(urls, value)
-		}
-	}
-	urls = uniqueStrings(urls)
-	if len(urls) == 0 {
-		return experienceProvenance{}, provenanceIntegrityError("experience record must include at least one provenance URL", ref)
-	}
-	for _, value := range urls {
-		if !validGitHubProvenanceURLShape(value) {
-			return experienceProvenance{}, provenanceIntegrityError("experience provenance URL must be a canonical https://github.com/ URL", ref)
-		}
-	}
-	return experienceProvenance{URLs: urls}, nil
+	provenance, ingestErr := ingestdoc.NormalizeProvenance(event, ref)
+	return provenance, commandErrorFromIngest(ingestErr)
 }
 
 func persistExperienceRecords(root string, records []experienceRecord) ([]string, *CommandError) {
@@ -2181,10 +2167,6 @@ func persistExperienceRecords(root string, records []experienceRecord) ([]string
 func redactForPersistence(event map[string]any, ref string) (any, *CommandError) {
 	redacted, ingestErr := ingestdoc.RedactForPersistence(event, ref)
 	return redacted, commandErrorFromIngest(ingestErr)
-}
-
-func validGitHubProvenanceURLShape(value string) bool {
-	return ingestdoc.ValidGitHubProvenanceURLShape(value)
 }
 
 func gitHubProvenanceURLRepoMatchesExperience(value string, record experienceRecord) bool {
@@ -2453,23 +2435,6 @@ func sha256String(value string) string {
 func shortHash(value string) string {
 	digest := sha256.Sum256([]byte(value))
 	return fmt.Sprintf("%x", digest)[:12]
-}
-
-func uniqueStrings(values []string) []string {
-	seen := map[string]struct{}{}
-	var result []string
-	for _, value := range values {
-		value = strings.TrimSpace(value)
-		if value == "" {
-			continue
-		}
-		if _, ok := seen[value]; ok {
-			continue
-		}
-		seen[value] = struct{}{}
-		result = append(result, value)
-	}
-	return result
 }
 
 func uniqueInts(values []int) []int {
