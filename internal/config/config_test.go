@@ -115,6 +115,62 @@ func TestFindRepoRootRejectsDifferentModule(t *testing.T) {
 	}
 }
 
+func TestCleanRepoPathRejectsUnsafeAndNormalizes(t *testing.T) {
+	cases := map[string]struct {
+		want string
+		ok   bool
+	}{
+		" ./cmd/relia/main.go ":          {"cmd/relia/main.go", true},
+		"cmd/../internal/config/repo.go": {"internal/config/repo.go", true},
+		"":                               {"", false},
+		"/absolute":                      {"", false},
+		"../outside":                     {"", false},
+		"cmd/../../outside":              {"", false},
+	}
+
+	for input, tc := range cases {
+		got, ok := CleanRepoPath(input)
+		if ok != tc.ok || filepath.ToSlash(got) != tc.want {
+			t.Fatalf("CleanRepoPath(%q) = %q, %v; want %q, %v", input, got, ok, tc.want, tc.ok)
+		}
+	}
+}
+
+func TestScopePatternMatchesDoubleStar(t *testing.T) {
+	if !ScopePatternMatches("cmd/**", "cmd/relia/main.go") {
+		t.Fatal("expected recursive scope pattern to match nested path")
+	}
+	if ScopePatternMatches("cmd/**", "internal/config/repo.go") {
+		t.Fatal("recursive scope pattern matched outside prefix")
+	}
+	if !ScopePatternMatches("*.md", "README.md") {
+		t.Fatal("expected path.Match-compatible pattern")
+	}
+}
+
+func TestWorkingTreePathMatchesSkipsInternalStateDirs(t *testing.T) {
+	root := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(root, "cmd", "relia"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "cmd", "relia", "main.go"), []byte("package main\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Join(root, ".relia", "experiences"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, ".relia", "experiences", "record.jsonl"), []byte("{}\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	if !WorkingTreePathMatches(root, "cmd/**") {
+		t.Fatal("expected working tree glob to match source file")
+	}
+	if WorkingTreePathMatches(root, ".relia/**") {
+		t.Fatal("working tree glob should skip Relia runtime state")
+	}
+}
+
 func TestRefHelpersUseLineNumbers(t *testing.T) {
 	if got := Ref(DefaultFile, yamlmini.Scalar{}); got != DefaultFile {
 		t.Fatalf("Ref without line = %q", got)

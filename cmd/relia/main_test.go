@@ -290,7 +290,7 @@ func TestDistillInputDraftsAvoidRuleFromPlantedRecurrenceCluster(t *testing.T) {
 	writeFileForTest(t, filepath.Join(tempDir, fixtureRel), string(fixtureContent))
 	for _, record := range decodeJSONLines(t, string(fixtureContent)) {
 		for _, path := range stringListField(record, "paths", "context.paths") {
-			clean, ok := cleanRepoPath(path)
+			clean, ok := configdoc.CleanRepoPath(path)
 			if !ok {
 				t.Fatalf("fixture path is not repo-relative: %q", path)
 			}
