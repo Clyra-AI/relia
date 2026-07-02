@@ -90,6 +90,9 @@ Current progress:
 - `internal/distill` now owns distill clustering and canonical signature-key
   selection with direct package tests, while rule assembly and artifact writes
   remain in `cmd/relia`.
+- `internal/distill` now also owns deterministic memory-rule ID and statement
+  formatting with direct package tests, while rule assembly and artifact writes
+  remain in `cmd/relia`.
 - `internal/review` now owns `relia review` argument parsing, repo-relative
   scope-path validation, memory rule lookup, lifecycle file updates, and
   review update validation with direct package tests, while command-result
@@ -173,8 +176,9 @@ Current progress:
 - `internal/modelpull`: local model artifact pull argument parsing and
   manifest construction before config-owned validation and CLI-owned writes.
 - `internal/distill`: distill argument parsing, provider plan construction,
-  request-shape description, cost estimation, embedding-mode helpers, and
-  distill clustering/review-gate helpers.
+  request-shape description, cost estimation, embedding-mode helpers, distill
+  clustering/review-gate helpers, and deterministic memory-rule ID/statement
+  formatting.
 - `internal/review`: review command argument parsing, review action defaults,
   label validation, edit scope-path validation, memory-rule lookup, lifecycle
   artifact mutation, and review update validation before CLI-owned

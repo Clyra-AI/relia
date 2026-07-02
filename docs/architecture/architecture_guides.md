@@ -261,7 +261,8 @@ confidence threshold handling, and prior-state comparison helpers;
 manifest construction before config-owned validation and CLI-owned writes;
 `internal/distill` owns distill argument parsing, provider plan construction,
 request-shape description, cost estimation, embedding-mode helpers, clustering,
-canonical signature-key selection, and review gate helpers; `internal/review`
+canonical signature-key selection, review gate helpers, and deterministic rule
+ID/statement formatting; `internal/review`
 owns review command argument parsing, review action defaults and validation,
 repo-relative scope-path validation, memory rule lookup, and review lifecycle
 artifact updates; `internal/memory` owns memory command
