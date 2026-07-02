@@ -78,6 +78,13 @@ type Attribution struct {
 	Confidence float64 `json:"confidence"`
 }
 
+type AttributionPolicy struct {
+	PRLabels          []string
+	CoauthorTrailers  []string
+	AgentAuthorLogins []string
+	Uncertain         string
+}
+
 type Context struct {
 	Paths           []string `json:"paths"`
 	DiffFingerprint string   `json:"diff_fingerprint"`

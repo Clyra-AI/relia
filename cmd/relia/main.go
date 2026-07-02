@@ -2016,76 +2016,26 @@ func normalizeExperienceContext(event map[string]any, action experienceAction, r
 }
 
 func normalizeExperienceAttribution(config yamlDocument, event map[string]any, ref string) (experienceAttribution, bool, *CommandError) {
-	confidence := -1.0
-	if parsedConfidence, exists, commandErr := optionalFloatField(event, ref, "attribution confidence", "attribution_confidence", "attribution.confidence"); commandErr != nil {
-		return experienceAttribution{}, false, commandErr
-	} else if exists {
-		confidence = parsedConfidence
-	}
-	attribution := experienceAttribution{
-		ActorKind:  stringField(event, "actor_kind", "attribution.actor_kind"),
-		Method:     stringField(event, "attribution_method", "attribution.method"),
-		Confidence: confidence,
-	}
-	if attribution.ActorKind == "" {
-		switch {
-		case overlaps(stringListField(event, "labels", "pr_labels"), yamlListValues(config, "attribution.pr_labels")):
-			attribution.ActorKind = "agent"
-			attribution.Method = "pr_label"
-		case overlaps(stringListField(event, "coauthors", "coauthor_trailers"), yamlListValues(config, "attribution.coauthor_trailers")):
-			attribution.ActorKind = "agent"
-			attribution.Method = "coauthor_trailer"
-		case containsStringValue(yamlListValuesWithMapFields(config, "attribution.agent_authors", "login"), attributionActorLogin(event)):
-			attribution.ActorKind = "agent"
-			attribution.Method = "bot_login"
-		default:
-			attribution.ActorKind = "uncertain"
-			attribution.Method = "uncertain"
-		}
-	}
-	switch attribution.ActorKind {
-	case "agent", "human", "uncertain":
-	default:
-		return attribution, false, artifactContractError("attribution actor_kind must be agent, human, or uncertain", ref)
-	}
-	if attribution.ActorKind == "uncertain" && attributionUncertainPolicy(config) == "exclude" {
-		return attribution, true, nil
-	}
-	if attribution.Method == "" {
-		if attribution.ActorKind == "human" {
-			attribution.Method = "manual"
-		} else {
-			attribution.Method = "uncertain"
-		}
-	}
-	switch attribution.Method {
-	case "bot_login", "coauthor_trailer", "pr_label", "manual", "uncertain":
-	default:
-		return attribution, false, artifactContractError("attribution method is invalid", ref)
-	}
-	if attribution.Confidence < 0 {
-		attribution.Confidence = defaultAttributionConfidence(attribution.Method)
-	}
-	if attribution.Confidence < 0 || attribution.Confidence > 1 {
-		return attribution, false, artifactContractError("attribution confidence must be between 0 and 1", ref)
-	}
-	return attribution, false, nil
+	attribution, skipped, ingestErr := ingestdoc.NormalizeAttribution(event, attributionPolicy(config), ref)
+	return attribution, skipped, commandErrorFromIngest(ingestErr)
 }
 
-func attributionActorLogin(event map[string]any) string {
-	return stringField(event, "actor.login", "author.login", "actor", "author")
-}
-
-func attributionUncertainPolicy(document yamlDocument) string {
+func attributionPolicy(document yamlDocument) ingestdoc.AttributionPolicy {
+	policy := ingestdoc.AttributionPolicy{
+		PRLabels:          yamlmini.ListValues(document, "attribution.pr_labels"),
+		CoauthorTrailers:  yamlmini.ListValues(document, "attribution.coauthor_trailers"),
+		AgentAuthorLogins: yamlmini.ListValuesWithMapFields(document, "attribution.agent_authors", "login"),
+		Uncertain:         "exclude",
+	}
 	if scalar, ok := document.Scalars["attribution.uncertain"]; ok {
 		switch scalar.Value {
 		case "include_flagged":
-			return "include_flagged"
+			policy.Uncertain = "include_flagged"
 		case "exclude":
-			return "exclude"
+			policy.Uncertain = "exclude"
 		}
 	}
-	return "exclude"
+	return policy
 }
 
 func normalizeExperienceOutcome(event map[string]any, action experienceAction, paths []string, ref string) (experienceOutcome, map[string]any, *CommandError) {
@@ -2254,47 +2204,6 @@ func stringFromAny(value any) string {
 		return strings.TrimSpace(typed.String())
 	default:
 		return ""
-	}
-}
-
-func yamlListValues(document yamlDocument, path string) []string {
-	return yamlmini.ListValues(document, path)
-}
-
-func yamlListValuesWithMapFields(document yamlDocument, path string, fields ...string) []string {
-	return yamlmini.ListValuesWithMapFields(document, path, fields...)
-}
-
-func overlaps(left []string, right []string) bool {
-	for _, candidate := range left {
-		if containsStringValue(right, candidate) {
-			return true
-		}
-	}
-	return false
-}
-
-func containsStringValue(values []string, want string) bool {
-	want = strings.TrimSpace(strings.ToLower(want))
-	if want == "" {
-		return false
-	}
-	for _, value := range values {
-		if strings.TrimSpace(strings.ToLower(value)) == want {
-			return true
-		}
-	}
-	return false
-}
-
-func defaultAttributionConfidence(method string) float64 {
-	switch method {
-	case "manual":
-		return 1
-	case "pr_label", "coauthor_trailer", "bot_login":
-		return 0.9
-	default:
-		return 0
 	}
 }
 

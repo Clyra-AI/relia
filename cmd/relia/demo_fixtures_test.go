@@ -1184,7 +1184,7 @@ func assertLifecycleStaleRule(t *testing.T, fixtureCase demoLifecycleCase, outco
 		t.Fatalf("stale fixture missing metadata.stale_path: %#v", fixtureCase.Rule.Metadata)
 	}
 	assertRepoRelativeFixturePath(t, stalePath)
-	if !containsStringValue(fixtureCase.Rule.Scope.Paths, stalePath) {
+	if !demoStringListContains(fixtureCase.Rule.Scope.Paths, stalePath) {
 		t.Fatalf("stale fixture stale_path %q not present in rule scope %#v", stalePath, fixtureCase.Rule.Scope.Paths)
 	}
 	deletionPR, ok := fixtureCase.Rule.Metadata["deletion_pr"].(float64)
@@ -1205,7 +1205,7 @@ func assertLifecycleStaleRule(t *testing.T, fixtureCase demoLifecycleCase, outco
 				t.Fatalf("stale deletion citation has wrong outcome: %#v", outcome)
 			}
 			for _, scopedPath := range fixtureCase.Rule.Scope.Paths {
-				if !containsStringValue(outcome.Paths, scopedPath) {
+				if !demoStringListContains(outcome.Paths, scopedPath) {
 					t.Fatalf("stale deletion citation %s does not delete scoped path %q; deletion paths = %#v", citation.ExperienceID, scopedPath, outcome.Paths)
 				}
 			}
@@ -1225,6 +1225,19 @@ func assertLifecycleStaleRule(t *testing.T, fixtureCase demoLifecycleCase, outco
 	if len(fixtureCase.Rule.Scope.Paths) != len(originalScopePaths) {
 		t.Fatalf("stale fixture scope %#v narrowed or expanded original evidence scope %#v", fixtureCase.Rule.Scope.Paths, originalScopePaths)
 	}
+}
+
+func demoStringListContains(values []string, want string) bool {
+	want = strings.TrimSpace(strings.ToLower(want))
+	if want == "" {
+		return false
+	}
+	for _, value := range values {
+		if strings.TrimSpace(strings.ToLower(value)) == want {
+			return true
+		}
+	}
+	return false
 }
 
 func assertLifecycleOutcomesVisibleOnMemoryPage(t *testing.T, root string, fixtures demoLifecycleFixtures, prURLs map[int]string) {
