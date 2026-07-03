@@ -4725,8 +4725,10 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T6/",
+        "cmd/relia/",
         "internal/distill/",
-        "internal/config/"
+        "internal/config/",
+        "internal/ingest/"
       ],
       "architecture_guidance_refs": [
         {
@@ -5138,8 +5140,10 @@
         "factoryd_run_once_report"
       ],
       "architecture_target_paths": [
+        "cmd/relia/",
         "internal/distill/",
-        "internal/config/"
+        "internal/config/",
+        "internal/ingest/"
       ],
       "path_planning_method": "relia_decomposition_targets_2026_07_03"
     },
@@ -7215,7 +7219,8 @@
         "cmd/relia/",
         "internal/modelpull/",
         "internal/distill/",
-        "internal/config/"
+        "internal/config/",
+        "internal/advise/"
       ],
       "architecture_guidance_refs": [
         {
@@ -7668,7 +7673,8 @@
         "cmd/relia/",
         "internal/modelpull/",
         "internal/distill/",
-        "internal/config/"
+        "internal/config/",
+        "internal/advise/"
       ],
       "path_planning_method": "relia_decomposition_targets_2026_07_03"
     },
