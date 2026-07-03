@@ -536,7 +536,7 @@ def self_test():
                 {
                     "architecture_target_paths": ["internal/review/"],
                     "path_planning_method": "self_test",
-                    "allowed_paths": ["internal/"],
+                    "allowed_paths": ["internal"],
                 },
                 "self-test",
             )
@@ -545,6 +545,36 @@ def self_test():
                 raise
         else:
             fail("broad internal/ allowed path fixture did not fail closed")
+
+        try:
+            validate_architecture_target_paths(
+                {
+                    "architecture_target_paths": ["../../internal/review/"],
+                    "path_planning_method": "self_test",
+                    "allowed_paths": ["internal/review/"],
+                },
+                "self-test",
+            )
+        except AssertionError as exc:
+            if "parent-directory segments" not in str(exc):
+                raise
+        else:
+            fail("parent-directory architecture target fixture did not fail closed")
+
+        try:
+            validate_architecture_target_paths(
+                {
+                    "architecture_target_paths": ["/tmp/review"],
+                    "path_planning_method": "self_test",
+                    "allowed_paths": ["tmp/review"],
+                },
+                "self-test",
+            )
+        except AssertionError as exc:
+            if "repo-relative" not in str(exc):
+                raise
+        else:
+            fail("absolute architecture target fixture did not fail closed")
 
         try:
             validate_validation_contract_evidence_split(

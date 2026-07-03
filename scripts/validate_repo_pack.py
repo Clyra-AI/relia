@@ -272,22 +272,40 @@ def path_is_ancestor_of(path, root):
     root = normalize_repo_path(root).rstrip("/")
     return bool(path) and path != root and root.startswith(path + "/")
 
+def raw_repo_relative_path_error(path):
+    raw = str(path).strip()
+    if not raw:
+        return "path must be non-empty"
+    if raw.startswith(("/", "\\")) or re.match(r"^[A-Za-z]:[\\/]", raw):
+        return "path must be repo-relative, not absolute"
+    if any(part == ".." for part in raw.replace("\\", "/").split("/")):
+        return "path must not contain parent-directory segments"
+    return ""
+
 def validate_architecture_target_paths(task, task_id):
     targets = task.get("architecture_target_paths")
     if not isinstance(targets, list) or not targets:
         fail(f"{task_id}.architecture_target_paths must be a non-empty list")
-    normalized_targets = [normalize_repo_path(path) for path in targets if normalize_repo_path(path)]
-    if len(normalized_targets) != len(targets):
-        fail(f"{task_id}.architecture_target_paths must contain only repo-relative paths")
-    if "internal/" in normalized_targets:
+    normalized_targets = []
+    for index, path in enumerate(targets):
+        path_error = raw_repo_relative_path_error(path)
+        if path_error:
+            fail(f"{task_id}.architecture_target_paths[{index}] {path_error}")
+        normalized_targets.append(normalize_repo_path(path))
+    if any(path.rstrip("/") == "internal" for path in normalized_targets):
         fail(f"{task_id}.architecture_target_paths must name bounded internal packages, not broad internal/")
     method = task.get("path_planning_method")
     if not isinstance(method, str) or not method.strip():
         fail(f"{task_id}.path_planning_method must identify the architecture path-planning rule")
-    allowed = [normalize_repo_path(path) for path in task.get("allowed_paths") or []]
-    if "internal/" in allowed:
+    allowed = []
+    for index, path in enumerate(task.get("allowed_paths") or []):
+        path_error = raw_repo_relative_path_error(path)
+        if path_error:
+            fail(f"{task_id}.allowed_paths[{index}] {path_error}")
+        allowed.append(normalize_repo_path(path))
+    if any(path.rstrip("/") == "internal" for path in allowed):
         fail(f"{task_id}.allowed_paths must not include broad internal/ after decomposition")
-    if "cmd/" in allowed and "cmd/" not in normalized_targets:
+    if any(path.rstrip("/") == "cmd" for path in allowed) and not any(path.rstrip("/") == "cmd" for path in normalized_targets):
         fail(f"{task_id}.allowed_paths may include cmd/ only when cmd/ is an explicit architecture target")
     missing = sorted(
         target for target in normalized_targets
