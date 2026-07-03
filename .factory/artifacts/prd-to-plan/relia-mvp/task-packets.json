@@ -2746,6 +2746,7 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T4.2/",
+        "cmd/relia/",
         "internal/backtest/",
         "internal/distill/"
       ],
@@ -3134,6 +3135,7 @@
         "factoryd_run_once_report"
       ],
       "architecture_target_paths": [
+        "cmd/relia/",
         "internal/backtest/",
         "internal/distill/",
         "examples/"
@@ -10834,7 +10836,10 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T15/",
-        "cmd/"
+        "cmd/",
+        "internal/ingest/",
+        "internal/assess/",
+        "internal/advise/"
       ],
       "architecture_guidance_refs": [
         {
@@ -11257,6 +11262,9 @@
       ],
       "architecture_target_paths": [
         "cmd/",
+        "internal/ingest/",
+        "internal/assess/",
+        "internal/advise/",
         "examples/",
         "docs/"
       ],
@@ -13209,7 +13217,8 @@
         ".github/",
         ".factory/artifacts/task-runs/T15.1/",
         "cmd/",
-        "internal/backtest/"
+        "internal/backtest/",
+        "internal/ingest/"
       ],
       "architecture_guidance_refs": [
         {
@@ -13619,6 +13628,7 @@
       "architecture_target_paths": [
         "cmd/",
         "internal/backtest/",
+        "internal/ingest/",
         "examples/",
         "docs/"
       ],
