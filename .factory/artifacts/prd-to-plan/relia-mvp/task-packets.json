@@ -1127,7 +1127,8 @@
         ".github/",
         ".factory/artifacts/task-runs/T2/",
         "cmd/relia/",
-        "internal/config/"
+        "internal/config/",
+        "internal/yamlmini/"
       ],
       "architecture_guidance_refs": [
         {
@@ -1513,6 +1514,7 @@
       "architecture_target_paths": [
         "cmd/relia/",
         "internal/config/",
+        "internal/yamlmini/",
         "schemas/"
       ],
       "path_planning_method": "relia_decomposition_targets_2026_07_03"
