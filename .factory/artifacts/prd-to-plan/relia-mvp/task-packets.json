@@ -3959,6 +3959,7 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T5/",
+        "cmd/",
         "internal/backtest/",
         "internal/diffparse/"
       ],
@@ -4366,6 +4367,7 @@
         "factoryd_run_once_report"
       ],
       "architecture_target_paths": [
+        "cmd/",
         "internal/backtest/",
         "internal/diffparse/"
       ],

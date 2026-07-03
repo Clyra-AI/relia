@@ -135,6 +135,10 @@ def active_factoryd_repo_config(repo_key):
         fail(f"active factoryd config missing repo key: {repo_key}")
     return repo
 
+def validate_active_architecture_budget_policy(active_repo):
+    if active_repo is not None and "architecture_budget" in active_repo:
+        validate_architecture_budget_policy(active_repo, "active factoryd config")
+
 def profile_visibility_from_text(profile_text):
     for line in profile_text.splitlines():
         stripped = line.strip()
@@ -969,8 +973,7 @@ def main():
     validate_architecture_budget_policy(repo, "factoryd config")
     validate_architecture_budget_policy(autoship_repo, "autoship config")
     active_repo = active_factoryd_repo_config(repo_key)
-    if active_repo is not None:
-        validate_architecture_budget_policy(active_repo, "active factoryd config")
+    validate_active_architecture_budget_policy(active_repo)
     for rel in [repo["acceptance_ledger"], repo["task_packets"], repo["scope_closure_map"], repo["validation_contract"]]:
         if not (root / rel).exists():
             fail(f"factoryd config references missing file: {rel}")

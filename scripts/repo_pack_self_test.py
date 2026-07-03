@@ -23,6 +23,7 @@ factoryd_config_capability_grants = validator.factoryd_config_capability_grants
 fail = validator.fail
 model_provider_gate_task = validator.model_provider_gate_task
 public_release_boundary_error = validator.public_release_boundary_error
+validate_active_architecture_budget_policy = validator.validate_active_architecture_budget_policy
 validate_context_brief = validator.validate_context_brief
 validate_architecture_target_paths = validator.validate_architecture_target_paths
 validate_lifecycle_path_ownership = validator.validate_lifecycle_path_ownership
@@ -641,6 +642,7 @@ def self_test():
                     fail("active factoryd.json grants should be visible")
                 if active_factoryd_repo_config(FACTORYD_REPO_KEY) != config_payload["repos"][FACTORYD_REPO_KEY]:
                     fail("repo-shaped active factoryd.json config should be visible")
+                validate_active_architecture_budget_policy(active_factoryd_repo_config(FACTORYD_REPO_KEY))
                 top_level_grants_payload = {"capability_grants": [active_config_grant]}
                 active_config.write_text(json.dumps(top_level_grants_payload), encoding="utf-8")
                 if factoryd_config_capability_grants() != [active_config_grant]:
