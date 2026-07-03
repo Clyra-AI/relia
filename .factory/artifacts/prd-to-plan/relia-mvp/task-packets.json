@@ -3969,6 +3969,8 @@
         ".factory/artifacts/task-runs/T5/",
         "cmd/",
         "internal/backtest/",
+        "internal/ingest/",
+        "internal/config/",
         "internal/diffparse/"
       ],
       "architecture_guidance_refs": [
@@ -4377,6 +4379,8 @@
       "architecture_target_paths": [
         "cmd/",
         "internal/backtest/",
+        "internal/ingest/",
+        "internal/config/",
         "internal/diffparse/"
       ],
       "path_planning_method": "relia_decomposition_targets_2026_07_03"
@@ -5533,6 +5537,7 @@
         "internal/distill/",
         "internal/config/",
         "internal/review/",
+        "internal/memory/",
         "internal/modelpull/"
       ],
       "architecture_guidance_refs": [
@@ -5973,6 +5978,7 @@
         "internal/distill/",
         "internal/config/",
         "internal/review/",
+        "internal/memory/",
         "internal/modelpull/"
       ],
       "path_planning_method": "relia_decomposition_targets_2026_07_03"
