@@ -1126,6 +1126,7 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T2/",
+        "cmd/relia/",
         "internal/config/"
       ],
       "architecture_guidance_refs": [
@@ -1510,6 +1511,7 @@
         "factoryd_run_once_report"
       ],
       "architecture_target_paths": [
+        "cmd/relia/",
         "internal/config/",
         "schemas/"
       ],
