@@ -121,6 +121,42 @@ def factoryd_config_capability_grants():
         grants.extend(grant for grant in config["capability_grants"] if isinstance(grant, dict))
     return grants
 
+def active_factoryd_repo_config(repo_key):
+    if not FACTORYD_ACTIVE_CONFIG.exists():
+        return None
+    config = load_json_file(FACTORYD_ACTIVE_CONFIG)
+    repos = config.get("repos")
+    if not isinstance(repos, dict):
+        if isinstance(config.get("capability_grants"), list):
+            return None
+        fail("active factoryd config must declare repos as an object")
+    repo = repos.get(repo_key)
+    if not isinstance(repo, dict):
+        fail(f"active factoryd config missing repo key: {repo_key}")
+    return repo
+
+def validate_active_architecture_budget_policy(active_repo):
+    if active_repo is None:
+        return
+    if "architecture_budget" in active_repo:
+        validate_architecture_budget_policy(active_repo, "active factoryd config")
+        return
+    if active_repo_is_grant_overlay(active_repo):
+        return
+    fail("active factoryd config.architecture_budget must be an object for full active configs")
+
+def active_repo_is_grant_overlay(active_repo):
+    overlay_keys = {
+        "capability_grants",
+        "metadata",
+        "notes",
+        "repo_key",
+        "repo_name",
+        "repo_path",
+        "repo_root",
+    }
+    return isinstance(active_repo.get("capability_grants"), list) and set(active_repo.keys()) <= overlay_keys
+
 def profile_visibility_from_text(profile_text):
     for line in profile_text.splitlines():
         stripped = line.strip()
@@ -259,6 +295,56 @@ def path_is_ancestor_of(path, root):
     path = normalize_repo_path(path).rstrip("/")
     root = normalize_repo_path(root).rstrip("/")
     return bool(path) and path != root and root.startswith(path + "/")
+
+def raw_repo_relative_path_error(path):
+    if not isinstance(path, str):
+        return "path must be a string"
+    raw = str(path).strip()
+    if not raw:
+        return "path must be non-empty"
+    if raw.startswith(("/", "\\")) or re.match(r"^[A-Za-z]:[\\/]", raw):
+        return "path must be repo-relative, not absolute"
+    if any(part == ".." for part in raw.replace("\\", "/").split("/")):
+        return "path must not contain parent-directory segments"
+    return ""
+
+def normalized_scoped_repo_path(path, label):
+    normalized = normalize_repo_path(path)
+    if not normalized.rstrip("/"):
+        fail(f"{label} path must not target repository root")
+    return normalized
+
+def validate_architecture_target_paths(task, task_id):
+    targets = task.get("architecture_target_paths")
+    if not isinstance(targets, list) or not targets:
+        fail(f"{task_id}.architecture_target_paths must be a non-empty list")
+    normalized_targets = []
+    for index, path in enumerate(targets):
+        path_error = raw_repo_relative_path_error(path)
+        if path_error:
+            fail(f"{task_id}.architecture_target_paths[{index}] {path_error}")
+        normalized_targets.append(normalized_scoped_repo_path(path, f"{task_id}.architecture_target_paths[{index}]"))
+    if any(path.rstrip("/") == "internal" for path in normalized_targets):
+        fail(f"{task_id}.architecture_target_paths must name bounded internal packages, not broad internal/")
+    method = task.get("path_planning_method")
+    if not isinstance(method, str) or not method.strip():
+        fail(f"{task_id}.path_planning_method must identify the architecture path-planning rule")
+    allowed = []
+    for index, path in enumerate(task.get("allowed_paths") or []):
+        path_error = raw_repo_relative_path_error(path)
+        if path_error:
+            fail(f"{task_id}.allowed_paths[{index}] {path_error}")
+        allowed.append(normalized_scoped_repo_path(path, f"{task_id}.allowed_paths[{index}]"))
+    if any(path.rstrip("/") == "internal" for path in allowed):
+        fail(f"{task_id}.allowed_paths must not include broad internal/ after decomposition")
+    if any(path.rstrip("/") == "cmd" for path in allowed) and not any(path.rstrip("/") == "cmd" for path in normalized_targets):
+        fail(f"{task_id}.allowed_paths may include cmd/ only when cmd/ is an explicit architecture target")
+    missing = sorted(
+        target for target in normalized_targets
+        if not any(path_matches_or_contains(target, allowed_path) or path_is_ancestor_of(allowed_path, target) for allowed_path in allowed)
+    )
+    if missing:
+        fail(f"{task_id}.allowed_paths must include architecture_target_paths: {missing}")
 
 def validate_lifecycle_path_ownership(task, task_id):
     lifecycle_keys = {
@@ -912,6 +998,8 @@ def main():
         fail("factoryd config must declare capability_grants as a list")
     validate_architecture_budget_policy(repo, "factoryd config")
     validate_architecture_budget_policy(autoship_repo, "autoship config")
+    active_repo = active_factoryd_repo_config(repo_key)
+    validate_active_architecture_budget_policy(active_repo)
     for rel in [repo["acceptance_ledger"], repo["task_packets"], repo["scope_closure_map"], repo["validation_contract"]]:
         if not (root / rel).exists():
             fail(f"factoryd config references missing file: {rel}")
@@ -1072,6 +1160,7 @@ def main():
         )
         if control_allowed:
             fail(f"{task_id}.allowed_paths includes runtime-owned control artifact: {control_allowed}")
+        validate_architecture_target_paths(task, task_id)
         validate_lifecycle_path_ownership(task, task_id)
         if task.get("worker_type") != "codex_cli":
             fail(f"{task_id}.worker_type must be codex_cli")

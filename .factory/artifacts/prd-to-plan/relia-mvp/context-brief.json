@@ -3,7 +3,7 @@
     "acceptance_group_count": 47,
     "blocking_questions": [],
     "factoryd_dispatch_policy": "runner-ready task packets must declare worker_type, factoryd_runtime, validation_commands, worker-owned evidence_required, worker_evidence_required, lifecycle_evidence_required, stop_conditions, path policy, lifecycle gates, and scope exclusions before dispatch",
-    "implementation_may_start": false,
+    "implementation_may_start": true,
     "live_work_unlock_requirement": "human approval plus credential and network posture update",
     "repo_local_profile_ref": ".factory/profile.yaml",
     "resolved": [
@@ -36,13 +36,12 @@
         "value": "standalone_binary"
       }
     ],
-    "status": "needs_decision",
+    "status": "resolved_with_task_scoped_live_work_gates",
     "unresolved": [
-      "PRD requires networked or provider work; confirm network allowlist and deterministic replay boundary before live tasks are unblocked",
-      "PRD requires credentials or secrets; confirm scoped credential posture before live implementation tasks are unblocked",
-      "PRD contains judgment-only acceptance criteria; define objective evidence or route those checks to a human approval gate",
-      "PRD requires explicit local embedding artifact pulls only when the optional embeddings: local path is exercised; approve model source URL, ID/version, license, digest, cache path, update policy, rollback policy, absence behavior, and network allowlist before any live model-artifact pull or local-embedding validation run",
-      "PRD requires provider embeddings or LLM rule-drafting adapters; approve model provider identity, provider model, endpoint/base_url, credential environment, budget posture, redaction posture, and network allowlist before provider-backed distill runs are unblocked"
+      "Live network/provider dispatch remains blocked unless the selected task carries a fresh task-scoped network, credential, model_artifact_pull, or model_provider_endpoint grant.",
+      "Judgment-only acceptance remains blocked unless the selected task carries human approval evidence or objective acceptance evidence.",
+      "PRD requires explicit local embedding artifact pulls only when the optional embeddings: local path is exercised; approve model source URL, ID/version, license, digest, cache path, update policy, rollback policy, absence behavior, and network allowlist before any live model-artifact pull or local-embedding validation run.",
+      "PRD requires provider embeddings or LLM rule-drafting adapters; approve model provider identity, provider model, endpoint/base_url, credential environment, budget posture, redaction posture, and network allowlist before provider-backed distill runs are unblocked."
     ],
     "model_artifact_pull": {
       "status": "pending_approval",

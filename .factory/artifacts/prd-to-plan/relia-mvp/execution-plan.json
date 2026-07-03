@@ -64,13 +64,9 @@
   "acceptance_mapping_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
   "active_loop_id": "implementation_task_to_validated_pr",
   "alignment_gate": {
-    "blocking_questions": [
-      "PRD requires networked or provider work; confirm network allowlist and deterministic replay boundary before live tasks are unblocked",
-      "PRD requires credentials or secrets; confirm scoped credential posture before live implementation tasks are unblocked",
-      "PRD contains judgment-only acceptance criteria; define objective evidence or route those checks to a human approval gate"
-    ],
+    "blocking_questions": [],
     "context_brief_ref": "context-brief.json",
-    "implementation_may_start": false,
+    "implementation_may_start": true,
     "prd_ambiguity_checks": [
       "scope",
       "provider",
@@ -80,7 +76,11 @@
       "feedback owner",
       "judgment-only acceptance"
     ],
-    "status": "needs_decision"
+    "status": "resolved_with_task_scoped_live_work_gates",
+    "task_scoped_live_work_gates": [
+      "Live network/provider dispatch requires a fresh task-scoped network, credential, model_artifact_pull, or model_provider_endpoint grant.",
+      "Judgment-only acceptance requires human approval evidence or objective acceptance evidence before closure."
+    ]
   },
   "blast_radius": "Generated bootstrap files and PRD-derived MVP implementation paths.",
   "collaboration_rationale": "Generated PRD decomposition runs serially until boundaries, validation, and merge policy are reviewed.",

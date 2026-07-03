@@ -599,15 +599,16 @@
         "go.sum",
         "relia.yaml",
         "CLAUDE.md",
-        "cmd/",
-        "internal/",
         "tests/",
         "schemas/",
         "docs/",
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T1/"
+        ".factory/artifacts/task-runs/T1/",
+        "cmd/",
+        "internal/config/",
+        "internal/result/"
       ],
       "architecture_guidance_refs": [
         {
@@ -987,7 +988,13 @@
         "scope_closure_report",
         "pr_lifecycle_report",
         "factoryd_run_once_report"
-      ]
+      ],
+      "architecture_target_paths": [
+        "cmd/",
+        "internal/config/",
+        "internal/result/"
+      ],
+      "path_planning_method": "relia_decomposition_targets_2026_07_03"
     },
     {
       "acceptance_checks": [
@@ -1112,15 +1119,16 @@
         "go.sum",
         "relia.yaml",
         "CLAUDE.md",
-        "cmd/",
-        "internal/",
         "tests/",
         "schemas/",
         "docs/",
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T2/"
+        ".factory/artifacts/task-runs/T2/",
+        "cmd/relia/",
+        "internal/config/",
+        "internal/yamlmini/"
       ],
       "architecture_guidance_refs": [
         {
@@ -1502,7 +1510,14 @@
         "scope_closure_report",
         "pr_lifecycle_report",
         "factoryd_run_once_report"
-      ]
+      ],
+      "architecture_target_paths": [
+        "cmd/relia/",
+        "internal/config/",
+        "internal/yamlmini/",
+        "schemas/"
+      ],
+      "path_planning_method": "relia_decomposition_targets_2026_07_03"
     },
     {
       "acceptance_checks": [
@@ -1635,15 +1650,17 @@
         "go.sum",
         "relia.yaml",
         "CLAUDE.md",
-        "cmd/",
-        "internal/",
         "tests/",
         "schemas/",
         "docs/",
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T3/"
+        ".factory/artifacts/task-runs/T3/",
+        "cmd/relia/",
+        "internal/ingest/",
+        "internal/config/",
+        "internal/result/"
       ],
       "architecture_guidance_refs": [
         {
@@ -2029,7 +2046,14 @@
         "scope_closure_report",
         "pr_lifecycle_report",
         "factoryd_run_once_report"
-      ]
+      ],
+      "architecture_target_paths": [
+        "cmd/relia/",
+        "internal/ingest/",
+        "internal/config/",
+        "internal/result/"
+      ],
+      "path_planning_method": "relia_decomposition_targets_2026_07_03"
     },
     {
       "acceptance_checks": [
@@ -2211,15 +2235,15 @@
         "go.sum",
         "relia.yaml",
         "CLAUDE.md",
-        "cmd/",
-        "internal/",
         "tests/",
         "schemas/",
         "docs/",
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T4.1/"
+        ".factory/artifacts/task-runs/T4.1/",
+        "cmd/relia/",
+        "internal/backtest/"
       ],
       "architecture_guidance_refs": [
         {
@@ -2610,7 +2634,13 @@
         "scope_closure_report",
         "pr_lifecycle_report",
         "factoryd_run_once_report"
-      ]
+      ],
+      "architecture_target_paths": [
+        "cmd/relia/",
+        "internal/backtest/",
+        "examples/"
+      ],
+      "path_planning_method": "relia_decomposition_targets_2026_07_03"
     },
     {
       "acceptance_checks": [
@@ -2717,15 +2747,16 @@
         "go.sum",
         "relia.yaml",
         "CLAUDE.md",
-        "cmd/",
-        "internal/",
         "tests/",
         "schemas/",
         "docs/",
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T4.2/"
+        ".factory/artifacts/task-runs/T4.2/",
+        "cmd/relia/",
+        "internal/backtest/",
+        "internal/distill/"
       ],
       "architecture_guidance_refs": [
         {
@@ -3110,7 +3141,14 @@
         "scope_closure_report",
         "pr_lifecycle_report",
         "factoryd_run_once_report"
-      ]
+      ],
+      "architecture_target_paths": [
+        "cmd/relia/",
+        "internal/backtest/",
+        "internal/distill/",
+        "examples/"
+      ],
+      "path_planning_method": "relia_decomposition_targets_2026_07_03"
     },
     {
       "acceptance_checks": [
@@ -3168,15 +3206,16 @@
         "go.sum",
         "relia.yaml",
         "CLAUDE.md",
-        "cmd/",
-        "internal/",
         "tests/",
         "schemas/",
         "docs/",
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T4.3/"
+        ".factory/artifacts/task-runs/T4.3/",
+        "cmd/relia/",
+        "internal/assess/",
+        "internal/diffparse/"
       ],
       "architecture_guidance_refs": [
         {
@@ -3557,7 +3596,14 @@
         "scope_closure_report",
         "pr_lifecycle_report",
         "factoryd_run_once_report"
-      ]
+      ],
+      "architecture_target_paths": [
+        "cmd/relia/",
+        "internal/assess/",
+        "internal/diffparse/",
+        "examples/"
+      ],
+      "path_planning_method": "relia_decomposition_targets_2026_07_03"
     },
     {
       "acceptance_checks": [
@@ -3918,15 +3964,18 @@
         "go.sum",
         "relia.yaml",
         "CLAUDE.md",
-        "cmd/",
-        "internal/",
         "tests/",
         "schemas/",
         "docs/",
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T5/"
+        ".factory/artifacts/task-runs/T5/",
+        "cmd/",
+        "internal/backtest/",
+        "internal/ingest/",
+        "internal/config/",
+        "internal/diffparse/"
       ],
       "architecture_guidance_refs": [
         {
@@ -4330,7 +4379,15 @@
         "scope_closure_report",
         "pr_lifecycle_report",
         "factoryd_run_once_report"
-      ]
+      ],
+      "architecture_target_paths": [
+        "cmd/",
+        "internal/backtest/",
+        "internal/ingest/",
+        "internal/config/",
+        "internal/diffparse/"
+      ],
+      "path_planning_method": "relia_decomposition_targets_2026_07_03"
     },
     {
       "acceptance_checks": [
@@ -4675,15 +4732,20 @@
         "go.sum",
         "relia.yaml",
         "CLAUDE.md",
-        "cmd/",
-        "internal/",
         "tests/",
         "schemas/",
         "docs/",
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T6/"
+        ".factory/artifacts/task-runs/T6/",
+        "cmd/relia/",
+        "internal/distill/",
+        "internal/config/",
+        "internal/ingest/",
+        "internal/review/",
+        "internal/memory/",
+        "internal/backtest/"
       ],
       "architecture_guidance_refs": [
         {
@@ -5093,7 +5155,17 @@
         "scope_closure_report",
         "pr_lifecycle_report",
         "factoryd_run_once_report"
-      ]
+      ],
+      "architecture_target_paths": [
+        "cmd/relia/",
+        "internal/distill/",
+        "internal/config/",
+        "internal/ingest/",
+        "internal/review/",
+        "internal/memory/",
+        "internal/backtest/"
+      ],
+      "path_planning_method": "relia_decomposition_targets_2026_07_03"
     },
     {
       "acceptance_checks": [
@@ -5464,15 +5536,19 @@
         "go.sum",
         "relia.yaml",
         "CLAUDE.md",
-        "cmd/",
-        "internal/",
         "tests/",
         "schemas/",
         "docs/",
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T7/"
+        ".factory/artifacts/task-runs/T7/",
+        "cmd/relia/",
+        "internal/distill/",
+        "internal/config/",
+        "internal/review/",
+        "internal/memory/",
+        "internal/modelpull/"
       ],
       "architecture_guidance_refs": [
         {
@@ -5906,7 +5982,16 @@
         "scope_closure_report",
         "pr_lifecycle_report",
         "factoryd_run_once_report"
-      ]
+      ],
+      "architecture_target_paths": [
+        "cmd/relia/",
+        "internal/distill/",
+        "internal/config/",
+        "internal/review/",
+        "internal/memory/",
+        "internal/modelpull/"
+      ],
+      "path_planning_method": "relia_decomposition_targets_2026_07_03"
     },
     {
       "acceptance_checks": [
@@ -5962,15 +6047,15 @@
         "go.sum",
         "relia.yaml",
         "CLAUDE.md",
-        "cmd/",
-        "internal/",
         "tests/",
         "schemas/",
         "docs/",
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T7.1/"
+        ".factory/artifacts/task-runs/T7.1/",
+        "cmd/",
+        "internal/distill/"
       ],
       "architecture_guidance_refs": [
         {
@@ -6378,7 +6463,12 @@
         "scope_closure_report",
         "pr_lifecycle_report",
         "factoryd_run_once_report"
-      ]
+      ],
+      "architecture_target_paths": [
+        "cmd/",
+        "internal/distill/"
+      ],
+      "path_planning_method": "relia_decomposition_targets_2026_07_03"
     },
     {
       "acceptance_checks": [
@@ -6434,15 +6524,17 @@
         "go.sum",
         "relia.yaml",
         "CLAUDE.md",
-        "cmd/",
-        "internal/",
         "tests/",
         "schemas/",
         "docs/",
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T8/"
+        ".factory/artifacts/task-runs/T8/",
+        "cmd/relia/",
+        "internal/ingest/",
+        "internal/result/",
+        "internal/memory/"
       ],
       "architecture_guidance_refs": [
         {
@@ -6822,7 +6914,14 @@
         "scope_closure_report",
         "pr_lifecycle_report",
         "factoryd_run_once_report"
-      ]
+      ],
+      "architecture_target_paths": [
+        "cmd/relia/",
+        "internal/ingest/",
+        "internal/result/",
+        "internal/memory/"
+      ],
+      "path_planning_method": "relia_decomposition_targets_2026_07_03"
     },
     {
       "acceptance_checks": [
@@ -7136,15 +7235,19 @@
         "go.sum",
         "relia.yaml",
         "CLAUDE.md",
-        "cmd/",
-        "internal/",
         "tests/",
         "schemas/",
         "docs/",
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T9/"
+        ".factory/artifacts/task-runs/T9/",
+        "cmd/relia/",
+        "internal/modelpull/",
+        "internal/distill/",
+        "internal/config/",
+        "internal/advise/",
+        "internal/assess/"
       ],
       "architecture_guidance_refs": [
         {
@@ -7592,7 +7695,16 @@
         "scope_closure_report",
         "pr_lifecycle_report",
         "factoryd_run_once_report"
-      ]
+      ],
+      "architecture_target_paths": [
+        "cmd/relia/",
+        "internal/modelpull/",
+        "internal/distill/",
+        "internal/config/",
+        "internal/advise/",
+        "internal/assess/"
+      ],
+      "path_planning_method": "relia_decomposition_targets_2026_07_03"
     },
     {
       "acceptance_checks": [
@@ -7751,15 +7863,18 @@
         "go.sum",
         "relia.yaml",
         "CLAUDE.md",
-        "cmd/",
-        "internal/",
         "tests/",
         "schemas/",
         "docs/",
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T10/"
+        ".factory/artifacts/task-runs/T10/",
+        "cmd/relia/",
+        "internal/ingest/",
+        "internal/backtest/",
+        "internal/review/",
+        "internal/advise/"
       ],
       "architecture_guidance_refs": [
         {
@@ -8153,7 +8268,15 @@
         "scope_closure_report",
         "pr_lifecycle_report",
         "factoryd_run_once_report"
-      ]
+      ],
+      "architecture_target_paths": [
+        "cmd/relia/",
+        "internal/ingest/",
+        "internal/backtest/",
+        "internal/review/",
+        "internal/advise/"
+      ],
+      "path_planning_method": "relia_decomposition_targets_2026_07_03"
     },
     {
       "acceptance_checks": [
@@ -8209,15 +8332,15 @@
         "go.sum",
         "relia.yaml",
         "CLAUDE.md",
-        "cmd/",
-        "internal/",
         "tests/",
         "schemas/",
         "docs/",
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T11/"
+        ".factory/artifacts/task-runs/T11/",
+        "cmd/relia/",
+        "internal/memory/"
       ],
       "architecture_guidance_refs": [
         {
@@ -8597,7 +8720,12 @@
         "scope_closure_report",
         "pr_lifecycle_report",
         "factoryd_run_once_report"
-      ]
+      ],
+      "architecture_target_paths": [
+        "cmd/relia/",
+        "internal/memory/"
+      ],
+      "path_planning_method": "relia_decomposition_targets_2026_07_03"
     },
     {
       "acceptance_checks": [
@@ -8703,15 +8831,18 @@
         "go.sum",
         "relia.yaml",
         "CLAUDE.md",
-        "cmd/",
-        "internal/",
         "tests/",
         "schemas/",
         "docs/",
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T12/"
+        ".factory/artifacts/task-runs/T12/",
+        "cmd/relia/",
+        "internal/backtest/",
+        "internal/serve/",
+        "internal/memory/",
+        "internal/assess/"
       ],
       "architecture_guidance_refs": [
         {
@@ -9095,7 +9226,15 @@
         "scope_closure_report",
         "pr_lifecycle_report",
         "factoryd_run_once_report"
-      ]
+      ],
+      "architecture_target_paths": [
+        "cmd/relia/",
+        "internal/backtest/",
+        "internal/serve/",
+        "internal/memory/",
+        "internal/assess/"
+      ],
+      "path_planning_method": "relia_decomposition_targets_2026_07_03"
     },
     {
       "acceptance_checks": [
@@ -9229,15 +9368,16 @@
         "go.sum",
         "relia.yaml",
         "CLAUDE.md",
-        "cmd/",
-        "internal/",
         "tests/",
         "schemas/",
         "docs/",
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T13/"
+        ".factory/artifacts/task-runs/T13/",
+        "cmd/relia/",
+        "internal/memory/",
+        "internal/config/"
       ],
       "architecture_guidance_refs": [
         {
@@ -9623,7 +9763,13 @@
         "scope_closure_report",
         "pr_lifecycle_report",
         "factoryd_run_once_report"
-      ]
+      ],
+      "architecture_target_paths": [
+        "cmd/relia/",
+        "internal/memory/",
+        "internal/config/"
+      ],
+      "path_planning_method": "relia_decomposition_targets_2026_07_03"
     },
     {
       "acceptance_checks": [
@@ -9885,15 +10031,21 @@
         "go.sum",
         "relia.yaml",
         "CLAUDE.md",
-        "cmd/",
-        "internal/",
         "tests/",
         "schemas/",
         "docs/",
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T14/"
+        ".factory/artifacts/task-runs/T14/",
+        "cmd/relia/",
+        "internal/assess/",
+        "internal/advise/",
+        "internal/diffparse/",
+        "internal/serve/",
+        "internal/ingest/",
+        "internal/backtest/",
+        "internal/distill/"
       ],
       "architecture_guidance_refs": [
         {
@@ -10289,7 +10441,18 @@
         "scope_closure_report",
         "pr_lifecycle_report",
         "factoryd_run_once_report"
-      ]
+      ],
+      "architecture_target_paths": [
+        "cmd/relia/",
+        "internal/assess/",
+        "internal/advise/",
+        "internal/diffparse/",
+        "internal/serve/",
+        "internal/ingest/",
+        "internal/backtest/",
+        "internal/distill/"
+      ],
+      "path_planning_method": "relia_decomposition_targets_2026_07_03"
     },
     {
       "acceptance_checks": [
@@ -10702,15 +10865,22 @@
         "go.sum",
         "relia.yaml",
         "CLAUDE.md",
-        "cmd/",
-        "internal/",
         "tests/",
         "schemas/",
         "docs/",
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T15/"
+        ".factory/artifacts/task-runs/T15/",
+        "cmd/",
+        "internal/ingest/",
+        "internal/assess/",
+        "internal/advise/",
+        "internal/backtest/",
+        "internal/distill/",
+        "internal/review/",
+        "internal/memory/",
+        "internal/serve/"
       ],
       "architecture_guidance_refs": [
         {
@@ -11130,7 +11300,21 @@
         "scope_closure_report",
         "pr_lifecycle_report",
         "factoryd_run_once_report"
-      ]
+      ],
+      "architecture_target_paths": [
+        "cmd/",
+        "internal/ingest/",
+        "internal/assess/",
+        "internal/advise/",
+        "internal/backtest/",
+        "internal/distill/",
+        "internal/review/",
+        "internal/memory/",
+        "internal/serve/",
+        "examples/",
+        "docs/"
+      ],
+      "path_planning_method": "relia_decomposition_targets_2026_07_03"
     },
     {
       "acceptance_checks": [
@@ -11493,15 +11677,18 @@
         "go.sum",
         "relia.yaml",
         "CLAUDE.md",
-        "cmd/",
-        "internal/",
         "tests/",
         "schemas/",
         "docs/",
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T16/"
+        ".factory/artifacts/task-runs/T16/",
+        "cmd/",
+        "internal/backtest/",
+        "internal/serve/",
+        "internal/assess/",
+        "internal/advise/"
       ],
       "architecture_guidance_refs": [
         {
@@ -11914,7 +12101,17 @@
         "scope_closure_report",
         "pr_lifecycle_report",
         "factoryd_run_once_report"
-      ]
+      ],
+      "architecture_target_paths": [
+        "cmd/",
+        "internal/backtest/",
+        "internal/serve/",
+        "internal/assess/",
+        "internal/advise/",
+        "examples/",
+        "docs/"
+      ],
+      "path_planning_method": "relia_decomposition_targets_2026_07_03"
     },
     {
       "acceptance_checks": [
@@ -12021,8 +12218,6 @@
         "go.sum",
         "relia.yaml",
         "CLAUDE.md",
-        "cmd/",
-        "internal/",
         "tests/",
         "schemas/",
         "docs/",
@@ -12033,7 +12228,11 @@
         "docs/product/",
         "docs/dev/",
         ".factory/artifacts/customer-failure-intake/",
-        "examples/fixtures/customer-failures/"
+        "examples/fixtures/customer-failures/",
+        "cmd/relia/",
+        "internal/ingest/",
+        "internal/review/",
+        "internal/config/"
       ],
       "architecture_guidance_refs": [
         {
@@ -12418,7 +12617,15 @@
         "scope_closure_report",
         "pr_lifecycle_report",
         "factoryd_run_once_report"
-      ]
+      ],
+      "architecture_target_paths": [
+        "cmd/relia/",
+        "internal/ingest/",
+        "internal/review/",
+        "internal/config/",
+        "examples/"
+      ],
+      "path_planning_method": "relia_decomposition_targets_2026_07_03"
     },
     {
       "acceptance_checks": [
@@ -12549,8 +12756,6 @@
         "go.sum",
         "relia.yaml",
         "CLAUDE.md",
-        "cmd/",
-        "internal/",
         "tests/",
         "schemas/",
         "docs/",
@@ -12561,7 +12766,10 @@
         "docs/architecture/",
         "docs/dev/",
         ".factory/artifacts/lesson-records/",
-        "memory/lessons/"
+        "memory/lessons/",
+        "cmd/relia/",
+        "internal/memory/",
+        "internal/review/"
       ],
       "architecture_guidance_refs": [
         {
@@ -12948,7 +13156,13 @@
         "scope_closure_report",
         "pr_lifecycle_report",
         "factoryd_run_once_report"
-      ]
+      ],
+      "architecture_target_paths": [
+        "cmd/relia/",
+        "internal/memory/",
+        "internal/review/"
+      ],
+      "path_planning_method": "relia_decomposition_targets_2026_07_03"
     },
     {
       "acceptance_checks": [
@@ -13055,15 +13269,18 @@
         "go.sum",
         "relia.yaml",
         "CLAUDE.md",
-        "cmd/",
-        "internal/",
         "tests/",
         "schemas/",
         "docs/",
         "examples/",
         "memory/",
         ".github/",
-        ".factory/artifacts/task-runs/T15.1/"
+        ".factory/artifacts/task-runs/T15.1/",
+        "cmd/",
+        "internal/backtest/",
+        "internal/ingest/",
+        "internal/distill/",
+        "internal/review/"
       ],
       "architecture_guidance_refs": [
         {
@@ -13469,7 +13686,17 @@
       "acceptance_group_refs": [
         "nfr2-fast-first-memory",
         "mvp-in-scope"
-      ]
+      ],
+      "architecture_target_paths": [
+        "cmd/",
+        "internal/backtest/",
+        "internal/ingest/",
+        "internal/distill/",
+        "internal/review/",
+        "examples/",
+        "docs/"
+      ],
+      "path_planning_method": "relia_decomposition_targets_2026_07_03"
     }
   ]
 }

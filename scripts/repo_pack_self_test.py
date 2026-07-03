@@ -17,12 +17,15 @@ FACTORYD_REPO_KEY = validator.FACTORYD_REPO_KEY
 PROVIDER_ACCEPTANCE_IDS = validator.PROVIDER_ACCEPTANCE_IDS
 ROOT = validator.ROOT
 RUNNER_READY_TASK_FIELDS = validator.RUNNER_READY_TASK_FIELDS
+active_factoryd_repo_config = validator.active_factoryd_repo_config
 duplicate_values = validator.duplicate_values
 factoryd_config_capability_grants = validator.factoryd_config_capability_grants
 fail = validator.fail
 model_provider_gate_task = validator.model_provider_gate_task
 public_release_boundary_error = validator.public_release_boundary_error
+validate_active_architecture_budget_policy = validator.validate_active_architecture_budget_policy
 validate_context_brief = validator.validate_context_brief
+validate_architecture_target_paths = validator.validate_architecture_target_paths
 validate_lifecycle_path_ownership = validator.validate_lifecycle_path_ownership
 validate_model_provider_gate = validator.validate_model_provider_gate
 validate_runner_ready_task_fields = validator.validate_runner_ready_task_fields
@@ -197,6 +200,14 @@ def self_test():
     sample_task["required_proof_level"] = "workflow_behavior"
     sample_task["redaction_posture"] = {"classification": "internal", "customer_safe": False}
     validate_runner_ready_task_fields(sample_task, "self-test")
+    validate_architecture_target_paths(
+        {
+            "architecture_target_paths": ["internal/review/"],
+            "path_planning_method": "self_test",
+            "allowed_paths": ["internal/review/", "tests/"],
+        },
+        "self-test",
+    )
     validate_lifecycle_path_ownership(
         {
             "work_item_id": "relia-mvp-t1",
@@ -523,6 +534,111 @@ def self_test():
             fail("workflow proof level without scorecard fixture did not fail closed")
 
         try:
+            validate_architecture_target_paths(
+                {
+                    "architecture_target_paths": ["internal/review/"],
+                    "path_planning_method": "self_test",
+                    "allowed_paths": ["internal"],
+                },
+                "self-test",
+            )
+        except AssertionError as exc:
+            if "broad internal" not in str(exc):
+                raise
+        else:
+            fail("broad internal/ allowed path fixture did not fail closed")
+
+        try:
+            validate_architecture_target_paths(
+                {
+                    "architecture_target_paths": ["../../internal/review/"],
+                    "path_planning_method": "self_test",
+                    "allowed_paths": ["internal/review/"],
+                },
+                "self-test",
+            )
+        except AssertionError as exc:
+            if "parent-directory segments" not in str(exc):
+                raise
+        else:
+            fail("parent-directory architecture target fixture did not fail closed")
+
+        try:
+            validate_architecture_target_paths(
+                {
+                    "architecture_target_paths": [123],
+                    "path_planning_method": "self_test",
+                    "allowed_paths": ["internal/review/"],
+                },
+                "self-test",
+            )
+        except AssertionError as exc:
+            if "architecture_target_paths[0] path must be a string" not in str(exc):
+                raise
+        else:
+            fail("non-string architecture target fixture did not fail closed")
+
+        try:
+            validate_architecture_target_paths(
+                {
+                    "architecture_target_paths": ["internal/review/"],
+                    "path_planning_method": "self_test",
+                    "allowed_paths": [{"path": "internal/review/"}],
+                },
+                "self-test",
+            )
+        except AssertionError as exc:
+            if "allowed_paths[0] path must be a string" not in str(exc):
+                raise
+        else:
+            fail("non-string allowed path fixture did not fail closed")
+
+        try:
+            validate_architecture_target_paths(
+                {
+                    "architecture_target_paths": ["/tmp/review"],
+                    "path_planning_method": "self_test",
+                    "allowed_paths": ["tmp/review"],
+                },
+                "self-test",
+            )
+        except AssertionError as exc:
+            if "repo-relative" not in str(exc):
+                raise
+        else:
+            fail("absolute architecture target fixture did not fail closed")
+
+        try:
+            validate_architecture_target_paths(
+                {
+                    "architecture_target_paths": ["./"],
+                    "path_planning_method": "self_test",
+                    "allowed_paths": ["internal/review/"],
+                },
+                "self-test",
+            )
+        except AssertionError as exc:
+            if "architecture_target_paths[0] path must not target repository root" not in str(exc):
+                raise
+        else:
+            fail("repo-root architecture target fixture did not fail closed")
+
+        try:
+            validate_architecture_target_paths(
+                {
+                    "architecture_target_paths": ["internal/review/"],
+                    "path_planning_method": "self_test",
+                    "allowed_paths": ["."],
+                },
+                "self-test",
+            )
+        except AssertionError as exc:
+            if "allowed_paths[0] path must not target repository root" not in str(exc):
+                raise
+        else:
+            fail("repo-root allowed path fixture did not fail closed")
+
+        try:
             validate_validation_contract_evidence_split(
                 {
                     "evidence_required": "validation_report",
@@ -584,6 +700,48 @@ def self_test():
                 active_config.write_text(json.dumps(config_payload), encoding="utf-8")
                 if factoryd_config_capability_grants() != [active_config_grant]:
                     fail("active factoryd.json grants should be visible")
+                if active_factoryd_repo_config(FACTORYD_REPO_KEY) != config_payload["repos"][FACTORYD_REPO_KEY]:
+                    fail("repo-shaped active factoryd.json config should be visible")
+                validate_active_architecture_budget_policy(active_factoryd_repo_config(FACTORYD_REPO_KEY))
+                metadata_overlay_payload = {
+                    "repos": {
+                        FACTORYD_REPO_KEY: {
+                            "repo_path": str(temp_root),
+                            "capability_grants": [active_config_grant],
+                        }
+                    }
+                }
+                active_config.write_text(json.dumps(metadata_overlay_payload), encoding="utf-8")
+                if factoryd_config_capability_grants() != [active_config_grant]:
+                    fail("metadata-bearing active factoryd.json grants should be visible")
+                validate_active_architecture_budget_policy(active_factoryd_repo_config(FACTORYD_REPO_KEY))
+                top_level_grants_payload = {"capability_grants": [active_config_grant]}
+                active_config.write_text(json.dumps(top_level_grants_payload), encoding="utf-8")
+                if factoryd_config_capability_grants() != [active_config_grant]:
+                    fail("top-level active factoryd.json grants should remain visible")
+                if active_factoryd_repo_config(FACTORYD_REPO_KEY) is not None:
+                    fail("top-level-only active factoryd.json config should skip repo architecture parity")
+                full_active_missing_budget_payload = {
+                    "repos": {
+                        FACTORYD_REPO_KEY: {
+                            "acceptance_ledger": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+                            "task_packets": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
+                            "scope_closure_map": ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+                            "validation_contract": ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
+                            "validation_commands": ["make prepush-full"],
+                            "worker_type": "codex_cli",
+                            "capability_grants": [],
+                        }
+                    }
+                }
+                active_config.write_text(json.dumps(full_active_missing_budget_payload), encoding="utf-8")
+                try:
+                    validate_active_architecture_budget_policy(active_factoryd_repo_config(FACTORYD_REPO_KEY))
+                except AssertionError as exc:
+                    if "architecture_budget" not in str(exc):
+                        raise
+                else:
+                    fail("full active factoryd.json config without architecture_budget should fail closed")
             finally:
                 validator.FACTORYD_CONFIG = original_example_config
                 validator.FACTORYD_ACTIVE_CONFIG = original_active_config
