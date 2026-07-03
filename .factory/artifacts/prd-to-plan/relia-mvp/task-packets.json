@@ -11681,7 +11681,10 @@
         ".github/",
         ".factory/artifacts/task-runs/T16/",
         "cmd/",
-        "internal/backtest/"
+        "internal/backtest/",
+        "internal/serve/",
+        "internal/assess/",
+        "internal/advise/"
       ],
       "architecture_guidance_refs": [
         {
@@ -12098,6 +12101,9 @@
       "architecture_target_paths": [
         "cmd/",
         "internal/backtest/",
+        "internal/serve/",
+        "internal/assess/",
+        "internal/advise/",
         "examples/",
         "docs/"
       ],
@@ -13268,7 +13274,9 @@
         ".factory/artifacts/task-runs/T15.1/",
         "cmd/",
         "internal/backtest/",
-        "internal/ingest/"
+        "internal/ingest/",
+        "internal/distill/",
+        "internal/review/"
       ],
       "architecture_guidance_refs": [
         {
@@ -13679,6 +13687,8 @@
         "cmd/",
         "internal/backtest/",
         "internal/ingest/",
+        "internal/distill/",
+        "internal/review/",
         "examples/",
         "docs/"
       ],
