@@ -649,6 +649,27 @@ def self_test():
                     fail("top-level active factoryd.json grants should remain visible")
                 if active_factoryd_repo_config(FACTORYD_REPO_KEY) is not None:
                     fail("top-level-only active factoryd.json config should skip repo architecture parity")
+                full_active_missing_budget_payload = {
+                    "repos": {
+                        FACTORYD_REPO_KEY: {
+                            "acceptance_ledger": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+                            "task_packets": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
+                            "scope_closure_map": ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+                            "validation_contract": ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
+                            "validation_commands": ["make prepush-full"],
+                            "worker_type": "codex_cli",
+                            "capability_grants": [],
+                        }
+                    }
+                }
+                active_config.write_text(json.dumps(full_active_missing_budget_payload), encoding="utf-8")
+                try:
+                    validate_active_architecture_budget_policy(active_factoryd_repo_config(FACTORYD_REPO_KEY))
+                except AssertionError as exc:
+                    if "architecture_budget" not in str(exc):
+                        raise
+                else:
+                    fail("full active factoryd.json config without architecture_budget should fail closed")
             finally:
                 validator.FACTORYD_CONFIG = original_example_config
                 validator.FACTORYD_ACTIVE_CONFIG = original_active_config

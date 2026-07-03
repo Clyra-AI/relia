@@ -136,8 +136,14 @@ def active_factoryd_repo_config(repo_key):
     return repo
 
 def validate_active_architecture_budget_policy(active_repo):
-    if active_repo is not None and "architecture_budget" in active_repo:
+    if active_repo is None:
+        return
+    if "architecture_budget" in active_repo:
         validate_architecture_budget_policy(active_repo, "active factoryd config")
+        return
+    if set(active_repo.keys()) <= {"capability_grants"}:
+        return
+    fail("active factoryd config.architecture_budget must be an object for full active configs")
 
 def profile_visibility_from_text(profile_text):
     for line in profile_text.splitlines():
