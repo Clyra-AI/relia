@@ -4742,7 +4742,9 @@
         "cmd/relia/",
         "internal/distill/",
         "internal/config/",
-        "internal/ingest/"
+        "internal/ingest/",
+        "internal/review/",
+        "internal/memory/"
       ],
       "architecture_guidance_refs": [
         {
@@ -5157,7 +5159,9 @@
         "cmd/relia/",
         "internal/distill/",
         "internal/config/",
-        "internal/ingest/"
+        "internal/ingest/",
+        "internal/review/",
+        "internal/memory/"
       ],
       "path_planning_method": "relia_decomposition_targets_2026_07_03"
     },
@@ -10859,7 +10863,8 @@
         "cmd/",
         "internal/ingest/",
         "internal/assess/",
-        "internal/advise/"
+        "internal/advise/",
+        "internal/backtest/"
       ],
       "architecture_guidance_refs": [
         {
@@ -11285,6 +11290,7 @@
         "internal/ingest/",
         "internal/assess/",
         "internal/advise/",
+        "internal/backtest/",
         "examples/",
         "docs/"
       ],
