@@ -579,6 +579,36 @@ def self_test():
             fail("absolute architecture target fixture did not fail closed")
 
         try:
+            validate_architecture_target_paths(
+                {
+                    "architecture_target_paths": ["./"],
+                    "path_planning_method": "self_test",
+                    "allowed_paths": ["internal/review/"],
+                },
+                "self-test",
+            )
+        except AssertionError as exc:
+            if "architecture_target_paths[0] path must not target repository root" not in str(exc):
+                raise
+        else:
+            fail("repo-root architecture target fixture did not fail closed")
+
+        try:
+            validate_architecture_target_paths(
+                {
+                    "architecture_target_paths": ["internal/review/"],
+                    "path_planning_method": "self_test",
+                    "allowed_paths": ["."],
+                },
+                "self-test",
+            )
+        except AssertionError as exc:
+            if "allowed_paths[0] path must not target repository root" not in str(exc):
+                raise
+        else:
+            fail("repo-root allowed path fixture did not fail closed")
+
+        try:
             validate_validation_contract_evidence_split(
                 {
                     "evidence_required": "validation_report",

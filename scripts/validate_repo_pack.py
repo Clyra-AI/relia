@@ -306,6 +306,12 @@ def raw_repo_relative_path_error(path):
         return "path must not contain parent-directory segments"
     return ""
 
+def normalized_scoped_repo_path(path, label):
+    normalized = normalize_repo_path(path)
+    if not normalized.rstrip("/"):
+        fail(f"{label} path must not target repository root")
+    return normalized
+
 def validate_architecture_target_paths(task, task_id):
     targets = task.get("architecture_target_paths")
     if not isinstance(targets, list) or not targets:
@@ -315,7 +321,7 @@ def validate_architecture_target_paths(task, task_id):
         path_error = raw_repo_relative_path_error(path)
         if path_error:
             fail(f"{task_id}.architecture_target_paths[{index}] {path_error}")
-        normalized_targets.append(normalize_repo_path(path))
+        normalized_targets.append(normalized_scoped_repo_path(path, f"{task_id}.architecture_target_paths[{index}]"))
     if any(path.rstrip("/") == "internal" for path in normalized_targets):
         fail(f"{task_id}.architecture_target_paths must name bounded internal packages, not broad internal/")
     method = task.get("path_planning_method")
@@ -326,7 +332,7 @@ def validate_architecture_target_paths(task, task_id):
         path_error = raw_repo_relative_path_error(path)
         if path_error:
             fail(f"{task_id}.allowed_paths[{index}] {path_error}")
-        allowed.append(normalize_repo_path(path))
+        allowed.append(normalized_scoped_repo_path(path, f"{task_id}.allowed_paths[{index}]"))
     if any(path.rstrip("/") == "internal" for path in allowed):
         fail(f"{task_id}.allowed_paths must not include broad internal/ after decomposition")
     if any(path.rstrip("/") == "cmd" for path in allowed) and not any(path.rstrip("/") == "cmd" for path in normalized_targets):
