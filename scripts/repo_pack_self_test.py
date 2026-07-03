@@ -643,6 +643,18 @@ def self_test():
                 if active_factoryd_repo_config(FACTORYD_REPO_KEY) != config_payload["repos"][FACTORYD_REPO_KEY]:
                     fail("repo-shaped active factoryd.json config should be visible")
                 validate_active_architecture_budget_policy(active_factoryd_repo_config(FACTORYD_REPO_KEY))
+                metadata_overlay_payload = {
+                    "repos": {
+                        FACTORYD_REPO_KEY: {
+                            "repo_path": str(temp_root),
+                            "capability_grants": [active_config_grant],
+                        }
+                    }
+                }
+                active_config.write_text(json.dumps(metadata_overlay_payload), encoding="utf-8")
+                if factoryd_config_capability_grants() != [active_config_grant]:
+                    fail("metadata-bearing active factoryd.json grants should be visible")
+                validate_active_architecture_budget_policy(active_factoryd_repo_config(FACTORYD_REPO_KEY))
                 top_level_grants_payload = {"capability_grants": [active_config_grant]}
                 active_config.write_text(json.dumps(top_level_grants_payload), encoding="utf-8")
                 if factoryd_config_capability_grants() != [active_config_grant]:

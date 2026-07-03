@@ -141,9 +141,21 @@ def validate_active_architecture_budget_policy(active_repo):
     if "architecture_budget" in active_repo:
         validate_architecture_budget_policy(active_repo, "active factoryd config")
         return
-    if set(active_repo.keys()) <= {"capability_grants"}:
+    if active_repo_is_grant_overlay(active_repo):
         return
     fail("active factoryd config.architecture_budget must be an object for full active configs")
+
+def active_repo_is_grant_overlay(active_repo):
+    overlay_keys = {
+        "capability_grants",
+        "metadata",
+        "notes",
+        "repo_key",
+        "repo_name",
+        "repo_path",
+        "repo_root",
+    }
+    return isinstance(active_repo.get("capability_grants"), list) and set(active_repo.keys()) <= overlay_keys
 
 def profile_visibility_from_text(profile_text):
     for line in profile_text.splitlines():
