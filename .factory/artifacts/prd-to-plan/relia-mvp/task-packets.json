@@ -6513,6 +6513,8 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T8/",
+        "cmd/relia/",
+        "internal/ingest/",
         "internal/result/",
         "internal/memory/"
       ],
@@ -6896,6 +6898,8 @@
         "factoryd_run_once_report"
       ],
       "architecture_target_paths": [
+        "cmd/relia/",
+        "internal/ingest/",
         "internal/result/",
         "internal/memory/"
       ],
