@@ -4744,7 +4744,8 @@
         "internal/config/",
         "internal/ingest/",
         "internal/review/",
-        "internal/memory/"
+        "internal/memory/",
+        "internal/backtest/"
       ],
       "architecture_guidance_refs": [
         {
@@ -5161,7 +5162,8 @@
         "internal/config/",
         "internal/ingest/",
         "internal/review/",
-        "internal/memory/"
+        "internal/memory/",
+        "internal/backtest/"
       ],
       "path_planning_method": "relia_decomposition_targets_2026_07_03"
     },
@@ -12203,8 +12205,10 @@
         "docs/dev/",
         ".factory/artifacts/customer-failure-intake/",
         "examples/fixtures/customer-failures/",
+        "cmd/relia/",
         "internal/ingest/",
-        "internal/review/"
+        "internal/review/",
+        "internal/config/"
       ],
       "architecture_guidance_refs": [
         {
@@ -12591,8 +12595,10 @@
         "factoryd_run_once_report"
       ],
       "architecture_target_paths": [
+        "cmd/relia/",
         "internal/ingest/",
         "internal/review/",
+        "internal/config/",
         "examples/"
       ],
       "path_planning_method": "relia_decomposition_targets_2026_07_03"
@@ -12737,6 +12743,7 @@
         "docs/dev/",
         ".factory/artifacts/lesson-records/",
         "memory/lessons/",
+        "cmd/relia/",
         "internal/memory/",
         "internal/review/"
       ],
@@ -13127,6 +13134,7 @@
         "factoryd_run_once_report"
       ],
       "architecture_target_paths": [
+        "cmd/relia/",
         "internal/memory/",
         "internal/review/"
       ],
