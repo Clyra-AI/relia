@@ -12,22 +12,21 @@ from repo_pack_architecture import (
     architecture_debt_exception_expiry_error,
     validate_architecture_debt_exception_expiry,
 )
-from validate_repo_pack import (
-    FACTORYD_REPO_KEY,
-    PROVIDER_ACCEPTANCE_IDS,
-    ROOT,
-    RUNNER_READY_TASK_FIELDS,
-    duplicate_values,
-    factoryd_config_capability_grants,
-    fail,
-    model_provider_gate_task,
-    public_release_boundary_error,
-    validate_context_brief,
-    validate_lifecycle_path_ownership,
-    validate_model_provider_gate,
-    validate_runner_ready_task_fields,
-    validate_validation_contract_evidence_split,
-)
+
+FACTORYD_REPO_KEY = validator.FACTORYD_REPO_KEY
+PROVIDER_ACCEPTANCE_IDS = validator.PROVIDER_ACCEPTANCE_IDS
+ROOT = validator.ROOT
+RUNNER_READY_TASK_FIELDS = validator.RUNNER_READY_TASK_FIELDS
+duplicate_values = validator.duplicate_values
+factoryd_config_capability_grants = validator.factoryd_config_capability_grants
+fail = validator.fail
+model_provider_gate_task = validator.model_provider_gate_task
+public_release_boundary_error = validator.public_release_boundary_error
+validate_context_brief = validator.validate_context_brief
+validate_lifecycle_path_ownership = validator.validate_lifecycle_path_ownership
+validate_model_provider_gate = validator.validate_model_provider_gate
+validate_runner_ready_task_fields = validator.validate_runner_ready_task_fields
+validate_validation_contract_evidence_split = validator.validate_validation_contract_evidence_split
 
 def self_test_public_release_boundary():
     valid = {
