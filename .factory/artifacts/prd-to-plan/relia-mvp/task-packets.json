@@ -8331,6 +8331,7 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T11/",
+        "cmd/relia/",
         "internal/memory/"
       ],
       "architecture_guidance_refs": [
@@ -8713,6 +8714,7 @@
         "factoryd_run_once_report"
       ],
       "architecture_target_paths": [
+        "cmd/relia/",
         "internal/memory/"
       ],
       "path_planning_method": "relia_decomposition_targets_2026_07_03"
@@ -11656,7 +11658,8 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T16/",
-        "cmd/"
+        "cmd/",
+        "internal/backtest/"
       ],
       "architecture_guidance_refs": [
         {
@@ -12072,6 +12075,7 @@
       ],
       "architecture_target_paths": [
         "cmd/",
+        "internal/backtest/",
         "examples/",
         "docs/"
       ],
