@@ -3203,6 +3203,7 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T4.3/",
+        "cmd/relia/",
         "internal/assess/",
         "internal/diffparse/"
       ],
@@ -3587,6 +3588,7 @@
         "factoryd_run_once_report"
       ],
       "architecture_target_paths": [
+        "cmd/relia/",
         "internal/assess/",
         "internal/diffparse/",
         "examples/"
@@ -5517,8 +5519,11 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T7/",
+        "cmd/relia/",
         "internal/distill/",
-        "internal/config/"
+        "internal/config/",
+        "internal/review/",
+        "internal/modelpull/"
       ],
       "architecture_guidance_refs": [
         {
@@ -5954,8 +5959,11 @@
         "factoryd_run_once_report"
       ],
       "architecture_target_paths": [
+        "cmd/relia/",
         "internal/distill/",
-        "internal/config/"
+        "internal/config/",
+        "internal/review/",
+        "internal/modelpull/"
       ],
       "path_planning_method": "relia_decomposition_targets_2026_07_03"
     },
@@ -9982,9 +9990,11 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T14/",
+        "cmd/relia/",
         "internal/assess/",
         "internal/advise/",
-        "internal/diffparse/"
+        "internal/diffparse/",
+        "internal/serve/"
       ],
       "architecture_guidance_refs": [
         {
@@ -10382,9 +10392,11 @@
         "factoryd_run_once_report"
       ],
       "architecture_target_paths": [
+        "cmd/relia/",
         "internal/assess/",
         "internal/advise/",
-        "internal/diffparse/"
+        "internal/diffparse/",
+        "internal/serve/"
       ],
       "path_planning_method": "relia_decomposition_targets_2026_07_03"
     },
