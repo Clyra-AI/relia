@@ -1,22 +1,34 @@
 # TEMP Finding: Relia Architecture Budget And Decomposition
 
 Date: 2026-06-30
-Status: source finding; not dispatchable
+Status: closed source finding
 Repo: Relia
 
 ## Boundary
 
-This file is repo-local source evidence for future Factory/factoryd planning.
+This file is repo-local source evidence retained for architecture audit history.
 It is not a generated execution contract, task packet, acceptance ledger, or
-scope-closure artifact. Before implementation starts, this finding must be
-ingested or promoted through the governed Factory path so runner-ready task
-packets, validation commands, lifecycle evidence, and acceptance refs are
-materialized.
+scope-closure artifact. The finding was promoted through the governed Factory
+path and closed by the systemic architecture/review-convergence ledger in
+Factory PR #240, with Relia evidence synchronized through PR #145.
 
 ## Objective
 
 Adopt architecture budget rules and decompose the current CLI monolith before
 more Relia feature work expands the same file.
+
+## Closure
+
+Closed. Relia's repo operating pack now records the architecture budget and
+exception path, implementation behavior has been moved into bounded
+`internal/*` packages, and the previously oversized CLI/test/validator surfaces
+are below the warning threshold:
+
+- `cmd/relia/main.go`: 1,093 lines.
+- `cmd/relia/main_test.go`: 999 lines.
+- `scripts/validate_repo_pack.py`: 1,090 lines.
+- `scripts/repo_pack_architecture.py`: 296 lines.
+- `scripts/repo_pack_self_test.py`: 778 lines.
 
 ## Current Finding
 
