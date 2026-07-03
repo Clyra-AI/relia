@@ -23,6 +23,7 @@ fail = validator.fail
 model_provider_gate_task = validator.model_provider_gate_task
 public_release_boundary_error = validator.public_release_boundary_error
 validate_context_brief = validator.validate_context_brief
+validate_architecture_target_paths = validator.validate_architecture_target_paths
 validate_lifecycle_path_ownership = validator.validate_lifecycle_path_ownership
 validate_model_provider_gate = validator.validate_model_provider_gate
 validate_runner_ready_task_fields = validator.validate_runner_ready_task_fields
@@ -197,6 +198,14 @@ def self_test():
     sample_task["required_proof_level"] = "workflow_behavior"
     sample_task["redaction_posture"] = {"classification": "internal", "customer_safe": False}
     validate_runner_ready_task_fields(sample_task, "self-test")
+    validate_architecture_target_paths(
+        {
+            "architecture_target_paths": ["internal/review/"],
+            "path_planning_method": "self_test",
+            "allowed_paths": ["internal/review/", "tests/"],
+        },
+        "self-test",
+    )
     validate_lifecycle_path_ownership(
         {
             "work_item_id": "relia-mvp-t1",
@@ -521,6 +530,21 @@ def self_test():
                 raise
         else:
             fail("workflow proof level without scorecard fixture did not fail closed")
+
+        try:
+            validate_architecture_target_paths(
+                {
+                    "architecture_target_paths": ["internal/review/"],
+                    "path_planning_method": "self_test",
+                    "allowed_paths": ["internal/"],
+                },
+                "self-test",
+            )
+        except AssertionError as exc:
+            if "broad internal" not in str(exc):
+                raise
+        else:
+            fail("broad internal/ allowed path fixture did not fail closed")
 
         try:
             validate_validation_contract_evidence_split(
