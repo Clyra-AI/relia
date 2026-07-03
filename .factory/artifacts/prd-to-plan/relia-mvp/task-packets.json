@@ -7246,7 +7246,8 @@
         "internal/modelpull/",
         "internal/distill/",
         "internal/config/",
-        "internal/advise/"
+        "internal/advise/",
+        "internal/assess/"
       ],
       "architecture_guidance_refs": [
         {
@@ -7700,7 +7701,8 @@
         "internal/modelpull/",
         "internal/distill/",
         "internal/config/",
-        "internal/advise/"
+        "internal/advise/",
+        "internal/assess/"
       ],
       "path_planning_method": "relia_decomposition_targets_2026_07_03"
     },
@@ -8839,7 +8841,8 @@
         "cmd/relia/",
         "internal/backtest/",
         "internal/serve/",
-        "internal/memory/"
+        "internal/memory/",
+        "internal/assess/"
       ],
       "architecture_guidance_refs": [
         {
@@ -9228,7 +9231,8 @@
         "cmd/relia/",
         "internal/backtest/",
         "internal/serve/",
-        "internal/memory/"
+        "internal/memory/",
+        "internal/assess/"
       ],
       "path_planning_method": "relia_decomposition_targets_2026_07_03"
     },
