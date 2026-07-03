@@ -10038,7 +10038,10 @@
         "internal/assess/",
         "internal/advise/",
         "internal/diffparse/",
-        "internal/serve/"
+        "internal/serve/",
+        "internal/ingest/",
+        "internal/backtest/",
+        "internal/distill/"
       ],
       "architecture_guidance_refs": [
         {
@@ -10440,7 +10443,10 @@
         "internal/assess/",
         "internal/advise/",
         "internal/diffparse/",
-        "internal/serve/"
+        "internal/serve/",
+        "internal/ingest/",
+        "internal/backtest/",
+        "internal/distill/"
       ],
       "path_planning_method": "relia_decomposition_targets_2026_07_03"
     },
@@ -10866,7 +10872,11 @@
         "internal/ingest/",
         "internal/assess/",
         "internal/advise/",
-        "internal/backtest/"
+        "internal/backtest/",
+        "internal/distill/",
+        "internal/review/",
+        "internal/memory/",
+        "internal/serve/"
       ],
       "architecture_guidance_refs": [
         {
@@ -11293,6 +11303,10 @@
         "internal/assess/",
         "internal/advise/",
         "internal/backtest/",
+        "internal/distill/",
+        "internal/review/",
+        "internal/memory/",
+        "internal/serve/",
         "examples/",
         "docs/"
       ],
