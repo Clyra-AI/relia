@@ -7204,6 +7204,7 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T9/",
+        "cmd/relia/",
         "internal/modelpull/",
         "internal/distill/",
         "internal/config/"
@@ -7656,6 +7657,7 @@
         "factoryd_run_once_report"
       ],
       "architecture_target_paths": [
+        "cmd/relia/",
         "internal/modelpull/",
         "internal/distill/",
         "internal/config/"
