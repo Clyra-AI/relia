@@ -127,6 +127,8 @@ def active_factoryd_repo_config(repo_key):
     config = load_json_file(FACTORYD_ACTIVE_CONFIG)
     repos = config.get("repos")
     if not isinstance(repos, dict):
+        if isinstance(config.get("capability_grants"), list):
+            return None
         fail("active factoryd config must declare repos as an object")
     repo = repos.get(repo_key)
     if not isinstance(repo, dict):

@@ -17,6 +17,7 @@ FACTORYD_REPO_KEY = validator.FACTORYD_REPO_KEY
 PROVIDER_ACCEPTANCE_IDS = validator.PROVIDER_ACCEPTANCE_IDS
 ROOT = validator.ROOT
 RUNNER_READY_TASK_FIELDS = validator.RUNNER_READY_TASK_FIELDS
+active_factoryd_repo_config = validator.active_factoryd_repo_config
 duplicate_values = validator.duplicate_values
 factoryd_config_capability_grants = validator.factoryd_config_capability_grants
 fail = validator.fail
@@ -638,6 +639,14 @@ def self_test():
                 active_config.write_text(json.dumps(config_payload), encoding="utf-8")
                 if factoryd_config_capability_grants() != [active_config_grant]:
                     fail("active factoryd.json grants should be visible")
+                if active_factoryd_repo_config(FACTORYD_REPO_KEY) != config_payload["repos"][FACTORYD_REPO_KEY]:
+                    fail("repo-shaped active factoryd.json config should be visible")
+                top_level_grants_payload = {"capability_grants": [active_config_grant]}
+                active_config.write_text(json.dumps(top_level_grants_payload), encoding="utf-8")
+                if factoryd_config_capability_grants() != [active_config_grant]:
+                    fail("top-level active factoryd.json grants should remain visible")
+                if active_factoryd_repo_config(FACTORYD_REPO_KEY) is not None:
+                    fail("top-level-only active factoryd.json config should skip repo architecture parity")
             finally:
                 validator.FACTORYD_CONFIG = original_example_config
                 validator.FACTORYD_ACTIVE_CONFIG = original_active_config
