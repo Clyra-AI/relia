@@ -244,7 +244,7 @@ Current progress:
   behavior.
 - `scripts/repo_pack_architecture.py` now owns architecture-budget validation
   helpers and `scripts/repo_pack_self_test.py` owns the validator self-test
-  harness, lowering `scripts/validate_repo_pack.py` to 1,097 lines, below the
+  harness, lowering `scripts/validate_repo_pack.py` to 1,090 lines, below the
   architecture warning threshold, while preserving repo-pack validation
   behavior.
 
