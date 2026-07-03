@@ -1657,6 +1657,7 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T3/",
+        "cmd/relia/",
         "internal/ingest/",
         "internal/config/",
         "internal/result/"
@@ -2047,6 +2048,7 @@
         "factoryd_run_once_report"
       ],
       "architecture_target_paths": [
+        "cmd/relia/",
         "internal/ingest/",
         "internal/config/",
         "internal/result/"
@@ -2240,6 +2242,7 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T4.1/",
+        "cmd/relia/",
         "internal/backtest/"
       ],
       "architecture_guidance_refs": [
@@ -2633,6 +2636,7 @@
         "factoryd_run_once_report"
       ],
       "architecture_target_paths": [
+        "cmd/relia/",
         "internal/backtest/",
         "examples/"
       ],
