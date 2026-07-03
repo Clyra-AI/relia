@@ -9317,6 +9317,7 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T13/",
+        "cmd/relia/",
         "internal/memory/",
         "internal/config/"
       ],
@@ -9706,6 +9707,7 @@
         "factoryd_run_once_report"
       ],
       "architecture_target_paths": [
+        "cmd/relia/",
         "internal/memory/",
         "internal/config/"
       ],
