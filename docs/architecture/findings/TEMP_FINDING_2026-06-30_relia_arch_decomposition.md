@@ -21,14 +21,19 @@ more Relia feature work expands the same file.
 
 Closed. Relia's repo operating pack now records the architecture budget and
 exception path, implementation behavior has been moved into bounded
-`internal/*` packages, and the previously oversized CLI/test/validator surfaces
-are below the warning threshold:
+`internal/*` packages, and the former CLI/test/validator closure targets are
+below the warning threshold:
 
 - `cmd/relia/main.go`: 1,093 lines.
 - `cmd/relia/main_test.go`: 999 lines.
 - `scripts/validate_repo_pack.py`: 1,090 lines.
 - `scripts/repo_pack_architecture.py`: 296 lines.
 - `scripts/repo_pack_self_test.py`: 778 lines.
+
+Remaining warning-level debt is recorded, but it is below the fail threshold
+and no longer part of the closed CLI monolith target:
+
+- `cmd/relia/demo_fixtures_test.go`: 1,522 lines.
 
 ## Current Finding
 
