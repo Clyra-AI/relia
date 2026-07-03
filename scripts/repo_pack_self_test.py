@@ -566,6 +566,36 @@ def self_test():
         try:
             validate_architecture_target_paths(
                 {
+                    "architecture_target_paths": [123],
+                    "path_planning_method": "self_test",
+                    "allowed_paths": ["internal/review/"],
+                },
+                "self-test",
+            )
+        except AssertionError as exc:
+            if "architecture_target_paths[0] path must be a string" not in str(exc):
+                raise
+        else:
+            fail("non-string architecture target fixture did not fail closed")
+
+        try:
+            validate_architecture_target_paths(
+                {
+                    "architecture_target_paths": ["internal/review/"],
+                    "path_planning_method": "self_test",
+                    "allowed_paths": [{"path": "internal/review/"}],
+                },
+                "self-test",
+            )
+        except AssertionError as exc:
+            if "allowed_paths[0] path must be a string" not in str(exc):
+                raise
+        else:
+            fail("non-string allowed path fixture did not fail closed")
+
+        try:
+            validate_architecture_target_paths(
+                {
                     "architecture_target_paths": ["/tmp/review"],
                     "path_planning_method": "self_test",
                     "allowed_paths": ["tmp/review"],

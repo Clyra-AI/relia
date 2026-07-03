@@ -297,6 +297,8 @@ def path_is_ancestor_of(path, root):
     return bool(path) and path != root and root.startswith(path + "/")
 
 def raw_repo_relative_path_error(path):
+    if not isinstance(path, str):
+        return "path must be a string"
     raw = str(path).strip()
     if not raw:
         return "path must be non-empty"
