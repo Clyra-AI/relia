@@ -7842,6 +7842,9 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T10/",
+        "cmd/relia/",
+        "internal/ingest/",
+        "internal/backtest/",
         "internal/review/",
         "internal/advise/"
       ],
@@ -8239,6 +8242,9 @@
         "factoryd_run_once_report"
       ],
       "architecture_target_paths": [
+        "cmd/relia/",
+        "internal/ingest/",
+        "internal/backtest/",
         "internal/review/",
         "internal/advise/"
       ],
@@ -8802,6 +8808,8 @@
         "memory/",
         ".github/",
         ".factory/artifacts/task-runs/T12/",
+        "cmd/relia/",
+        "internal/backtest/",
         "internal/serve/",
         "internal/memory/"
       ],
@@ -9189,6 +9197,8 @@
         "factoryd_run_once_report"
       ],
       "architecture_target_paths": [
+        "cmd/relia/",
+        "internal/backtest/",
         "internal/serve/",
         "internal/memory/"
       ],
