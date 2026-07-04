@@ -163,6 +163,15 @@ func RedactForPersistence(event map[string]any, ref string) (any, *Error) {
 	return redactValue(event, nil, ref)
 }
 
+func ValidateJSONRedactionSafe(content []byte, ref string) *Error {
+	var decoded any
+	if err := DecodeJSONUseNumber(string(content), &decoded); err != nil {
+		return artifactContractError("ingest input must be valid JSON before redaction scan", ref)
+	}
+	_, commandErr := redactValue(decoded, nil, ref)
+	return commandErr
+}
+
 func ValidGitHubProvenanceURLShape(value string) bool {
 	parsed, err := url.Parse(strings.TrimSpace(value))
 	if err != nil {

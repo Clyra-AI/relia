@@ -92,6 +92,9 @@ func parseIngestEvents(content []byte, ref string) ([]map[string]any, *CommandEr
 
 func parseIngestEventsForOptions(content []byte, ref string, options ingestOptions) ([]map[string]any, *CommandError) {
 	if options.GitHubOutcomes {
+		if ingestErr := ingestdoc.ValidateJSONRedactionSafe(content, ref); ingestErr != nil {
+			return nil, commandErrorFromIngest(ingestErr)
+		}
 		events, ingestErr := ingestdoc.ParseGitHubOutcomeEvents(content, ref)
 		return events, commandErrorFromIngest(ingestErr)
 	}
