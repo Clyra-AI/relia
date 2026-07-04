@@ -110,6 +110,27 @@ func TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage(t *testing.
 		}
 	}
 
+	stdout, stderr, code = runForTest(t, []string{"--json", "review", "merge", "--rule", playbook.Scalars["id"].Value, "--into", avoid.Scalars["id"].Value, "--reason", "covered by accepted avoid rule"}, false)
+	if code != ExitSuccess {
+		t.Fatalf("review merge exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	stdout, stderr, code = runForTest(t, []string{"--json", "distill", "--format", "json"}, false)
+	if code != ExitSuccess {
+		t.Fatalf("merge-preserving distill exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	mergedPreserved := parseRuleDocForTest(t, readRuleByIDForTest(t, tempDir, playbook.Scalars["id"].Value))
+	for key, want := range map[string]string{
+		"status":                    "retired",
+		"review.decision":           "merged",
+		"review.merged_into":        avoid.Scalars["id"].Value,
+		"review.reviewed_by":        "maintainer",
+		"metadata.lifecycle_reason": "previous retired review preserved",
+	} {
+		if got := mergedPreserved.Scalars[key].Value; got != want {
+			t.Fatalf("merged preserved %s = %q, want %q", key, got, want)
+		}
+	}
+
 	stdout, stderr, code = runForTest(t, []string{"--json", "memory", "--format", "json"}, false)
 	if code != ExitSuccess {
 		t.Fatalf("memory exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
@@ -121,7 +142,7 @@ func TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage(t *testing.
 	for _, want := range []string{
 		"# Relia Memory",
 		"active",
-		"candidate",
+		"retired",
 		"confidence",
 		"[PR #101](https://github.com/acme/billing-service/pull/101)",
 		"[PR #110](https://github.com/acme/billing-service/pull/110)",
