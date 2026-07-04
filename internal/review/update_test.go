@@ -185,6 +185,81 @@ func TestUpdateRuleReviewRejectClearsStaleMergeTarget(t *testing.T) {
 	}
 }
 
+func TestUpdateRuleReviewLabelPreservesRetiredMergeDecision(t *testing.T) {
+	root := setupReviewRuleRepo(t, "candidate")
+	rulePath := filepath.Join(root, "memory", "rules", "avoid-demo.yaml")
+
+	_, commandErr := UpdateRuleReview(root, rulePath, Options{
+		Action:     "merge",
+		Label:      "needs_user_input",
+		Rule:       "avoid-demo",
+		MergeInto:  "canonical-demo",
+		Reason:     "covered by the canonical rule",
+		ReviewedBy: "maintainer",
+	}, testUpdateOptions())
+	if commandErr != nil {
+		t.Fatalf("merge UpdateRuleReview returned error: %v", commandErr)
+	}
+	status, commandErr := UpdateRuleReview(root, rulePath, Options{
+		Action: "label",
+		Label:  "suggested",
+		Rule:   "avoid-demo",
+	}, testUpdateOptions())
+	if commandErr != nil {
+		t.Fatalf("label UpdateRuleReview returned error: %v", commandErr)
+	}
+	if status != "retired" {
+		t.Fatalf("status = %q, want retired", status)
+	}
+	document := readReviewRuleDocument(t, rulePath)
+	if got := document.Scalars["review.label"].Value; got != "suggested" {
+		t.Fatalf("review.label = %q, want suggested", got)
+	}
+	if got := document.Scalars["review.decision"].Value; got != "merged" {
+		t.Fatalf("review.decision = %q, want merged", got)
+	}
+	if got := document.Scalars["review.merged_into"].Value; got != "canonical-demo" {
+		t.Fatalf("review.merged_into = %q, want canonical-demo", got)
+	}
+}
+
+func TestUpdateRuleReviewLabelPreservesRetiredRejectDecision(t *testing.T) {
+	root := setupReviewRuleRepo(t, "candidate")
+	rulePath := filepath.Join(root, "memory", "rules", "avoid-demo.yaml")
+
+	_, commandErr := UpdateRuleReview(root, rulePath, Options{
+		Action:     "reject",
+		Label:      "needs_user_input",
+		Rule:       "avoid-demo",
+		Reason:     "not durable enough",
+		ReviewedBy: "maintainer",
+	}, testUpdateOptions())
+	if commandErr != nil {
+		t.Fatalf("reject UpdateRuleReview returned error: %v", commandErr)
+	}
+	status, commandErr := UpdateRuleReview(root, rulePath, Options{
+		Action: "label",
+		Label:  "suggested",
+		Rule:   "avoid-demo",
+	}, testUpdateOptions())
+	if commandErr != nil {
+		t.Fatalf("label UpdateRuleReview returned error: %v", commandErr)
+	}
+	if status != "retired" {
+		t.Fatalf("status = %q, want retired", status)
+	}
+	document := readReviewRuleDocument(t, rulePath)
+	if got := document.Scalars["review.label"].Value; got != "suggested" {
+		t.Fatalf("review.label = %q, want suggested", got)
+	}
+	if got := document.Scalars["review.decision"].Value; got != "rejected" {
+		t.Fatalf("review.decision = %q, want rejected", got)
+	}
+	if got := document.Scalars["review.merged_into"].Value; got != "" {
+		t.Fatalf("review.merged_into = %q, want empty", got)
+	}
+}
+
 func setupReviewRuleRepo(t *testing.T, status string) string {
 	t.Helper()
 	root := t.TempDir()
