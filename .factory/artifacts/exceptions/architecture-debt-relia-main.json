@@ -9,7 +9,7 @@
       "cmd/relia/main_test.go"
     ],
     "line_ceilings": {
-      "cmd/relia/main.go": 1093,
+      "cmd/relia/main.go": 1086,
       "cmd/relia/main_test.go": 999
     },
     "budget": {
@@ -116,6 +116,7 @@
     "cmd/relia/result_helpers.go",
     "cmd/relia/repo_helpers.go",
     "cmd/relia/models_command.go",
+    "cmd/relia/distill_lifecycle.go",
     "cmd/relia/memory_command.go",
     "cmd/relia/review_command.go",
     "cmd/relia/serve_command.go",

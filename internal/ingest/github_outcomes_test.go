@@ -76,6 +76,16 @@ func TestParseGitHubOutcomeEventsTranslatesStructuredExport(t *testing.T) {
 			t.Fatalf("event %d extraction_confidence = %q", index, got)
 		}
 	}
+	if got := stringFromAny(events[1]["signature_key"]); got != "packages/billing/tax.py" {
+		t.Fatalf("check-run signature_key = %q, want changed path", got)
+	}
+	if got := stringFromAny(events[2]["commit"]); got != "abc302" {
+		t.Fatalf("revert action commit = %q, want original PR head", got)
+	}
+	metadata := events[2]["metadata"].(map[string]any)
+	if got := stringFromAny(metadata["github_source_commit"]); got != "def302" {
+		t.Fatalf("revert metadata github_source_commit = %q, want def302", got)
+	}
 }
 
 func TestParseGitHubOutcomeEventsRequiresStructuredInputs(t *testing.T) {

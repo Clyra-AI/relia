@@ -55,7 +55,7 @@ func ParseGitHubOutcomeEvents(content []byte, ref string) ([]map[string]any, *Er
 			events = append(events, githubOutcomeEvent(base, revert, githubOutcomeEventOptions{
 				Kind:           "revert",
 				RecordedAt:     githubString(revert, "created_at", "merged_at", "committed_at", "recorded_at"),
-				Commit:         githubString(revert, "commit_sha", "sha", "commit"),
+				SourceCommit:   githubString(revert, "commit_sha", "sha", "commit"),
 				Paths:          githubPaths(revert, base.Paths),
 				CheckName:      "revert",
 				SignatureClass: "revert",
@@ -129,6 +129,7 @@ type githubOutcomeEventOptions struct {
 	SignatureKey   string
 	Message        string
 	ProvenanceURL  string
+	SourceCommit   string
 }
 
 func githubOutcomeBase(defaultRepo Repo, pull map[string]any, ref string, index int) (githubOutcomeBaseFields, *Error) {
@@ -197,8 +198,11 @@ func githubOutcomeEvent(base githubOutcomeBaseFields, source map[string]any, opt
 		"extraction_confidence": "structured",
 		"provenance_urls":       provenanceURLs,
 		"metadata": map[string]any{
-			"source_kind": "github_structured_export",
+			"source_format": "github_structured_export",
 		},
+	}
+	if options.SourceCommit != "" {
+		event["metadata"].(map[string]any)["github_source_commit"] = options.SourceCommit
 	}
 	if options.Message != "" {
 		event["message"] = options.Message
@@ -267,7 +271,7 @@ func githubPaths(event map[string]any, fallback []string) []string {
 
 func githubSignatureKey(event map[string]any, fallback []string) string {
 	return firstString(
-		githubString(event, "signature_key", "path", "filename", "name"),
+		githubString(event, "signature_key", "path", "filename"),
 		firstString(githubPaths(event, fallback)...),
 	)
 }

@@ -20,6 +20,11 @@ type Rule struct {
 	Experiences     []string
 	Provenance      []RuleProvenance
 	ReviewLabel     string
+	ReviewGate      string
+	ReviewDecision  string
+	ReviewedBy      string
+	DecisionRef     string
+	MergedInto      string
 	StatementOrigin string
 	Metadata        RuleMetadata
 }
@@ -111,6 +116,21 @@ func RenderRuleYAML(rule Rule) string {
 	builder.WriteString("review:\n")
 	builder.WriteString("  label: " + YAMLScalar(rule.ReviewLabel) + "\n")
 	builder.WriteString("  statement_origin: " + YAMLScalar(rule.StatementOrigin) + "\n")
+	if rule.ReviewGate != "" {
+		builder.WriteString("  gate: " + YAMLScalar(rule.ReviewGate) + "\n")
+	}
+	if rule.ReviewDecision != "" {
+		builder.WriteString("  decision: " + YAMLScalar(rule.ReviewDecision) + "\n")
+	}
+	if rule.ReviewedBy != "" {
+		builder.WriteString("  reviewed_by: " + YAMLScalar(rule.ReviewedBy) + "\n")
+	}
+	if rule.DecisionRef != "" {
+		builder.WriteString("  decision_ref: " + YAMLScalar(rule.DecisionRef) + "\n")
+	}
+	if rule.MergedInto != "" {
+		builder.WriteString("  merged_into: " + YAMLScalar(rule.MergedInto) + "\n")
+	}
 	builder.WriteString("metadata:\n")
 	builder.WriteString("  confidence_label: " + YAMLScalar(rule.Metadata.ConfidenceLabel) + "\n")
 	builder.WriteString("  lifecycle_reason: " + YAMLScalar(rule.Metadata.LifecycleReason) + "\n")

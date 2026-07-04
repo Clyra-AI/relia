@@ -357,10 +357,26 @@ func TestIngestGitHubOutcomesPersistsStructuredPRCheckRevertAndReviewRecords(t *
 	kinds := map[string]bool{}
 	for _, record := range records {
 		outcome := record["outcome"].(map[string]any)
-		kinds[outcome["kind"].(string)] = true
+		kind := outcome["kind"].(string)
+		kinds[kind] = true
 		metadata := record["metadata"].(map[string]any)
 		if metadata["memory_source"] != "verified_outcome_event" {
 			t.Fatalf("metadata = %#v", metadata)
+		}
+		if kind == "ci_failure" {
+			signature := metadata["signature"].(map[string]any)
+			if signature["key"] != "packages/billing/tax.py" {
+				t.Fatalf("ci signature metadata = %#v", signature)
+			}
+		}
+		if kind == "revert" {
+			action := record["action"].(map[string]any)
+			if action["commit"] != "abc302" {
+				t.Fatalf("revert action = %#v", action)
+			}
+			if metadata["github_source_commit"] != "def302" {
+				t.Fatalf("revert metadata = %#v", metadata)
+			}
 		}
 	}
 	for _, want := range []string{"merged_clean", "ci_failure", "revert", "review_correction"} {
