@@ -6,6 +6,16 @@
   "proof_level": "user_visible_behavior",
   "behaviors": [
     {
+      "behavior": "relia ingest --github-outcomes translates structured GitHub PR metadata, check-run failures, reverts, and marked review corrections into canonical experience records",
+      "status": "pass",
+      "evidence_refs": [
+        "internal/ingest/github_outcomes.go",
+        "internal/ingest/github_outcomes_test.go",
+        "cmd/relia/ingest_contract_test.go",
+        "examples/demo/github-outcome-fixtures.json"
+      ]
+    },
+    {
       "behavior": "relia review approve writes explicit human-review gate and approved decision evidence",
       "status": "pass",
       "evidence_refs": [
@@ -63,6 +73,61 @@
     "MVP-IN-SCOPE-002",
     "MVP-IN-SCOPE-014"
   ],
+  "acceptance_results": [
+    {
+      "acceptance_item_id": "FR3-GITHUB-OUTCOME-INTAKE-001",
+      "status": "implemented",
+      "proof_level": "user_visible_behavior",
+      "evidence_refs": [
+        "internal/ingest/github_outcomes.go",
+        "internal/ingest/github_outcomes_test.go",
+        "cmd/relia/ingest_contract_test.go",
+        "examples/demo/github-outcome-fixtures.json",
+        ".factory/artifacts/acceptance-evidence/FR3-GITHUB-OUTCOME-INTAKE-001/20260704T144320.000000000Z.json"
+      ]
+    },
+    {
+      "acceptance_item_id": "FR9-BACKTEST-BEFORE-BEHAVIOR-CHANGE-001",
+      "status": "implemented",
+      "proof_level": "user_visible_behavior",
+      "evidence_refs": [
+        "cmd/relia/backtest_report_test.go",
+        ".factory/artifacts/task-runs/T10/validation-report.json"
+      ]
+    },
+    {
+      "acceptance_item_id": "NFR7-RULE-READABILITY-001",
+      "status": "implemented",
+      "proof_level": "user_visible_behavior",
+      "evidence_refs": [
+        "schemas/memory-rule.schema.json",
+        "memory/rules/demo-assessment-active-rule.yaml",
+        ".factory/artifacts/acceptance-evidence/NFR7-RULE-READABILITY-001/20260704T144320.000000000Z.json"
+      ]
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-002",
+      "status": "implemented",
+      "proof_level": "user_visible_behavior",
+      "evidence_refs": [
+        "internal/ingest/github_outcomes.go",
+        "cmd/relia/ingest_contract_test.go",
+        "examples/demo/github-outcome-fixtures.json",
+        ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-002/20260704T144320.000000000Z.json"
+      ]
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-014",
+      "status": "implemented",
+      "proof_level": "user_visible_behavior",
+      "evidence_refs": [
+        "internal/review/update.go",
+        "internal/review/update_test.go",
+        "cmd/relia/distill_review_command_test.go",
+        ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-014/20260704T144320.000000000Z.json"
+      ]
+    }
+  ],
   "commands": [
     {
       "command": "make lint-fast",
@@ -76,6 +141,16 @@
     },
     {
       "command": "make test-contracts",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "go test ./internal/ingest ./cmd/relia -run 'TestParseArgsAcceptsGitHubOutcomesMode|TestParseGitHubOutcomeEvents|TestIngestGitHubOutcomesPersistsStructuredPRCheckRevertAndReviewRecords' -count=1",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "go run ./cmd/relia --json ingest --github-outcomes --input examples/demo/github-outcome-fixtures.json",
       "status": "pass",
       "exit_code": 0
     },

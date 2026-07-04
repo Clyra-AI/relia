@@ -1,0 +1,14 @@
+{
+  "acceptance_item_id": "NFR7-RULE-READABILITY-001",
+  "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+  "artifact_type": "acceptance_evidence_record",
+  "expires_at": "",
+  "external_evidence_ref": ".factory/artifacts/task-runs/T10/proof-of-behavior-scorecard.json#NFR7-RULE-READABILITY-001",
+  "generated_at": "2026-07-04T14:43:20Z",
+  "generated_by": "codex acceptance evidence repair",
+  "notes": "T10 preserves engineer-readable rule YAML and review metadata through schema, fixture, and review lifecycle tests. Evidence: schemas/memory-rule.schema.json, memory/rules/demo-assessment-active-rule.yaml, internal/review/update_test.go, cmd/relia/distill_review_command_test.go.",
+  "repo": "relia",
+  "reviewer": "codex",
+  "schema_version": "0.1",
+  "status": "implemented"
+}

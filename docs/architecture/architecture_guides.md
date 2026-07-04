@@ -321,6 +321,11 @@ synthetic fixtures, reviewed lessons, and shipped product behavior.
 - Raw customer material is not a Relia state source. It can only produce a
   redacted intake record, private delivery debt, or an approved synthetic
   fixture proposal.
+- GitHub-derived outcomes enter through structured PR metadata, check-run,
+  revert, and marked-review-correction exports before they become Relia
+  experience records. Live GitHub API collection remains a separate
+  network/credential-gated adapter; the default MVP path is offline structured
+  export intake plus the normal redaction and provenance checks.
 - Synthetic fixtures are the preferred bridge from customer observation to
   testable behavior. They must keep expected outcome, provenance, and negative
   case information close to the test or example that consumes them.

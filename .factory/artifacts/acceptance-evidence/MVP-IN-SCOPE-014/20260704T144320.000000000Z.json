@@ -1,0 +1,14 @@
+{
+  "acceptance_item_id": "MVP-IN-SCOPE-014",
+  "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+  "artifact_type": "acceptance_evidence_record",
+  "expires_at": "",
+  "external_evidence_ref": ".factory/artifacts/task-runs/T10/proof-of-behavior-scorecard.json#MVP-IN-SCOPE-014",
+  "generated_at": "2026-07-04T14:43:20Z",
+  "generated_by": "codex acceptance evidence repair",
+  "notes": "T10 implements explicit human review lifecycle commands, approval gate evidence, labels, decisions, and merge/reject/edit flows. Evidence: internal/review/update.go, internal/review/update_test.go, internal/review/args_test.go, cmd/relia/distill_review_command_test.go.",
+  "repo": "relia",
+  "reviewer": "codex",
+  "schema_version": "0.1",
+  "status": "implemented"
+}

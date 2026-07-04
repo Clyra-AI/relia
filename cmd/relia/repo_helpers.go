@@ -90,6 +90,21 @@ func parseIngestEvents(content []byte, ref string) ([]map[string]any, *CommandEr
 	return events, commandErrorFromIngest(ingestErr)
 }
 
+func parseIngestEventsForOptions(content []byte, ref string, options ingestOptions) ([]map[string]any, *CommandError) {
+	if options.GitHubOutcomes {
+		events, ingestErr := ingestdoc.ParseGitHubOutcomeEvents(content, ref)
+		return events, commandErrorFromIngest(ingestErr)
+	}
+	return parseIngestEvents(content, ref)
+}
+
+func ingestSourceFormat(options ingestOptions) string {
+	if options.GitHubOutcomes {
+		return "github_outcomes"
+	}
+	return "outcome_events"
+}
+
 func decodeJSONUseNumber(input string, target any) error {
 	return ingestdoc.DecodeJSONUseNumber(input, target)
 }
