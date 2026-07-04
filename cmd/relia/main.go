@@ -1030,28 +1030,28 @@ func allScopePathsMissing(root string, scopePaths []string) bool {
 	return true
 }
 
-func writeDistilledRules(root string, ruleDir string, rules []distilledRule) ([]ArtifactRef, *CommandError) {
+func writeDistilledRules(root string, ruleDir string, rules []distilledRule) ([]ArtifactRef, []distilledRule, *CommandError) {
 	cleanRuleDir, ok := configdoc.CleanRepoPath(ruleDir)
 	if !ok {
-		return nil, usageError("distill rule directory must be repo-relative")
+		return nil, nil, usageError("distill rule directory must be repo-relative")
 	}
 	ruleDirRel := filepath.ToSlash(cleanRuleDir)
-	ruleDirPath := filepath.Join(root, filepath.FromSlash(ruleDirRel))
-	if err := os.MkdirAll(ruleDirPath, 0o755); err != nil {
-		return nil, internalError("could not create memory rule directory", err)
+	if err := os.MkdirAll(filepath.Join(root, filepath.FromSlash(ruleDirRel)), 0o755); err != nil {
+		return nil, nil, internalError("could not create memory rule directory", err)
 	}
 	artifacts := make([]ArtifactRef, 0, len(rules))
-	for _, rule := range rules {
+	for index, rule := range rules {
 		rule = mergeExistingRuleLifecycle(root, ruleDirRel, rule)
+		rules[index] = rule
 		rel := filepath.ToSlash(filepath.Join(ruleDirRel, rule.ID+".yaml"))
 		path := filepath.Join(root, filepath.FromSlash(rel))
 		content := []byte(distilldoc.RenderRuleYAML(rule))
 		if commandErr := writeAtomicRepoFile(path, content, "memory rule"); commandErr != nil {
-			return nil, commandErr
+			return nil, nil, commandErr
 		}
 		artifacts = append(artifacts, ArtifactRef{Kind: "memory_rule", Path: rel})
 	}
-	return artifacts, nil
+	return artifacts, rules, nil
 }
 
 func mergeExistingRuleLifecycle(root string, ruleDir string, rule distilledRule) distilledRule {

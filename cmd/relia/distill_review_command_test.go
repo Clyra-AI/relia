@@ -118,6 +118,12 @@ func TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage(t *testing.
 	if code != ExitSuccess {
 		t.Fatalf("merge-preserving distill exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
 	}
+	result = decodeResult(t, stdout)
+	if int(result.Data["candidate_rules"].(float64)) != 0 ||
+		int(result.Data["active_rules"].(float64)) != 1 ||
+		int(result.Data["retired_rules"].(float64)) != 1 {
+		t.Fatalf("merge-preserving distill counts = %#v", result.Data)
+	}
 	mergedPreserved := parseRuleDocForTest(t, readRuleByIDForTest(t, tempDir, playbook.Scalars["id"].Value))
 	for key, want := range map[string]string{
 		"status":             "retired",

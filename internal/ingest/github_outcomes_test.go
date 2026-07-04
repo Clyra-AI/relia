@@ -98,3 +98,30 @@ func TestParseGitHubOutcomeEventsRequiresStructuredInputs(t *testing.T) {
 		t.Fatalf("error = %#v, want provenance error", ingestErr)
 	}
 }
+
+func TestParseGitHubOutcomeEventsAllowsPerPullRepos(t *testing.T) {
+	events, ingestErr := ParseGitHubOutcomeEvents([]byte(`{
+  "pull_requests": [
+    {
+      "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},
+      "number": 401,
+      "head_sha": "abc401",
+      "html_url": "https://github.com/acme/billing-service/pull/401",
+      "merged_at": "2026-06-05T12:00:00Z",
+      "labels": [{"name": "agent-authored"}],
+      "files": [{"filename": "packages/billing/invoice.py"}]
+    }
+  ]
+}`), "github-outcomes.json")
+
+	if ingestErr != nil {
+		t.Fatalf("ParseGitHubOutcomeEvents returned error: %v", ingestErr)
+	}
+	if len(events) != 1 {
+		t.Fatalf("events = %d, want 1: %#v", len(events), events)
+	}
+	repo := events[0]["repo"].(map[string]any)
+	if repo["owner"] != "acme" || repo["name"] != "billing-service" {
+		t.Fatalf("repo = %#v", repo)
+	}
+}
