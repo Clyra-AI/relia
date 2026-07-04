@@ -163,6 +163,38 @@ func TestIngestFailsClosedBeforePersistenceForUnrecognizedSecret(t *testing.T) {
 	}
 }
 
+func TestIngestGitHubOutcomesFailsClosedBeforeDroppingRawSecret(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	inputPath := filepath.Join(tempDir, "fixtures", "github-outcomes.json")
+	writeFileForTest(t, inputPath, `{
+  "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},
+  "pull_requests": [
+    {
+      "number": 144,
+      "head_sha": "def144",
+      "html_url": "https://github.com/acme/billing-service/pull/144",
+      "files": [{"filename": "packages/billing/invoice.py"}],
+      "merged_at": "2026-06-04T12:00:00Z",
+      "body": "unused raw field z6MvN2p9QxR4sT8aK3vY7bL0cD5eF1gH2jP9mQ4rS6tU"
+    }
+  ]
+}`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--github-outcomes", "--input", inputPath}, false)
+
+	if code != ExitRedactionSafety {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "redaction_safety_failed" {
+		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+	if _, err := os.Stat(filepath.Join(tempDir, ".relia", "experiences", "2026-06.jsonl")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("experience shard should not be persisted on raw GitHub export redaction failure: %v", err)
+	}
+}
+
 func TestIngestFailsClosedBeforePersistenceForSecretShapedMetadataKey(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
