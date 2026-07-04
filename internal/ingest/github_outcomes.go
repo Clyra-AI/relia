@@ -203,6 +203,9 @@ func githubOutcomeBase(defaultRepo Repo, pull map[string]any, ref string, index 
 		return githubOutcomeBaseFields{}, provenanceIntegrityError(fmt.Sprintf("github pull request %d URL must be a canonical https://github.com/ URL", pr), ref)
 	}
 	repo = githubRepoFromPRURL(repo, prURL)
+	if !githubPullRequestURLMatchesBase(repo, pr, prURL) {
+		return githubOutcomeBaseFields{}, provenanceIntegrityError(fmt.Sprintf("github pull request %d URL must match repo and pull number", pr), ref)
+	}
 	paths := githubPaths(pull, nil)
 	return githubOutcomeBaseFields{
 		Repo:                  repo,
@@ -233,6 +236,15 @@ func githubRepoFromPRURL(repo Repo, prURL string) Repo {
 		repo.Name = parts[1]
 	}
 	return repo
+}
+
+func githubPullRequestURLMatchesBase(repo Repo, pr int, prURL string) bool {
+	urlRepo := githubRepoFromPRURL(Repo{}, prURL)
+	urlPR, ok := GitHubPullRequestURLNumber(prURL)
+	return ok &&
+		urlPR == pr &&
+		strings.EqualFold(urlRepo.Owner, repo.Owner) &&
+		strings.EqualFold(urlRepo.Name, repo.Name)
 }
 
 func githubOutcomeEvent(base githubOutcomeBaseFields, source map[string]any, options githubOutcomeEventOptions, ref string) (map[string]any, *Error) {
