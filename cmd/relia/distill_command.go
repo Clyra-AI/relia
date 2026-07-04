@@ -71,7 +71,7 @@ func distillResult(args []string, start time.Time) CommandResult {
 	if commandErr != nil {
 		return withFormat(errorResult("distill", "distill", commandErr, start))
 	}
-	ruleArtifacts, commandErr := writeDistilledRules(root, options.RuleDir, rules)
+	ruleArtifacts, writtenRules, commandErr := writeDistilledRules(root, options.RuleDir, rules)
 	if commandErr != nil {
 		return withFormat(errorResult("distill", "distill", commandErr, start))
 	}
@@ -79,7 +79,7 @@ func distillResult(args []string, start time.Time) CommandResult {
 		return withFormat(errorResult("distill", "distill", commandErr, start))
 	}
 
-	statusCounts := distilldoc.StatusCounts(rules)
+	statusCounts := distilldoc.StatusCounts(writtenRules)
 	ruleArtifactPaths := make([]string, 0, len(ruleArtifacts))
 	for _, artifact := range ruleArtifacts {
 		ruleArtifactPaths = append(ruleArtifactPaths, artifact.Path)
@@ -88,7 +88,7 @@ func distillResult(args []string, start time.Time) CommandResult {
 		"format":                     options.Format,
 		"input_path":                 distillInputPathMetadata(options, sourceArtifacts),
 		"rule_dir":                   options.RuleDir,
-		"rules_written":              len(rules),
+		"rules_written":              len(writtenRules),
 		"candidate_rules":            statusCounts["candidate"],
 		"active_rules":               statusCounts["active"],
 		"stale_rules":                statusCounts["stale"],
@@ -104,7 +104,7 @@ func distillResult(args []string, start time.Time) CommandResult {
 		"decay_half_life_days":       options.HalfLifeDays,
 		"source_artifacts":           sourceArtifacts,
 		"source_artifact_digest":     sourceDigest,
-		"drafted_rules":              distilldoc.DraftedRuleData(rules, ruleArtifactPaths),
+		"drafted_rules":              distilldoc.DraftedRuleData(writtenRules, ruleArtifactPaths),
 		"provider_data_disclosure":   "none; provider is none and no network call was attempted",
 		"redacted_records_only":      true,
 		"local_privacy_default":      true,

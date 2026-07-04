@@ -15,13 +15,17 @@ func ParseGitHubOutcomeEvents(content []byte, ref string) ([]map[string]any, *Er
 	if !ok {
 		return nil, artifactContractError("github outcome input must be a JSON object", ref)
 	}
-	defaultRepo, commandErr := NormalizeRepo(envelope, ref)
-	if commandErr != nil {
-		return nil, commandErr
-	}
 	pulls := githubOutcomeObjects(envelope, "pull_requests", "prs")
 	if len(pulls) == 0 {
 		return nil, artifactContractError("github outcome input must include pull_requests", ref)
+	}
+	defaultRepo := Repo{Provider: "github"}
+	if githubEnvelopeHasRepo(envelope) {
+		var commandErr *Error
+		defaultRepo, commandErr = NormalizeRepo(envelope, ref)
+		if commandErr != nil {
+			return nil, commandErr
+		}
 	}
 
 	var events []map[string]any
@@ -107,6 +111,15 @@ func ParseGitHubOutcomeEvents(content []byte, ref string) ([]map[string]any, *Er
 		return stringFromAny(events[left]["outcome_kind"]) < stringFromAny(events[right]["outcome_kind"])
 	})
 	return events, nil
+}
+
+func githubEnvelopeHasRepo(envelope map[string]any) bool {
+	for _, path := range []string{"repo", "repo_owner", "repo_name"} {
+		if _, ok := nestedField(envelope, path); ok {
+			return true
+		}
+	}
+	return false
 }
 
 type githubOutcomeBaseFields struct {
