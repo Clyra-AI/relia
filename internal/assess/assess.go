@@ -47,12 +47,14 @@ type RiskAssessmentMatch struct {
 }
 
 type Rule struct {
-	ID         string
-	Kind       string
-	Path       string
-	Confidence float64
-	ScopePaths []string
-	Citations  []RuleCitation
+	ID             string
+	Kind           string
+	Path           string
+	Confidence     float64
+	ScopePaths     []string
+	Citations      []RuleCitation
+	ReviewGate     string
+	ReviewDecision string
 }
 
 type RuleCitation struct {
@@ -114,12 +116,14 @@ func ReadRule(root string, rulePath string, options Options) (Rule, bool, *resul
 		return Rule{}, false, artifactError(options, "memory rule confidence must be numeric", rel)
 	}
 	return Rule{
-		ID:         document.Scalars["id"].Value,
-		Kind:       document.Scalars["kind"].Value,
-		Path:       rel,
-		Confidence: confidence,
-		ScopePaths: yamlmini.ListValues(document, "scope.paths"),
-		Citations:  RuleCitations(document),
+		ID:             document.Scalars["id"].Value,
+		Kind:           document.Scalars["kind"].Value,
+		Path:           rel,
+		Confidence:     confidence,
+		ScopePaths:     yamlmini.ListValues(document, "scope.paths"),
+		Citations:      RuleCitations(document),
+		ReviewGate:     activeRuleReviewGate(document),
+		ReviewDecision: activeRuleReviewDecision(document),
 	}, true, nil
 }
 
@@ -229,6 +233,20 @@ func ValidateActiveRuleIdentity(root string, document yamlmini.Document, rel str
 	return nil
 }
 
+func activeRuleReviewGate(document yamlmini.Document) string {
+	if reviewGate, ok := document.Scalars["review.gate"]; ok {
+		return reviewGate.Value
+	}
+	return "human_review"
+}
+
+func activeRuleReviewDecision(document yamlmini.Document) string {
+	if reviewDecision, ok := document.Scalars["review.decision"]; ok {
+		return reviewDecision.Value
+	}
+	return "approved"
+}
+
 func ServedRuleData(rules []Rule, options Options) ([]map[string]any, *resultdoc.CommandError) {
 	data := make([]map[string]any, 0, len(rules))
 	for _, rule := range rules {
@@ -241,12 +259,14 @@ func ServedRuleData(rules []Rule, options Options) ([]map[string]any, *resultdoc
 			return nil, commandErr
 		}
 		data = append(data, map[string]any{
-			"rule_id":     rule.ID,
-			"kind":        rule.Kind,
-			"confidence":  rule.Confidence,
-			"scope_paths": append([]string(nil), rule.ScopePaths...),
-			"citations":   servedCitations,
-			"path":        rule.Path,
+			"rule_id":         rule.ID,
+			"kind":            rule.Kind,
+			"confidence":      rule.Confidence,
+			"scope_paths":     append([]string(nil), rule.ScopePaths...),
+			"citations":       servedCitations,
+			"path":            rule.Path,
+			"review_gate":     rule.ReviewGate,
+			"review_decision": rule.ReviewDecision,
 		})
 	}
 	return data, nil

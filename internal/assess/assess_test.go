@@ -154,6 +154,9 @@ metadata: {}
 	if len(rules) != 1 || rules[0].ID != "billing-active" {
 		t.Fatalf("rules = %#v", rules)
 	}
+	if rules[0].ReviewGate != "human_review" || rules[0].ReviewDecision != "approved" {
+		t.Fatalf("review normalization = gate %q decision %q", rules[0].ReviewGate, rules[0].ReviewDecision)
+	}
 }
 
 func TestLoadRulesRejectsInvalidActiveRule(t *testing.T) {
