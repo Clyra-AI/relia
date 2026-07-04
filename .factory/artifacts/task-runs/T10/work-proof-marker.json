@@ -1,0 +1,30 @@
+{
+  "artifact_type": "work_proof_marker",
+  "changed_paths": [
+    ".factory/artifacts/task-runs/T10/proof-of-behavior-scorecard.json",
+    ".factory/artifacts/task-runs/T10/validation-report.json",
+    ".factory/artifacts/task-runs/T10/work-proof-marker.json",
+    "README.md",
+    "cmd/relia/demo_fixtures_test.go",
+    "cmd/relia/distill_review_command_test.go",
+    "cmd/relia/review_command.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/dev/dev_guides.md",
+    "examples/demo/distill-review-lifecycle-fixtures.json",
+    "internal/review/args.go",
+    "internal/review/args_test.go",
+    "internal/review/update.go",
+    "internal/review/update_test.go",
+    "memory/rules/demo-assessment-active-rule.yaml",
+    "schemas/memory-rule.schema.json"
+  ],
+  "evidence_refs": [
+    ".factory/artifacts/task-runs/T10/validation-report.json",
+    ".factory/artifacts/task-runs/T10/proof-of-behavior-scorecard.json"
+  ],
+  "implementation_performed": true,
+  "schema_version": "1.0",
+  "status": "implemented",
+  "summary": "Implemented review approval gate evidence, merged/rejected human-decision workflow metadata, review JSON output fields, memory-rule schema fields, policy-aligned fixtures, and docs updates within the T10 allowed path set.",
+  "task_id": "T10"
+}

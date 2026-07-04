@@ -43,6 +43,15 @@ func TestUpdateRuleReviewApproveActivatesRule(t *testing.T) {
 	if got := document.Scalars["review.label"].Value; got != "accepted" {
 		t.Fatalf("review.label = %q, want accepted", got)
 	}
+	if got := document.Scalars["review.gate"].Value; got != "human_review" {
+		t.Fatalf("review.gate = %q, want human_review", got)
+	}
+	if got := document.Scalars["review.decision"].Value; got != "approved" {
+		t.Fatalf("review.decision = %q, want approved", got)
+	}
+	if got := document.Scalars["review.reviewed_by"].Value; got != "maintainer" {
+		t.Fatalf("review.reviewed_by = %q, want maintainer", got)
+	}
 	if got := document.Scalars["metadata.lifecycle_reason"].Value; got != "approved by human review" {
 		t.Fatalf("metadata.lifecycle_reason = %q", got)
 	}
@@ -83,6 +92,9 @@ func TestUpdateRuleReviewEditUpdatesStatementAndScope(t *testing.T) {
 	if got := document.Scalars["metadata.lifecycle_reason"].Value; got != "edited by human review; pending approval" {
 		t.Fatalf("metadata.lifecycle_reason = %q", got)
 	}
+	if got := document.Scalars["review.decision"].Value; got != "pending" {
+		t.Fatalf("review.decision = %q, want pending", got)
+	}
 }
 
 func TestUpdateRuleReviewRejectsRetiredApproval(t *testing.T) {
@@ -99,6 +111,36 @@ func TestUpdateRuleReviewRejectsRetiredApproval(t *testing.T) {
 	}
 	if commandErr.Message != "cannot mark retired memory rule accepted without fresh distill evidence" {
 		t.Fatalf("message = %q", commandErr.Message)
+	}
+}
+
+func TestUpdateRuleReviewMergeRetiresSourceWithGovernanceEvidence(t *testing.T) {
+	root := setupReviewRuleRepo(t, "candidate")
+	rulePath := filepath.Join(root, "memory", "rules", "avoid-demo.yaml")
+
+	status, commandErr := UpdateRuleReview(root, rulePath, Options{
+		Action:     "merge",
+		Label:      "needs_user_input",
+		Rule:       "avoid-demo",
+		MergeInto:  "canonical-demo",
+		Reason:     "covered by the canonical rule",
+		ReviewedBy: "maintainer",
+	}, testUpdateOptions())
+	if commandErr != nil {
+		t.Fatalf("UpdateRuleReview returned error: %v", commandErr)
+	}
+	if status != "retired" {
+		t.Fatalf("status = %q, want retired", status)
+	}
+	document := readReviewRuleDocument(t, rulePath)
+	if got := document.Scalars["review.decision"].Value; got != "merged" {
+		t.Fatalf("review.decision = %q, want merged", got)
+	}
+	if got := document.Scalars["review.merged_into"].Value; got != "canonical-demo" {
+		t.Fatalf("review.merged_into = %q, want canonical-demo", got)
+	}
+	if got := document.Scalars["metadata.lifecycle_reason"].Value; !strings.Contains(got, "canonical-demo") {
+		t.Fatalf("metadata.lifecycle_reason = %q", got)
 	}
 }
 

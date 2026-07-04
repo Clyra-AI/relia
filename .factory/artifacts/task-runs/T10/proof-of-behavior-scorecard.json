@@ -1,0 +1,90 @@
+{
+  "artifact_type": "proof-of-behavior-scorecard",
+  "schema_version": "1.0",
+  "task_id": "T10",
+  "status": "pass",
+  "proof_level": "user_visible_behavior",
+  "behaviors": [
+    {
+      "behavior": "relia review approve writes explicit human-review gate and approved decision evidence",
+      "status": "pass",
+      "evidence_refs": [
+        "internal/review/update_test.go",
+        "cmd/relia/distill_review_command_test.go"
+      ]
+    },
+    {
+      "behavior": "relia review edit keeps rules candidate and pending after human-authored changes",
+      "status": "pass",
+      "evidence_refs": [
+        "internal/review/update_test.go",
+        "cmd/relia/distill_review_command_test.go"
+      ]
+    },
+    {
+      "behavior": "relia review reject retires rules with rejected decision evidence and lifecycle reason",
+      "status": "pass",
+      "evidence_refs": [
+        "internal/review/update_test.go",
+        "cmd/relia/distill_review_command_test.go"
+      ]
+    },
+    {
+      "behavior": "relia review merge retires duplicate rules with merged decision evidence and target rule reference",
+      "status": "pass",
+      "evidence_refs": [
+        "internal/review/args_test.go",
+        "internal/review/update_test.go",
+        "cmd/relia/distill_review_command_test.go"
+      ]
+    },
+    {
+      "behavior": "Review command JSON output exposes review_gate, decision, and merge target data for non-interactive agents",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/review_command.go",
+        "cmd/relia/distill_review_command_test.go"
+      ]
+    },
+    {
+      "behavior": "Memory-rule schema and committed fixtures document optional review gate and decision fields while preserving existing generated rule compatibility",
+      "status": "pass",
+      "evidence_refs": [
+        "schemas/memory-rule.schema.json",
+        "examples/demo/distill-review-lifecycle-fixtures.json",
+        "memory/rules/demo-assessment-active-rule.yaml"
+      ]
+    }
+  ],
+  "acceptance_item_ids": [
+    "FR3-GITHUB-OUTCOME-INTAKE-001",
+    "FR9-BACKTEST-BEFORE-BEHAVIOR-CHANGE-001",
+    "NFR7-RULE-READABILITY-001",
+    "MVP-IN-SCOPE-002",
+    "MVP-IN-SCOPE-014"
+  ],
+  "commands": [
+    {
+      "command": "make lint-fast",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "make test-fast",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "make test-contracts",
+      "status": "pass",
+      "exit_code": 0
+    },
+    {
+      "command": "make prepush-full",
+      "status": "pass",
+      "exit_code": 0
+    }
+  ],
+  "no_live_network_or_credentials": true,
+  "lifecycle_evidence_note": "scope_closure_report, pr_lifecycle_report, and factoryd_run_once_report are factoryd-owned and intentionally not authored by this task-executor worker."
+}

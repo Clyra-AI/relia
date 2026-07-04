@@ -245,6 +245,8 @@ type demoLifecycleProvenance struct {
 
 type demoLifecycleRuleReview struct {
 	Label           string `json:"label"`
+	Gate            string `json:"gate"`
+	Decision        string `json:"decision"`
 	StatementOrigin string `json:"statement_origin"`
 }
 
@@ -953,6 +955,14 @@ func assertLifecycleRuleSchemaShape(t *testing.T, rule demoLifecycleRule) {
 	case "accepted", "suggested", "needs_user_input":
 	default:
 		t.Fatalf("lifecycle rule %s review.label = %q", rule.ID, rule.Review.Label)
+	}
+	if rule.Review.Gate != "human_review" {
+		t.Fatalf("lifecycle rule %s review.gate = %q", rule.ID, rule.Review.Gate)
+	}
+	switch rule.Review.Decision {
+	case "pending", "approved", "needs_user_input", "rejected", "merged":
+	default:
+		t.Fatalf("lifecycle rule %s review.decision = %q", rule.ID, rule.Review.Decision)
 	}
 	if rule.Status == "active" && rule.Review.Label != "accepted" {
 		t.Fatalf("active lifecycle rule %s review.label = %q", rule.ID, rule.Review.Label)

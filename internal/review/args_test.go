@@ -56,12 +56,41 @@ func TestParseArgsRejectAction(t *testing.T) {
 	}
 }
 
+func TestParseArgsMergeAction(t *testing.T) {
+	options, parseErr := ParseArgs([]string{
+		"merge",
+		"--rule", "duplicate-rule",
+		"--into", "canonical-rule",
+		"--reason", "covered by narrower canonical rule",
+		"--reviewed-by", "maintainer",
+	})
+	if parseErr != nil {
+		t.Fatalf("ParseArgs returned error: %v", parseErr)
+	}
+	if options.Action != "merge" ||
+		options.Label != "needs_user_input" ||
+		options.MergeInto != "canonical-rule" ||
+		options.ReviewedBy != "maintainer" {
+		t.Fatalf("unexpected options: %+v", options)
+	}
+}
+
 func TestParseArgsRejectsEditInputWithoutEditAction(t *testing.T) {
 	_, parseErr := ParseArgs([]string{"--rule", "avoid-demo", "--statement", "new text"})
 	if parseErr == nil {
 		t.Fatal("expected edit action error")
 	}
 	if parseErr.Message != "review --statement and --scope-path require review edit" {
+		t.Fatalf("message = %q", parseErr.Message)
+	}
+}
+
+func TestParseArgsRejectsIntoWithoutMergeAction(t *testing.T) {
+	_, parseErr := ParseArgs([]string{"--rule", "avoid-demo", "--into", "canonical"})
+	if parseErr == nil {
+		t.Fatal("expected merge action error")
+	}
+	if parseErr.Message != "review --into requires review merge" {
 		t.Fatalf("message = %q", parseErr.Message)
 	}
 }

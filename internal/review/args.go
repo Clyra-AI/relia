@@ -9,9 +9,11 @@ import (
 type Options struct {
 	Action     string
 	Rule       string
+	MergeInto  string
 	Label      string
 	Statement  string
 	Reason     string
+	ReviewedBy string
 	ScopePaths []string
 }
 
@@ -27,7 +29,7 @@ func ParseArgs(args []string) (Options, *ParseError) {
 	var options Options
 	if len(args) > 0 {
 		switch args[0] {
-		case "approve", "edit", "reject":
+		case "approve", "edit", "reject", "merge":
 			options.Action = args[0]
 			args = args[1:]
 		}
@@ -47,6 +49,12 @@ func ParseArgs(args []string) (Options, *ParseError) {
 			}
 			options.Label = args[index+1]
 			index++
+		case "--into":
+			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
+				return options, &ParseError{Message: "review merge requires a rule id or path after --into"}
+			}
+			options.MergeInto = args[index+1]
+			index++
 		case "--statement":
 			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
 				return options, &ParseError{Message: "review edit requires a statement after --statement"}
@@ -55,9 +63,15 @@ func ParseArgs(args []string) (Options, *ParseError) {
 			index++
 		case "--reason":
 			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
-				return options, &ParseError{Message: "review reject requires a reason after --reason"}
+				return options, &ParseError{Message: "review reject or merge requires a reason after --reason"}
 			}
 			options.Reason = args[index+1]
+			index++
+		case "--reviewed-by":
+			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
+				return options, &ParseError{Message: "review requires a reviewer after --reviewed-by"}
+			}
+			options.ReviewedBy = args[index+1]
 			index++
 		case "--scope-path":
 			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
@@ -80,7 +94,12 @@ func ParseArgs(args []string) (Options, *ParseError) {
 		return options, &ParseError{Message: "review --statement and --scope-path require review edit"}
 	}
 	if options.Action != "reject" && strings.TrimSpace(options.Reason) != "" {
-		return options, &ParseError{Message: "review --reason requires review reject"}
+		if options.Action != "merge" {
+			return options, &ParseError{Message: "review --reason requires review reject or merge"}
+		}
+	}
+	if options.Action != "merge" && strings.TrimSpace(options.MergeInto) != "" {
+		return options, &ParseError{Message: "review --into requires review merge"}
 	}
 	switch options.Action {
 	case "approve":
@@ -106,12 +125,23 @@ func ParseArgs(args []string) (Options, *ParseError) {
 		if options.Label == "accepted" {
 			return options, &ParseError{Message: "review edit keeps a rule candidate; run review approve after editing"}
 		}
+	case "merge":
+		if strings.TrimSpace(options.MergeInto) == "" {
+			return options, &ParseError{Message: "review merge requires --into <rule-id-or-path>"}
+		}
+		if strings.TrimSpace(options.Reason) == "" {
+			return options, &ParseError{Message: "review merge requires --reason <text>"}
+		}
+		if options.Label != "" && options.Label != "needs_user_input" {
+			return options, &ParseError{Message: "review merge can only use review label needs_user_input"}
+		}
+		options.Label = "needs_user_input"
 	case "label":
 		if options.Label == "" {
 			options.Label = "accepted"
 		}
 	default:
-		return options, &ParseError{Message: "review action must be approve, edit, reject, or omitted for --label"}
+		return options, &ParseError{Message: "review action must be approve, edit, merge, reject, or omitted for --label"}
 	}
 	switch options.Label {
 	case "accepted", "suggested", "needs_user_input":
@@ -122,6 +152,9 @@ func ParseArgs(args []string) (Options, *ParseError) {
 		if _, ok := cleanRepoPath(scopePath); !ok {
 			return options, &ParseError{Message: "review --scope-path must be repo-relative"}
 		}
+	}
+	if strings.ContainsAny(options.ReviewedBy, "\n\r") {
+		return options, &ParseError{Message: "review --reviewed-by must be a stable reviewer id"}
 	}
 	return options, nil
 }

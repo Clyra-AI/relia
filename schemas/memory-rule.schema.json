@@ -138,6 +138,24 @@
         "label": {
           "enum": ["accepted", "suggested", "needs_user_input"]
         },
+        "gate": {
+          "enum": ["human_review"]
+        },
+        "decision": {
+          "enum": ["pending", "approved", "needs_user_input", "rejected", "merged"]
+        },
+        "reviewed_by": {
+          "type": "string",
+          "minLength": 1
+        },
+        "decision_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "merged_into": {
+          "type": "string",
+          "minLength": 1
+        },
         "statement_origin": {
           "enum": ["llm_drafted", "cluster_summary", "human_authored"]
         }
@@ -228,6 +246,9 @@
         "review_required": {
           "type": "boolean"
         },
+        "serving_eligible": {
+          "type": "boolean"
+        },
         "deterministic_fallback": {
           "type": "boolean"
         },
@@ -266,6 +287,52 @@
                 "const": "accepted"
               }
             }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": ["review"],
+        "properties": {
+          "review": {
+            "required": ["decision"],
+            "properties": {
+              "decision": {
+                "const": "approved"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "required": ["status"],
+        "properties": {
+          "status": {
+            "const": "active"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": ["review"],
+        "properties": {
+          "review": {
+            "required": ["decision"],
+            "properties": {
+              "decision": {
+                "enum": ["rejected", "merged"]
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "required": ["status"],
+        "properties": {
+          "status": {
+            "const": "retired"
           }
         }
       }

@@ -1,0 +1,143 @@
+{
+  "acceptance_results": [
+    {
+      "acceptance_item_id": "FR3-GITHUB-OUTCOME-INTAKE-001",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T10/proof-of-behavior-scorecard.json",
+        "make prepush-full"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "FR9-BACKTEST-BEFORE-BEHAVIOR-CHANGE-001",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T10/proof-of-behavior-scorecard.json",
+        "make prepush-full"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "NFR7-RULE-READABILITY-001",
+      "evidence_refs": [
+        "schemas/memory-rule.schema.json",
+        "memory/rules/demo-assessment-active-rule.yaml",
+        ".factory/artifacts/task-runs/T10/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-002",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T10/proof-of-behavior-scorecard.json",
+        "make prepush-full"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-014",
+      "evidence_refs": [
+        "internal/review/update_test.go",
+        "cmd/relia/distill_review_command_test.go",
+        ".factory/artifacts/task-runs/T10/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    }
+  ],
+  "artifact_type": "validation_report",
+  "baseline_evidence": [
+    {
+      "command": "make lint-fast",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "make test-fast",
+      "exit_code": 0,
+      "status": "pass"
+    }
+  ],
+  "blockers": [],
+  "changed_paths": [
+    ".factory/artifacts/task-runs/T10/proof-of-behavior-scorecard.json",
+    ".factory/artifacts/task-runs/T10/validation-report.json",
+    ".factory/artifacts/task-runs/T10/work-proof-marker.json",
+    "README.md",
+    "cmd/relia/demo_fixtures_test.go",
+    "cmd/relia/distill_review_command_test.go",
+    "cmd/relia/review_command.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/dev/dev_guides.md",
+    "examples/demo/distill-review-lifecycle-fixtures.json",
+    "internal/review/args.go",
+    "internal/review/args_test.go",
+    "internal/review/update.go",
+    "internal/review/update_test.go",
+    "memory/rules/demo-assessment-active-rule.yaml",
+    "schemas/memory-rule.schema.json"
+  ],
+  "changelog_result": {
+    "note": "No changelog file exists in the allowed paths; README and dev/architecture docs were updated per docs_sync_refs.",
+    "status": "not_applicable"
+  },
+  "commands_run": [
+    "make lint-fast",
+    "make test-fast",
+    "make test-contracts",
+    "make prepush-full"
+  ],
+  "docs_sync_result": {
+    "status": "pass",
+    "updated_paths": [
+      "README.md",
+      "docs/dev/dev_guides.md",
+      "docs/architecture/architecture_guides.md"
+    ]
+  },
+  "final_validation_evidence": [
+    {
+      "command": "make prepush-full",
+      "coverage": "79.0% statements for ./cmd/... against 75.0% minimum",
+      "exit_code": 0,
+      "status": "pass"
+    }
+  ],
+  "green_evidence": [
+    {
+      "command": "make test-fast",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "make test-contracts",
+      "exit_code": 0,
+      "status": "pass"
+    }
+  ],
+  "path_policy_result": {
+    "changed_paths_within_allowed_paths": true,
+    "forbidden_paths_changed": false,
+    "status": "pass"
+  },
+  "plan_drift_result": {
+    "note": "Implementation stayed within review governance and human-decision workflow scope.",
+    "status": "pass"
+  },
+  "red_evidence": [
+    {
+      "command": "make test-fast",
+      "exit_code": 0,
+      "note": "Red-first command ran before implementation and passed against existing behavior; new focused tests were added for review merge and governance evidence.",
+      "status": "pass"
+    }
+  ],
+  "residual_risks": [
+    "Lifecycle evidence artifacts remain factoryd-owned and were not authored by this worker."
+  ],
+  "schema_version": "1.0",
+  "status": "pass",
+  "task_id": "T10",
+  "versioning_result": {
+    "note": "Pre-1.0 schema-compatible optional fields; no runtime pin or module version change.",
+    "status": "not_applicable"
+  }
+}

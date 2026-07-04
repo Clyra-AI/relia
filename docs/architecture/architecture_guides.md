@@ -117,9 +117,9 @@ default 90-day recency half-life, contradictions, flake discounts, and
 extraction confidence with no drafting-model contribution. Drafted
 `cluster_summary` and future `llm_drafted` rules are invalid unless their
 metadata carries confidence inputs and decay fields. The blast radius is limited
-to generated memory-rule YAML, review status transitions, memory-page
-rendering, and assessment serving eligibility because only accepted active rules
-are served.
+to generated memory-rule YAML, review status transitions, human-review gate and
+decision evidence, memory-page rendering, and assessment serving eligibility
+because only accepted active rules are served.
 Rollback is removal of the T6 command implementation, tests, docs, and generated
 `memory/rules/*.yaml` or `memory/MEMORY.md`; `.relia/experiences` remains the
 source of truth for re-distillation.
@@ -132,7 +132,7 @@ records an already-present local artifact. Feedback sources are focused
 distill/review/model tests, schema contract validation, `make prepush-full`,
 and Factory task-run evidence. Deterministic clustering now uses canonical
 signature keys before signature ID fallback, confidence is capped at `0.6`
-until three confirmed experiences exist, review supports approve/edit/reject
+until three confirmed experiences exist, review supports approve/edit/merge/reject
 state transitions, and MEMORY.md separates strong active memory from weak
 candidate, stale, contradicted, and retired memory. The local embedding
 inference boundary is decision-recorded in
@@ -265,11 +265,11 @@ construction, path normalization, collision checks, and result payload shaping
 before config-owned validation and CLI-owned writes;
 `internal/distill` owns distill argument parsing, provider plan construction,
 request-shape description, cost estimation, embedding-mode helpers, clustering,
-canonical signature-key selection, review gate helpers, and deterministic rule
-ID/statement formatting; `internal/review`
+canonical signature-key selection, review gate helpers, review decision
+defaults, and deterministic rule ID/statement formatting; `internal/review`
 owns review command argument parsing, review action defaults and validation,
-repo-relative scope-path validation, memory rule lookup, and review lifecycle
-artifact updates; `internal/memory` owns memory command
+repo-relative scope-path validation, memory rule lookup, human-decision
+metadata, and review lifecycle artifact updates; `internal/memory` owns memory command
 argument parsing, repo-relative output-path validation, memory-rule artifact
 validation, drafted rule calibration checks, rule summary provenance ordering,
 status counts, rule summary loading, and MEMORY.md rendering; `internal/serve`
