@@ -194,6 +194,7 @@ func githubOutcomeBase(defaultRepo Repo, pull map[string]any, ref string, index 
 	if !ValidGitHubProvenanceURLShape(prURL) {
 		return githubOutcomeBaseFields{}, provenanceIntegrityError(fmt.Sprintf("github pull request %d URL must be a canonical https://github.com/ URL", pr), ref)
 	}
+	repo = githubRepoFromPRURL(repo, prURL)
 	paths := githubPaths(pull, nil)
 	return githubOutcomeBaseFields{
 		Repo:                  repo,
@@ -208,6 +209,22 @@ func githubOutcomeBase(defaultRepo Repo, pull map[string]any, ref string, index 
 		AttributionMethod:     githubString(pull, "attribution_method", "attribution.method"),
 		AttributionConfidence: githubFirstAny(pull, "attribution_confidence", "attribution.confidence"),
 	}, nil
+}
+
+func githubRepoFromPRURL(repo Repo, prURL string) Repo {
+	if repo.Owner != "" && repo.Name != "" {
+		return repo
+	}
+	const prefix = "https://github.com/"
+	if !strings.HasPrefix(prURL, prefix) {
+		return repo
+	}
+	parts := strings.Split(strings.TrimPrefix(prURL, prefix), "/")
+	if len(parts) >= 4 && parts[0] != "" && parts[1] != "" && parts[2] == "pull" {
+		repo.Owner = parts[0]
+		repo.Name = parts[1]
+	}
+	return repo
 }
 
 func githubOutcomeEvent(base githubOutcomeBaseFields, source map[string]any, options githubOutcomeEventOptions, ref string) (map[string]any, *Error) {
@@ -389,6 +406,9 @@ func githubFirstAny(event map[string]any, paths ...string) any {
 func githubOptionalAny(event map[string]any, paths ...string) (any, bool) {
 	for _, path := range paths {
 		if value, ok := nestedField(event, path); ok {
+			if value == nil {
+				continue
+			}
 			return value, true
 		}
 	}
