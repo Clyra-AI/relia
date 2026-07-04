@@ -581,6 +581,8 @@ func entropySafeFieldValue(fieldPath []string, value string) bool {
 			return validGitCommitHash(value)
 		case "signature_id":
 			return validSignatureIDValue(value)
+		case "node_id":
+			return true
 		case "diff_fingerprint", "message_fingerprint", "digest", "checksum":
 			return validHashLikeValue(value)
 		}

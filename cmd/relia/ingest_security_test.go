@@ -195,6 +195,40 @@ func TestIngestGitHubOutcomesFailsClosedBeforeDroppingRawSecret(t *testing.T) {
 	}
 }
 
+func TestIngestGitHubOutcomesAllowsRawGitHubNodeID(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	inputPath := filepath.Join(tempDir, "fixtures", "github-outcomes.json")
+	rawNodeID := "MDEyOlB1bGxSZXF1ZXN0MTIzNDU2Nzg5MDEyMzQ1Njc4OTA="
+	writeFileForTest(t, inputPath, `{
+  "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},
+  "pull_requests": [
+    {
+      "number": 145,
+      "node_id": "`+rawNodeID+`",
+      "head_sha": "def145",
+      "html_url": "https://github.com/acme/billing-service/pull/145",
+      "labels": [{"name": "agent-authored"}],
+      "files": [{"filename": "packages/billing/invoice.py"}],
+      "merged_at": "2026-06-04T12:00:00Z"
+    }
+  ]
+}`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--github-outcomes", "--input", inputPath}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	content, err := os.ReadFile(filepath.Join(tempDir, ".relia", "experiences", "2026-06.jsonl"))
+	if err != nil {
+		t.Fatalf("expected persisted experience shard: %v", err)
+	}
+	if bytes.Contains(content, []byte(rawNodeID)) {
+		t.Fatalf("raw GitHub node_id should not be persisted:\n%s", content)
+	}
+}
+
 func TestIngestFailsClosedBeforePersistenceForSecretShapedMetadataKey(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
