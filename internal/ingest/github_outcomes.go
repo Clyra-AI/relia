@@ -190,9 +190,6 @@ func githubOutcomeBase(defaultRepo Repo, pull map[string]any, ref string, index 
 		return githubOutcomeBaseFields{}, provenanceIntegrityError(fmt.Sprintf("github pull request %d number must be a positive integer", index+1), ref)
 	}
 	commit := githubString(pull, "head_sha", "head.sha", "commit", "merge_commit_sha")
-	if commit == "" {
-		return githubOutcomeBaseFields{}, artifactContractError(fmt.Sprintf("github pull request %d must include head_sha or commit", pr), ref)
-	}
 	prURL := githubString(pull, "html_url", "pr_url")
 	if prURL == "" {
 		if candidate := githubString(pull, "url"); ValidGitHubProvenanceURLShape(candidate) {
@@ -243,6 +240,9 @@ func githubOutcomeEvent(base githubOutcomeBaseFields, source map[string]any, opt
 		return nil, commandErr
 	}
 	commit := firstString(options.Commit, base.Commit)
+	if commit == "" {
+		return nil, artifactContractError(fmt.Sprintf("github pull request %d %s outcome must include head_sha or commit", base.PR, options.Kind), ref)
+	}
 	paths := options.Paths
 	if len(paths) == 0 {
 		paths = base.Paths

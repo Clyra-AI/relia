@@ -167,6 +167,13 @@ func ValidateRuleArtifact(root string, path string, options ValidationOptions) *
 	if status != "active" && reviewLabel.Value == "accepted" {
 		return artifactContractError(options, "accepted memory rule status must be active", configdoc.RefWithPath(rel, reviewLabel))
 	}
+	if reviewGate, ok := document.Scalars["review.gate"]; ok {
+		switch reviewGate.Value {
+		case "human_review":
+		default:
+			return artifactContractError(options, "memory rule review.gate is invalid", configdoc.RefWithPath(rel, reviewGate))
+		}
+	}
 	if reviewDecision, ok := document.Scalars["review.decision"]; ok {
 		switch reviewDecision.Value {
 		case "pending", "approved", "needs_user_input", "rejected", "merged":
