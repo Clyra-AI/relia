@@ -596,6 +596,32 @@ func TestParseGitHubOutcomeEventsRejectsCrossRepoOutcomeURL(t *testing.T) {
 	}
 }
 
+func TestParseGitHubOutcomeEventsRejectsMismatchedOutcomePRURL(t *testing.T) {
+	_, ingestErr := ParseGitHubOutcomeEvents([]byte(`{
+  "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},
+  "pull_requests": [
+    {
+      "number": 412,
+      "head_sha": "abc412",
+      "html_url": "https://github.com/acme/billing-service/pull/412",
+      "files": [{"filename": "cmd/relia/main.go"}],
+      "check_runs": [
+        {
+          "name": "validate",
+          "conclusion": "failure",
+          "completed_at": "2026-06-17T12:00:00Z",
+          "html_url": "https://github.com/acme/billing-service/pull/999"
+        }
+      ]
+    }
+  ]
+}`), "github-outcomes.json")
+
+	if ingestErr == nil || ingestErr.Kind != ErrorProvenance {
+		t.Fatalf("error = %#v, want provenance error", ingestErr)
+	}
+}
+
 func TestParseGitHubOutcomeEventsPreservesCleanMergeSignatureMetadata(t *testing.T) {
 	events, ingestErr := ParseGitHubOutcomeEvents([]byte(`{
   "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},
