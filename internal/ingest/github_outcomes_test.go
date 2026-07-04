@@ -234,3 +234,90 @@ func TestParseGitHubOutcomeEventsPreservesExplicitAttribution(t *testing.T) {
 		t.Fatalf("attribution_confidence = %#v, want 0.97", events[0]["attribution_confidence"])
 	}
 }
+
+func TestParseGitHubOutcomeEventsPreservesCheckRunSignatureClass(t *testing.T) {
+	events, ingestErr := ParseGitHubOutcomeEvents([]byte(`{
+  "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},
+  "pull_requests": [
+    {
+      "number": 404,
+      "head_sha": "abc404",
+      "html_url": "https://github.com/acme/billing-service/pull/404",
+      "labels": [{"name": "agent-authored"}],
+      "files": [{"filename": "cmd/relia/main.go"}],
+      "check_runs": [
+        {
+          "name": "validate",
+          "check_name": "golangci-lint",
+          "conclusion": "failure",
+          "completed_at": "2026-06-08T12:00:00Z",
+          "html_url": "https://github.com/acme/billing-service/actions/runs/404",
+          "signature_class": "lint_failure",
+          "signature_key": "cmd/relia/main.go::lint"
+        }
+      ]
+    }
+  ]
+}`), "github-outcomes.json")
+
+	if ingestErr != nil {
+		t.Fatalf("ParseGitHubOutcomeEvents returned error: %v", ingestErr)
+	}
+	if len(events) != 1 {
+		t.Fatalf("events = %d, want 1: %#v", len(events), events)
+	}
+	if got := stringFromAny(events[0]["signature_class"]); got != "lint_failure" {
+		t.Fatalf("signature_class = %q, want lint_failure", got)
+	}
+	if got := stringFromAny(events[0]["check_name"]); got != "golangci-lint" {
+		t.Fatalf("check_name = %q, want golangci-lint", got)
+	}
+	if got := stringFromAny(events[0]["signature_key"]); got != "cmd/relia/main.go::lint" {
+		t.Fatalf("signature_key = %q, want explicit lint key", got)
+	}
+}
+
+func TestParseGitHubOutcomeEventsPreservesCleanMergeSignatureMetadata(t *testing.T) {
+	events, ingestErr := ParseGitHubOutcomeEvents([]byte(`{
+  "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},
+  "pull_requests": [
+    {
+      "number": 405,
+      "head_sha": "abc405",
+      "html_url": "https://github.com/acme/billing-service/pull/405",
+      "merged_at": "2026-06-09T12:00:00Z",
+      "labels": [{"name": "agent-authored"}],
+      "files": [{"filename": "packages/billing/invoice.py"}],
+      "signature_id": "sig_billing_clock",
+      "signature_class": "test_failure",
+      "check_name": "pytest-billing",
+      "signature_key": "tests/billing/test_invoice.py::test_clock",
+      "message_fingerprint": "sha256:clock-failure",
+      "extraction_confidence": "log_parsed_high"
+    }
+  ]
+}`), "github-outcomes.json")
+
+	if ingestErr != nil {
+		t.Fatalf("ParseGitHubOutcomeEvents returned error: %v", ingestErr)
+	}
+	if len(events) != 1 {
+		t.Fatalf("events = %d, want 1: %#v", len(events), events)
+	}
+	event := events[0]
+	if got := stringFromAny(event["outcome_kind"]); got != "merged_clean" {
+		t.Fatalf("outcome_kind = %q, want merged_clean", got)
+	}
+	for key, want := range map[string]string{
+		"signature_id":          "sig_billing_clock",
+		"signature_class":       "test_failure",
+		"check_name":            "pytest-billing",
+		"signature_key":         "tests/billing/test_invoice.py::test_clock",
+		"message_fingerprint":   "sha256:clock-failure",
+		"extraction_confidence": "log_parsed_high",
+	} {
+		if got := stringFromAny(event[key]); got != want {
+			t.Fatalf("%s = %q, want %q", key, got, want)
+		}
+	}
+}
