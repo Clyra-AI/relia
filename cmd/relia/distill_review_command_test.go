@@ -92,6 +92,23 @@ func TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage(t *testing.
 	if reviewed.Scalars["status"].Value != "active" || reviewed.Scalars["review.label"].Value != "accepted" {
 		t.Fatalf("reviewed lifecycle = status %q review %q", reviewed.Scalars["status"].Value, reviewed.Scalars["review.label"].Value)
 	}
+	stdout, stderr, code = runForTest(t, []string{"--json", "distill", "--format", "json"}, false)
+	if code != ExitSuccess {
+		t.Fatalf("review-preserving distill exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	preserved := parseRuleDocForTest(t, readRuleByIDForTest(t, tempDir, avoid.Scalars["id"].Value))
+	for key, want := range map[string]string{
+		"status":              "active",
+		"review.label":        "accepted",
+		"review.gate":         "human_review",
+		"review.decision":     "approved",
+		"review.reviewed_by":  "maintainer",
+		"review.decision_ref": "relia review --label accepted --rule " + avoid.Scalars["id"].Value,
+	} {
+		if got := preserved.Scalars[key].Value; got != want {
+			t.Fatalf("preserved %s = %q, want %q", key, got, want)
+		}
+	}
 
 	stdout, stderr, code = runForTest(t, []string{"--json", "memory", "--format", "json"}, false)
 	if code != ExitSuccess {

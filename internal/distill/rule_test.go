@@ -58,6 +58,10 @@ func TestRenderRuleYAMLIncludesStableMetadata(t *testing.T) {
 		Experiences:     []string{"exp-1", "exp-2"},
 		Provenance:      []RuleProvenance{{PR: 42, Outcome: "failure", URL: "https://github.com/Clyra-AI/relia/pull/42", ExperienceID: "exp-1"}},
 		ReviewLabel:     "suggested",
+		ReviewGate:      "human_review",
+		ReviewDecision:  "pending",
+		ReviewedBy:      "maintainer",
+		DecisionRef:     "relia review",
 		StatementOrigin: "cluster_summary",
 		Metadata: RuleMetadata{
 			ConfidenceLabel:       "medium",
@@ -96,6 +100,10 @@ func TestRenderRuleYAMLIncludesStableMetadata(t *testing.T) {
 		`  - .relia/experiences/2026-06.jsonl`,
 		`  deterministic_fallback: true`,
 		`    url: https://github.com/Clyra-AI/relia/pull/42`,
+		`  gate: human_review`,
+		`  decision: pending`,
+		`  reviewed_by: maintainer`,
+		`  decision_ref: relia review`,
 	} {
 		if !strings.Contains(got, want) {
 			t.Fatalf("rendered YAML missing %q:\n%s", want, got)

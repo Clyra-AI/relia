@@ -1067,14 +1067,7 @@ func mergeExistingRuleLifecycle(root string, ruleDir string, rule distilledRule)
 	if err != nil {
 		return rule
 	}
-	if document.Scalars["status"].Value == "active" &&
-		document.Scalars["review.label"].Value == "accepted" &&
-		rule.Status == "candidate" {
-		rule.Status = "active"
-		rule.ReviewLabel = "accepted"
-		rule.Metadata.LifecycleReason = "previous accepted review preserved"
-	}
-	return rule
+	return preserveExistingAcceptedRuleLifecycle(rule, document)
 }
 
 func yamlFloat(value float64) string {
