@@ -102,7 +102,7 @@ func ParseGitHubOutcomeEvents(content []byte, ref string) ([]map[string]any, *Er
 				RecordedAt:     githubString(pull, "merged_at", "updated_at", "created_at"),
 				Commit:         base.Commit,
 				Paths:          base.Paths,
-				CheckName:      githubCheckName(pull, "merge"),
+				CheckName:      firstString(githubCheckName(pull), "merge"),
 				SignatureClass: githubSignatureClass(pull, "unknown"),
 				SignatureKey:   githubSignatureKey(pull, base.Paths),
 				ProvenanceURL:  base.PRURL,
