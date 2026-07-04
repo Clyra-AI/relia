@@ -48,8 +48,8 @@ func ParseGitHubOutcomeEvents(content []byte, ref string) ([]map[string]any, *Er
 				RecordedAt:     githubString(checkRun, "completed_at", "updated_at", "created_at"),
 				Commit:         githubString(checkRun, "head_sha", "commit"),
 				Paths:          githubPaths(checkRun, base.Paths),
-				CheckName:      githubString(checkRun, "name", "check_name"),
-				SignatureClass: "test_failure",
+				CheckName:      githubCheckName(checkRun, "name", "ci_failure"),
+				SignatureClass: githubSignatureClass(checkRun, "test_failure"),
 				SignatureKey:   githubSignatureKey(checkRun, base.Paths),
 				Message:        githubString(checkRun, "message", "summary", "output.summary", "conclusion"),
 				ProvenanceURL:  githubString(checkRun, "html_url", "details_url", "url", "check_run_url"),
@@ -87,9 +87,9 @@ func ParseGitHubOutcomeEvents(content []byte, ref string) ([]map[string]any, *Er
 				RecordedAt:     githubString(pull, "merged_at", "updated_at", "created_at"),
 				Commit:         base.Commit,
 				Paths:          base.Paths,
-				CheckName:      "merge",
-				SignatureClass: "unknown",
-				SignatureKey:   firstString(firstString(base.Paths...), base.Commit),
+				CheckName:      githubCheckName(pull, "merge"),
+				SignatureClass: githubSignatureClass(pull, "unknown"),
+				SignatureKey:   githubSignatureKey(pull, base.Paths),
 				ProvenanceURL:  base.PRURL,
 			}))
 		}
@@ -225,6 +225,15 @@ func githubOutcomeEvent(base githubOutcomeBaseFields, source map[string]any, opt
 			"source_format": "github_structured_export",
 		},
 	}
+	if signatureID := githubString(source, "signature_id", "outcome.signature.signature_id"); signatureID != "" {
+		event["signature_id"] = signatureID
+	}
+	if extractionConfidence := githubString(source, "extraction_confidence", "outcome.signature.extraction_confidence"); extractionConfidence != "" {
+		event["extraction_confidence"] = extractionConfidence
+	}
+	if messageFingerprint := githubString(source, "message_fingerprint", "outcome.signature.message_fingerprint"); messageFingerprint != "" {
+		event["message_fingerprint"] = messageFingerprint
+	}
 	if actorKind := firstString(githubString(source, "actor_kind", "attribution.actor_kind"), base.ActorKind); actorKind != "" {
 		event["actor_kind"] = actorKind
 	}
@@ -315,9 +324,20 @@ func githubLabels(event map[string]any) []string {
 	return uniqueStrings(labels)
 }
 
+func githubCheckName(event map[string]any, fallback ...string) string {
+	return firstString(
+		githubString(event, "check_name", "outcome.signature.check_name", "outcome.signature.check"),
+		githubString(event, fallback...),
+	)
+}
+
+func githubSignatureClass(event map[string]any, fallback string) string {
+	return firstString(githubString(event, "signature_class", "outcome.signature.class"), fallback)
+}
+
 func githubSignatureKey(event map[string]any, fallback []string) string {
 	return firstString(
-		githubString(event, "signature_key", "path", "filename"),
+		githubString(event, "signature_key", "outcome.signature.key", "path", "filename"),
 		firstString(githubPaths(event, fallback)...),
 	)
 }
