@@ -180,6 +180,9 @@ func ValidateRuleArtifact(root string, path string, options ValidationOptions) *
 		default:
 			return artifactContractError(options, "memory rule review.decision is invalid", configdoc.RefWithPath(rel, reviewDecision))
 		}
+		if status == "active" && reviewDecision.Value != "approved" {
+			return artifactContractError(options, "active memory rule review.decision must be approved", configdoc.RefWithPath(rel, reviewDecision))
+		}
 		if reviewDecision.Value == "approved" && status != "active" {
 			return artifactContractError(options, "approved memory rule status must be active", configdoc.RefWithPath(rel, reviewDecision))
 		}
