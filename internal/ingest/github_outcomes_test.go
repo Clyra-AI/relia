@@ -56,6 +56,14 @@ func TestParseGitHubOutcomeEventsTranslatesStructuredExport(t *testing.T) {
           "html_url": "https://github.com/acme/billing-service/pull/302",
           "path": "packages/billing/ignored.py"
         }
+      ],
+      "marked_review_corrections": [
+        {
+          "resolved_at": "2026-06-04T13:00:00Z",
+          "html_url": "https://github.com/acme/billing-service/pull/302#discussion_r123",
+          "path": "packages/billing/tax.py",
+          "message": "Follow-up marked correction"
+        }
       ]
     }
   ]
@@ -64,10 +72,10 @@ func TestParseGitHubOutcomeEventsTranslatesStructuredExport(t *testing.T) {
 	if ingestErr != nil {
 		t.Fatalf("ParseGitHubOutcomeEvents returned error: %v", ingestErr)
 	}
-	if len(events) != 4 {
-		t.Fatalf("events = %d, want 4: %#v", len(events), events)
+	if len(events) != 5 {
+		t.Fatalf("events = %d, want 5: %#v", len(events), events)
 	}
-	wantKinds := []string{"merged_clean", "ci_failure", "revert", "review_correction"}
+	wantKinds := []string{"merged_clean", "ci_failure", "revert", "review_correction", "review_correction"}
 	for index, want := range wantKinds {
 		if got := stringFromAny(events[index]["outcome_kind"]); got != want {
 			t.Fatalf("event %d outcome_kind = %q, want %q", index, got, want)
@@ -90,6 +98,10 @@ func TestParseGitHubOutcomeEventsTranslatesStructuredExport(t *testing.T) {
 	if got := stringFromAny(metadata["github_source_commit"]); got != "def302" {
 		t.Fatalf("revert metadata github_source_commit = %q, want def302", got)
 	}
+	provenanceURLs := events[4]["provenance_urls"].([]string)
+	if len(provenanceURLs) != 1 || provenanceURLs[0] != "https://github.com/acme/billing-service/pull/302" {
+		t.Fatalf("fragment provenance_urls = %#v", provenanceURLs)
+	}
 }
 
 func TestParseGitHubOutcomeEventsRequiresStructuredInputs(t *testing.T) {
@@ -103,7 +115,8 @@ func TestParseGitHubOutcomeEventsAllowsPerPullRepos(t *testing.T) {
 	events, ingestErr := ParseGitHubOutcomeEvents([]byte(`{
   "pull_requests": [
     {
-      "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},
+      "repo_owner": "acme",
+      "repo_name": "billing-service",
       "number": 401,
       "head_sha": "abc401",
       "html_url": "https://github.com/acme/billing-service/pull/401",
