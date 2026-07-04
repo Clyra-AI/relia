@@ -165,3 +165,45 @@ func TestParseGitHubOutcomeEventsPreservesCoauthorTrailers(t *testing.T) {
 		t.Fatalf("coauthors = %#v, want Claude Code", coauthors)
 	}
 }
+
+func TestParseGitHubOutcomeEventsPreservesExplicitAttribution(t *testing.T) {
+	events, ingestErr := ParseGitHubOutcomeEvents([]byte(`{
+  "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},
+  "pull_requests": [
+    {
+      "number": 403,
+      "head_sha": "abc403",
+      "html_url": "https://github.com/acme/billing-service/pull/403",
+      "actor_kind": "agent",
+      "attribution_method": "manual",
+      "attribution_confidence": 0.97,
+      "files": [{"filename": "packages/billing/invoice.py"}],
+      "check_runs": [
+        {
+          "name": "validate",
+          "conclusion": "failure",
+          "completed_at": "2026-06-07T12:00:00Z",
+          "html_url": "https://github.com/acme/billing-service/actions/runs/403",
+          "summary": "unit test failed"
+        }
+      ]
+    }
+  ]
+}`), "github-outcomes.json")
+
+	if ingestErr != nil {
+		t.Fatalf("ParseGitHubOutcomeEvents returned error: %v", ingestErr)
+	}
+	if len(events) != 1 {
+		t.Fatalf("events = %d, want 1: %#v", len(events), events)
+	}
+	if got := stringFromAny(events[0]["actor_kind"]); got != "agent" {
+		t.Fatalf("actor_kind = %q, want agent", got)
+	}
+	if got := stringFromAny(events[0]["attribution_method"]); got != "manual" {
+		t.Fatalf("attribution_method = %q, want manual", got)
+	}
+	if got, ok := numericValue(events[0]["attribution_confidence"]); !ok || got != 0.97 {
+		t.Fatalf("attribution_confidence = %#v, want 0.97", events[0]["attribution_confidence"])
+	}
+}
