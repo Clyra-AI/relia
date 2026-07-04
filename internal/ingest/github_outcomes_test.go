@@ -259,6 +259,9 @@ func TestParseGitHubOutcomeEventsAllowsOutcomeLevelPaths(t *testing.T) {
           "commit_sha": "def404",
           "commit_url": "https://github.com/acme/billing-service/commit/def404",
           "flake_discount": 0.5,
+          "signature_class": "test_failure",
+          "check_name": "pytest-billing",
+          "signature_key": "tests/billing/test_invoice.py::test_clock",
           "paths": ["internal/ingest/github_outcomes.go"]
         }
       ],
@@ -295,6 +298,15 @@ func TestParseGitHubOutcomeEventsAllowsOutcomeLevelPaths(t *testing.T) {
 		if got, ok := numericValue(events[index]["flake_discount"]); !ok || got != want {
 			t.Fatalf("event %d flake_discount = %#v, want %.2f", index, events[index]["flake_discount"], want)
 		}
+	}
+	if got := stringFromAny(events[1]["signature_class"]); got != "test_failure" {
+		t.Fatalf("revert signature_class = %q, want test_failure", got)
+	}
+	if got := stringFromAny(events[1]["check_name"]); got != "pytest-billing" {
+		t.Fatalf("revert check_name = %q, want pytest-billing", got)
+	}
+	if got := stringFromAny(events[1]["signature_key"]); got != "tests/billing/test_invoice.py::test_clock" {
+		t.Fatalf("revert signature_key = %q, want explicit test key", got)
 	}
 }
 
