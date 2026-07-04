@@ -167,6 +167,25 @@ func ValidateRuleArtifact(root string, path string, options ValidationOptions) *
 	if status != "active" && reviewLabel.Value == "accepted" {
 		return artifactContractError(options, "accepted memory rule status must be active", configdoc.RefWithPath(rel, reviewLabel))
 	}
+	if reviewDecision, ok := document.Scalars["review.decision"]; ok {
+		switch reviewDecision.Value {
+		case "pending", "approved", "needs_user_input", "rejected", "merged":
+		default:
+			return artifactContractError(options, "memory rule review.decision is invalid", configdoc.RefWithPath(rel, reviewDecision))
+		}
+		if reviewDecision.Value == "approved" && status != "active" {
+			return artifactContractError(options, "approved memory rule status must be active", configdoc.RefWithPath(rel, reviewDecision))
+		}
+		if (reviewDecision.Value == "rejected" || reviewDecision.Value == "merged") && status != "retired" {
+			return artifactContractError(options, "rejected or merged memory rule status must be retired", configdoc.RefWithPath(rel, reviewDecision))
+		}
+		if reviewDecision.Value == "merged" {
+			mergedInto, ok := document.Scalars["review.merged_into"]
+			if !ok || strings.TrimSpace(mergedInto.Value) == "" {
+				return artifactContractError(options, "merged memory rule review.merged_into is required", configdoc.RefWithPath(rel, reviewDecision))
+			}
+		}
+	}
 	statementOrigin, ok := document.Scalars["review.statement_origin"]
 	if !ok {
 		return artifactContractError(options, "memory rule missing required key review.statement_origin", rel)
