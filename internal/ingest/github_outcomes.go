@@ -43,7 +43,7 @@ func ParseGitHubOutcomeEvents(content []byte, ref string) ([]map[string]any, *Er
 				continue
 			}
 			failingChecks++
-			events = append(events, githubOutcomeEvent(base, checkRun, githubOutcomeEventOptions{
+			event, commandErr := githubOutcomeEvent(base, checkRun, githubOutcomeEventOptions{
 				Kind:           "ci_failure",
 				RecordedAt:     githubString(checkRun, "completed_at", "updated_at", "created_at"),
 				Commit:         githubString(checkRun, "head_sha", "commit"),
@@ -53,10 +53,14 @@ func ParseGitHubOutcomeEvents(content []byte, ref string) ([]map[string]any, *Er
 				SignatureKey:   githubSignatureKey(checkRun, base.Paths),
 				Message:        githubString(checkRun, "message", "summary", "output.summary", "conclusion"),
 				ProvenanceURL:  githubString(checkRun, "html_url", "details_url", "url", "check_run_url"),
-			}))
+			}, ref)
+			if commandErr != nil {
+				return nil, commandErr
+			}
+			events = append(events, event)
 		}
 		for _, revert := range reverts {
-			events = append(events, githubOutcomeEvent(base, revert, githubOutcomeEventOptions{
+			event, commandErr := githubOutcomeEvent(base, revert, githubOutcomeEventOptions{
 				Kind:           "revert",
 				RecordedAt:     githubString(revert, "created_at", "merged_at", "committed_at", "recorded_at"),
 				SourceCommit:   githubString(revert, "commit_sha", "sha", "commit"),
@@ -66,10 +70,14 @@ func ParseGitHubOutcomeEvents(content []byte, ref string) ([]map[string]any, *Er
 				SignatureKey:   githubSignatureKey(revert, base.Paths),
 				Message:        githubString(revert, "message", "title"),
 				ProvenanceURL:  githubString(revert, "html_url", "url", "commit_url", "revert_url"),
-			}))
+			}, ref)
+			if commandErr != nil {
+				return nil, commandErr
+			}
+			events = append(events, event)
 		}
 		for _, correction := range reviewCorrections {
-			events = append(events, githubOutcomeEvent(base, correction, githubOutcomeEventOptions{
+			event, commandErr := githubOutcomeEvent(base, correction, githubOutcomeEventOptions{
 				Kind:           "review_correction",
 				RecordedAt:     githubString(correction, "resolved_at", "updated_at", "created_at", "recorded_at"),
 				Commit:         githubString(correction, "commit_id", "commit", "head_sha"),
@@ -79,10 +87,14 @@ func ParseGitHubOutcomeEvents(content []byte, ref string) ([]map[string]any, *Er
 				SignatureKey:   githubSignatureKey(correction, base.Paths),
 				Message:        githubString(correction, "message", "body", "title"),
 				ProvenanceURL:  githubString(correction, "html_url", "url", "review_url"),
-			}))
+			}, ref)
+			if commandErr != nil {
+				return nil, commandErr
+			}
+			events = append(events, event)
 		}
 		if githubString(pull, "merged_at") != "" && failingChecks == 0 && len(reverts) == 0 && len(reviewCorrections) == 0 {
-			events = append(events, githubOutcomeEvent(base, pull, githubOutcomeEventOptions{
+			event, commandErr := githubOutcomeEvent(base, pull, githubOutcomeEventOptions{
 				Kind:           "merged_clean",
 				RecordedAt:     githubString(pull, "merged_at", "updated_at", "created_at"),
 				Commit:         base.Commit,
@@ -91,7 +103,11 @@ func ParseGitHubOutcomeEvents(content []byte, ref string) ([]map[string]any, *Er
 				SignatureClass: githubSignatureClass(pull, "unknown"),
 				SignatureKey:   githubSignatureKey(pull, base.Paths),
 				ProvenanceURL:  base.PRURL,
-			}))
+			}, ref)
+			if commandErr != nil {
+				return nil, commandErr
+			}
+			events = append(events, event)
 		}
 	}
 	if len(events) == 0 {
@@ -174,9 +190,6 @@ func githubOutcomeBase(defaultRepo Repo, pull map[string]any, ref string, index 
 		return githubOutcomeBaseFields{}, provenanceIntegrityError(fmt.Sprintf("github pull request %d URL must be a canonical https://github.com/ URL", pr), ref)
 	}
 	paths := githubPaths(pull, nil)
-	if len(paths) == 0 {
-		return githubOutcomeBaseFields{}, artifactContractError(fmt.Sprintf("github pull request %d must include changed files", pr), ref)
-	}
 	return githubOutcomeBaseFields{
 		Repo:                  repo,
 		PR:                    pr,
@@ -192,11 +205,14 @@ func githubOutcomeBase(defaultRepo Repo, pull map[string]any, ref string, index 
 	}, nil
 }
 
-func githubOutcomeEvent(base githubOutcomeBaseFields, source map[string]any, options githubOutcomeEventOptions) map[string]any {
+func githubOutcomeEvent(base githubOutcomeBaseFields, source map[string]any, options githubOutcomeEventOptions, ref string) (map[string]any, *Error) {
 	commit := firstString(options.Commit, base.Commit)
 	paths := options.Paths
 	if len(paths) == 0 {
 		paths = base.Paths
+	}
+	if len(paths) == 0 {
+		return nil, artifactContractError(fmt.Sprintf("github pull request %d %s outcome must include changed files", base.PR, options.Kind), ref)
 	}
 	provenanceURLs := []string{base.PRURL}
 	if provenanceURL := strings.TrimSpace(options.ProvenanceURL); provenanceURL != "" && ValidGitHubProvenanceURLShape(provenanceURL) {
@@ -254,7 +270,7 @@ func githubOutcomeEvent(base githubOutcomeBaseFields, source map[string]any, opt
 	if event["recorded_at"] == "" {
 		event["recorded_at"] = githubString(source, "updated_at", "created_at")
 	}
-	return event
+	return event, nil
 }
 
 func githubOutcomeObjects(event map[string]any, paths ...string) []map[string]any {
@@ -301,7 +317,7 @@ func githubCheckRunFailed(checkRun map[string]any) bool {
 }
 
 func githubPaths(event map[string]any, fallback []string) []string {
-	paths := stringListField(event, "paths", "changed_files", "files")
+	paths := stringListField(event, "paths", "changed_files", "files", "path", "filename")
 	for _, file := range githubOutcomeObjects(event, "files") {
 		if path := githubString(file, "filename", "path"); path != "" {
 			paths = append(paths, path)

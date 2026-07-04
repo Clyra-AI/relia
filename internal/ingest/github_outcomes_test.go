@@ -235,6 +235,79 @@ func TestParseGitHubOutcomeEventsPreservesExplicitAttribution(t *testing.T) {
 	}
 }
 
+func TestParseGitHubOutcomeEventsAllowsOutcomeLevelPaths(t *testing.T) {
+	events, ingestErr := ParseGitHubOutcomeEvents([]byte(`{
+  "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},
+  "pull_requests": [
+    {
+      "number": 404,
+      "head_sha": "abc404",
+      "html_url": "https://github.com/acme/billing-service/pull/404",
+      "check_runs": [
+        {
+          "name": "validate",
+          "conclusion": "failure",
+          "completed_at": "2026-06-08T12:00:00Z",
+          "html_url": "https://github.com/acme/billing-service/actions/runs/404",
+          "paths": ["cmd/relia/main.go"]
+        }
+      ],
+      "reverts": [
+        {
+          "created_at": "2026-06-09T12:00:00Z",
+          "commit_sha": "def404",
+          "commit_url": "https://github.com/acme/billing-service/commit/def404",
+          "paths": ["internal/ingest/github_outcomes.go"]
+        }
+      ],
+      "review_corrections": [
+        {
+          "marked": true,
+          "resolved_at": "2026-06-10T12:00:00Z",
+          "html_url": "https://github.com/acme/billing-service/pull/404#discussion_r404",
+          "path": "internal/ingest/github_outcomes_test.go"
+        }
+      ]
+    }
+  ]
+}`), "github-outcomes.json")
+
+	if ingestErr != nil {
+		t.Fatalf("ParseGitHubOutcomeEvents returned error: %v", ingestErr)
+	}
+	if len(events) != 3 {
+		t.Fatalf("events = %d, want 3: %#v", len(events), events)
+	}
+	for index, want := range []string{
+		"cmd/relia/main.go",
+		"internal/ingest/github_outcomes.go",
+		"internal/ingest/github_outcomes_test.go",
+	} {
+		paths := events[index]["paths"].([]string)
+		if len(paths) != 1 || paths[0] != want {
+			t.Fatalf("event %d paths = %#v, want %q", index, paths, want)
+		}
+	}
+}
+
+func TestParseGitHubOutcomeEventsRejectsPathlessEmittedOutcome(t *testing.T) {
+	_, ingestErr := ParseGitHubOutcomeEvents([]byte(`{
+  "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},
+  "pull_requests": [
+    {
+      "number": 406,
+      "head_sha": "abc406",
+      "html_url": "https://github.com/acme/billing-service/pull/406",
+      "merged_at": "2026-06-11T12:00:00Z"
+    }
+  ]
+}`), "github-outcomes.json")
+
+	if ingestErr == nil || ingestErr.Kind != ErrorArtifactContract {
+		t.Fatalf("error = %#v, want artifact contract error", ingestErr)
+	}
+}
+
 func TestParseGitHubOutcomeEventsPreservesCheckRunSignatureClass(t *testing.T) {
 	events, ingestErr := ParseGitHubOutcomeEvents([]byte(`{
   "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},
