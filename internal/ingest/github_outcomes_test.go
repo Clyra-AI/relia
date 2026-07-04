@@ -426,6 +426,40 @@ func TestParseGitHubOutcomeEventsAllowsOutcomeLevelPaths(t *testing.T) {
 	}
 }
 
+func TestParseGitHubOutcomeEventsUsesRevertLandingTime(t *testing.T) {
+	events, ingestErr := ParseGitHubOutcomeEvents([]byte(`{
+  "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},
+  "pull_requests": [
+    {
+      "number": 405,
+      "head_sha": "abc405",
+      "html_url": "https://github.com/acme/billing-service/pull/405",
+      "files": [{"filename": "packages/billing/tax.py"}],
+      "reverts": [
+        {
+          "created_at": "2026-06-01T12:00:00Z",
+          "merged_at": "2026-06-05T12:00:00Z",
+          "commit_sha": "def405",
+          "commit_url": "https://github.com/acme/billing-service/commit/def405",
+          "message": "Revert tax change",
+          "paths": ["packages/billing/tax.py"]
+        }
+      ]
+    }
+  ]
+}`), "github-outcomes.json")
+
+	if ingestErr != nil {
+		t.Fatalf("ParseGitHubOutcomeEvents returned error: %v", ingestErr)
+	}
+	if len(events) != 1 {
+		t.Fatalf("events = %d, want 1: %#v", len(events), events)
+	}
+	if got := stringFromAny(events[0]["recorded_at"]); got != "2026-06-05T12:00:00Z" {
+		t.Fatalf("recorded_at = %q, want revert landing time", got)
+	}
+}
+
 func TestParseGitHubOutcomeEventsRedactsTypedPathSlicesBeforePersistence(t *testing.T) {
 	events, ingestErr := ParseGitHubOutcomeEvents([]byte(`{
   "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},

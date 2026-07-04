@@ -65,7 +65,7 @@ func ParseGitHubOutcomeEvents(content []byte, ref string) ([]map[string]any, *Er
 		for _, revert := range reverts {
 			event, commandErr := githubOutcomeEvent(base, revert, githubOutcomeEventOptions{
 				Kind:           "revert",
-				RecordedAt:     githubString(revert, "created_at", "merged_at", "committed_at", "recorded_at"),
+				RecordedAt:     githubString(revert, "merged_at", "committed_at", "recorded_at", "created_at"),
 				SourceCommit:   githubString(revert, "commit_sha", "sha", "commit"),
 				Paths:          githubPaths(revert, base.Paths),
 				CheckName:      githubCheckName(revert, "revert"),
