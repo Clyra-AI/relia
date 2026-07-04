@@ -20,6 +20,9 @@ func ParseGitHubOutcomeEvents(content []byte, ref string) ([]map[string]any, *Er
 		return nil, artifactContractError("github outcome input must include pull_requests", ref)
 	}
 	defaultRepo := Repo{Provider: "github"}
+	if commandErr := ValidateEventMemorySource(envelope, ref); commandErr != nil {
+		return nil, commandErr
+	}
 	if githubEnvelopeHasRepo(envelope) {
 		var commandErr *Error
 		defaultRepo, commandErr = NormalizeRepo(envelope, ref)
@@ -130,12 +133,17 @@ func ParseGitHubOutcomeEvents(content []byte, ref string) ([]map[string]any, *Er
 }
 
 func githubEnvelopeHasRepo(envelope map[string]any) bool {
-	for _, path := range []string{"repo", "repo_owner", "repo_name"} {
-		if _, ok := nestedField(envelope, path); ok {
-			return true
+	if value, ok := nestedField(envelope, "repo"); ok {
+		switch typed := value.(type) {
+		case map[string]any:
+			return strings.TrimSpace(stringFromAny(typed["owner"])) != "" &&
+				strings.TrimSpace(stringFromAny(typed["name"])) != ""
+		case string:
+			owner, name, ok := strings.Cut(strings.TrimSpace(typed), "/")
+			return ok && strings.TrimSpace(owner) != "" && strings.TrimSpace(name) != ""
 		}
 	}
-	return false
+	return githubString(envelope, "repo_owner") != "" && githubString(envelope, "repo_name") != ""
 }
 
 type githubOutcomeBaseFields struct {
@@ -166,6 +174,9 @@ type githubOutcomeEventOptions struct {
 }
 
 func githubOutcomeBase(defaultRepo Repo, pull map[string]any, ref string, index int) (githubOutcomeBaseFields, *Error) {
+	if commandErr := ValidateEventMemorySource(pull, ref); commandErr != nil {
+		return githubOutcomeBaseFields{}, commandErr
+	}
 	repo := defaultRepo
 	if githubEnvelopeHasRepo(pull) {
 		candidate, commandErr := NormalizeRepo(pull, ref)
@@ -228,6 +239,9 @@ func githubRepoFromPRURL(repo Repo, prURL string) Repo {
 }
 
 func githubOutcomeEvent(base githubOutcomeBaseFields, source map[string]any, options githubOutcomeEventOptions, ref string) (map[string]any, *Error) {
+	if commandErr := ValidateEventMemorySource(source, ref); commandErr != nil {
+		return nil, commandErr
+	}
 	commit := firstString(options.Commit, base.Commit)
 	paths := options.Paths
 	if len(paths) == 0 {
