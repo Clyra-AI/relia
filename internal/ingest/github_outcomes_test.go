@@ -139,6 +139,28 @@ func TestParseGitHubOutcomeEventsAllowsPerPullRepos(t *testing.T) {
 	}
 }
 
+func TestParseGitHubOutcomeEventsDerivesRepoFromPRURL(t *testing.T) {
+	events, ingestErr := ParseGitHubOutcomeEvents([]byte(`{
+  "pull_requests": [
+    {
+      "number": 401,
+      "head_sha": "abc401",
+      "html_url": "https://github.com/acme/billing-service/pull/401",
+      "merged_at": "2026-06-05T12:00:00Z",
+      "files": [{"filename": "packages/billing/invoice.py"}]
+    }
+  ]
+}`), "github-outcomes.json")
+
+	if ingestErr != nil {
+		t.Fatalf("ParseGitHubOutcomeEvents returned error: %v", ingestErr)
+	}
+	repo := events[0]["repo"].(map[string]any)
+	if repo["owner"] != "acme" || repo["name"] != "billing-service" {
+		t.Fatalf("repo = %#v, want owner/name from PR URL", repo)
+	}
+}
+
 func TestParseGitHubOutcomeEventsPrefersHeadSHAOverMergeCommit(t *testing.T) {
 	events, ingestErr := ParseGitHubOutcomeEvents([]byte(`{
   "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},
@@ -370,6 +392,36 @@ func TestParseGitHubOutcomeEventsIgnoresCancelledChecks(t *testing.T) {
 	}
 	if got := stringFromAny(events[0]["outcome_kind"]); got != "merged_clean" {
 		t.Fatalf("outcome_kind = %q, want merged_clean", got)
+	}
+}
+
+func TestParseGitHubOutcomeEventsIgnoresNullFlakeDiscount(t *testing.T) {
+	events, ingestErr := ParseGitHubOutcomeEvents([]byte(`{
+  "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},
+  "pull_requests": [
+    {
+      "number": 409,
+      "head_sha": "abc409",
+      "html_url": "https://github.com/acme/billing-service/pull/409",
+      "files": [{"filename": "packages/billing/invoice.py"}],
+      "check_runs": [
+        {
+          "name": "validate",
+          "conclusion": "failure",
+          "completed_at": "2026-06-14T12:10:00Z",
+          "html_url": "https://github.com/acme/billing-service/actions/runs/409",
+          "flake_discount": null
+        }
+      ]
+    }
+  ]
+}`), "github-outcomes.json")
+
+	if ingestErr != nil {
+		t.Fatalf("ParseGitHubOutcomeEvents returned error: %v", ingestErr)
+	}
+	if _, ok := events[0]["flake_discount"]; ok {
+		t.Fatalf("flake_discount should be omitted when source value is null: %#v", events[0]["flake_discount"])
 	}
 }
 
