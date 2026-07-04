@@ -1,6 +1,9 @@
 package ingest
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestParseGitHubOutcomeEventsTranslatesStructuredExport(t *testing.T) {
 	events, ingestErr := ParseGitHubOutcomeEvents([]byte(`{
@@ -420,6 +423,44 @@ func TestParseGitHubOutcomeEventsAllowsOutcomeLevelPaths(t *testing.T) {
 	}
 	if got := stringFromAny(events[2]["signature_key"]); got != "tests/billing/test_invoice.py::test_clock" {
 		t.Fatalf("review correction signature_key = %q, want explicit test key", got)
+	}
+}
+
+func TestParseGitHubOutcomeEventsRedactsTypedPathSlicesBeforePersistence(t *testing.T) {
+	events, ingestErr := ParseGitHubOutcomeEvents([]byte(`{
+  "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},
+  "pull_requests": [
+    {
+      "number": 405,
+      "head_sha": "abc405",
+      "html_url": "https://github.com/acme/billing-service/pull/405",
+      "check_runs": [
+        {
+          "name": "validate",
+          "conclusion": "failure",
+          "completed_at": "2026-06-08T12:00:00Z",
+          "html_url": "https://github.com/acme/billing-service/actions/runs/405",
+          "paths": ["internal/ghp_1234567890abcdef1234567890abcdef123456/github_outcomes.go"]
+        }
+      ]
+    }
+  ]
+}`), "github-outcomes.json")
+
+	if ingestErr != nil {
+		t.Fatalf("ParseGitHubOutcomeEvents returned error: %v", ingestErr)
+	}
+	if len(events) != 1 {
+		t.Fatalf("events = %d, want 1: %#v", len(events), events)
+	}
+	redacted, ingestErr := RedactForPersistence(events[0], "github-outcomes.json:1")
+	if ingestErr != nil {
+		t.Fatalf("RedactForPersistence returned error: %v", ingestErr)
+	}
+	event := redacted.(map[string]any)
+	paths := event["paths"].([]string)
+	if len(paths) != 1 || strings.Contains(paths[0], "ghp_1234567890abcdef") || !strings.Contains(paths[0], "[REDACTED:token]") {
+		t.Fatalf("paths = %#v, want redacted token path", paths)
 	}
 }
 

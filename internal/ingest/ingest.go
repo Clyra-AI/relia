@@ -472,6 +472,17 @@ func redactValue(value any, fieldPath []string, ref string) (any, *Error) {
 			redacted = append(redacted, next)
 		}
 		return redacted, nil
+	case []string:
+		redacted := make([]string, 0, len(typed))
+		for index, child := range typed {
+			childPath := append(append([]string{}, fieldPath...), strconv.Itoa(index))
+			next, commandErr := redactStringValue(child, childPath, ref)
+			if commandErr != nil {
+				return nil, commandErr
+			}
+			redacted = append(redacted, next)
+		}
+		return redacted, nil
 	case string:
 		return redactStringValue(typed, fieldPath, ref)
 	default:
