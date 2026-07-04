@@ -216,6 +216,38 @@ func TestParseGitHubOutcomeEventsPrefersHeadSHAOverMergeCommit(t *testing.T) {
 	}
 }
 
+func TestParseGitHubOutcomeEventsAcceptsCheckRunHeadSHAMissingPullHeadSHA(t *testing.T) {
+	events, ingestErr := ParseGitHubOutcomeEvents([]byte(`{
+  "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},
+  "pull_requests": [
+    {
+      "number": 411,
+      "html_url": "https://github.com/acme/billing-service/pull/411",
+      "files": [{"filename": "packages/billing/invoice.py"}],
+      "check_runs": [
+        {
+          "name": "validate",
+          "conclusion": "failure",
+          "head_sha": "check411",
+          "completed_at": "2026-06-16T12:10:00Z",
+          "html_url": "https://github.com/acme/billing-service/actions/runs/411"
+        }
+      ]
+    }
+  ]
+}`), "github-outcomes.json")
+
+	if ingestErr != nil {
+		t.Fatalf("ParseGitHubOutcomeEvents returned error: %v", ingestErr)
+	}
+	if len(events) != 1 {
+		t.Fatalf("events = %d, want 1: %#v", len(events), events)
+	}
+	if got := stringFromAny(events[0]["commit"]); got != "check411" {
+		t.Fatalf("commit = %q, want check-run head SHA", got)
+	}
+}
+
 func TestParseGitHubOutcomeEventsPreservesCoauthorTrailers(t *testing.T) {
 	events, ingestErr := ParseGitHubOutcomeEvents([]byte(`{
   "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},

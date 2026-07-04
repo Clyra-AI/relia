@@ -32,6 +32,20 @@ func TestValidateRuleArtifactRejectsActiveRuleWithoutAcceptedReview(t *testing.T
 	}
 }
 
+func TestValidateRuleArtifactRejectsInvalidReviewGate(t *testing.T) {
+	root := t.TempDir()
+	content := strings.Replace(validMemoryRuleYAML(), "review:\n  label: accepted", "review:\n  gate: automatic\n  label: accepted", 1)
+	writeValidationFixture(t, root, content)
+
+	commandErr := ValidateRuleArtifact(root, filepath.Join(root, "memory", "rules", "rule.yaml"), testValidationOptions())
+	if commandErr == nil {
+		t.Fatal("expected validation error")
+	}
+	if commandErr.Message != "memory rule review.gate is invalid" {
+		t.Fatalf("message = %q", commandErr.Message)
+	}
+}
+
 func writeValidationFixture(t *testing.T, root string, content string) {
 	t.Helper()
 	sourcePath := filepath.Join(root, "cmd", "relia")
