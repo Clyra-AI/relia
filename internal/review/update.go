@@ -160,6 +160,8 @@ func applyReviewDecisionYAML(content string, reviewOptions Options, decision str
 	next = replaceOrAddNestedYAMLScalar(next, "review", "decision_ref", reviewDecisionRef(reviewOptions, decision))
 	if strings.TrimSpace(mergedInto) != "" {
 		next = replaceOrAddNestedYAMLScalar(next, "review", "merged_into", strings.TrimSpace(mergedInto))
+	} else {
+		next = removeNestedYAMLScalar(next, "review", "merged_into")
 	}
 	return next
 }
@@ -218,6 +220,26 @@ func replaceNestedYAMLScalar(content string, parent string, key string, value st
 		}
 	}
 	return strings.Join(lines, "\n")
+}
+
+func removeNestedYAMLScalar(content string, parent string, key string) string {
+	lines := strings.Split(content, "\n")
+	parentPrefix := parent + ":"
+	keyPrefix := key + ":"
+	inParent := false
+	result := make([]string, 0, len(lines))
+	for _, line := range lines {
+		indent := yamlmini.LeadingSpaces(line)
+		trimmed := strings.TrimSpace(line)
+		if indent == 0 {
+			inParent = strings.HasPrefix(trimmed, parentPrefix)
+		}
+		if inParent && indent == 2 && strings.HasPrefix(trimmed, keyPrefix) {
+			continue
+		}
+		result = append(result, line)
+	}
+	return strings.Join(result, "\n")
 }
 
 func replaceOrAddNestedYAMLScalar(content string, parent string, key string, value string) string {

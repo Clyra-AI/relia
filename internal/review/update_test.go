@@ -144,6 +144,47 @@ func TestUpdateRuleReviewMergeRetiresSourceWithGovernanceEvidence(t *testing.T) 
 	}
 }
 
+func TestUpdateRuleReviewRejectClearsStaleMergeTarget(t *testing.T) {
+	root := setupReviewRuleRepo(t, "candidate")
+	rulePath := filepath.Join(root, "memory", "rules", "avoid-demo.yaml")
+
+	_, commandErr := UpdateRuleReview(root, rulePath, Options{
+		Action:     "merge",
+		Label:      "needs_user_input",
+		Rule:       "avoid-demo",
+		MergeInto:  "canonical-demo",
+		Reason:     "covered by the canonical rule",
+		ReviewedBy: "maintainer",
+	}, testUpdateOptions())
+	if commandErr != nil {
+		t.Fatalf("merge UpdateRuleReview returned error: %v", commandErr)
+	}
+	_, commandErr = UpdateRuleReview(root, rulePath, Options{
+		Action:     "reject",
+		Label:      "needs_user_input",
+		Rule:       "avoid-demo",
+		Reason:     "not durable enough",
+		ReviewedBy: "maintainer",
+	}, testUpdateOptions())
+	if commandErr != nil {
+		t.Fatalf("reject UpdateRuleReview returned error: %v", commandErr)
+	}
+	content, err := os.ReadFile(rulePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(content), "merged_into:") {
+		t.Fatalf("review.merged_into was not removed:\n%s", string(content))
+	}
+	document := readReviewRuleDocument(t, rulePath)
+	if got := document.Scalars["review.decision"].Value; got != "rejected" {
+		t.Fatalf("review.decision = %q, want rejected", got)
+	}
+	if got := document.Scalars["review.merged_into"].Value; got != "" {
+		t.Fatalf("review.merged_into = %q, want empty", got)
+	}
+}
+
 func setupReviewRuleRepo(t *testing.T, status string) string {
 	t.Helper()
 	root := t.TempDir()

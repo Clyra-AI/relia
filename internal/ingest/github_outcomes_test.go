@@ -138,3 +138,30 @@ func TestParseGitHubOutcomeEventsAllowsPerPullRepos(t *testing.T) {
 		t.Fatalf("repo = %#v", repo)
 	}
 }
+
+func TestParseGitHubOutcomeEventsPreservesCoauthorTrailers(t *testing.T) {
+	events, ingestErr := ParseGitHubOutcomeEvents([]byte(`{
+  "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},
+  "pull_requests": [
+    {
+      "number": 402,
+      "head_sha": "abc402",
+      "html_url": "https://github.com/acme/billing-service/pull/402",
+      "merged_at": "2026-06-06T12:00:00Z",
+      "coauthor_trailers": ["Claude Code"],
+      "files": [{"filename": "packages/billing/invoice.py"}]
+    }
+  ]
+}`), "github-outcomes.json")
+
+	if ingestErr != nil {
+		t.Fatalf("ParseGitHubOutcomeEvents returned error: %v", ingestErr)
+	}
+	if len(events) != 1 {
+		t.Fatalf("events = %d, want 1: %#v", len(events), events)
+	}
+	coauthors := events[0]["coauthors"].([]string)
+	if len(coauthors) != 1 || coauthors[0] != "Claude Code" {
+		t.Fatalf("coauthors = %#v, want Claude Code", coauthors)
+	}
+}

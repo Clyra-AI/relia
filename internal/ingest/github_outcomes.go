@@ -123,13 +123,14 @@ func githubEnvelopeHasRepo(envelope map[string]any) bool {
 }
 
 type githubOutcomeBaseFields struct {
-	Repo   Repo
-	PR     int
-	Commit string
-	PRURL  string
-	Paths  []string
-	Labels []string
-	Actor  string
+	Repo      Repo
+	PR        int
+	Commit    string
+	PRURL     string
+	Paths     []string
+	Labels    []string
+	Coauthors []string
+	Actor     string
 }
 
 type githubOutcomeEventOptions struct {
@@ -174,13 +175,14 @@ func githubOutcomeBase(defaultRepo Repo, pull map[string]any, ref string, index 
 		return githubOutcomeBaseFields{}, artifactContractError(fmt.Sprintf("github pull request %d must include changed files", pr), ref)
 	}
 	return githubOutcomeBaseFields{
-		Repo:   repo,
-		PR:     pr,
-		Commit: commit,
-		PRURL:  prURL,
-		Paths:  paths,
-		Labels: githubLabels(pull),
-		Actor:  githubString(pull, "author.login", "user.login", "actor.login", "author", "user", "actor"),
+		Repo:      repo,
+		PR:        pr,
+		Commit:    commit,
+		PRURL:     prURL,
+		Paths:     paths,
+		Labels:    githubLabels(pull),
+		Coauthors: stringListField(pull, "coauthors", "coauthor_trailers"),
+		Actor:     githubString(pull, "author.login", "user.login", "actor.login", "author", "user", "actor"),
 	}, nil
 }
 
@@ -205,6 +207,7 @@ func githubOutcomeEvent(base githubOutcomeBaseFields, source map[string]any, opt
 		"commit":                commit,
 		"paths":                 paths,
 		"labels":                base.Labels,
+		"coauthors":             base.Coauthors,
 		"actor":                 map[string]any{"login": base.Actor},
 		"outcome_kind":          options.Kind,
 		"signature_class":       options.SignatureClass,
