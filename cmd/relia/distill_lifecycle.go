@@ -16,6 +16,9 @@ func preserveExistingAcceptedRuleLifecycle(rule distilledRule, document yamlDocu
 	default:
 		return rule
 	}
+	if existingReason := document.Scalars["metadata.lifecycle_reason"].Value; existingReason != "" {
+		lifecycleReason = existingReason
+	}
 	rule.Status = status
 	rule.ReviewLabel = reviewLabel
 	rule.ReviewGate = document.Scalars["review.gate"].Value

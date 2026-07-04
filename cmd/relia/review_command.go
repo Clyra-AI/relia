@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"strings"
 	"time"
 
 	configdoc "github.com/Clyra-AI/relia/internal/config"
@@ -41,6 +42,9 @@ func reviewResult(args []string, start time.Time) CommandResult {
 		}
 		if commandErr := validateMemoryRuleArtifact(root, mergedIntoPath); commandErr != nil {
 			return errorResult("review", "review", commandErr, start)
+		}
+		if !isMemoryRulesPath(root, mergedIntoPath) {
+			return errorResult("review", "review", usageError("review merge --into must reference a rule under memory/rules"), start)
 		}
 	}
 	status, commandErr := reviewdoc.UpdateRuleReview(root, rulePath, options, updateOptions)
@@ -88,4 +92,8 @@ func reviewDecisionOutput(options reviewdoc.Options) string {
 			return "pending"
 		}
 	}
+}
+
+func isMemoryRulesPath(root string, path string) bool {
+	return strings.HasPrefix(displayPath(root, path), "memory/rules/")
 }

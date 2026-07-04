@@ -120,15 +120,17 @@ func TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage(t *testing.
 	}
 	mergedPreserved := parseRuleDocForTest(t, readRuleByIDForTest(t, tempDir, playbook.Scalars["id"].Value))
 	for key, want := range map[string]string{
-		"status":                    "retired",
-		"review.decision":           "merged",
-		"review.merged_into":        avoid.Scalars["id"].Value,
-		"review.reviewed_by":        "maintainer",
-		"metadata.lifecycle_reason": "previous retired review preserved",
+		"status":             "retired",
+		"review.decision":    "merged",
+		"review.merged_into": avoid.Scalars["id"].Value,
+		"review.reviewed_by": "maintainer",
 	} {
 		if got := mergedPreserved.Scalars[key].Value; got != want {
 			t.Fatalf("merged preserved %s = %q, want %q", key, got, want)
 		}
+	}
+	if got := mergedPreserved.Scalars["metadata.lifecycle_reason"].Value; !strings.Contains(got, "covered by accepted avoid rule") {
+		t.Fatalf("merged preserved metadata.lifecycle_reason = %q", got)
 	}
 
 	stdout, stderr, code = runForTest(t, []string{"--json", "memory", "--format", "json"}, false)
@@ -818,6 +820,17 @@ metadata:
 	if stillRejected.Scalars["review.decision"].Value != "rejected" ||
 		stillRejected.Scalars["review.merged_into"].Value != "" {
 		t.Fatalf("invalid merge target mutated source rule = %#v", stillRejected.Scalars)
+	}
+
+	writeFileForTest(t, filepath.Join(tempDir, "docs", "archive", "canonical.yaml"), strings.Replace(readRuleByIDForTest(t, tempDir, "billing-time"), "id: billing-time", "id: outside-canonical", 1))
+	stdout, stderr, code = runForTest(t, []string{"--json", "review", "merge", "--rule", "billing-time", "--into", "docs/archive/canonical.yaml", "--reason", "outside target"}, false)
+	if code != ExitUsage {
+		t.Fatalf("review merge outside target exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	stillRejected = parseRuleDocForTest(t, readRuleByIDForTest(t, tempDir, "billing-time"))
+	if stillRejected.Scalars["review.decision"].Value != "rejected" ||
+		stillRejected.Scalars["review.merged_into"].Value != "" {
+		t.Fatalf("outside merge target mutated source rule = %#v", stillRejected.Scalars)
 	}
 
 	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "canonical-billing-time.yaml"), strings.Replace(readRuleByIDForTest(t, tempDir, "billing-time"), "id: billing-time", "id: canonical-billing-time", 1))
