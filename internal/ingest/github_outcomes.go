@@ -123,14 +123,17 @@ func githubEnvelopeHasRepo(envelope map[string]any) bool {
 }
 
 type githubOutcomeBaseFields struct {
-	Repo      Repo
-	PR        int
-	Commit    string
-	PRURL     string
-	Paths     []string
-	Labels    []string
-	Coauthors []string
-	Actor     string
+	Repo                  Repo
+	PR                    int
+	Commit                string
+	PRURL                 string
+	Paths                 []string
+	Labels                []string
+	Coauthors             []string
+	Actor                 string
+	ActorKind             string
+	AttributionMethod     string
+	AttributionConfidence any
 }
 
 type githubOutcomeEventOptions struct {
@@ -175,14 +178,17 @@ func githubOutcomeBase(defaultRepo Repo, pull map[string]any, ref string, index 
 		return githubOutcomeBaseFields{}, artifactContractError(fmt.Sprintf("github pull request %d must include changed files", pr), ref)
 	}
 	return githubOutcomeBaseFields{
-		Repo:      repo,
-		PR:        pr,
-		Commit:    commit,
-		PRURL:     prURL,
-		Paths:     paths,
-		Labels:    githubLabels(pull),
-		Coauthors: stringListField(pull, "coauthors", "coauthor_trailers"),
-		Actor:     githubString(pull, "author.login", "user.login", "actor.login", "author", "user", "actor"),
+		Repo:                  repo,
+		PR:                    pr,
+		Commit:                commit,
+		PRURL:                 prURL,
+		Paths:                 paths,
+		Labels:                githubLabels(pull),
+		Coauthors:             stringListField(pull, "coauthors", "coauthor_trailers"),
+		Actor:                 githubString(pull, "author.login", "user.login", "actor.login", "author", "user", "actor"),
+		ActorKind:             githubString(pull, "actor_kind", "attribution.actor_kind"),
+		AttributionMethod:     githubString(pull, "attribution_method", "attribution.method"),
+		AttributionConfidence: githubFirstAny(pull, "attribution_confidence", "attribution.confidence"),
 	}, nil
 }
 
@@ -218,6 +224,17 @@ func githubOutcomeEvent(base githubOutcomeBaseFields, source map[string]any, opt
 		"metadata": map[string]any{
 			"source_format": "github_structured_export",
 		},
+	}
+	if actorKind := firstString(githubString(source, "actor_kind", "attribution.actor_kind"), base.ActorKind); actorKind != "" {
+		event["actor_kind"] = actorKind
+	}
+	if attributionMethod := firstString(githubString(source, "attribution_method", "attribution.method"), base.AttributionMethod); attributionMethod != "" {
+		event["attribution_method"] = attributionMethod
+	}
+	if attributionConfidence := githubFirstAny(source, "attribution_confidence", "attribution.confidence"); attributionConfidence != nil {
+		event["attribution_confidence"] = attributionConfidence
+	} else if base.AttributionConfidence != nil {
+		event["attribution_confidence"] = base.AttributionConfidence
 	}
 	if options.SourceCommit != "" {
 		event["metadata"].(map[string]any)["github_source_commit"] = options.SourceCommit
@@ -314,6 +331,15 @@ func githubString(event map[string]any, paths ...string) string {
 		}
 	}
 	return ""
+}
+
+func githubFirstAny(event map[string]any, paths ...string) any {
+	for _, path := range paths {
+		if value, ok := nestedField(event, path); ok {
+			return value
+		}
+	}
+	return nil
 }
 
 func githubBool(event map[string]any, paths ...string) bool {
