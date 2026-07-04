@@ -809,6 +809,17 @@ metadata:
 		t.Fatalf("rejected rule = %#v", rejected.Scalars)
 	}
 
+	writeFileForTest(t, filepath.Join(tempDir, "docs", "not-a-memory-rule.yaml"), "kind: note\n")
+	stdout, stderr, code = runForTest(t, []string{"--json", "review", "merge", "--rule", "billing-time", "--into", "docs/not-a-memory-rule.yaml", "--reason", "invalid target"}, false)
+	if code != ExitValidation {
+		t.Fatalf("review merge invalid target exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	stillRejected := parseRuleDocForTest(t, readRuleByIDForTest(t, tempDir, "billing-time"))
+	if stillRejected.Scalars["review.decision"].Value != "rejected" ||
+		stillRejected.Scalars["review.merged_into"].Value != "" {
+		t.Fatalf("invalid merge target mutated source rule = %#v", stillRejected.Scalars)
+	}
+
 	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "canonical-billing-time.yaml"), strings.Replace(readRuleByIDForTest(t, tempDir, "billing-time"), "id: billing-time", "id: canonical-billing-time", 1))
 	stdout, stderr, code = runForTest(t, []string{"--json", "review", "merge", "--rule", "billing-time", "--into", "canonical-billing-time", "--reason", "duplicate of canonical billing rule"}, false)
 	if code != ExitSuccess {

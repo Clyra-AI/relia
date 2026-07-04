@@ -11,7 +11,7 @@ func TestParseGitHubOutcomeEventsTranslatesStructuredExport(t *testing.T) {
       "head_sha": "abc301",
       "html_url": "https://github.com/acme/billing-service/pull/301",
       "merged_at": "2026-06-01T12:00:00Z",
-      "labels": ["agent-authored"],
+      "labels": [{"name": "agent-authored"}],
       "author": {"login": "acme-agent"},
       "files": [{"filename": "packages/billing/invoice.py"}],
       "check_runs": [{"name": "validate", "conclusion": "success"}]
@@ -78,6 +78,10 @@ func TestParseGitHubOutcomeEventsTranslatesStructuredExport(t *testing.T) {
 	}
 	if got := stringFromAny(events[1]["signature_key"]); got != "packages/billing/tax.py" {
 		t.Fatalf("check-run signature_key = %q, want changed path", got)
+	}
+	labels := events[0]["labels"].([]string)
+	if len(labels) != 1 || labels[0] != "agent-authored" {
+		t.Fatalf("labels = %#v, want GitHub object label name", labels)
 	}
 	if got := stringFromAny(events[2]["commit"]); got != "abc302" {
 		t.Fatalf("revert action commit = %q, want original PR head", got)
