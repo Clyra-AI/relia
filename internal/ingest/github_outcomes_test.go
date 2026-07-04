@@ -141,6 +141,7 @@ func TestParseGitHubOutcomeEventsAllowsPerPullRepos(t *testing.T) {
 
 func TestParseGitHubOutcomeEventsDerivesRepoFromPRURL(t *testing.T) {
 	events, ingestErr := ParseGitHubOutcomeEvents([]byte(`{
+  "repo": null,
   "pull_requests": [
     {
       "number": 401,
@@ -158,6 +159,33 @@ func TestParseGitHubOutcomeEventsDerivesRepoFromPRURL(t *testing.T) {
 	repo := events[0]["repo"].(map[string]any)
 	if repo["owner"] != "acme" || repo["name"] != "billing-service" {
 		t.Fatalf("repo = %#v, want owner/name from PR URL", repo)
+	}
+}
+
+func TestParseGitHubOutcomeEventsRejectsSelfReportSourceMetadata(t *testing.T) {
+	_, ingestErr := ParseGitHubOutcomeEvents([]byte(`{
+  "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},
+  "pull_requests": [
+    {
+      "number": 410,
+      "head_sha": "abc410",
+      "html_url": "https://github.com/acme/billing-service/pull/410",
+      "files": [{"filename": "packages/billing/invoice.py"}],
+      "check_runs": [
+        {
+          "name": "validate",
+          "conclusion": "failure",
+          "completed_at": "2026-06-15T12:10:00Z",
+          "html_url": "https://github.com/acme/billing-service/actions/runs/410",
+          "metadata": {"source_kind": "agent_self_report"}
+        }
+      ]
+    }
+  ]
+}`), "github-outcomes.json")
+
+	if ingestErr == nil || ingestErr.Kind != ErrorArtifactContract {
+		t.Fatalf("error = %#v, want artifact contract error", ingestErr)
 	}
 }
 
