@@ -111,6 +111,25 @@ func TestParseGitHubOutcomeEventsRequiresStructuredInputs(t *testing.T) {
 	}
 }
 
+func TestParseGitHubOutcomeEventsRejectsMismatchedPRURL(t *testing.T) {
+	_, ingestErr := ParseGitHubOutcomeEvents([]byte(`{
+  "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},
+  "pull_requests": [
+    {
+      "number": 401,
+      "head_sha": "abc401",
+      "html_url": "https://github.com/other/repo/pull/999",
+      "merged_at": "2026-06-05T12:00:00Z",
+      "files": [{"filename": "packages/billing/invoice.py"}]
+    }
+  ]
+}`), "github-outcomes.json")
+
+	if ingestErr == nil || ingestErr.Kind != ErrorProvenance {
+		t.Fatalf("error = %#v, want provenance error", ingestErr)
+	}
+}
+
 func TestParseGitHubOutcomeEventsAllowsPerPullRepos(t *testing.T) {
 	events, ingestErr := ParseGitHubOutcomeEvents([]byte(`{
   "pull_requests": [

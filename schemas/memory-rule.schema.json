@@ -293,6 +293,30 @@
     },
     {
       "if": {
+        "required": ["status", "review"],
+        "properties": {
+          "status": {
+            "const": "active"
+          },
+          "review": {
+            "required": ["decision"]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "review": {
+            "properties": {
+              "decision": {
+                "const": "approved"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
         "required": ["review"],
         "properties": {
           "review": {
