@@ -266,14 +266,19 @@ T6 adds deterministic offline distillation, review, and memory-page rendering:
   does not auto-accept generated drafts. A rule can become `active` through
   `relia review approve --rule <id>` or the legacy
   `relia review --rule <id> --label accepted`; stale and contradicted rules
-  fail closed and cannot be accepted without fresh distill evidence. `review
-  edit` keeps a rule in candidate review and marks the statement
-  `human_authored`; `review reject --reason <text>` retires the rule with the
-  rejection reason in lifecycle metadata.
+  fail closed and cannot be accepted without fresh distill evidence. Rule YAML
+  carries `review.gate: human_review` and `review.decision` values of
+  `pending`, `approved`, `needs_user_input`, `rejected`, or `merged` so
+  approval state is readable without a UI. `review edit` keeps a rule in
+  candidate review and marks the statement `human_authored`; `review reject
+  --reason <text>` retires the rule with the rejection reason in lifecycle
+  metadata; `review merge --rule <source> --into <target> --reason <text>`
+  retires duplicate or superseded rules with a merged decision.
 - `relia memory --format json` renders `memory/MEMORY.md` with statements,
   confidence labels, lifecycle status, review labels, and clickable PR
   provenance. The renderer separates strong active memory from weak candidate,
-  stale, contradicted, and retired memory.
+  stale, contradicted, and retired memory; rule YAML remains the canonical
+  place for durable review gate and decision evidence.
 
 T8 adds report/evidence feedback on top of the local artifact path:
 

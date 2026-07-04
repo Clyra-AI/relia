@@ -83,10 +83,12 @@ func UpdateRuleReview(root string, rulePath string, reviewOptions Options, updat
 		}
 		status = "active"
 		label = "accepted"
+		next = applyReviewDecisionYAML(next, reviewOptions, "approved", "")
 		next = replaceOrAddNestedYAMLScalar(next, "metadata", "lifecycle_reason", "approved by human review")
 	case "reject":
 		status = "retired"
 		label = "needs_user_input"
+		next = applyReviewDecisionYAML(next, reviewOptions, "rejected", "")
 		next = replaceOrAddNestedYAMLScalar(next, "metadata", "lifecycle_reason", "rejected by human review: "+strings.TrimSpace(reviewOptions.Reason))
 	case "edit":
 		switch status {
@@ -107,7 +109,13 @@ func UpdateRuleReview(root string, rulePath string, reviewOptions Options, updat
 			}
 			next = replaceNestedYAMLStringList(next, "scope", "paths", scopePaths)
 		}
+		next = applyReviewDecisionYAML(next, reviewOptions, "pending", "")
 		next = replaceOrAddNestedYAMLScalar(next, "metadata", "lifecycle_reason", "edited by human review; pending approval")
+	case "merge":
+		status = "retired"
+		label = "needs_user_input"
+		next = applyReviewDecisionYAML(next, reviewOptions, "merged", strings.TrimSpace(reviewOptions.MergeInto))
+		next = replaceOrAddNestedYAMLScalar(next, "metadata", "lifecycle_reason", "merged by human review into "+strings.TrimSpace(reviewOptions.MergeInto)+": "+strings.TrimSpace(reviewOptions.Reason))
 	case "label":
 		if label == "accepted" {
 			switch status {
@@ -115,13 +123,17 @@ func UpdateRuleReview(root string, rulePath string, reviewOptions Options, updat
 				return "", artifactContractError(updateOptions, "cannot mark "+status+" memory rule accepted without fresh distill evidence", rel)
 			}
 			status = "active"
+			next = applyReviewDecisionYAML(next, reviewOptions, "approved", "")
 			next = replaceOrAddNestedYAMLScalar(next, "metadata", "lifecycle_reason", "approved by human review")
 		} else if status == "active" {
 			status = "candidate"
+			next = applyReviewDecisionYAML(next, reviewOptions, reviewDecisionForLabel(label), "")
 			next = replaceOrAddNestedYAMLScalar(next, "metadata", "lifecycle_reason", "returned to candidate review")
+		} else {
+			next = applyReviewDecisionYAML(next, reviewOptions, reviewDecisionForLabel(label), "")
 		}
 	default:
-		return "", usageError(updateOptions, "review action must be approve, edit, reject, or omitted for --label")
+		return "", usageError(updateOptions, "review action must be approve, edit, merge, reject, or omitted for --label")
 	}
 	next = replaceTopLevelYAMLScalar(next, "status", status)
 	next = replaceNestedYAMLScalar(next, "review", "label", label)
@@ -135,6 +147,45 @@ func UpdateRuleReview(root string, rulePath string, reviewOptions Options, updat
 		return "", commandErr
 	}
 	return status, nil
+}
+
+func applyReviewDecisionYAML(content string, reviewOptions Options, decision string, mergedInto string) string {
+	next := replaceOrAddNestedYAMLScalar(content, "review", "gate", "human_review")
+	next = replaceOrAddNestedYAMLScalar(next, "review", "decision", decision)
+	reviewer := strings.TrimSpace(reviewOptions.ReviewedBy)
+	if reviewer == "" {
+		reviewer = "maintainer"
+	}
+	next = replaceOrAddNestedYAMLScalar(next, "review", "reviewed_by", reviewer)
+	next = replaceOrAddNestedYAMLScalar(next, "review", "decision_ref", reviewDecisionRef(reviewOptions, decision))
+	if strings.TrimSpace(mergedInto) != "" {
+		next = replaceOrAddNestedYAMLScalar(next, "review", "merged_into", strings.TrimSpace(mergedInto))
+	}
+	return next
+}
+
+func reviewDecisionForLabel(label string) string {
+	switch label {
+	case "accepted":
+		return "approved"
+	case "needs_user_input":
+		return "needs_user_input"
+	default:
+		return "pending"
+	}
+}
+
+func reviewDecisionRef(reviewOptions Options, decision string) string {
+	action := reviewOptions.Action
+	if action == "label" {
+		action = "--label " + reviewOptions.Label
+	} else if action == "merge" {
+		action = "merge --into " + strings.TrimSpace(reviewOptions.MergeInto)
+	}
+	if action == "" {
+		action = decision
+	}
+	return "relia review " + action + " --rule " + strings.TrimSpace(reviewOptions.Rule)
 }
 
 func replaceTopLevelYAMLScalar(content string, key string, value string) string {

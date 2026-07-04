@@ -89,6 +89,8 @@
         ],
         "review": {
           "label": "suggested",
+          "gate": "human_review",
+          "decision": "pending",
           "statement_origin": "cluster_summary"
         },
         "metadata": {
@@ -206,7 +208,9 @@
           }
         ],
         "review": {
-          "label": "accepted",
+          "label": "needs_user_input",
+          "gate": "human_review",
+          "decision": "needs_user_input",
           "statement_origin": "cluster_summary"
         },
         "metadata": {
@@ -326,7 +330,9 @@
           }
         ],
         "review": {
-          "label": "accepted",
+          "label": "needs_user_input",
+          "gate": "human_review",
+          "decision": "needs_user_input",
           "statement_origin": "cluster_summary"
         },
         "metadata": {

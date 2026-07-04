@@ -79,15 +79,19 @@ approval boundaries, and agent-native output contract:
   artifact. It performs no network download in the offline MVP runner path and
   validates the artifact digest before `embeddings: local` can pass.
 - `relia review approve --rule <id>` moves a candidate memory rule to
-  `active`. `relia review edit --rule <id> --statement <text>` marks the
-  statement `human_authored` and keeps it in candidate review. `relia review
-  reject --rule <id> --reason <text>` moves it to `retired`. The legacy
+  `active` and writes `review.gate: human_review` plus
+  `review.decision: approved`. `relia review edit --rule <id> --statement
+  <text>` marks the statement `human_authored` and keeps it pending candidate
+  review. `relia review reject --rule <id> --reason <text>` moves it to
+  `retired`, and `relia review merge --rule <source> --into <target> --reason
+  <text>` retires a duplicate rule with a durable merged decision. The legacy
   `relia review --rule <id> --label accepted|suggested|needs_user_input` form
   remains supported.
 - `relia memory --format json` renders `memory/MEMORY.md` with each rule's
   statement, confidence, lifecycle status, review label, and clickable PR
   provenance, separating active accepted rules as strong memory from candidate,
-  stale, contradicted, and retired weak memory.
+  stale, contradicted, and retired weak memory. The rule YAML itself carries
+  the durable review gate and decision evidence.
 - `relia serve --format json` exposes the local MCP capability manifest for
   `recall`, `assess`, and `coverage` over active accepted rules only. Hosted or
   network transports fail closed unless explicitly approved.

@@ -747,8 +747,15 @@ metadata:
 	if code != ExitSuccess {
 		t.Fatalf("review approve exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
 	}
+	result := decodeResult(t, stdout)
+	if result.Data["review_gate"] != "human_review" || result.Data["decision"] != "approved" {
+		t.Fatalf("review approve data = %#v", result.Data)
+	}
 	approved := parseRuleDocForTest(t, readRuleByIDForTest(t, tempDir, "billing-time"))
-	if approved.Scalars["status"].Value != "active" || approved.Scalars["review.label"].Value != "accepted" {
+	if approved.Scalars["status"].Value != "active" ||
+		approved.Scalars["review.label"].Value != "accepted" ||
+		approved.Scalars["review.gate"].Value != "human_review" ||
+		approved.Scalars["review.decision"].Value != "approved" {
 		t.Fatalf("approved rule = %#v", approved.Scalars)
 	}
 
@@ -759,8 +766,25 @@ metadata:
 	rejected := parseRuleDocForTest(t, readRuleByIDForTest(t, tempDir, "billing-time"))
 	if rejected.Scalars["status"].Value != "retired" ||
 		rejected.Scalars["review.label"].Value != "needs_user_input" ||
+		rejected.Scalars["review.decision"].Value != "rejected" ||
 		!strings.Contains(rejected.Scalars["metadata.lifecycle_reason"].Value, "superseded") {
 		t.Fatalf("rejected rule = %#v", rejected.Scalars)
+	}
+
+	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "canonical-billing-time.yaml"), strings.Replace(readRuleByIDForTest(t, tempDir, "billing-time"), "id: billing-time", "id: canonical-billing-time", 1))
+	stdout, stderr, code = runForTest(t, []string{"--json", "review", "merge", "--rule", "billing-time", "--into", "canonical-billing-time", "--reason", "duplicate of canonical billing rule"}, false)
+	if code != ExitSuccess {
+		t.Fatalf("review merge exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result = decodeResult(t, stdout)
+	if result.Data["decision"] != "merged" || result.Data["merged_into"] != "canonical-billing-time" {
+		t.Fatalf("review merge data = %#v", result.Data)
+	}
+	merged := parseRuleDocForTest(t, readRuleByIDForTest(t, tempDir, "billing-time"))
+	if merged.Scalars["status"].Value != "retired" ||
+		merged.Scalars["review.decision"].Value != "merged" ||
+		merged.Scalars["review.merged_into"].Value != "canonical-billing-time" {
+		t.Fatalf("merged rule = %#v", merged.Scalars)
 	}
 }
 

@@ -30,20 +30,59 @@ func reviewResult(args []string, start time.Time) CommandResult {
 	if commandErr != nil {
 		return errorResult("review", "review", commandErr, start)
 	}
+	mergedIntoPath := ""
+	if options.Action == "merge" {
+		mergedIntoPath, commandErr = reviewdoc.FindRulePath(root, "memory/rules", options.MergeInto, updateOptions)
+		if commandErr != nil {
+			return errorResult("review", "review", commandErr, start)
+		}
+		if mergedIntoPath == rulePath {
+			return errorResult("review", "review", usageError("review merge --into must reference a different rule"), start)
+		}
+	}
 	status, commandErr := reviewdoc.UpdateRuleReview(root, rulePath, options, updateOptions)
 	if commandErr != nil {
 		return errorResult("review", "review", commandErr, start)
 	}
 	rel := displayPath(root, rulePath)
-	result := passResult("review", "review", "updated memory rule review label", start, map[string]any{
+	data := map[string]any{
 		"rule":         options.Rule,
 		"rule_path":    rel,
 		"action":       options.Action,
 		"review_label": options.Label,
+		"review_gate":  "human_review",
+		"decision":     reviewDecisionOutput(options),
 		"status":       status,
-	})
+	}
+	if mergedIntoPath != "" {
+		data["merged_into"] = options.MergeInto
+		data["merged_into_path"] = displayPath(root, mergedIntoPath)
+	}
+	result := passResult("review", "review", "updated memory rule review label", start, data)
 	result.Warnings = append(result.Warnings, warnings...)
 	result.EvidenceRefs = append(result.EvidenceRefs, "schemas/memory-rule.schema.json", rel)
 	result.Artifacts = append(result.Artifacts, ArtifactRef{Kind: "memory_rule", Path: rel})
 	return result
+}
+
+func reviewDecisionOutput(options reviewdoc.Options) string {
+	switch options.Action {
+	case "approve":
+		return "approved"
+	case "reject":
+		return "rejected"
+	case "merge":
+		return "merged"
+	case "edit":
+		return "pending"
+	default:
+		switch options.Label {
+		case "accepted":
+			return "approved"
+		case "needs_user_input":
+			return "needs_user_input"
+		default:
+			return "pending"
+		}
+	}
 }

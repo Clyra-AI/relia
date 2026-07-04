@@ -29,6 +29,10 @@ provenance:
     url: https://github.com/Clyra-AI/relia-demo-seed/pull/203
 review:
   label: accepted
+  gate: human_review
+  decision: approved
+  reviewed_by: maintainer
+  decision_ref: relia review approve --rule avoid-direct-datetime-in-assessment-fixture
   statement_origin: cluster_summary
 metadata:
   confidence_label: high
