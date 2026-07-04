@@ -247,15 +247,21 @@ func githubPullRequestURLMatchesBase(repo Repo, pr int, prURL string) bool {
 		strings.EqualFold(urlRepo.Name, repo.Name)
 }
 
-func githubProvenanceURLRepoMatchesBase(repo Repo, provenanceURL string) bool {
+func githubProvenanceURLMatchesBase(repo Repo, pr int, provenanceURL string) bool {
 	const prefix = "https://github.com/"
 	if !strings.HasPrefix(provenanceURL, prefix) {
 		return false
 	}
 	parts := strings.Split(strings.TrimPrefix(provenanceURL, prefix), "/")
-	return len(parts) >= 2 &&
-		strings.EqualFold(parts[0], repo.Owner) &&
-		strings.EqualFold(parts[1], repo.Name)
+	if len(parts) < 2 ||
+		!strings.EqualFold(parts[0], repo.Owner) ||
+		!strings.EqualFold(parts[1], repo.Name) {
+		return false
+	}
+	if urlPR, ok := GitHubPullRequestURLPathNumber(provenanceURL); ok && urlPR != pr {
+		return false
+	}
+	return true
 }
 
 func githubOutcomeEvent(base githubOutcomeBaseFields, source map[string]any, options githubOutcomeEventOptions, ref string) (map[string]any, *Error) {
@@ -275,8 +281,8 @@ func githubOutcomeEvent(base githubOutcomeBaseFields, source map[string]any, opt
 	}
 	provenanceURLs := []string{base.PRURL}
 	if provenanceURL := strings.TrimSpace(options.ProvenanceURL); provenanceURL != "" && ValidGitHubProvenanceURLShape(provenanceURL) {
-		if !githubProvenanceURLRepoMatchesBase(base.Repo, provenanceURL) {
-			return nil, provenanceIntegrityError(fmt.Sprintf("github pull request %d %s outcome provenance URL must match repo", base.PR, options.Kind), ref)
+		if !githubProvenanceURLMatchesBase(base.Repo, base.PR, provenanceURL) {
+			return nil, provenanceIntegrityError(fmt.Sprintf("github pull request %d %s outcome provenance URL must match repo and pull number", base.PR, options.Kind), ref)
 		}
 		provenanceURLs = uniqueStrings(append(provenanceURLs, provenanceURL))
 	}
