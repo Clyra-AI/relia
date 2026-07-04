@@ -249,6 +249,7 @@ func TestParseGitHubOutcomeEventsAllowsOutcomeLevelPaths(t *testing.T) {
           "conclusion": "failure",
           "completed_at": "2026-06-08T12:00:00Z",
           "html_url": "https://github.com/acme/billing-service/actions/runs/404",
+          "flake_discount": 0.25,
           "paths": ["cmd/relia/main.go"]
         }
       ],
@@ -257,6 +258,7 @@ func TestParseGitHubOutcomeEventsAllowsOutcomeLevelPaths(t *testing.T) {
           "created_at": "2026-06-09T12:00:00Z",
           "commit_sha": "def404",
           "commit_url": "https://github.com/acme/billing-service/commit/def404",
+          "flake_discount": 0.5,
           "paths": ["internal/ingest/github_outcomes.go"]
         }
       ],
@@ -265,6 +267,7 @@ func TestParseGitHubOutcomeEventsAllowsOutcomeLevelPaths(t *testing.T) {
           "marked": true,
           "resolved_at": "2026-06-10T12:00:00Z",
           "html_url": "https://github.com/acme/billing-service/pull/404#discussion_r404",
+          "flake_discount": 0.75,
           "path": "internal/ingest/github_outcomes_test.go"
         }
       ]
@@ -288,6 +291,11 @@ func TestParseGitHubOutcomeEventsAllowsOutcomeLevelPaths(t *testing.T) {
 			t.Fatalf("event %d paths = %#v, want %q", index, paths, want)
 		}
 	}
+	for index, want := range []float64{0.25, 0.5, 0.75} {
+		if got, ok := numericValue(events[index]["flake_discount"]); !ok || got != want {
+			t.Fatalf("event %d flake_discount = %#v, want %.2f", index, events[index]["flake_discount"], want)
+		}
+	}
 }
 
 func TestParseGitHubOutcomeEventsRejectsPathlessEmittedOutcome(t *testing.T) {
@@ -305,6 +313,30 @@ func TestParseGitHubOutcomeEventsRejectsPathlessEmittedOutcome(t *testing.T) {
 
 	if ingestErr == nil || ingestErr.Kind != ErrorArtifactContract {
 		t.Fatalf("error = %#v, want artifact contract error", ingestErr)
+	}
+}
+
+func TestParseGitHubOutcomeEventsPrefersCanonicalPRURL(t *testing.T) {
+	events, ingestErr := ParseGitHubOutcomeEvents([]byte(`{
+  "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},
+  "pull_requests": [
+    {
+      "number": 407,
+      "head_sha": "abc407",
+      "url": "https://api.github.com/repos/acme/billing-service/pulls/407",
+      "pr_url": "https://github.com/acme/billing-service/pull/407",
+      "merged_at": "2026-06-12T12:00:00Z",
+      "files": [{"filename": "packages/billing/invoice.py"}]
+    }
+  ]
+}`), "github-outcomes.json")
+
+	if ingestErr != nil {
+		t.Fatalf("ParseGitHubOutcomeEvents returned error: %v", ingestErr)
+	}
+	provenanceURLs := events[0]["provenance_urls"].([]string)
+	if len(provenanceURLs) != 1 || provenanceURLs[0] != "https://github.com/acme/billing-service/pull/407" {
+		t.Fatalf("provenance_urls = %#v, want canonical PR URL", provenanceURLs)
 	}
 }
 

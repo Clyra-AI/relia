@@ -182,7 +182,12 @@ func githubOutcomeBase(defaultRepo Repo, pull map[string]any, ref string, index 
 	if commit == "" {
 		return githubOutcomeBaseFields{}, artifactContractError(fmt.Sprintf("github pull request %d must include head_sha or commit", pr), ref)
 	}
-	prURL := githubString(pull, "html_url", "url", "pr_url")
+	prURL := githubString(pull, "html_url", "pr_url")
+	if prURL == "" {
+		if candidate := githubString(pull, "url"); ValidGitHubProvenanceURLShape(candidate) {
+			prURL = candidate
+		}
+	}
 	if prURL == "" {
 		prURL = fmt.Sprintf("https://github.com/%s/%s/pull/%d", repo.Owner, repo.Name, pr)
 	}
@@ -246,6 +251,9 @@ func githubOutcomeEvent(base githubOutcomeBaseFields, source map[string]any, opt
 	}
 	if extractionConfidence := githubString(source, "extraction_confidence", "outcome.signature.extraction_confidence"); extractionConfidence != "" {
 		event["extraction_confidence"] = extractionConfidence
+	}
+	if flakeDiscount, ok := githubOptionalAny(source, "flake_discount", "outcome.flake_discount"); ok {
+		event["flake_discount"] = flakeDiscount
 	}
 	if messageFingerprint := githubString(source, "message_fingerprint", "outcome.signature.message_fingerprint"); messageFingerprint != "" {
 		event["message_fingerprint"] = messageFingerprint
@@ -376,6 +384,15 @@ func githubFirstAny(event map[string]any, paths ...string) any {
 		}
 	}
 	return nil
+}
+
+func githubOptionalAny(event map[string]any, paths ...string) (any, bool) {
+	for _, path := range paths {
+		if value, ok := nestedField(event, path); ok {
+			return value, true
+		}
+	}
+	return nil, false
 }
 
 func githubBool(event map[string]any, paths ...string) bool {
