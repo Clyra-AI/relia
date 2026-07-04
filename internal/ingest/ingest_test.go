@@ -67,6 +67,9 @@ func TestParseEventsRejectsInvalidInput(t *testing.T) {
 func TestRedactForPersistenceRedactsKnownTokensAndSecretFields(t *testing.T) {
 	got, err := RedactForPersistence(map[string]any{
 		"message": "Authorization failed for Bearer ghp_1234567890abcdef1234567890abcdef123456",
+		"paths": []string{
+			"internal/ghp_1234567890abcdef1234567890abcdef123456/main.go",
+		},
 		"metadata": map[string]any{
 			"secrets": []any{"short-password", "low-token"},
 		},
@@ -78,6 +81,10 @@ func TestRedactForPersistenceRedactsKnownTokensAndSecretFields(t *testing.T) {
 	message := event["message"].(string)
 	if strings.Contains(message, "ghp_1234567890abcdef") || !strings.Contains(message, "[REDACTED:token]") {
 		t.Fatalf("message = %q", message)
+	}
+	paths := event["paths"].([]string)
+	if len(paths) != 1 || strings.Contains(paths[0], "ghp_1234567890abcdef") || !strings.Contains(paths[0], "[REDACTED:token]") {
+		t.Fatalf("paths = %#v, want redacted token path", paths)
 	}
 	metadata := event["metadata"].(map[string]any)
 	if metadata["secrets"] != "[REDACTED:secret]" {
