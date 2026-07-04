@@ -38,7 +38,7 @@ func ingestResult(args []string, start time.Time) CommandResult {
 		}
 		return errorResult("ingest", "ingest", internalError("could not read ingest input", err), start)
 	}
-	events, commandErr := parseIngestEvents(inputContent, displayPath(root, inputPath))
+	events, commandErr := parseIngestEventsForOptions(inputContent, displayPath(root, inputPath), options)
 	if commandErr != nil {
 		return errorResult("ingest", "ingest", commandErr, start)
 	}
@@ -85,6 +85,7 @@ func ingestResult(args []string, start time.Time) CommandResult {
 	}
 	result := passResult("ingest", "ingest", "ingested canonical experience records", start, map[string]any{
 		"input_path":                    displayPath(root, inputPath),
+		"source_format":                 ingestSourceFormat(options),
 		"experiences_total":             len(events),
 		"experiences_persisted":         len(records),
 		"experiences_agent_attributed":  agentAttributed,

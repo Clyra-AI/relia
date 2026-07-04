@@ -3,9 +3,15 @@
     {
       "acceptance_item_id": "FR3-GITHUB-OUTCOME-INTAKE-001",
       "evidence_refs": [
+        "internal/ingest/github_outcomes.go",
+        "internal/ingest/github_outcomes_test.go",
+        "cmd/relia/ingest_contract_test.go",
+        "examples/demo/github-outcome-fixtures.json",
+        ".factory/artifacts/acceptance-evidence/FR3-GITHUB-OUTCOME-INTAKE-001/20260704T144320.000000000Z.json",
         ".factory/artifacts/task-runs/T10/proof-of-behavior-scorecard.json",
         "make prepush-full"
       ],
+      "proof_level": "user_visible_behavior",
       "status": "implemented"
     },
     {
@@ -14,6 +20,7 @@
         ".factory/artifacts/task-runs/T10/proof-of-behavior-scorecard.json",
         "make prepush-full"
       ],
+      "proof_level": "user_visible_behavior",
       "status": "implemented"
     },
     {
@@ -21,16 +28,23 @@
       "evidence_refs": [
         "schemas/memory-rule.schema.json",
         "memory/rules/demo-assessment-active-rule.yaml",
+        ".factory/artifacts/acceptance-evidence/NFR7-RULE-READABILITY-001/20260704T144320.000000000Z.json",
         ".factory/artifacts/task-runs/T10/proof-of-behavior-scorecard.json"
       ],
+      "proof_level": "user_visible_behavior",
       "status": "implemented"
     },
     {
       "acceptance_item_id": "MVP-IN-SCOPE-002",
       "evidence_refs": [
+        "internal/ingest/github_outcomes.go",
+        "cmd/relia/ingest_contract_test.go",
+        "examples/demo/github-outcome-fixtures.json",
+        ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-002/20260704T144320.000000000Z.json",
         ".factory/artifacts/task-runs/T10/proof-of-behavior-scorecard.json",
         "make prepush-full"
       ],
+      "proof_level": "user_visible_behavior",
       "status": "implemented"
     },
     {
@@ -38,8 +52,10 @@
       "evidence_refs": [
         "internal/review/update_test.go",
         "cmd/relia/distill_review_command_test.go",
+        ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-014/20260704T144320.000000000Z.json",
         ".factory/artifacts/task-runs/T10/proof-of-behavior-scorecard.json"
       ],
+      "proof_level": "user_visible_behavior",
       "status": "implemented"
     }
   ],
@@ -61,13 +77,25 @@
     ".factory/artifacts/task-runs/T10/proof-of-behavior-scorecard.json",
     ".factory/artifacts/task-runs/T10/validation-report.json",
     ".factory/artifacts/task-runs/T10/work-proof-marker.json",
+    ".factory/artifacts/acceptance-evidence/FR3-GITHUB-OUTCOME-INTAKE-001/20260704T144320.000000000Z.json",
+    ".factory/artifacts/acceptance-evidence/NFR7-RULE-READABILITY-001/20260704T144320.000000000Z.json",
+    ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-002/20260704T144320.000000000Z.json",
+    ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-014/20260704T144320.000000000Z.json",
     "README.md",
     "cmd/relia/demo_fixtures_test.go",
     "cmd/relia/distill_review_command_test.go",
+    "cmd/relia/ingest_command.go",
+    "cmd/relia/ingest_contract_test.go",
+    "cmd/relia/repo_helpers.go",
     "cmd/relia/review_command.go",
     "docs/architecture/architecture_guides.md",
     "docs/dev/dev_guides.md",
     "examples/demo/distill-review-lifecycle-fixtures.json",
+    "examples/demo/github-outcome-fixtures.json",
+    "internal/ingest/args.go",
+    "internal/ingest/args_test.go",
+    "internal/ingest/github_outcomes.go",
+    "internal/ingest/github_outcomes_test.go",
     "internal/review/args.go",
     "internal/review/args_test.go",
     "internal/review/update.go",
@@ -80,6 +108,8 @@
     "status": "not_applicable"
   },
   "commands_run": [
+    "go test ./internal/ingest ./cmd/relia -run 'TestParseArgsAcceptsGitHubOutcomesMode|TestParseGitHubOutcomeEvents|TestIngestGitHubOutcomesPersistsStructuredPRCheckRevertAndReviewRecords' -count=1",
+    "go run ./cmd/relia --json ingest --github-outcomes --input examples/demo/github-outcome-fixtures.json",
     "make lint-fast",
     "make test-fast",
     "make test-contracts",
@@ -96,7 +126,7 @@
   "final_validation_evidence": [
     {
       "command": "make prepush-full",
-      "coverage": "79.0% statements for ./cmd/... against 75.0% minimum",
+      "coverage": "79.1% statements for ./cmd/... against 75.0% minimum",
       "exit_code": 0,
       "status": "pass"
     }

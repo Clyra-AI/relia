@@ -33,9 +33,12 @@ approval boundaries, and agent-native output contract:
 - `relia ingest --input <path>` reads local JSON or JSONL outcome events,
   redacts and entropy-scans them before persistence, normalizes canonical
   experience records, and upserts monthly shards under `.relia/experiences/`.
-  This task slice is offline only; live GitHub intake remains behind future
-  credential and network gates. Events marked as agent self-reports or
-  reflections fail before persistence.
+  `relia ingest --github-outcomes --input <path>` accepts a local structured
+  GitHub export with PR metadata, check runs, reverts, and marked review
+  corrections, then translates those outcomes into the same canonical records.
+  This task slice remains offline and credential-free; live GitHub API intake
+  remains behind future credential and network gates. Events marked as agent
+  self-reports or reflections fail before persistence.
 - `relia backtest --window 180d` reads local `.relia/experiences/*.jsonl`
   shards, extracts deterministic signatures, pairs confirmed recurrences
   separately from possible recurrences, discounts flakes, and writes JSON plus
@@ -124,6 +127,9 @@ static reports live under `examples/reports/`:
   every demo citation without network access.
 - `examples/demo/seeded-repo/outcomes.jsonl` is the seeded outcome stream used
   to reproduce the backtest headline.
+- `examples/demo/github-outcome-fixtures.json` is a structured GitHub-export
+  fixture covering PR metadata, check-run failures, reverts, and marked review
+  corrections.
 - `examples/demo/attribution-precision-sample.json`,
   `examples/demo/flake-discount-fixtures.json`, and
   `examples/demo/redaction-fixtures/expected-redacted-artifacts.json` cover the

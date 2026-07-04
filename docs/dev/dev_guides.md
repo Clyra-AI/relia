@@ -203,6 +203,11 @@ T3 adds offline ingestion:
 
 - `relia ingest --input <path>` accepts local JSON, JSON arrays, `{"events":[]}`
   objects, or JSONL streams of outcome events.
+- `relia ingest --github-outcomes --input <path>` accepts local structured
+  GitHub exports with PR metadata, check runs, reverts, and explicitly marked
+  review corrections. It translates those records into canonical experience
+  records before the same redaction, provenance, attribution, and shard
+  persistence path used by normal ingest.
 - Input is recursively redacted and entropy-scanned before any artifact is
   opened for write. Known token shapes and secret-named fields are redacted;
   unclassified high-entropy values fail closed with exit `6`.

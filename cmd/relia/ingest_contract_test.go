@@ -282,6 +282,94 @@ func TestIngestInfersAttributionAndUpsertsIdempotently(t *testing.T) {
 	}
 }
 
+func TestIngestGitHubOutcomesPersistsStructuredPRCheckRevertAndReviewRecords(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	inputPath := filepath.Join(tempDir, "fixtures", "github-outcomes.json")
+	writeFileForTest(t, inputPath, `{
+  "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},
+  "pull_requests": [
+    {
+      "number": 301,
+      "head_sha": "abc301",
+      "html_url": "https://github.com/acme/billing-service/pull/301",
+      "merged_at": "2026-06-01T12:00:00Z",
+      "labels": ["agent-authored"],
+      "files": [{"filename": "packages/billing/invoice.py"}],
+      "check_runs": [{"name": "validate", "conclusion": "success"}]
+    },
+    {
+      "number": 302,
+      "head_sha": "abc302",
+      "html_url": "https://github.com/acme/billing-service/pull/302",
+      "merged_at": "2026-06-02T12:00:00Z",
+      "labels": ["agent-authored"],
+      "files": ["packages/billing/tax.py"],
+      "check_runs": [
+        {
+          "name": "validate",
+          "conclusion": "failure",
+          "completed_at": "2026-06-02T12:10:00Z",
+          "html_url": "https://github.com/acme/billing-service/actions/runs/302",
+          "summary": "unit test failed",
+          "paths": ["packages/billing/tax.py"]
+        }
+      ],
+      "reverts": [
+        {
+          "created_at": "2026-06-03T12:00:00Z",
+          "commit_sha": "def302",
+          "commit_url": "https://github.com/acme/billing-service/commit/def302",
+          "message": "Revert tax change",
+          "paths": ["packages/billing/tax.py"]
+        }
+      ],
+      "review_corrections": [
+        {
+          "marked": true,
+          "resolved_at": "2026-06-04T12:00:00Z",
+          "html_url": "https://github.com/acme/billing-service/pull/302",
+          "path": "packages/billing/tax.py",
+          "message": "Fix review finding"
+        }
+      ]
+    }
+  ]
+}`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "ingest", "--github-outcomes", "--input", inputPath}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Data["source_format"] != "github_outcomes" {
+		t.Fatalf("source_format = %#v", result.Data["source_format"])
+	}
+	if got := int(result.Data["experiences_persisted"].(float64)); got != 4 {
+		t.Fatalf("experiences_persisted = %d", got)
+	}
+	content, err := os.ReadFile(filepath.Join(tempDir, ".relia", "experiences", "2026-06.jsonl"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	records := decodeJSONLines(t, string(content))
+	kinds := map[string]bool{}
+	for _, record := range records {
+		outcome := record["outcome"].(map[string]any)
+		kinds[outcome["kind"].(string)] = true
+		metadata := record["metadata"].(map[string]any)
+		if metadata["memory_source"] != "verified_outcome_event" {
+			t.Fatalf("metadata = %#v", metadata)
+		}
+	}
+	for _, want := range []string{"merged_clean", "ci_failure", "revert", "review_correction"} {
+		if !kinds[want] {
+			t.Fatalf("missing outcome kind %q in records:\n%s", want, content)
+		}
+	}
+}
+
 func TestIngestGeneratedExperienceIDIncludesSignatureIdentity(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)

@@ -26,6 +26,19 @@ func TestParseArgsAcceptsInputAliases(t *testing.T) {
 	}
 }
 
+func TestParseArgsAcceptsGitHubOutcomesMode(t *testing.T) {
+	options, parseErr := ParseArgs([]string{"--github-outcomes", "--input", "github-outcomes.json"})
+	if parseErr != nil {
+		t.Fatalf("ParseArgs returned error: %v", parseErr)
+	}
+	if !options.GitHubOutcomes {
+		t.Fatal("expected GitHubOutcomes mode")
+	}
+	if options.InputPath != "github-outcomes.json" {
+		t.Fatalf("InputPath = %q, want github-outcomes.json", options.InputPath)
+	}
+}
+
 func TestParseArgsRejectsMissingInputValue(t *testing.T) {
 	_, parseErr := ParseArgs([]string{"-i"})
 	if parseErr == nil {

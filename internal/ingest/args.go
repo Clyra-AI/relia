@@ -6,7 +6,8 @@ import (
 )
 
 type CLIOptions struct {
-	InputPath string
+	InputPath      string
+	GitHubOutcomes bool
 }
 
 type ParseError struct {
@@ -28,6 +29,8 @@ func ParseArgs(args []string) (CLIOptions, *ParseError) {
 			}
 			options.InputPath = args[index+1]
 			index++
+		case "--github-outcomes":
+			options.GitHubOutcomes = true
 		default:
 			return options, &ParseError{Message: fmt.Sprintf("unknown ingest argument %q", arg)}
 		}
