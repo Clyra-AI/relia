@@ -147,8 +147,8 @@ type githubOutcomeEventOptions struct {
 
 func githubOutcomeBase(defaultRepo Repo, pull map[string]any, ref string, index int) (githubOutcomeBaseFields, *Error) {
 	repo := defaultRepo
-	if value, ok := nestedField(pull, "repo"); ok {
-		candidate, commandErr := NormalizeRepo(map[string]any{"repo": value}, ref)
+	if githubEnvelopeHasRepo(pull) {
+		candidate, commandErr := NormalizeRepo(pull, ref)
 		if commandErr != nil {
 			return githubOutcomeBaseFields{}, commandErr
 		}
@@ -190,8 +190,10 @@ func githubOutcomeEvent(base githubOutcomeBaseFields, source map[string]any, opt
 	if len(paths) == 0 {
 		paths = base.Paths
 	}
-	provenanceURL := firstString(options.ProvenanceURL, base.PRURL)
-	provenanceURLs := uniqueStrings([]string{base.PRURL, provenanceURL})
+	provenanceURLs := []string{base.PRURL}
+	if provenanceURL := strings.TrimSpace(options.ProvenanceURL); provenanceURL != "" && ValidGitHubProvenanceURLShape(provenanceURL) {
+		provenanceURLs = uniqueStrings(append(provenanceURLs, provenanceURL))
+	}
 	event := map[string]any{
 		"repo": map[string]any{
 			"provider": base.Repo.Provider,
@@ -251,11 +253,12 @@ func githubOutcomeObjects(event map[string]any, paths ...string) []map[string]an
 
 func githubMarkedReviewCorrections(pull map[string]any) []map[string]any {
 	var result []map[string]any
-	for _, correction := range githubOutcomeObjects(pull, "review_corrections", "marked_review_corrections") {
+	for _, correction := range githubOutcomeObjects(pull, "review_corrections") {
 		if githubBool(correction, "marked", "correction", "requires_correction", "is_correction") {
 			result = append(result, correction)
 		}
 	}
+	result = append(result, githubOutcomeObjects(pull, "marked_review_corrections")...)
 	return result
 }
 
