@@ -82,8 +82,8 @@ func ParseGitHubOutcomeEvents(content []byte, ref string) ([]map[string]any, *Er
 				RecordedAt:     githubString(correction, "resolved_at", "updated_at", "created_at", "recorded_at"),
 				Commit:         githubString(correction, "commit_id", "commit", "head_sha"),
 				Paths:          githubPaths(correction, base.Paths),
-				CheckName:      "review_correction",
-				SignatureClass: "review_correction",
+				CheckName:      githubCheckName(correction, "review_correction"),
+				SignatureClass: githubSignatureClass(correction, "review_correction"),
 				SignatureKey:   githubSignatureKey(correction, base.Paths),
 				Message:        githubString(correction, "message", "body", "title"),
 				ProvenanceURL:  githubString(correction, "html_url", "url", "review_url"),
@@ -317,7 +317,7 @@ func githubMarkedReviewCorrections(pull map[string]any) []map[string]any {
 
 func githubCheckRunFailed(checkRun map[string]any) bool {
 	switch strings.ToLower(githubString(checkRun, "conclusion", "status")) {
-	case "failure", "failed", "timed_out", "action_required", "cancelled":
+	case "failure", "failed", "timed_out", "action_required":
 		return true
 	default:
 		return false

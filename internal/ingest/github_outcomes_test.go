@@ -271,6 +271,9 @@ func TestParseGitHubOutcomeEventsAllowsOutcomeLevelPaths(t *testing.T) {
           "resolved_at": "2026-06-10T12:00:00Z",
           "html_url": "https://github.com/acme/billing-service/pull/404#discussion_r404",
           "flake_discount": 0.75,
+          "signature_class": "test_failure",
+          "check_name": "pytest-billing",
+          "signature_key": "tests/billing/test_invoice.py::test_clock",
           "path": "internal/ingest/github_outcomes_test.go"
         }
       ]
@@ -308,6 +311,15 @@ func TestParseGitHubOutcomeEventsAllowsOutcomeLevelPaths(t *testing.T) {
 	if got := stringFromAny(events[1]["signature_key"]); got != "tests/billing/test_invoice.py::test_clock" {
 		t.Fatalf("revert signature_key = %q, want explicit test key", got)
 	}
+	if got := stringFromAny(events[2]["signature_class"]); got != "test_failure" {
+		t.Fatalf("review correction signature_class = %q, want test_failure", got)
+	}
+	if got := stringFromAny(events[2]["check_name"]); got != "pytest-billing" {
+		t.Fatalf("review correction check_name = %q, want pytest-billing", got)
+	}
+	if got := stringFromAny(events[2]["signature_key"]); got != "tests/billing/test_invoice.py::test_clock" {
+		t.Fatalf("review correction signature_key = %q, want explicit test key", got)
+	}
 }
 
 func TestParseGitHubOutcomeEventsRejectsPathlessEmittedOutcome(t *testing.T) {
@@ -325,6 +337,39 @@ func TestParseGitHubOutcomeEventsRejectsPathlessEmittedOutcome(t *testing.T) {
 
 	if ingestErr == nil || ingestErr.Kind != ErrorArtifactContract {
 		t.Fatalf("error = %#v, want artifact contract error", ingestErr)
+	}
+}
+
+func TestParseGitHubOutcomeEventsIgnoresCancelledChecks(t *testing.T) {
+	events, ingestErr := ParseGitHubOutcomeEvents([]byte(`{
+  "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},
+  "pull_requests": [
+    {
+      "number": 408,
+      "head_sha": "abc408",
+      "html_url": "https://github.com/acme/billing-service/pull/408",
+      "merged_at": "2026-06-13T12:00:00Z",
+      "files": [{"filename": "packages/billing/invoice.py"}],
+      "check_runs": [
+        {
+          "name": "validate",
+          "conclusion": "cancelled",
+          "completed_at": "2026-06-13T12:10:00Z",
+          "html_url": "https://github.com/acme/billing-service/actions/runs/408"
+        }
+      ]
+    }
+  ]
+}`), "github-outcomes.json")
+
+	if ingestErr != nil {
+		t.Fatalf("ParseGitHubOutcomeEvents returned error: %v", ingestErr)
+	}
+	if len(events) != 1 {
+		t.Fatalf("events = %d, want 1: %#v", len(events), events)
+	}
+	if got := stringFromAny(events[0]["outcome_kind"]); got != "merged_clean" {
+		t.Fatalf("outcome_kind = %q, want merged_clean", got)
 	}
 }
 
