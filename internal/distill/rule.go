@@ -116,12 +116,16 @@ func RenderRuleYAML(rule Rule) string {
 	builder.WriteString("review:\n")
 	builder.WriteString("  label: " + YAMLScalar(rule.ReviewLabel) + "\n")
 	builder.WriteString("  statement_origin: " + YAMLScalar(rule.StatementOrigin) + "\n")
-	if rule.ReviewGate != "" {
-		builder.WriteString("  gate: " + YAMLScalar(rule.ReviewGate) + "\n")
+	reviewGate := rule.ReviewGate
+	if reviewGate == "" {
+		reviewGate = "human_review"
 	}
-	if rule.ReviewDecision != "" {
-		builder.WriteString("  decision: " + YAMLScalar(rule.ReviewDecision) + "\n")
+	builder.WriteString("  gate: " + YAMLScalar(reviewGate) + "\n")
+	reviewDecision := rule.ReviewDecision
+	if reviewDecision == "" {
+		reviewDecision = "pending"
 	}
+	builder.WriteString("  decision: " + YAMLScalar(reviewDecision) + "\n")
 	if rule.ReviewedBy != "" {
 		builder.WriteString("  reviewed_by: " + YAMLScalar(rule.ReviewedBy) + "\n")
 	}

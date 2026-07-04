@@ -58,6 +58,12 @@ func TestDistillDraftsDeterministicCandidateRulesReviewAndMemoryPage(t *testing.
 	if avoid.Scalars["review.statement_origin"].Value != "cluster_summary" || playbook.Scalars["review.statement_origin"].Value != "cluster_summary" {
 		t.Fatalf("statement origins = avoid %q playbook %q", avoid.Scalars["review.statement_origin"].Value, playbook.Scalars["review.statement_origin"].Value)
 	}
+	if avoid.Scalars["review.gate"].Value != "human_review" ||
+		avoid.Scalars["review.decision"].Value != "pending" ||
+		playbook.Scalars["review.gate"].Value != "human_review" ||
+		playbook.Scalars["review.decision"].Value != "pending" {
+		t.Fatalf("pending review fields = avoid %#v playbook %#v", avoid.Scalars, playbook.Scalars)
+	}
 	if avoid.Scalars["metadata.confidence_inputs.drafting_model_weight"].Value != "0" {
 		t.Fatalf("drafting model affected confidence: %#v", avoid.Scalars["metadata.confidence_inputs.drafting_model_weight"])
 	}

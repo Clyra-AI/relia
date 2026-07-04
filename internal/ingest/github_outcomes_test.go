@@ -139,6 +139,33 @@ func TestParseGitHubOutcomeEventsAllowsPerPullRepos(t *testing.T) {
 	}
 }
 
+func TestParseGitHubOutcomeEventsPrefersHeadSHAOverMergeCommit(t *testing.T) {
+	events, ingestErr := ParseGitHubOutcomeEvents([]byte(`{
+  "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},
+  "pull_requests": [
+    {
+      "number": 402,
+      "head": {"sha": "head402"},
+      "merge_commit_sha": "merge402",
+      "html_url": "https://github.com/acme/billing-service/pull/402",
+      "merged_at": "2026-06-06T12:00:00Z",
+      "labels": [{"name": "agent-authored"}],
+      "files": [{"filename": "packages/billing/invoice.py"}]
+    }
+  ]
+}`), "github-outcomes.json")
+
+	if ingestErr != nil {
+		t.Fatalf("ParseGitHubOutcomeEvents returned error: %v", ingestErr)
+	}
+	if len(events) != 1 {
+		t.Fatalf("events = %d, want 1: %#v", len(events), events)
+	}
+	if got := stringFromAny(events[0]["commit"]); got != "head402" {
+		t.Fatalf("commit = %q, want PR head SHA", got)
+	}
+}
+
 func TestParseGitHubOutcomeEventsPreservesCoauthorTrailers(t *testing.T) {
 	events, ingestErr := ParseGitHubOutcomeEvents([]byte(`{
   "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},
