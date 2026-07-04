@@ -666,3 +666,28 @@ func TestParseGitHubOutcomeEventsPreservesCleanMergeSignatureMetadata(t *testing
 		}
 	}
 }
+
+func TestParseGitHubOutcomeEventsDefaultsCleanMergeCheckName(t *testing.T) {
+	events, ingestErr := ParseGitHubOutcomeEvents([]byte(`{
+  "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},
+  "pull_requests": [
+    {
+      "number": 406,
+      "head_sha": "abc406",
+      "html_url": "https://github.com/acme/billing-service/pull/406",
+      "merged_at": "2026-06-09T12:00:00Z",
+      "files": [{"filename": "packages/billing/invoice.py"}]
+    }
+  ]
+}`), "github-outcomes.json")
+
+	if ingestErr != nil {
+		t.Fatalf("ParseGitHubOutcomeEvents returned error: %v", ingestErr)
+	}
+	if len(events) != 1 {
+		t.Fatalf("events = %d, want 1: %#v", len(events), events)
+	}
+	if got := stringFromAny(events[0]["check_name"]); got != "merge" {
+		t.Fatalf("check_name = %q, want merge", got)
+	}
+}
