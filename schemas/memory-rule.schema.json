@@ -322,6 +322,28 @@
             "required": ["decision"],
             "properties": {
               "decision": {
+                "const": "merged"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "review": {
+            "required": ["merged_into"]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": ["review"],
+        "properties": {
+          "review": {
+            "required": ["decision"],
+            "properties": {
+              "decision": {
                 "enum": ["rejected", "merged"]
               }
             }
