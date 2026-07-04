@@ -162,6 +162,9 @@ func ValidateActiveRuleIdentity(root string, document yamlmini.Document, rel str
 	if reviewLabel.Value != "accepted" {
 		return artifactError(options, "active memory rule review.label must be accepted", configdoc.RefWithPath(rel, reviewLabel))
 	}
+	if reviewGate, ok := document.Scalars["review.gate"]; ok && reviewGate.Value != "human_review" {
+		return artifactError(options, "memory rule review.gate is invalid", configdoc.RefWithPath(rel, reviewGate))
+	}
 	if reviewDecision, ok := document.Scalars["review.decision"]; ok && reviewDecision.Value != "approved" {
 		return artifactError(options, "active memory rule review.decision must be approved", configdoc.RefWithPath(rel, reviewDecision))
 	}
