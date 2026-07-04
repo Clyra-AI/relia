@@ -23,6 +23,9 @@ func preserveExistingAcceptedRuleLifecycle(rule distilledRule, document yamlDocu
 	rule.ReviewLabel = reviewLabel
 	rule.ReviewGate = document.Scalars["review.gate"].Value
 	rule.ReviewDecision = reviewDecision
+	if status == "active" && reviewLabel == "accepted" && rule.ReviewDecision == "" {
+		rule.ReviewDecision = "approved"
+	}
 	rule.ReviewedBy = document.Scalars["review.reviewed_by"].Value
 	rule.DecisionRef = document.Scalars["review.decision_ref"].Value
 	rule.MergedInto = document.Scalars["review.merged_into"].Value
