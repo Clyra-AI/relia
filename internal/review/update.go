@@ -129,6 +129,8 @@ func UpdateRuleReview(root string, rulePath string, reviewOptions Options, updat
 			status = "candidate"
 			next = applyReviewDecisionYAML(next, reviewOptions, reviewDecisionForLabel(label), "")
 			next = replaceOrAddNestedYAMLScalar(next, "metadata", "lifecycle_reason", "returned to candidate review")
+		} else if status == "retired" && isDurableRetiredReviewDecision(document.Scalars["review.decision"].Value) {
+			// Relabeling a retired rule must not erase the durable merge/reject decision.
 		} else {
 			next = applyReviewDecisionYAML(next, reviewOptions, reviewDecisionForLabel(label), "")
 		}
@@ -174,6 +176,15 @@ func reviewDecisionForLabel(label string) string {
 		return "needs_user_input"
 	default:
 		return "pending"
+	}
+}
+
+func isDurableRetiredReviewDecision(decision string) bool {
+	switch strings.TrimSpace(decision) {
+	case "merged", "rejected":
+		return true
+	default:
+		return false
 	}
 }
 
