@@ -39,6 +39,9 @@ func reviewResult(args []string, start time.Time) CommandResult {
 		if mergedIntoPath == rulePath {
 			return errorResult("review", "review", usageError("review merge --into must reference a different rule"), start)
 		}
+		if commandErr := validateMemoryRuleArtifact(root, mergedIntoPath); commandErr != nil {
+			return errorResult("review", "review", commandErr, start)
+		}
 	}
 	status, commandErr := reviewdoc.UpdateRuleReview(root, rulePath, options, updateOptions)
 	if commandErr != nil {

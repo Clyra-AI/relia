@@ -166,7 +166,7 @@ func githubOutcomeBase(defaultRepo Repo, pull map[string]any, ref string, index 
 		Commit: commit,
 		PRURL:  prURL,
 		Paths:  paths,
-		Labels: stringListField(pull, "labels", "label_names"),
+		Labels: githubLabels(pull),
 		Actor:  githubString(pull, "author.login", "user.login", "actor.login", "author", "user", "actor"),
 	}, nil
 }
@@ -267,6 +267,16 @@ func githubPaths(event map[string]any, fallback []string) []string {
 		return paths
 	}
 	return append([]string(nil), fallback...)
+}
+
+func githubLabels(event map[string]any) []string {
+	labels := stringListField(event, "labels", "label_names")
+	for _, label := range githubOutcomeObjects(event, "labels") {
+		if name := githubString(label, "name"); name != "" {
+			labels = append(labels, name)
+		}
+	}
+	return uniqueStrings(labels)
 }
 
 func githubSignatureKey(event map[string]any, fallback []string) string {
