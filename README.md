@@ -91,10 +91,13 @@ approval boundaries, and agent-native output contract:
   `relia review --rule <id> --label accepted|suggested|needs_user_input` form
   remains supported.
 - `relia memory --format json` renders `memory/MEMORY.md` with each rule's
-  statement, confidence, lifecycle status, review label, and clickable PR
-  provenance, separating active accepted rules as strong memory from candidate,
-  stale, contradicted, and retired weak memory. The rule YAML itself carries
-  the durable review gate and decision evidence.
+  statement, confidence, lifecycle status, review label, lifecycle reason when
+  present, and receipt lines with clickable PR provenance plus outcome and
+  experience IDs when available. The generated page carries a Relia-managed
+  marker, schema/version metadata, and a lifecycle summary that separates
+  active accepted rules as strong memory from candidate, stale, contradicted,
+  and retired weak memory. The JSON result includes `rules_by_status`; the rule
+  YAML itself carries the durable review gate and decision evidence.
 - `relia serve --format json` exposes the local MCP capability manifest for
   `recall`, `assess`, and `coverage` over active accepted rules only. Hosted or
   network transports fail closed unless explicitly approved.

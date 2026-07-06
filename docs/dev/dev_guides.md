@@ -280,10 +280,13 @@ T6 adds deterministic offline distillation, review, and memory-page rendering:
   metadata; `review merge --rule <source> --into <target> --reason <text>`
   retires duplicate or superseded rules with a merged decision.
 - `relia memory --format json` renders `memory/MEMORY.md` with statements,
-  confidence labels, lifecycle status, review labels, and clickable PR
-  provenance. The renderer separates strong active memory from weak candidate,
-  stale, contradicted, and retired memory; rule YAML remains the canonical
-  place for durable review gate and decision evidence.
+  confidence labels, lifecycle status, review labels, lifecycle reasons, and
+  receipt lines with clickable PR provenance, provenance outcome, and
+  experience IDs when rule artifacts provide them. The renderer writes a
+  Relia-managed marker, schema/version metadata, and a lifecycle summary before
+  separating strong active memory from weak candidate, stale, contradicted, and
+  retired memory. The command result includes `rules_by_status`; rule YAML
+  remains the canonical place for durable review gate and decision evidence.
 
 T8 adds report/evidence feedback on top of the local artifact path:
 

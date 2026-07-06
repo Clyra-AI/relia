@@ -1,0 +1,59 @@
+{
+  "artifact_type": "proof-of-behavior-scorecard",
+  "schema_version": "1.0",
+  "task_id": "T11",
+  "status": "pass",
+  "produced_at": "2026-07-06T15:24:53Z",
+  "repair_task_id": "20260706T150337.644031000Z-relia-T11-repair",
+  "proof_level": "user_visible_behavior",
+  "acceptance_item_ids": [
+    "MVP-IN-SCOPE-015"
+  ],
+  "behaviors": [
+    {
+      "behavior": "MEMORY.md renders as a managed Relia artifact with schema/version metadata and lifecycle summary counts, including the no-rule case.",
+      "status": "pass",
+      "evidence_refs": [
+        "internal/memory/summary.go",
+        "internal/memory/summary_test.go"
+      ]
+    },
+    {
+      "behavior": "Memory page sections use the canonical active, candidate, stale, contradicted, retired lifecycle order while keeping weak memory separate from active strong memory.",
+      "status": "pass",
+      "evidence_refs": [
+        "internal/memory/summary.go",
+        "internal/memory/summary_test.go"
+      ]
+    },
+    {
+      "behavior": "Memory page receipt lines show clickable PR provenance plus provenance outcome and experience ID when the rule artifact carries them.",
+      "status": "pass",
+      "evidence_refs": [
+        "internal/memory/summary.go",
+        "internal/memory/summary_test.go",
+        "cmd/relia/memory_validation_test.go"
+      ]
+    },
+    {
+      "behavior": "relia memory JSON output exposes lifecycle counts through rules_by_status and explicit *_rules fields without an ambiguous bare contradicted key.",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/memory_command.go",
+        "cmd/relia/memory_validation_test.go"
+      ]
+    },
+    {
+      "behavior": "Task validation passed through focused memory tests, contract tests, and the full prepush gate.",
+      "status": "pass",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T11/validation-report.json",
+        "make prepush-full"
+      ]
+    }
+  ],
+  "validation_refs": [
+    ".factory/artifacts/task-runs/T11/validation-report.json",
+    "make prepush-full"
+  ]
+}

@@ -194,6 +194,21 @@ Rollback is removal of the T9 command paths, workflow, docs, and generated
 `.relia/reports/advisory-*` files; repository memory artifacts remain portable
 and useful without any hosted Relia account.
 
+T11 tightens the durable memory-page artifact without changing the later
+compiled-context boundary. The state owner remains `internal/memory` for rule
+summary loading and markdown rendering, with `cmd/relia` only wiring command
+metadata and JSON result fields. The source of truth remains reviewed
+`memory/rules/*.yaml`; `memory/MEMORY.md` is a generated, Relia-managed
+derivative with schema/version metadata, lifecycle counts, strong versus weak
+memory sections, lifecycle reasons, and receipt lines that cite PR URL,
+outcome, and experience ID when present. Feedback sources are renderer unit
+tests, command-boundary tests in `cmd/relia/memory_validation_test.go`, and
+`make prepush-full`. The blast radius is limited to local `relia memory`
+output, generated `memory/MEMORY.md`, and additive command-result data such as
+`rules_by_status`. Rollback is deletion of the T11 renderer and command-output
+edits plus regenerated `memory/MEMORY.md`; canonical rule YAML remains the
+source for re-rendering.
+
 ## Systems Thinking Map
 
 - State lives in repo-local config, generated artifacts, source files, and Factory evidence.

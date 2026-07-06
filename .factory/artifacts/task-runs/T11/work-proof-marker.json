@@ -1,0 +1,44 @@
+{
+  "artifact_type": "work_proof_marker",
+  "changed_paths": [
+    ".factory/artifacts/task-runs/T11/proof-of-behavior-scorecard.json",
+    ".factory/artifacts/task-runs/T11/validation-report.json",
+    ".factory/artifacts/task-runs/T11/work-proof-marker.json",
+    "README.md",
+    "cmd/relia/memory_command.go",
+    "cmd/relia/memory_validation_test.go",
+    "cmd/relia/repo_helpers.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/dev/dev_guides.md",
+    "internal/memory/summary.go",
+    "internal/memory/summary_test.go"
+  ],
+  "evidence_refs": [
+    ".factory/artifacts/task-runs/T11/validation-report.json",
+    ".factory/artifacts/task-runs/T11/proof-of-behavior-scorecard.json",
+    "internal/memory/summary_test.go",
+    "cmd/relia/memory_validation_test.go",
+    "make prepush-full"
+  ],
+  "implementation_performed": true,
+  "implementation_summary": [
+    "Memory page rendering now uses one canonical lifecycle order for active, candidate, stale, contradicted, and retired rules.",
+    "Empty MEMORY.md output remains a managed Relia artifact with zero-count lifecycle, strong-memory, and weak-memory sections.",
+    "relia memory JSON output keeps lifecycle counts in rules_by_status and explicit *_rules convenience fields without the ambiguous bare contradicted key.",
+    "Focused regression tests cover lifecycle section ordering, empty managed memory pages, and the command JSON output contract."
+  ],
+  "lifecycle_handoff": {
+    "factoryd_owned_evidence_not_authored": [
+      "scope_closure_report",
+      "pr_lifecycle_report",
+      "factoryd_run_once_report"
+    ],
+    "status": "handoff_to_factoryd_lifecycle_workers"
+  },
+  "objective": "Implement PRD-defined durable memory artifacts, lifecycle rendering, provenance display, stale/contradicted handling, and managed memory-page output.",
+  "produced_at": "2026-07-06T15:24:53Z",
+  "repair_task_id": "20260706T150337.644031000Z-relia-T11-repair",
+  "schema_version": "1.0",
+  "status": "implemented",
+  "task_id": "T11"
+}
