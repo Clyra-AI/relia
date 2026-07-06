@@ -116,6 +116,59 @@ func TestRenderMarkdownSplitsStrongAndWeakMemory(t *testing.T) {
 	}
 }
 
+func TestRenderMarkdownShowsManagedMetadataReceiptsAndLifecycleReasons(t *testing.T) {
+	markdown := RenderMarkdown([]RuleSummary{
+		{
+			ID:              "active-rule",
+			Kind:            "avoid",
+			Status:          "active",
+			Statement:       "Avoid direct UTC clocks.",
+			Confidence:      "0.86",
+			ConfidenceLabel: "high",
+			EvidenceCount:   "2",
+			Contradictions:  "0",
+			ReviewLabel:     "accepted",
+			StatementOrigin: "human_authored",
+			Path:            "memory/rules/active-rule.yaml",
+			Provenance: []RuleProvenance{
+				{PR: 142, Outcome: "ci_failure", URL: "https://github.com/acme/repo/pull/142", ExperienceID: "exp_0142"},
+			},
+		},
+		{
+			ID:              "contradicted-rule",
+			Kind:            "avoid",
+			Status:          "contradicted",
+			Statement:       "Avoid blind schema regeneration.",
+			Confidence:      "0.44",
+			ConfidenceLabel: "low",
+			EvidenceCount:   "4",
+			Contradictions:  "2",
+			ReviewLabel:     "needs_user_input",
+			StatementOrigin: "cluster_summary",
+			LifecycleReason: "later clean merges contradicted the avoided pattern",
+			Path:            "memory/rules/contradicted-rule.yaml",
+			Provenance: []RuleProvenance{
+				{PR: 282, Outcome: "merged_clean", URL: "https://github.com/acme/repo/pull/282", ExperienceID: "exp_0282"},
+			},
+		},
+	}, RenderOptions{SchemaVersion: "1.0", ReliaVersion: "0.0.0-dev"})
+
+	for _, want := range []string{
+		"<!-- relia:memory-page generated; schema_version=1.0; relia_version=0.0.0-dev; source=memory/rules -->",
+		"- schema version: `1.0`",
+		"- relia version: `0.0.0-dev`",
+		"| active | 1 | served as strong memory |",
+		"| contradicted | 1 | visible only; not served |",
+		"- lifecycle: `contradicted` (visible only; not served)",
+		"- lifecycle reason: later clean merges contradicted the avoided pattern",
+		"  - [PR #282](https://github.com/acme/repo/pull/282) - outcome `merged_clean`, experience `exp_0282`",
+	} {
+		if !strings.Contains(markdown, want) {
+			t.Fatalf("markdown missing %q:\n%s", want, markdown)
+		}
+	}
+}
+
 func TestStatusCounts(t *testing.T) {
 	counts := StatusCounts([]RuleSummary{
 		{Status: "active"},

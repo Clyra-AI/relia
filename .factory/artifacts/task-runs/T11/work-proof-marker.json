@@ -1,0 +1,43 @@
+{
+  "artifact_type": "work_proof_marker",
+  "changed_paths": [
+    ".factory/artifacts/task-runs/T11/proof-of-behavior-scorecard.json",
+    ".factory/artifacts/task-runs/T11/validation-report.json",
+    ".factory/artifacts/task-runs/T11/work-proof-marker.json",
+    "README.md",
+    "cmd/relia/memory_command.go",
+    "cmd/relia/memory_validation_test.go",
+    "cmd/relia/repo_helpers.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/dev/dev_guides.md",
+    "internal/memory/summary.go",
+    "internal/memory/summary_test.go"
+  ],
+  "evidence_refs": [
+    ".factory/artifacts/task-runs/T11/validation-report.json",
+    ".factory/artifacts/task-runs/T11/proof-of-behavior-scorecard.json",
+    "internal/memory/summary_test.go",
+    "cmd/relia/memory_validation_test.go",
+    "make prepush-full"
+  ],
+  "implementation_performed": true,
+  "implementation_summary": [
+    "MEMORY.md rendering now includes a Relia-managed marker, schema/version metadata, and lifecycle summary counts.",
+    "Rule summaries load lifecycle reasons and render receipt lines with PR URL, outcome, and experience ID when present.",
+    "relia memory JSON output includes rules_by_status plus explicit contradicted_rules and retired_rules counts.",
+    "README, developer guidance, and architecture guidance document the updated memory-page output contract."
+  ],
+  "lifecycle_handoff": {
+    "factoryd_owned_evidence_not_authored": [
+      "scope_closure_report",
+      "pr_lifecycle_report",
+      "factoryd_run_once_report"
+    ],
+    "status": "handoff_to_factoryd_lifecycle_workers"
+  },
+  "objective": "Implement PRD-defined durable memory artifacts, lifecycle rendering, provenance display, stale/contradicted handling, and managed memory-page output.",
+  "produced_at": "2026-07-06T15:11:41Z",
+  "schema_version": "1.0",
+  "status": "implemented",
+  "task_id": "T11"
+}

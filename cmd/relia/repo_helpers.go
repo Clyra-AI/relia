@@ -79,7 +79,11 @@ func writeMemoryPage(root string, outputPath string, rules []memorydoc.RuleSumma
 	}
 	rel := filepath.ToSlash(clean)
 	path := filepath.Join(root, filepath.FromSlash(rel))
-	if commandErr := writeAtomicRepoFile(path, []byte(memorydoc.RenderMarkdown(rules)), "memory page"); commandErr != nil {
+	markdown := memorydoc.RenderMarkdown(rules, memorydoc.RenderOptions{
+		SchemaVersion: commandSchemaVersion,
+		ReliaVersion:  reliaVersion,
+	})
+	if commandErr := writeAtomicRepoFile(path, []byte(markdown), "memory page"); commandErr != nil {
 		return "", commandErr
 	}
 	return rel, nil

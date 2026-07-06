@@ -1,0 +1,59 @@
+{
+  "artifact_type": "proof-of-behavior-scorecard",
+  "schema_version": "1.0",
+  "task_id": "T11",
+  "status": "pass",
+  "produced_at": "2026-07-06T15:11:41Z",
+  "proof_level": "user_visible_behavior",
+  "acceptance_item_ids": [
+    "MVP-IN-SCOPE-015"
+  ],
+  "behaviors": [
+    {
+      "behavior": "MEMORY.md renders as a managed Relia artifact with schema/version metadata and lifecycle summary counts.",
+      "status": "pass",
+      "evidence_refs": [
+        "internal/memory/summary_test.go",
+        "cmd/relia/memory_validation_test.go"
+      ]
+    },
+    {
+      "behavior": "Memory page receipt lines show clickable PR provenance plus provenance outcome and experience ID when the rule artifact carries them.",
+      "status": "pass",
+      "evidence_refs": [
+        "internal/memory/summary.go",
+        "internal/memory/summary_test.go",
+        "cmd/relia/memory_validation_test.go"
+      ]
+    },
+    {
+      "behavior": "Candidate, stale, contradicted, and retired rules remain visibly separated from active strong memory and render as not served.",
+      "status": "pass",
+      "evidence_refs": [
+        "internal/memory/summary.go",
+        "internal/memory/summary_test.go"
+      ]
+    },
+    {
+      "behavior": "relia memory JSON output exposes lifecycle counts through rules_by_status while preserving existing count fields and artifact refs.",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/memory_command.go",
+        "cmd/relia/memory_validation_test.go"
+      ]
+    },
+    {
+      "behavior": "User-facing docs describe the updated memory page output and its rule-YAML source of truth.",
+      "status": "pass",
+      "evidence_refs": [
+        "README.md",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md"
+      ]
+    }
+  ],
+  "validation_refs": [
+    ".factory/artifacts/task-runs/T11/validation-report.json",
+    "make prepush-full"
+  ]
+}

@@ -1,0 +1,146 @@
+{
+  "acceptance_results": [
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-015",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T11/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T11/proof-of-behavior-scorecard.json",
+        "internal/memory/summary_test.go",
+        "cmd/relia/memory_validation_test.go",
+        "internal/memory/summary.go",
+        "cmd/relia/memory_command.go",
+        "make prepush-full"
+      ],
+      "proof_level": "user_visible_behavior",
+      "status": "implemented"
+    }
+  ],
+  "artifact_type": "validation_report",
+  "baseline_evidence": [
+    {
+      "command": "make lint-fast",
+      "exit_code": 0,
+      "phase": "baseline",
+      "status": "pass"
+    },
+    {
+      "command": "make test-fast",
+      "exit_code": 0,
+      "phase": "baseline",
+      "status": "pass"
+    }
+  ],
+  "changed_paths": [
+    ".factory/artifacts/task-runs/T11/proof-of-behavior-scorecard.json",
+    ".factory/artifacts/task-runs/T11/validation-report.json",
+    ".factory/artifacts/task-runs/T11/work-proof-marker.json",
+    "README.md",
+    "cmd/relia/memory_command.go",
+    "cmd/relia/memory_validation_test.go",
+    "cmd/relia/repo_helpers.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/dev/dev_guides.md",
+    "internal/memory/summary.go",
+    "internal/memory/summary_test.go"
+  ],
+  "changelog_result": {
+    "notes": "No repository changelog file exists; README and repo guides carry the public behavior update for this task.",
+    "status": "pass"
+  },
+  "commands_run": [
+    "make lint-fast",
+    "make test-fast",
+    "make test-contracts",
+    "make prepush-full",
+    "python3 -m json.tool .factory/artifacts/task-runs/T11/work-proof-marker.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T11/validation-report.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T11/proof-of-behavior-scorecard.json"
+  ],
+  "docs_sync_result": {
+    "status": "pass",
+    "updated_refs": [
+      "README.md",
+      "docs/dev/dev_guides.md",
+      "docs/architecture/architecture_guides.md"
+    ]
+  },
+  "final_validation_evidence": [
+    {
+      "command": "make prepush-full",
+      "coverage": {
+        "minimum": "75.0%",
+        "observed": "80.0%",
+        "scope": "cmd/relia"
+      },
+      "exit_code": 0,
+      "status": "pass"
+    }
+  ],
+  "green_evidence": [
+    {
+      "command": "make test-fast",
+      "exit_code": 0,
+      "phase": "post_implementation",
+      "status": "pass"
+    },
+    {
+      "command": "make lint-fast",
+      "exit_code": 0,
+      "phase": "validation",
+      "status": "pass"
+    },
+    {
+      "command": "make test-contracts",
+      "exit_code": 0,
+      "phase": "validation",
+      "status": "pass"
+    }
+  ],
+  "lifecycle_evidence_result": {
+    "notes": "scope_closure_report, pr_lifecycle_report, and factoryd_run_once_report are factoryd-owned and intentionally not authored by task-executor.",
+    "status": "handoff_to_factoryd_lifecycle_workers"
+  },
+  "migration_result": {
+    "notes": "No migration required. MEMORY.md can be regenerated from canonical memory/rules YAML.",
+    "status": "pass"
+  },
+  "path_policy_result": {
+    "changed_paths": [
+      ".factory/artifacts/task-runs/T11/proof-of-behavior-scorecard.json",
+      ".factory/artifacts/task-runs/T11/validation-report.json",
+      ".factory/artifacts/task-runs/T11/work-proof-marker.json",
+      "README.md",
+      "cmd/relia/memory_command.go",
+      "cmd/relia/memory_validation_test.go",
+      "cmd/relia/repo_helpers.go",
+      "docs/architecture/architecture_guides.md",
+      "docs/dev/dev_guides.md",
+      "internal/memory/summary.go",
+      "internal/memory/summary_test.go"
+    ],
+    "forbidden_paths_changed": [],
+    "status": "pass"
+  },
+  "plan_drift_result": {
+    "notes": "Implementation stayed on MVP-IN-SCOPE-015. The later relia compile managed AGENTS/CLAUDE block remains out of scope for T11.",
+    "status": "pass"
+  },
+  "produced_at": "2026-07-06T15:11:41Z",
+  "red_evidence": [
+    {
+      "command": "make test-fast",
+      "exit_code": 2,
+      "phase": "red_first",
+      "reason": "New renderer test required LifecycleReason and RenderOptions before implementation.",
+      "status": "expected_red"
+    }
+  ],
+  "residual_risks": [],
+  "schema_version": "1.0",
+  "status": "pass",
+  "task_id": "T11",
+  "versioning_result": {
+    "notes": "Pre-1.0 additive output change; no runtime pin or module version change.",
+    "status": "pass"
+  }
+}

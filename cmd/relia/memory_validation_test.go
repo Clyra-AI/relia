@@ -672,3 +672,106 @@ metadata: {}
 		t.Fatalf("error message = %q", result.Errors[0].Message)
 	}
 }
+
+func TestMemoryCommandRendersManagedPageWithReceiptsAndStatusCounts(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	rulesDir := filepath.Join(tempDir, "memory", "rules")
+	activeRule := `object_type: relia.memory_rule
+schema_version: "1.0"
+id: avoid-direct-time
+kind: avoid
+status: active
+statement: >
+  Avoid direct time calls in billing rollover tests.
+scope:
+  paths:
+    - tests/
+confidence: 0.86
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_0142
+provenance:
+  - pr: 142
+    outcome: ci_failure
+    url: https://github.com/acme/billing-service/pull/142
+    experience_id: exp_0142
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata:
+  lifecycle_reason: approved by human review
+`
+	contradictedRule := `object_type: relia.memory_rule
+schema_version: "1.0"
+id: avoid-blind-schema-snapshot-regeneration
+kind: avoid
+status: contradicted
+statement: >
+  Avoid regenerating schema snapshots without checking required error-shape assertions.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.44
+evidence:
+  count: 1
+  contradictions: 1
+  experiences:
+    - exp_0282
+provenance:
+  - pr: 282
+    outcome: merged_clean
+    url: https://github.com/acme/billing-service/pull/282
+    experience_id: exp_0282
+review:
+  label: needs_user_input
+  decision: needs_user_input
+  statement_origin: human_authored
+metadata:
+  lifecycle_reason: later clean merges contradicted the avoided pattern
+`
+	writeFileForTest(t, filepath.Join(rulesDir, "active.yaml"), activeRule)
+	writeFileForTest(t, filepath.Join(rulesDir, "contradicted.yaml"), contradictedRule)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "memory", "--format", "json"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Data["memory_page_path"] != "memory/MEMORY.md" {
+		t.Fatalf("memory_page_path = %#v", result.Data["memory_page_path"])
+	}
+	statusCounts, ok := result.Data["rules_by_status"].(map[string]any)
+	if !ok {
+		t.Fatalf("rules_by_status = %#v", result.Data["rules_by_status"])
+	}
+	for status, want := range map[string]int{
+		"active":       1,
+		"candidate":    0,
+		"stale":        0,
+		"contradicted": 1,
+		"retired":      0,
+	} {
+		if got := int(statusCounts[status].(float64)); got != want {
+			t.Fatalf("rules_by_status[%s] = %d, want %d in %#v", status, got, want, statusCounts)
+		}
+	}
+	page, err := os.ReadFile(filepath.Join(tempDir, "memory", "MEMORY.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{
+		"<!-- relia:memory-page generated; schema_version=1.0; relia_version=0.0.0-dev; source=memory/rules -->",
+		"| active | 1 | served as strong memory |",
+		"| contradicted | 1 | visible only; not served |",
+		"- lifecycle reason: later clean merges contradicted the avoided pattern",
+		"  - [PR #282](https://github.com/acme/billing-service/pull/282) - outcome `merged_clean`, experience `exp_0282`",
+	} {
+		if !strings.Contains(string(page), want) {
+			t.Fatalf("MEMORY.md missing %q:\n%s", want, page)
+		}
+	}
+}

@@ -41,13 +41,16 @@ func memoryResult(args []string, start time.Time) CommandResult {
 	}
 	statusCounts := memorydoc.StatusCounts(rules)
 	result := passResult("memory", "memory", "rendered MEMORY.md with rule receipts", start, map[string]any{
-		"format":           options.Format,
-		"memory_page_path": outputPath,
-		"rule_count":       len(rules),
-		"active_rules":     statusCounts["active"],
-		"candidate_rules":  statusCounts["candidate"],
-		"stale_rules":      statusCounts["stale"],
-		"contradicted":     statusCounts["contradicted"],
+		"format":             options.Format,
+		"memory_page_path":   outputPath,
+		"rule_count":         len(rules),
+		"rules_by_status":    statusCounts,
+		"active_rules":       statusCounts["active"],
+		"candidate_rules":    statusCounts["candidate"],
+		"stale_rules":        statusCounts["stale"],
+		"contradicted":       statusCounts["contradicted"],
+		"contradicted_rules": statusCounts["contradicted"],
+		"retired_rules":      statusCounts["retired"],
 	})
 	result.Warnings = append(result.Warnings, warnings...)
 	result.EvidenceRefs = append(result.EvidenceRefs, "schemas/memory-rule.schema.json", outputPath)
