@@ -1,0 +1,51 @@
+{
+  "artifact_type": "post_merge_report",
+  "checks_observed": [
+    {
+      "conclusion": "SUCCESS",
+      "name": "Analyze (go)",
+      "state": "",
+      "status": "COMPLETED"
+    },
+    {
+      "conclusion": "SUCCESS",
+      "name": "CodeQL analyze",
+      "state": "",
+      "status": "COMPLETED"
+    },
+    {
+      "conclusion": "SUCCESS",
+      "name": "advise",
+      "state": "",
+      "status": "COMPLETED"
+    },
+    {
+      "conclusion": "SUCCESS",
+      "name": "validate",
+      "state": "",
+      "status": "COMPLETED"
+    },
+    {
+      "conclusion": "SUCCESS",
+      "name": "Analyze (python)",
+      "state": "",
+      "status": "COMPLETED"
+    },
+    {
+      "conclusion": "SUCCESS",
+      "name": "CodeQL",
+      "state": "",
+      "status": "COMPLETED"
+    }
+  ],
+  "default_branch_checked": true,
+  "default_branch_ref": "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5",
+  "merge_performed": true,
+  "merge_reference": "189596279064798eff25e64eebcb2c3e71626cb5",
+  "operator_notes": "closure-sync repair materialized terminal post-merge evidence from verified merged T10 PR #148",
+  "post_merge_evidence_ref": "https://github.com/Clyra-AI/relia/pull/148",
+  "scope_closure_report_ref": ".factory/artifacts/task-runs/T10/scope-closure-report.json",
+  "status": "healthy",
+  "task_id": "T10",
+  "work_item_id": "relia-mvp-t10"
+}
