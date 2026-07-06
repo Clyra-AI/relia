@@ -124,7 +124,8 @@
     "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
     "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
     "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors.",
-    "CLI-AGENT-001: Agent-facing CLI output supports stable JSON mode or records an approved deferral."
+    "CLI-AGENT-001: Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+    "Live GitHub API intake must fetch structured PR, check-run, revert, and marked review-correction outcomes through a read-only adapter only after explicit network, credential, and human approval, while preserving offline replay fixtures, redaction, provenance receipts, rate-limit/error handling, and no ambient credentials."
   ],
   "acceptance_groups": [
     {
@@ -150,7 +151,8 @@
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#fr3-github-outcome-intake",
       "task_refs": [
-        "T10"
+        "T10",
+        "T11.1"
       ],
       "title": "FR3: GitHub Outcome Intake"
     },
@@ -627,7 +629,7 @@
       "required": false
     }
   ],
-  "acceptance_item_count": 122,
+  "acceptance_item_count": 123,
   "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
   "acceptance_mapping_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
   "artifact_type": "validation_contract",
@@ -930,6 +932,22 @@
       "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T11",
       "task_refs": [
         "T11"
+      ]
+    },
+    {
+      "acceptance_group_refs": [
+        "fr3-github-outcome-intake"
+      ],
+      "acceptance_item_ids": [
+        "FR3-GITHUB-LIVE-API-INTAKE-001"
+      ],
+      "name": "Live GitHub API Intake",
+      "public_release_boundary": false,
+      "required_for_completion": true,
+      "slice_id": "live-github-api-intake",
+      "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T11.1",
+      "task_refs": [
+        "T11.1"
       ]
     },
     {

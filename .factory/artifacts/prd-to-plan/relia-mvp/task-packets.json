@@ -1,5 +1,5 @@
 {
-  "acceptance_item_count": 122,
+  "acceptance_item_count": 123,
   "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
   "acceptance_mapping_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
   "artifact_type": "task_packets",
@@ -301,6 +301,22 @@
       "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T11",
       "task_refs": [
         "T11"
+      ]
+    },
+    {
+      "acceptance_group_refs": [
+        "fr3-github-outcome-intake"
+      ],
+      "acceptance_item_ids": [
+        "FR3-GITHUB-LIVE-API-INTAKE-001"
+      ],
+      "name": "Live GitHub API Intake",
+      "public_release_boundary": false,
+      "required_for_completion": true,
+      "slice_id": "live-github-api-intake",
+      "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T11.1",
+      "task_refs": [
+        "T11.1"
       ]
     },
     {
@@ -8729,6 +8745,498 @@
     },
     {
       "acceptance_checks": [
+        "Live GitHub API intake must fetch structured PR, check-run, revert, and marked review-correction outcomes through a read-only adapter only after explicit network, credential, and human approval, while preserving offline replay fixtures, redaction, provenance receipts, rate-limit/error handling, and no ambient credentials."
+      ],
+      "acceptance_group_id": "fr3-github-outcome-intake",
+      "acceptance_group_ids": [
+        "fr3-github-outcome-intake"
+      ],
+      "acceptance_group_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json#/groups",
+      "acceptance_item_ids": [
+        "FR3-GITHUB-LIVE-API-INTAKE-001"
+      ],
+      "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+      "acceptance_result_requirements": [
+        {
+          "acceptance_item_id": "FR3-GITHUB-LIVE-API-INTAKE-001",
+          "allowed_statuses": [
+            "implemented",
+            "partial",
+            "missing",
+            "blocked",
+            "deferred_with_approval"
+          ],
+          "evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
+            "scope_closure_report"
+          ]
+        }
+      ],
+      "agent_native_cli_checks": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
+      ],
+      "alignment_gate_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions",
+      "allowed_paths": [
+        "AGENTS.md",
+        "WORKFLOW.md",
+        "README.md",
+        "Makefile",
+        ".tool-versions",
+        "go.mod",
+        "go.sum",
+        "relia.yaml",
+        "CLAUDE.md",
+        "tests/",
+        "schemas/",
+        "docs/",
+        "examples/",
+        "memory/",
+        ".github/",
+        ".factory/artifacts/task-runs/T11.1/",
+        "cmd/relia/",
+        "internal/ingest/",
+        "internal/config/",
+        "internal/result/"
+      ],
+      "architecture_guidance_refs": [
+        {
+          "rule": "Record state owner, feedback source, blast radius, source-of-truth impact, and rollback/deletion checks for material changes.",
+          "source_ref": "docs/architecture/architecture_guides.md#systems-thinking-map"
+        },
+        {
+          "rule": "Use test-first evidence or a structured skipped reason.",
+          "source_ref": "docs/architecture/architecture_guides.md#tdd-and-red-first-expectations"
+        },
+        {
+          "rule": "Boundary, public contract, credential/network, or major reliability/perf changes require a decision note.",
+          "source_ref": "docs/architecture/architecture_guides.md#adr-and-decision-triggers"
+        },
+        {
+          "rule": "Deterministic bootstrap has no network/secrets; live work requires approval and evidence.",
+          "source_ref": "docs/architecture/architecture_guides.md#trust-mode-posture"
+        }
+      ],
+      "artifact_budget_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "baseline_commands": [
+        "make lint-fast",
+        "make test-fast"
+      ],
+      "blocked_by": [
+        "T11"
+      ],
+      "changelog_intent": {
+        "draft_entry": "Add a gated live GitHub API outcome intake adapter with deterministic replay fixtures and provenance-safe ingestion.",
+        "impact": "required",
+        "section": "Unreleased",
+        "semver_marker": "pre_1_0_minor_candidate"
+      },
+      "ci_control_refs": {
+        "action_ref_exceptions_ref": ".github/action-ref-exceptions.yaml",
+        "controls": [
+          "least_privilege_permissions",
+          "concurrency",
+          "timeouts",
+          "toolchain_pin_from_go_mod"
+        ],
+        "owner_review_ref": ".github/CODEOWNERS",
+        "required": true,
+        "required_checks_ref": ".github/required-checks.json",
+        "workflow_refs": [
+          ".github/workflows/validate.yml",
+          ".github/workflows/codeql.yml"
+        ]
+      },
+      "ci_lane_refs": [
+        {
+          "command_refs": [
+            "make lint-fast",
+            "make test-fast"
+          ],
+          "lane": "fast",
+          "source_ref": "docs/dev/dev_guides.md#validation-matrix"
+        },
+        {
+          "command_refs": [
+            "make test-contracts",
+            "make prepush-full"
+          ],
+          "lane": "core",
+          "source_ref": "docs/dev/dev_guides.md#validation-matrix"
+        },
+        {
+          "lane": "risk",
+          "source_ref": "docs/dev/dev_guides.md#ci-and-pr-lifecycle",
+          "status_check_refs": [
+            "CodeQL analyze"
+          ]
+        }
+      ],
+      "commands": [
+        "make prepush-full"
+      ],
+      "coverage_policy_refs": {
+        "command_refs": [
+          "make test-coverage",
+          "make prepush-full"
+        ],
+        "exception_policy": "coverage misses block promotion unless the task records an approved scoped exception with owner, reason, expiry or follow-up task, and compensating validation evidence",
+        "minimums": [
+          {
+            "command_refs": [
+              "make test-coverage"
+            ],
+            "scope": "go_first_party_packages_overall",
+            "threshold": 75
+          }
+        ],
+        "required": true,
+        "source_ref": "docs/dev/dev_guides.md#coverage-gates"
+      },
+      "delivery_slice_refs": [
+        "live-github-api-intake"
+      ],
+      "docs_sync_refs": [
+        {
+          "path": "README.md",
+          "reason": "Keep user-facing behavior, commands, and artifact paths accurate."
+        },
+        {
+          "path": "docs/dev/dev_guides.md",
+          "reason": "Keep validation, CI, scanner, and test matrix guidance aligned."
+        },
+        {
+          "path": "docs/architecture/architecture_guides.md",
+          "reason": "Keep boundaries, state, feedback, and trust posture aligned."
+        }
+      ],
+      "engineering_policy_refs": [
+        {
+          "policy": "docs_parity",
+          "rule": "Behavior, flags, outputs, install paths, and workflow semantics update docs and Factory planning artifacts together.",
+          "source_ref": "docs/dev/dev_guides.md"
+        },
+        {
+          "policy": "output_contracts",
+          "rule": "CLI output, exit codes, schemas, and artifacts are executable contracts.",
+          "source_ref": "docs/dev/dev_guides.md"
+        },
+        {
+          "policy": "provenance_evidence",
+          "rule": "Validation, work-proof, PR lifecycle, scanner, and scope-closure evidence use repo-relative refs.",
+          "source_ref": "docs/dev/dev_guides.md"
+        },
+        {
+          "policy": "structured_parser_policy",
+          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+        },
+        {
+          "policy": "agent_native_cli",
+          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use.",
+          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy"
+        },
+        {
+          "policy": "artifact_budget_and_refs",
+          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+        },
+        {
+          "policy": "customer_safe_redaction",
+          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+        }
+      ],
+      "evidence_required": [
+        "work_proof_marker",
+        "validation_report",
+        "proof-of-behavior-scorecard"
+      ],
+      "factory_compatibility": {
+        "factory_contract_version": "1.0",
+        "generated_by": "repo-bootstrap-from-prd",
+        "profile_ref": ".factory/profile.yaml",
+        "skill_inventory_ref": "Factory skills/README.md"
+      },
+      "factoryd_runtime": {
+        "approval_posture": "human approval required for live GitHub API network, credentials, and merge",
+        "branch_prefix": "codex",
+        "capability_grants": [
+          {
+            "approved": false,
+            "capability": "approval",
+            "evidence_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions/live_work_unlock_requirement",
+            "task_id": "T11.1"
+          },
+          {
+            "approved": false,
+            "capability": "network",
+            "evidence_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions/live_work_unlock_requirement",
+            "network_allowlist": [
+              "api.github.com"
+            ],
+            "task_id": "T11.1"
+          },
+          {
+            "approved": false,
+            "capability": "credentials",
+            "credential_scopes": [
+              "read-only GitHub PR, checks, reviews, and metadata access"
+            ],
+            "evidence_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions/live_work_unlock_requirement",
+            "task_id": "T11.1"
+          }
+        ],
+        "credential_posture": "no ambient secrets; live GitHub API token must be explicit and read-only",
+        "network_posture": "offline by default; api.github.com requires task-scoped network approval",
+        "runtime_control": {
+          "autonomy_level": "restricted",
+          "conflict_behavior": "fail_closed",
+          "launch_request": {
+            "expected_decision": "allow",
+            "reason_code": "within_runtime_control_limits",
+            "requested_action": "continue_mission",
+            "requested_adapter": "codex_cli"
+          },
+          "owner": "factoryd-operator",
+          "release_freeze": {
+            "enabled": false
+          }
+        },
+        "state_dir": ".factoryd/",
+        "worker_command": "",
+        "worker_type": "codex_cli",
+        "workspace_root": ".factoryd/workspaces/"
+      },
+      "final_validation_commands": [
+        "make prepush-full"
+      ],
+      "forbidden_paths": [
+        ".git/",
+        ".factory/tmp/",
+        ".factoryd/",
+        ".factory/artifacts/prd-to-plan/relia-mvp/",
+        ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t11-1/",
+        ".factory/artifacts/task-runs/T11.1/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T11.1/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T11.1/factoryd-run-once-report.json"
+      ],
+      "input_artifacts": [
+        "docs/product/prd.md",
+        "AGENTS.md",
+        "WORKFLOW.md",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        ".factory/profile.yaml",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json"
+      ],
+      "lifecycle_gates": {
+        "ci_required": true,
+        "codex_review_required": true,
+        "commit_push_required": true,
+        "local_validation_required": true,
+        "post_merge_monitor_required": true,
+        "pr_lifecycle_report_required": true,
+        "skip_policy": "approved_exception_required"
+      },
+      "max_iterations": 2,
+      "migration_impact": "None expected unless this task changes public output, schemas, artifacts, or install/distribution behavior.",
+      "mission_contract_ref": "docs/product/prd.md",
+      "objective": "Implement a read-only live GitHub API outcome intake adapter after T11, preserving offline replay, redaction, provenance, rate-limit/error handling, and explicit network/credential approval gates.",
+      "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
+      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
+      "proof_scorecard_required": true,
+      "red_first_commands": [
+        "make test-fast"
+      ],
+      "redaction_posture": {
+        "classification": "internal",
+        "customer_safe": false,
+        "recursive_policy": "GitHub owner, token, endpoint, author, reviewer, branch, URL, and machine-local path fields must be redacted or classified before sharing.",
+        "redaction_notes": "Live GitHub API evidence remains internal unless explicitly exported through the redacted share path."
+      },
+      "required_proof_level": "workflow_behavior",
+      "required_worker_chain": [
+        "task-executor",
+        "validation-gate",
+        "commit-push",
+        "post-merge-monitor"
+      ],
+      "requires_credentials": true,
+      "requires_human_approval": true,
+      "requires_network": true,
+      "risk_class": "medium",
+      "runtime_pins": {
+        "artifact_namespace": ".factory/artifacts/",
+        "dependency_policy": "standard library first; pin and justify dependencies",
+        "distribution_target": "standalone_binary",
+        "language": "go",
+        "live_work_policy": "no ambient secrets or live network by default",
+        "module_or_package_path": "github.com/Clyra-AI/relia",
+        "provider_policy": "none by default",
+        "toolchain_version": "1.26.4"
+      },
+      "scope_exclusions": [
+        "No scope outside docs/product/prd.md.",
+        "No completion claim without acceptance evidence.",
+        "No live GitHub API calls without approved task-scoped network and credential grants.",
+        "No ambient credentials; token environment and scope must be explicit and recorded in evidence.",
+        "Offline structured export intake remains supported and must not regress.",
+        "Do not persist raw secrets, tokens, owner handles, or unredacted endpoint-bearing records."
+      ],
+      "security_scanner_gates": {
+        "exception_policy": "approved_exception_required_when_required_or_surface_touched",
+        "required": true,
+        "required_for_surfaces": [
+          "dependency additions",
+          "generated-code intake",
+          "CI or workflow changes",
+          "external calls",
+          "security-sensitive code",
+          "release-sensitive changes"
+        ],
+        "scanner": "CodeQL",
+        "status_check": "CodeQL analyze",
+        "workflow_ref": ".github/workflows/codeql.yml"
+      },
+      "shared_constraints_ref": "AGENTS.md",
+      "slice_rationale": {
+        "rationale": "Task advances a product-shaped capability slice while preserving acceptance-item closure refs.",
+        "slice_type": "vertical"
+      },
+      "slice_type": "vertical",
+      "stop_conditions": [
+        "missing runner-ready task contract",
+        "changed path outside allowed_paths",
+        "forbidden path changed",
+        "required validation command failed",
+        "plan drift detected",
+        "scope closure did not advance",
+        "live GitHub API work attempted without task-scoped network grant",
+        "live GitHub API work attempted without task-scoped credentials grant",
+        "human approval missing for live GitHub API intake",
+        "offline replay fixtures or redaction/provenance receipts are missing",
+        "rate-limit, pagination, auth failure, or API error semantics are not covered by deterministic tests"
+      ],
+      "structured_parser_policy_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "task_id": "T11.1",
+      "test_matrix_refs": [
+        {
+          "command_refs": [
+            "make test-fast"
+          ],
+          "source_ref": "docs/dev/dev_guides.md#12-level-test-matrix",
+          "tier": "Tier 1 Unit"
+        },
+        {
+          "command_refs": [
+            "scope closure map"
+          ],
+          "source_ref": "docs/dev/dev_guides.md#12-level-test-matrix",
+          "tier": "Tier 4 Acceptance"
+        },
+        {
+          "command_refs": [
+            "make test-contracts"
+          ],
+          "source_ref": "docs/dev/dev_guides.md#12-level-test-matrix",
+          "tier": "Tier 9 Contract"
+        }
+      ],
+      "upstream_debt_refs": [],
+      "validation_commands": [
+        "make prepush-full"
+      ],
+      "validation_contract_inheritance": {
+        "acceptance_criteria": [
+          "Live GitHub API intake must fetch structured PR, check-run, revert, and marked review-correction outcomes through a read-only adapter only after explicit network, credential, and human approval, while preserving offline replay fixtures, redaction, provenance receipts, rate-limit/error handling, and no ambient credentials."
+        ],
+        "acceptance_item_ids": [
+          "FR3-GITHUB-LIVE-API-INTAKE-001"
+        ],
+        "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+        "evidence_required": [
+          "work_proof_marker",
+          "validation_report",
+          "proof-of-behavior-scorecard"
+        ],
+        "required_checks": [
+          "make prepush-full"
+        ],
+        "required_review": {
+          "required": false,
+          "review_type": "code",
+          "reviewer_class": "peer_agent"
+        },
+        "source_validation_contract_ref": ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
+        "stop_conditions": [
+          "missing runner-ready task contract",
+          "changed path outside allowed_paths",
+          "forbidden path changed",
+          "required validation command failed",
+          "plan drift detected",
+          "scope closure did not advance",
+          "live GitHub API work attempted without task-scoped network grant",
+          "live GitHub API work attempted without task-scoped credentials grant",
+          "human approval missing for live GitHub API intake",
+          "offline replay fixtures or redaction/provenance receipts are missing",
+          "rate-limit, pagination, auth failure, or API error semantics are not covered by deterministic tests"
+        ],
+        "worker_evidence_required": [
+          "work_proof_marker",
+          "validation_report",
+          "proof-of-behavior-scorecard"
+        ],
+        "lifecycle_evidence_required": [
+          "scope_closure_report",
+          "pr_lifecycle_report",
+          "factoryd_run_once_report"
+        ]
+      },
+      "versioning_impact": "Pre-1.0 MVP work; live GitHub API behavior must preserve offline replay compatibility and explicit credential/network migration notes before release.",
+      "work_item_id": "relia-mvp-t11-1",
+      "worker_type": "codex_cli",
+      "worker_evidence_required": [
+        "work_proof_marker",
+        "validation_report",
+        "proof-of-behavior-scorecard"
+      ],
+      "lifecycle_evidence_required": [
+        "scope_closure_report",
+        "pr_lifecycle_report",
+        "factoryd_run_once_report"
+      ],
+      "architecture_target_paths": [
+        "cmd/relia/",
+        "internal/ingest/",
+        "internal/config/",
+        "internal/result/"
+      ],
+      "path_planning_method": "relia_live_github_api_intake_plan_2026_07_06"
+    },
+    {
+      "acceptance_checks": [
         "A real agent session retrieves a rule via `recall` and the rule's citations resolve.",
         "The Action never blocks by default; with the gate explicitly enabled, a tripped threshold exits 5.",
         "ERR trend compares against the saved baseline and labels staleness."
@@ -8870,7 +9378,7 @@
         "make test-fast"
       ],
       "blocked_by": [
-        "T11"
+        "T11.1"
       ],
       "changelog_intent": {
         "draft_entry": "Implement PRD-defined MCP tools, recall behavior, coverage/OOD responses, active-memory serving rules, and agent-facing access boundaries.",
