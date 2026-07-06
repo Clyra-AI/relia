@@ -1074,7 +1074,7 @@
     },
     {
       "acceptance_criteria": [
-        "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence \u2014 never from the drafting model."
+        "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence — never from the drafting model."
       ],
       "acceptance_item_ids": [
         "FR11-CALIBRATED-CONFIDENCE-001"
@@ -1121,7 +1121,7 @@
       ],
       "remaining_task_refs": [],
       "requires_human_approval": false,
-      "scope_item": "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence \u2014 never from the drafting model.",
+      "scope_item": "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence — never from the drafting model.",
       "scope_item_id": "FR11-CALIBRATED-CONFIDENCE-001",
       "source_ref": "docs/product/prd.md#fr11-calibrated-confidence",
       "status": "implemented",
@@ -3382,28 +3382,49 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "MVP-IN-SCOPE-015",
-          "evidence_refs": [],
+          "evidence_refs": [
+            ".factory/artifacts/task-runs/T11/work-proof-marker.json",
+            ".factory/artifacts/task-runs/T11/proof-of-behavior-scorecard.json",
+            "internal/memory/summary_test.go",
+            "cmd/relia/memory_validation_test.go",
+            "internal/memory/summary.go",
+            "cmd/relia/memory_command.go",
+            "make prepush-full",
+            "factoryd://runs/20260706T150337.644031000Z-relia-T11/lifecycle/work-proof-marker.json",
+            "factoryd://runs/20260706T150337.644031000Z-relia-T11/lifecycle/validation-report.json",
+            "factoryd://runs/20260706T150337.644031000Z-relia-T11/lifecycle/ship-packet.json",
+            "factoryd://runs/20260706T150337.644031000Z-relia-T11/lifecycle/pr-lifecycle-report.json",
+            "factoryd://runs/20260706T150337.644031000Z-relia-T11/lifecycle/post-merge-report.json",
+            "factoryd://runs/20260706T150337.644031000Z-relia-T11/lifecycle/scope-closure-report.json"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "memory-rendering-and-lifecycle"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        "factoryd://runs/20260706T150337.644031000Z-relia-T11/lifecycle/work-proof-marker.json",
+        "factoryd://runs/20260706T150337.644031000Z-relia-T11/lifecycle/validation-report.json",
+        "factoryd://runs/20260706T150337.644031000Z-relia-T11/lifecycle/ship-packet.json",
+        "factoryd://runs/20260706T150337.644031000Z-relia-T11/lifecycle/pr-lifecycle-report.json",
+        "factoryd://runs/20260706T150337.644031000Z-relia-T11/lifecycle/post-merge-report.json",
+        "factoryd://runs/20260706T150337.644031000Z-relia-T11/lifecycle/scope-closure-report.json"
+      ],
       "group_id": "mvp-in-scope",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T11"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T11"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "MEMORY.md memory page with receipts",
       "scope_item_id": "MVP-IN-SCOPE-015",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T11"
       ]
@@ -6326,7 +6347,7 @@
       ]
     }
   ],
-  "last_updated_at": "2026-07-06T13:07:33Z",
+  "last_updated_at": "2026-07-06T16:28:48Z",
   "schema_version": "0.1",
   "source_prd_ref": "docs/product/prd.md"
 }
