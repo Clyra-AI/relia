@@ -992,10 +992,11 @@
         "cmd/relia/distill_review_command_test.go",
         ".factory/artifacts/acceptance-evidence/NFR7-RULE-READABILITY-001/20260704T144320.000000000Z.json",
         "https://github.com/Clyra-AI/relia/pull/148",
-        "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5"
+        "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5",
+        ".factory/artifacts/acceptance-evidence/NFR7-RULE-READABILITY-001/20260706T122535.000000000Z.json"
       ],
       "recorded_by": "codex closure-sync repair",
-      "recorded_at": "2026-07-06T12:16:19Z"
+      "recorded_at": "2026-07-06T12:25:35Z"
     },
     {
       "acceptance_item_id": "NFR8-STRUCTURED-DATA-FIRST-001",
@@ -1652,10 +1653,11 @@
         "cmd/relia/distill_review_command_test.go",
         ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-014/20260704T144320.000000000Z.json",
         "https://github.com/Clyra-AI/relia/pull/148",
-        "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5"
+        "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5",
+        ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-014/20260706T122535.000000000Z.json"
       ],
       "recorded_by": "codex closure-sync repair",
-      "recorded_at": "2026-07-06T12:16:19Z"
+      "recorded_at": "2026-07-06T12:25:35Z"
     },
     {
       "acceptance_item_id": "MVP-IN-SCOPE-015",
@@ -3314,7 +3316,7 @@
       ]
     }
   ],
-  "last_updated_at": "2026-07-06T12:16:19Z",
+  "last_updated_at": "2026-07-06T12:25:35Z",
   "schema_version": "1.0",
   "source_prd_ref": "docs/product/prd.md",
   "source_ref": "docs/product/prd.md"
