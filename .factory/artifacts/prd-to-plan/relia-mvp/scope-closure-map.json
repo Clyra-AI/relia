@@ -633,7 +633,8 @@
             "examples/demo/github-outcome-fixtures.json",
             ".factory/artifacts/acceptance-evidence/FR3-GITHUB-OUTCOME-INTAKE-001/20260704T144320.000000000Z.json",
             "https://github.com/Clyra-AI/relia/pull/148",
-            "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5"
+            "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5",
+            ".factory/artifacts/acceptance-evidence/FR3-GITHUB-OUTCOME-INTAKE-001/20260706T123241.000000000Z.json"
           ],
           "repair_task_refs": [],
           "status": "implemented"
@@ -653,7 +654,8 @@
         "examples/demo/github-outcome-fixtures.json",
         ".factory/artifacts/acceptance-evidence/FR3-GITHUB-OUTCOME-INTAKE-001/20260704T144320.000000000Z.json",
         "https://github.com/Clyra-AI/relia/pull/148",
-        "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5"
+        "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5",
+        ".factory/artifacts/acceptance-evidence/FR3-GITHUB-OUTCOME-INTAKE-001/20260706T123241.000000000Z.json"
       ],
       "group_id": "fr3-github-outcome-intake",
       "implemented_task_refs": [
@@ -2613,7 +2615,8 @@
             "examples/demo/github-outcome-fixtures.json",
             ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-002/20260704T144320.000000000Z.json",
             "https://github.com/Clyra-AI/relia/pull/148",
-            "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5"
+            "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5",
+            ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-002/20260706T123241.000000000Z.json"
           ],
           "repair_task_refs": [],
           "status": "implemented"
@@ -2632,7 +2635,8 @@
         "examples/demo/github-outcome-fixtures.json",
         ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-002/20260704T144320.000000000Z.json",
         "https://github.com/Clyra-AI/relia/pull/148",
-        "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5"
+        "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5",
+        ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-002/20260706T123241.000000000Z.json"
       ],
       "group_id": "mvp-in-scope",
       "implemented_task_refs": [
@@ -6266,7 +6270,7 @@
       ]
     }
   ],
-  "last_updated_at": "2026-07-06T12:25:35Z",
+  "last_updated_at": "2026-07-06T12:32:41Z",
   "schema_version": "0.1",
   "source_prd_ref": "docs/product/prd.md"
 }

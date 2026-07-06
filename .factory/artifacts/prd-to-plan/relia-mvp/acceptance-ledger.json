@@ -123,10 +123,11 @@
         "examples/demo/github-outcome-fixtures.json",
         ".factory/artifacts/acceptance-evidence/FR3-GITHUB-OUTCOME-INTAKE-001/20260704T144320.000000000Z.json",
         "https://github.com/Clyra-AI/relia/pull/148",
-        "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5"
+        "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5",
+        ".factory/artifacts/acceptance-evidence/FR3-GITHUB-OUTCOME-INTAKE-001/20260706T123241.000000000Z.json"
       ],
       "recorded_by": "codex closure-sync repair",
-      "recorded_at": "2026-07-06T12:16:19Z"
+      "recorded_at": "2026-07-06T12:32:41Z"
     },
     {
       "acceptance_item_id": "FR4-ATTRIBUTION-WITH-CONFIDENCE-001",
@@ -1297,10 +1298,11 @@
         "examples/demo/github-outcome-fixtures.json",
         ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-002/20260704T144320.000000000Z.json",
         "https://github.com/Clyra-AI/relia/pull/148",
-        "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5"
+        "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5",
+        ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-002/20260706T123241.000000000Z.json"
       ],
       "recorded_by": "codex closure-sync repair",
-      "recorded_at": "2026-07-06T12:16:19Z"
+      "recorded_at": "2026-07-06T12:32:41Z"
     },
     {
       "acceptance_item_id": "MVP-IN-SCOPE-003",
@@ -3316,7 +3318,7 @@
       ]
     }
   ],
-  "last_updated_at": "2026-07-06T12:25:35Z",
+  "last_updated_at": "2026-07-06T12:32:41Z",
   "schema_version": "1.0",
   "source_prd_ref": "docs/product/prd.md",
   "source_ref": "docs/product/prd.md"
