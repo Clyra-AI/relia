@@ -1,7 +1,7 @@
 {
   "artifact_type": "factoryd_task_closure_sync_report",
   "schema_version": "0.1",
-  "generated_at": "2026-07-06T12:16:19Z",
+  "generated_at": "2026-07-06T12:25:35Z",
   "repo": "relia",
   "task_id": "T10",
   "ok": true,
@@ -13,7 +13,9 @@
     ".factory/artifacts/task-runs/T10/work-proof-marker.json",
     ".factory/artifacts/task-runs/T10/validation-report.json",
     ".factory/artifacts/task-runs/T10/proof-of-behavior-scorecard.json",
-    ".factory/artifacts/task-runs/T10/scope-closure-report.json"
+    ".factory/artifacts/task-runs/T10/scope-closure-report.json",
+    ".factory/artifacts/acceptance-evidence/NFR7-RULE-READABILITY-001/20260706T122535.000000000Z.json",
+    ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-014/20260706T122535.000000000Z.json"
   ],
   "recovery_mode": "merged_pr_post_merge",
   "recovery_evidence_refs": [
@@ -27,7 +29,9 @@
   "materialized_evidence_refs": [
     ".factory/artifacts/task-runs/T10/scope-closure-map.json",
     ".factory/artifacts/task-runs/T10/scope-closure-report.json",
-    ".factory/artifacts/pr-lifecycle/relia-mvp-t10/post-merge-report.json"
+    ".factory/artifacts/pr-lifecycle/relia-mvp-t10/post-merge-report.json",
+    ".factory/artifacts/acceptance-evidence/NFR7-RULE-READABILITY-001/20260706T122535.000000000Z.json",
+    ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-014/20260706T122535.000000000Z.json"
   ],
   "canonical_scope_closure_map_ref": ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
   "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",

@@ -1,0 +1,14 @@
+{
+  "acceptance_item_id": "NFR7-RULE-READABILITY-001",
+  "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+  "artifact_type": "acceptance_evidence_record",
+  "expires_at": "",
+  "external_evidence_ref": ".factory/artifacts/task-runs/T10/proof-of-behavior-scorecard.json#NFR7-RULE-READABILITY-001",
+  "generated_at": "2026-07-06T12:25:35Z",
+  "generated_by": "codex closure-sync repair",
+  "notes": "Human operator approval recorded for closing the manual-review rule-readability acceptance item after reviewing the T10 closure-sync context, existing T10 evidence, PR #148, and passing validation. This approval covers the judgment that rule YAML, review metadata, and MEMORY-facing lifecycle evidence are engineer-readable without a custom UI.",
+  "repo": "relia",
+  "reviewer": "davidahmann",
+  "schema_version": "0.1",
+  "status": "implemented"
+}

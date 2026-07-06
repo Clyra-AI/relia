@@ -1,5 +1,8 @@
 {
-  "approved_deferral_refs": [],
+  "approved_deferral_refs": [
+    ".factory/artifacts/acceptance-evidence/NFR7-RULE-READABILITY-001/20260706T122535.000000000Z.json",
+    ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-014/20260706T122535.000000000Z.json"
+  ],
   "artifact_type": "scope_closure_report",
   "blocker_refs": [],
   "closure_items": [
@@ -128,7 +131,8 @@
             "cmd/relia/distill_review_command_test.go",
             ".factory/artifacts/acceptance-evidence/NFR7-RULE-READABILITY-001/20260704T144320.000000000Z.json",
             "https://github.com/Clyra-AI/relia/pull/148",
-            "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5"
+            "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5",
+            ".factory/artifacts/acceptance-evidence/NFR7-RULE-READABILITY-001/20260706T122535.000000000Z.json"
           ],
           "repair_task_refs": [],
           "status": "implemented"
@@ -147,7 +151,8 @@
         "cmd/relia/distill_review_command_test.go",
         ".factory/artifacts/acceptance-evidence/NFR7-RULE-READABILITY-001/20260704T144320.000000000Z.json",
         "https://github.com/Clyra-AI/relia/pull/148",
-        "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5"
+        "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5",
+        ".factory/artifacts/acceptance-evidence/NFR7-RULE-READABILITY-001/20260706T122535.000000000Z.json"
       ],
       "implementation_refs": [],
       "implemented_task_refs": [
@@ -238,7 +243,8 @@
             "cmd/relia/distill_review_command_test.go",
             ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-014/20260704T144320.000000000Z.json",
             "https://github.com/Clyra-AI/relia/pull/148",
-            "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5"
+            "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5",
+            ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-014/20260706T122535.000000000Z.json"
           ],
           "repair_task_refs": [],
           "status": "implemented"
@@ -257,7 +263,8 @@
         "cmd/relia/distill_review_command_test.go",
         ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-014/20260704T144320.000000000Z.json",
         "https://github.com/Clyra-AI/relia/pull/148",
-        "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5"
+        "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5",
+        ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-014/20260706T122535.000000000Z.json"
       ],
       "implementation_refs": [],
       "implemented_task_refs": [
@@ -278,7 +285,7 @@
   ],
   "delivery_debt_refs": [],
   "event_log_ref": "task-runs/T10/materialized-merged-pr-recovery",
-  "generated_at": "2026-07-06T12:16:19Z",
+  "generated_at": "2026-07-06T12:25:35Z",
   "intent_source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T10",
   "mission_contract_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T10",
   "overall_status": "closed",
@@ -295,5 +302,9 @@
   "work_item_id": "relia-mvp-t10",
   "work_proof_marker_refs": [
     ".factory/artifacts/task-runs/T10/work-proof-marker.json"
+  ],
+  "approval_evidence_refs": [
+    ".factory/artifacts/acceptance-evidence/NFR7-RULE-READABILITY-001/20260706T122535.000000000Z.json",
+    ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-014/20260706T122535.000000000Z.json"
   ]
 }

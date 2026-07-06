@@ -49,7 +49,8 @@
         "cmd/relia/distill_review_command_test.go",
         ".factory/artifacts/acceptance-evidence/NFR7-RULE-READABILITY-001/20260704T144320.000000000Z.json",
         "https://github.com/Clyra-AI/relia/pull/148",
-        "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5"
+        "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5",
+        ".factory/artifacts/acceptance-evidence/NFR7-RULE-READABILITY-001/20260706T122535.000000000Z.json"
       ],
       "status": "implemented",
       "summary": ""
@@ -86,7 +87,8 @@
         "cmd/relia/distill_review_command_test.go",
         ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-014/20260704T144320.000000000Z.json",
         "https://github.com/Clyra-AI/relia/pull/148",
-        "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5"
+        "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5",
+        ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-014/20260706T122535.000000000Z.json"
       ],
       "status": "implemented",
       "summary": ""
