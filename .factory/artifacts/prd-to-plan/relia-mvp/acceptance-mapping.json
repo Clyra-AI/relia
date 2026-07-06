@@ -304,6 +304,22 @@
     },
     {
       "acceptance_group_refs": [
+        "fr3-github-outcome-intake"
+      ],
+      "acceptance_item_ids": [
+        "FR3-GITHUB-LIVE-API-INTAKE-001"
+      ],
+      "name": "Live GitHub API Intake",
+      "public_release_boundary": false,
+      "required_for_completion": true,
+      "slice_id": "live-github-api-intake",
+      "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T11.1",
+      "task_refs": [
+        "T11.1"
+      ]
+    },
+    {
+      "acceptance_group_refs": [
         "serve-and-advise-acceptance-tests"
       ],
       "acceptance_item_ids": [
@@ -572,11 +588,13 @@
     },
     {
       "acceptance_item_ids": [
-        "FR3-GITHUB-OUTCOME-INTAKE-001"
+        "FR3-GITHUB-OUTCOME-INTAKE-001",
+        "FR3-GITHUB-LIVE-API-INTAKE-001"
       ],
       "closure_status": "partial",
       "criteria": [
-        "Relia must ingest PR metadata, check runs, reverts, and marked review corrections."
+        "Relia must ingest PR metadata, check runs, reverts, and marked review corrections.",
+        "Live GitHub API intake must fetch structured PR, check-run, revert, and marked review-correction outcomes through a read-only adapter only after explicit network, credential, and human approval, while preserving offline replay fixtures, redaction, provenance receipts, rate-limit/error handling, and no ambient credentials."
       ],
       "group_id": "fr3-github-outcome-intake",
       "item_mappings": [
@@ -589,17 +607,28 @@
           "task_refs": [
             "T10"
           ]
+        },
+        {
+          "acceptance_item_id": "FR3-GITHUB-LIVE-API-INTAKE-001",
+          "delivery_slice_refs": [
+            "live-github-api-intake"
+          ],
+          "evidence_mode": "external",
+          "task_refs": [
+            "T11.1"
+          ]
         }
       ],
       "judgment_only": false,
-      "requires_credentials": false,
+      "requires_credentials": true,
       "requires_network": true,
       "source_ref": "docs/product/prd.md#fr3-github-outcome-intake",
       "suggested_validation": [
         "make prepush-full"
       ],
       "task_refs": [
-        "T10"
+        "T10",
+        "T11.1"
       ],
       "title": "FR3: GitHub Outcome Intake"
     },

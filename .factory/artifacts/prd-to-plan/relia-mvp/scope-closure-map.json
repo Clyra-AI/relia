@@ -1,5 +1,5 @@
 {
-  "acceptance_item_count": 122,
+  "acceptance_item_count": 123,
   "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
   "acceptance_mapping_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
   "artifact_type": "scope_closure_map",
@@ -302,6 +302,22 @@
       "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T11",
       "task_refs": [
         "T11"
+      ]
+    },
+    {
+      "acceptance_group_refs": [
+        "fr3-github-outcome-intake"
+      ],
+      "acceptance_item_ids": [
+        "FR3-GITHUB-LIVE-API-INTAKE-001"
+      ],
+      "name": "Live GitHub API Intake",
+      "public_release_boundary": false,
+      "required_for_completion": true,
+      "slice_id": "live-github-api-intake",
+      "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T11.1",
+      "task_refs": [
+        "T11.1"
       ]
     },
     {
@@ -677,6 +693,44 @@
     },
     {
       "acceptance_criteria": [
+        "Live GitHub API intake must fetch structured PR, check-run, revert, and marked review-correction outcomes through a read-only adapter only after explicit network, credential, and human approval, while preserving offline replay fixtures, redaction, provenance receipts, rate-limit/error handling, and no ambient credentials."
+      ],
+      "acceptance_item_ids": [
+        "FR3-GITHUB-LIVE-API-INTAKE-001"
+      ],
+      "acceptance_item_statuses": [
+        {
+          "acceptance_item_id": "FR3-GITHUB-LIVE-API-INTAKE-001",
+          "evidence_refs": [],
+          "repair_task_refs": [],
+          "status": "planned"
+        }
+      ],
+      "delivery_slice_refs": [
+        "live-github-api-intake"
+      ],
+      "evidence_refs": [],
+      "group_id": "fr3-github-outcome-intake",
+      "implemented_task_refs": [],
+      "notes": [
+        "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence.",
+        "T11.1 owns live GitHub API intake after T11. It must remain planned until task-scoped network, credential, and human approval evidence exists.",
+        "T10 closure remains offline structured GitHub export intake only."
+      ],
+      "remaining_task_refs": [
+        "T11.1"
+      ],
+      "requires_human_approval": true,
+      "scope_item": "Live GitHub API intake must fetch structured PR, check-run, revert, and marked review-correction outcomes through a read-only adapter only after explicit network, credential, and human approval, while preserving offline replay fixtures, redaction, provenance receipts, rate-limit/error handling, and no ambient credentials.",
+      "scope_item_id": "FR3-GITHUB-LIVE-API-INTAKE-001",
+      "source_ref": "docs/product/prd.md#fr3-github-outcome-intake",
+      "status": "planned",
+      "task_refs": [
+        "T11.1"
+      ]
+    },
+    {
+      "acceptance_criteria": [
         "Relia must attribute agent authorship via bot login, co-author trailer, and PR label, with method and confidence recorded. Uncertain attribution must fail closed (excluded from ERR) by default."
       ],
       "acceptance_item_ids": [
@@ -1020,7 +1074,7 @@
     },
     {
       "acceptance_criteria": [
-        "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence — never from the drafting model."
+        "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence \u2014 never from the drafting model."
       ],
       "acceptance_item_ids": [
         "FR11-CALIBRATED-CONFIDENCE-001"
@@ -1067,7 +1121,7 @@
       ],
       "remaining_task_refs": [],
       "requires_human_approval": false,
-      "scope_item": "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence — never from the drafting model.",
+      "scope_item": "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence \u2014 never from the drafting model.",
       "scope_item_id": "FR11-CALIBRATED-CONFIDENCE-001",
       "source_ref": "docs/product/prd.md#fr11-calibrated-confidence",
       "status": "implemented",
@@ -6272,7 +6326,7 @@
       ]
     }
   ],
-  "last_updated_at": "2026-07-06T12:45:21Z",
+  "last_updated_at": "2026-07-06T13:07:33Z",
   "schema_version": "0.1",
   "source_prd_ref": "docs/product/prd.md"
 }

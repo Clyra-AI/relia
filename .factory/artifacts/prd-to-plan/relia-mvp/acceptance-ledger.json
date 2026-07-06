@@ -1,5 +1,5 @@
 {
-  "acceptance_item_count": 122,
+  "acceptance_item_count": 123,
   "artifact_type": "acceptance_ledger",
   "coverage_policy": {
     "closure_unit": "acceptance_item",
@@ -128,6 +128,35 @@
       ],
       "recorded_by": "codex closure-sync repair",
       "recorded_at": "2026-07-06T12:45:21Z"
+    },
+    {
+      "acceptance_item_id": "FR3-GITHUB-LIVE-API-INTAKE-001",
+      "closure_required_for": [
+        "mvp"
+      ],
+      "delivery_slice_refs": [
+        "live-github-api-intake"
+      ],
+      "evidence_mode": "external",
+      "evidence_refs": [],
+      "group_id": "fr3-github-outcome-intake",
+      "kind": "acceptance_test",
+      "notes": [
+        "Added as a governed follow-on so live GitHub API intake is explicit and cannot be folded into T11 or T12 without approval.",
+        "T10 remains closed for offline structured GitHub export intake only; this item requires live network, credential, and human approval evidence before closure."
+      ],
+      "recorded_at": "2026-07-06T13:07:33Z",
+      "recorded_by": "codex plan-update",
+      "risk_class": "medium",
+      "source_ref": "docs/product/prd.md#fr3-github-outcome-intake",
+      "source_text": "Live GitHub API intake must fetch structured PR, check-run, revert, and marked review-correction outcomes through a read-only adapter only after explicit network, credential, and human approval, while preserving offline replay fixtures, redaction, provenance receipts, rate-limit/error handling, and no ambient credentials.",
+      "status": "planned",
+      "task_refs": [
+        "T11.1"
+      ],
+      "validation_refs": [
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/14/validation_commands"
+      ]
     },
     {
       "acceptance_item_id": "FR4-ATTRIBUTION-WITH-CONFIDENCE-001",
@@ -338,7 +367,7 @@
       "recorded_by": "davidahmann-via-codex",
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#fr11-calibrated-confidence",
-      "source_text": "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence — never from the drafting model.",
+      "source_text": "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence \u2014 never from the drafting model.",
       "status": "implemented",
       "task_refs": [
         "T6"
@@ -3318,7 +3347,7 @@
       ]
     }
   ],
-  "last_updated_at": "2026-07-06T12:45:21Z",
+  "last_updated_at": "2026-07-06T13:07:33Z",
   "schema_version": "1.0",
   "source_prd_ref": "docs/product/prd.md",
   "source_ref": "docs/product/prd.md"
