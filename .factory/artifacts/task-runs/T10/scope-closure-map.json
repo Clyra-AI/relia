@@ -14,7 +14,8 @@
         "examples/demo/github-outcome-fixtures.json",
         ".factory/artifacts/acceptance-evidence/FR3-GITHUB-OUTCOME-INTAKE-001/20260704T144320.000000000Z.json",
         "https://github.com/Clyra-AI/relia/pull/148",
-        "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5"
+        "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5",
+        ".factory/artifacts/acceptance-evidence/FR3-GITHUB-OUTCOME-INTAKE-001/20260706T123241.000000000Z.json"
       ],
       "status": "implemented",
       "summary": ""
@@ -68,7 +69,8 @@
         "examples/demo/github-outcome-fixtures.json",
         ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-002/20260704T144320.000000000Z.json",
         "https://github.com/Clyra-AI/relia/pull/148",
-        "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5"
+        "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5",
+        ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-002/20260706T123241.000000000Z.json"
       ],
       "status": "implemented",
       "summary": ""

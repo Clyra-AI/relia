@@ -1,0 +1,14 @@
+{
+  "acceptance_item_id": "FR3-GITHUB-OUTCOME-INTAKE-001",
+  "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+  "artifact_type": "acceptance_evidence_record",
+  "expires_at": "",
+  "external_evidence_ref": ".factory/artifacts/task-runs/T10/proof-of-behavior-scorecard.json#FR3-GITHUB-OUTCOME-INTAKE-001",
+  "generated_at": "2026-07-06T12:32:41Z",
+  "generated_by": "codex closure-sync repair",
+  "notes": "Human operator approval recorded for closing the T10 offline GitHub outcome intake acceptance item after reviewing the T10 closure-sync context, existing implementation evidence, PR #148, and passing validation. This approval covers the implemented offline structured export intake for PR metadata, check runs, reverts, and marked review corrections; live GitHub API/network intake remains future-gated and is not approved by this record.",
+  "repo": "relia",
+  "reviewer": "davidahmann",
+  "schema_version": "0.1",
+  "status": "implemented"
+}
