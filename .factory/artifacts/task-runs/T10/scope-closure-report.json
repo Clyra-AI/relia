@@ -1,10 +1,5 @@
 {
-  "approved_deferral_refs": [
-    ".factory/artifacts/acceptance-evidence/NFR7-RULE-READABILITY-001/20260706T122535.000000000Z.json",
-    ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-014/20260706T122535.000000000Z.json",
-    ".factory/artifacts/acceptance-evidence/FR3-GITHUB-OUTCOME-INTAKE-001/20260706T123241.000000000Z.json",
-    ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-002/20260706T123241.000000000Z.json"
-  ],
+  "approved_deferral_refs": [],
   "artifact_type": "scope_closure_report",
   "blocker_refs": [],
   "closure_items": [
