@@ -40,6 +40,8 @@ type RuleProvenance struct {
 	ExperienceID string
 }
 
+var lifecycleStatuses = []string{"active", "candidate", "stale", "contradicted", "retired"}
+
 func LoadRuleSummaries(root string, options ValidationOptions) ([]RuleSummary, *resultdoc.CommandError) {
 	patterns := []string{
 		filepath.Join(root, "memory", "rules", "*.yaml"),
@@ -88,14 +90,7 @@ func LoadRuleSummaries(root string, options ValidationOptions) ([]RuleSummary, *
 			Provenance:      RuleProvenanceEntries(document),
 		})
 	}
-	sort.Slice(summaries, func(i, j int) bool {
-		left := StatusRank(summaries[i].Status)
-		right := StatusRank(summaries[j].Status)
-		if left == right {
-			return summaries[i].ID < summaries[j].ID
-		}
-		return left < right
-	})
+	sortRuleSummaries(summaries)
 	return summaries, nil
 }
 
@@ -123,29 +118,18 @@ func RuleProvenanceEntries(document yamlmini.Document) []RuleProvenance {
 }
 
 func StatusRank(status string) int {
-	switch status {
-	case "active":
-		return 0
-	case "candidate":
-		return 1
-	case "contradicted":
-		return 2
-	case "stale":
-		return 3
-	case "retired":
-		return 4
-	default:
-		return 5
+	for index, lifecycleStatus := range lifecycleStatuses {
+		if status == lifecycleStatus {
+			return index
+		}
 	}
+	return len(lifecycleStatuses)
 }
 
 func StatusCounts(rules []RuleSummary) map[string]int {
-	counts := map[string]int{
-		"active":       0,
-		"candidate":    0,
-		"stale":        0,
-		"contradicted": 0,
-		"retired":      0,
+	counts := map[string]int{}
+	for _, status := range lifecycleStatuses {
+		counts[status] = 0
 	}
 	for _, rule := range rules {
 		counts[rule.Status]++
@@ -154,6 +138,7 @@ func StatusCounts(rules []RuleSummary) map[string]int {
 }
 
 func RenderMarkdown(rules []RuleSummary, options ...RenderOptions) string {
+	rules = sortedRuleSummaries(rules)
 	renderOptions := defaultRenderOptions(options)
 	var builder strings.Builder
 	builder.WriteString("<!-- relia:memory-page generated; schema_version=" + renderOptions.SchemaVersion + "; relia_version=" + renderOptions.ReliaVersion + "; source=memory/rules -->\n")
@@ -163,8 +148,7 @@ func RenderMarkdown(rules []RuleSummary, options ...RenderOptions) string {
 	builder.WriteString("- relia version: `" + renderOptions.ReliaVersion + "`\n")
 	builder.WriteString("- source of truth: `memory/rules/*.yaml`\n\n")
 	if len(rules) == 0 {
-		builder.WriteString("No memory rules found.\n")
-		return builder.String()
+		builder.WriteString("No memory rules found.\n\n")
 	}
 	builder.WriteString("## Lifecycle Summary\n\n")
 	renderStatusSummary(&builder, rules)
@@ -205,10 +189,27 @@ func renderStatusSummary(builder *strings.Builder, rules []RuleSummary) {
 	counts := StatusCounts(rules)
 	builder.WriteString("| lifecycle | count | serving posture |\n")
 	builder.WriteString("| --- | ---: | --- |\n")
-	for _, status := range []string{"active", "candidate", "stale", "contradicted", "retired"} {
+	for _, status := range lifecycleStatuses {
 		builder.WriteString("| " + status + " | " + strconv.Itoa(counts[status]) + " | " + servingPosture(status) + " |\n")
 	}
 	builder.WriteString("\n")
+}
+
+func sortedRuleSummaries(rules []RuleSummary) []RuleSummary {
+	sorted := append([]RuleSummary(nil), rules...)
+	sortRuleSummaries(sorted)
+	return sorted
+}
+
+func sortRuleSummaries(rules []RuleSummary) {
+	sort.Slice(rules, func(i, j int) bool {
+		left := StatusRank(rules[i].Status)
+		right := StatusRank(rules[j].Status)
+		if left == right {
+			return rules[i].ID < rules[j].ID
+		}
+		return left < right
+	})
 }
 
 func filterRulesByActiveStatus(rules []RuleSummary, active bool) []RuleSummary {

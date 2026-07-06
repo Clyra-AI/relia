@@ -748,6 +748,12 @@ metadata:
 	if !ok {
 		t.Fatalf("rules_by_status = %#v", result.Data["rules_by_status"])
 	}
+	if _, ok := result.Data["contradicted"]; ok {
+		t.Fatalf("unexpected top-level contradicted count; use rules_by_status.contradicted or contradicted_rules: %#v", result.Data)
+	}
+	if got := int(result.Data["contradicted_rules"].(float64)); got != 1 {
+		t.Fatalf("contradicted_rules = %d, want 1 in %#v", got, result.Data)
+	}
 	for status, want := range map[string]int{
 		"active":       1,
 		"candidate":    0,

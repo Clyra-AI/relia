@@ -48,7 +48,6 @@ func memoryResult(args []string, start time.Time) CommandResult {
 		"active_rules":       statusCounts["active"],
 		"candidate_rules":    statusCounts["candidate"],
 		"stale_rules":        statusCounts["stale"],
-		"contradicted":       statusCounts["contradicted"],
 		"contradicted_rules": statusCounts["contradicted"],
 		"retired_rules":      statusCounts["retired"],
 	})

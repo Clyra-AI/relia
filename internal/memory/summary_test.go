@@ -169,6 +169,103 @@ func TestRenderMarkdownShowsManagedMetadataReceiptsAndLifecycleReasons(t *testin
 	}
 }
 
+func TestRenderMarkdownUsesCanonicalLifecycleOrder(t *testing.T) {
+	markdown := RenderMarkdown([]RuleSummary{
+		{
+			ID:              "retired-rule",
+			Kind:            "avoid",
+			Status:          "retired",
+			Statement:       "Retired.",
+			Confidence:      "0.31",
+			ConfidenceLabel: "low",
+			EvidenceCount:   "1",
+			Contradictions:  "0",
+			ReviewLabel:     "suggested",
+			StatementOrigin: "human_authored",
+			Path:            "memory/rules/retired-rule.yaml",
+		},
+		{
+			ID:              "contradicted-rule",
+			Kind:            "avoid",
+			Status:          "contradicted",
+			Statement:       "Contradicted.",
+			Confidence:      "0.44",
+			ConfidenceLabel: "low",
+			EvidenceCount:   "1",
+			Contradictions:  "1",
+			ReviewLabel:     "needs_user_input",
+			StatementOrigin: "human_authored",
+			Path:            "memory/rules/contradicted-rule.yaml",
+		},
+		{
+			ID:              "stale-rule",
+			Kind:            "avoid",
+			Status:          "stale",
+			Statement:       "Stale.",
+			Confidence:      "0.52",
+			ConfidenceLabel: "medium",
+			EvidenceCount:   "1",
+			Contradictions:  "0",
+			ReviewLabel:     "suggested",
+			StatementOrigin: "human_authored",
+			Path:            "memory/rules/stale-rule.yaml",
+		},
+		{
+			ID:              "candidate-rule",
+			Kind:            "avoid",
+			Status:          "candidate",
+			Statement:       "Candidate.",
+			Confidence:      "0.61",
+			ConfidenceLabel: "medium",
+			EvidenceCount:   "1",
+			Contradictions:  "0",
+			ReviewLabel:     "suggested",
+			StatementOrigin: "human_authored",
+			Path:            "memory/rules/candidate-rule.yaml",
+		},
+	})
+
+	for _, section := range []string{"### Candidate", "### Stale", "### Contradicted", "### Retired"} {
+		if !strings.Contains(markdown, section) {
+			t.Fatalf("markdown missing %q:\n%s", section, markdown)
+		}
+	}
+	assertBefore := func(left string, right string) {
+		t.Helper()
+		leftIndex := strings.Index(markdown, left)
+		rightIndex := strings.Index(markdown, right)
+		if leftIndex < 0 || rightIndex < 0 || leftIndex > rightIndex {
+			t.Fatalf("expected %q before %q:\n%s", left, right, markdown)
+		}
+	}
+	assertBefore("### Candidate", "### Stale")
+	assertBefore("### Stale", "### Contradicted")
+	assertBefore("### Contradicted", "### Retired")
+}
+
+func TestRenderMarkdownEmptyPageStillShowsManagedLifecycle(t *testing.T) {
+	markdown := RenderMarkdown(nil)
+
+	for _, want := range []string{
+		"<!-- relia:memory-page generated; schema_version=1.0; relia_version=0.0.0-dev; source=memory/rules -->",
+		"No memory rules found.",
+		"## Lifecycle Summary",
+		"| active | 0 | served as strong memory |",
+		"| candidate | 0 | visible only; not served |",
+		"| stale | 0 | visible only; not served |",
+		"| contradicted | 0 | visible only; not served |",
+		"| retired | 0 | visible only; not served |",
+		"## Strong Memory",
+		"No active accepted rules.",
+		"## Weak Memory",
+		"No weak memory rules.",
+	} {
+		if !strings.Contains(markdown, want) {
+			t.Fatalf("markdown missing %q:\n%s", want, markdown)
+		}
+	}
+}
+
 func TestStatusCounts(t *testing.T) {
 	counts := StatusCounts([]RuleSummary{
 		{Status: "active"},

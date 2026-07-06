@@ -22,10 +22,10 @@
   ],
   "implementation_performed": true,
   "implementation_summary": [
-    "MEMORY.md rendering now includes a Relia-managed marker, schema/version metadata, and lifecycle summary counts.",
-    "Rule summaries load lifecycle reasons and render receipt lines with PR URL, outcome, and experience ID when present.",
-    "relia memory JSON output includes rules_by_status plus explicit contradicted_rules and retired_rules counts.",
-    "README, developer guidance, and architecture guidance document the updated memory-page output contract."
+    "Memory page rendering now uses one canonical lifecycle order for active, candidate, stale, contradicted, and retired rules.",
+    "Empty MEMORY.md output remains a managed Relia artifact with zero-count lifecycle, strong-memory, and weak-memory sections.",
+    "relia memory JSON output keeps lifecycle counts in rules_by_status and explicit *_rules convenience fields without the ambiguous bare contradicted key.",
+    "Focused regression tests cover lifecycle section ordering, empty managed memory pages, and the command JSON output contract."
   ],
   "lifecycle_handoff": {
     "factoryd_owned_evidence_not_authored": [
@@ -36,7 +36,8 @@
     "status": "handoff_to_factoryd_lifecycle_workers"
   },
   "objective": "Implement PRD-defined durable memory artifacts, lifecycle rendering, provenance display, stale/contradicted handling, and managed memory-page output.",
-  "produced_at": "2026-07-06T15:11:41Z",
+  "produced_at": "2026-07-06T15:24:53Z",
+  "repair_task_id": "20260706T150337.644031000Z-relia-T11-repair",
   "schema_version": "1.0",
   "status": "implemented",
   "task_id": "T11"
