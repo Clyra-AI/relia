@@ -1,0 +1,299 @@
+{
+  "approved_deferral_refs": [],
+  "artifact_type": "scope_closure_report",
+  "blocker_refs": [],
+  "closure_items": [
+    {
+      "acceptance_item_ids": [
+        "FR3-GITHUB-OUTCOME-INTAKE-001"
+      ],
+      "acceptance_item_statuses": [
+        {
+          "acceptance_item_id": "FR3-GITHUB-OUTCOME-INTAKE-001",
+          "evidence_refs": [
+            ".factory/artifacts/task-runs/T10/proof-of-behavior-scorecard.json",
+            ".factory/artifacts/task-runs/T10/work-proof-marker.json",
+            ".factory/artifacts/task-runs/T10/validation-report.json",
+            ".factory/artifacts/task-runs/T10/scope-closure-map.json",
+            ".factory/artifacts/task-runs/T10/scope-closure-report.json",
+            "internal/ingest/github_outcomes.go",
+            "internal/ingest/github_outcomes_test.go",
+            "cmd/relia/ingest_contract_test.go",
+            "examples/demo/github-outcome-fixtures.json",
+            ".factory/artifacts/acceptance-evidence/FR3-GITHUB-OUTCOME-INTAKE-001/20260704T144320.000000000Z.json",
+            "https://github.com/Clyra-AI/relia/pull/148",
+            "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5"
+          ],
+          "repair_task_refs": [],
+          "status": "implemented"
+        }
+      ],
+      "classification": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T10/proof-of-behavior-scorecard.json",
+        ".factory/artifacts/task-runs/T10/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T10/validation-report.json",
+        ".factory/artifacts/task-runs/T10/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T10/scope-closure-report.json",
+        "internal/ingest/github_outcomes.go",
+        "internal/ingest/github_outcomes_test.go",
+        "cmd/relia/ingest_contract_test.go",
+        "examples/demo/github-outcome-fixtures.json",
+        ".factory/artifacts/acceptance-evidence/FR3-GITHUB-OUTCOME-INTAKE-001/20260704T144320.000000000Z.json",
+        "https://github.com/Clyra-AI/relia/pull/148",
+        "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5"
+      ],
+      "implementation_refs": [],
+      "implemented_task_refs": [
+        "T10"
+      ],
+      "intent_item_id": "FR3-GITHUB-OUTCOME-INTAKE-001",
+      "intent_statement": "Relia must ingest PR metadata, check runs, reverts, and marked review corrections.",
+      "remaining_task_refs": [],
+      "repair_report_refs": [],
+      "repair_task_packet_refs": [],
+      "task_refs": [
+        "T10"
+      ],
+      "work_proof_marker_refs": [
+        ".factory/artifacts/task-runs/T10/work-proof-marker.json"
+      ]
+    },
+    {
+      "acceptance_item_ids": [
+        "FR9-BACKTEST-BEFORE-BEHAVIOR-CHANGE-001"
+      ],
+      "acceptance_item_statuses": [
+        {
+          "acceptance_item_id": "FR9-BACKTEST-BEFORE-BEHAVIOR-CHANGE-001",
+          "evidence_refs": [
+            ".factory/artifacts/task-runs/T10/proof-of-behavior-scorecard.json",
+            ".factory/artifacts/task-runs/T10/work-proof-marker.json",
+            ".factory/artifacts/task-runs/T10/validation-report.json",
+            ".factory/artifacts/task-runs/T10/scope-closure-map.json",
+            ".factory/artifacts/task-runs/T10/scope-closure-report.json",
+            "cmd/relia/backtest_report_test.go",
+            "make prepush-full",
+            "https://github.com/Clyra-AI/relia/pull/148",
+            "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5"
+          ],
+          "repair_task_refs": [],
+          "status": "implemented"
+        }
+      ],
+      "classification": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T10/proof-of-behavior-scorecard.json",
+        ".factory/artifacts/task-runs/T10/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T10/validation-report.json",
+        ".factory/artifacts/task-runs/T10/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T10/scope-closure-report.json",
+        "cmd/relia/backtest_report_test.go",
+        "make prepush-full",
+        "https://github.com/Clyra-AI/relia/pull/148",
+        "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5"
+      ],
+      "implementation_refs": [],
+      "implemented_task_refs": [
+        "T10"
+      ],
+      "intent_item_id": "FR9-BACKTEST-BEFORE-BEHAVIOR-CHANGE-001",
+      "intent_statement": "relia backtest` must deliver the ERR headline and paired evidence read-only, with no rules, review, or workflow change required.",
+      "remaining_task_refs": [],
+      "repair_report_refs": [],
+      "repair_task_packet_refs": [],
+      "task_refs": [
+        "T10"
+      ],
+      "work_proof_marker_refs": [
+        ".factory/artifacts/task-runs/T10/work-proof-marker.json"
+      ]
+    },
+    {
+      "acceptance_item_ids": [
+        "NFR7-RULE-READABILITY-001"
+      ],
+      "acceptance_item_statuses": [
+        {
+          "acceptance_item_id": "NFR7-RULE-READABILITY-001",
+          "evidence_refs": [
+            ".factory/artifacts/task-runs/T10/proof-of-behavior-scorecard.json",
+            ".factory/artifacts/task-runs/T10/work-proof-marker.json",
+            ".factory/artifacts/task-runs/T10/validation-report.json",
+            ".factory/artifacts/task-runs/T10/scope-closure-map.json",
+            ".factory/artifacts/task-runs/T10/scope-closure-report.json",
+            "schemas/memory-rule.schema.json",
+            "memory/rules/demo-assessment-active-rule.yaml",
+            "internal/review/update_test.go",
+            "cmd/relia/distill_review_command_test.go",
+            ".factory/artifacts/acceptance-evidence/NFR7-RULE-READABILITY-001/20260704T144320.000000000Z.json",
+            "https://github.com/Clyra-AI/relia/pull/148",
+            "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5"
+          ],
+          "repair_task_refs": [],
+          "status": "implemented"
+        }
+      ],
+      "classification": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T10/proof-of-behavior-scorecard.json",
+        ".factory/artifacts/task-runs/T10/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T10/validation-report.json",
+        ".factory/artifacts/task-runs/T10/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T10/scope-closure-report.json",
+        "schemas/memory-rule.schema.json",
+        "memory/rules/demo-assessment-active-rule.yaml",
+        "internal/review/update_test.go",
+        "cmd/relia/distill_review_command_test.go",
+        ".factory/artifacts/acceptance-evidence/NFR7-RULE-READABILITY-001/20260704T144320.000000000Z.json",
+        "https://github.com/Clyra-AI/relia/pull/148",
+        "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5"
+      ],
+      "implementation_refs": [],
+      "implemented_task_refs": [
+        "T10"
+      ],
+      "intent_item_id": "NFR7-RULE-READABILITY-001",
+      "intent_statement": "Rule YAML and MEMORY.md must be understandable by engineers without a custom UI.",
+      "remaining_task_refs": [],
+      "repair_report_refs": [],
+      "repair_task_packet_refs": [],
+      "task_refs": [
+        "T10"
+      ],
+      "work_proof_marker_refs": [
+        ".factory/artifacts/task-runs/T10/work-proof-marker.json"
+      ]
+    },
+    {
+      "acceptance_item_ids": [
+        "MVP-IN-SCOPE-002"
+      ],
+      "acceptance_item_statuses": [
+        {
+          "acceptance_item_id": "MVP-IN-SCOPE-002",
+          "evidence_refs": [
+            ".factory/artifacts/task-runs/T10/proof-of-behavior-scorecard.json",
+            ".factory/artifacts/task-runs/T10/work-proof-marker.json",
+            ".factory/artifacts/task-runs/T10/validation-report.json",
+            ".factory/artifacts/task-runs/T10/scope-closure-map.json",
+            ".factory/artifacts/task-runs/T10/scope-closure-report.json",
+            "internal/ingest/github_outcomes.go",
+            "cmd/relia/ingest_contract_test.go",
+            "examples/demo/github-outcome-fixtures.json",
+            ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-002/20260704T144320.000000000Z.json",
+            "https://github.com/Clyra-AI/relia/pull/148",
+            "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5"
+          ],
+          "repair_task_refs": [],
+          "status": "implemented"
+        }
+      ],
+      "classification": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T10/proof-of-behavior-scorecard.json",
+        ".factory/artifacts/task-runs/T10/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T10/validation-report.json",
+        ".factory/artifacts/task-runs/T10/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T10/scope-closure-report.json",
+        "internal/ingest/github_outcomes.go",
+        "cmd/relia/ingest_contract_test.go",
+        "examples/demo/github-outcome-fixtures.json",
+        ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-002/20260704T144320.000000000Z.json",
+        "https://github.com/Clyra-AI/relia/pull/148",
+        "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5"
+      ],
+      "implementation_refs": [],
+      "implemented_task_refs": [
+        "T10"
+      ],
+      "intent_item_id": "MVP-IN-SCOPE-002",
+      "intent_statement": "GitHub PR/check-run/revert/review-correction intake",
+      "remaining_task_refs": [],
+      "repair_report_refs": [],
+      "repair_task_packet_refs": [],
+      "task_refs": [
+        "T10"
+      ],
+      "work_proof_marker_refs": [
+        ".factory/artifacts/task-runs/T10/work-proof-marker.json"
+      ]
+    },
+    {
+      "acceptance_item_ids": [
+        "MVP-IN-SCOPE-014"
+      ],
+      "acceptance_item_statuses": [
+        {
+          "acceptance_item_id": "MVP-IN-SCOPE-014",
+          "evidence_refs": [
+            ".factory/artifacts/task-runs/T10/proof-of-behavior-scorecard.json",
+            ".factory/artifacts/task-runs/T10/work-proof-marker.json",
+            ".factory/artifacts/task-runs/T10/validation-report.json",
+            ".factory/artifacts/task-runs/T10/scope-closure-map.json",
+            ".factory/artifacts/task-runs/T10/scope-closure-report.json",
+            "internal/review/update.go",
+            "internal/review/update_test.go",
+            "internal/review/args_test.go",
+            "cmd/relia/distill_review_command_test.go",
+            ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-014/20260704T144320.000000000Z.json",
+            "https://github.com/Clyra-AI/relia/pull/148",
+            "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5"
+          ],
+          "repair_task_refs": [],
+          "status": "implemented"
+        }
+      ],
+      "classification": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T10/proof-of-behavior-scorecard.json",
+        ".factory/artifacts/task-runs/T10/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T10/validation-report.json",
+        ".factory/artifacts/task-runs/T10/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T10/scope-closure-report.json",
+        "internal/review/update.go",
+        "internal/review/update_test.go",
+        "internal/review/args_test.go",
+        "cmd/relia/distill_review_command_test.go",
+        ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-014/20260704T144320.000000000Z.json",
+        "https://github.com/Clyra-AI/relia/pull/148",
+        "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5"
+      ],
+      "implementation_refs": [],
+      "implemented_task_refs": [
+        "T10"
+      ],
+      "intent_item_id": "MVP-IN-SCOPE-014",
+      "intent_statement": "human review flow with labels",
+      "remaining_task_refs": [],
+      "repair_report_refs": [],
+      "repair_task_packet_refs": [],
+      "task_refs": [
+        "T10"
+      ],
+      "work_proof_marker_refs": [
+        ".factory/artifacts/task-runs/T10/work-proof-marker.json"
+      ]
+    }
+  ],
+  "delivery_debt_refs": [],
+  "event_log_ref": "task-runs/T10/materialized-merged-pr-recovery",
+  "generated_at": "2026-07-06T12:16:19Z",
+  "intent_source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T10",
+  "mission_contract_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T10",
+  "overall_status": "closed",
+  "recovery_evidence_refs": [
+    "https://github.com/Clyra-AI/relia/pull/148",
+    "refs/remotes/origin/main@189596279064798eff25e64eebcb2c3e71626cb5"
+  ],
+  "rerun_required": false,
+  "schema_version": "0.1",
+  "task_id": "T10",
+  "validation_report_refs": [
+    ".factory/artifacts/task-runs/T10/validation-report.json"
+  ],
+  "work_item_id": "relia-mvp-t10",
+  "work_proof_marker_refs": [
+    ".factory/artifacts/task-runs/T10/work-proof-marker.json"
+  ]
+}
