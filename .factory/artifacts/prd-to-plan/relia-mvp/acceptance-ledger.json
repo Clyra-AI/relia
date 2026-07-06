@@ -99,7 +99,7 @@
       "group_id": "fr3-github-outcome-intake",
       "kind": "acceptance_test",
       "notes": [
-        "Requires approved network allowlist before live closure."
+        "T10 closure covers offline structured GitHub export intake only. Live GitHub API/network intake remains future-gated and requires explicit network approval before any live closure claim."
       ],
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#fr3-github-outcome-intake",
@@ -127,7 +127,7 @@
         ".factory/artifacts/acceptance-evidence/FR3-GITHUB-OUTCOME-INTAKE-001/20260706T123241.000000000Z.json"
       ],
       "recorded_by": "codex closure-sync repair",
-      "recorded_at": "2026-07-06T12:32:41Z"
+      "recorded_at": "2026-07-06T12:45:21Z"
     },
     {
       "acceptance_item_id": "FR4-ATTRIBUTION-WITH-CONFIDENCE-001",
@@ -1275,7 +1275,7 @@
       "group_id": "mvp-in-scope",
       "kind": "acceptance_test",
       "notes": [
-        "Requires approved network allowlist before live closure."
+        "T10 closure covers offline structured GitHub export intake only. Live GitHub API/network intake remains future-gated and requires explicit network approval before any live closure claim."
       ],
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
@@ -1302,7 +1302,7 @@
         ".factory/artifacts/acceptance-evidence/MVP-IN-SCOPE-002/20260706T123241.000000000Z.json"
       ],
       "recorded_by": "codex closure-sync repair",
-      "recorded_at": "2026-07-06T12:32:41Z"
+      "recorded_at": "2026-07-06T12:45:21Z"
     },
     {
       "acceptance_item_id": "MVP-IN-SCOPE-003",
@@ -3318,7 +3318,7 @@
       ]
     }
   ],
-  "last_updated_at": "2026-07-06T12:32:41Z",
+  "last_updated_at": "2026-07-06T12:45:21Z",
   "schema_version": "1.0",
   "source_prd_ref": "docs/product/prd.md",
   "source_ref": "docs/product/prd.md"
