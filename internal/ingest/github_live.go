@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -131,6 +132,9 @@ func normalizeGitHubLiveOptions(options GitHubLiveOptions) (GitHubLiveOptions, G
 		return options, receipt, credentialRequiredError("live GitHub API intake requires explicit --github-token-env and never reads ambient credentials", "docs/architecture/architecture_guides.md#trust-mode-posture")
 	}
 	options.Token = strings.TrimSpace(options.Token)
+	if options.Token == "" {
+		options.Token = strings.TrimSpace(os.Getenv(options.TokenEnv))
+	}
 	if options.Token == "" {
 		return options, receipt, credentialRequiredError("live GitHub API token environment is unset or empty", options.TokenEnv)
 	}

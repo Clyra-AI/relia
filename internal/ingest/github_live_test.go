@@ -148,6 +148,52 @@ func TestFetchGitHubLiveOutcomeExportBuildsReplayableStructuredOutcomes(t *testi
 	}
 }
 
+func TestFetchGitHubLiveOutcomeExportReadsTokenEnvAfterApprovalGates(t *testing.T) {
+	t.Setenv("RELIA_GITHUB_TOKEN", "env-token")
+	client := newFakeGitHubLiveClient(map[string]fakeGitHubLiveResponse{
+		"/repos/acme/billing-service/pulls/302": {
+			body: `{
+				"number": 302,
+				"html_url": "https://github.com/acme/billing-service/pull/302",
+				"head": {"sha": "abc302"},
+				"base": {"ref": "main"},
+				"merged_at": "2026-06-02T12:00:00Z",
+				"files": [{"filename": "packages/billing/tax.py"}]
+			}`,
+		},
+		"/repos/acme/billing-service/pulls/302/files?per_page=100": {
+			body: `[{"filename": "packages/billing/tax.py"}]`,
+		},
+		"/repos/acme/billing-service/pulls/302/commits?per_page=100": {
+			body: `[]`,
+		},
+		"/repos/acme/billing-service/commits/abc302/check-runs?filter=all&per_page=100": {
+			body: `{"check_runs": []}`,
+		},
+		"/repos/acme/billing-service/pulls/302/comments?per_page=100": {
+			body: `[]`,
+		},
+		"/repos/acme/billing-service/issues/302/comments?per_page=100": {
+			body: `[]`,
+		},
+		"/repos/acme/billing-service/commits?per_page=100&sha=main": {
+			body: `[]`,
+		},
+	})
+
+	options := approvedGitHubLiveOptions()
+	options.Token = ""
+	if _, _, ingestErr := FetchGitHubLiveOutcomeExport(context.Background(), client, options); ingestErr != nil {
+		t.Fatalf("FetchGitHubLiveOutcomeExport returned error: %v", ingestErr)
+	}
+	if len(client.requests) == 0 {
+		t.Fatalf("expected live requests")
+	}
+	if got := client.requests[0].authorization; got != "Bearer env-token" {
+		t.Fatalf("authorization = %q, want env token", got)
+	}
+}
+
 func TestFetchGitHubLiveOutcomeExportMatchesMergeCommitSHARevert(t *testing.T) {
 	client := newFakeGitHubLiveClient(map[string]fakeGitHubLiveResponse{
 		"/repos/acme/billing-service/pulls/302": {

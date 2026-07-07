@@ -123,17 +123,12 @@ func ingestEventsForOptions(root string, options ingestOptions) ([]map[string]an
 		if ingestErr != nil {
 			return nil, "", nil, commandErrorFromIngest(ingestErr)
 		}
-		token := ""
-		if options.GitHubTokenEnv != "" {
-			token = os.Getenv(options.GitHubTokenEnv)
-		}
 		ctx, cancel, client := githubLiveRequestContext()
 		defer cancel()
 		export, receipt, ingestErr := ingestdoc.FetchGitHubLiveOutcomeExport(ctx, client, ingestdoc.GitHubLiveOptions{
 			Repo:                repo,
 			PullNumbers:         options.GitHubPulls,
 			TokenEnv:            options.GitHubTokenEnv,
-			Token:               token,
 			TokenScope:          options.GitHubTokenScope,
 			NetworkApproved:     options.AllowNetwork,
 			CredentialsApproved: options.AllowCredentials,
