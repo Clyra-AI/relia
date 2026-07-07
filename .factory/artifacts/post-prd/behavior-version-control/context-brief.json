@@ -1,0 +1,56 @@
+{
+  "alignment_decisions": {
+    "artifact_namespace": ".factory/artifacts/post-prd/behavior-version-control",
+    "implementation_may_start": true,
+    "scope_rule": "Post-PRD work closes against this mission scope unless a human promotes it into docs/product/prd.md.",
+    "source_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md",
+    "status": "resolved"
+  },
+  "alignment_questions": null,
+  "assumptions": [
+    "Generated post-PRD work runs serially until a planner marks tasks parallel-safe."
+  ],
+  "decision_points": [
+    "Promote post-PRD work into product PRD scope only when it changes product requirements."
+  ],
+  "evidence_summary": {
+    "bounds": [
+      "Parsing is deterministic and conservative; humans should review the generated DAG before unattended execution."
+    ],
+    "reviewed_surfaces": [
+      ".factory/artifacts/post-prd/behavior-version-control/source.md",
+      "repo operating pack",
+      "Factory daemon contracts"
+    ]
+  },
+  "generated_at": "2026-07-07T21:48:18Z",
+  "open_questions": [],
+  "proven_findings": [
+    "Post-PRD intake generated a governed artifact set from the supplied work signal.",
+    "Detected 3 recommendation groups for task DAG generation."
+  ],
+  "recommended_workers": [
+    "task-executor",
+    "validation-gate",
+    "commit-push",
+    "post-merge-monitor"
+  ],
+  "relevant_files": [
+    ".factory/artifacts/post-prd/behavior-version-control/source.md",
+    "AGENTS.md",
+    "WORKFLOW.md",
+    "docs/dev/dev_guides.md",
+    "docs/architecture/architecture_guides.md",
+    ".factory/profile.yaml"
+  ],
+  "risk_flags": [
+    "Generated post-PRD plan must be reviewed before autonomous implementation."
+  ],
+  "scope_risks": [],
+  "shared_constraints_ref": "AGENTS.md",
+  "source_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md",
+  "system_model_summary": "State lives in repo-local files and Factory artifacts; feedback lives in validation commands, PR lifecycle reports, and scope closure.",
+  "unknowns": [],
+  "work_item_id": "behavior-version-control-post-prd",
+  "work_signal_kind": "ideas"
+}

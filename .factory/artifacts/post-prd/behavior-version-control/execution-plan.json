@@ -1,0 +1,133 @@
+{
+  "acceptance_ledger_coverage": {
+    "acceptance_mapping_ref": ".factory/artifacts/post-prd/behavior-version-control/acceptance-mapping.json",
+    "closure_status_source_ref": ".factory/artifacts/post-prd/behavior-version-control/scope-closure-map.json#/items",
+    "coverage_unit": "acceptance_item",
+    "group_only_refs_allowed": false,
+    "ledger_ref": ".factory/artifacts/post-prd/behavior-version-control/acceptance-ledger.json",
+    "required_groups": [
+      "behavior-change-provenance-inventory",
+      "err-regression-attribution",
+      "rollback-recommendation-report"
+    ],
+    "required_item_count": 12,
+    "scope_closure_map_ref": ".factory/artifacts/post-prd/behavior-version-control/scope-closure-map.json",
+    "status": "mapped"
+  },
+  "acceptance_ledger_ref": ".factory/artifacts/post-prd/behavior-version-control/acceptance-ledger.json",
+  "acceptance_mapping_ref": ".factory/artifacts/post-prd/behavior-version-control/acceptance-mapping.json",
+  "active_loop_id": "implementation_task_to_validated_pr",
+  "alignment_gate": {
+    "blocking_questions": null,
+    "context_brief_ref": "context-brief.json",
+    "implementation_may_start": true,
+    "status": "resolved"
+  },
+  "artifact_type": "execution_plan",
+  "blast_radius": "Post-PRD mission-scoped implementation paths.",
+  "collaboration_rationale": "Generated post-PRD decomposition runs serially until boundaries, validation, and merge policy are reviewed.",
+  "collaboration_strategy": "serial",
+  "dependencies": [
+    {
+      "blocked_by": "T1",
+      "task_id": "T2"
+    },
+    {
+      "blocked_by": "T2",
+      "task_id": "T3"
+    }
+  ],
+  "factory_compatibility": {
+    "execution_compiler_ref": "factory://skills/execution-compiler",
+    "factory_contract_version": "1.0",
+    "generated_by": "factoryd-ingest",
+    "planning_skill_refs": [
+      "factory://skills/ideas-to-plan",
+      "factory://skills/execution-compiler"
+    ],
+    "profile_ref": ".factory/profile.yaml",
+    "skill_inventory_ref": "Factory skills/README.md"
+  },
+  "factoryd_runtime": {
+    "approval_posture": "human approval required for live credentials, high-risk tasks, and merge",
+    "branch_prefix": "codex",
+    "capability_grants": [],
+    "credential_posture": "no ambient secrets during deterministic bootstrap",
+    "feedback_graph_ref": ".factory/artifacts/lifecycle-signal-feedback-graph.json",
+    "model_routing_policy_ref": "docs/standards/model-routing-standard.md",
+    "network_posture": "offline by default until approved",
+    "sovereignty_mode": "restricted",
+    "state_dir": "../.factoryd",
+    "worker_command": "",
+    "worker_type": "codex_cli",
+    "workspace_root": "../.factoryd/workspaces"
+  },
+  "feedback_plan": "Use repo-configured validation commands, validation reports, PR lifecycle reports, and scope closure.",
+  "generated_at": "2026-07-07T21:48:18Z",
+  "level_gates": [
+    "Plan approval before implementation",
+    "Human approval before live credentials or network"
+  ],
+  "loop_contract_refs": [
+    "WORKFLOW.md"
+  ],
+  "mission_contract_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md",
+  "objective": "Implement post-PRD recommendations from .factory/artifacts/post-prd/behavior-version-control/source.md through governed vertical slices.",
+  "parallelism_groups": [],
+  "plan_drift_policy": {
+    "rule": "Update context brief, execution plan, task packets, validation contract, acceptance ledger, acceptance mapping, scope closure, and generated factoryd config before continuing after post-PRD alignment drift."
+  },
+  "plan_id": "behavior-version-control-post-prd-plan",
+  "planning_skill_alignment": {
+    "source_refs": [
+      "factory://skills/ideas-to-plan",
+      "factory://skills/execution-compiler",
+      "factory://skills/execution-compiler"
+    ],
+    "status": "aligned"
+  },
+  "recovery_policy": "Generate repair task and stop on validation, path policy, or closure failure.",
+  "rollback_or_deletion_test": "Deleting any task output should be detectable by validation or scope closure.",
+  "runtime_pins": {
+    "artifact_namespace": ".factory/artifacts",
+    "dependency_policy": "inherit repo operating pack; pin and justify dependencies",
+    "distribution_target": "inherit repo operating pack",
+    "language": "repo_profile",
+    "live_work_policy": "no ambient secrets or live network by default",
+    "module_or_package_path": "relia",
+    "provider_policy": "inherit repo operating pack",
+    "toolchain_version": "repo_operating_pack"
+  },
+  "schema_version": "0.1",
+  "scope_exclusions": [
+    "Do not mutate docs/product/prd.md unless the recommendation explicitly changes product scope.",
+    "Do not add live credentials or network access without approval.",
+    "Do not mark judgment-only acceptance complete without human approval evidence."
+  ],
+  "slice_rationale": "Each generated task maps one post-PRD recommendation to implementation, tests, evidence, and closure.",
+  "slice_type": "vertical",
+  "source_of_truth_changes": [
+    ".factory/artifacts/post-prd/behavior-version-control/source.md",
+    ".factory/artifacts/post-prd/behavior-version-control/"
+  ],
+  "source_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md",
+  "state_impact": "Repo-local source and Factory artifacts only.",
+  "stop_conditions": [
+    "validation failed",
+    "path policy violation",
+    "missing evidence",
+    "closure not advanced",
+    "alignment drift"
+  ],
+  "system_model_summary": "State is repo-local; feedback is command and artifact based.",
+  "tasks": [
+    "T1",
+    "T2",
+    "T3"
+  ],
+  "validation_requirements": [
+    "python3 scripts/validate_repo_pack.py"
+  ],
+  "work_item_id": "behavior-version-control-post-prd",
+  "work_signal_kind": "ideas"
+}

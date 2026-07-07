@@ -1,0 +1,98 @@
+{
+  "acceptance_ledger_ref": ".factory/artifacts/post-prd/behavior-version-control/acceptance-ledger.json",
+  "artifact_type": "acceptance_mapping",
+  "decomposition_mode": "post_prd_recommendation_items",
+  "generated_at": "2026-07-07T21:48:18Z",
+  "groups": [
+    {
+      "acceptance_item_ids": [
+        "BEHAVIOR-CHANGE-PROVENANCE-INVENTORY-001",
+        "BEHAVIOR-CHANGE-PROVENANCE-INVENTORY-002",
+        "BEHAVIOR-CHANGE-PROVENANCE-INVENTORY-003",
+        "BEHAVIOR-CHANGE-PROVENANCE-INVENTORY-004"
+      ],
+      "closure_status": "partial",
+      "criteria": [
+        "Deliver: Record versioned changes to memory rules, compiled context, AGENTS/CLAUDE blocks, and Relia-owned instruction artifacts as local behavior-change candidates with commit refs, diff refs, owner/reviewer metadata when available, source rule IDs, lifecycle status, and affected path/signal scope.",
+        "Implement by: Build a deterministic offline inventory from local git history, committed rule files, Relia lifecycle metadata, and existing report artifacts. The inventory must not mutate rules, compile targets, or reviewed memory by itself.",
+        "Touch or validate paths: schemas/, examples/, docs/product/, docs/dev/, docs/architecture/, cmd/relia/, internal/memory/, internal/backtest/, internal/assess/",
+        "Respect dependency: Run after T18 because lesson grain, owner, evidence, applicability, and expiry rules must exist before behavior-change attribution can be trusted."
+      ],
+      "group_id": "behavior-change-provenance-inventory",
+      "judgment_only": false,
+      "requires_credentials": false,
+      "requires_model_artifact_pull": false,
+      "requires_model_provider_endpoint": false,
+      "requires_network": false,
+      "source_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#behavior-change-provenance-inventory",
+      "suggested_validation": [
+        "make prepush-full"
+      ],
+      "task_refs": [
+        "T1"
+      ],
+      "title": "Behavior change provenance inventory"
+    },
+    {
+      "acceptance_item_ids": [
+        "ERR-REGRESSION-ATTRIBUTION-001",
+        "ERR-REGRESSION-ATTRIBUTION-002",
+        "ERR-REGRESSION-ATTRIBUTION-003",
+        "ERR-REGRESSION-ATTRIBUTION-004"
+      ],
+      "closure_status": "partial",
+      "criteria": [
+        "Deliver: Compare repeat-failure and ERR deltas before and after behavior-change candidates, then report candidate links with confidence, supporting receipts, diff refs, comparison windows, sample sizes, and excluded confounders.",
+        "Implement by: Reuse existing recurrence signatures, baselines, flake discounts, attribution confidence, contradiction handling, and stale-rule logic. When evidence is thin, classify the result as attribution_uncertain instead of blaming a behavior change.",
+        "Touch or validate paths: schemas/, examples/, docs/product/, docs/dev/, docs/architecture/, cmd/relia/, internal/backtest/, internal/memory/, internal/assess/",
+        "Respect dependency: Run after behavior change provenance inventory."
+      ],
+      "group_id": "err-regression-attribution",
+      "judgment_only": false,
+      "requires_credentials": false,
+      "requires_model_artifact_pull": false,
+      "requires_model_provider_endpoint": false,
+      "requires_network": false,
+      "source_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#err-regression-attribution",
+      "suggested_validation": [
+        "make prepush-full"
+      ],
+      "task_refs": [
+        "T2"
+      ],
+      "title": "ERR regression attribution"
+    },
+    {
+      "acceptance_item_ids": [
+        "ROLLBACK-RECOMMENDATION-REPORT-001",
+        "ROLLBACK-RECOMMENDATION-REPORT-002",
+        "ROLLBACK-RECOMMENDATION-REPORT-003",
+        "ROLLBACK-RECOMMENDATION-REPORT-004"
+      ],
+      "closure_status": "partial",
+      "criteria": [
+        "Deliver: Surface a product-safe advisory such as \"repeat-failure rate rose after rule X v3 was approved; here is the rule/instruction diff, confidence, evidence, and recommended rollback path.\" The recommendation is advisory only and never auto-applies a rollback.",
+        "Implement by: Add structured CLI/report fields and fixtures that show the diff ref, candidate rollback action, expected effect, confidence, and required human review. Tests must prove redaction is preserved and no rule, memory page, compiled block, or instruction file changes unless a later explicit task makes that mutation.",
+        "Touch or validate paths: schemas/, examples/, docs/product/, docs/dev/, docs/architecture/, cmd/relia/, internal/backtest/, internal/memory/, internal/assess/, internal/advise/",
+        "Respect dependency: Run after ERR regression attribution."
+      ],
+      "group_id": "rollback-recommendation-report",
+      "judgment_only": false,
+      "requires_credentials": false,
+      "requires_model_artifact_pull": false,
+      "requires_model_provider_endpoint": false,
+      "requires_network": false,
+      "source_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#rollback-recommendation-report",
+      "suggested_validation": [
+        "make prepush-full"
+      ],
+      "task_refs": [
+        "T3"
+      ],
+      "title": "Rollback recommendation report"
+    }
+  ],
+  "schema_version": "0.1",
+  "source_post_prd_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md",
+  "work_signal_kind": "ideas"
+}
