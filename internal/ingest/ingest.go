@@ -27,8 +27,11 @@ type ErrorKind string
 
 const (
 	ErrorArtifactContract ErrorKind = "artifact_contract"
+	ErrorCredential       ErrorKind = "credential_required"
+	ErrorGitHubAPI        ErrorKind = "github_api"
 	ErrorInternal         ErrorKind = "internal"
 	ErrorProvenance       ErrorKind = "provenance_integrity"
+	ErrorRateLimit        ErrorKind = "github_rate_limit"
 	ErrorRedactionSafety  ErrorKind = "redaction_safety"
 )
 

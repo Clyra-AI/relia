@@ -1,0 +1,85 @@
+{
+  "artifact_type": "proof-of-behavior-scorecard",
+  "schema_version": "1.0",
+  "task_id": "T11.1",
+  "status": "pass",
+  "produced_at_utc": "2026-07-07T12:27:33Z",
+  "acceptance_item_id": "FR3-GITHUB-LIVE-API-INTAKE-001",
+  "required_proof_level": "workflow_behavior",
+  "behavior_checks": [
+    {
+      "behavior": "live GitHub API intake is blocked until explicit human, network, and credential approvals are present",
+      "status": "pass",
+      "evidence_refs": [
+        "internal/ingest/github_live_test.go",
+        "cmd/relia/ingest_contract_test.go"
+      ],
+      "tests": [
+        "TestFetchGitHubLiveOutcomeExportRequiresExplicitApprovalBeforeRequest",
+        "TestIngestGitHubLiveFailsClosedWithoutExplicitApprovals"
+      ]
+    },
+    {
+      "behavior": "ambient credentials are not used",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/ingest_contract_test.go"
+      ],
+      "tests": [
+        "TestIngestGitHubLiveDoesNotUseAmbientCredentials"
+      ]
+    },
+    {
+      "behavior": "adapter uses read-only GET requests and does not disclose tokens in replay exports",
+      "status": "pass",
+      "evidence_refs": [
+        "internal/ingest/github_live_test.go"
+      ],
+      "tests": [
+        "TestFetchGitHubLiveOutcomeExportBuildsReplayableStructuredOutcomes"
+      ]
+    },
+    {
+      "behavior": "live API responses convert to the existing offline GitHub outcome replay format before redaction and canonical normalization",
+      "status": "pass",
+      "evidence_refs": [
+        "internal/ingest/github_live_test.go",
+        "internal/ingest/github_outcomes.go"
+      ],
+      "tests": [
+        "TestFetchGitHubLiveOutcomeExportBuildsReplayableStructuredOutcomes",
+        "TestParseGitHubOutcomeEventsTranslatesStructuredExport"
+      ]
+    },
+    {
+      "behavior": "pagination, rate-limit, auth failure, and API error semantics are deterministic and typed",
+      "status": "pass",
+      "evidence_refs": [
+        "internal/ingest/github_live_test.go"
+      ],
+      "tests": [
+        "TestFetchGitHubLiveOutcomeExportBuildsReplayableStructuredOutcomes",
+        "TestFetchGitHubLiveOutcomeExportMapsRateLimit",
+        "TestFetchGitHubLiveOutcomeExportMapsAuthFailure",
+        "TestFetchGitHubLiveOutcomeExportMapsAPIError"
+      ]
+    },
+    {
+      "behavior": "public docs describe live intake invocation, approval gates, no ambient credentials, and offline replay compatibility",
+      "status": "pass",
+      "evidence_refs": [
+        "README.md",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md"
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "command": "make prepush-full",
+      "status": "pass",
+      "exit_code": 0
+    }
+  ],
+  "notes": "The worker did not request or use live network or credentials. Live GitHub behavior was tested with injected fake HTTP clients and fail-closed CLI gate checks."
+}

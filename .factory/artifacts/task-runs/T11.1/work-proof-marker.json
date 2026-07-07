@@ -1,0 +1,33 @@
+{
+  "acceptance_item_ids": [
+    "FR3-GITHUB-LIVE-API-INTAKE-001"
+  ],
+  "artifact_type": "work_proof_marker",
+  "changed_paths": [
+    ".factory/artifacts/task-runs/T11.1/proof-of-behavior-scorecard.json",
+    ".factory/artifacts/task-runs/T11.1/validation-report.json",
+    ".factory/artifacts/task-runs/T11.1/work-proof-marker.json",
+    "README.md",
+    "cmd/relia/errors.go",
+    "cmd/relia/ingest_command.go",
+    "cmd/relia/ingest_contract_test.go",
+    "cmd/relia/repo_helpers.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/dev/dev_guides.md",
+    "internal/ingest/args.go",
+    "internal/ingest/args_test.go",
+    "internal/ingest/github_live.go",
+    "internal/ingest/github_live_test.go",
+    "internal/ingest/github_outcomes.go",
+    "internal/ingest/ingest.go"
+  ],
+  "evidence_refs": [
+    ".factory/artifacts/task-runs/T11.1/validation-report.json",
+    ".factory/artifacts/task-runs/T11.1/proof-of-behavior-scorecard.json"
+  ],
+  "implementation_performed": true,
+  "produced_at_utc": "2026-07-07T12:27:33Z",
+  "schema_version": "1.0",
+  "status": "implemented",
+  "task_id": "T11.1"
+}

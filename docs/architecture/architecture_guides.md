@@ -209,6 +209,24 @@ output, generated `memory/MEMORY.md`, and additive command-result data such as
 edits plus regenerated `memory/MEMORY.md`; canonical rule YAML remains the
 source for re-rendering.
 
+T11.1 adds a live GitHub API intake adapter while keeping the offline structured
+export as the replay boundary. The state owner is `internal/ingest` for
+approval-gate validation, read-only API request construction, pagination,
+rate-limit/auth/API error mapping, sanitized GitHub outcome export assembly,
+and replay-compatible source-format metadata; `cmd/relia` owns token-env
+lookup, command-result receipts, and reuse of the canonical ingest pipeline.
+Feedback sources are deterministic fake-client tests, command-boundary gate
+tests, `make prepush-full`, and Factory task-run evidence. The adapter only
+uses GET requests against `api.github.com`, never reads ambient credentials,
+and fails closed until human, network, credential, explicit token-env, and
+declared read-only-scope gates are present. API payloads are reduced to PR
+metadata, changed files, check-run outcomes, revert receipts, and marked
+review-correction comments before the existing redaction and provenance checks
+run. The blast radius is limited to `relia ingest`, generated local experience
+shards, command-result receipt metadata, and replay fixtures. Rollback is
+removal of the live adapter and CLI flags; existing offline
+`--github-outcomes --input` replay remains the source of truth.
+
 ## Systems Thinking Map
 
 - State lives in repo-local config, generated artifacts, source files, and Factory evidence.
@@ -338,8 +356,9 @@ synthetic fixtures, reviewed lessons, and shipped product behavior.
   fixture proposal.
 - GitHub-derived outcomes enter through structured PR metadata, check-run,
   revert, and marked-review-correction exports before they become Relia
-  experience records. Live GitHub API collection remains a separate
-  network/credential-gated adapter; the default MVP path is offline structured
+  experience records. Live GitHub API collection is a separate
+  network/credential/human-approval-gated adapter that emits the same replay
+  export shape; the default deterministic path remains offline structured
   export intake plus the normal redaction and provenance checks.
 - Synthetic fixtures are the preferred bridge from customer observation to
   testable behavior. They must keep expected outcome, provenance, and negative

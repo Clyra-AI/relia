@@ -65,10 +65,16 @@ func commandErrorFromIngest(ingestErr *ingestdoc.Error) *CommandError {
 	switch ingestErr.Kind {
 	case ingestdoc.ErrorArtifactContract:
 		return artifactContractError(ingestErr.Message, ingestErr.Ref)
+	case ingestdoc.ErrorCredential:
+		return credentialError(ingestErr.Message, ingestErr.Ref)
+	case ingestdoc.ErrorGitHubAPI:
+		return githubAPIError(ingestErr.Message, ingestErr.Ref)
 	case ingestdoc.ErrorInternal:
 		return internalError(ingestErr.Message, nil)
 	case ingestdoc.ErrorProvenance:
 		return provenanceIntegrityError(ingestErr.Message, ingestErr.Ref)
+	case ingestdoc.ErrorRateLimit:
+		return githubRateLimitError(ingestErr.Message, ingestErr.Ref)
 	case ingestdoc.ErrorRedactionSafety:
 		return redactionSafetyError(ingestErr.Message, ingestErr.Ref)
 	default:
@@ -142,6 +148,36 @@ func provenanceIntegrityError(message string, ref string) *CommandError {
 		Message:     message,
 		ExitCode:    ExitProvenanceIntegrity,
 		Remediation: "Provide PR and source evidence URLs before persisting canonical experience records.",
+		Ref:         ref,
+	}
+}
+
+func credentialError(message string, ref string) *CommandError {
+	return &CommandError{
+		Type:        "credential_required",
+		Message:     message,
+		ExitCode:    ExitCredential,
+		Remediation: "Provide explicit task-scoped human, network, and read-only credential approval before live GitHub API intake.",
+		Ref:         ref,
+	}
+}
+
+func githubRateLimitError(message string, ref string) *CommandError {
+	return &CommandError{
+		Type:        "github_rate_limit",
+		Message:     message,
+		ExitCode:    ExitOutcomeObservability,
+		Remediation: "Retry after the GitHub API rate-limit reset or ingest an offline structured export with --github-outcomes --input.",
+		Ref:         ref,
+	}
+}
+
+func githubAPIError(message string, ref string) *CommandError {
+	return &CommandError{
+		Type:        "github_api_unavailable",
+		Message:     message,
+		ExitCode:    ExitOutcomeObservability,
+		Remediation: "Retry live intake after GitHub API recovery or use offline replay with --github-outcomes --input.",
 		Ref:         ref,
 	}
 }
