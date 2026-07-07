@@ -611,7 +611,7 @@ func isGitHubProvenanceURLField(fieldPath []string) bool {
 	for index, part := range fieldPath {
 		normalized := strings.ToLower(part)
 		switch normalized {
-		case "pr_url", "check_run_url", "revert_url", "review_url", "provenance_urls":
+		case "pr_url", "check_run_url", "revert_url", "review_url", "provenance_urls", "html_url", "details_url":
 			return true
 		case "urls":
 			if index > 0 && strings.ToLower(fieldPath[index-1]) == "provenance" {
