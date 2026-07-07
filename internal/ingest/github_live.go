@@ -296,7 +296,7 @@ func (f *githubLiveFetcher) doJSON(requestPath string, resource string) (any, ht
 	if err != nil {
 		return nil, nil, internalError("could not read github api response", err)
 	}
-	if commandErr := githubLiveStatusError(response, resource); commandErr != nil {
+	if commandErr := githubLiveStatusError(response, string(body), resource); commandErr != nil {
 		return nil, nil, commandErr
 	}
 	var decoded any
@@ -328,22 +328,39 @@ func githubLiveRequestURL(requestPath string) (string, *Error) {
 	return githubLiveAPIBaseURL + requestPath, nil
 }
 
-func githubLiveStatusError(response *http.Response, resource string) *Error {
+func githubLiveStatusError(response *http.Response, body string, resource string) *Error {
 	if response.StatusCode >= 200 && response.StatusCode < 300 {
 		return nil
 	}
-	if response.StatusCode == http.StatusTooManyRequests ||
-		(response.StatusCode == http.StatusForbidden && strings.TrimSpace(response.Header.Get("X-RateLimit-Remaining")) == "0") {
-		ref := "github api rate limit"
-		if reset := strings.TrimSpace(response.Header.Get("X-RateLimit-Reset")); reset != "" {
-			ref += " reset=" + reset
-		}
+	if ref, ok := githubLiveRateLimitRef(response, body); ok {
 		return rateLimitError("github api rate limit reached before live outcome intake completed", ref)
 	}
 	if response.StatusCode == http.StatusUnauthorized || response.StatusCode == http.StatusForbidden {
 		return credentialRequiredError("github api credentials were rejected for read-only outcome intake", "relia ingest --github-token-env")
 	}
 	return githubAPIError(fmt.Sprintf("github api %s request failed with status %d", resource, response.StatusCode), resource)
+}
+
+func githubLiveRateLimitRef(response *http.Response, body string) (string, bool) {
+	isRateLimit := response.StatusCode == http.StatusTooManyRequests
+	if response.StatusCode == http.StatusForbidden {
+		lowerBody := strings.ToLower(body)
+		isRateLimit = strings.TrimSpace(response.Header.Get("X-RateLimit-Remaining")) == "0" ||
+			strings.TrimSpace(response.Header.Get("Retry-After")) != "" ||
+			strings.Contains(lowerBody, "secondary rate limit") ||
+			strings.Contains(lowerBody, "secondary limit")
+	}
+	if !isRateLimit {
+		return "", false
+	}
+	ref := "github api rate limit"
+	if reset := strings.TrimSpace(response.Header.Get("X-RateLimit-Reset")); reset != "" {
+		ref += " reset=" + reset
+	}
+	if retryAfter := strings.TrimSpace(response.Header.Get("Retry-After")); retryAfter != "" {
+		ref += " retry-after=" + retryAfter
+	}
+	return ref, true
 }
 
 func githubLiveArrayFromDecoded(decoded any, objectKey string, resource string) ([]map[string]any, *Error) {

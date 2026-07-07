@@ -217,16 +217,51 @@ func TestFetchGitHubLiveOutcomeExportMatchesMergeCommitSHARevert(t *testing.T) {
 }
 
 func TestFetchGitHubLiveOutcomeExportMapsRateLimit(t *testing.T) {
-	client := newFakeGitHubLiveClient(map[string]fakeGitHubLiveResponse{
-		"/repos/acme/billing-service/pulls/302": {
-			status: http.StatusForbidden,
-			header: http.Header{"X-RateLimit-Remaining": {"0"}, "X-RateLimit-Reset": {"1783459200"}},
-			body:   `{"message": "API rate limit exceeded"}`,
+	for _, testCase := range []struct {
+		name    string
+		status  int
+		header  http.Header
+		body    string
+		wantRef string
+	}{
+		{
+			name:    "primary",
+			status:  http.StatusForbidden,
+			header:  http.Header{"X-RateLimit-Remaining": {"0"}, "X-RateLimit-Reset": {"1783459200"}},
+			body:    `{"message": "API rate limit exceeded"}`,
+			wantRef: "reset=1783459200",
 		},
-	})
-	_, _, ingestErr := FetchGitHubLiveOutcomeExport(context.Background(), client, approvedGitHubLiveOptions())
-	if ingestErr == nil || ingestErr.Kind != ErrorRateLimit {
-		t.Fatalf("error = %#v, want rate limit error", ingestErr)
+		{
+			name:    "secondary_retry_after",
+			status:  http.StatusForbidden,
+			header:  http.Header{"Retry-After": {"60"}},
+			body:    `{"message": "You have exceeded a secondary rate limit."}`,
+			wantRef: "retry-after=60",
+		},
+		{
+			name:    "secondary_body",
+			status:  http.StatusForbidden,
+			header:  http.Header{},
+			body:    `{"message": "You have exceeded a secondary limit."}`,
+			wantRef: "github api rate limit",
+		},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			client := newFakeGitHubLiveClient(map[string]fakeGitHubLiveResponse{
+				"/repos/acme/billing-service/pulls/302": {
+					status: testCase.status,
+					header: testCase.header,
+					body:   testCase.body,
+				},
+			})
+			_, _, ingestErr := FetchGitHubLiveOutcomeExport(context.Background(), client, approvedGitHubLiveOptions())
+			if ingestErr == nil || ingestErr.Kind != ErrorRateLimit {
+				t.Fatalf("error = %#v, want rate limit error", ingestErr)
+			}
+			if !strings.Contains(ingestErr.Ref, testCase.wantRef) {
+				t.Fatalf("ref = %q, want %q", ingestErr.Ref, testCase.wantRef)
+			}
+		})
 	}
 }
 
