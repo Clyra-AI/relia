@@ -1,0 +1,80 @@
+{
+  "artifact_type": "proof_of_behavior_scorecard",
+  "artifact_name": "proof-of-behavior-scorecard",
+  "schema_version": "1.0",
+  "task_id": "T12",
+  "status": "pass",
+  "produced_at": "2026-07-07T18:23:38Z",
+  "required_proof_level": "user_visible_behavior",
+  "scorecard": [
+    {
+      "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-002",
+      "status": "implemented",
+      "behavior": "A local agent-facing recall call retrieves an active rule with statement, lifecycle status, confidence, and resolved citations.",
+      "proof": [
+        "TestServeRecallReturnsRelevantActiveRuleWithResolvedCitations verifies recall returns only the active accepted rule and excludes a candidate rule.",
+        "Direct command probe returned relia.recall_result for memory/rules/demo-assessment-active-rule.yaml with citations https://github.com/Clyra-AI/relia-demo-seed/pull/142, /187, and /203.",
+        "ServedRuleData and ValidateServedRuleCitations fail closed unless served rule citations are canonical GitHub PR URLs matching provenance PR numbers."
+      ],
+      "evidence_refs": [
+        "cmd/relia/assess_command_test.go",
+        "internal/serve/tools.go",
+        "internal/assess/assess.go",
+        "memory/rules/demo-assessment-active-rule.yaml"
+      ]
+    },
+    {
+      "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-007",
+      "status": "implemented",
+      "behavior": "The advisory loop remains non-blocking by default, while an explicitly enabled recurrence gate exits 5 when the threshold trips.",
+      "proof": [
+        "TestBacktestExplicitEnabledGateEvaluatesThreshold verifies gate.enabled=true with a tripped threshold returns ExitGate 5 and does not overwrite the baseline on failure.",
+        "Backtest report tests verify the gate is off by default.",
+        "Advisory command and workflow tests verify the Action path is advisory-only, writes at most one comment plan, skips unchanged or capped comments, and treats unavailable trusted-base advisory support as a successful skip."
+      ],
+      "evidence_refs": [
+        "cmd/relia/backtest_integrity_test.go",
+        "cmd/relia/backtest_report_test.go",
+        "cmd/relia/advise_test.go",
+        ".github/workflows/relia-advisory.yml"
+      ]
+    },
+    {
+      "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-008",
+      "status": "implemented",
+      "behavior": "ERR trend compares against a saved baseline and labels stale baselines.",
+      "proof": [
+        "TestCompareBaselineJSONMarksDigestAndWindowMismatchStale verifies stale labels for source digest and window mismatches.",
+        "TestBacktestBaselineMarksWindowMismatchStale verifies command-level stale baseline reporting.",
+        "Backtest report tests verify baseline status travels in report diagnostics and command-result data."
+      ],
+      "evidence_refs": [
+        "internal/backtest/baseline_test.go",
+        "cmd/relia/backtest_report_test.go",
+        "internal/backtest/baseline.go"
+      ]
+    },
+    {
+      "acceptance_item_id": "coverage-ood-active-memory-boundary",
+      "status": "implemented",
+      "behavior": "Coverage reports active-memory density and no_coverage/out-of-distribution signals for repo-relative paths.",
+      "proof": [
+        "TestServeCoverageLabelsCoveredAndOutOfDistributionPaths verifies covered_risky for a path with an active avoid rule and no_coverage/out_of_distribution for an uncovered path.",
+        "serve --paths rejects non-repo-relative explicit path arguments.",
+        "Coverage response uses active_memory_rules as its source and includes agent access boundary metadata."
+      ],
+      "evidence_refs": [
+        "cmd/relia/assess_command_test.go",
+        "internal/serve/args_test.go",
+        "internal/serve/tools.go"
+      ]
+    }
+  ],
+  "validation_refs": [
+    ".factory/artifacts/task-runs/T12/validation-report.json"
+  ],
+  "residual_risks": [
+    "This task provides deterministic local tool-call responses in the existing JSON command-result envelope; a long-running JSON-RPC MCP transport remains outside this bounded worker slice.",
+    "Factory lifecycle evidence is intentionally not authored by the task-executor worker."
+  ]
+}

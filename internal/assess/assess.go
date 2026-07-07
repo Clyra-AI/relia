@@ -50,6 +50,7 @@ type Rule struct {
 	ID             string
 	Kind           string
 	Path           string
+	Statement      string
 	Confidence     float64
 	ScopePaths     []string
 	Citations      []RuleCitation
@@ -119,6 +120,7 @@ func ReadRule(root string, rulePath string, options Options) (Rule, bool, *resul
 		ID:             document.Scalars["id"].Value,
 		Kind:           document.Scalars["kind"].Value,
 		Path:           rel,
+		Statement:      document.Scalars["statement"].Value,
 		Confidence:     confidence,
 		ScopePaths:     yamlmini.ListValues(document, "scope.paths"),
 		Citations:      RuleCitations(document),
@@ -259,14 +261,16 @@ func ServedRuleData(rules []Rule, options Options) ([]map[string]any, *resultdoc
 			return nil, commandErr
 		}
 		data = append(data, map[string]any{
-			"rule_id":         rule.ID,
-			"kind":            rule.Kind,
-			"confidence":      rule.Confidence,
-			"scope_paths":     append([]string(nil), rule.ScopePaths...),
-			"citations":       servedCitations,
-			"path":            rule.Path,
-			"review_gate":     rule.ReviewGate,
-			"review_decision": rule.ReviewDecision,
+			"rule_id":          rule.ID,
+			"kind":             rule.Kind,
+			"statement":        rule.Statement,
+			"lifecycle_status": "active",
+			"confidence":       rule.Confidence,
+			"scope_paths":      append([]string(nil), rule.ScopePaths...),
+			"citations":        servedCitations,
+			"path":             rule.Path,
+			"review_gate":      rule.ReviewGate,
+			"review_decision":  rule.ReviewDecision,
 		})
 	}
 	return data, nil

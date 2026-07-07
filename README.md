@@ -17,7 +17,7 @@ FACTORY_REPO=/path/to/factory factoryd run --config .factory/factoryd.autoship.e
 
 ## CLI Baseline
 
-The T1/T2/T3/T4.3/T5/T6/T7/T8/T9/T11/T11.1 command surface establishes the lifecycle
+The T1/T2/T3/T4.3/T5/T6/T7/T8/T9/T11/T11.1/T12 command surface establishes the lifecycle
 skeleton, configuration contract, assessment fixture slice, recurrence
 backtest, deterministic distillation, reporting evidence, provider/advisory
 approval boundaries, and agent-native output contract:
@@ -107,7 +107,13 @@ approval boundaries, and agent-native output contract:
   YAML itself carries the durable review gate and decision evidence.
 - `relia serve --format json` exposes the local MCP capability manifest for
   `recall`, `assess`, and `coverage` over active accepted rules only. Hosted or
-  network transports fail closed unless explicitly approved.
+  network transports fail closed unless explicitly approved. Deterministic
+  local tool calls are available through `relia serve --tool recall --context
+  <task>`, `relia serve --tool coverage --paths <repo-paths>`, and
+  `relia serve --tool assess --input <diff>`. Recall returns active rules with
+  statements, lifecycle status, confidence, and resolved PR citations. Coverage
+  labels covered paths as `covered_risky` or `covered_clean` and uncovered
+  paths as `no_coverage`/out-of-distribution.
 - `relia assess --input <diff>` reads a local unified diff, compares touched
   paths with active local `memory/rules/*.yaml` rules, and emits a
   `relia.risk_assessment` payload with `match_high`, `match_medium`, or

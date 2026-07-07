@@ -1,0 +1,34 @@
+{
+  "artifact_type": "work_proof_marker",
+  "changed_paths": [
+    ".factory/artifacts/task-runs/T12/proof-of-behavior-scorecard.json",
+    ".factory/artifacts/task-runs/T12/validation-report.json",
+    ".factory/artifacts/task-runs/T12/work-proof-marker.json",
+    "README.md",
+    "cmd/relia/assess_command_test.go",
+    "cmd/relia/serve_command.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/dev/dev_guides.md",
+    "internal/assess/assess.go",
+    "internal/serve/args.go",
+    "internal/serve/args_test.go",
+    "internal/serve/tools.go"
+  ],
+  "evidence_refs": [
+    ".factory/artifacts/task-runs/T12/validation-report.json",
+    ".factory/artifacts/task-runs/T12/proof-of-behavior-scorecard.json"
+  ],
+  "implementation_performed": true,
+  "implementation_summary": [
+    "Added local MCP-style serve tool responses for recall, coverage, and assess while preserving the command-result envelope.",
+    "Recall returns active accepted rules with statement, lifecycle status, confidence, and resolved GitHub PR citations.",
+    "Coverage reports covered_risky, covered_clean, and no_coverage out-of-distribution responses for repo-relative paths.",
+    "Serve tool calls expose agent-facing boundaries: active memory only, human-review approval required, citations required, no hosted service, and no live network.",
+    "Documented the T12 serve tool behavior in README and repo dev/architecture guides."
+  ],
+  "objective": "Implement PRD-defined MCP tools, recall behavior, coverage/OOD responses, active-memory serving rules, and agent-facing access boundaries.",
+  "produced_at": "2026-07-07T18:23:38Z",
+  "schema_version": "1.0",
+  "status": "implemented",
+  "task_id": "T12"
+}
