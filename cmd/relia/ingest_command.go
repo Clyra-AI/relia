@@ -12,6 +12,11 @@ import (
 	ingestdoc "github.com/Clyra-AI/relia/internal/ingest"
 )
 
+const (
+	githubLiveOverallTimeout     = 2 * time.Minute
+	githubLiveHTTPRequestTimeout = 30 * time.Second
+)
+
 func ingestResult(args []string, start time.Time) CommandResult {
 	options, parseErr := ingestdoc.ParseArgs(args)
 	if parseErr != nil {
@@ -122,7 +127,9 @@ func ingestEventsForOptions(root string, options ingestOptions) ([]map[string]an
 		if options.GitHubTokenEnv != "" {
 			token = os.Getenv(options.GitHubTokenEnv)
 		}
-		export, receipt, ingestErr := ingestdoc.FetchGitHubLiveOutcomeExport(context.Background(), http.DefaultClient, ingestdoc.GitHubLiveOptions{
+		ctx, cancel, client := githubLiveRequestContext()
+		defer cancel()
+		export, receipt, ingestErr := ingestdoc.FetchGitHubLiveOutcomeExport(ctx, client, ingestdoc.GitHubLiveOptions{
 			Repo:                repo,
 			PullNumbers:         options.GitHubPulls,
 			TokenEnv:            options.GitHubTokenEnv,
@@ -165,6 +172,11 @@ func ingestEventsForOptions(root string, options ingestOptions) ([]map[string]an
 		return nil, "", nil, commandErr
 	}
 	return events, sourceRef, nil, nil
+}
+
+func githubLiveRequestContext() (context.Context, context.CancelFunc, *http.Client) {
+	ctx, cancel := context.WithTimeout(context.Background(), githubLiveOverallTimeout)
+	return ctx, cancel, &http.Client{Timeout: githubLiveHTTPRequestTimeout}
 }
 
 func githubLiveReceiptData(receipt ingestdoc.GitHubLiveReceipt) map[string]any {

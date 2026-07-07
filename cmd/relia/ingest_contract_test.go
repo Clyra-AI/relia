@@ -5,10 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestIngestRejectsMalformedNumericFieldsBeforePersistence(t *testing.T) {
@@ -158,6 +160,26 @@ func TestIngestGitHubLiveDoesNotUseAmbientCredentials(t *testing.T) {
 	if result.Errors[0].Type != "credential_required" ||
 		!strings.Contains(result.Errors[0].Message, "explicit --github-token-env") {
 		t.Fatalf("errors = %#v", result.Errors)
+	}
+}
+
+func TestIngestGitHubLiveUsesBoundedRequestContext(t *testing.T) {
+	ctx, cancel, client := githubLiveRequestContext()
+	defer cancel()
+
+	deadline, ok := ctx.Deadline()
+	if !ok {
+		t.Fatalf("github live request context has no deadline")
+	}
+	remaining := time.Until(deadline)
+	if remaining <= 0 || remaining > githubLiveOverallTimeout {
+		t.Fatalf("github live deadline remaining = %v, want within %v", remaining, githubLiveOverallTimeout)
+	}
+	if client == http.DefaultClient {
+		t.Fatalf("github live client should not use http.DefaultClient")
+	}
+	if client.Timeout != githubLiveHTTPRequestTimeout {
+		t.Fatalf("github live client timeout = %v, want %v", client.Timeout, githubLiveHTTPRequestTimeout)
 	}
 }
 
