@@ -26,7 +26,10 @@
     ".factory/artifacts/task-runs/T11.1/proof-of-behavior-scorecard.json"
   ],
   "implementation_performed": true,
-  "produced_at_utc": "2026-07-07T12:27:33Z",
+  "produced_at_utc": "2026-07-07T13:28:04Z",
+  "repair_performed": true,
+  "repair_summary": "Tightened live GitHub revert intake so PR markers use exact token boundaries and PR 30 no longer matches PR 302 markers.",
+  "repair_task_id": "20260707T121442.197389000Z-relia-T11.1-repair-2",
   "schema_version": "1.0",
   "status": "implemented",
   "task_id": "T11.1"

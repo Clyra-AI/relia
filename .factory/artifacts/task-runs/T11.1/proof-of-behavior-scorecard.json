@@ -3,7 +3,7 @@
   "schema_version": "1.0",
   "task_id": "T11.1",
   "status": "pass",
-  "produced_at_utc": "2026-07-07T12:27:33Z",
+  "produced_at_utc": "2026-07-07T13:28:04Z",
   "acceptance_item_id": "FR3-GITHUB-LIVE-API-INTAKE-001",
   "required_proof_level": "workflow_behavior",
   "behavior_checks": [
@@ -52,6 +52,17 @@
       ]
     },
     {
+      "behavior": "revert commit intake requires exact PR markers and rejects PR-number prefix matches",
+      "status": "pass",
+      "evidence_refs": [
+        "internal/ingest/github_live.go",
+        "internal/ingest/github_live_test.go"
+      ],
+      "tests": [
+        "TestGitHubLiveCommitRevertsPullRequiresExactPRMarker"
+      ]
+    },
+    {
       "behavior": "pagination, rate-limit, auth failure, and API error semantics are deterministic and typed",
       "status": "pass",
       "evidence_refs": [
@@ -75,6 +86,11 @@
     }
   ],
   "commands": [
+    {
+      "command": "go test ./internal/ingest -run TestGitHubLiveCommitRevertsPullRequiresExactPRMarker -count=1",
+      "status": "pass",
+      "exit_code": 0
+    },
     {
       "command": "make prepush-full",
       "status": "pass",

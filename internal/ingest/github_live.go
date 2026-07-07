@@ -485,11 +485,36 @@ func githubLiveCommitRevertsPull(message string, pr int, headSHA string) bool {
 		"pr " + strconv.Itoa(pr),
 		"pr#" + strconv.Itoa(pr),
 	} {
-		if strings.Contains(normalized, marker) {
+		if githubLiveContainsExactPRMarker(normalized, marker) {
 			return true
 		}
 	}
 	return false
+}
+
+func githubLiveContainsExactPRMarker(message string, marker string) bool {
+	offset := 0
+	for offset < len(message) {
+		index := strings.Index(message[offset:], marker)
+		if index < 0 {
+			return false
+		}
+		index += offset
+		end := index + len(marker)
+		if githubLiveMarkerBoundary(message, index-1) && githubLiveMarkerBoundary(message, end) {
+			return true
+		}
+		offset = index + 1
+	}
+	return false
+}
+
+func githubLiveMarkerBoundary(value string, index int) bool {
+	if index < 0 || index >= len(value) {
+		return true
+	}
+	ch := value[index]
+	return !((ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9') || ch == '_')
 }
 
 func githubLiveReviewCorrectionMarked(body string) bool {

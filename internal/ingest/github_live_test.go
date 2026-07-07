@@ -173,6 +173,30 @@ func TestFetchGitHubLiveOutcomeExportMapsAPIError(t *testing.T) {
 	}
 }
 
+func TestGitHubLiveCommitRevertsPullRequiresExactPRMarker(t *testing.T) {
+	for _, message := range []string{
+		`Revert "tax change" (#30)`,
+		`Revert tax change via pull/30`,
+		`Revert tax change for PR 30`,
+		`Revert tax change for pr#30`,
+	} {
+		if !githubLiveCommitRevertsPull(message, 30, "") {
+			t.Fatalf("message %q did not match exact PR 30 marker", message)
+		}
+	}
+
+	for _, message := range []string{
+		`Revert "tax change" (#302)`,
+		`Revert tax change via https://github.com/acme/billing-service/pull/302`,
+		`Revert tax change for PR 302`,
+		`Revert tax change for pr#302`,
+	} {
+		if githubLiveCommitRevertsPull(message, 30, "") {
+			t.Fatalf("message %q matched PR 30, want no prefix match", message)
+		}
+	}
+}
+
 func approvedGitHubLiveOptions() GitHubLiveOptions {
 	return GitHubLiveOptions{
 		Repo:                Repo{Provider: "github", Owner: "acme", Name: "billing-service"},
