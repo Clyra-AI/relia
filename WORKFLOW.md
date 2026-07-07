@@ -20,6 +20,25 @@ This repo accepts work from:
 5. commit-push
 6. post-merge-monitor
 
+## Supervised Autoship
+
+When the operator wants daemon-led implementation with bounded oversight, use
+the Factory `autoship-supervisor` skill from the Relia repo root and bind it to
+exactly one task ID, for example `T12`.
+
+The supervisor may start or resume `factoryd run` with the autoship config, but
+`factoryd` remains the implementation and shipping engine. The supervisor only
+classifies blockers, records human acceptance when a task explicitly requires
+approval evidence, applies narrow manual repair after daemon stop or
+non-convergence, and confirms CI, Codex review, merge, post-merge, and
+item-level scope closure. Any intervention must be recorded as an
+`autoship_supervisor_report` under
+`.factory/artifacts/supervisor-runs/<task_id>/`.
+
+Do not use supervised autoship to widen task scope, bypass lifecycle gates,
+edit PRD-derived control artifacts directly, or close acceptance with broad
+labels instead of item-level evidence.
+
 ## Validation Lanes
 
 - Fast lane: make lint-fast, make test-fast

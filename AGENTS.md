@@ -69,6 +69,13 @@ factoryd-owned evidence such as scope closure, PR lifecycle, and run-once
 reports; workers must not fabricate those files or mark worker validation
 blocked only because lifecycle artifacts do not exist before shipping.
 
+When a task is run through Factory `autoship-supervisor`, bind supervision to
+one task ID and keep the supervisor as the judgment layer only. It may classify
+blockers, record explicit human acceptance, or make narrow repair after daemon
+stop/non-convergence, but it must not replace `factoryd` as the implementation
+or shipping engine. Supervisor decisions belong in
+`.factory/artifacts/supervisor-runs/<task_id>/`.
+
 ## 6. CI And Scanner Posture
 
 Relia is public. Pull requests must preserve the required-check manifest,
