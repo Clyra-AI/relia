@@ -97,7 +97,8 @@ func ParseGitHubOutcomeEvents(content []byte, ref string) ([]map[string]any, *Er
 			}
 			events = append(events, event)
 		}
-		if githubString(pull, "merged_at") != "" && failingChecks == 0 && len(reverts) == 0 && len(reviewCorrections) == 0 {
+		revertScanTruncated := githubBool(pull, "revert_scan_truncated", "metadata.revert_scan_truncated")
+		if githubString(pull, "merged_at") != "" && !revertScanTruncated && failingChecks == 0 && len(reverts) == 0 && len(reviewCorrections) == 0 {
 			event, commandErr := githubOutcomeEvent(base, pull, githubOutcomeEventOptions{
 				Kind:           "merged_clean",
 				RecordedAt:     githubString(pull, "merged_at", "updated_at", "created_at"),

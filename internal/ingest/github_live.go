@@ -190,12 +190,13 @@ func (f *githubLiveFetcher) pull(number int) (map[string]any, *Error) {
 		return nil, commandErr
 	}
 	checkRuns := []map[string]any{}
-	if headSHA != "" {
-		checkPath := fmt.Sprintf("/repos/%s/%s/commits/%s/check-runs?filter=all&per_page=100", url.PathEscape(f.options.Repo.Owner), url.PathEscape(f.options.Repo.Name), url.PathEscape(headSHA))
-		checkRuns, commandErr = f.getArray(checkPath, "check_runs", "check_runs")
+	for _, commitSHA := range githubLiveCommitSHAs(prCommits, headSHA) {
+		checkPath := fmt.Sprintf("/repos/%s/%s/commits/%s/check-runs?filter=all&per_page=100", url.PathEscape(f.options.Repo.Owner), url.PathEscape(f.options.Repo.Name), url.PathEscape(commitSHA))
+		commitCheckRuns, commandErr := f.getArray(checkPath, "check_runs", "check_runs")
 		if commandErr != nil {
 			return nil, commandErr
 		}
+		checkRuns = append(checkRuns, commitCheckRuns...)
 	}
 	reviewComments, commandErr := f.getArray(pullPath+"/comments?per_page=100", "", "pull_review_comments")
 	if commandErr != nil {
@@ -207,13 +208,14 @@ func (f *githubLiveFetcher) pull(number int) (map[string]any, *Error) {
 		return nil, commandErr
 	}
 	commits := []map[string]any{}
+	revertScanTruncated := false
 	if mergedAt != "" {
 		commitsPath := fmt.Sprintf("/repos/%s/%s/commits?per_page=100", url.PathEscape(f.options.Repo.Owner), url.PathEscape(f.options.Repo.Name))
 		if baseRef != "" {
 			commitsPath += "&sha=" + url.QueryEscape(baseRef)
 		}
 		commitsPath += "&since=" + url.QueryEscape(mergedAt)
-		commits, commandErr = f.getArrayAllowTruncated(commitsPath, "", "commits")
+		commits, revertScanTruncated, commandErr = f.getArrayAllowTruncated(commitsPath, "", "commits")
 		if commandErr != nil {
 			return nil, commandErr
 		}
@@ -231,6 +233,9 @@ func (f *githubLiveFetcher) pull(number int) (map[string]any, *Error) {
 	}
 	if mergeCommitSHA != "" {
 		pull["merge_commit_sha"] = mergeCommitSHA
+	}
+	if revertScanTruncated {
+		pull["revert_scan_truncated"] = true
 	}
 	if labels := sanitizeGitHubLiveLabels(githubOutcomeObjects(rawPull, "labels")); len(labels) > 0 {
 		pull["labels"] = labels
@@ -263,14 +268,15 @@ func (f *githubLiveFetcher) getObject(requestPath string, resource string) (map[
 }
 
 func (f *githubLiveFetcher) getArray(requestPath string, objectKey string, resource string) ([]map[string]any, *Error) {
-	return f.getArrayWithPageLimit(requestPath, objectKey, resource, false)
+	values, _, commandErr := f.getArrayWithPageLimit(requestPath, objectKey, resource, false)
+	return values, commandErr
 }
 
-func (f *githubLiveFetcher) getArrayAllowTruncated(requestPath string, objectKey string, resource string) ([]map[string]any, *Error) {
+func (f *githubLiveFetcher) getArrayAllowTruncated(requestPath string, objectKey string, resource string) ([]map[string]any, bool, *Error) {
 	return f.getArrayWithPageLimit(requestPath, objectKey, resource, true)
 }
 
-func (f *githubLiveFetcher) getArrayWithPageLimit(requestPath string, objectKey string, resource string, allowTruncated bool) ([]map[string]any, *Error) {
+func (f *githubLiveFetcher) getArrayWithPageLimit(requestPath string, objectKey string, resource string, allowTruncated bool) ([]map[string]any, bool, *Error) {
 	var result []map[string]any
 	nextPath := requestPath
 	pages := 0
@@ -278,22 +284,22 @@ func (f *githubLiveFetcher) getArrayWithPageLimit(requestPath string, objectKey 
 		pages++
 		if pages > f.options.MaxPages {
 			if allowTruncated {
-				return result, nil
+				return result, true, nil
 			}
-			return nil, githubAPIError("github api pagination exceeded configured page limit", resource)
+			return nil, false, githubAPIError("github api pagination exceeded configured page limit", resource)
 		}
 		decoded, header, commandErr := f.doJSON(nextPath, resource)
 		if commandErr != nil {
-			return nil, commandErr
+			return nil, false, commandErr
 		}
 		values, commandErr := githubLiveArrayFromDecoded(decoded, objectKey, resource)
 		if commandErr != nil {
-			return nil, commandErr
+			return nil, false, commandErr
 		}
 		result = append(result, values...)
 		nextPath = githubLiveNextLink(header.Get("Link"))
 	}
-	return result, nil
+	return result, false, nil
 }
 
 func (f *githubLiveFetcher) doJSON(requestPath string, resource string) (any, http.Header, *Error) {
@@ -479,6 +485,19 @@ func sanitizeGitHubLiveCheckRuns(checkRuns []map[string]any) []map[string]any {
 		result = append(result, sanitized)
 	}
 	return result
+}
+
+func githubLiveCommitSHAs(commits []map[string]any, headSHA string) []string {
+	values := make([]string, 0, len(commits)+1)
+	for _, commit := range commits {
+		if sha := githubString(commit, "sha", "commit.sha", "head_sha"); sha != "" {
+			values = append(values, sha)
+		}
+	}
+	if headSHA != "" {
+		values = append(values, headSHA)
+	}
+	return uniqueStrings(values)
 }
 
 func sanitizeGitHubLiveCoauthorTrailers(commits []map[string]any) []string {

@@ -297,6 +297,72 @@ func TestFetchGitHubLiveOutcomeExportMatchesMergeCommitSHARevert(t *testing.T) {
 	}
 }
 
+func TestFetchGitHubLiveOutcomeExportFetchesChecksForEveryPRCommit(t *testing.T) {
+	client := newFakeGitHubLiveClient(map[string]fakeGitHubLiveResponse{
+		"/repos/acme/billing-service/pulls/302": {
+			body: `{
+				"number": 302,
+				"html_url": "https://github.com/acme/billing-service/pull/302",
+				"head": {"sha": "abc302"},
+				"labels": [{"name": "agent-authored"}]
+			}`,
+		},
+		"/repos/acme/billing-service/pulls/302/files?per_page=100": {
+			body: `[{"filename": "packages/billing/tax.py"}]`,
+		},
+		"/repos/acme/billing-service/pulls/302/commits?per_page=100": {
+			body: `[{"sha": "old302"}, {"sha": "abc302"}]`,
+		},
+		"/repos/acme/billing-service/commits/old302/check-runs?filter=all&per_page=100": {
+			body: `{"check_runs": [{
+				"name": "validate",
+				"conclusion": "failure",
+				"completed_at": "2026-06-02T11:00:00Z",
+				"html_url": "https://github.com/acme/billing-service/actions/runs/301",
+				"head_sha": "old302",
+				"output": {"summary": "unit test failed before fix"}
+			}]}`,
+		},
+		"/repos/acme/billing-service/commits/abc302/check-runs?filter=all&per_page=100": {
+			body: `{"check_runs": [{
+				"name": "validate",
+				"conclusion": "success",
+				"completed_at": "2026-06-02T12:00:00Z",
+				"html_url": "https://github.com/acme/billing-service/actions/runs/302",
+				"head_sha": "abc302"
+			}]}`,
+		},
+		"/repos/acme/billing-service/pulls/302/comments?per_page=100": {
+			body: `[]`,
+		},
+		"/repos/acme/billing-service/issues/302/comments?per_page=100": {
+			body: `[]`,
+		},
+	})
+
+	export, _, ingestErr := FetchGitHubLiveOutcomeExport(context.Background(), client, approvedGitHubLiveOptions())
+	if ingestErr != nil {
+		t.Fatalf("FetchGitHubLiveOutcomeExport returned error: %v", ingestErr)
+	}
+	content, err := json.Marshal(export)
+	if err != nil {
+		t.Fatalf("marshal export: %v", err)
+	}
+	events, ingestErr := ParseGitHubOutcomeEvents(content, "github-live-replay.json")
+	if ingestErr != nil {
+		t.Fatalf("ParseGitHubOutcomeEvents returned error: %v", ingestErr)
+	}
+	if len(events) != 1 {
+		t.Fatalf("events = %d, want only prior commit CI failure: %#v", len(events), events)
+	}
+	if got := stringFromAny(events[0]["outcome_kind"]); got != "ci_failure" {
+		t.Fatalf("outcome_kind = %q, want ci_failure", got)
+	}
+	if got := stringFromAny(events[0]["commit"]); got != "old302" {
+		t.Fatalf("commit = %q, want old302", got)
+	}
+}
+
 func TestFetchGitHubLiveOutcomeExportDoesNotFailOnLongRevertScan(t *testing.T) {
 	client := newFakeGitHubLiveClient(map[string]fakeGitHubLiveResponse{
 		"/repos/acme/billing-service/pulls/302": {
@@ -336,6 +402,14 @@ func TestFetchGitHubLiveOutcomeExportDoesNotFailOnLongRevertScan(t *testing.T) {
 	if ingestErr != nil {
 		t.Fatalf("FetchGitHubLiveOutcomeExport returned error: %v", ingestErr)
 	}
+	pulls, ok := export["pull_requests"].([]any)
+	if !ok || len(pulls) != 1 {
+		t.Fatalf("pull_requests = %#v, want one pull", export["pull_requests"])
+	}
+	pull, ok := pulls[0].(map[string]any)
+	if !ok || pull["revert_scan_truncated"] != true {
+		t.Fatalf("pull revert_scan_truncated = %#v, want true", pulls[0])
+	}
 	for _, request := range client.requests {
 		if strings.Contains(request.path, "page=2") {
 			t.Fatalf("unexpected request after optional revert scan page cap: %#v", client.requests)
@@ -345,8 +419,8 @@ func TestFetchGitHubLiveOutcomeExportDoesNotFailOnLongRevertScan(t *testing.T) {
 	if err != nil {
 		t.Fatalf("marshal export: %v", err)
 	}
-	if _, ingestErr := ParseGitHubOutcomeEvents(content, "github-live-replay.json"); ingestErr != nil {
-		t.Fatalf("ParseGitHubOutcomeEvents returned error: %v", ingestErr)
+	if _, ingestErr := ParseGitHubOutcomeEvents(content, "github-live-replay.json"); ingestErr == nil || !strings.Contains(ingestErr.Message, "produced no supported outcomes") {
+		t.Fatalf("ParseGitHubOutcomeEvents error = %#v, want no clean outcome from truncated revert scan", ingestErr)
 	}
 }
 
