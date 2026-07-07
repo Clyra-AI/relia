@@ -211,6 +211,43 @@ func TestParseGitHubOutcomeEventsRejectsSelfReportSourceMetadata(t *testing.T) {
 	}
 }
 
+func TestParseGitHubOutcomeEventsRejectsSelfReportSourceFormat(t *testing.T) {
+	for _, testCase := range []struct {
+		name   string
+		prefix string
+	}{
+		{name: "top_level", prefix: `"source_format": "agent_self_report",`},
+		{name: "metadata", prefix: `"metadata": {"source_format": "agent_reflection"},`},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			_, ingestErr := ParseGitHubOutcomeEvents([]byte(`{
+  `+testCase.prefix+`
+  "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},
+  "pull_requests": [
+    {
+      "number": 411,
+      "head_sha": "abc411",
+      "html_url": "https://github.com/acme/billing-service/pull/411",
+      "files": [{"filename": "packages/billing/invoice.py"}],
+      "check_runs": [
+        {
+          "name": "validate",
+          "conclusion": "failure",
+          "completed_at": "2026-06-15T12:10:00Z",
+          "html_url": "https://github.com/acme/billing-service/actions/runs/411"
+        }
+      ]
+    }
+  ]
+}`), "github-outcomes.json")
+
+			if ingestErr == nil || ingestErr.Kind != ErrorArtifactContract {
+				t.Fatalf("error = %#v, want artifact contract error", ingestErr)
+			}
+		})
+	}
+}
+
 func TestParseGitHubOutcomeEventsPrefersHeadSHAOverMergeCommit(t *testing.T) {
 	events, ingestErr := ParseGitHubOutcomeEvents([]byte(`{
   "repo": {"provider": "github", "owner": "acme", "name": "billing-service"},

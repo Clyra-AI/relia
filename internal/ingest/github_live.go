@@ -182,7 +182,7 @@ func (f *githubLiveFetcher) pull(number int) (map[string]any, *Error) {
 	}
 	checkRuns := []map[string]any{}
 	if headSHA != "" {
-		checkPath := fmt.Sprintf("/repos/%s/%s/commits/%s/check-runs?per_page=100", url.PathEscape(f.options.Repo.Owner), url.PathEscape(f.options.Repo.Name), url.PathEscape(headSHA))
+		checkPath := fmt.Sprintf("/repos/%s/%s/commits/%s/check-runs?filter=all&per_page=100", url.PathEscape(f.options.Repo.Owner), url.PathEscape(f.options.Repo.Name), url.PathEscape(headSHA))
 		checkRuns, commandErr = f.getArray(checkPath, "check_runs", "check_runs")
 		if commandErr != nil {
 			return nil, commandErr

@@ -59,7 +59,7 @@ func TestFetchGitHubLiveOutcomeExportBuildsReplayableStructuredOutcomes(t *testi
 				}
 			]`,
 		},
-		"/repos/acme/billing-service/commits/abc302/check-runs?per_page=100": {
+		"/repos/acme/billing-service/commits/abc302/check-runs?filter=all&per_page=100": {
 			body: `{
 				"check_runs": [
 					{
@@ -169,7 +169,7 @@ func TestFetchGitHubLiveOutcomeExportMatchesMergeCommitSHARevert(t *testing.T) {
 		"/repos/acme/billing-service/pulls/302/commits?per_page=100": {
 			body: `[]`,
 		},
-		"/repos/acme/billing-service/commits/abc302/check-runs?per_page=100": {
+		"/repos/acme/billing-service/commits/abc302/check-runs?filter=all&per_page=100": {
 			body: `{"check_runs": []}`,
 		},
 		"/repos/acme/billing-service/pulls/302/comments?per_page=100": {
