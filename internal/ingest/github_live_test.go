@@ -194,6 +194,41 @@ func TestFetchGitHubLiveOutcomeExportReadsTokenEnvAfterApprovalGates(t *testing.
 	}
 }
 
+func TestFetchGitHubLiveOutcomeExportRejectsUnsafeTokenEnvWithoutLeakingValue(t *testing.T) {
+	rawToken := "github_pat_1234567890abcdef1234567890abcdef123456"
+	options := approvedGitHubLiveOptions()
+	options.TokenEnv = rawToken
+	options.Token = ""
+
+	_, _, ingestErr := FetchGitHubLiveOutcomeExport(context.Background(), &fakeGitHubLiveClient{}, options)
+	if ingestErr == nil || ingestErr.Kind != ErrorCredential {
+		t.Fatalf("error = %#v, want credential error", ingestErr)
+	}
+	if strings.Contains(ingestErr.Ref, rawToken) || strings.Contains(ingestErr.Message, rawToken) {
+		t.Fatalf("error leaked token value: %#v", ingestErr)
+	}
+	if ingestErr.Ref != githubTokenEnvRef {
+		t.Fatalf("ref = %q, want %q", ingestErr.Ref, githubTokenEnvRef)
+	}
+}
+
+func TestFetchGitHubLiveOutcomeExportMissingTokenEnvUsesConstantRef(t *testing.T) {
+	options := approvedGitHubLiveOptions()
+	options.TokenEnv = "RELIA_MISSING_GITHUB_TOKEN_FOR_TEST"
+	options.Token = ""
+
+	_, _, ingestErr := FetchGitHubLiveOutcomeExport(context.Background(), &fakeGitHubLiveClient{}, options)
+	if ingestErr == nil || ingestErr.Kind != ErrorCredential {
+		t.Fatalf("error = %#v, want credential error", ingestErr)
+	}
+	if strings.Contains(ingestErr.Ref, options.TokenEnv) {
+		t.Fatalf("ref leaked token env value: %#v", ingestErr)
+	}
+	if ingestErr.Ref != githubTokenEnvRef {
+		t.Fatalf("ref = %q, want %q", ingestErr.Ref, githubTokenEnvRef)
+	}
+}
+
 func TestFetchGitHubLiveOutcomeExportMatchesMergeCommitSHARevert(t *testing.T) {
 	client := newFakeGitHubLiveClient(map[string]fakeGitHubLiveResponse{
 		"/repos/acme/billing-service/pulls/302": {

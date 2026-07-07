@@ -17,6 +17,7 @@ const (
 	githubLiveAPIHost    = "api.github.com"
 	githubLiveSource     = "github_live_api"
 	githubLiveMaxPages   = 10
+	githubTokenEnvRef    = "relia ingest --github-token-env"
 )
 
 type GitHubLiveOptions struct {
@@ -131,12 +132,15 @@ func normalizeGitHubLiveOptions(options GitHubLiveOptions) (GitHubLiveOptions, G
 	if options.TokenEnv == "" {
 		return options, receipt, credentialRequiredError("live GitHub API intake requires explicit --github-token-env and never reads ambient credentials", "docs/architecture/architecture_guides.md#trust-mode-posture")
 	}
+	if !validEnvironmentVariableName(options.TokenEnv) {
+		return options, receipt, credentialRequiredError("live GitHub API token environment must be an environment variable name", githubTokenEnvRef)
+	}
 	options.Token = strings.TrimSpace(options.Token)
 	if options.Token == "" {
 		options.Token = strings.TrimSpace(os.Getenv(options.TokenEnv))
 	}
 	if options.Token == "" {
-		return options, receipt, credentialRequiredError("live GitHub API token environment is unset or empty", options.TokenEnv)
+		return options, receipt, credentialRequiredError("live GitHub API token environment is unset or empty", githubTokenEnvRef)
 	}
 	options.TokenScope = strings.TrimSpace(options.TokenScope)
 	if options.TokenScope != "read-only" {
@@ -598,6 +602,23 @@ func validGitHubPathSegment(value string) bool {
 			r == '-' ||
 			r == '_' ||
 			r == '.' {
+			continue
+		}
+		return false
+	}
+	return true
+}
+
+func validEnvironmentVariableName(value string) bool {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return false
+	}
+	for index, r := range value {
+		if (r >= 'A' && r <= 'Z') ||
+			(r >= 'a' && r <= 'z') ||
+			r == '_' ||
+			(index > 0 && r >= '0' && r <= '9') {
 			continue
 		}
 		return false
