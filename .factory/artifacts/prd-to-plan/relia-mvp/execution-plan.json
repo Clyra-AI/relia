@@ -744,6 +744,20 @@
     "worker_type": "codex_cli",
     "workspace_root": ".factoryd/workspaces/"
   },
+  "supervised_autoship_policy": {
+    "skill_ref": "factory://skills/autoship-supervisor",
+    "scope_rule": "Bind supervision to exactly one selected task ID per run.",
+    "daemon_authority": "factoryd remains the implementation, validation, PR, review, merge, post-merge, and routine repair engine.",
+    "allowed_interventions": [
+      "typed blocker classification",
+      "explicit human acceptance for gated evidence",
+      "narrow repair after daemon stop or non-convergence",
+      "plan update or systemic follow-up when the task contract is stale"
+    ],
+    "evidence_artifact_type": "autoship_supervisor_report",
+    "evidence_path": ".factory/artifacts/supervisor-runs/<task_id>/<timestamp>.json",
+    "task_packet_policy": "Runner-ready task packets remain daemon-owned; supervised autoship adds supervisor evidence only when the supervisor skill is explicitly used."
+  },
   "feedback_plan": "Use make prepush-full, validation reports, PR lifecycle reports, and scope closure.",
   "generated_at": "2026-06-11T15:48:57Z",
   "handoff_conditions": [
