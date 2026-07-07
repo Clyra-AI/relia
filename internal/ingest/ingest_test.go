@@ -114,6 +114,24 @@ func TestRedactForPersistenceFailsClosedForUnsafeGitHubURLPath(t *testing.T) {
 	}
 }
 
+func TestRedactForPersistenceAllowsCanonicalGitHubDetailsURL(t *testing.T) {
+	_, err := RedactForPersistence(map[string]any{
+		"details_url": "https://github.com/acme/billing-service/actions/runs/1234567890/job/9876543210",
+	}, "input.json")
+	if err != nil {
+		t.Fatalf("error = %#v, want canonical GitHub details URL allowed", err)
+	}
+}
+
+func TestRedactForPersistenceFailsClosedForUnsafeGitHubDetailsURL(t *testing.T) {
+	_, err := RedactForPersistence(map[string]any{
+		"details_url": "https://github.com/acme/billing-service/actions/runs/z6MvN2p9QxR4sT8aK3vY7bL0cD5eF1gH2jP9mQ4rS6tU",
+	}, "input.json")
+	if err == nil || err.Kind != ErrorRedactionSafety || !strings.Contains(err.Message, "high-entropy") {
+		t.Fatalf("error = %#v, want redaction safety", err)
+	}
+}
+
 func TestValidGitHubProvenanceURLShape(t *testing.T) {
 	if !ValidGitHubProvenanceURLShape("https://github.com/acme/billing-service/pull/142") {
 		t.Fatal("expected clean GitHub URL")

@@ -1,0 +1,48 @@
+{
+  "object_type": "relia.command_result",
+  "schema_version": "1.0",
+  "command": "ingest",
+  "status": "pass",
+  "mode": "ingest",
+  "exit_code": 0,
+  "warnings": [],
+  "errors": [],
+  "artifacts": [],
+  "evidence_refs": [
+    "docs/product/prd.md#command-model",
+    "docs/dev/dev_guides.md#agent-native-cli-policy",
+    "schemas/command-result.schema.json",
+    "docs/product/prd.md#2-ingest",
+    "schemas/experience-record.schema.json"
+  ],
+  "duration_ms": 6989,
+  "redaction_status": "applied",
+  "metadata": {
+    "relia_version": "0.0.0-dev",
+    "schema_ref": "schemas/command-result.schema.json",
+    "schema_version": "1.0"
+  },
+  "data": {
+    "artifact_root": ".relia",
+    "commit_experiences": false,
+    "experience_shards": [],
+    "experiences_agent_attributed": 0,
+    "experiences_human_attributed": 0,
+    "experiences_persisted": 0,
+    "experiences_skipped_uncertain": 1,
+    "experiences_total": 1,
+    "github_live_receipt": {
+      "api_host": "api.github.com",
+      "pages_fetched": 18,
+      "pull_requests_fetched": 1,
+      "read_only": true,
+      "requests_made": 18,
+      "source_format": "github_live_api",
+      "token_env": "RELIA_GITHUB_TOKEN",
+      "token_scope": "read-only"
+    },
+    "message": "ingested canonical experience records",
+    "source_format": "github_live_api",
+    "source_ref": "github-live-api"
+  }
+}

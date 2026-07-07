@@ -140,7 +140,9 @@
       "evidence_mode": "external",
       "evidence_refs": [
         ".factory/artifacts/acceptance-evidence/FR3-GITHUB-LIVE-API-INTAKE-001/20260707T125612.642813000Z.json",
-        ".factory/artifacts/task-runs/T11.1/proof-of-behavior-scorecard.json#FR3-GITHUB-LIVE-API-INTAKE-001"
+        ".factory/artifacts/task-runs/T11.1/proof-of-behavior-scorecard.json#FR3-GITHUB-LIVE-API-INTAKE-001",
+        ".factory/artifacts/acceptance-evidence/FR3-GITHUB-LIVE-API-INTAKE-001/20260707T154528.039363000Z.json",
+        ".factory/artifacts/acceptance-evidence/FR3-GITHUB-LIVE-API-INTAKE-001/20260707T154100.000000000Z-live-smoke-command-result.json"
       ],
       "group_id": "fr3-github-outcome-intake",
       "kind": "acceptance_test",
@@ -148,7 +150,7 @@
         "Added as a governed follow-on so live GitHub API intake is explicit and cannot be folded into T11 or T12 without approval.",
         "T10 remains closed for offline structured GitHub export intake only; this item requires live network, credential, and human approval evidence before closure."
       ],
-      "recorded_at": "2026-07-07T12:56:12Z",
+      "recorded_at": "2026-07-07T15:45:28Z",
       "recorded_by": "davidahmann",
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#fr3-github-outcome-intake",

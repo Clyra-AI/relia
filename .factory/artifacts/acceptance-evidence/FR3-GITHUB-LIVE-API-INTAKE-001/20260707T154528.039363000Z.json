@@ -1,0 +1,14 @@
+{
+  "acceptance_item_id": "FR3-GITHUB-LIVE-API-INTAKE-001",
+  "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+  "artifact_type": "acceptance_evidence_record",
+  "expires_at": "",
+  "external_evidence_ref": ".factory/artifacts/acceptance-evidence/FR3-GITHUB-LIVE-API-INTAKE-001/20260707T154100.000000000Z-live-smoke-command-result.json",
+  "generated_at": "2026-07-07T15:45:28Z",
+  "generated_by": "factoryd record-acceptance",
+  "notes": "Reviewed T11.1 daemon implementation plus explicit live GitHub API smoke evidence after merge. The live smoke ran relia ingest --github-live against Clyra-AI/relia PR #153 with --github-token-env RELIA_GITHUB_TOKEN, --github-token-scope read-only, --allow-network, --allow-credentials, and --human-approved. It used the token only through the named environment variable, reported api.github.com, read_only=true, source_format=github_live_api, one PR fetched, and redaction_status=applied. A token-leak scan found no persisted GitHub token value or authorization header value; the only credential-related persisted value is the approved token env var name. Deterministic fake-client tests and make prepush-full remain required validation.",
+  "repo": "relia",
+  "reviewer": "davidahmann",
+  "schema_version": "0.1",
+  "status": "implemented"
+}

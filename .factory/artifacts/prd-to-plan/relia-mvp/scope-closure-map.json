@@ -703,9 +703,11 @@
           "acceptance_item_id": "FR3-GITHUB-LIVE-API-INTAKE-001",
           "evidence_refs": [
             ".factory/artifacts/acceptance-evidence/FR3-GITHUB-LIVE-API-INTAKE-001/20260707T125612.642813000Z.json",
-            ".factory/artifacts/task-runs/T11.1/proof-of-behavior-scorecard.json#FR3-GITHUB-LIVE-API-INTAKE-001"
+            ".factory/artifacts/task-runs/T11.1/proof-of-behavior-scorecard.json#FR3-GITHUB-LIVE-API-INTAKE-001",
+            ".factory/artifacts/acceptance-evidence/FR3-GITHUB-LIVE-API-INTAKE-001/20260707T154528.039363000Z.json",
+            ".factory/artifacts/acceptance-evidence/FR3-GITHUB-LIVE-API-INTAKE-001/20260707T154100.000000000Z-live-smoke-command-result.json"
           ],
-          "recorded_at": "2026-07-07T12:56:12Z",
+          "recorded_at": "2026-07-07T15:45:28Z",
           "recorded_by": "davidahmann",
           "repair_task_refs": [],
           "status": "implemented"
@@ -722,7 +724,9 @@
         "factoryd://runs/20260707T121442.197389000Z-relia-T11.1/lifecycle/ship-packet.json",
         "factoryd://runs/20260707T121442.197389000Z-relia-T11.1/lifecycle/pr-lifecycle-report.json",
         "factoryd://runs/20260707T121442.197389000Z-relia-T11.1/lifecycle/post-merge-report.json",
-        "factoryd://runs/20260707T121442.197389000Z-relia-T11.1/lifecycle/scope-closure-report.json"
+        "factoryd://runs/20260707T121442.197389000Z-relia-T11.1/lifecycle/scope-closure-report.json",
+        ".factory/artifacts/acceptance-evidence/FR3-GITHUB-LIVE-API-INTAKE-001/20260707T154528.039363000Z.json",
+        ".factory/artifacts/acceptance-evidence/FR3-GITHUB-LIVE-API-INTAKE-001/20260707T154100.000000000Z-live-smoke-command-result.json"
       ],
       "group_id": "fr3-github-outcome-intake",
       "implemented_task_refs": [
@@ -6361,7 +6365,7 @@
       ]
     }
   ],
-  "last_updated_at": "2026-07-07T15:30:31Z",
+  "last_updated_at": "2026-07-07T15:45:28Z",
   "schema_version": "0.1",
   "source_prd_ref": "docs/product/prd.md"
 }
