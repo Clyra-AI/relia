@@ -40,12 +40,12 @@ func serveResult(args []string, start time.Time) CommandResult {
 	if commandErr != nil {
 		return withFormat(errorResult("serve", "serve", commandErr, start))
 	}
+	if options.Tool != "" {
+		return withFormat(serveToolResult(root, options, rules, start, warnings))
+	}
 	servedRules, commandErr := servedRuleData(rules)
 	if commandErr != nil {
 		return withFormat(errorResult("serve", "serve", commandErr, start))
-	}
-	if options.Tool != "" {
-		return withFormat(serveToolResult(root, options, rules, start, warnings))
 	}
 	result := passResult("serve", "serve", "exposed local MCP capability manifest for active memory rules", start, map[string]any{
 		"format":                  options.Format,

@@ -228,6 +228,71 @@ metadata: {}
 	}
 }
 
+func TestServeRecallIgnoresUnservedMalformedRuleCitations(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "billing-time.yaml"), `object_type: relia.memory_rule
+schema_version: "1.0"
+id: billing-time-fixture
+kind: avoid
+status: active
+statement: Use the billing clock fixture instead of direct UTC calls.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.86
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_0142
+provenance:
+  - pr: 142
+    outcome: ci_failure
+    url: https://github.com/acme/billing-service/pull/142
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`)
+	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "unrelated-tests.yaml"), `object_type: relia.memory_rule
+schema_version: "1.0"
+id: unrelated-tests-fixture
+kind: avoid
+status: active
+statement: Tests-only history should not block unrelated recall tool responses.
+scope:
+  paths:
+    - tests/
+confidence: 0.82
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_0999
+provenance:
+  - pr: 999
+    outcome: ci_failure
+    url: https://example.com/not-a-pr
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "serve", "--tool", "recall", "--context", "I am changing packages/billing/invoice.py rollover logic"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("serve recall exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	toolResult := result.Data["tool_result"].(map[string]any)
+	rules := toolResult["rules"].([]any)
+	if len(rules) != 1 || !strings.Contains(fmt.Sprint(rules[0]), "billing-time-fixture") || strings.Contains(fmt.Sprint(rules), "unrelated-tests-fixture") {
+		t.Fatalf("recall rules = %#v", rules)
+	}
+}
+
 func TestServeCoverageLabelsCoveredAndOutOfDistributionPaths(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
@@ -297,6 +362,57 @@ metadata: {}
 	summary := toolResult["summary"].(map[string]any)
 	if int(summary["no_coverage_count"].(float64)) != 1 || int(summary["covered_risky_count"].(float64)) != 1 {
 		t.Fatalf("summary = %#v", summary)
+	}
+}
+
+func TestServeCoverageIgnoresUnservedMalformedRuleCitations(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "unrelated-tests.yaml"), `object_type: relia.memory_rule
+schema_version: "1.0"
+id: unrelated-tests-fixture
+kind: avoid
+status: active
+statement: Tests-only history should not block no-coverage tool responses.
+scope:
+  paths:
+    - tests/
+confidence: 0.82
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_0999
+provenance:
+  - pr: 999
+    outcome: ci_failure
+    url: https://example.com/not-a-pr
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "serve", "--tool", "coverage", "--paths", "packages/search/query.py"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("serve coverage exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	toolResult := result.Data["tool_result"].(map[string]any)
+	entries := toolResult["entries"].([]any)
+	if len(entries) != 1 {
+		t.Fatalf("coverage entries = %#v", entries)
+	}
+	entry := entries[0].(map[string]any)
+	if entry["coverage"] != "no_coverage" || entry["out_of_distribution"] != true {
+		t.Fatalf("coverage entry = %#v", entry)
+	}
+	if got := stringsFromInterfaceSlice(t, entry["matched_rule_ids"]); len(got) != 0 {
+		t.Fatalf("matched_rule_ids = %#v, want empty list", got)
+	}
+	if got := stringsFromInterfaceSlice(t, entry["citations"]); len(got) != 0 {
+		t.Fatalf("citations = %#v, want empty list", got)
 	}
 }
 
