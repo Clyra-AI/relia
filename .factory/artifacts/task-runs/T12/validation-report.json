@@ -3,12 +3,13 @@
   "schema_version": "1.0",
   "task_id": "T12",
   "status": "pass",
-  "produced_at": "2026-07-07T18:43:11Z",
+  "produced_at": "2026-07-07T19:08:45Z",
   "repair_task_id": "20260707T181313.827303000Z-relia-T12-repair",
   "commands_run": [
     "make lint-fast",
     "make test-fast",
     "go test ./cmd/relia -run 'TestServe(RecallIgnoresUnservedMalformedRuleCitations|CoverageIgnoresUnservedMalformedRuleCitations|FailsClosedForInvalidRuleCitationURL)' -count=1",
+    "go test ./cmd/relia -run 'TestServeAssessToolRedactsExternalInputRefs|TestServeAssessToolUsesAssessmentEngine|TestServeRecallIgnoresUnservedMalformedRuleCitations|TestServeCoverageIgnoresUnservedMalformedRuleCitations' -count=1",
     "make prepush-full",
     "python3 -m json.tool .factory/artifacts/task-runs/T12/work-proof-marker.json",
     "python3 -m json.tool .factory/artifacts/task-runs/T12/validation-report.json",
@@ -35,6 +36,15 @@
         "https://github.com/Clyra-AI/relia/pull/156#discussion_r3538788812"
       ],
       "summary": "Review gate reported actionable discussion_r3538788812: serve --tool dispatch validated every active rule before matched recall or coverage/no_coverage responses."
+    },
+    {
+      "command": "canonical Codex review gate after first repair push",
+      "status": "expected_fail",
+      "exit_code": 2,
+      "evidence_refs": [
+        "https://github.com/Clyra-AI/relia/pull/156#discussion_r3538986825"
+      ],
+      "summary": "Review gate reported actionable discussion_r3538986825: serve --tool assess returned a sanitized display path in the payload but still emitted the raw external input path in artifact and evidence refs."
     }
   ],
   "green_evidence": [
@@ -43,6 +53,12 @@
       "status": "pass",
       "exit_code": 0,
       "summary": "Focused repair tests verify recall and coverage ignore unserved malformed rule citations while manifest serve remains fail-closed."
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestServeAssessToolRedactsExternalInputRefs|TestServeAssessToolUsesAssessmentEngine|TestServeRecallIgnoresUnservedMalformedRuleCitations|TestServeCoverageIgnoresUnservedMalformedRuleCitations' -count=1",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "Focused repair tests verify serve assess external input refs use the redacted external-input display path and preserve the prior recall/coverage repair behavior."
     }
   ],
   "final_validation_evidence": [
@@ -50,13 +66,13 @@
       "command": "make prepush-full",
       "status": "pass",
       "exit_code": 0,
-      "summary": "Ran lint-fast, test-fast, test-coverage with 79.2% cmd coverage against 75% minimum, and test-contracts."
+      "summary": "Ran lint-fast, test-fast, test-coverage with 79.3% cmd coverage against 75% minimum, repo-pack validation, and demo tests."
     }
   ],
   "coverage_result": {
     "command": "make prepush-full",
     "status": "pass",
-    "coverage": "79.2%",
+    "coverage": "79.3%",
     "minimum": "75.0%"
   },
   "acceptance_results": [
@@ -113,11 +129,11 @@
   },
   "plan_drift_result": {
     "status": "pass",
-    "summary": "Repair stayed inside the T12 local serve/active-memory boundary and did not change lifecycle, PR, merge, tracker, provider, credential, or network posture."
+    "summary": "Repairs stayed inside the T12 local serve/active-memory boundary and did not change lifecycle, PR, merge, tracker, provider, credential, or network posture."
   },
   "docs_sync_result": {
     "status": "pass",
-    "summary": "No docs changes were needed; the repair restores the documented behavior that tool calls serve only matched active memory and return no_coverage for uncovered paths."
+    "summary": "No docs changes were needed; the repairs restore the documented behavior that tool calls serve only matched active memory, return no_coverage for uncovered paths, and keep external input refs redacted."
   },
   "changelog_result": {
     "status": "not_applicable",
