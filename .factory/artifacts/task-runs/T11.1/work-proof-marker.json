@@ -19,7 +19,9 @@
     "internal/ingest/github_live.go",
     "internal/ingest/github_live_test.go",
     "internal/ingest/github_outcomes.go",
-    "internal/ingest/ingest.go"
+    "internal/ingest/github_outcomes_test.go",
+    "internal/ingest/ingest.go",
+    "internal/ingest/record_validation.go"
   ],
   "evidence_refs": [
     ".factory/artifacts/task-runs/T11.1/validation-report.json",
