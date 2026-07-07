@@ -109,8 +109,9 @@ func serveToolResult(root string, options servedoc.Options, rules []assessdoc.Ru
 		result.EvidenceRefs = append(result.EvidenceRefs, rule.Path)
 	}
 	if options.Tool == "assess" && options.InputPath != "" {
-		result.Artifacts = append(result.Artifacts, ArtifactRef{Kind: "input_diff", Path: options.InputPath})
-		result.EvidenceRefs = append(result.EvidenceRefs, options.InputPath)
+		inputRef := displayPath(root, resolveInputPath(root, options.InputPath))
+		result.Artifacts = append(result.Artifacts, ArtifactRef{Kind: "input_diff", Path: inputRef})
+		result.EvidenceRefs = append(result.EvidenceRefs, inputRef)
 	}
 	return result
 }

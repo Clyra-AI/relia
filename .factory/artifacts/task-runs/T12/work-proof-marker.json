@@ -3,14 +3,15 @@
   "schema_version": "1.0",
   "task_id": "T12",
   "status": "implemented",
-  "produced_at": "2026-07-07T18:43:11Z",
+  "produced_at": "2026-07-07T19:08:45Z",
   "repair_task_id": "20260707T181313.827303000Z-relia-T12-repair",
   "objective": "Implement PRD-defined MCP tools, recall behavior, coverage/OOD responses, active-memory serving rules, and agent-facing access boundaries.",
   "implementation_performed": true,
   "implementation_summary": [
     "Repaired serve tool dispatch so recall, coverage, and assess tool calls validate only rules served by that tool response.",
     "Preserved manifest-only serve behavior that fails closed when any active served rule has malformed citations.",
-    "Added regression tests proving unrelated malformed active-rule citations do not block matched recall or no_coverage coverage tool responses."
+    "Added regression tests proving unrelated malformed active-rule citations do not block matched recall or no_coverage coverage tool responses.",
+    "Repaired serve assess command-envelope artifact and evidence refs so external input paths use the redacted external-input display path."
   ],
   "changed_paths": [
     ".factory/artifacts/task-runs/T12/proof-of-behavior-scorecard.json",
@@ -23,6 +24,11 @@
     {
       "source": "https://github.com/Clyra-AI/relia/pull/156#discussion_r3538788812",
       "summary": "Tool calls should not validate unrelated active rules before returning matched recall or coverage/no_coverage responses.",
+      "status": "implemented"
+    },
+    {
+      "source": "https://github.com/Clyra-AI/relia/pull/156#discussion_r3538986825",
+      "summary": "serve --tool assess should not leak raw external input paths through command-envelope artifact or evidence refs.",
       "status": "implemented"
     }
   ],

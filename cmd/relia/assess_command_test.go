@@ -468,6 +468,51 @@ metadata: {}
 	}
 }
 
+func TestServeAssessToolRedactsExternalInputRefs(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	externalDir := t.TempDir()
+	externalDiff := filepath.Join(externalDir, "external-change.diff")
+	writeFileForTest(t, externalDiff, `diff --git a/packages/search/query.py b/packages/search/query.py
+--- a/packages/search/query.py
++++ b/packages/search/query.py
+@@ -1,2 +1,3 @@
+ def query():
+-    return "old"
++    return "new"
+`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "serve", "--tool", "assess", "--input", externalDiff}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("serve assess exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	wantRef := "external-input/external-change.diff"
+	if len(result.Artifacts) == 0 || result.Artifacts[len(result.Artifacts)-1].Path != wantRef {
+		t.Fatalf("artifacts = %#v, want final input_diff path %q", result.Artifacts, wantRef)
+	}
+	if !stringListContainsForTest(result.EvidenceRefs, wantRef) {
+		t.Fatalf("evidence refs = %#v, want %q", result.EvidenceRefs, wantRef)
+	}
+	if stringListContainsForTest(result.EvidenceRefs, externalDiff) {
+		t.Fatalf("evidence refs leaked absolute input path %q: %#v", externalDiff, result.EvidenceRefs)
+	}
+	toolResult := result.Data["tool_result"].(map[string]any)
+	if toolResult["input_path"] != wantRef {
+		t.Fatalf("tool input_path = %#v, want %q", toolResult["input_path"], wantRef)
+	}
+}
+
+func stringListContainsForTest(values []string, want string) bool {
+	for _, value := range values {
+		if value == want {
+			return true
+		}
+	}
+	return false
+}
+
 func TestServeFiltersPlaybookCitationsToCleanEvidence(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)
