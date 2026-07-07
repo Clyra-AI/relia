@@ -87,7 +87,7 @@ func TestFetchGitHubLiveOutcomeExportBuildsReplayableStructuredOutcomes(t *testi
 		"/repos/acme/billing-service/issues/302/comments?per_page=100": {
 			body: `[]`,
 		},
-		"/repos/acme/billing-service/commits?per_page=100&sha=main": {
+		"/repos/acme/billing-service/commits?per_page=100&sha=main&since=2026-06-02T12%3A00%3A00Z": {
 			body: `[
 				{
 					"sha": "def302",
@@ -176,7 +176,7 @@ func TestFetchGitHubLiveOutcomeExportReadsTokenEnvAfterApprovalGates(t *testing.
 		"/repos/acme/billing-service/issues/302/comments?per_page=100": {
 			body: `[]`,
 		},
-		"/repos/acme/billing-service/commits?per_page=100&sha=main": {
+		"/repos/acme/billing-service/commits?per_page=100&sha=main&since=2026-06-02T12%3A00%3A00Z": {
 			body: `[]`,
 		},
 	})
@@ -259,7 +259,7 @@ func TestFetchGitHubLiveOutcomeExportMatchesMergeCommitSHARevert(t *testing.T) {
 		"/repos/acme/billing-service/issues/302/comments?per_page=100": {
 			body: `[]`,
 		},
-		"/repos/acme/billing-service/commits?per_page=100&sha=main": {
+		"/repos/acme/billing-service/commits?per_page=100&sha=main&since=2026-06-02T12%3A00%3A00Z": {
 			body: `[
 				{
 					"sha": "def302",
@@ -392,6 +392,18 @@ func TestGitHubLiveCommitRevertsPullRequiresExactPRMarker(t *testing.T) {
 	} {
 		if githubLiveCommitRevertsPull(message, 30, "") {
 			t.Fatalf("message %q matched PR 30, want no prefix match", message)
+		}
+	}
+}
+
+func TestGitHubLiveReviewCorrectionMarkedAcceptsDocumentedMarker(t *testing.T) {
+	for _, body := range []string{
+		"relia:correction\nFixed the review finding.",
+		"Relia Correction: addressed in follow-up.",
+		"relia-correction applied",
+	} {
+		if !githubLiveReviewCorrectionMarked(body) {
+			t.Fatalf("body %q was not marked as review correction", body)
 		}
 	}
 }

@@ -180,6 +180,7 @@ func (f *githubLiveFetcher) pull(number int) (map[string]any, *Error) {
 	headSHA := githubString(rawPull, "head.sha", "head_sha")
 	mergeCommitSHA := githubString(rawPull, "merge_commit_sha")
 	baseRef := githubString(rawPull, "base.ref", "base_ref")
+	mergedAt := githubString(rawPull, "merged_at")
 	files, commandErr := f.getArray(pullPath+"/files?per_page=100", "", "pull_request_files")
 	if commandErr != nil {
 		return nil, commandErr
@@ -205,20 +206,24 @@ func (f *githubLiveFetcher) pull(number int) (map[string]any, *Error) {
 	if commandErr != nil {
 		return nil, commandErr
 	}
-	commitsPath := fmt.Sprintf("/repos/%s/%s/commits?per_page=100", url.PathEscape(f.options.Repo.Owner), url.PathEscape(f.options.Repo.Name))
-	if baseRef != "" {
-		commitsPath += "&sha=" + url.QueryEscape(baseRef)
-	}
-	commits, commandErr := f.getArray(commitsPath, "", "commits")
-	if commandErr != nil {
-		return nil, commandErr
+	commits := []map[string]any{}
+	if mergedAt != "" {
+		commitsPath := fmt.Sprintf("/repos/%s/%s/commits?per_page=100", url.PathEscape(f.options.Repo.Owner), url.PathEscape(f.options.Repo.Name))
+		if baseRef != "" {
+			commitsPath += "&sha=" + url.QueryEscape(baseRef)
+		}
+		commitsPath += "&since=" + url.QueryEscape(mergedAt)
+		commits, commandErr = f.getArray(commitsPath, "", "commits")
+		if commandErr != nil {
+			return nil, commandErr
+		}
 	}
 
 	pull := map[string]any{
 		"number":     number,
 		"head_sha":   headSHA,
 		"html_url":   githubString(rawPull, "html_url"),
-		"merged_at":  githubString(rawPull, "merged_at"),
+		"merged_at":  mergedAt,
 		"updated_at": githubString(rawPull, "updated_at"),
 		"created_at": githubString(rawPull, "created_at"),
 		"files":      sanitizeGitHubLiveFiles(files),
@@ -580,7 +585,10 @@ func githubLiveMarkerBoundary(value string, index int) bool {
 func githubLiveReviewCorrectionMarked(body string) bool {
 	normalized := strings.ToLower(body)
 	return strings.Contains(normalized, "relia:review-correction") ||
+		strings.Contains(normalized, "relia:correction") ||
 		strings.Contains(normalized, "relia-review-correction") ||
+		strings.Contains(normalized, "relia-correction") ||
+		strings.Contains(normalized, "relia correction") ||
 		strings.Contains(normalized, "relia review correction")
 }
 
