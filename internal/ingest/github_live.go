@@ -213,7 +213,7 @@ func (f *githubLiveFetcher) pull(number int) (map[string]any, *Error) {
 			commitsPath += "&sha=" + url.QueryEscape(baseRef)
 		}
 		commitsPath += "&since=" + url.QueryEscape(mergedAt)
-		commits, commandErr = f.getArray(commitsPath, "", "commits")
+		commits, commandErr = f.getArrayAllowTruncated(commitsPath, "", "commits")
 		if commandErr != nil {
 			return nil, commandErr
 		}
@@ -263,12 +263,23 @@ func (f *githubLiveFetcher) getObject(requestPath string, resource string) (map[
 }
 
 func (f *githubLiveFetcher) getArray(requestPath string, objectKey string, resource string) ([]map[string]any, *Error) {
+	return f.getArrayWithPageLimit(requestPath, objectKey, resource, false)
+}
+
+func (f *githubLiveFetcher) getArrayAllowTruncated(requestPath string, objectKey string, resource string) ([]map[string]any, *Error) {
+	return f.getArrayWithPageLimit(requestPath, objectKey, resource, true)
+}
+
+func (f *githubLiveFetcher) getArrayWithPageLimit(requestPath string, objectKey string, resource string, allowTruncated bool) ([]map[string]any, *Error) {
 	var result []map[string]any
 	nextPath := requestPath
 	pages := 0
 	for nextPath != "" {
 		pages++
 		if pages > f.options.MaxPages {
+			if allowTruncated {
+				return result, nil
+			}
 			return nil, githubAPIError("github api pagination exceeded configured page limit", resource)
 		}
 		decoded, header, commandErr := f.doJSON(nextPath, resource)

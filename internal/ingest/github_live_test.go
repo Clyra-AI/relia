@@ -297,6 +297,59 @@ func TestFetchGitHubLiveOutcomeExportMatchesMergeCommitSHARevert(t *testing.T) {
 	}
 }
 
+func TestFetchGitHubLiveOutcomeExportDoesNotFailOnLongRevertScan(t *testing.T) {
+	client := newFakeGitHubLiveClient(map[string]fakeGitHubLiveResponse{
+		"/repos/acme/billing-service/pulls/302": {
+			body: `{
+				"number": 302,
+				"html_url": "https://github.com/acme/billing-service/pull/302",
+				"head": {"sha": "abc302"},
+				"base": {"ref": "main"},
+				"merged_at": "2026-06-02T12:00:00Z",
+				"labels": [{"name": "agent-authored"}]
+			}`,
+		},
+		"/repos/acme/billing-service/pulls/302/files?per_page=100": {
+			body: `[{"filename": "packages/billing/tax.py"}]`,
+		},
+		"/repos/acme/billing-service/pulls/302/commits?per_page=100": {
+			body: `[]`,
+		},
+		"/repos/acme/billing-service/commits/abc302/check-runs?filter=all&per_page=100": {
+			body: `{"check_runs": []}`,
+		},
+		"/repos/acme/billing-service/pulls/302/comments?per_page=100": {
+			body: `[]`,
+		},
+		"/repos/acme/billing-service/issues/302/comments?per_page=100": {
+			body: `[]`,
+		},
+		"/repos/acme/billing-service/commits?per_page=100&sha=main&since=2026-06-02T12%3A00%3A00Z": {
+			header: http.Header{"Link": {`<https://api.github.com/repos/acme/billing-service/commits?per_page=100&sha=main&since=2026-06-02T12%3A00%3A00Z&page=2>; rel="next"`}},
+			body:   `[]`,
+		},
+	})
+
+	options := approvedGitHubLiveOptions()
+	options.MaxPages = 1
+	export, _, ingestErr := FetchGitHubLiveOutcomeExport(context.Background(), client, options)
+	if ingestErr != nil {
+		t.Fatalf("FetchGitHubLiveOutcomeExport returned error: %v", ingestErr)
+	}
+	for _, request := range client.requests {
+		if strings.Contains(request.path, "page=2") {
+			t.Fatalf("unexpected request after optional revert scan page cap: %#v", client.requests)
+		}
+	}
+	content, err := json.Marshal(export)
+	if err != nil {
+		t.Fatalf("marshal export: %v", err)
+	}
+	if _, ingestErr := ParseGitHubOutcomeEvents(content, "github-live-replay.json"); ingestErr != nil {
+		t.Fatalf("ParseGitHubOutcomeEvents returned error: %v", ingestErr)
+	}
+}
+
 func TestFetchGitHubLiveOutcomeExportMapsRateLimit(t *testing.T) {
 	for _, testCase := range []struct {
 		name    string
