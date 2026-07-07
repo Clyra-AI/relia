@@ -1,0 +1,14 @@
+{
+  "acceptance_item_id": "FR3-GITHUB-LIVE-API-INTAKE-001",
+  "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+  "artifact_type": "acceptance_evidence_record",
+  "expires_at": "",
+  "external_evidence_ref": ".factory/artifacts/task-runs/T11.1/proof-of-behavior-scorecard.json#FR3-GITHUB-LIVE-API-INTAKE-001",
+  "generated_at": "2026-07-07T12:56:12Z",
+  "generated_by": "factoryd record-acceptance",
+  "notes": "Reviewed T11.1 daemon-generated implementation and evidence. Acceptance is recorded for the gated live GitHub API intake adapter because it requires explicit human, network, and credential gates; uses explicit --github-token-env only; rejects ambient credentials; declares read-only token scope; uses GET-only api.github.com requests; converts live responses into the existing offline replay shape before redaction/provenance/normalization; maps pagination, rate-limit, auth, and API errors deterministically; preserves offline replay; and passed make prepush-full with 79.2% coverage. No live network call was executed during validation; behavior was validated with deterministic fake HTTP clients.",
+  "repo": "relia",
+  "reviewer": "davidahmann",
+  "schema_version": "0.1",
+  "status": "implemented"
+}
