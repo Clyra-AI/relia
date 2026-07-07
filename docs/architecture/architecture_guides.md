@@ -228,6 +228,21 @@ shards, command-result receipt metadata, and replay fixtures. Rollback is
 removal of the live adapter and CLI flags; existing offline
 `--github-outcomes --input` replay remains the source of truth.
 
+T12 adds deterministic local MCP tool responses for active memory serving. The
+state owner is `internal/serve` for serve argument parsing, local tool
+manifest, recall matching, coverage/OOD response shaping, and agent-facing
+access-boundary metadata; `internal/assess` remains the owner of active rule
+loading, serving projections, path matching, risk assessment, and citation
+integrity. Feedback sources are focused serve/assess command tests, parser
+tests, `make prepush-full`, and Factory task-run evidence. Recall, coverage,
+and serve-assess tool calls preserve the command-result envelope, require
+repo-relative explicit path arguments, serve only active accepted rules, and
+fail closed if a served rule citation does not resolve to a canonical GitHub PR
+URL matching the rule provenance. The blast radius is limited to local
+`relia serve` JSON output, active-memory matching, and docs. Rollback is
+removal of the T12 serve tool response path; existing `relia assess` and the
+serve capability manifest remain usable.
+
 ## Systems Thinking Map
 
 - State lives in repo-local config, generated artifacts, source files, and Factory evidence.

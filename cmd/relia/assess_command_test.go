@@ -139,6 +139,219 @@ metadata: {}
 	}
 }
 
+func TestServeRecallReturnsRelevantActiveRuleWithResolvedCitations(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "billing-time.yaml"), `object_type: relia.memory_rule
+schema_version: "1.0"
+id: billing-time-fixture
+kind: avoid
+status: active
+statement: Use the billing clock fixture instead of direct UTC calls.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.86
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_0142
+provenance:
+  - pr: 142
+    outcome: ci_failure
+    url: https://github.com/acme/billing-service/pull/142
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`)
+	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "candidate.yaml"), `object_type: relia.memory_rule
+schema_version: "1.0"
+id: candidate-rule
+kind: avoid
+status: candidate
+statement: Candidate rules must not be served.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.86
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_0143
+provenance:
+  - pr: 143
+    outcome: ci_failure
+    url: https://github.com/acme/billing-service/pull/143
+review:
+  label: suggested
+  statement_origin: cluster_summary
+metadata: {}
+`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "serve", "--tool", "recall", "--context", "I am changing packages/billing/invoice.py rollover logic"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("serve recall exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Data["tool_name"] != "recall" {
+		t.Fatalf("tool_name = %#v", result.Data["tool_name"])
+	}
+	toolResult := result.Data["tool_result"].(map[string]any)
+	if toolResult["object_type"] != "relia.recall_result" {
+		t.Fatalf("tool_result = %#v", toolResult)
+	}
+	if toolResult["coverage"] != "covered_risky" || toolResult["out_of_distribution"] != false {
+		t.Fatalf("recall coverage = %#v", toolResult)
+	}
+	rules := toolResult["rules"].([]any)
+	if len(rules) != 1 {
+		t.Fatalf("recall rules = %#v", rules)
+	}
+	rule := rules[0].(map[string]any)
+	if rule["rule_id"] != "billing-time-fixture" ||
+		rule["statement"] != "Use the billing clock fixture instead of direct UTC calls." ||
+		rule["lifecycle_status"] != "active" ||
+		strings.Contains(fmt.Sprint(rules), "candidate-rule") {
+		t.Fatalf("recall rule = %#v", rule)
+	}
+	citations := stringsFromInterfaceSlice(t, rule["citations"])
+	if fmt.Sprint(citations) != fmt.Sprint([]string{"https://github.com/acme/billing-service/pull/142"}) {
+		t.Fatalf("citations = %#v", citations)
+	}
+	metadata := toolResult["metadata"].(map[string]any)
+	if metadata["active_memory_only"] != true || metadata["citation_resolution"] != "resolved" {
+		t.Fatalf("metadata = %#v", metadata)
+	}
+}
+
+func TestServeCoverageLabelsCoveredAndOutOfDistributionPaths(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "billing-time.yaml"), `object_type: relia.memory_rule
+schema_version: "1.0"
+id: billing-time-fixture
+kind: avoid
+status: active
+statement: Use the billing clock fixture instead of direct UTC calls.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.86
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_0142
+provenance:
+  - pr: 142
+    outcome: ci_failure
+    url: https://github.com/acme/billing-service/pull/142
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "serve", "--tool", "coverage", "--paths", "packages/billing/invoice.py,packages/search/query.py"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("serve coverage exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	toolResult := result.Data["tool_result"].(map[string]any)
+	if toolResult["object_type"] != "relia.coverage_response" {
+		t.Fatalf("tool_result = %#v", toolResult)
+	}
+	entries := toolResult["entries"].([]any)
+	if len(entries) != 2 {
+		t.Fatalf("coverage entries = %#v", entries)
+	}
+	coverageByPath := map[string]string{}
+	oodByPath := map[string]bool{}
+	for _, rawEntry := range entries {
+		entry := rawEntry.(map[string]any)
+		coverageByPath[entry["path"].(string)] = entry["coverage"].(string)
+		oodByPath[entry["path"].(string)] = entry["out_of_distribution"].(bool)
+	}
+	if coverageByPath["packages/billing/invoice.py"] != "covered_risky" || oodByPath["packages/billing/invoice.py"] {
+		t.Fatalf("billing coverage = %q ood=%v", coverageByPath["packages/billing/invoice.py"], oodByPath["packages/billing/invoice.py"])
+	}
+	if coverageByPath["packages/search/query.py"] != "no_coverage" || !oodByPath["packages/search/query.py"] {
+		t.Fatalf("search coverage = %q ood=%v", coverageByPath["packages/search/query.py"], oodByPath["packages/search/query.py"])
+	}
+	for _, rawEntry := range entries {
+		entry := rawEntry.(map[string]any)
+		if entry["path"] == "packages/search/query.py" {
+			if got := stringsFromInterfaceSlice(t, entry["matched_rule_ids"]); len(got) != 0 {
+				t.Fatalf("no coverage matched_rule_ids = %#v, want empty list", got)
+			}
+			if got := stringsFromInterfaceSlice(t, entry["citations"]); len(got) != 0 {
+				t.Fatalf("no coverage citations = %#v, want empty list", got)
+			}
+		}
+	}
+	summary := toolResult["summary"].(map[string]any)
+	if int(summary["no_coverage_count"].(float64)) != 1 || int(summary["covered_risky_count"].(float64)) != 1 {
+		t.Fatalf("summary = %#v", summary)
+	}
+}
+
+func TestServeAssessToolUsesAssessmentEngine(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "billing-time.yaml"), `object_type: relia.memory_rule
+schema_version: "1.0"
+id: billing-time-fixture
+kind: avoid
+status: active
+statement: Use the billing clock fixture instead of direct UTC calls.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.86
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_0142
+provenance:
+  - pr: 142
+    outcome: ci_failure
+    url: https://github.com/acme/billing-service/pull/142
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`)
+	writeFileForTest(t, filepath.Join(tempDir, "change.diff"), `diff --git a/packages/billing/invoice.py b/packages/billing/invoice.py
+--- a/packages/billing/invoice.py
++++ b/packages/billing/invoice.py
+@@ -1,2 +1,3 @@
+ def rollover_day():
+-    return "2026-01-01"
++    return datetime.utcnow().strftime("%Y-%m-%d")
+`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "serve", "--tool", "assess", "--input", "change.diff"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("serve assess exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	assessment := result.Data["tool_result"].(map[string]any)["assessment"].(map[string]any)
+	if assessment["risk_level"] != "match_high" {
+		t.Fatalf("assessment = %#v", assessment)
+	}
+	citations := stringsFromInterfaceSlice(t, assessment["citations"])
+	if fmt.Sprint(citations) != fmt.Sprint([]string{"https://github.com/acme/billing-service/pull/142"}) {
+		t.Fatalf("citations = %#v", citations)
+	}
+}
+
 func TestServeFiltersPlaybookCitationsToCleanEvidence(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)

@@ -367,6 +367,21 @@ offline default:
   cleared advisory so stale warning comments do not remain visible. The workflow
   is advisory-only by default and is not part of the required-check manifest.
 
+T12 adds deterministic agent-facing MCP tool responses without changing the
+offline trust posture:
+
+- `relia serve --tool recall --context <task> --format json` returns relevant
+  active accepted rules with statements, lifecycle status, confidence, and
+  resolved GitHub PR citations.
+- `relia serve --tool coverage --paths <repo-paths> --format json` reports
+  active-memory coverage for repo-relative paths and labels uncovered paths
+  `no_coverage` as the out-of-distribution signal.
+- `relia serve --tool assess --input <diff> --format json` reuses the same risk
+  assessment engine as `relia assess` and the advisory planner.
+- Tool responses preserve the command-result envelope, reject non-repo-relative
+  explicit path arguments, serve only active accepted memory, and require
+  resolvable citations for any served rule.
+
 ## Structured Data, Proof, Budgets, And Redaction
 
 - PR, check-run, experience, memory, MCP, assessment, report, and config data

@@ -1,0 +1,164 @@
+{
+  "acceptance_results": [
+    {
+      "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-002",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T12/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T12/proof-of-behavior-scorecard.json",
+        "cmd/relia/assess_command_test.go",
+        "internal/serve/tools.go"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-007",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T12/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T12/proof-of-behavior-scorecard.json",
+        "cmd/relia/backtest_integrity_test.go",
+        "cmd/relia/advise_test.go",
+        ".github/workflows/relia-advisory.yml"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-008",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T12/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T12/proof-of-behavior-scorecard.json",
+        "internal/backtest/baseline_test.go",
+        "cmd/relia/backtest_report_test.go"
+      ],
+      "status": "implemented"
+    }
+  ],
+  "artifact_type": "validation_report",
+  "baseline_evidence": [
+    {
+      "command": "make lint-fast",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "make test-fast",
+      "exit_code": 0,
+      "status": "pass"
+    }
+  ],
+  "changed_paths": [
+    ".factory/artifacts/task-runs/T12/proof-of-behavior-scorecard.json",
+    ".factory/artifacts/task-runs/T12/validation-report.json",
+    ".factory/artifacts/task-runs/T12/work-proof-marker.json",
+    "README.md",
+    "cmd/relia/assess_command_test.go",
+    "cmd/relia/serve_command.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/dev/dev_guides.md",
+    "internal/assess/assess.go",
+    "internal/serve/args.go",
+    "internal/serve/args_test.go",
+    "internal/serve/tools.go"
+  ],
+  "commands_run": [
+    "make lint-fast",
+    "make test-fast",
+    "go test ./cmd/relia ./internal/serve -count=1 -run 'TestServe|TestParseArgs'",
+    "go test ./cmd/relia ./internal/serve ./internal/assess -count=1 -run 'TestServe|TestParseArgs|TestBuildRiskAssessment|TestServedRuleData|TestLoadRules|TestRuleCitationURLs'",
+    "make test-contracts",
+    "go run ./cmd/relia --json serve --tool recall --context 'edit examples/demo/assessment-fixtures/seeded-repo/packages/billing/invoice.py rollover logic'",
+    "go run ./cmd/relia --json serve --tool coverage --paths examples/demo/assessment-fixtures/seeded-repo/packages/billing/invoice.py,examples/demo/assessment-fixtures/seeded-repo/packages/search/query.py",
+    "make prepush-full"
+  ],
+  "coverage_result": {
+    "command": "make prepush-full",
+    "coverage": "79.2%",
+    "minimum": "75.0%",
+    "status": "pass"
+  },
+  "docs_sync_result": {
+    "status": "pass",
+    "updated_refs": [
+      "README.md",
+      "docs/dev/dev_guides.md",
+      "docs/architecture/architecture_guides.md"
+    ]
+  },
+  "final_validation_evidence": [
+    {
+      "command": "make prepush-full",
+      "exit_code": 0,
+      "status": "pass",
+      "summary": "Ran lint-fast, test-fast, test-coverage with 79.2% cmd coverage against 75% minimum, and test-contracts."
+    }
+  ],
+  "green_evidence": [
+    {
+      "command": "go test ./cmd/relia ./internal/serve ./internal/assess -count=1 -run 'TestServe|TestParseArgs|TestBuildRiskAssessment|TestServedRuleData|TestLoadRules|TestRuleCitationURLs'",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "make lint-fast",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "make test-fast",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "make test-contracts",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "go run ./cmd/relia --json serve --tool recall --context 'edit examples/demo/assessment-fixtures/seeded-repo/packages/billing/invoice.py rollover logic'",
+      "exit_code": 0,
+      "status": "pass",
+      "summary": "Returned relia.recall_result with one active rule and resolved seeded GitHub PR citations."
+    },
+    {
+      "command": "go run ./cmd/relia --json serve --tool coverage --paths examples/demo/assessment-fixtures/seeded-repo/packages/billing/invoice.py,examples/demo/assessment-fixtures/seeded-repo/packages/search/query.py",
+      "exit_code": 0,
+      "status": "pass",
+      "summary": "Returned relia.coverage_response with covered_risky for the seeded billing path and no_coverage/out_of_distribution for the search path."
+    }
+  ],
+  "lifecycle_evidence_note": "scope_closure_report, pr_lifecycle_report, and factoryd_run_once_report are factoryd-owned lifecycle artifacts and were not authored by this worker.",
+  "path_policy_result": {
+    "changed_paths": [
+      ".factory/artifacts/task-runs/T12/proof-of-behavior-scorecard.json",
+      ".factory/artifacts/task-runs/T12/validation-report.json",
+      ".factory/artifacts/task-runs/T12/work-proof-marker.json",
+      "README.md",
+      "cmd/relia/assess_command_test.go",
+      "cmd/relia/serve_command.go",
+      "docs/architecture/architecture_guides.md",
+      "docs/dev/dev_guides.md",
+      "internal/assess/assess.go",
+      "internal/serve/args.go",
+      "internal/serve/args_test.go",
+      "internal/serve/tools.go"
+    ],
+    "changed_paths_within_allowed_paths": true,
+    "forbidden_path_changed": false,
+    "status": "pass"
+  },
+  "plan_drift_result": {
+    "status": "pass",
+    "summary": "Implementation stayed within the T12 serve/assess/backtest acceptance slice and did not implement compile, lifecycle closure, PR, merge, or tracker changes."
+  },
+  "produced_at": "2026-07-07T18:23:38Z",
+  "red_evidence": [
+    {
+      "command": "go test ./cmd/relia ./internal/serve -count=1 -run 'TestServe|TestParseArgs'",
+      "exit_code": 1,
+      "status": "expected_fail",
+      "summary": "Focused red-first tests failed because serve did not yet return tool_name or tool_result for recall and coverage."
+    }
+  ],
+  "schema_version": "1.0",
+  "status": "pass",
+  "task_id": "T12"
+}
