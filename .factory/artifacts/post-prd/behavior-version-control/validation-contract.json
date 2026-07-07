@@ -1,0 +1,111 @@
+{
+  "acceptance_criteria": [
+    "Deliver: Record versioned changes to memory rules, compiled context, AGENTS/CLAUDE blocks, and Relia-owned instruction artifacts as local behavior-change candidates with commit refs, diff refs, owner/reviewer metadata when available, source rule IDs, lifecycle status, and affected path/signal scope.",
+    "Implement by: Build a deterministic offline inventory from local git history, committed rule files, Relia lifecycle metadata, and existing report artifacts. The inventory must not mutate rules, compile targets, or reviewed memory by itself.",
+    "Touch or validate paths: schemas/, examples/, docs/product/, docs/dev/, docs/architecture/, cmd/relia/, internal/memory/, internal/backtest/, internal/assess/",
+    "Respect dependency: Run after T18 because lesson grain, owner, evidence, applicability, and expiry rules must exist before behavior-change attribution can be trusted.",
+    "Deliver: Compare repeat-failure and ERR deltas before and after behavior-change candidates, then report candidate links with confidence, supporting receipts, diff refs, comparison windows, sample sizes, and excluded confounders.",
+    "Implement by: Reuse existing recurrence signatures, baselines, flake discounts, attribution confidence, contradiction handling, and stale-rule logic. When evidence is thin, classify the result as attribution_uncertain instead of blaming a behavior change.",
+    "Touch or validate paths: schemas/, examples/, docs/product/, docs/dev/, docs/architecture/, cmd/relia/, internal/backtest/, internal/memory/, internal/assess/",
+    "Respect dependency: Run after behavior change provenance inventory.",
+    "Deliver: Surface a product-safe advisory such as \"repeat-failure rate rose after rule X v3 was approved; here is the rule/instruction diff, confidence, evidence, and recommended rollback path.\" The recommendation is advisory only and never auto-applies a rollback.",
+    "Implement by: Add structured CLI/report fields and fixtures that show the diff ref, candidate rollback action, expected effect, confidence, and required human review. Tests must prove redaction is preserved and no rule, memory page, compiled block, or instruction file changes unless a later explicit task makes that mutation.",
+    "Touch or validate paths: schemas/, examples/, docs/product/, docs/dev/, docs/architecture/, cmd/relia/, internal/backtest/, internal/memory/, internal/assess/, internal/advise/",
+    "Respect dependency: Run after ERR regression attribution."
+  ],
+  "acceptance_groups": [
+    {
+      "group_id": "behavior-change-provenance-inventory",
+      "risk_class": "low",
+      "source_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#behavior-change-provenance-inventory",
+      "task_refs": [
+        "T4",
+        "T5",
+        "T6"
+      ],
+      "title": "Behavior change provenance inventory"
+    },
+    {
+      "group_id": "err-regression-attribution",
+      "risk_class": "low",
+      "source_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#err-regression-attribution",
+      "task_refs": [
+        "T2",
+        "T3",
+        "T6"
+      ],
+      "title": "ERR regression attribution"
+    },
+    {
+      "group_id": "rollback-recommendation-report",
+      "risk_class": "low",
+      "source_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#rollback-recommendation-report",
+      "task_refs": [
+        "T1",
+        "T2",
+        "T6"
+      ],
+      "title": "Rollback recommendation report"
+    }
+  ],
+  "acceptance_item_count": 12,
+  "acceptance_ledger_ref": ".factory/artifacts/post-prd/behavior-version-control/acceptance-ledger.json",
+  "acceptance_mapping_ref": ".factory/artifacts/post-prd/behavior-version-control/acceptance-mapping.json",
+  "artifact_type": "validation_contract",
+  "contract_id": "behavior-version-control-post-prd-validation-contract",
+  "evidence_required": [
+    "work_proof_marker",
+    "validation_report",
+    "scope_closure_report",
+    "pr_lifecycle_report",
+    "factoryd_run_once_report"
+  ],
+  "factoryd_runtime_requirements": {
+    "runner_ready_fields": [
+      "allowed_paths",
+      "forbidden_paths",
+      "worker_type",
+      "factoryd_runtime",
+      "validation_commands",
+      "evidence_required",
+      "worker_evidence_required",
+      "lifecycle_evidence_required",
+      "stop_conditions",
+      "max_iterations",
+      "required_proof_level",
+      "engineering_policy_refs"
+    ],
+    "runtime": {
+      "approval_posture": "human approval required for live credentials, high-risk tasks, and merge",
+      "branch_prefix": "codex",
+      "capability_grants": [],
+      "credential_posture": "no ambient secrets during deterministic bootstrap",
+      "feedback_graph_ref": ".factory/artifacts/lifecycle-signal-feedback-graph.json",
+      "model_routing_policy_ref": "docs/standards/model-routing-standard.md",
+      "network_posture": "offline by default until approved",
+      "sovereignty_mode": "restricted",
+      "state_dir": "../.factoryd",
+      "worker_command": "",
+      "worker_type": "codex_cli",
+      "workspace_root": "../.factoryd/workspaces"
+    }
+  },
+  "generated_at": "2026-07-07T21:48:18Z",
+  "required_checks": [
+    "python3 scripts/validate_repo_pack.py"
+  ],
+  "required_review": {
+    "required": false,
+    "review_type": "code",
+    "reviewer_class": "peer_agent"
+  },
+  "schema_version": "0.1",
+  "source_post_prd_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md",
+  "stop_conditions": [
+    "validation failed",
+    "path policy violation",
+    "closure did not advance",
+    "alignment drift detected"
+  ],
+  "work_signal_kind": "ideas"
+}

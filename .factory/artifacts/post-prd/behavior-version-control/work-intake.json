@@ -1,0 +1,66 @@
+{
+  "acceptance_basis": {
+    "acceptance_ledger_required": true,
+    "source_acceptance_refs": [
+      ".factory/artifacts/post-prd/behavior-version-control/source.md"
+    ]
+  },
+  "artifact_type": "work_signal_intake_envelope",
+  "decomposition_mode": "post_prd_idea_items",
+  "evidence_bounds": [
+    "Generated from a post-PRD work signal; it does not mutate docs/product/prd.md by default."
+  ],
+  "evidence_requirements": [
+    "acceptance_ledger",
+    "validation_contract",
+    "scope_closure_map"
+  ],
+  "execution_compiler_refs": [
+    "factory://skills/execution-compiler"
+  ],
+  "generated_at": "2026-07-07T21:48:18Z",
+  "intake_decision": "plan",
+  "kind": "ideas",
+  "mission": "behavior-version-control",
+  "original_source_ref": "product/ideas/behavior-version-control.md",
+  "planning_skill_refs": [
+    "factory://skills/ideas-to-plan",
+    "factory://skills/execution-compiler"
+  ],
+  "priority": "medium",
+  "proposed_task_candidates": [
+    {
+      "candidate_id": "behavior-change-provenance-inventory",
+      "source_refs": [
+        ".factory/artifacts/post-prd/behavior-version-control/source.md"
+      ],
+      "summary": "Behavior change provenance inventory"
+    },
+    {
+      "candidate_id": "err-regression-attribution",
+      "source_refs": [
+        ".factory/artifacts/post-prd/behavior-version-control/source.md"
+      ],
+      "summary": "ERR regression attribution"
+    },
+    {
+      "candidate_id": "rollback-recommendation-report",
+      "source_refs": [
+        ".factory/artifacts/post-prd/behavior-version-control/source.md"
+      ],
+      "summary": "Rollback recommendation report"
+    }
+  ],
+  "recommendation_count": 3,
+  "repo": "relia",
+  "risk_class": "medium",
+  "schema_version": "0.1",
+  "signal_id": "behavior-version-control-post-prd-signal",
+  "source_kind": "ideas",
+  "source_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md",
+  "source_refs": [
+    ".factory/artifacts/post-prd/behavior-version-control/source.md"
+  ],
+  "source_sha256": "sha256:576e71fb6301cb479c0b37d70f2664713e798a9b57592c4144ed1eeebff0fb19",
+  "summary": "Post-PRD work signal generated from .factory/artifacts/post-prd/behavior-version-control/source.md"
+}

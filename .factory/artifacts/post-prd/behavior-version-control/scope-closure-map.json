@@ -1,0 +1,181 @@
+{
+  "acceptance_ledger_ref": ".factory/artifacts/post-prd/behavior-version-control/acceptance-ledger.json",
+  "acceptance_mapping_ref": ".factory/artifacts/post-prd/behavior-version-control/acceptance-mapping.json",
+  "artifact_type": "scope_closure_map",
+  "closure_rule": "All non-deferred post-PRD closure items must be implemented with evidence refs before mission closure.",
+  "closure_status": "partial",
+  "items": [
+    {
+      "acceptance_criteria": [
+        "Deliver: Record versioned changes to memory rules, compiled context, AGENTS/CLAUDE blocks, and Relia-owned instruction artifacts as local behavior-change candidates with commit refs, diff refs, owner/reviewer metadata when available, source rule IDs, lifecycle status, and affected path/signal scope.",
+        "Implement by: Build a deterministic offline inventory from local git history, committed rule files, Relia lifecycle metadata, and existing report artifacts. The inventory must not mutate rules, compile targets, or reviewed memory by itself.",
+        "Touch or validate paths: schemas/, examples/, docs/product/, docs/dev/, docs/architecture/, cmd/relia/, internal/memory/, internal/backtest/, internal/assess/",
+        "Respect dependency: Run after T18 because lesson grain, owner, evidence, applicability, and expiry rules must exist before behavior-change attribution can be trusted."
+      ],
+      "acceptance_item_ids": [
+        "BEHAVIOR-CHANGE-PROVENANCE-INVENTORY-001",
+        "BEHAVIOR-CHANGE-PROVENANCE-INVENTORY-002",
+        "BEHAVIOR-CHANGE-PROVENANCE-INVENTORY-003",
+        "BEHAVIOR-CHANGE-PROVENANCE-INVENTORY-004"
+      ],
+      "acceptance_item_statuses": [
+        {
+          "acceptance_item_id": "BEHAVIOR-CHANGE-PROVENANCE-INVENTORY-001",
+          "evidence_refs": [],
+          "repair_task_refs": [],
+          "status": "partial"
+        },
+        {
+          "acceptance_item_id": "BEHAVIOR-CHANGE-PROVENANCE-INVENTORY-002",
+          "evidence_refs": [],
+          "repair_task_refs": [],
+          "status": "partial"
+        },
+        {
+          "acceptance_item_id": "BEHAVIOR-CHANGE-PROVENANCE-INVENTORY-003",
+          "evidence_refs": [],
+          "repair_task_refs": [],
+          "status": "partial"
+        },
+        {
+          "acceptance_item_id": "BEHAVIOR-CHANGE-PROVENANCE-INVENTORY-004",
+          "evidence_refs": [],
+          "repair_task_refs": [],
+          "status": "partial"
+        }
+      ],
+      "evidence_refs": [],
+      "implemented_task_refs": [],
+      "notes": [
+        "Generated from post-PRD intake; update status only with validation evidence."
+      ],
+      "remaining_task_refs": [
+        "T1"
+      ],
+      "requires_human_approval": false,
+      "scope_item": "Behavior change provenance inventory",
+      "scope_item_id": "behavior-change-provenance-inventory",
+      "source_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#behavior-change-provenance-inventory",
+      "status": "partial",
+      "task_refs": [
+        "T1"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "Deliver: Compare repeat-failure and ERR deltas before and after behavior-change candidates, then report candidate links with confidence, supporting receipts, diff refs, comparison windows, sample sizes, and excluded confounders.",
+        "Implement by: Reuse existing recurrence signatures, baselines, flake discounts, attribution confidence, contradiction handling, and stale-rule logic. When evidence is thin, classify the result as attribution_uncertain instead of blaming a behavior change.",
+        "Touch or validate paths: schemas/, examples/, docs/product/, docs/dev/, docs/architecture/, cmd/relia/, internal/backtest/, internal/memory/, internal/assess/",
+        "Respect dependency: Run after behavior change provenance inventory."
+      ],
+      "acceptance_item_ids": [
+        "ERR-REGRESSION-ATTRIBUTION-001",
+        "ERR-REGRESSION-ATTRIBUTION-002",
+        "ERR-REGRESSION-ATTRIBUTION-003",
+        "ERR-REGRESSION-ATTRIBUTION-004"
+      ],
+      "acceptance_item_statuses": [
+        {
+          "acceptance_item_id": "ERR-REGRESSION-ATTRIBUTION-001",
+          "evidence_refs": [],
+          "repair_task_refs": [],
+          "status": "partial"
+        },
+        {
+          "acceptance_item_id": "ERR-REGRESSION-ATTRIBUTION-002",
+          "evidence_refs": [],
+          "repair_task_refs": [],
+          "status": "partial"
+        },
+        {
+          "acceptance_item_id": "ERR-REGRESSION-ATTRIBUTION-003",
+          "evidence_refs": [],
+          "repair_task_refs": [],
+          "status": "partial"
+        },
+        {
+          "acceptance_item_id": "ERR-REGRESSION-ATTRIBUTION-004",
+          "evidence_refs": [],
+          "repair_task_refs": [],
+          "status": "partial"
+        }
+      ],
+      "evidence_refs": [],
+      "implemented_task_refs": [],
+      "notes": [
+        "Generated from post-PRD intake; update status only with validation evidence."
+      ],
+      "remaining_task_refs": [
+        "T2"
+      ],
+      "requires_human_approval": false,
+      "scope_item": "ERR regression attribution",
+      "scope_item_id": "err-regression-attribution",
+      "source_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#err-regression-attribution",
+      "status": "partial",
+      "task_refs": [
+        "T2"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "Deliver: Surface a product-safe advisory such as \"repeat-failure rate rose after rule X v3 was approved; here is the rule/instruction diff, confidence, evidence, and recommended rollback path.\" The recommendation is advisory only and never auto-applies a rollback.",
+        "Implement by: Add structured CLI/report fields and fixtures that show the diff ref, candidate rollback action, expected effect, confidence, and required human review. Tests must prove redaction is preserved and no rule, memory page, compiled block, or instruction file changes unless a later explicit task makes that mutation.",
+        "Touch or validate paths: schemas/, examples/, docs/product/, docs/dev/, docs/architecture/, cmd/relia/, internal/backtest/, internal/memory/, internal/assess/, internal/advise/",
+        "Respect dependency: Run after ERR regression attribution."
+      ],
+      "acceptance_item_ids": [
+        "ROLLBACK-RECOMMENDATION-REPORT-001",
+        "ROLLBACK-RECOMMENDATION-REPORT-002",
+        "ROLLBACK-RECOMMENDATION-REPORT-003",
+        "ROLLBACK-RECOMMENDATION-REPORT-004"
+      ],
+      "acceptance_item_statuses": [
+        {
+          "acceptance_item_id": "ROLLBACK-RECOMMENDATION-REPORT-001",
+          "evidence_refs": [],
+          "repair_task_refs": [],
+          "status": "partial"
+        },
+        {
+          "acceptance_item_id": "ROLLBACK-RECOMMENDATION-REPORT-002",
+          "evidence_refs": [],
+          "repair_task_refs": [],
+          "status": "partial"
+        },
+        {
+          "acceptance_item_id": "ROLLBACK-RECOMMENDATION-REPORT-003",
+          "evidence_refs": [],
+          "repair_task_refs": [],
+          "status": "partial"
+        },
+        {
+          "acceptance_item_id": "ROLLBACK-RECOMMENDATION-REPORT-004",
+          "evidence_refs": [],
+          "repair_task_refs": [],
+          "status": "partial"
+        }
+      ],
+      "evidence_refs": [],
+      "implemented_task_refs": [],
+      "notes": [
+        "Generated from post-PRD intake; update status only with validation evidence."
+      ],
+      "remaining_task_refs": [
+        "T3"
+      ],
+      "requires_human_approval": false,
+      "scope_item": "Rollback recommendation report",
+      "scope_item_id": "rollback-recommendation-report",
+      "source_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#rollback-recommendation-report",
+      "status": "partial",
+      "task_refs": [
+        "T3"
+      ]
+    }
+  ],
+  "last_updated_at": "2026-07-07T21:48:18Z",
+  "schema_version": "0.1",
+  "source_post_prd_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md",
+  "work_signal_kind": "ideas"
+}
