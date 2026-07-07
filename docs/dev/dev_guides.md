@@ -220,6 +220,26 @@ T3 adds offline ingestion:
   skipped instead of persisted, while explicit human and agent outcomes can both
   become rule evidence.
 
+T11.1 adds gated live GitHub API intake without changing offline replay:
+
+- `relia ingest --github-live --repo <owner/repo> --pr <number>
+  --github-token-env <ENV> --github-token-scope read-only --allow-network
+  --allow-credentials --human-approved` fetches PR metadata, changed files,
+  PR commit coauthor trailers, check runs, revert commit receipts, and marked
+  review-correction comments through a read-only adapter. Revert matching
+  considers exact PR markers plus PR head and merge commit SHAs.
+- Live intake fails closed before any request unless human approval, network
+  approval, credential approval, an explicit token environment, and a declared
+  `read-only` scope are present. The command never falls back to ambient
+  credentials.
+- The adapter converts API responses into the same structured GitHub outcome
+  export consumed by `--github-outcomes --input`, then runs the normal
+  redaction, provenance, attribution, and shard persistence path. Offline
+  replay fixtures remain the deterministic compatibility surface.
+- Deterministic tests must cover no-approval/no-credential gates, GET-only
+  request behavior, pagination, rate-limit, auth failure, API error mapping,
+  replay parsing, token non-disclosure, and provenance-bearing outcomes.
+
 T4.3 adds bounded offline assessment:
 
 - `relia assess --input <diff>` accepts a local unified diff and returns a

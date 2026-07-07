@@ -1,0 +1,125 @@
+{
+  "acceptance_results": [
+    {
+      "acceptance_item_id": "FR3-GITHUB-LIVE-API-INTAKE-001",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T11.1/validation-report.json",
+        ".factory/artifacts/task-runs/T11.1/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T11.1/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    }
+  ],
+  "artifact_type": "validation_report",
+  "baseline_evidence": [
+    {
+      "command": "make lint-fast",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "make test-fast",
+      "exit_code": 0,
+      "status": "pass"
+    }
+  ],
+  "changed_paths": [
+    ".factory/artifacts/task-runs/T11.1/proof-of-behavior-scorecard.json",
+    ".factory/artifacts/task-runs/T11.1/validation-report.json",
+    ".factory/artifacts/task-runs/T11.1/work-proof-marker.json",
+    "README.md",
+    "cmd/relia/errors.go",
+    "cmd/relia/ingest_command.go",
+    "cmd/relia/ingest_contract_test.go",
+    "cmd/relia/repo_helpers.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/dev/dev_guides.md",
+    "internal/ingest/args.go",
+    "internal/ingest/args_test.go",
+    "internal/ingest/github_live.go",
+    "internal/ingest/github_live_test.go",
+    "internal/ingest/github_outcomes.go",
+    "internal/ingest/github_outcomes_test.go",
+    "internal/ingest/ingest.go",
+    "internal/ingest/record_validation.go"
+  ],
+  "commands_run": [
+    "make lint-fast",
+    "make test-fast",
+    "go test ./internal/ingest -run 'TestFetchGitHubLiveOutcomeExport(BuildsReplayableStructuredOutcomes|MatchesMergeCommitSHARevert)' -count=1",
+    "go test ./internal/ingest -run 'TestFetchGitHubLiveOutcomeExport(BuildsReplayableStructuredOutcomes|MatchesMergeCommitSHARevert|MapsRateLimit|MapsAuthFailure|MapsAPIError)|TestGitHubLiveCommitRevertsPullRequiresExactPRMarker' -count=1",
+    "make test-fast",
+    "make prepush-full",
+    "python3 -m json.tool .factory/artifacts/task-runs/T11.1/work-proof-marker.json \u003e/tmp/t11_1_work_proof_marker.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T11.1/validation-report.json \u003e/tmp/t11_1_validation_report.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T11.1/proof-of-behavior-scorecard.json \u003e/tmp/t11_1_scorecard.json"
+  ],
+  "evidence_validation": [
+    {
+      "command": "python3 -m json.tool .factory/artifacts/task-runs/T11.1/work-proof-marker.json \u003e/tmp/t11_1_work_proof_marker.json",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "python3 -m json.tool .factory/artifacts/task-runs/T11.1/validation-report.json \u003e/tmp/t11_1_validation_report.json",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "python3 -m json.tool .factory/artifacts/task-runs/T11.1/proof-of-behavior-scorecard.json \u003e/tmp/t11_1_scorecard.json",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "python3 status-field check for worker-owned evidence artifacts",
+      "exit_code": 0,
+      "status": "pass"
+    }
+  ],
+  "final_validation_evidence": [
+    {
+      "command": "make prepush-full",
+      "coverage": "79.2% statements in cmd/relia with minimum 75.0%",
+      "exit_code": 0,
+      "status": "pass"
+    }
+  ],
+  "focused_validation_evidence": [
+    {
+      "command": "go test ./internal/ingest -run 'TestFetchGitHubLiveOutcomeExport(BuildsReplayableStructuredOutcomes|MatchesMergeCommitSHARevert|MapsRateLimit|MapsAuthFailure|MapsAPIError)|TestGitHubLiveCommitRevertsPullRequiresExactPRMarker' -count=1",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "make test-fast",
+      "exit_code": 0,
+      "status": "pass"
+    }
+  ],
+  "live_api_execution_result": {
+    "notes": "No live GitHub API call was attempted in this worker run; live behavior was covered through deterministic fake HTTP clients and fail-closed CLI gate tests.",
+    "status": "pass"
+  },
+  "path_policy_result": {
+    "changed_paths_within_allowed_paths": true,
+    "forbidden_paths_changed": [],
+    "status": "pass"
+  },
+  "plan_drift_result": {
+    "notes": "Repaired only the current T11.1 Codex review feedback for merge_commit_sha revert matching and live coauthor trailer preservation, plus required docs/evidence updates.",
+    "status": "pass"
+  },
+  "produced_at_utc": "2026-07-07T14:02:13Z",
+  "red_first_evidence": [
+    {
+      "command": "go test ./internal/ingest -run 'TestFetchGitHubLiveOutcomeExport(BuildsReplayableStructuredOutcomes|MatchesMergeCommitSHARevert)' -count=1",
+      "exit_code": 1,
+      "failure_summary": "repair regressions failed before implementation because live replay exports did not populate coauthor trailers and merge_commit_sha-only revert messages were classified as merged_clean.",
+      "status": "expected_fail"
+    }
+  ],
+  "residual_risks": [],
+  "schema_version": "1.0",
+  "status": "pass",
+  "task_id": "T11.1"
+}

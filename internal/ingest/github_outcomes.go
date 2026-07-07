@@ -23,6 +23,7 @@ func ParseGitHubOutcomeEvents(content []byte, ref string) ([]map[string]any, *Er
 	if commandErr := ValidateEventMemorySource(envelope, ref); commandErr != nil {
 		return nil, commandErr
 	}
+	sourceFormat := firstString(githubString(envelope, "source_format", "metadata.source_format"), "github_structured_export")
 	if githubEnvelopeHasRepo(envelope) {
 		var commandErr *Error
 		defaultRepo, commandErr = NormalizeRepo(envelope, ref)
@@ -33,7 +34,7 @@ func ParseGitHubOutcomeEvents(content []byte, ref string) ([]map[string]any, *Er
 
 	var events []map[string]any
 	for index, pull := range pulls {
-		base, commandErr := githubOutcomeBase(defaultRepo, pull, ref, index)
+		base, commandErr := githubOutcomeBase(defaultRepo, pull, ref, index, sourceFormat)
 		if commandErr != nil {
 			return nil, commandErr
 		}
@@ -96,7 +97,8 @@ func ParseGitHubOutcomeEvents(content []byte, ref string) ([]map[string]any, *Er
 			}
 			events = append(events, event)
 		}
-		if githubString(pull, "merged_at") != "" && failingChecks == 0 && len(reverts) == 0 && len(reviewCorrections) == 0 {
+		revertScanTruncated := githubBool(pull, "revert_scan_truncated", "metadata.revert_scan_truncated")
+		if githubString(pull, "merged_at") != "" && !revertScanTruncated && failingChecks == 0 && len(reverts) == 0 && len(reviewCorrections) == 0 {
 			event, commandErr := githubOutcomeEvent(base, pull, githubOutcomeEventOptions{
 				Kind:           "merged_clean",
 				RecordedAt:     githubString(pull, "merged_at", "updated_at", "created_at"),
@@ -158,6 +160,7 @@ type githubOutcomeBaseFields struct {
 	ActorKind             string
 	AttributionMethod     string
 	AttributionConfidence any
+	SourceFormat          string
 }
 
 type githubOutcomeEventOptions struct {
@@ -173,7 +176,7 @@ type githubOutcomeEventOptions struct {
 	SourceCommit   string
 }
 
-func githubOutcomeBase(defaultRepo Repo, pull map[string]any, ref string, index int) (githubOutcomeBaseFields, *Error) {
+func githubOutcomeBase(defaultRepo Repo, pull map[string]any, ref string, index int, sourceFormat string) (githubOutcomeBaseFields, *Error) {
 	if commandErr := ValidateEventMemorySource(pull, ref); commandErr != nil {
 		return githubOutcomeBaseFields{}, commandErr
 	}
@@ -219,6 +222,7 @@ func githubOutcomeBase(defaultRepo Repo, pull map[string]any, ref string, index 
 		ActorKind:             githubString(pull, "actor_kind", "attribution.actor_kind"),
 		AttributionMethod:     githubString(pull, "attribution_method", "attribution.method"),
 		AttributionConfidence: githubFirstAny(pull, "attribution_confidence", "attribution.confidence"),
+		SourceFormat:          firstString(sourceFormat, "github_structured_export"),
 	}, nil
 }
 
@@ -306,7 +310,7 @@ func githubOutcomeEvent(base githubOutcomeBaseFields, source map[string]any, opt
 		"extraction_confidence": "structured",
 		"provenance_urls":       provenanceURLs,
 		"metadata": map[string]any{
-			"source_format": "github_structured_export",
+			"source_format": base.SourceFormat,
 		},
 	}
 	if signatureID := githubString(source, "signature_id", "outcome.signature.signature_id"); signatureID != "" {

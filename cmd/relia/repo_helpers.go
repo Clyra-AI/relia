@@ -106,6 +106,9 @@ func parseIngestEventsForOptions(content []byte, ref string, options ingestOptio
 }
 
 func ingestSourceFormat(options ingestOptions) string {
+	if options.GitHubLive {
+		return "github_live_api"
+	}
 	if options.GitHubOutcomes {
 		return "github_outcomes"
 	}

@@ -5,10 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestIngestRejectsMalformedNumericFieldsBeforePersistence(t *testing.T) {
@@ -103,6 +105,81 @@ func TestIngestRejectsExperienceWithoutProvenance(t *testing.T) {
 	result := decodeResult(t, stdout)
 	if result.Errors[0].Type != "provenance_integrity_failed" {
 		t.Fatalf("error type = %q", result.Errors[0].Type)
+	}
+}
+
+func TestIngestGitHubLiveFailsClosedWithoutExplicitApprovals(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	t.Setenv("RELIA_GITHUB_TOKEN", "test-token")
+
+	stdout, stderr, code := runForTest(t, []string{
+		"--json",
+		"ingest",
+		"--github-live",
+		"--repo", "acme/billing-service",
+		"--pr", "302",
+		"--github-token-env", "RELIA_GITHUB_TOKEN",
+		"--github-token-scope", "read-only",
+	}, false)
+
+	if code != ExitCredential {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "credential_required" ||
+		!strings.Contains(result.Errors[0].Message, "human approval") {
+		t.Fatalf("errors = %#v", result.Errors)
+	}
+	if _, err := os.Stat(filepath.Join(tempDir, ".relia", "experiences", "2026-06.jsonl")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("experience shard should not be persisted before live approval gates: %v", err)
+	}
+}
+
+func TestIngestGitHubLiveDoesNotUseAmbientCredentials(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	t.Setenv("GITHUB_TOKEN", "ambient-token-must-not-be-used")
+
+	stdout, stderr, code := runForTest(t, []string{
+		"--json",
+		"ingest",
+		"--github-live",
+		"--repo", "acme/billing-service",
+		"--pr", "302",
+		"--github-token-scope", "read-only",
+		"--allow-network",
+		"--allow-credentials",
+		"--human-approved",
+	}, false)
+
+	if code != ExitCredential {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	if result.Errors[0].Type != "credential_required" ||
+		!strings.Contains(result.Errors[0].Message, "explicit --github-token-env") {
+		t.Fatalf("errors = %#v", result.Errors)
+	}
+}
+
+func TestIngestGitHubLiveUsesBoundedRequestContext(t *testing.T) {
+	ctx, cancel, client := githubLiveRequestContext()
+	defer cancel()
+
+	deadline, ok := ctx.Deadline()
+	if !ok {
+		t.Fatalf("github live request context has no deadline")
+	}
+	remaining := time.Until(deadline)
+	if remaining <= 0 || remaining > githubLiveOverallTimeout {
+		t.Fatalf("github live deadline remaining = %v, want within %v", remaining, githubLiveOverallTimeout)
+	}
+	if client == http.DefaultClient {
+		t.Fatalf("github live client should not use http.DefaultClient")
+	}
+	if client.Timeout != githubLiveHTTPRequestTimeout {
+		t.Fatalf("github live client timeout = %v, want %v", client.Timeout, githubLiveHTTPRequestTimeout)
 	}
 }
 

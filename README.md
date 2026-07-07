@@ -17,7 +17,7 @@ FACTORY_REPO=/path/to/factory factoryd run --config .factory/factoryd.autoship.e
 
 ## CLI Baseline
 
-The T1/T2/T3/T4.3/T5/T6/T7/T8/T9 command surface establishes the lifecycle
+The T1/T2/T3/T4.3/T5/T6/T7/T8/T9/T11/T11.1 command surface establishes the lifecycle
 skeleton, configuration contract, assessment fixture slice, recurrence
 backtest, deterministic distillation, reporting evidence, provider/advisory
 approval boundaries, and agent-native output contract:
@@ -36,9 +36,16 @@ approval boundaries, and agent-native output contract:
   `relia ingest --github-outcomes --input <path>` accepts a local structured
   GitHub export with PR metadata, check runs, reverts, and marked review
   corrections, then translates those outcomes into the same canonical records.
-  This task slice remains offline and credential-free; live GitHub API intake
-  remains behind future credential and network gates. Events marked as agent
-  self-reports or reflections fail before persistence.
+  `relia ingest --github-live --repo <owner/repo> --pr <number>
+  --github-token-env <ENV> --github-token-scope read-only --allow-network
+  --allow-credentials --human-approved` uses a read-only GitHub API adapter to
+  build the same structured outcome export before redaction, provenance
+  validation, attribution, and shard persistence, including PR commit
+  coauthor trailers used by attribution. It never reads ambient
+  credentials such as `GITHUB_TOKEN`; the token environment, read-only scope,
+  network approval, credential approval, and human approval must be explicit.
+  Offline replay remains `--github-outcomes --input <path>`. Events marked as
+  agent self-reports or reflections fail before persistence.
 - `relia backtest --window 180d` reads local `.relia/experiences/*.jsonl`
   shards, extracts deterministic signatures, pairs confirmed recurrences
   separately from possible recurrences, discounts flakes, and writes JSON plus
