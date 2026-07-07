@@ -3,6 +3,13 @@
   "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
   "acceptance_mapping_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
   "artifact_type": "task_packets",
+  "supervised_autoship_policy": {
+    "skill_ref": "factory://skills/autoship-supervisor",
+    "scope_rule": "Supervisor runs must bind to one task_id and may not widen allowed_paths, forbidden_paths, acceptance_item_ids, validation_commands, lifecycle_gates, required_worker_chain, worker_evidence_required, or lifecycle_evidence_required.",
+    "evidence_artifact_type": "autoship_supervisor_report",
+    "evidence_path": ".factory/artifacts/supervisor-runs/<task_id>/<timestamp>.json",
+    "daemon_authority": "factoryd remains the task implementation and shipping engine; supervisor decisions are limited to blocker classification, explicit acceptance, narrow non-convergent repair, plan updates, or systemic follow-up."
+  },
   "delivery_slices": [
     {
       "acceptance_group_refs": [

@@ -1218,6 +1218,19 @@
     "review_type": "code",
     "reviewer_class": "peer_agent"
   },
+  "supervised_autoship_policy": {
+    "skill_ref": "factory://skills/autoship-supervisor",
+    "required_when": "A human supervisor explicitly oversees one factoryd autoship task from the Relia repo root.",
+    "evidence_artifact_type": "autoship_supervisor_report",
+    "evidence_path": ".factory/artifacts/supervisor-runs/<task_id>/<timestamp>.json",
+    "validation_rule": "Supervisor evidence supplements, but never replaces, validation_report, work_proof_marker, worker_evidence_required, lifecycle_evidence_required, scope closure, CI, and latest-head Codex review evidence.",
+    "blocked_if": [
+      "supervisor is used without a single task_id",
+      "manual intervention bypasses factoryd lifecycle evidence",
+      "manual acceptance lacks explicit gate evidence",
+      "non-convergent repair is applied without recording blocker classification"
+    ]
+  },
   "schema_version": "0.1",
   "source_prd_ref": "docs/product/prd.md",
   "stop_conditions": [
