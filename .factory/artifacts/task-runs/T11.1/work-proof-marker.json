@@ -26,10 +26,10 @@
     ".factory/artifacts/task-runs/T11.1/proof-of-behavior-scorecard.json"
   ],
   "implementation_performed": true,
-  "produced_at_utc": "2026-07-07T13:28:04Z",
+  "produced_at_utc": "2026-07-07T14:02:13Z",
   "repair_performed": true,
-  "repair_summary": "Tightened live GitHub revert intake so PR markers use exact token boundaries and PR 30 no longer matches PR 302 markers.",
-  "repair_task_id": "20260707T121442.197389000Z-relia-T11.1-repair-2",
+  "repair_summary": "Addressed repair-5 Codex review feedback by matching live revert receipts against merge_commit_sha as well as head_sha, and by exporting PR commit coauthor trailers for existing attribution policy matching.",
+  "repair_task_id": "20260707T121442.197389000Z-relia-T11.1-repair-5",
   "schema_version": "1.0",
   "status": "implemented",
   "task_id": "T11.1"

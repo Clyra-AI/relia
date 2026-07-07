@@ -225,8 +225,9 @@ T11.1 adds gated live GitHub API intake without changing offline replay:
 - `relia ingest --github-live --repo <owner/repo> --pr <number>
   --github-token-env <ENV> --github-token-scope read-only --allow-network
   --allow-credentials --human-approved` fetches PR metadata, changed files,
-  check runs, revert commit receipts, and marked review-correction comments
-  through a read-only adapter.
+  PR commit coauthor trailers, check runs, revert commit receipts, and marked
+  review-correction comments through a read-only adapter. Revert matching
+  considers exact PR markers plus PR head and merge commit SHAs.
 - Live intake fails closed before any request unless human approval, network
   approval, credential approval, an explicit token environment, and a declared
   `read-only` scope are present. The command never falls back to ambient

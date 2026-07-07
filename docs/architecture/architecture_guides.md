@@ -220,9 +220,10 @@ tests, `make prepush-full`, and Factory task-run evidence. The adapter only
 uses GET requests against `api.github.com`, never reads ambient credentials,
 and fails closed until human, network, credential, explicit token-env, and
 declared read-only-scope gates are present. API payloads are reduced to PR
-metadata, changed files, check-run outcomes, revert receipts, and marked
-review-correction comments before the existing redaction and provenance checks
-run. The blast radius is limited to `relia ingest`, generated local experience
+metadata, changed files, PR commit coauthor trailers, check-run outcomes,
+merge/head-SHA-linked revert receipts, and marked review-correction comments
+before the existing redaction and provenance checks run. The blast radius is
+limited to `relia ingest`, generated local experience
 shards, command-result receipt metadata, and replay fixtures. Rollback is
 removal of the live adapter and CLI flags; existing offline
 `--github-outcomes --input` replay remains the source of truth.

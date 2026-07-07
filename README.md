@@ -40,7 +40,8 @@ approval boundaries, and agent-native output contract:
   --github-token-env <ENV> --github-token-scope read-only --allow-network
   --allow-credentials --human-approved` uses a read-only GitHub API adapter to
   build the same structured outcome export before redaction, provenance
-  validation, attribution, and shard persistence. It never reads ambient
+  validation, attribution, and shard persistence, including PR commit
+  coauthor trailers used by attribution. It never reads ambient
   credentials such as `GITHUB_TOKEN`; the token environment, read-only scope,
   network approval, credential approval, and human approval must be explicit.
   Offline replay remains `--github-outcomes --input <path>`. Events marked as

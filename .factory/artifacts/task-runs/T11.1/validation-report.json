@@ -3,6 +3,7 @@
     {
       "acceptance_item_id": "FR3-GITHUB-LIVE-API-INTAKE-001",
       "evidence_refs": [
+        ".factory/artifacts/task-runs/T11.1/validation-report.json",
         ".factory/artifacts/task-runs/T11.1/work-proof-marker.json",
         ".factory/artifacts/task-runs/T11.1/proof-of-behavior-scorecard.json"
       ],
@@ -43,12 +44,9 @@
   "commands_run": [
     "make lint-fast",
     "make test-fast",
-    "go test ./internal/ingest ./cmd/relia -run 'Test(ParseArgsAcceptsGitHubLiveMode|ParseArgsRejectsGitHubLiveReplayMix|FetchGitHubLiveOutcomeExport|IngestGitHubLive)' -count=1",
-    "GOCACHE=\"${TMPDIR:-/tmp}/relia-go-build\" go test ./internal/ingest ./cmd/relia -run 'Test(ParseArgsAcceptsGitHubLiveMode|ParseArgsRejectsGitHubLiveReplayMix|FetchGitHubLiveOutcomeExport|IngestGitHubLive)' -count=1",
-    "GOCACHE=\"${TMPDIR:-/tmp}/relia-go-build\" go test ./internal/ingest ./cmd/relia -run 'Test(ParseArgsAcceptsGitHubLiveMode|ParseArgsRejectsGitHubLiveReplayMix|ParseArgsRejectsGitHubLiveArgumentsWithoutGitHubLiveMode|FetchGitHubLiveOutcomeExport|IngestGitHubLive)' -count=1",
+    "go test ./internal/ingest -run 'TestFetchGitHubLiveOutcomeExport(BuildsReplayableStructuredOutcomes|MatchesMergeCommitSHARevert)' -count=1",
+    "go test ./internal/ingest -run 'TestFetchGitHubLiveOutcomeExport(BuildsReplayableStructuredOutcomes|MatchesMergeCommitSHARevert|MapsRateLimit|MapsAuthFailure|MapsAPIError)|TestGitHubLiveCommitRevertsPullRequiresExactPRMarker' -count=1",
     "make test-fast",
-    "go test ./internal/ingest -run TestGitHubLiveCommitRevertsPullRequiresExactPRMarker -count=1",
-    "go test ./internal/ingest -run TestGitHubLiveCommitRevertsPullRequiresExactPRMarker -count=1",
     "make prepush-full",
     "python3 -m json.tool .factory/artifacts/task-runs/T11.1/work-proof-marker.json \u003e/tmp/t11_1_work_proof_marker.json",
     "python3 -m json.tool .factory/artifacts/task-runs/T11.1/validation-report.json \u003e/tmp/t11_1_validation_report.json",
@@ -86,22 +84,12 @@
   ],
   "focused_validation_evidence": [
     {
-      "command": "GOCACHE=\"${TMPDIR:-/tmp}/relia-go-build\" go test ./internal/ingest ./cmd/relia -run 'Test(ParseArgsAcceptsGitHubLiveMode|ParseArgsRejectsGitHubLiveReplayMix|FetchGitHubLiveOutcomeExport|IngestGitHubLive)' -count=1",
-      "exit_code": 0,
-      "status": "pass"
-    },
-    {
-      "command": "GOCACHE=\"${TMPDIR:-/tmp}/relia-go-build\" go test ./internal/ingest ./cmd/relia -run 'Test(ParseArgsAcceptsGitHubLiveMode|ParseArgsRejectsGitHubLiveReplayMix|ParseArgsRejectsGitHubLiveArgumentsWithoutGitHubLiveMode|FetchGitHubLiveOutcomeExport|IngestGitHubLive)' -count=1",
+      "command": "go test ./internal/ingest -run 'TestFetchGitHubLiveOutcomeExport(BuildsReplayableStructuredOutcomes|MatchesMergeCommitSHARevert|MapsRateLimit|MapsAuthFailure|MapsAPIError)|TestGitHubLiveCommitRevertsPullRequiresExactPRMarker' -count=1",
       "exit_code": 0,
       "status": "pass"
     },
     {
       "command": "make test-fast",
-      "exit_code": 0,
-      "status": "pass"
-    },
-    {
-      "command": "go test ./internal/ingest -run TestGitHubLiveCommitRevertsPullRequiresExactPRMarker -count=1",
       "exit_code": 0,
       "status": "pass"
     }
@@ -116,21 +104,15 @@
     "status": "pass"
   },
   "plan_drift_result": {
-    "notes": "Implemented only the T11.1 live GitHub API intake adapter, CLI gates, deterministic tests, and required docs/evidence updates.",
+    "notes": "Repaired only the current T11.1 Codex review feedback for merge_commit_sha revert matching and live coauthor trailer preservation, plus required docs/evidence updates.",
     "status": "pass"
   },
-  "produced_at_utc": "2026-07-07T13:28:04Z",
+  "produced_at_utc": "2026-07-07T14:02:13Z",
   "red_first_evidence": [
     {
-      "command": "go test ./internal/ingest ./cmd/relia -run 'Test(ParseArgsAcceptsGitHubLiveMode|ParseArgsRejectsGitHubLiveReplayMix|FetchGitHubLiveOutcomeExport|IngestGitHubLive)' -count=1",
+      "command": "go test ./internal/ingest -run 'TestFetchGitHubLiveOutcomeExport(BuildsReplayableStructuredOutcomes|MatchesMergeCommitSHARevert)' -count=1",
       "exit_code": 1,
-      "failure_summary": "new live GitHub intake tests failed before implementation because GitHubLiveOptions, --github-live args, and live fetcher behavior did not exist",
-      "status": "expected_fail"
-    },
-    {
-      "command": "go test ./internal/ingest -run TestGitHubLiveCommitRevertsPullRequiresExactPRMarker -count=1",
-      "exit_code": 1,
-      "failure_summary": "repair regression failed before implementation because substring matching attached PR 302 revert markers to PR 30.",
+      "failure_summary": "repair regressions failed before implementation because live replay exports did not populate coauthor trailers and merge_commit_sha-only revert messages were classified as merged_clean.",
       "status": "expected_fail"
     }
   ],

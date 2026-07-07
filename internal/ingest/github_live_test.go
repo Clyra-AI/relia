@@ -33,6 +33,7 @@ func TestFetchGitHubLiveOutcomeExportBuildsReplayableStructuredOutcomes(t *testi
 				"number": 302,
 				"html_url": "https://github.com/acme/billing-service/pull/302",
 				"head": {"sha": "abc302"},
+				"merge_commit_sha": "merge302",
 				"base": {"ref": "main"},
 				"merged_at": "2026-06-02T12:00:00Z",
 				"created_at": "2026-06-01T12:00:00Z",
@@ -47,6 +48,16 @@ func TestFetchGitHubLiveOutcomeExportBuildsReplayableStructuredOutcomes(t *testi
 		},
 		"/repos/acme/billing-service/pulls/302/files?per_page=100&page=2": {
 			body: `[{"filename": "packages/billing/tax_test.py"}]`,
+		},
+		"/repos/acme/billing-service/pulls/302/commits?per_page=100": {
+			body: `[
+				{
+					"sha": "abc302",
+					"commit": {
+						"message": "Implement tax change\n\nCo-authored-by: Claude Code <claude@example.invalid>"
+					}
+				}
+			]`,
 		},
 		"/repos/acme/billing-service/commits/abc302/check-runs?per_page=100": {
 			body: `{
@@ -126,10 +137,82 @@ func TestFetchGitHubLiveOutcomeExportBuildsReplayableStructuredOutcomes(t *testi
 		if got := stringFromAny(events[index]["outcome_kind"]); got != want {
 			t.Fatalf("event %d outcome_kind = %q, want %q", index, got, want)
 		}
+		coauthors := events[index]["coauthors"].([]string)
+		if len(coauthors) != 1 || coauthors[0] != "Claude Code" {
+			t.Fatalf("event %d coauthors = %#v, want Claude Code", index, coauthors)
+		}
 		metadata := events[index]["metadata"].(map[string]any)
 		if metadata["source_format"] != "github_live_api" {
 			t.Fatalf("event %d metadata.source_format = %#v, want github_live_api", index, metadata["source_format"])
 		}
+	}
+}
+
+func TestFetchGitHubLiveOutcomeExportMatchesMergeCommitSHARevert(t *testing.T) {
+	client := newFakeGitHubLiveClient(map[string]fakeGitHubLiveResponse{
+		"/repos/acme/billing-service/pulls/302": {
+			body: `{
+				"number": 302,
+				"html_url": "https://github.com/acme/billing-service/pull/302",
+				"head": {"sha": "abc302"},
+				"merge_commit_sha": "merge302",
+				"base": {"ref": "main"},
+				"merged_at": "2026-06-02T12:00:00Z",
+				"created_at": "2026-06-01T12:00:00Z",
+				"updated_at": "2026-06-02T12:00:00Z",
+				"labels": [{"name": "agent-authored"}]
+			}`,
+		},
+		"/repos/acme/billing-service/pulls/302/files?per_page=100": {
+			body: `[{"filename": "packages/billing/tax.py"}]`,
+		},
+		"/repos/acme/billing-service/pulls/302/commits?per_page=100": {
+			body: `[]`,
+		},
+		"/repos/acme/billing-service/commits/abc302/check-runs?per_page=100": {
+			body: `{"check_runs": []}`,
+		},
+		"/repos/acme/billing-service/pulls/302/comments?per_page=100": {
+			body: `[]`,
+		},
+		"/repos/acme/billing-service/issues/302/comments?per_page=100": {
+			body: `[]`,
+		},
+		"/repos/acme/billing-service/commits?per_page=100&sha=main": {
+			body: `[
+				{
+					"sha": "def302",
+					"html_url": "https://github.com/acme/billing-service/commit/def302",
+					"commit": {
+						"message": "Revert custom merge\n\nThis reverts commit merge302.",
+						"committer": {"date": "2026-06-03T12:00:00Z"}
+					}
+				}
+			]`,
+		},
+	})
+
+	export, _, ingestErr := FetchGitHubLiveOutcomeExport(context.Background(), client, approvedGitHubLiveOptions())
+	if ingestErr != nil {
+		t.Fatalf("FetchGitHubLiveOutcomeExport returned error: %v", ingestErr)
+	}
+	content, err := json.Marshal(export)
+	if err != nil {
+		t.Fatalf("marshal export: %v", err)
+	}
+	events, ingestErr := ParseGitHubOutcomeEvents(content, "github-live-replay.json")
+	if ingestErr != nil {
+		t.Fatalf("ParseGitHubOutcomeEvents returned error: %v", ingestErr)
+	}
+	if len(events) != 1 {
+		t.Fatalf("events = %d, want only revert outcome: %#v", len(events), events)
+	}
+	if got := stringFromAny(events[0]["outcome_kind"]); got != "revert" {
+		t.Fatalf("outcome_kind = %q, want revert", got)
+	}
+	metadata := events[0]["metadata"].(map[string]any)
+	if got := stringFromAny(metadata["github_source_commit"]); got != "def302" {
+		t.Fatalf("github_source_commit = %q, want def302", got)
 	}
 }
 

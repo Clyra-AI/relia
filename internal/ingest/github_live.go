@@ -170,8 +170,13 @@ func (f *githubLiveFetcher) pull(number int) (map[string]any, *Error) {
 		return nil, commandErr
 	}
 	headSHA := githubString(rawPull, "head.sha", "head_sha")
+	mergeCommitSHA := githubString(rawPull, "merge_commit_sha")
 	baseRef := githubString(rawPull, "base.ref", "base_ref")
 	files, commandErr := f.getArray(pullPath+"/files?per_page=100", "", "pull_request_files")
+	if commandErr != nil {
+		return nil, commandErr
+	}
+	prCommits, commandErr := f.getArray(pullPath+"/commits?per_page=100", "", "pull_commits")
 	if commandErr != nil {
 		return nil, commandErr
 	}
@@ -211,13 +216,19 @@ func (f *githubLiveFetcher) pull(number int) (map[string]any, *Error) {
 		"files":      sanitizeGitHubLiveFiles(files),
 		"check_runs": sanitizeGitHubLiveCheckRuns(checkRuns),
 	}
+	if mergeCommitSHA != "" {
+		pull["merge_commit_sha"] = mergeCommitSHA
+	}
 	if labels := sanitizeGitHubLiveLabels(githubOutcomeObjects(rawPull, "labels")); len(labels) > 0 {
 		pull["labels"] = labels
+	}
+	if coauthors := sanitizeGitHubLiveCoauthorTrailers(prCommits); len(coauthors) > 0 {
+		pull["coauthor_trailers"] = coauthors
 	}
 	if login := githubString(rawPull, "user.login", "author.login"); login != "" {
 		pull["author"] = map[string]any{"login": login}
 	}
-	if reverts := sanitizeGitHubLiveReverts(commits, number, headSHA, sanitizeGitHubLivePathList(files)); len(reverts) > 0 {
+	if reverts := sanitizeGitHubLiveReverts(commits, number, sanitizeGitHubLivePathList(files), headSHA, mergeCommitSHA); len(reverts) > 0 {
 		pull["reverts"] = reverts
 	}
 	if corrections := sanitizeGitHubLiveReviewCorrections(append(reviewComments, issueComments...)); len(corrections) > 0 {
@@ -429,11 +440,32 @@ func sanitizeGitHubLiveCheckRuns(checkRuns []map[string]any) []map[string]any {
 	return result
 }
 
-func sanitizeGitHubLiveReverts(commits []map[string]any, pr int, headSHA string, paths []string) []map[string]any {
+func sanitizeGitHubLiveCoauthorTrailers(commits []map[string]any) []string {
+	var result []string
+	for _, commit := range commits {
+		message := githubString(commit, "commit.message", "message")
+		for _, line := range strings.Split(strings.ReplaceAll(message, "\r\n", "\n"), "\n") {
+			label, value, ok := strings.Cut(line, ":")
+			if !ok || !strings.EqualFold(strings.TrimSpace(label), "Co-authored-by") {
+				continue
+			}
+			name := strings.TrimSpace(value)
+			if beforeEmail, _, ok := strings.Cut(name, "<"); ok {
+				name = strings.TrimSpace(beforeEmail)
+			}
+			if name != "" {
+				result = append(result, name)
+			}
+		}
+	}
+	return uniqueStrings(result)
+}
+
+func sanitizeGitHubLiveReverts(commits []map[string]any, pr int, paths []string, commitSHAs ...string) []map[string]any {
 	var result []map[string]any
 	for _, commit := range commits {
 		message := githubString(commit, "commit.message", "message")
-		if !githubLiveCommitRevertsPull(message, pr, headSHA) {
+		if !githubLiveCommitRevertsPull(message, pr, commitSHAs...) {
 			continue
 		}
 		sanitized := map[string]any{
@@ -471,13 +503,16 @@ func sanitizeGitHubLiveReviewCorrections(comments []map[string]any) []map[string
 	return result
 }
 
-func githubLiveCommitRevertsPull(message string, pr int, headSHA string) bool {
+func githubLiveCommitRevertsPull(message string, pr int, commitSHAs ...string) bool {
 	normalized := strings.ToLower(message)
 	if !strings.Contains(normalized, "revert") {
 		return false
 	}
-	if headSHA != "" && strings.Contains(normalized, strings.ToLower(headSHA)) {
-		return true
+	for _, commitSHA := range commitSHAs {
+		commitSHA = strings.TrimSpace(commitSHA)
+		if commitSHA != "" && strings.Contains(normalized, strings.ToLower(commitSHA)) {
+			return true
+		}
 	}
 	for _, marker := range []string{
 		"#" + strconv.Itoa(pr),
