@@ -111,6 +111,7 @@ def repo_local_path(value, flag):
     path = Path(value)
     if not path.is_absolute():
         path = ROOT / path
+    path = path.resolve()
     try:
         path.relative_to(ROOT)
     except ValueError:

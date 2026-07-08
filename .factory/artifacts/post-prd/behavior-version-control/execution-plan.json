@@ -127,7 +127,7 @@
     "workspace_root": "../.factoryd/workspaces"
   },
   "feedback_plan": "Use repo-configured validation commands, validation reports, PR lifecycle reports, and scope closure.",
-  "generated_at": "2026-07-08T03:49:58Z",
+  "generated_at": "2026-07-08T04:22:46Z",
   "level_gates": [
     "Plan approval before implementation",
     "Human approval before live credentials or network"

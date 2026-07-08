@@ -90,6 +90,12 @@ def self_test():
     if parsed["factoryd_config"] != ROOT / ".factory" / "factoryd.behavior-version-control.json":
         fail("--factoryd-config did not resolve to the requested repo-local config")
     try:
+        validator.parse_args(["--factoryd-config", "../outside.json"])
+    except SystemExit:
+        pass
+    else:
+        fail("--factoryd-config accepted an escaped repo path")
+    try:
         validator.parse_args(["--unknown"])
     except SystemExit:
         pass

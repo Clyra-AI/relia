@@ -64,7 +64,7 @@
       ]
     }
   ],
-  "generated_at": "2026-07-08T03:49:58Z",
+  "generated_at": "2026-07-08T04:22:46Z",
   "schema_version": "0.1",
   "source_post_prd_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md",
   "tasks": [
@@ -1561,7 +1561,7 @@
         "post-merge-monitor"
       ],
       "requires_credentials": false,
-      "requires_human_approval": false,
+      "requires_human_approval": true,
       "requires_network": false,
       "risk_class": "low",
       "runtime_pins": {
