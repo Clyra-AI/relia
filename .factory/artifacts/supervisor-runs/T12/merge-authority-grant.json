@@ -1,0 +1,14 @@
+{
+  "artifact_type": "runtime_capability_grant_evidence",
+  "schema_version": "0.1",
+  "generated_at": "2026-07-07T18:12:00Z",
+  "repo": "relia",
+  "task_id": "T12",
+  "capability": "merge_authority",
+  "approved": true,
+  "evidence_ref": "operator_request:2026-07-07T18:12Z:use-autoship-supervisor-for-T12",
+  "expires_at": "2026-07-08T18:12:00Z",
+  "committed_config_ref": ".factory/factoryd.autoship.example.json",
+  "local_config_ref": ".factory/factoryd.json",
+  "redaction_note": "The local runtime config was gitignored and may contain operator-local runtime state. This artifact records the non-secret task-scoped merge authority grant evidence needed to interpret the supervised T12 run."
+}
