@@ -25,7 +25,7 @@
       "Factory daemon contracts"
     ]
   },
-  "generated_at": "2026-07-08T03:49:58Z",
+  "generated_at": "2026-07-08T04:22:46Z",
   "open_questions": [],
   "proven_findings": [
     "Post-PRD intake generated a governed artifact set from the supplied work signal.",

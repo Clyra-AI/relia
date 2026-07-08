@@ -146,7 +146,7 @@
       "workspace_root": "../.factoryd/workspaces"
     }
   },
-  "generated_at": "2026-07-08T03:49:58Z",
+  "generated_at": "2026-07-08T04:22:46Z",
   "lifecycle_evidence_required": [
     "scope_closure_report",
     "pr_lifecycle_report",
