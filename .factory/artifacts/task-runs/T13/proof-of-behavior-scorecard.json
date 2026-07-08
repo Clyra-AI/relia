@@ -146,6 +146,18 @@
       "observed_result": "Workflow fallback discovery returns `advise,go tests` and ignores the workflow display name `validate` and named steps."
     },
     {
+      "behavior": "relia init preserves discovered required-check names that contain YAML-sensitive characters",
+      "status": "pass",
+      "evidence_refs": [
+        "internal/config/config.go",
+        "internal/config/config_test.go",
+        "internal/yamlmini/yamlmini.go",
+        "internal/yamlmini/yamlmini_test.go",
+        ".factory/artifacts/task-runs/T13/validation-report.json"
+      ],
+      "observed_result": "Generated required checks such as `test #1` and `build: linux` are quoted in relia.yaml and read back unchanged by yamlmini."
+    },
+    {
       "behavior": "Agent-facing command output remains machine-readable and evidence-bearing",
       "status": "pass",
       "evidence_refs": [

@@ -155,6 +155,19 @@
         "internal/memory/summary.go",
         "https://github.com/Clyra-AI/relia/pull/161#discussion_r3547072540"
       ]
+    },
+    {
+      "decision_type": "review_disposition",
+      "actor": "supervisor",
+      "action_taken": "accepted_and_fixed",
+      "reason": "Generated required-check names containing YAML comment or mapping syntax must survive relia.yaml readback.",
+      "evidence_refs": [
+        "internal/config/config.go",
+        "internal/config/config_test.go",
+        "internal/yamlmini/yamlmini.go",
+        "internal/yamlmini/yamlmini_test.go",
+        "https://github.com/Clyra-AI/relia/pull/161#discussion_r3547132744"
+      ]
     }
   ],
   "validation": {
@@ -197,6 +210,14 @@
         "exit_code": 0
       },
       {
+        "command": "go test ./internal/yamlmini -run 'TestParseDocumentHandlesCommentsQuotesAndBlockScalars|TestParseDocumentUnquotesListScalars|TestListValuesWithMapFieldsReturnsUniqueValues' -count=1",
+        "exit_code": 0
+      },
+      {
+        "command": "go test ./internal/config -run 'TestDefaultYAMLWithChecksRendersDiscoveredChecks|TestDefaultYAMLWithChecksQuotesYAMLSensitiveCheckNames|TestCompileSettingsFromConfigAcceptsQuotedTargets|TestCompileSettingsFromConfigAcceptsInlineTargets' -count=1",
+        "exit_code": 0
+      },
+      {
         "command": "go test ./internal/memory -run 'TestValidateRuleArtifactRejectsManagedMarkersInStatement|TestValidateRuleArtifactAcceptsBlockScalarStatement|TestLoadRuleSummariesResolvesBlockScalarStatement' -count=1",
         "exit_code": 0
       },
@@ -230,6 +251,7 @@
     "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546926665",
     "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546926670",
     "https://github.com/Clyra-AI/relia/pull/161#discussion_r3547016206",
-    "https://github.com/Clyra-AI/relia/pull/161#discussion_r3547072540"
+    "https://github.com/Clyra-AI/relia/pull/161#discussion_r3547072540",
+    "https://github.com/Clyra-AI/relia/pull/161#discussion_r3547132744"
   ]
 }

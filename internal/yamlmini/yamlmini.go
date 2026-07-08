@@ -66,8 +66,9 @@ func ParseDocument(content string) (Document, error) {
 			if strings.HasPrefix(trimmed, "- ") {
 				itemValue = strings.TrimSpace(strings.TrimPrefix(trimmed, "- "))
 			}
+			listValue := unquoteScalar(itemValue)
 			document.Lists[parent] = append(document.Lists[parent], Scalar{
-				Value: itemValue,
+				Value: listValue,
 				Line:  lineNumber,
 			})
 			itemIndex := len(document.Lists[parent]) - 1
