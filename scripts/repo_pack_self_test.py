@@ -86,6 +86,15 @@ def self_test():
         fail("repo root resolution selected scripts/ instead of repository root")
     if not (ROOT / "scripts" / "validate_repo_pack.py").exists():
         fail("repo root resolution must be relative to this validator file")
+    parsed = validator.parse_args(["--factoryd-config", ".factory/factoryd.behavior-version-control.json"])
+    if parsed["factoryd_config"] != ROOT / ".factory" / "factoryd.behavior-version-control.json":
+        fail("--factoryd-config did not resolve to the requested repo-local config")
+    try:
+        validator.parse_args(["--unknown"])
+    except SystemExit:
+        pass
+    else:
+        fail("unknown validator argument did not fail closed")
     with TemporaryDirectory() as temp_dir:
         temp_root = Path(temp_dir)
         oversized = temp_root / "cmd" / "demo" / "main.go"

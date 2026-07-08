@@ -47,6 +47,68 @@
   "acceptance_mapping_ref": ".factory/artifacts/post-prd/behavior-version-control/acceptance-mapping.json",
   "artifact_type": "validation_contract",
   "contract_id": "behavior-version-control-post-prd-validation-contract",
+  "delivery_slices": [
+    {
+      "acceptance_group_refs": [
+        "behavior-change-provenance-inventory"
+      ],
+      "acceptance_item_ids": [
+        "BEHAVIOR-CHANGE-PROVENANCE-INVENTORY-001",
+        "BEHAVIOR-CHANGE-PROVENANCE-INVENTORY-002",
+        "BEHAVIOR-CHANGE-PROVENANCE-INVENTORY-003",
+        "BEHAVIOR-CHANGE-PROVENANCE-INVENTORY-004"
+      ],
+      "generated_from_group_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#behavior-change-provenance-inventory",
+      "name": "Behavior change provenance inventory",
+      "public_release_boundary": false,
+      "required_for_completion": true,
+      "slice_id": "behavior-change-provenance-inventory",
+      "source_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#behavior-change-provenance-inventory",
+      "task_refs": [
+        "behavior-version-control-t1"
+      ]
+    },
+    {
+      "acceptance_group_refs": [
+        "err-regression-attribution"
+      ],
+      "acceptance_item_ids": [
+        "ERR-REGRESSION-ATTRIBUTION-001",
+        "ERR-REGRESSION-ATTRIBUTION-002",
+        "ERR-REGRESSION-ATTRIBUTION-003",
+        "ERR-REGRESSION-ATTRIBUTION-004"
+      ],
+      "generated_from_group_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#err-regression-attribution",
+      "name": "ERR regression attribution",
+      "public_release_boundary": false,
+      "required_for_completion": true,
+      "slice_id": "err-regression-attribution",
+      "source_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#err-regression-attribution",
+      "task_refs": [
+        "behavior-version-control-t2"
+      ]
+    },
+    {
+      "acceptance_group_refs": [
+        "rollback-recommendation-report"
+      ],
+      "acceptance_item_ids": [
+        "ROLLBACK-RECOMMENDATION-REPORT-001",
+        "ROLLBACK-RECOMMENDATION-REPORT-002",
+        "ROLLBACK-RECOMMENDATION-REPORT-003",
+        "ROLLBACK-RECOMMENDATION-REPORT-004"
+      ],
+      "generated_from_group_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#rollback-recommendation-report",
+      "name": "Rollback recommendation report",
+      "public_release_boundary": false,
+      "required_for_completion": true,
+      "slice_id": "rollback-recommendation-report",
+      "source_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#rollback-recommendation-report",
+      "task_refs": [
+        "behavior-version-control-t3"
+      ]
+    }
+  ],
   "evidence_required": [
     "work_proof_marker",
     "validation_report",
@@ -84,9 +146,14 @@
       "workspace_root": "../.factoryd/workspaces"
     }
   },
-  "generated_at": "2026-07-08T02:33:00Z",
+  "generated_at": "2026-07-08T03:49:58Z",
+  "lifecycle_evidence_required": [
+    "scope_closure_report",
+    "pr_lifecycle_report",
+    "factoryd_run_once_report"
+  ],
   "required_checks": [
-    "python3 scripts/validate_repo_pack.py"
+    "python3 scripts/validate_repo_pack.py --factoryd-config .factory/factoryd.behavior-version-control.json"
   ],
   "required_review": {
     "required": false,
@@ -101,5 +168,9 @@
     "closure did not advance",
     "alignment drift detected"
   ],
-  "work_signal_kind": "ideas"
+  "work_signal_kind": "ideas",
+  "worker_evidence_required": [
+    "work_proof_marker",
+    "validation_report"
+  ]
 }

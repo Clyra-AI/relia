@@ -2,7 +2,69 @@
   "acceptance_ledger_ref": ".factory/artifacts/post-prd/behavior-version-control/acceptance-ledger.json",
   "artifact_type": "acceptance_mapping",
   "decomposition_mode": "post_prd_recommendation_items",
-  "generated_at": "2026-07-08T02:33:00Z",
+  "delivery_slices": [
+    {
+      "acceptance_group_refs": [
+        "behavior-change-provenance-inventory"
+      ],
+      "acceptance_item_ids": [
+        "BEHAVIOR-CHANGE-PROVENANCE-INVENTORY-001",
+        "BEHAVIOR-CHANGE-PROVENANCE-INVENTORY-002",
+        "BEHAVIOR-CHANGE-PROVENANCE-INVENTORY-003",
+        "BEHAVIOR-CHANGE-PROVENANCE-INVENTORY-004"
+      ],
+      "generated_from_group_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#behavior-change-provenance-inventory",
+      "name": "Behavior change provenance inventory",
+      "public_release_boundary": false,
+      "required_for_completion": true,
+      "slice_id": "behavior-change-provenance-inventory",
+      "source_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#behavior-change-provenance-inventory",
+      "task_refs": [
+        "behavior-version-control-t1"
+      ]
+    },
+    {
+      "acceptance_group_refs": [
+        "err-regression-attribution"
+      ],
+      "acceptance_item_ids": [
+        "ERR-REGRESSION-ATTRIBUTION-001",
+        "ERR-REGRESSION-ATTRIBUTION-002",
+        "ERR-REGRESSION-ATTRIBUTION-003",
+        "ERR-REGRESSION-ATTRIBUTION-004"
+      ],
+      "generated_from_group_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#err-regression-attribution",
+      "name": "ERR regression attribution",
+      "public_release_boundary": false,
+      "required_for_completion": true,
+      "slice_id": "err-regression-attribution",
+      "source_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#err-regression-attribution",
+      "task_refs": [
+        "behavior-version-control-t2"
+      ]
+    },
+    {
+      "acceptance_group_refs": [
+        "rollback-recommendation-report"
+      ],
+      "acceptance_item_ids": [
+        "ROLLBACK-RECOMMENDATION-REPORT-001",
+        "ROLLBACK-RECOMMENDATION-REPORT-002",
+        "ROLLBACK-RECOMMENDATION-REPORT-003",
+        "ROLLBACK-RECOMMENDATION-REPORT-004"
+      ],
+      "generated_from_group_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#rollback-recommendation-report",
+      "name": "Rollback recommendation report",
+      "public_release_boundary": false,
+      "required_for_completion": true,
+      "slice_id": "rollback-recommendation-report",
+      "source_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#rollback-recommendation-report",
+      "task_refs": [
+        "behavior-version-control-t3"
+      ]
+    }
+  ],
+  "generated_at": "2026-07-08T03:49:58Z",
   "groups": [
     {
       "acceptance_item_ids": [
@@ -19,6 +81,44 @@
         "Respect dependency: Run after T18 because lesson grain, owner, evidence, applicability, and expiry rules must exist before behavior-change attribution can be trusted."
       ],
       "group_id": "behavior-change-provenance-inventory",
+      "item_mappings": [
+        {
+          "acceptance_item_id": "BEHAVIOR-CHANGE-PROVENANCE-INVENTORY-001",
+          "delivery_slice_refs": [
+            "behavior-change-provenance-inventory"
+          ],
+          "task_refs": [
+            "behavior-version-control-t1"
+          ]
+        },
+        {
+          "acceptance_item_id": "BEHAVIOR-CHANGE-PROVENANCE-INVENTORY-002",
+          "delivery_slice_refs": [
+            "behavior-change-provenance-inventory"
+          ],
+          "task_refs": [
+            "behavior-version-control-t1"
+          ]
+        },
+        {
+          "acceptance_item_id": "BEHAVIOR-CHANGE-PROVENANCE-INVENTORY-003",
+          "delivery_slice_refs": [
+            "behavior-change-provenance-inventory"
+          ],
+          "task_refs": [
+            "behavior-version-control-t1"
+          ]
+        },
+        {
+          "acceptance_item_id": "BEHAVIOR-CHANGE-PROVENANCE-INVENTORY-004",
+          "delivery_slice_refs": [
+            "behavior-change-provenance-inventory"
+          ],
+          "task_refs": [
+            "behavior-version-control-t1"
+          ]
+        }
+      ],
       "judgment_only": false,
       "requires_credentials": false,
       "requires_model_artifact_pull": false,
@@ -48,6 +148,44 @@
         "Respect dependency: Run after behavior change provenance inventory."
       ],
       "group_id": "err-regression-attribution",
+      "item_mappings": [
+        {
+          "acceptance_item_id": "ERR-REGRESSION-ATTRIBUTION-001",
+          "delivery_slice_refs": [
+            "err-regression-attribution"
+          ],
+          "task_refs": [
+            "behavior-version-control-t2"
+          ]
+        },
+        {
+          "acceptance_item_id": "ERR-REGRESSION-ATTRIBUTION-002",
+          "delivery_slice_refs": [
+            "err-regression-attribution"
+          ],
+          "task_refs": [
+            "behavior-version-control-t2"
+          ]
+        },
+        {
+          "acceptance_item_id": "ERR-REGRESSION-ATTRIBUTION-003",
+          "delivery_slice_refs": [
+            "err-regression-attribution"
+          ],
+          "task_refs": [
+            "behavior-version-control-t2"
+          ]
+        },
+        {
+          "acceptance_item_id": "ERR-REGRESSION-ATTRIBUTION-004",
+          "delivery_slice_refs": [
+            "err-regression-attribution"
+          ],
+          "task_refs": [
+            "behavior-version-control-t2"
+          ]
+        }
+      ],
       "judgment_only": false,
       "requires_credentials": false,
       "requires_model_artifact_pull": false,
@@ -77,6 +215,44 @@
         "Respect dependency: Run after ERR regression attribution."
       ],
       "group_id": "rollback-recommendation-report",
+      "item_mappings": [
+        {
+          "acceptance_item_id": "ROLLBACK-RECOMMENDATION-REPORT-001",
+          "delivery_slice_refs": [
+            "rollback-recommendation-report"
+          ],
+          "task_refs": [
+            "behavior-version-control-t3"
+          ]
+        },
+        {
+          "acceptance_item_id": "ROLLBACK-RECOMMENDATION-REPORT-002",
+          "delivery_slice_refs": [
+            "rollback-recommendation-report"
+          ],
+          "task_refs": [
+            "behavior-version-control-t3"
+          ]
+        },
+        {
+          "acceptance_item_id": "ROLLBACK-RECOMMENDATION-REPORT-003",
+          "delivery_slice_refs": [
+            "rollback-recommendation-report"
+          ],
+          "task_refs": [
+            "behavior-version-control-t3"
+          ]
+        },
+        {
+          "acceptance_item_id": "ROLLBACK-RECOMMENDATION-REPORT-004",
+          "delivery_slice_refs": [
+            "rollback-recommendation-report"
+          ],
+          "task_refs": [
+            "behavior-version-control-t3"
+          ]
+        }
+      ],
       "judgment_only": false,
       "requires_credentials": false,
       "requires_model_artifact_pull": false,
