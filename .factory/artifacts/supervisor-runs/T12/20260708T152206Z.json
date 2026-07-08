@@ -1,0 +1,124 @@
+{
+  "artifact_type": "autoship_supervisor_report",
+  "schema_version": "0.1",
+  "generated_at": "2026-07-08T15:22:06Z",
+  "repo": "relia",
+  "task_id": "T12",
+  "work_item_id": "relia-mvp-t12",
+  "source_kind": "prd",
+  "supervisor_skill": "autoship-supervisor",
+  "factoryd_config_ref": ".factory/factoryd.autoship.example.json",
+  "factoryd_command": "FACTORY_REPO=<factory-repo> factoryd run --config .factory/factoryd.autoship.example.json --repo relia --task T12 --loop --max-tasks 1 --json",
+  "task_scope": {
+    "delivery_slice_refs": [
+      "mcp-serving-and-recall"
+    ],
+    "acceptance_item_ids": [
+      "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-002",
+      "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-007",
+      "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-008"
+    ],
+    "allowed_paths": [
+      "AGENTS.md",
+      "WORKFLOW.md",
+      "README.md",
+      "Makefile",
+      ".tool-versions",
+      "go.mod",
+      "go.sum",
+      "relia.yaml",
+      "CLAUDE.md",
+      "tests/",
+      "schemas/",
+      "docs/",
+      "examples/",
+      "memory/",
+      ".github/",
+      ".factory/artifacts/task-runs/T12/",
+      "cmd/relia/",
+      "internal/backtest/",
+      "internal/serve/",
+      "internal/memory/",
+      "internal/assess/"
+    ],
+    "forbidden_paths": [
+      ".git/",
+      ".factory/tmp/",
+      ".factoryd/",
+      ".factory/artifacts/prd-to-plan/relia-mvp/",
+      ".factory/artifacts/pr-lifecycle/relia-mvp-t12/",
+      ".factory/artifacts/task-runs/T12/scope-closure-report.json",
+      ".factory/artifacts/task-runs/T12/scope-closure-map.json",
+      ".factory/artifacts/task-runs/T12/factoryd-run-once-report.json"
+    ],
+    "validation_commands": [
+      "make prepush-full"
+    ],
+    "explicit_gates": [
+      "human_approval",
+      "ci_status",
+      "codex_review",
+      "quality_bot_review",
+      "scope_closure",
+      "architecture_budget"
+    ]
+  },
+  "observations": {
+    "task_binding_status": "verified",
+    "factoryd_dispatch_status": "started",
+    "selected_task_assertion_ref": ".factory/artifacts/supervisor-runs/T12/20260707T185417Z.json",
+    "factoryd_run_report_ref": ".factory/artifacts/pr-lifecycle/relia-mvp-t12/post-merge-report.json",
+    "factoryd_status": "shipping_complete_after_repair_and_closure_sync",
+    "pr_number": 159,
+    "pr_url": "https://github.com/Clyra-AI/relia/pull/159",
+    "ci_status": "passed",
+    "review_status": "clear",
+    "post_merge_status": "passed",
+    "closure_status": "complete"
+  },
+  "decisions": [
+    {
+      "decision_type": "systemic_factory_fix",
+      "actor": "supervisor",
+      "action_taken": "preserved_prior_blocker_report",
+      "reason": "The earlier supervised T12 run report recorded the legitimate review-repair stall that occurred before PR #156 and the follow-up closure-sync PR were completed.",
+      "evidence_refs": [
+        ".factory/artifacts/supervisor-runs/T12/20260707T185417Z.json",
+        "https://github.com/Clyra-AI/relia/pull/156"
+      ]
+    },
+    {
+      "decision_type": "manual_patch",
+      "actor": "supervisor",
+      "action_taken": "recorded_final_reconciliation",
+      "reason": "T12 later reached merged, post-merge monitored, and scope-closed state through PR #156 and closure-sync PR #159, so the source repo should carry durable supervisor evidence instead of leaving the prior report untracked and blocking the next daemon task.",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T12/validation-report.json",
+        ".factory/artifacts/task-runs/T12/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T12/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T12/closure-sync-report.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t12/post-merge-report.json",
+        "https://github.com/Clyra-AI/relia/pull/159"
+      ]
+    }
+  ],
+  "final_state": {
+    "status": "complete",
+    "reason": "T12 implementation and closure-sync PRs are merged, post-merge evidence is present, and T12 item-level scope closure artifacts are committed.",
+    "merged": true,
+    "post_merge_monitored": true,
+    "repo_clean": true
+  },
+  "evidence_refs": [
+    ".factory/artifacts/supervisor-runs/T12/20260707T185417Z.json",
+    ".factory/artifacts/task-runs/T12/validation-report.json",
+    ".factory/artifacts/task-runs/T12/proof-of-behavior-scorecard.json",
+    ".factory/artifacts/task-runs/T12/work-proof-marker.json",
+    ".factory/artifacts/task-runs/T12/scope-closure-report.json",
+    ".factory/artifacts/task-runs/T12/scope-closure-map.json",
+    ".factory/artifacts/task-runs/T12/closure-sync-report.json",
+    ".factory/artifacts/pr-lifecycle/relia-mvp-t12/post-merge-report.json",
+    "https://github.com/Clyra-AI/relia/pull/156",
+    "https://github.com/Clyra-AI/relia/pull/159"
+  ]
+}
