@@ -635,6 +635,10 @@ func CompileSettingsFromConfig(document yamlmini.Document) (CompileSettings, *Er
 		MaxRules: DefaultCompileMaxRules,
 	}
 	targets := yamlmini.ListValues(document, "serve.compile.targets")
+	maxRulesScalar, maxRulesConfigured := document.Scalars["serve.compile.max_rules"]
+	if len(targets) == 0 && !maxRulesConfigured {
+		return settings, nil
+	}
 	if len(targets) == 0 {
 		return settings, configErrorAt("serve.compile.targets must include AGENTS.md and CLAUDE.md", PathRef(DefaultFile, document, "serve.compile.targets"))
 	}
@@ -655,8 +659,7 @@ func CompileSettingsFromConfig(document yamlmini.Document) (CompileSettings, *Er
 			return settings, configErrorAt("serve.compile.targets must include "+required, PathRef(DefaultFile, document, "serve.compile.targets"))
 		}
 	}
-	maxRulesScalar, ok := document.Scalars["serve.compile.max_rules"]
-	if !ok {
+	if !maxRulesConfigured {
 		return settings, configErrorAt("serve.compile.max_rules is required", PathRef(DefaultFile, document, "serve.compile"))
 	}
 	maxRules, err := strconv.Atoi(maxRulesScalar.Value)

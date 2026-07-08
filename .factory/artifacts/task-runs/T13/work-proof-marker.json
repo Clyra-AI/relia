@@ -38,11 +38,13 @@
   "schema_version": "1.0",
   "status": "implemented",
   "task_id": "T13",
-  "work_summary": [
-    "Implemented relia compile managed AGENTS.md and CLAUDE.md marker blocks from active accepted memory rules.",
-    "Added idempotent marker replacement that fails closed on mismatched, duplicated, or out-of-order markers and preserves content outside the managed block.",
-    "Added offline init required-check discovery from .github/required-checks.json and compile target config validation.",
-    "Generated the repository managed block in AGENTS.md, CLAUDE.md, and memory/compiled/agents-block.md.",
-    "Repaired Codex review feedback by resolving documented block-scalar rule statements before validation and compiled context rendering."
-  ]
+    "work_summary": [
+        "Implemented relia compile managed AGENTS.md and CLAUDE.md marker blocks from active accepted memory rules.",
+        "Added idempotent marker replacement that fails closed on mismatched, duplicated, or out-of-order markers and preserves content outside the managed block.",
+        "Added offline init required-check discovery from .github/required-checks.json and compile target config validation.",
+        "Generated the repository managed block in AGENTS.md, CLAUDE.md, and memory/compiled/agents-block.md.",
+        "Repaired Codex review feedback by resolving documented block-scalar rule statements before validation and compiled context rendering.",
+        "Supervisor repair after factoryd non-convergence made missing serve.compile settings fall back to defaults for upgraded repos.",
+        "Supervisor repair after factoryd non-convergence rejects Relia managed marker literals in rule statements before compiled block rendering."
+    ]
 }

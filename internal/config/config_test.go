@@ -48,6 +48,46 @@ func TestDefaultYAMLWithChecksRendersDiscoveredChecks(t *testing.T) {
 	}
 }
 
+func TestCompileSettingsFromConfigDefaultsMissingCompileBlock(t *testing.T) {
+	document, err := yamlmini.ParseDocument(`serve:
+  advisory_only: true
+`)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	settings, configErr := CompileSettingsFromConfig(document)
+
+	if configErr != nil {
+		t.Fatal(configErr)
+	}
+	if got := strings.Join(settings.Targets, ","); got != "AGENTS.md,CLAUDE.md" {
+		t.Fatalf("targets = %q", got)
+	}
+	if settings.MaxRules != DefaultCompileMaxRules {
+		t.Fatalf("max rules = %d", settings.MaxRules)
+	}
+}
+
+func TestCompileSettingsFromConfigRejectsPartialCompileBlock(t *testing.T) {
+	document, err := yamlmini.ParseDocument(`serve:
+  compile:
+    max_rules: 25
+`)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, configErr := CompileSettingsFromConfig(document)
+
+	if configErr == nil {
+		t.Fatal("expected config error")
+	}
+	if !strings.Contains(configErr.Message, "serve.compile.targets") {
+		t.Fatalf("message = %q", configErr.Message)
+	}
+}
+
 func TestArtifactSkeletonPathsReturnsCopy(t *testing.T) {
 	paths := ArtifactSkeletonPaths()
 	if len(paths) == 0 {
