@@ -7,7 +7,7 @@
   "work_item_id": "relia-mvp-t12",
   "source_kind": "prd",
   "supervisor_skill": "autoship-supervisor",
-  "factoryd_config_ref": ".factory/factoryd.autoship.example.json plus .factory/artifacts/supervisor-runs/T12/merge-authority-grant.json; local runtime config .factory/factoryd.json was gitignored",
+  "factoryd_config_ref": ".factory/factoryd.autoship.example.json",
   "factoryd_command": "redacted_template_command_not_directly_replayable: FACTORY_REPO=<factory-repo> factoryd run --config .factory/factoryd.json --repo relia --task T12 --loop --max-tasks 1 --json; task-scoped merge_authority evidence is recorded in .factory/artifacts/supervisor-runs/T12/merge-authority-grant.json",
   "task_scope": {
     "delivery_slice_refs": [
