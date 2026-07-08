@@ -13,6 +13,10 @@ const (
 	ManagedEndMarker   = "<!-- relia:end -->"
 )
 
+func containsManagedMarker(value string) bool {
+	return strings.Contains(value, ManagedBeginMarker) || strings.Contains(value, ManagedEndMarker)
+}
+
 type CompileOptions struct {
 	SchemaVersion string
 	ReliaVersion  string

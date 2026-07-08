@@ -120,12 +120,13 @@
       "behavior": "Memory rules cannot inject Relia managed marker literals into generated AGENTS.md or CLAUDE.md blocks",
       "status": "pass",
       "evidence_refs": [
+        "internal/memory/compile.go",
         "internal/memory/validation.go",
         "internal/memory/validation_test.go",
         "cmd/relia/compile_command_test.go",
         "schemas/memory-rule.schema.json"
       ],
-      "observed_result": "Rule IDs and statements containing Relia managed marker text fail memory-rule validation before compile renders managed context."
+      "observed_result": "Rule IDs, statements, provenance experience IDs, and rule source paths containing Relia managed marker text fail memory-rule validation before compile renders managed context."
     },
     {
       "behavior": "relia init writes valid config with discovered checks and candidate attribution markers",

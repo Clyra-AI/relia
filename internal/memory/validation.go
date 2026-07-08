@@ -50,6 +50,9 @@ func ValidateRuleArtifact(root string, path string, options ValidationOptions) *
 	if err != nil {
 		rel = path
 	}
+	if containsManagedMarker(filepath.ToSlash(rel)) {
+		return artifactContractError(options, "memory rule path must not contain Relia managed markers", rel)
+	}
 	document, parseErr := yamlmini.ParseDocument(string(content))
 	if parseErr != nil {
 		return artifactContractError(options, parseErr.Error(), rel)
@@ -67,14 +70,14 @@ func ValidateRuleArtifact(root string, path string, options ValidationOptions) *
 		return artifactContractError(options, "memory rule schema_version must be "+options.SchemaVersion, rel)
 	}
 	ruleID := document.Scalars["id"].Value
-	if strings.Contains(ruleID, ManagedBeginMarker) || strings.Contains(ruleID, ManagedEndMarker) {
+	if containsManagedMarker(ruleID) {
 		return artifactContractError(options, "memory rule id must not contain Relia managed markers", configdoc.RefWithPath(rel, document.Scalars["id"]))
 	}
 	statement, ok := resolvedRuleStatement(document, string(content))
 	if !ok || strings.TrimSpace(statement) == "" {
 		return artifactContractError(options, "memory rule statement is required", rel)
 	}
-	if strings.Contains(statement, ManagedBeginMarker) || strings.Contains(statement, ManagedEndMarker) {
+	if containsManagedMarker(statement) {
 		return artifactContractError(options, "memory rule statement must not contain Relia managed markers", rel)
 	}
 	kind := document.Scalars["kind"].Value
@@ -158,6 +161,9 @@ func ValidateRuleArtifact(root string, path string, options ValidationOptions) *
 			}
 		default:
 			return artifactContractError(options, "memory rule provenance outcome is invalid", configdoc.RefWithPath(rel, outcome))
+		}
+		if experienceID, ok := provenance["experience_id"]; ok && containsManagedMarker(experienceID.Value) {
+			return artifactContractError(options, "memory rule provenance experience_id must not contain Relia managed markers", configdoc.RefWithPath(rel, experienceID))
 		}
 	}
 	if kind == "playbook" && !hasPositivePlaybookEvidence {
