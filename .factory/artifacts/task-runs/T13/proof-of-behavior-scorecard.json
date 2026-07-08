@@ -41,6 +41,19 @@
       ]
     },
     {
+      "behavior": "Compiled blocks render documented block-scalar rule statements as rule guidance instead of raw YAML markers",
+      "status": "pass",
+      "evidence_refs": [
+        "internal/memory/statement.go",
+        "internal/memory/summary.go",
+        "internal/memory/validation.go",
+        "internal/memory/summary_test.go",
+        "internal/memory/validation_test.go",
+        "cmd/relia/compile_command_test.go"
+      ],
+      "observed_result": "`statement: >` rules compile to statement text, and empty block-scalar statements fail memory-rule validation."
+    },
+    {
       "behavior": "relia init writes valid config with discovered checks and candidate attribution markers",
       "status": "pass",
       "evidence_refs": [

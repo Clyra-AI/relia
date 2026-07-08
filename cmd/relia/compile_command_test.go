@@ -94,6 +94,9 @@ func TestCompileWritesManagedBlocksIdempotentlyAndPreservesOutsideMarkers(t *tes
 	if strings.Contains(agentsAfter, "search-candidate") || strings.Contains(agentsAfter, "stale generated text") {
 		t.Fatalf("AGENTS.md included inactive or stale generated content:\n%s", agentsAfter)
 	}
+	if strings.Contains(agentsAfter, "): >") {
+		t.Fatalf("AGENTS.md rendered unresolved block-scalar marker:\n%s", agentsAfter)
+	}
 	claudeAfter := readTextForTest(t, filepath.Join(tempDir, "CLAUDE.md"))
 	if !strings.HasPrefix(claudeAfter, "claude manual preface\n\n<!-- relia:begin") {
 		t.Fatalf("CLAUDE.md did not append managed block after manual content:\n%s", claudeAfter)
@@ -154,7 +157,8 @@ schema_version: "1.0"
 id: billing-active
 kind: avoid
 status: active
-statement: Use invoice clock fixtures instead of direct datetime calls.
+statement: >
+  Use invoice clock fixtures instead of direct datetime calls.
 scope:
   paths:
     - packages/billing/invoice.py
