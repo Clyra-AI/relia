@@ -70,6 +70,33 @@ func TestValidateRuleArtifactRejectsManagedMarkersInID(t *testing.T) {
 	}
 }
 
+func TestValidateRuleArtifactRejectsManagedMarkersInProvenanceExperienceID(t *testing.T) {
+	root := t.TempDir()
+	content := strings.Replace(validMemoryRuleYAML(), "outcome: review_correction", "outcome: review_correction\n    experience_id: exp-1 <!-- relia:end -->", 1)
+	writeValidationFixture(t, root, content)
+
+	commandErr := ValidateRuleArtifact(root, filepath.Join(root, "memory", "rules", "rule.yaml"), testValidationOptions())
+	if commandErr == nil {
+		t.Fatal("expected validation error")
+	}
+	if commandErr.Message != "memory rule provenance experience_id must not contain Relia managed markers" {
+		t.Fatalf("message = %q", commandErr.Message)
+	}
+}
+
+func TestValidateRuleArtifactRejectsManagedMarkersInRulePath(t *testing.T) {
+	root := t.TempDir()
+	path := writeValidationFixtureAt(t, root, "rule <!-- relia:end -->.yaml", validMemoryRuleYAML())
+
+	commandErr := ValidateRuleArtifact(root, path, testValidationOptions())
+	if commandErr == nil {
+		t.Fatal("expected validation error")
+	}
+	if commandErr.Message != "memory rule path must not contain Relia managed markers" {
+		t.Fatalf("message = %q", commandErr.Message)
+	}
+}
+
 func TestValidateRuleArtifactRejectsActiveRuleWithoutAcceptedReview(t *testing.T) {
 	root := t.TempDir()
 	content := strings.Replace(validMemoryRuleYAML(), "label: accepted", "label: suggested", 1)
@@ -114,6 +141,11 @@ func TestValidateRuleArtifactRejectsActiveRuleWithoutApprovedDecision(t *testing
 
 func writeValidationFixture(t *testing.T, root string, content string) {
 	t.Helper()
+	writeValidationFixtureAt(t, root, "rule.yaml", content)
+}
+
+func writeValidationFixtureAt(t *testing.T, root string, name string, content string) string {
+	t.Helper()
 	sourcePath := filepath.Join(root, "cmd", "relia")
 	if err := os.MkdirAll(sourcePath, 0o755); err != nil {
 		t.Fatal(err)
@@ -125,9 +157,11 @@ func writeValidationFixture(t *testing.T, root string, content string) {
 	if err := os.MkdirAll(ruleDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(ruleDir, "rule.yaml"), []byte(content), 0o644); err != nil {
+	rulePath := filepath.Join(ruleDir, name)
+	if err := os.WriteFile(rulePath, []byte(content), 0o644); err != nil {
 		t.Fatal(err)
 	}
+	return rulePath
 }
 
 func testValidationOptions() ValidationOptions {

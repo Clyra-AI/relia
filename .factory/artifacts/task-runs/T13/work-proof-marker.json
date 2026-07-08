@@ -60,6 +60,7 @@
     "Supervisor repair after latest-head Codex review rejects explicitly empty or malformed serve.compile.targets instead of applying upgrade defaults.",
     "Supervisor repair after latest-head Codex review compiles only active accepted rules with explicit human_review/approved fields.",
     "Supervisor repair after latest-head Codex review quotes YAML-sensitive discovered required-check names and unquotes list scalars on readback.",
-    "Supervisor repair after latest-head Codex review rejects Relia managed marker literals in memory rule IDs before compiled block rendering."
+    "Supervisor repair after latest-head Codex review rejects Relia managed marker literals in memory rule IDs before compiled block rendering.",
+    "Supervisor repair after latest-head Codex review rejects Relia managed marker literals in rendered provenance receipts and rule source paths before compiled block rendering."
   ]
 }
