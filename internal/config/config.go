@@ -245,24 +245,47 @@ func discoverWorkflowChecks(root string) []string {
 		if err != nil {
 			continue
 		}
-		if scalar, ok := document.Scalars["name"]; ok {
-			checks = append(checks, scalar.Value)
-		}
-		var jobNames []string
-		for key, scalar := range document.Scalars {
-			if isWorkflowJobNameKey(key) {
-				jobNames = append(jobNames, scalar.Value)
-			}
-		}
-		sort.Strings(jobNames)
-		checks = append(checks, jobNames...)
+		checks = append(checks, workflowJobChecks(document)...)
 	}
 	return uniqueNonEmptyStrings(checks)
 }
 
-func isWorkflowJobNameKey(key string) bool {
+func workflowJobChecks(document yamlmini.Document) []string {
+	jobIDs := map[string]bool{}
+	for key := range document.Containers {
+		if jobID, ok := workflowJobIDFromPath(key); ok {
+			jobIDs[jobID] = true
+		}
+	}
+	for key := range document.Scalars {
+		if jobID, ok := workflowJobIDFromPath(key); ok {
+			jobIDs[jobID] = true
+		}
+	}
+	ids := make([]string, 0, len(jobIDs))
+	for jobID := range jobIDs {
+		ids = append(ids, jobID)
+	}
+	sort.Strings(ids)
+	checks := make([]string, 0, len(ids))
+	for _, jobID := range ids {
+		if scalar, ok := document.Scalars["jobs."+jobID+".name"]; ok {
+			if name := strings.TrimSpace(scalar.Value); name != "" {
+				checks = append(checks, name)
+				continue
+			}
+		}
+		checks = append(checks, jobID)
+	}
+	return checks
+}
+
+func workflowJobIDFromPath(key string) (string, bool) {
 	parts := strings.Split(key, ".")
-	return len(parts) == 3 && parts[0] == "jobs" && parts[1] != "" && parts[2] == "name"
+	if len(parts) < 2 || parts[0] != "jobs" || parts[1] == "" || strings.Contains(parts[1], "[") {
+		return "", false
+	}
+	return parts[1], true
 }
 
 func uniqueNonEmptyStrings(values []string) []string {

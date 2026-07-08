@@ -6,7 +6,9 @@ import (
 	"github.com/Clyra-AI/relia/internal/yamlmini"
 )
 
-func resolvedRuleStatement(document yamlmini.Document, content string) (string, bool) {
+// ResolvedRuleStatement returns the user-authored rule statement, including
+// rendered YAML block scalars, so validation, summaries, and serving agree.
+func ResolvedRuleStatement(document yamlmini.Document, content string) (string, bool) {
 	scalar, ok := document.Scalars["statement"]
 	if !ok {
 		return "", false
@@ -16,6 +18,10 @@ func resolvedRuleStatement(document yamlmini.Document, content string) (string, 
 		return strings.TrimSpace(scalar.Value), true
 	}
 	return strings.TrimSpace(renderStatementBlockScalar(content, scalar.Line, style)), true
+}
+
+func resolvedRuleStatement(document yamlmini.Document, content string) (string, bool) {
+	return ResolvedRuleStatement(document, content)
 }
 
 func statementBlockScalarStyle(content string, lineNumber int) (byte, bool) {

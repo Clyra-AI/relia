@@ -54,6 +54,17 @@
       "observed_result": "`statement: >` rules compile to statement text, and empty block-scalar statements fail memory-rule validation."
     },
     {
+      "behavior": "Assess, advise, and serve load documented block-scalar rule statements as guidance text instead of raw YAML markers",
+      "status": "pass",
+      "evidence_refs": [
+        "internal/assess/assess.go",
+        "internal/assess/assess_test.go",
+        "internal/memory/statement.go",
+        ".factory/artifacts/task-runs/T13/validation-report.json"
+      ],
+      "observed_result": "`statement: >` active rules load through assess rule data as the folded statement text."
+    },
+    {
       "behavior": "Existing repos without serve.compile settings continue to use default AGENTS.md and CLAUDE.md compile targets",
       "status": "pass",
       "evidence_refs": [
@@ -103,14 +114,14 @@
       ]
     },
     {
-      "behavior": "relia init workflow fallback discovery records workflow and job check names without step names",
+      "behavior": "relia init workflow fallback discovery records job check names or job IDs without workflow names or step names",
       "status": "pass",
       "evidence_refs": [
         "internal/config/config.go",
         "internal/config/config_test.go",
         ".factory/artifacts/task-runs/T13/validation-report.json"
       ],
-      "observed_result": "Workflow fallback discovery returns `validate,go tests` and ignores a named step `Check out repository`."
+      "observed_result": "Workflow fallback discovery returns `advise,go tests` and ignores the workflow display name `validate` and named steps."
     },
     {
       "behavior": "Agent-facing command output remains machine-readable and evidence-bearing",

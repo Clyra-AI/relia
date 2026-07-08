@@ -109,6 +109,29 @@
         "internal/config/config_test.go",
         "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546860530"
       ]
+    },
+    {
+      "decision_type": "review_disposition",
+      "actor": "supervisor",
+      "action_taken": "accepted_and_fixed",
+      "reason": "Serving paths must use the same resolved block-scalar memory rule statements as validation and compiled context.",
+      "evidence_refs": [
+        "internal/assess/assess.go",
+        "internal/assess/assess_test.go",
+        "internal/memory/statement.go",
+        "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546926665"
+      ]
+    },
+    {
+      "decision_type": "review_disposition",
+      "actor": "supervisor",
+      "action_taken": "accepted_and_fixed",
+      "reason": "Required GitHub checks should be discovered from job check names or job IDs, not top-level workflow display names.",
+      "evidence_refs": [
+        "internal/config/config.go",
+        "internal/config/config_test.go",
+        "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546926670"
+      ]
     }
   ],
   "validation": {
@@ -128,6 +151,14 @@
       },
       {
         "command": "go test ./internal/config -run 'TestDiscoverRequiredChecksUsesManifest|TestDiscoverRequiredChecksIgnoresStepNames|TestCompileSettingsFromConfigDefaultsMissingCompileBlock|TestCompileSettingsFromConfigRejectsPartialCompileBlock|TestCompileSettingsFromConfigAcceptsQuotedTargets|TestCompileSettingsFromConfigAcceptsInlineTargets' -count=1",
+        "exit_code": 0
+      },
+      {
+        "command": "go test ./internal/assess -run 'TestLoadRulesResolvesBlockScalarStatement|TestLoadRulesReturnsOnlyActiveAcceptedRules' -count=1",
+        "exit_code": 0
+      },
+      {
+        "command": "go test ./internal/config -run 'TestDiscoverRequiredChecksUsesManifest|TestDiscoverRequiredChecksIgnoresStepNames' -count=1",
         "exit_code": 0
       },
       {
@@ -160,6 +191,8 @@
     "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546659911",
     "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546740455",
     "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546792660",
-    "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546860530"
+    "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546860530",
+    "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546926665",
+    "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546926670"
   ]
 }
