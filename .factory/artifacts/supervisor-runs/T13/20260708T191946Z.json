@@ -168,6 +168,18 @@
         "internal/yamlmini/yamlmini_test.go",
         "https://github.com/Clyra-AI/relia/pull/161#discussion_r3547132744"
       ]
+    },
+    {
+      "decision_type": "review_disposition",
+      "actor": "supervisor",
+      "action_taken": "accepted_and_fixed",
+      "reason": "Memory rule IDs rendered into managed AGENTS.md and CLAUDE.md blocks must not be able to inject Relia marker literals.",
+      "evidence_refs": [
+        "internal/memory/validation.go",
+        "internal/memory/validation_test.go",
+        "schemas/memory-rule.schema.json",
+        "https://github.com/Clyra-AI/relia/pull/161#discussion_r3547182597"
+      ]
     }
   ],
   "validation": {
@@ -226,6 +238,10 @@
         "exit_code": 0
       },
       {
+        "command": "go test ./internal/memory -run 'TestValidateRuleArtifactRejectsManagedMarkersInID|TestValidateRuleArtifactRejectsManagedMarkersInStatement|TestSelectCompiledRulesRequiresExplicitApprovalFields'",
+        "exit_code": 0
+      },
+      {
         "command": "make prepush-full",
         "exit_code": 0
       }
@@ -252,6 +268,7 @@
     "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546926670",
     "https://github.com/Clyra-AI/relia/pull/161#discussion_r3547016206",
     "https://github.com/Clyra-AI/relia/pull/161#discussion_r3547072540",
-    "https://github.com/Clyra-AI/relia/pull/161#discussion_r3547132744"
+    "https://github.com/Clyra-AI/relia/pull/161#discussion_r3547132744",
+    "https://github.com/Clyra-AI/relia/pull/161#discussion_r3547182597"
   ]
 }

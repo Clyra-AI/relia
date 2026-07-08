@@ -56,6 +56,20 @@ func TestValidateRuleArtifactRejectsManagedMarkersInStatement(t *testing.T) {
 	}
 }
 
+func TestValidateRuleArtifactRejectsManagedMarkersInID(t *testing.T) {
+	root := t.TempDir()
+	content := strings.Replace(validMemoryRuleYAML(), "id: rule-1", "id: rule-1 <!-- relia:end -->", 1)
+	writeValidationFixture(t, root, content)
+
+	commandErr := ValidateRuleArtifact(root, filepath.Join(root, "memory", "rules", "rule.yaml"), testValidationOptions())
+	if commandErr == nil {
+		t.Fatal("expected validation error")
+	}
+	if commandErr.Message != "memory rule id must not contain Relia managed markers" {
+		t.Fatalf("message = %q", commandErr.Message)
+	}
+}
+
 func TestValidateRuleArtifactRejectsActiveRuleWithoutAcceptedReview(t *testing.T) {
 	root := t.TempDir()
 	content := strings.Replace(validMemoryRuleYAML(), "label: accepted", "label: suggested", 1)
