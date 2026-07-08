@@ -42,7 +42,7 @@
     "daemon_repair_head": "ee65ff9925eb373f3cd71bd66ba23ef156a60b4b",
     "ci_status_before_supervisor_repair": "passed",
     "review_status_before_supervisor_repair": "latest_head_actionable_p2_comments",
-    "followup_review_status": "latest_head_actionable_p2_comment_repaired"
+    "followup_review_status": "latest_head_actionable_p2_comments_repaired"
   },
   "decisions": [
     {
@@ -87,6 +87,17 @@
         "internal/config/config_test.go",
         "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546740455"
       ]
+    },
+    {
+      "decision_type": "review_disposition",
+      "actor": "supervisor",
+      "action_taken": "accepted_and_fixed",
+      "reason": "Inline YAML lists are valid hand-edited compile target config and should parse before target allow-list enforcement.",
+      "evidence_refs": [
+        "internal/config/config.go",
+        "internal/config/config_test.go",
+        "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546792660"
+      ]
     }
   ],
   "validation": {
@@ -98,6 +109,10 @@
       },
       {
         "command": "go test ./internal/config -run 'TestCompileSettingsFromConfigDefaultsMissingCompileBlock|TestCompileSettingsFromConfigRejectsPartialCompileBlock|TestCompileSettingsFromConfigAcceptsQuotedTargets' -count=1",
+        "exit_code": 0
+      },
+      {
+        "command": "go test ./internal/config -run 'TestCompileSettingsFromConfigDefaultsMissingCompileBlock|TestCompileSettingsFromConfigRejectsPartialCompileBlock|TestCompileSettingsFromConfigAcceptsQuotedTargets|TestCompileSettingsFromConfigAcceptsInlineTargets' -count=1",
         "exit_code": 0
       },
       {
@@ -128,6 +143,7 @@
     "https://github.com/Clyra-AI/relia/pull/161",
     "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546659908",
     "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546659911",
-    "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546740455"
+    "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546740455",
+    "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546792660"
   ]
 }
