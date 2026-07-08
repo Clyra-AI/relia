@@ -103,6 +103,16 @@
       ]
     },
     {
+      "behavior": "relia init workflow fallback discovery records workflow and job check names without step names",
+      "status": "pass",
+      "evidence_refs": [
+        "internal/config/config.go",
+        "internal/config/config_test.go",
+        ".factory/artifacts/task-runs/T13/validation-report.json"
+      ],
+      "observed_result": "Workflow fallback discovery returns `validate,go tests` and ignores a named step `Check out repository`."
+    },
+    {
       "behavior": "Agent-facing command output remains machine-readable and evidence-bearing",
       "status": "pass",
       "evidence_refs": [

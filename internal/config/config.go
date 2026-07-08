@@ -250,7 +250,7 @@ func discoverWorkflowChecks(root string) []string {
 		}
 		var jobNames []string
 		for key, scalar := range document.Scalars {
-			if strings.HasPrefix(key, "jobs.") && strings.HasSuffix(key, ".name") {
+			if isWorkflowJobNameKey(key) {
 				jobNames = append(jobNames, scalar.Value)
 			}
 		}
@@ -258,6 +258,11 @@ func discoverWorkflowChecks(root string) []string {
 		checks = append(checks, jobNames...)
 	}
 	return uniqueNonEmptyStrings(checks)
+}
+
+func isWorkflowJobNameKey(key string) bool {
+	parts := strings.Split(key, ".")
+	return len(parts) == 3 && parts[0] == "jobs" && parts[1] != "" && parts[2] == "name"
 }
 
 func uniqueNonEmptyStrings(values []string) []string {

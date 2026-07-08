@@ -340,6 +340,29 @@ func TestDiscoverRequiredChecksUsesManifest(t *testing.T) {
 	}
 }
 
+func TestDiscoverRequiredChecksIgnoresStepNames(t *testing.T) {
+	root := t.TempDir()
+	workflowDir := filepath.Join(root, ".github", "workflows")
+	if err := os.MkdirAll(workflowDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	content := `name: validate
+jobs:
+  build:
+    name: go tests
+    steps:
+      - name: Check out repository
+        run: echo checkout
+`
+	if err := os.WriteFile(filepath.Join(workflowDir, "validate.yml"), []byte(content), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	if got := strings.Join(DiscoverRequiredChecks(root), ","); got != "validate,go tests" {
+		t.Fatalf("DiscoverRequiredChecks = %q", got)
+	}
+}
+
 func TestValidateRejectsProviderBaseURLUserInfo(t *testing.T) {
 	content := strings.Replace(DefaultYAML("1.0", "0.0.0-dev"), `distill:
   embeddings: signature

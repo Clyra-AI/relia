@@ -47,6 +47,7 @@
         "Supervisor repair after factoryd non-convergence made missing serve.compile settings fall back to defaults for upgraded repos.",
         "Supervisor repair after factoryd non-convergence rejects Relia managed marker literals in rule statements before compiled block rendering.",
         "Supervisor repair after latest-head Codex review accepts quoted serve.compile target scalars before enforcing allowed target names.",
-        "Supervisor repair after latest-head Codex review accepts inline serve.compile target lists before enforcing allowed target names."
+        "Supervisor repair after latest-head Codex review accepts inline serve.compile target lists before enforcing allowed target names.",
+        "Supervisor repair after latest-head Codex review filters workflow discovery to job-level check names instead of step names."
     ]
 }

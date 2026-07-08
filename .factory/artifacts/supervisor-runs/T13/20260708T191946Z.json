@@ -98,6 +98,17 @@
         "internal/config/config_test.go",
         "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546792660"
       ]
+    },
+    {
+      "decision_type": "review_disposition",
+      "actor": "supervisor",
+      "action_taken": "accepted_and_fixed",
+      "reason": "Workflow fallback discovery should not seed step display names as required check names.",
+      "evidence_refs": [
+        "internal/config/config.go",
+        "internal/config/config_test.go",
+        "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546860530"
+      ]
     }
   ],
   "validation": {
@@ -113,6 +124,10 @@
       },
       {
         "command": "go test ./internal/config -run 'TestCompileSettingsFromConfigDefaultsMissingCompileBlock|TestCompileSettingsFromConfigRejectsPartialCompileBlock|TestCompileSettingsFromConfigAcceptsQuotedTargets|TestCompileSettingsFromConfigAcceptsInlineTargets' -count=1",
+        "exit_code": 0
+      },
+      {
+        "command": "go test ./internal/config -run 'TestDiscoverRequiredChecksUsesManifest|TestDiscoverRequiredChecksIgnoresStepNames|TestCompileSettingsFromConfigDefaultsMissingCompileBlock|TestCompileSettingsFromConfigRejectsPartialCompileBlock|TestCompileSettingsFromConfigAcceptsQuotedTargets|TestCompileSettingsFromConfigAcceptsInlineTargets' -count=1",
         "exit_code": 0
       },
       {
@@ -144,6 +159,7 @@
     "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546659908",
     "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546659911",
     "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546740455",
-    "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546792660"
+    "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546792660",
+    "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546860530"
   ]
 }
