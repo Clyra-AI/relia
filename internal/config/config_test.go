@@ -29,6 +29,23 @@ func TestDefaultYAMLUsesVersionPinsAndParses(t *testing.T) {
 			t.Fatalf("DefaultYAML missing scalar %q", key)
 		}
 	}
+	if got := strings.Join(yamlmini.ListValues(document, "serve.compile.targets"), ","); got != "AGENTS.md,CLAUDE.md" {
+		t.Fatalf("compile targets = %q", got)
+	}
+	if got := document.Scalars["serve.compile.max_rules"].Value; got != "25" {
+		t.Fatalf("compile max_rules = %q", got)
+	}
+}
+
+func TestDefaultYAMLWithChecksRendersDiscoveredChecks(t *testing.T) {
+	content := DefaultYAMLWithChecks("1.0", "0.0.0-dev", []string{"validate", "CodeQL analyze", "validate"})
+	document, err := yamlmini.ParseDocument(content)
+	if err != nil {
+		t.Fatalf("DefaultYAMLWithChecks did not parse: %v", err)
+	}
+	if got := strings.Join(yamlmini.ListValues(document, "outcomes.checks.required"), ","); got != "validate,CodeQL analyze" {
+		t.Fatalf("required checks = %q", got)
+	}
 }
 
 func TestArtifactSkeletonPathsReturnsCopy(t *testing.T) {
@@ -224,6 +241,20 @@ func TestValidateDefaultYAMLPasses(t *testing.T) {
 	}
 	if len(warnings) != 0 {
 		t.Fatalf("warnings = %#v", warnings)
+	}
+}
+
+func TestDiscoverRequiredChecksUsesManifest(t *testing.T) {
+	root := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(root, ".github"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, ".github", "required-checks.json"), []byte(`{"required_checks":["validate","CodeQL analyze"]}`+"\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	if got := strings.Join(DiscoverRequiredChecks(root), ","); got != "validate,CodeQL analyze" {
+		t.Fatalf("DiscoverRequiredChecks = %q", got)
 	}
 }
 

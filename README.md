@@ -17,14 +17,16 @@ FACTORY_REPO=/path/to/factory factoryd run --config .factory/factoryd.autoship.e
 
 ## CLI Baseline
 
-The T1/T2/T3/T4.3/T5/T6/T7/T8/T9/T11/T11.1/T12 command surface establishes the lifecycle
+The T1/T2/T3/T4.3/T5/T6/T7/T8/T9/T11/T11.1/T12/T13 command surface establishes the lifecycle
 skeleton, configuration contract, assessment fixture slice, recurrence
 backtest, deterministic distillation, reporting evidence, provider/advisory
 approval boundaries, and agent-native output contract:
 
 - `relia init` creates `relia.yaml` if it is missing and is idempotent when the
   file already exists. It also creates the repo-native artifact skeleton under
-  `.relia/` and `memory/`.
+  `.relia/` and `memory/`, records locally discovered required checks from
+  `.github/required-checks.json` when present, and seeds candidate attribution
+  markers for Claude coauthor trailers and the `agent-authored` label.
 - `relia check` validates the repo-local operating pack baseline, required
   Phase 0 schemas, explicit privacy defaults, fail-closed redaction defaults,
   local model-artifact posture, and any `memory/rules/*.yaml` artifacts present.
@@ -114,6 +116,13 @@ approval boundaries, and agent-native output contract:
   statements, lifecycle status, confidence, and resolved PR citations. Coverage
   labels covered paths as `covered_risky` or `covered_clean` and uncovered
   paths as `no_coverage`/out-of-distribution.
+- `relia compile` writes a Relia-managed, marker-delimited block into
+  `AGENTS.md` and `CLAUDE.md` for non-MCP agents and refreshes the source block
+  at `memory/compiled/agents-block.md`. The command serves only active accepted
+  rules, includes PR citations, never rewrites content outside
+  `<!-- relia:begin (generated; edit rules in memory/rules/, not here) -->`
+  and `<!-- relia:end -->`, and reports zero changed targets on an idempotent
+  rerun.
 - `relia assess --input <diff>` reads a local unified diff, compares touched
   paths with active local `memory/rules/*.yaml` rules, and emits a
   `relia.risk_assessment` payload with `match_high`, `match_medium`, or

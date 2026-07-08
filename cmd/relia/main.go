@@ -119,9 +119,7 @@ type parsedArgs struct {
 type ingestOptions = ingestdoc.CLIOptions
 
 type backtestOptions = backtestdoc.Options
-
 type distillOptions = distilldoc.Options
-
 type memoryOptions = memorydoc.Options
 
 type experienceRecord = ingestdoc.Record
@@ -250,7 +248,9 @@ func dispatch(parsed parsedArgs, start time.Time) CommandResult {
 		return adviseResult(parsed.commandArgs, start)
 	case "models":
 		return modelsResult(parsed.commandArgs, start)
-	case "compile", "demo", "share":
+	case "compile":
+		return compileResult(parsed.commandArgs, start)
+	case "demo", "share":
 		return notImplementedResult(command, start)
 	default:
 		return errorResult(command, command, usageError(fmt.Sprintf("unknown command %q", command)), start)

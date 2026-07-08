@@ -243,6 +243,23 @@ URL matching the rule provenance. The blast radius is limited to local
 removal of the T12 serve tool response path; existing `relia assess` and the
 serve capability manifest remain usable.
 
+T13 adds the compiled-context boundary for non-MCP agents. The state owner is
+`internal/memory` for active-rule selection, marker rendering, compiled-context
+metadata, and managed-block replacement; `internal/config` owns local required
+check discovery and `serve.compile` config validation; `cmd/relia` owns command
+result wiring and atomic writes. The source of truth remains reviewed
+`memory/rules/*.yaml`; `memory/compiled/agents-block.md`, `AGENTS.md`, and
+`CLAUDE.md` managed sections are generated derivatives. Feedback sources are
+compile command tests, config validation tests, `make prepush-full`, and
+Factory task-run evidence. Marker replacement fails closed on missing,
+mismatched, duplicated, or out-of-order Relia markers, and it preserves bytes
+outside the managed block. The blast radius is limited to local CLI output,
+`relia.yaml` compile settings, `memory/compiled/agents-block.md`, and the
+managed sections of `AGENTS.md` and `CLAUDE.md`; no network, provider, or
+credential path is added. Rollback is removal of the T13 compile command,
+config additions, and regenerated managed blocks; reviewed rule YAML and MCP
+serving remain the authoritative memory surfaces.
+
 ## Systems Thinking Map
 
 - State lives in repo-local config, generated artifacts, source files, and Factory evidence.

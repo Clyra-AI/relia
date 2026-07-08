@@ -1,0 +1,42 @@
+{
+  "artifact_type": "work_proof_marker",
+  "changed_paths": [
+    ".factory/artifacts/task-runs/T13/proof-of-behavior-scorecard.json",
+    ".factory/artifacts/task-runs/T13/validation-report.json",
+    ".factory/artifacts/task-runs/T13/work-proof-marker.json",
+    "AGENTS.md",
+    "CLAUDE.md",
+    "README.md",
+    "cmd/relia/compile_command.go",
+    "cmd/relia/compile_command_test.go",
+    "cmd/relia/config_helpers.go",
+    "cmd/relia/main.go",
+    "cmd/relia/main_test.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/dev/dev_guides.md",
+    "internal/config/config.go",
+    "internal/config/config_test.go",
+    "internal/memory/compile.go",
+    "memory/compiled/agents-block.md",
+    "relia.yaml"
+  ],
+  "evidence_refs": [
+    ".factory/artifacts/task-runs/T13/validation-report.json",
+    ".factory/artifacts/task-runs/T13/proof-of-behavior-scorecard.json"
+  ],
+  "implementation_performed": true,
+  "lifecycle_evidence_authored": false,
+  "path_policy_result": {
+    "forbidden_paths_changed": [],
+    "status": "pass"
+  },
+  "schema_version": "1.0",
+  "status": "implemented",
+  "task_id": "T13",
+  "work_summary": [
+    "Implemented relia compile managed AGENTS.md and CLAUDE.md marker blocks from active accepted memory rules.",
+    "Added idempotent marker replacement that fails closed on mismatched, duplicated, or out-of-order markers and preserves content outside the managed block.",
+    "Added offline init required-check discovery from .github/required-checks.json and compile target config validation.",
+    "Generated the repository managed block in AGENTS.md, CLAUDE.md, and memory/compiled/agents-block.md."
+  ]
+}

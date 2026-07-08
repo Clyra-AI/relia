@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	assessdoc "github.com/Clyra-AI/relia/internal/assess"
 	configdoc "github.com/Clyra-AI/relia/internal/config"
 	memorydoc "github.com/Clyra-AI/relia/internal/memory"
@@ -128,5 +130,17 @@ func yamlPathRef(document yamlDocument, path string) string {
 }
 
 func defaultConfigYAML() string {
-	return configdoc.DefaultYAML(commandSchemaVersion, reliaVersion)
+	root := "."
+	if wd, err := os.Getwd(); err == nil {
+		if repoRoot, ok := configdoc.FindRepoRoot(wd); ok {
+			root = repoRoot
+		} else {
+			root = wd
+		}
+	}
+	return configdoc.DefaultYAMLWithChecks(commandSchemaVersion, reliaVersion, configdoc.DiscoverRequiredChecks(root))
+}
+
+func defaultConfigYAMLForRoot(root string) string {
+	return configdoc.DefaultYAMLWithChecks(commandSchemaVersion, reliaVersion, configdoc.DiscoverRequiredChecks(root))
 }

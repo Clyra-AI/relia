@@ -151,7 +151,7 @@ func TestHelpAndVersionUseEnvelope(t *testing.T) {
 
 func TestReservedCommandsReturnTypedNotImplemented(t *testing.T) {
 	for _, args := range [][]string{
-		{"--json", "compile"},
+		{"--json", "demo"},
 	} {
 		stdout, stderr, code := runForTest(t, args, false)
 		if code != ExitInternal {

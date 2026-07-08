@@ -387,6 +387,22 @@ offline trust posture:
   explicit path arguments, serve only active accepted memory, and require
   resolvable citations for any served rule.
 
+T13 adds non-MCP compiled context access:
+
+- `relia init` renders locally discovered required checks from
+  `.github/required-checks.json` into `outcomes.checks.required` when the file
+  exists, and keeps the candidate attribution markers for Claude coauthor
+  trailers and the `agent-authored` label visible in the command result.
+- `relia.yaml` declares `serve.compile.targets` as `AGENTS.md` and `CLAUDE.md`
+  and `serve.compile.max_rules: 25`; `relia check` validates those fields
+  offline.
+- `relia compile` regenerates `memory/compiled/agents-block.md` and maintains
+  the exact PRD markers in `AGENTS.md` and `CLAUDE.md`, preserving all content
+  outside the marker pair. A second run with unchanged active rules reports
+  zero changed targets.
+- Compiled blocks expose only active accepted rules with resolved PR citations,
+  schema/version metadata, and an explicit non-MCP agent-access boundary.
+
 ## Structured Data, Proof, Budgets, And Redaction
 
 - PR, check-run, experience, memory, MCP, assessment, report, and config data
