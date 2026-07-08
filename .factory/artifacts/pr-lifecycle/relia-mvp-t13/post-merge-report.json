@@ -1,0 +1,51 @@
+{
+  "artifact_type": "post_merge_report",
+  "checks_observed": [
+    {
+      "conclusion": "SUCCESS",
+      "name": "Analyze (go)",
+      "state": "",
+      "status": "COMPLETED"
+    },
+    {
+      "conclusion": "SUCCESS",
+      "name": "CodeQL analyze",
+      "state": "",
+      "status": "COMPLETED"
+    },
+    {
+      "conclusion": "SUCCESS",
+      "name": "advise",
+      "state": "",
+      "status": "COMPLETED"
+    },
+    {
+      "conclusion": "SUCCESS",
+      "name": "validate",
+      "state": "",
+      "status": "COMPLETED"
+    },
+    {
+      "conclusion": "SUCCESS",
+      "name": "Analyze (python)",
+      "state": "",
+      "status": "COMPLETED"
+    },
+    {
+      "conclusion": "SUCCESS",
+      "name": "CodeQL",
+      "state": "",
+      "status": "COMPLETED"
+    }
+  ],
+  "default_branch_checked": true,
+  "default_branch_ref": "refs/remotes/origin/main@b5616db03388494e999122a48fe36227cf2ea426",
+  "merge_performed": true,
+  "merge_reference": "b5616db03388494e999122a48fe36227cf2ea426",
+  "operator_notes": "factoryd materialized terminal post-merge evidence from a verified merged PR for task closure recovery",
+  "post_merge_evidence_ref": "https://github.com/Clyra-AI/relia/pull/161",
+  "scope_closure_report_ref": ".factory/artifacts/task-runs/T13/scope-closure-report.json",
+  "status": "healthy",
+  "task_id": "T13",
+  "work_item_id": "relia-mvp-t13"
+}

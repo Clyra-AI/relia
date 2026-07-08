@@ -372,7 +372,7 @@
       "recorded_by": "davidahmann-via-codex",
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#fr11-calibrated-confidence",
-      "source_text": "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence \u2014 never from the drafting model.",
+      "source_text": "Confidence must derive from evidence count, recency, contradictions, flake discounts, and extraction confidence — never from the drafting model.",
       "status": "implemented",
       "task_refs": [
         "T6"
@@ -546,13 +546,36 @@
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#fr17-compiled-context-block",
       "source_text": "relia compile` must maintain a managed, marker-delimited block in AGENTS.md and CLAUDE.md, regenerable and never touching content outside the markers.",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T13"
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/16/validation_commands"
-      ]
+      ],
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T13/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T13/proof-of-behavior-scorecard.json",
+        "AGENTS.md",
+        "CLAUDE.md",
+        "memory/compiled/agents-block.md",
+        "internal/memory/statement.go",
+        "internal/memory/summary.go",
+        "internal/memory/validation.go",
+        ".factory/artifacts/task-runs/T13/validation-report.json",
+        ".factory/artifacts/task-runs/T13/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T13/scope-closure-report.json",
+        "relia.yaml",
+        "cmd/relia/compile_command_test.go",
+        "internal/memory/summary_test.go",
+        "internal/memory/validation_test.go",
+        "internal/memory/compile.go",
+        "cmd/relia/compile_command.go",
+        "https://github.com/Clyra-AI/relia/pull/161",
+        "refs/remotes/origin/main@b5616db03388494e999122a48fe36227cf2ea426"
+      ],
+      "recorded_by": "factoryd sync-task-closure",
+      "recorded_at": "2026-07-08T21:58:59Z"
     },
     {
       "acceptance_item_id": "FR18-ADVISORY-ASSESSMENT-001",
@@ -1772,13 +1795,36 @@
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
       "source_text": "compiled managed block in AGENTS.md/CLAUDE.md",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T13"
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/16/validation_commands"
-      ]
+      ],
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T13/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T13/proof-of-behavior-scorecard.json",
+        "relia.yaml",
+        ".factory/artifacts/task-runs/T13/validation-report.json",
+        ".factory/artifacts/task-runs/T13/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T13/scope-closure-report.json",
+        "AGENTS.md",
+        "CLAUDE.md",
+        "memory/compiled/agents-block.md",
+        "internal/memory/statement.go",
+        "internal/memory/summary.go",
+        "internal/memory/validation.go",
+        "cmd/relia/compile_command_test.go",
+        "internal/memory/summary_test.go",
+        "internal/memory/validation_test.go",
+        "internal/memory/compile.go",
+        "cmd/relia/compile_command.go",
+        "https://github.com/Clyra-AI/relia/pull/161",
+        "refs/remotes/origin/main@b5616db03388494e999122a48fe36227cf2ea426"
+      ],
+      "recorded_by": "factoryd sync-task-closure",
+      "recorded_at": "2026-07-08T21:58:59Z"
     },
     {
       "acceptance_item_id": "MVP-IN-SCOPE-018",
@@ -2007,13 +2053,36 @@
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#ingest-attribute-backtest-acceptance-tests",
       "source_text": "relia init` writes valid config with discovered checks and candidate attribution markers.",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T13"
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/16/validation_commands"
-      ]
+      ],
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T13/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T13/proof-of-behavior-scorecard.json",
+        "cmd/relia/compile_command_test.go",
+        "internal/memory/summary_test.go",
+        "internal/memory/validation_test.go",
+        ".factory/artifacts/task-runs/T13/validation-report.json",
+        ".factory/artifacts/task-runs/T13/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T13/scope-closure-report.json",
+        "AGENTS.md",
+        "CLAUDE.md",
+        "memory/compiled/agents-block.md",
+        "internal/memory/statement.go",
+        "internal/memory/summary.go",
+        "internal/memory/validation.go",
+        "relia.yaml",
+        "internal/memory/compile.go",
+        "cmd/relia/compile_command.go",
+        "https://github.com/Clyra-AI/relia/pull/161",
+        "refs/remotes/origin/main@b5616db03388494e999122a48fe36227cf2ea426"
+      ],
+      "recorded_by": "factoryd sync-task-closure",
+      "recorded_at": "2026-07-08T21:58:59Z"
     },
     {
       "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-002",
@@ -2662,13 +2731,36 @@
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#serve-and-advise-acceptance-tests",
       "source_text": "relia compile` maintains the managed block idempotently and never edits outside markers.",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T13"
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/16/validation_commands"
-      ]
+      ],
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T13/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T13/proof-of-behavior-scorecard.json",
+        "internal/memory/compile.go",
+        "internal/memory/statement.go",
+        "cmd/relia/compile_command.go",
+        ".factory/artifacts/task-runs/T13/validation-report.json",
+        ".factory/artifacts/task-runs/T13/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T13/scope-closure-report.json",
+        "AGENTS.md",
+        "CLAUDE.md",
+        "memory/compiled/agents-block.md",
+        "internal/memory/summary.go",
+        "internal/memory/validation.go",
+        "relia.yaml",
+        "cmd/relia/compile_command_test.go",
+        "internal/memory/summary_test.go",
+        "internal/memory/validation_test.go",
+        "https://github.com/Clyra-AI/relia/pull/161",
+        "refs/remotes/origin/main@b5616db03388494e999122a48fe36227cf2ea426"
+      ],
+      "recorded_by": "factoryd sync-task-closure",
+      "recorded_at": "2026-07-08T21:58:59Z"
     },
     {
       "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-004",
@@ -3422,7 +3514,7 @@
       ]
     }
   ],
-  "last_updated_at": "2026-07-08T14:58:12Z",
+  "last_updated_at": "2026-07-08T21:58:59Z",
   "schema_version": "1.0",
   "source_prd_ref": "docs/product/prd.md",
   "source_ref": "docs/product/prd.md"
