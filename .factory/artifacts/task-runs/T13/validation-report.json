@@ -107,6 +107,7 @@
     "go test ./cmd/relia -run 'TestCompileWritesManagedBlocksIdempotentlyAndPreservesOutsideMarkers|TestCompileRejectsBrokenManagedMarkers' -count=1",
     "go test ./internal/config -run 'TestCompileSettingsFromConfigDefaultsMissingCompileBlock|TestCompileSettingsFromConfigRejectsPartialCompileBlock|TestCompileSettingsFromConfigAcceptsQuotedTargets' -count=1",
     "go test ./internal/config -run 'TestCompileSettingsFromConfigDefaultsMissingCompileBlock|TestCompileSettingsFromConfigRejectsPartialCompileBlock|TestCompileSettingsFromConfigAcceptsQuotedTargets|TestCompileSettingsFromConfigAcceptsInlineTargets' -count=1",
+    "go test ./internal/config -run 'TestDiscoverRequiredChecksUsesManifest|TestDiscoverRequiredChecksIgnoresStepNames|TestCompileSettingsFromConfigDefaultsMissingCompileBlock|TestCompileSettingsFromConfigRejectsPartialCompileBlock|TestCompileSettingsFromConfigAcceptsQuotedTargets|TestCompileSettingsFromConfigAcceptsInlineTargets' -count=1",
     "make prepush-full"
   ],
   "docs_sync_result": {
@@ -186,6 +187,12 @@
       "summary": "Verified inline serve.compile target lists normalize to AGENTS.md and CLAUDE.md before allowed-target validation."
     },
     {
+      "command": "go test ./internal/config -run 'TestDiscoverRequiredChecksUsesManifest|TestDiscoverRequiredChecksIgnoresStepNames|TestCompileSettingsFromConfigDefaultsMissingCompileBlock|TestCompileSettingsFromConfigRejectsPartialCompileBlock|TestCompileSettingsFromConfigAcceptsQuotedTargets|TestCompileSettingsFromConfigAcceptsInlineTargets' -count=1",
+      "exit_code": 0,
+      "status": "pass",
+      "summary": "Verified workflow fallback discovery includes workflow/job check names and ignores step names."
+    },
+    {
       "command": "make prepush-full",
       "exit_code": 0,
       "status": "pass",
@@ -244,6 +251,11 @@
       "source": "Codex review comment https://github.com/Clyra-AI/relia/pull/161#discussion_r3546792660",
       "status": "repaired",
       "summary": "Parsed inline serve.compile target lists before validation so hand-edited YAML using standard inline list syntax is accepted."
+    },
+    {
+      "source": "Codex review comment https://github.com/Clyra-AI/relia/pull/161#discussion_r3546860530",
+      "status": "repaired",
+      "summary": "Restricted workflow fallback discovery to direct job-level names so step names are not written as required checks."
     }
   ],
   "residual_risks": [],
