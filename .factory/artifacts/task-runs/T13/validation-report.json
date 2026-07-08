@@ -78,6 +78,7 @@
     "internal/config/config.go",
     "internal/config/config_test.go",
     "internal/memory/compile.go",
+    "internal/memory/compile_test.go",
     "internal/memory/statement.go",
     "internal/memory/summary.go",
     "internal/memory/summary_test.go",
@@ -113,6 +114,8 @@
     "go test ./internal/assess -run 'TestLoadRulesResolvesBlockScalarStatement|TestLoadRulesReturnsOnlyActiveAcceptedRules' -count=1",
     "go test ./internal/config -run 'TestDiscoverRequiredChecksUsesManifest|TestDiscoverRequiredChecksIgnoresStepNames' -count=1",
     "go test ./internal/config -run 'TestCompileSettingsFromConfigDefaultsMissingCompileBlock|TestCompileSettingsFromConfigRejectsPartialCompileBlock|TestCompileSettingsFromConfigRejectsExplicitEmptyTargets|TestCompileSettingsFromConfigAcceptsQuotedTargets|TestCompileSettingsFromConfigAcceptsInlineTargets' -count=1",
+    "go test ./internal/memory -run 'TestSelectCompiledRulesRequiresExplicitApprovalFields|TestLoadRuleSummariesSortsAndLoadsValidatedRules|TestLoadRuleSummariesResolvesBlockScalarStatement' -count=1",
+    "go test ./cmd/relia -run 'TestCompile' -count=1",
     "make prepush-full"
   ],
   "docs_sync_result": {
@@ -216,6 +219,18 @@
       "summary": "Verified missing serve.compile still defaults for upgraded repos while explicit empty or malformed serve.compile.targets fails validation."
     },
     {
+      "command": "go test ./internal/memory -run 'TestSelectCompiledRulesRequiresExplicitApprovalFields|TestLoadRuleSummariesSortsAndLoadsValidatedRules|TestLoadRuleSummariesResolvesBlockScalarStatement' -count=1",
+      "exit_code": 0,
+      "status": "pass",
+      "summary": "Verified compiled context selection excludes active accepted rules unless they carry explicit human_review and approved fields."
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestCompile' -count=1",
+      "exit_code": 0,
+      "status": "pass",
+      "summary": "Verified compile command behavior remains green after requiring explicit approval fields for selected compiled rules."
+    },
+    {
       "command": "make prepush-full",
       "exit_code": 0,
       "status": "pass",
@@ -294,6 +309,11 @@
       "source": "Codex review comment https://github.com/Clyra-AI/relia/pull/161#discussion_r3547016206",
       "status": "repaired",
       "summary": "Limited compile-setting upgrade defaults to absent serve.compile config and made explicitly empty or malformed serve.compile.targets fail validation."
+    },
+    {
+      "source": "Codex review comment https://github.com/Clyra-AI/relia/pull/161#discussion_r3547072540",
+      "status": "repaired",
+      "summary": "Changed compiled-context selection so only active accepted rules with explicit review.gate=human_review and review.decision=approved are emitted into AGENTS.md/CLAUDE.md context."
     }
   ],
   "residual_risks": [],

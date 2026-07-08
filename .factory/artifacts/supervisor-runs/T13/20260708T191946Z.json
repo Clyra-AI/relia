@@ -143,6 +143,18 @@
         "internal/config/config_test.go",
         "https://github.com/Clyra-AI/relia/pull/161#discussion_r3547016206"
       ]
+    },
+    {
+      "decision_type": "review_disposition",
+      "actor": "supervisor",
+      "action_taken": "accepted_and_fixed",
+      "reason": "Compiled context must not claim human-review approval for rules that omit explicit approval fields.",
+      "evidence_refs": [
+        "internal/memory/compile.go",
+        "internal/memory/compile_test.go",
+        "internal/memory/summary.go",
+        "https://github.com/Clyra-AI/relia/pull/161#discussion_r3547072540"
+      ]
     }
   ],
   "validation": {
@@ -174,6 +186,14 @@
       },
       {
         "command": "go test ./internal/config -run 'TestCompileSettingsFromConfigDefaultsMissingCompileBlock|TestCompileSettingsFromConfigRejectsPartialCompileBlock|TestCompileSettingsFromConfigRejectsExplicitEmptyTargets|TestCompileSettingsFromConfigAcceptsQuotedTargets|TestCompileSettingsFromConfigAcceptsInlineTargets' -count=1",
+        "exit_code": 0
+      },
+      {
+        "command": "go test ./internal/memory -run 'TestSelectCompiledRulesRequiresExplicitApprovalFields|TestLoadRuleSummariesSortsAndLoadsValidatedRules|TestLoadRuleSummariesResolvesBlockScalarStatement' -count=1",
+        "exit_code": 0
+      },
+      {
+        "command": "go test ./cmd/relia -run 'TestCompile' -count=1",
         "exit_code": 0
       },
       {
@@ -209,6 +229,7 @@
     "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546860530",
     "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546926665",
     "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546926670",
-    "https://github.com/Clyra-AI/relia/pull/161#discussion_r3547016206"
+    "https://github.com/Clyra-AI/relia/pull/161#discussion_r3547016206",
+    "https://github.com/Clyra-AI/relia/pull/161#discussion_r3547072540"
   ]
 }
