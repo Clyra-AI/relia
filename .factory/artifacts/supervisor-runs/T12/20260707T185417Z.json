@@ -115,9 +115,7 @@
       "action_taken": "stopped",
       "reason": "The factoryd review-repair worker produced a narrow local fix and evidence refresh, then remained alive for more than 20 minutes with no validation subprocess, no new run artifact, no push, and no handoff back to factoryd. The supervisor stopped the orphaned worker after interrupting factoryd.",
       "evidence_refs": [
-        ".factory/artifacts/supervisor-runs/T12/20260708T152206Z.json",
-        "https://github.com/Clyra-AI/relia/pull/156",
-        "https://github.com/Clyra-AI/relia/pull/159"
+        "https://github.com/Clyra-AI/relia/pull/156"
       ]
     }
   ],
@@ -134,8 +132,6 @@
     ".factory/artifacts/task-runs/T12/work-proof-marker.json",
     ".factory/artifacts/task-runs/T12/scope-closure-report.json",
     ".factory/artifacts/task-runs/T12/scope-closure-map.json",
-    ".factory/artifacts/task-runs/T12/closure-sync-report.json",
-    ".factory/artifacts/pr-lifecycle/relia-mvp-t12/post-merge-report.json",
     "https://github.com/Clyra-AI/relia/pull/156"
   ],
   "follow_up_refs": [
