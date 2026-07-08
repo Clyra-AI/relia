@@ -85,6 +85,7 @@ REQUIRED = [
     ".factory/factoryd.example.json",
     ".factory/factoryd.autoship.example.json",
     ".factory/profile.yaml",
+    ".factory/artifacts/task-supervisor-runs/.gitkeep",
     ".github/required-checks.json",
     ".github/CODEOWNERS",
     ".github/action-ref-exceptions.yaml",
@@ -1051,6 +1052,13 @@ def main():
     execution_plan = json.loads(execution_plan_path.read_text())
     context_brief = json.loads(context_brief_path.read_text())
     validation_contract = json.loads((root / repo["validation_contract"]).read_text())
+    task_supervision_policy = execution_plan.get("task_supervision_policy") or {}
+    if task_supervision_policy.get("skill_ref") != "factory://skills/task-supervisor":
+        fail("execution-plan task_supervision_policy.skill_ref must be factory://skills/task-supervisor")
+    if task_supervision_policy.get("evidence_artifact_type") != "task_supervisor_report":
+        fail("execution-plan task_supervision_policy.evidence_artifact_type must be task_supervisor_report")
+    if task_supervision_policy.get("evidence_path") != ".factory/artifacts/task-supervisor-runs/<mission>/<timestamp>.json":
+        fail("execution-plan task_supervision_policy.evidence_path must point at task-supervisor-runs")
     validate_validation_contract_evidence_split(validation_contract, "validation-contract")
     validate_validation_contract_evidence_split(execution_plan.get("validation_contract"), "execution-plan.validation_contract")
     ledger = json.loads((root / repo["acceptance_ledger"]).read_text())

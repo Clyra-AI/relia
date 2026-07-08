@@ -69,6 +69,11 @@ touches them must avoid net growth unless it is shrink-only decomposition.
 - Required-check manifest: .github/required-checks.json, expected checks validate and CodeQL analyze.
 - Workflow hardening: validate and CodeQL workflows declare least-privilege permissions, concurrency cancellation, job timeouts, and toolchain setup from pinned repo files.
 - PR lifecycle report path: .factory/artifacts/pr-lifecycle/<work_item_id>/pr-lifecycle-report.json.
+- Task-supervisor intake: use Factory `task-supervisor` for guided post-PRD,
+  audit, review, recommendation, or idea intake before implementation. The
+  report path is `.factory/artifacts/task-supervisor-runs/<mission>/<timestamp>.json`;
+  it records source validation, ingest, doctor, dry-run, alignment gates, and
+  the recommended next task.
 - Supervised autoship: use Factory `autoship-supervisor` only for one selected
   task at a time. The supervisor report path is
   `.factory/artifacts/supervisor-runs/<task_id>/<timestamp>.json`; it records

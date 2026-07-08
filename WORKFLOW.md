@@ -50,13 +50,16 @@ labels instead of item-level evidence.
 
 When product ideas, recommendations, audits, or code-review findings produce
 material follow-up work after the PRD-derived plan already exists, save the
-work list in the repo and run `factoryd ingest` with the matching kind:
+work list in the repo and run `factoryd ingest` with the matching kind. For a
+guided source-to-mission flow, use Factory `task-supervisor` from the Relia
+repo root; it records `task_supervisor_report` evidence, runs ingest, doctor,
+and dry-run, and recommends one next task before any autoship handoff:
 
 ```sh
 FACTORY_REPO=/path/to/factory factoryd ingest --config .factory/factoryd.example.json --repo relia --kind ideas --input product/ideas/<mission>.md --mission <mission> --json
 FACTORY_REPO=/path/to/factory factoryd ingest --config .factory/factoryd.example.json --repo relia --kind recommendations --input product/recommendations/<mission>.md --mission <mission> --json
-FACTORY_REPO=/path/to/factory factoryd ingest --config .factory/factoryd.example.json --repo relia --kind audit --input product/audits/<mission>.md --mission <mission> --json
-FACTORY_REPO=/path/to/factory factoryd ingest --config .factory/factoryd.example.json --repo relia --kind review --input product/reviews/<mission>.md --mission <mission> --json
+FACTORY_REPO=/path/to/factory factoryd ingest --config .factory/factoryd.example.json --repo relia --kind audit --input product/audits/<mission>.finding-list.json --mission <mission> --json
+FACTORY_REPO=/path/to/factory factoryd ingest --config .factory/factoryd.example.json --repo relia --kind review --input product/reviews/<mission>.finding-list.json --mission <mission> --json
 ```
 
 The generated `.factory/artifacts/post-prd/<mission>/` artifacts are the
