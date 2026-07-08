@@ -74,7 +74,7 @@
     "ci_status": "passed",
     "review_status": "clear",
     "post_merge_status": "passed",
-    "closure_status": "complete"
+    "closure_status": "partial_recovery"
   },
   "decisions": [
     {
@@ -90,8 +90,8 @@
     {
       "decision_type": "manual_patch",
       "actor": "supervisor",
-      "action_taken": "recorded_final_reconciliation",
-      "reason": "T12 later reached merged, post-merge monitored, and scope-closed state through PR #156 and closure-sync PR #159, so the source repo should carry durable supervisor evidence instead of leaving the prior report untracked and blocking the next daemon task.",
+      "action_taken": "stopped",
+      "reason": "T12 later reached merged and post-merge monitored state through PR #156 and closure-sync PR #159, but the committed closure-sync report remains partial because factoryd_run_once_report evidence was superseded by recovery evidence rather than materialized.",
       "evidence_refs": [
         ".factory/artifacts/task-runs/T12/validation-report.json",
         ".factory/artifacts/task-runs/T12/scope-closure-report.json",
@@ -103,8 +103,8 @@
     }
   ],
   "final_state": {
-    "status": "complete",
-    "reason": "T12 implementation and closure-sync PRs are merged, post-merge evidence is present, and T12 item-level scope closure artifacts are committed.",
+    "status": "blocked",
+    "reason": "T12 implementation and closure-sync PRs are merged and post-merge evidence is present, but closure evidence remains partial until durable factoryd run-once evidence is materialized or an approved recovery contract accepts the substituted evidence.",
     "merged": true,
     "post_merge_monitored": true,
     "repo_clean": true
