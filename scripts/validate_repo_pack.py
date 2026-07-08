@@ -85,6 +85,7 @@ REQUIRED = [
     ".factory/factoryd.example.json",
     ".factory/factoryd.autoship.example.json",
     ".factory/profile.yaml",
+    ".factory/artifacts/supervisor-runs/.gitkeep",
     ".factory/artifacts/task-supervisor-runs/.gitkeep",
     ".github/required-checks.json",
     ".github/CODEOWNERS",

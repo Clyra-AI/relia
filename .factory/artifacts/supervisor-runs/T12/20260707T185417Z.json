@@ -1,0 +1,141 @@
+{
+  "artifact_type": "autoship_supervisor_report",
+  "schema_version": "0.1",
+  "generated_at": "2026-07-07T18:54:17Z",
+  "repo": "relia",
+  "task_id": "T12",
+  "work_item_id": "relia-mvp-t12",
+  "source_kind": "prd",
+  "supervisor_skill": "autoship-supervisor",
+  "factoryd_config_ref": ".factory/factoryd.json",
+  "factoryd_command": "FACTORY_REPO=<factory-repo> factoryd run --config .factory/factoryd.json --repo relia --task T12 --loop --max-tasks 1 --json",
+  "task_scope": {
+    "delivery_slice_refs": [
+      "mcp-serving-and-recall"
+    ],
+    "acceptance_item_ids": [
+      "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-002",
+      "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-007",
+      "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-008"
+    ],
+    "allowed_paths": [
+      "AGENTS.md",
+      "WORKFLOW.md",
+      "README.md",
+      "Makefile",
+      ".tool-versions",
+      "go.mod",
+      "go.sum",
+      "relia.yaml",
+      "CLAUDE.md",
+      "tests/",
+      "schemas/",
+      "docs/",
+      "examples/",
+      "memory/",
+      ".github/",
+      ".factory/artifacts/task-runs/T12/",
+      "cmd/relia/",
+      "internal/backtest/",
+      "internal/serve/",
+      "internal/memory/",
+      "internal/assess/"
+    ],
+    "forbidden_paths": [
+      ".git/",
+      ".factory/tmp/",
+      ".factoryd/",
+      ".factory/artifacts/prd-to-plan/relia-mvp/",
+      ".factory/artifacts/pr-lifecycle/relia-mvp-t12/",
+      ".factory/artifacts/task-runs/T12/scope-closure-report.json",
+      ".factory/artifacts/task-runs/T12/scope-closure-map.json",
+      ".factory/artifacts/task-runs/T12/factoryd-run-once-report.json"
+    ],
+    "validation_commands": [
+      "make prepush-full"
+    ],
+    "explicit_gates": [
+      "human_approval",
+      "ci_status",
+      "codex_review",
+      "quality_bot_review",
+      "scope_closure",
+      "architecture_budget"
+    ]
+  },
+  "observations": {
+    "task_binding_status": "verified",
+    "factoryd_dispatch_status": "started",
+    "selected_task_assertion_ref": ".factoryd/events/20260707T181233.593209000Z-dry_run_task_selected-relia-T12.json",
+    "factoryd_run_report_ref": ".factoryd/runs/20260707T181313.827303000Z-relia-T12/lifecycle/pr-lifecycle-report.json",
+    "factoryd_status": "blocked_review_repair_worker_stalled",
+    "pr_number": 156,
+    "pr_url": "https://github.com/Clyra-AI/relia/pull/156",
+    "ci_status": "passed",
+    "review_status": "actionable_p2_unresolved",
+    "post_merge_status": "not_started",
+    "closure_status": "partial_rerun_required"
+  },
+  "decisions": [
+    {
+      "decision_type": "manual_acceptance",
+      "actor": "supervisor",
+      "action_taken": "recorded_acceptance",
+      "reason": "Relia restricted autonomy requires a task-scoped merge_authority grant before worker dispatch. The operator requested supervised T12 autoship, so the supervisor recorded a 24-hour T12-only grant instead of weakening runtime control.",
+      "evidence_refs": [
+        "operator_request:2026-07-07T18:12Z:use-autoship-supervisor-for-T12",
+        ".factory/factoryd.json"
+      ]
+    },
+    {
+      "decision_type": "daemon_continue",
+      "actor": "supervisor",
+      "action_taken": "none",
+      "reason": "Factoryd selected T12, completed worker implementation, pushed PR #156, and reached green CI without manual product-code edits.",
+      "evidence_refs": [
+        ".factoryd/events/20260707T181233.593209000Z-dry_run_task_selected-relia-T12.json",
+        ".factoryd/runs/20260707T181313.827303000Z-relia-T12/worker-attempts/20260707T181313.827303000Z/worker-output.log",
+        "https://github.com/Clyra-AI/relia/pull/156"
+      ]
+    },
+    {
+      "decision_type": "daemon_repair",
+      "actor": "factoryd",
+      "action_taken": "triggered_daemon_repair",
+      "reason": "Codex produced one legitimate latest-head P2 review finding: serve tool requests should not fail because an unrelated active rule has malformed citations. Factoryd classified the finding as codex_review_actionable and started review repair.",
+      "evidence_refs": [
+        "https://github.com/Clyra-AI/relia/pull/156#discussion_r3538788812",
+        ".factoryd/runs/20260707T181313.827303000Z-relia-T12/20260707T181313.827303000Z-relia-T12-repair-checker-failure-envelope.json",
+        ".factoryd/runs/20260707T181313.827303000Z-relia-T12/review-repair-batch-20260707T181313.827303000Z-relia-T12-repair.json"
+      ]
+    },
+    {
+      "decision_type": "systemic_factory_fix",
+      "actor": "supervisor",
+      "action_taken": "stopped",
+      "reason": "The factoryd review-repair worker produced a narrow local fix and evidence refresh, then remained alive for more than 20 minutes with no validation subprocess, no new run artifact, no push, and no handoff back to factoryd. The supervisor stopped the orphaned worker after interrupting factoryd.",
+      "evidence_refs": [
+        ".factoryd/workspaces/relia-T12-20260707T181313.827303000Z",
+        ".factoryd/runs/20260707T181313.827303000Z-relia-T12/codex-review-repair-1-prompt.md",
+        ".factoryd/runs/20260707T181313.827303000Z-relia-T12/codex-review-repair-1-task-packet.json"
+      ]
+    }
+  ],
+  "final_state": {
+    "status": "blocked",
+    "reason": "T12 implementation PR #156 is open with green CI, but the Codex P2 review thread remains unresolved and factoryd review repair stalled before validation, push, merge, post-merge monitoring, or closure completion.",
+    "merged": false,
+    "post_merge_monitored": false,
+    "repo_clean": false
+  },
+  "evidence_refs": [
+    ".factoryd/runs/20260707T181313.827303000Z-relia-T12/lifecycle/pr-lifecycle-report.json",
+    ".factoryd/runs/20260707T181313.827303000Z-relia-T12/lifecycle/scope-closure-report.json",
+    ".factoryd/runs/20260707T181313.827303000Z-relia-T12/codex_review-output.log",
+    "https://github.com/Clyra-AI/relia/pull/156"
+  ],
+  "follow_up_refs": [
+    "proposed: factoryd review-repair worker heartbeat/timeout and partial-repair recovery",
+    "proposed: resume T12 repair from existing worktree or re-run factoryd resume-repair with bounded timeout"
+  ]
+}
