@@ -3413,7 +3413,12 @@
             "factoryd://runs/20260706T150337.644031000Z-relia-T11/lifecycle/ship-packet.json",
             "factoryd://runs/20260706T150337.644031000Z-relia-T11/lifecycle/pr-lifecycle-report.json",
             "factoryd://runs/20260706T150337.644031000Z-relia-T11/lifecycle/post-merge-report.json",
-            "factoryd://runs/20260706T150337.644031000Z-relia-T11/lifecycle/scope-closure-report.json"
+            "factoryd://runs/20260706T150337.644031000Z-relia-T11/lifecycle/scope-closure-report.json",
+            ".factory/artifacts/task-runs/T11/validation-report.json",
+            ".factory/artifacts/task-runs/T11/scope-closure-map.json",
+            ".factory/artifacts/task-runs/T11/scope-closure-report.json",
+            "https://github.com/Clyra-AI/relia/pull/151",
+            "refs/remotes/origin/main@4c8e52e31fe44274b1f29944aee53f311bd1b2b8"
           ],
           "repair_task_refs": [],
           "status": "implemented"
@@ -3428,7 +3433,10 @@
         "factoryd://runs/20260706T150337.644031000Z-relia-T11/lifecycle/ship-packet.json",
         "factoryd://runs/20260706T150337.644031000Z-relia-T11/lifecycle/pr-lifecycle-report.json",
         "factoryd://runs/20260706T150337.644031000Z-relia-T11/lifecycle/post-merge-report.json",
-        "factoryd://runs/20260706T150337.644031000Z-relia-T11/lifecycle/scope-closure-report.json"
+        "factoryd://runs/20260706T150337.644031000Z-relia-T11/lifecycle/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T11/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T11/validation-report.json",
+        ".factory/artifacts/task-runs/T11/work-proof-marker.json"
       ],
       "group_id": "mvp-in-scope",
       "implemented_task_refs": [
@@ -5127,28 +5135,47 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-002",
-          "evidence_refs": [],
+          "evidence_refs": [
+            ".factory/artifacts/task-runs/T12/work-proof-marker.json",
+            ".factory/artifacts/task-runs/T12/proof-of-behavior-scorecard.json",
+            "cmd/relia/assess_command_test.go",
+            "cmd/relia/serve_command.go",
+            ".factory/artifacts/task-runs/T12/validation-report.json",
+            ".factory/artifacts/task-runs/T12/scope-closure-map.json",
+            ".factory/artifacts/task-runs/T12/scope-closure-report.json",
+            "cmd/relia/backtest_integrity_test.go",
+            "cmd/relia/advise_test.go",
+            ".github/workflows/relia-advisory.yml",
+            "internal/backtest/baseline_test.go",
+            "cmd/relia/backtest_report_test.go",
+            "https://github.com/Clyra-AI/relia/pull/156",
+            "refs/remotes/origin/main@4c8e52e31fe44274b1f29944aee53f311bd1b2b8"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "mcp-serving-and-recall"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T12/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T12/validation-report.json",
+        ".factory/artifacts/task-runs/T12/work-proof-marker.json"
+      ],
       "group_id": "serve-and-advise-acceptance-tests",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T12"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T12"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "A real agent session retrieves a rule via `recall` and the rule's citations resolve.",
       "scope_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-002",
       "source_ref": "docs/product/prd.md#serve-and-advise-acceptance-tests",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T12"
       ]
@@ -5340,28 +5367,47 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-007",
-          "evidence_refs": [],
+          "evidence_refs": [
+            ".factory/artifacts/task-runs/T12/work-proof-marker.json",
+            ".factory/artifacts/task-runs/T12/proof-of-behavior-scorecard.json",
+            "cmd/relia/backtest_integrity_test.go",
+            "cmd/relia/advise_test.go",
+            ".github/workflows/relia-advisory.yml",
+            ".factory/artifacts/task-runs/T12/validation-report.json",
+            ".factory/artifacts/task-runs/T12/scope-closure-map.json",
+            ".factory/artifacts/task-runs/T12/scope-closure-report.json",
+            "cmd/relia/assess_command_test.go",
+            "cmd/relia/serve_command.go",
+            "internal/backtest/baseline_test.go",
+            "cmd/relia/backtest_report_test.go",
+            "https://github.com/Clyra-AI/relia/pull/156",
+            "refs/remotes/origin/main@4c8e52e31fe44274b1f29944aee53f311bd1b2b8"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "mcp-serving-and-recall"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T12/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T12/validation-report.json",
+        ".factory/artifacts/task-runs/T12/work-proof-marker.json"
+      ],
       "group_id": "serve-and-advise-acceptance-tests",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T12"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T12"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "The Action never blocks by default; with the gate explicitly enabled, a tripped threshold exits 5.",
       "scope_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-007",
       "source_ref": "docs/product/prd.md#serve-and-advise-acceptance-tests",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T12"
       ]
@@ -5376,28 +5422,47 @@
       "acceptance_item_statuses": [
         {
           "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-008",
-          "evidence_refs": [],
+          "evidence_refs": [
+            ".factory/artifacts/task-runs/T12/work-proof-marker.json",
+            ".factory/artifacts/task-runs/T12/proof-of-behavior-scorecard.json",
+            "internal/backtest/baseline_test.go",
+            "cmd/relia/backtest_report_test.go",
+            ".factory/artifacts/task-runs/T12/validation-report.json",
+            ".factory/artifacts/task-runs/T12/scope-closure-map.json",
+            ".factory/artifacts/task-runs/T12/scope-closure-report.json",
+            "cmd/relia/assess_command_test.go",
+            "cmd/relia/serve_command.go",
+            "cmd/relia/backtest_integrity_test.go",
+            "cmd/relia/advise_test.go",
+            ".github/workflows/relia-advisory.yml",
+            "https://github.com/Clyra-AI/relia/pull/156",
+            "refs/remotes/origin/main@4c8e52e31fe44274b1f29944aee53f311bd1b2b8"
+          ],
           "repair_task_refs": [],
-          "status": "partial"
+          "status": "implemented"
         }
       ],
       "delivery_slice_refs": [
         "mcp-serving-and-recall"
       ],
-      "evidence_refs": [],
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T12/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T12/validation-report.json",
+        ".factory/artifacts/task-runs/T12/work-proof-marker.json"
+      ],
       "group_id": "serve-and-advise-acceptance-tests",
-      "implemented_task_refs": [],
+      "implemented_task_refs": [
+        "T12"
+      ],
       "notes": [
         "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
       ],
-      "remaining_task_refs": [
-        "T12"
-      ],
+      "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "ERR trend compares against the saved baseline and labels staleness.",
       "scope_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-008",
       "source_ref": "docs/product/prd.md#serve-and-advise-acceptance-tests",
-      "status": "partial",
+      "status": "implemented",
       "task_refs": [
         "T12"
       ]
@@ -6365,7 +6430,7 @@
       ]
     }
   ],
-  "last_updated_at": "2026-07-07T15:45:28Z",
+  "last_updated_at": "2026-07-08T14:58:12Z",
   "schema_version": "0.1",
   "source_prd_ref": "docs/product/prd.md"
 }

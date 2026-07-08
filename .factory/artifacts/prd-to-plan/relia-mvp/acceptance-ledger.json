@@ -1710,13 +1710,29 @@
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
       "source_text": "MEMORY.md memory page with receipts",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T11"
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/13/validation_commands"
-      ]
+      ],
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T11/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T11/proof-of-behavior-scorecard.json",
+        "internal/memory/summary_test.go",
+        "cmd/relia/memory_validation_test.go",
+        "internal/memory/summary.go",
+        "cmd/relia/memory_command.go",
+        "make prepush-full",
+        ".factory/artifacts/task-runs/T11/validation-report.json",
+        ".factory/artifacts/task-runs/T11/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T11/scope-closure-report.json",
+        "https://github.com/Clyra-AI/relia/pull/151",
+        "refs/remotes/origin/main@4c8e52e31fe44274b1f29944aee53f311bd1b2b8"
+      ],
+      "recorded_by": "factoryd sync-task-closure",
+      "recorded_at": "2026-07-08T14:58:12Z"
     },
     {
       "acceptance_item_id": "MVP-IN-SCOPE-016",
@@ -2605,13 +2621,31 @@
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#serve-and-advise-acceptance-tests",
       "source_text": "A real agent session retrieves a rule via `recall` and the rule's citations resolve.",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T12"
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/15/validation_commands"
-      ]
+      ],
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T12/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T12/proof-of-behavior-scorecard.json",
+        "cmd/relia/assess_command_test.go",
+        "cmd/relia/serve_command.go",
+        ".factory/artifacts/task-runs/T12/validation-report.json",
+        ".factory/artifacts/task-runs/T12/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T12/scope-closure-report.json",
+        "cmd/relia/backtest_integrity_test.go",
+        "cmd/relia/advise_test.go",
+        ".github/workflows/relia-advisory.yml",
+        "internal/backtest/baseline_test.go",
+        "cmd/relia/backtest_report_test.go",
+        "https://github.com/Clyra-AI/relia/pull/156",
+        "refs/remotes/origin/main@4c8e52e31fe44274b1f29944aee53f311bd1b2b8"
+      ],
+      "recorded_by": "factoryd sync-task-closure",
+      "recorded_at": "2026-07-08T14:57:44Z"
     },
     {
       "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-003",
@@ -2739,13 +2773,31 @@
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#serve-and-advise-acceptance-tests",
       "source_text": "The Action never blocks by default; with the gate explicitly enabled, a tripped threshold exits 5.",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T12"
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/15/validation_commands"
-      ]
+      ],
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T12/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T12/proof-of-behavior-scorecard.json",
+        "cmd/relia/backtest_integrity_test.go",
+        "cmd/relia/advise_test.go",
+        ".github/workflows/relia-advisory.yml",
+        ".factory/artifacts/task-runs/T12/validation-report.json",
+        ".factory/artifacts/task-runs/T12/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T12/scope-closure-report.json",
+        "cmd/relia/assess_command_test.go",
+        "cmd/relia/serve_command.go",
+        "internal/backtest/baseline_test.go",
+        "cmd/relia/backtest_report_test.go",
+        "https://github.com/Clyra-AI/relia/pull/156",
+        "refs/remotes/origin/main@4c8e52e31fe44274b1f29944aee53f311bd1b2b8"
+      ],
+      "recorded_by": "factoryd sync-task-closure",
+      "recorded_at": "2026-07-08T14:57:44Z"
     },
     {
       "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-008",
@@ -2762,13 +2814,31 @@
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#serve-and-advise-acceptance-tests",
       "source_text": "ERR trend compares against the saved baseline and labels staleness.",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T12"
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/15/validation_commands"
-      ]
+      ],
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T12/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T12/proof-of-behavior-scorecard.json",
+        "internal/backtest/baseline_test.go",
+        "cmd/relia/backtest_report_test.go",
+        ".factory/artifacts/task-runs/T12/validation-report.json",
+        ".factory/artifacts/task-runs/T12/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T12/scope-closure-report.json",
+        "cmd/relia/assess_command_test.go",
+        "cmd/relia/serve_command.go",
+        "cmd/relia/backtest_integrity_test.go",
+        "cmd/relia/advise_test.go",
+        ".github/workflows/relia-advisory.yml",
+        "https://github.com/Clyra-AI/relia/pull/156",
+        "refs/remotes/origin/main@4c8e52e31fe44274b1f29944aee53f311bd1b2b8"
+      ],
+      "recorded_by": "factoryd sync-task-closure",
+      "recorded_at": "2026-07-08T14:57:44Z"
     },
     {
       "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-009",
@@ -3352,7 +3422,7 @@
       ]
     }
   ],
-  "last_updated_at": "2026-07-07T15:45:28Z",
+  "last_updated_at": "2026-07-08T14:58:12Z",
   "schema_version": "1.0",
   "source_prd_ref": "docs/product/prd.md",
   "source_ref": "docs/product/prd.md"

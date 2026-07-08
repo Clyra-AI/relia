@@ -1,0 +1,211 @@
+{
+  "approved_deferral_refs": [],
+  "artifact_type": "scope_closure_report",
+  "blocker_refs": [],
+  "closure_items": [
+    {
+      "acceptance_item_ids": [
+        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-002"
+      ],
+      "acceptance_item_statuses": [
+        {
+          "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-002",
+          "evidence_refs": [
+            ".factory/artifacts/task-runs/T12/work-proof-marker.json",
+            ".factory/artifacts/task-runs/T12/proof-of-behavior-scorecard.json",
+            "cmd/relia/assess_command_test.go",
+            "cmd/relia/serve_command.go",
+            ".factory/artifacts/task-runs/T12/validation-report.json",
+            ".factory/artifacts/task-runs/T12/scope-closure-map.json",
+            ".factory/artifacts/task-runs/T12/scope-closure-report.json",
+            "cmd/relia/backtest_integrity_test.go",
+            "cmd/relia/advise_test.go",
+            ".github/workflows/relia-advisory.yml",
+            "internal/backtest/baseline_test.go",
+            "cmd/relia/backtest_report_test.go",
+            "https://github.com/Clyra-AI/relia/pull/156",
+            "refs/remotes/origin/main@4c8e52e31fe44274b1f29944aee53f311bd1b2b8"
+          ],
+          "repair_task_refs": [],
+          "status": "implemented"
+        }
+      ],
+      "classification": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T12/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T12/validation-report.json",
+        ".factory/artifacts/task-runs/T12/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T12/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T12/proof-of-behavior-scorecard.json",
+        "cmd/relia/assess_command_test.go",
+        "cmd/relia/serve_command.go",
+        "cmd/relia/backtest_integrity_test.go",
+        "cmd/relia/advise_test.go",
+        ".github/workflows/relia-advisory.yml",
+        "internal/backtest/baseline_test.go",
+        "cmd/relia/backtest_report_test.go",
+        "https://github.com/Clyra-AI/relia/pull/156",
+        "refs/remotes/origin/main@4c8e52e31fe44274b1f29944aee53f311bd1b2b8"
+      ],
+      "implementation_refs": [],
+      "implemented_task_refs": [
+        "T12"
+      ],
+      "intent_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-002",
+      "intent_statement": "A real agent session retrieves a rule via `recall` and the rule's citations resolve.",
+      "remaining_task_refs": [],
+      "repair_report_refs": [],
+      "repair_task_packet_refs": [],
+      "scope_item": "A real agent session retrieves a rule via `recall` and the rule's citations resolve.",
+      "task_refs": [
+        "T12"
+      ],
+      "work_proof_marker_refs": [
+        ".factory/artifacts/task-runs/T12/work-proof-marker.json"
+      ]
+    },
+    {
+      "acceptance_item_ids": [
+        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-007"
+      ],
+      "acceptance_item_statuses": [
+        {
+          "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-007",
+          "evidence_refs": [
+            ".factory/artifacts/task-runs/T12/work-proof-marker.json",
+            ".factory/artifacts/task-runs/T12/proof-of-behavior-scorecard.json",
+            "cmd/relia/backtest_integrity_test.go",
+            "cmd/relia/advise_test.go",
+            ".github/workflows/relia-advisory.yml",
+            ".factory/artifacts/task-runs/T12/validation-report.json",
+            ".factory/artifacts/task-runs/T12/scope-closure-map.json",
+            ".factory/artifacts/task-runs/T12/scope-closure-report.json",
+            "cmd/relia/assess_command_test.go",
+            "cmd/relia/serve_command.go",
+            "internal/backtest/baseline_test.go",
+            "cmd/relia/backtest_report_test.go",
+            "https://github.com/Clyra-AI/relia/pull/156",
+            "refs/remotes/origin/main@4c8e52e31fe44274b1f29944aee53f311bd1b2b8"
+          ],
+          "repair_task_refs": [],
+          "status": "implemented"
+        }
+      ],
+      "classification": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T12/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T12/validation-report.json",
+        ".factory/artifacts/task-runs/T12/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T12/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T12/proof-of-behavior-scorecard.json",
+        "cmd/relia/assess_command_test.go",
+        "cmd/relia/serve_command.go",
+        "cmd/relia/backtest_integrity_test.go",
+        "cmd/relia/advise_test.go",
+        ".github/workflows/relia-advisory.yml",
+        "internal/backtest/baseline_test.go",
+        "cmd/relia/backtest_report_test.go",
+        "https://github.com/Clyra-AI/relia/pull/156",
+        "refs/remotes/origin/main@4c8e52e31fe44274b1f29944aee53f311bd1b2b8"
+      ],
+      "implementation_refs": [],
+      "implemented_task_refs": [
+        "T12"
+      ],
+      "intent_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-007",
+      "intent_statement": "The Action never blocks by default; with the gate explicitly enabled, a tripped threshold exits 5.",
+      "remaining_task_refs": [],
+      "repair_report_refs": [],
+      "repair_task_packet_refs": [],
+      "scope_item": "The Action never blocks by default; with the gate explicitly enabled, a tripped threshold exits 5.",
+      "task_refs": [
+        "T12"
+      ],
+      "work_proof_marker_refs": [
+        ".factory/artifacts/task-runs/T12/work-proof-marker.json"
+      ]
+    },
+    {
+      "acceptance_item_ids": [
+        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-008"
+      ],
+      "acceptance_item_statuses": [
+        {
+          "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-008",
+          "evidence_refs": [
+            ".factory/artifacts/task-runs/T12/work-proof-marker.json",
+            ".factory/artifacts/task-runs/T12/proof-of-behavior-scorecard.json",
+            "internal/backtest/baseline_test.go",
+            "cmd/relia/backtest_report_test.go",
+            ".factory/artifacts/task-runs/T12/validation-report.json",
+            ".factory/artifacts/task-runs/T12/scope-closure-map.json",
+            ".factory/artifacts/task-runs/T12/scope-closure-report.json",
+            "cmd/relia/assess_command_test.go",
+            "cmd/relia/serve_command.go",
+            "cmd/relia/backtest_integrity_test.go",
+            "cmd/relia/advise_test.go",
+            ".github/workflows/relia-advisory.yml",
+            "https://github.com/Clyra-AI/relia/pull/156",
+            "refs/remotes/origin/main@4c8e52e31fe44274b1f29944aee53f311bd1b2b8"
+          ],
+          "repair_task_refs": [],
+          "status": "implemented"
+        }
+      ],
+      "classification": "implemented",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T12/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T12/validation-report.json",
+        ".factory/artifacts/task-runs/T12/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T12/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T12/proof-of-behavior-scorecard.json",
+        "cmd/relia/assess_command_test.go",
+        "cmd/relia/serve_command.go",
+        "cmd/relia/backtest_integrity_test.go",
+        "cmd/relia/advise_test.go",
+        ".github/workflows/relia-advisory.yml",
+        "internal/backtest/baseline_test.go",
+        "cmd/relia/backtest_report_test.go",
+        "https://github.com/Clyra-AI/relia/pull/156",
+        "refs/remotes/origin/main@4c8e52e31fe44274b1f29944aee53f311bd1b2b8"
+      ],
+      "implementation_refs": [],
+      "implemented_task_refs": [
+        "T12"
+      ],
+      "intent_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-008",
+      "intent_statement": "ERR trend compares against the saved baseline and labels staleness.",
+      "remaining_task_refs": [],
+      "repair_report_refs": [],
+      "repair_task_packet_refs": [],
+      "scope_item": "ERR trend compares against the saved baseline and labels staleness.",
+      "task_refs": [
+        "T12"
+      ],
+      "work_proof_marker_refs": [
+        ".factory/artifacts/task-runs/T12/work-proof-marker.json"
+      ]
+    }
+  ],
+  "delivery_debt_refs": [],
+  "event_log_ref": "task-runs/T12/materialized-merged-pr-recovery",
+  "generated_at": "2026-07-08T14:57:44Z",
+  "intent_source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T12",
+  "mission_contract_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T12",
+  "overall_status": "closed",
+  "recovery_evidence_refs": [
+    "https://github.com/Clyra-AI/relia/pull/156",
+    "refs/remotes/origin/main@4c8e52e31fe44274b1f29944aee53f311bd1b2b8"
+  ],
+  "report_scope": "task_run_recovery",
+  "rerun_required": false,
+  "schema_version": "0.1",
+  "task_id": "T12",
+  "validation_report_refs": [
+    ".factory/artifacts/task-runs/T12/validation-report.json"
+  ],
+  "work_item_id": "relia-mvp-t12",
+  "work_proof_marker_refs": [
+    ".factory/artifacts/task-runs/T12/work-proof-marker.json"
+  ]
+}
