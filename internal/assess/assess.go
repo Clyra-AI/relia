@@ -116,11 +116,15 @@ func ReadRule(root string, rulePath string, options Options) (Rule, bool, *resul
 	if err != nil {
 		return Rule{}, false, artifactError(options, "memory rule confidence must be numeric", rel)
 	}
+	statement, ok := memorydoc.ResolvedRuleStatement(document, string(content))
+	if !ok || strings.TrimSpace(statement) == "" {
+		return Rule{}, false, artifactError(options, "memory rule statement is required", rel)
+	}
 	return Rule{
 		ID:             document.Scalars["id"].Value,
 		Kind:           document.Scalars["kind"].Value,
 		Path:           rel,
-		Statement:      document.Scalars["statement"].Value,
+		Statement:      statement,
 		Confidence:     confidence,
 		ScopePaths:     yamlmini.ListValues(document, "scope.paths"),
 		Citations:      RuleCitations(document),

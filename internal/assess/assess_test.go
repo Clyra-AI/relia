@@ -159,6 +159,57 @@ metadata: {}
 	}
 }
 
+func TestLoadRulesResolvesBlockScalarStatement(t *testing.T) {
+	root := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(root, "packages", "billing"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Join(root, "memory", "rules"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "packages", "billing", "invoice.py"), []byte("def rollover_day(): pass\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	writeRuleForTest(t, root, "active.yaml", `object_type: relia.memory_rule
+schema_version: "1.0"
+id: billing-active
+kind: avoid
+status: active
+statement: >
+  Use the billing clock fixture
+  instead of direct UTC calls.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.86
+evidence:
+  count: 1
+  contradictions: 0
+  experiences:
+    - exp_0142
+provenance:
+  - pr: 142
+    outcome: ci_failure
+    url: https://github.com/acme/billing-service/pull/142
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`)
+
+	rules, commandErr := LoadRules(root, testOptions())
+
+	if commandErr != nil {
+		t.Fatal(commandErr)
+	}
+	if len(rules) != 1 {
+		t.Fatalf("rules = %#v", rules)
+	}
+	if got := rules[0].Statement; got != "Use the billing clock fixture instead of direct UTC calls." {
+		t.Fatalf("statement = %q", got)
+	}
+}
+
 func TestLoadRulesRejectsInvalidActiveRule(t *testing.T) {
 	root := t.TempDir()
 	if err := os.MkdirAll(filepath.Join(root, "memory", "rules"), 0o755); err != nil {

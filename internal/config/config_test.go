@@ -353,12 +353,17 @@ jobs:
     steps:
       - name: Check out repository
         run: echo checkout
+  advise:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run advisory
+        run: echo advise
 `
 	if err := os.WriteFile(filepath.Join(workflowDir, "validate.yml"), []byte(content), 0o644); err != nil {
 		t.Fatal(err)
 	}
 
-	if got := strings.Join(DiscoverRequiredChecks(root), ","); got != "validate,go tests" {
+	if got := strings.Join(DiscoverRequiredChecks(root), ","); got != "advise,go tests" {
 		t.Fatalf("DiscoverRequiredChecks = %q", got)
 	}
 }

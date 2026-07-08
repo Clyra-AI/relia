@@ -14,6 +14,8 @@
     "cmd/relia/main_test.go",
     "docs/architecture/architecture_guides.md",
     "docs/dev/dev_guides.md",
+    "internal/assess/assess.go",
+    "internal/assess/assess_test.go",
     "internal/config/config.go",
     "internal/config/config_test.go",
     "internal/memory/compile.go",
@@ -46,8 +48,10 @@
         "Repaired Codex review feedback by resolving documented block-scalar rule statements before validation and compiled context rendering.",
         "Supervisor repair after factoryd non-convergence made missing serve.compile settings fall back to defaults for upgraded repos.",
         "Supervisor repair after factoryd non-convergence rejects Relia managed marker literals in rule statements before compiled block rendering.",
-        "Supervisor repair after latest-head Codex review accepts quoted serve.compile target scalars before enforcing allowed target names.",
-        "Supervisor repair after latest-head Codex review accepts inline serve.compile target lists before enforcing allowed target names.",
-        "Supervisor repair after latest-head Codex review filters workflow discovery to job-level check names instead of step names."
-    ]
+    "Supervisor repair after latest-head Codex review accepts quoted serve.compile target scalars before enforcing allowed target names.",
+    "Supervisor repair after latest-head Codex review accepts inline serve.compile target lists before enforcing allowed target names.",
+    "Supervisor repair after latest-head Codex review filters workflow discovery to job-level check names instead of step names.",
+    "Supervisor repair after latest-head Codex review uses resolved block-scalar rule statements when serving assess/advise/serve rule data.",
+    "Supervisor repair after latest-head Codex review discovers required GitHub checks from job-level names or job IDs instead of workflow names."
+  ]
 }

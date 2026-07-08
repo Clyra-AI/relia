@@ -73,6 +73,8 @@
     "cmd/relia/main_test.go",
     "docs/architecture/architecture_guides.md",
     "docs/dev/dev_guides.md",
+    "internal/assess/assess.go",
+    "internal/assess/assess_test.go",
     "internal/config/config.go",
     "internal/config/config_test.go",
     "internal/memory/compile.go",
@@ -108,6 +110,8 @@
     "go test ./internal/config -run 'TestCompileSettingsFromConfigDefaultsMissingCompileBlock|TestCompileSettingsFromConfigRejectsPartialCompileBlock|TestCompileSettingsFromConfigAcceptsQuotedTargets' -count=1",
     "go test ./internal/config -run 'TestCompileSettingsFromConfigDefaultsMissingCompileBlock|TestCompileSettingsFromConfigRejectsPartialCompileBlock|TestCompileSettingsFromConfigAcceptsQuotedTargets|TestCompileSettingsFromConfigAcceptsInlineTargets' -count=1",
     "go test ./internal/config -run 'TestDiscoverRequiredChecksUsesManifest|TestDiscoverRequiredChecksIgnoresStepNames|TestCompileSettingsFromConfigDefaultsMissingCompileBlock|TestCompileSettingsFromConfigRejectsPartialCompileBlock|TestCompileSettingsFromConfigAcceptsQuotedTargets|TestCompileSettingsFromConfigAcceptsInlineTargets' -count=1",
+    "go test ./internal/assess -run 'TestLoadRulesResolvesBlockScalarStatement|TestLoadRulesReturnsOnlyActiveAcceptedRules' -count=1",
+    "go test ./internal/config -run 'TestDiscoverRequiredChecksUsesManifest|TestDiscoverRequiredChecksIgnoresStepNames' -count=1",
     "make prepush-full"
   ],
   "docs_sync_result": {
@@ -193,6 +197,18 @@
       "summary": "Verified workflow fallback discovery includes workflow/job check names and ignores step names."
     },
     {
+      "command": "go test ./internal/assess -run 'TestLoadRulesResolvesBlockScalarStatement|TestLoadRulesReturnsOnlyActiveAcceptedRules' -count=1",
+      "exit_code": 0,
+      "status": "pass",
+      "summary": "Verified active memory rules with folded block-scalar statements are served as guidance text instead of the raw YAML block marker."
+    },
+    {
+      "command": "go test ./internal/config -run 'TestDiscoverRequiredChecksUsesManifest|TestDiscoverRequiredChecksIgnoresStepNames' -count=1",
+      "exit_code": 0,
+      "status": "pass",
+      "summary": "Verified workflow fallback discovery records job-level check names or job IDs and does not record workflow display names or step names."
+    },
+    {
       "command": "make prepush-full",
       "exit_code": 0,
       "status": "pass",
@@ -256,6 +272,16 @@
       "source": "Codex review comment https://github.com/Clyra-AI/relia/pull/161#discussion_r3546860530",
       "status": "repaired",
       "summary": "Restricted workflow fallback discovery to direct job-level names so step names are not written as required checks."
+    },
+    {
+      "source": "Codex review comment https://github.com/Clyra-AI/relia/pull/161#discussion_r3546926665",
+      "status": "repaired",
+      "summary": "Reused the resolved memory rule statement path for assess/advise/serve rule loading so block-scalar statements are served as guidance text instead of the raw block marker."
+    },
+    {
+      "source": "Codex review comment https://github.com/Clyra-AI/relia/pull/161#discussion_r3546926670",
+      "status": "repaired",
+      "summary": "Changed workflow fallback discovery to emit job-level check names when configured and job IDs when unnamed, without emitting the top-level workflow display name."
     }
   ],
   "residual_risks": [],
