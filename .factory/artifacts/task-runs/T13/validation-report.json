@@ -7,7 +7,10 @@
         ".factory/artifacts/task-runs/T13/proof-of-behavior-scorecard.json",
         "AGENTS.md",
         "CLAUDE.md",
-        "memory/compiled/agents-block.md"
+        "memory/compiled/agents-block.md",
+        "internal/memory/statement.go",
+        "internal/memory/summary.go",
+        "internal/memory/validation.go"
       ],
       "status": "implemented"
     },
@@ -25,7 +28,9 @@
       "evidence_refs": [
         ".factory/artifacts/task-runs/T13/work-proof-marker.json",
         ".factory/artifacts/task-runs/T13/proof-of-behavior-scorecard.json",
-        "cmd/relia/compile_command_test.go"
+        "cmd/relia/compile_command_test.go",
+        "internal/memory/summary_test.go",
+        "internal/memory/validation_test.go"
       ],
       "status": "implemented"
     },
@@ -35,6 +40,7 @@
         ".factory/artifacts/task-runs/T13/work-proof-marker.json",
         ".factory/artifacts/task-runs/T13/proof-of-behavior-scorecard.json",
         "internal/memory/compile.go",
+        "internal/memory/statement.go",
         "cmd/relia/compile_command.go"
       ],
       "status": "implemented"
@@ -70,6 +76,11 @@
     "internal/config/config.go",
     "internal/config/config_test.go",
     "internal/memory/compile.go",
+    "internal/memory/statement.go",
+    "internal/memory/summary.go",
+    "internal/memory/summary_test.go",
+    "internal/memory/validation.go",
+    "internal/memory/validation_test.go",
     "memory/compiled/agents-block.md",
     "relia.yaml"
   ],
@@ -87,6 +98,9 @@
     "GOCACHE=\"${TMPDIR:-/tmp}/relia-go-build\" go run ./cmd/relia --json compile",
     "make prepush-full",
     "GOCACHE=\"${TMPDIR:-/tmp}/relia-go-build\" go test ./internal/config ./cmd/relia -run 'TestDefaultYAML|TestDiscoverRequiredChecksUsesManifest|TestValidateDefaultYAMLPasses|TestInitDiscoversRequiredChecksAndCompileTargets|TestCompileWritesManagedBlocksIdempotentlyAndPreservesOutsideMarkers|TestCompileRejectsBrokenManagedMarkers|TestReservedCommandsReturnTypedNotImplemented' -count=1",
+    "make prepush-full",
+    "go test ./internal/memory",
+    "go test ./cmd/relia -run 'TestCompile|TestInitDiscoversRequiredChecksAndCompileTargets'",
     "make prepush-full"
   ],
   "docs_sync_result": {
@@ -122,6 +136,18 @@
       "exit_code": 0,
       "status": "pass",
       "summary": "Second workspace compile reported changed_targets: 0."
+    },
+    {
+      "command": "go test ./internal/memory",
+      "exit_code": 0,
+      "status": "pass",
+      "summary": "Verified block-scalar rule statements resolve for summaries and empty block-scalar statements fail validation."
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestCompile|TestInitDiscoversRequiredChecksAndCompileTargets'",
+      "exit_code": 0,
+      "status": "pass",
+      "summary": "Verified compile writes documented folded-scalar statements into managed AGENTS/CLAUDE blocks without rendering the raw block marker."
     }
   ],
   "lifecycle_evidence_result": {
@@ -151,12 +177,18 @@
       "exit_code": 2,
       "status": "fail_repaired",
       "summary": "Initial full gate failed because architecture-debt exception line counts no longer matched cmd/relia/main.go and cmd/relia/main_test.go after decomposition; line counts were restored to recorded ceilings without editing forbidden exception artifacts."
+    },
+    {
+      "source": "Codex review comment https://github.com/Clyra-AI/relia/pull/161#discussion_r3546577092",
+      "status": "repaired",
+      "summary": "Resolved documented `statement: \u003e` rule text before validation and compiled rendering so AGENTS.md/CLAUDE.md no longer receive a raw block-scalar marker."
     }
   ],
   "residual_risks": [],
   "schema_version": "1.0",
   "status": "pass",
   "task_id": "T13",
+  "test_first_skipped_reason": "Codex review repair began from the actionable review artifact at https://github.com/Clyra-AI/relia/pull/161#discussion_r3546577092; a separate pre-edit local red rerun was not performed for the block-scalar regression. The repair added focused regression coverage before final validation.",
   "versioning_result": {
     "status": "pass",
     "summary": "Pre-1.0 additive CLI/config behavior; no migration artifact required for this task."

@@ -74,11 +74,15 @@ func LoadRuleSummaries(root string, options ValidationOptions) ([]RuleSummary, *
 		if parseErr != nil {
 			return nil, artifactContractError(options, parseErr.Error(), rel)
 		}
+		statement, ok := resolvedRuleStatement(document, string(content))
+		if !ok || strings.TrimSpace(statement) == "" {
+			return nil, artifactContractError(options, "memory rule statement is required", rel)
+		}
 		summaries = append(summaries, RuleSummary{
 			ID:              document.Scalars["id"].Value,
 			Kind:            document.Scalars["kind"].Value,
 			Status:          document.Scalars["status"].Value,
-			Statement:       document.Scalars["statement"].Value,
+			Statement:       statement,
 			Confidence:      document.Scalars["confidence"].Value,
 			ConfidenceLabel: document.Scalars["metadata.confidence_label"].Value,
 			EvidenceCount:   document.Scalars["evidence.count"].Value,

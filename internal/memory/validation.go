@@ -66,6 +66,10 @@ func ValidateRuleArtifact(root string, path string, options ValidationOptions) *
 	if document.Scalars["schema_version"].Value != options.SchemaVersion {
 		return artifactContractError(options, "memory rule schema_version must be "+options.SchemaVersion, rel)
 	}
+	statement, ok := resolvedRuleStatement(document, string(content))
+	if !ok || strings.TrimSpace(statement) == "" {
+		return artifactContractError(options, "memory rule statement is required", rel)
+	}
 	kind := document.Scalars["kind"].Value
 	if kind != "avoid" && kind != "playbook" {
 		return artifactContractError(options, "memory rule kind must be avoid or playbook", configdoc.RefWithPath(rel, document.Scalars["kind"]))

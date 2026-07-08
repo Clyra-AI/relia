@@ -17,6 +17,11 @@
     "internal/config/config.go",
     "internal/config/config_test.go",
     "internal/memory/compile.go",
+    "internal/memory/statement.go",
+    "internal/memory/summary.go",
+    "internal/memory/summary_test.go",
+    "internal/memory/validation.go",
+    "internal/memory/validation_test.go",
     "memory/compiled/agents-block.md",
     "relia.yaml"
   ],
@@ -37,6 +42,7 @@
     "Implemented relia compile managed AGENTS.md and CLAUDE.md marker blocks from active accepted memory rules.",
     "Added idempotent marker replacement that fails closed on mismatched, duplicated, or out-of-order markers and preserves content outside the managed block.",
     "Added offline init required-check discovery from .github/required-checks.json and compile target config validation.",
-    "Generated the repository managed block in AGENTS.md, CLAUDE.md, and memory/compiled/agents-block.md."
+    "Generated the repository managed block in AGENTS.md, CLAUDE.md, and memory/compiled/agents-block.md.",
+    "Repaired Codex review feedback by resolving documented block-scalar rule statements before validation and compiled context rendering."
   ]
 }

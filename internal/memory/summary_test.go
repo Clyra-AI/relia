@@ -67,6 +67,24 @@ func TestLoadRuleSummariesSortsAndLoadsValidatedRules(t *testing.T) {
 	}
 }
 
+func TestLoadRuleSummariesResolvesBlockScalarStatement(t *testing.T) {
+	root := t.TempDir()
+	content := strings.Replace(validMemoryRuleYAML(), "statement: Avoid repeating this failure.", "statement: >\n  Avoid repeating this failure.\n  Use the reviewed fixture.", 1)
+	writeValidationFixture(t, root, content)
+
+	summaries, commandErr := LoadRuleSummaries(root, testValidationOptions())
+
+	if commandErr != nil {
+		t.Fatal(commandErr)
+	}
+	if len(summaries) != 1 {
+		t.Fatalf("summaries = %#v", summaries)
+	}
+	if got := summaries[0].Statement; got != "Avoid repeating this failure. Use the reviewed fixture." {
+		t.Fatalf("statement = %q", got)
+	}
+}
+
 func TestRenderMarkdownSplitsStrongAndWeakMemory(t *testing.T) {
 	markdown := RenderMarkdown([]RuleSummary{
 		{
