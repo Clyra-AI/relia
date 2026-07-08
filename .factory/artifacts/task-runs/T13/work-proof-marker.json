@@ -52,6 +52,7 @@
     "Supervisor repair after latest-head Codex review accepts inline serve.compile target lists before enforcing allowed target names.",
     "Supervisor repair after latest-head Codex review filters workflow discovery to job-level check names instead of step names.",
     "Supervisor repair after latest-head Codex review uses resolved block-scalar rule statements when serving assess/advise/serve rule data.",
-    "Supervisor repair after latest-head Codex review discovers required GitHub checks from job-level names or job IDs instead of workflow names."
+    "Supervisor repair after latest-head Codex review discovers required GitHub checks from job-level names or job IDs instead of workflow names.",
+    "Supervisor repair after latest-head Codex review rejects explicitly empty or malformed serve.compile.targets instead of applying upgrade defaults."
   ]
 }

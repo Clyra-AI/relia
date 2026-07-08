@@ -662,12 +662,13 @@ func CompileSettingsFromConfig(document yamlmini.Document) (CompileSettings, *Er
 		Targets:  DefaultCompileTargets(),
 		MaxRules: DefaultCompileMaxRules,
 	}
-	targets := compileTargetValues(document)
+	targets, targetsConfigured := compileTargetValues(document)
+	compileConfigured := yamlmini.HasPath(document, "serve.compile")
 	maxRulesScalar, maxRulesConfigured := document.Scalars["serve.compile.max_rules"]
-	if len(targets) == 0 && !maxRulesConfigured {
+	if !compileConfigured {
 		return settings, nil
 	}
-	if len(targets) == 0 {
+	if !targetsConfigured || len(targets) == 0 {
 		return settings, configErrorAt("serve.compile.targets must include AGENTS.md and CLAUDE.md", PathRef(DefaultFile, document, "serve.compile.targets"))
 	}
 	seen := map[string]bool{}
@@ -699,15 +700,18 @@ func CompileSettingsFromConfig(document yamlmini.Document) (CompileSettings, *Er
 	return settings, nil
 }
 
-func compileTargetValues(document yamlmini.Document) []string {
-	if targets := yamlmini.ListValues(document, "serve.compile.targets"); len(targets) > 0 {
-		return normalizedCompileTargets(targets)
+func compileTargetValues(document yamlmini.Document) ([]string, bool) {
+	if _, ok := document.Lists["serve.compile.targets"]; ok {
+		return normalizedCompileTargets(yamlmini.ListValues(document, "serve.compile.targets")), true
 	}
 	scalar, ok := document.Scalars["serve.compile.targets"]
-	if !ok {
-		return nil
+	if ok {
+		return normalizedCompileTargets(parseInlineYAMLList(scalar.Value)), true
 	}
-	return normalizedCompileTargets(parseInlineYAMLList(scalar.Value))
+	if yamlmini.HasPath(document, "serve.compile.targets") {
+		return nil, true
+	}
+	return nil, false
 }
 
 func parseInlineYAMLList(value string) []string {
