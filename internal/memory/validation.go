@@ -70,6 +70,9 @@ func ValidateRuleArtifact(root string, path string, options ValidationOptions) *
 	if !ok || strings.TrimSpace(statement) == "" {
 		return artifactContractError(options, "memory rule statement is required", rel)
 	}
+	if strings.Contains(statement, ManagedBeginMarker) || strings.Contains(statement, ManagedEndMarker) {
+		return artifactContractError(options, "memory rule statement must not contain Relia managed markers", rel)
+	}
 	kind := document.Scalars["kind"].Value
 	if kind != "avoid" && kind != "playbook" {
 		return artifactContractError(options, "memory rule kind must be avoid or playbook", configdoc.RefWithPath(rel, document.Scalars["kind"]))

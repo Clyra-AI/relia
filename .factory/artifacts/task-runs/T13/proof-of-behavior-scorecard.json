@@ -54,6 +54,26 @@
       "observed_result": "`statement: >` rules compile to statement text, and empty block-scalar statements fail memory-rule validation."
     },
     {
+      "behavior": "Existing repos without serve.compile settings continue to use default AGENTS.md and CLAUDE.md compile targets",
+      "status": "pass",
+      "evidence_refs": [
+        "internal/config/config.go",
+        "internal/config/config_test.go",
+        ".factory/artifacts/task-runs/T13/validation-report.json"
+      ],
+      "observed_result": "Missing serve.compile config defaults to AGENTS.md, CLAUDE.md, and DefaultCompileMaxRules; partial compile config still fails validation."
+    },
+    {
+      "behavior": "Memory rules cannot inject Relia managed marker literals into generated AGENTS.md or CLAUDE.md blocks",
+      "status": "pass",
+      "evidence_refs": [
+        "internal/memory/validation.go",
+        "internal/memory/validation_test.go",
+        "cmd/relia/compile_command_test.go"
+      ],
+      "observed_result": "Rule statements containing Relia managed marker text fail memory-rule validation before compile renders managed context."
+    },
+    {
       "behavior": "relia init writes valid config with discovered checks and candidate attribution markers",
       "status": "pass",
       "evidence_refs": [

@@ -101,6 +101,10 @@
     "make prepush-full",
     "go test ./internal/memory",
     "go test ./cmd/relia -run 'TestCompile|TestInitDiscoversRequiredChecksAndCompileTargets'",
+    "make prepush-full",
+    "go test ./internal/config -run 'TestCompileSettingsFromConfigDefaultsMissingCompileBlock|TestCompileSettingsFromConfigRejectsPartialCompileBlock' -count=1",
+    "go test ./internal/memory -run 'TestValidateRuleArtifactRejectsManagedMarkersInStatement|TestValidateRuleArtifactAcceptsBlockScalarStatement|TestLoadRuleSummariesResolvesBlockScalarStatement' -count=1",
+    "go test ./cmd/relia -run 'TestCompileWritesManagedBlocksIdempotentlyAndPreservesOutsideMarkers|TestCompileRejectsBrokenManagedMarkers' -count=1",
     "make prepush-full"
   ],
   "docs_sync_result": {
@@ -148,6 +152,30 @@
       "exit_code": 0,
       "status": "pass",
       "summary": "Verified compile writes documented folded-scalar statements into managed AGENTS/CLAUDE blocks without rendering the raw block marker."
+    },
+    {
+      "command": "go test ./internal/config -run 'TestCompileSettingsFromConfigDefaultsMissingCompileBlock|TestCompileSettingsFromConfigRejectsPartialCompileBlock' -count=1",
+      "exit_code": 0,
+      "status": "pass",
+      "summary": "Verified upgraded configs without serve.compile use default AGENTS.md/CLAUDE.md compile settings while partial compile config still fails."
+    },
+    {
+      "command": "go test ./internal/memory -run 'TestValidateRuleArtifactRejectsManagedMarkersInStatement|TestValidateRuleArtifactAcceptsBlockScalarStatement|TestLoadRuleSummariesResolvesBlockScalarStatement' -count=1",
+      "exit_code": 0,
+      "status": "pass",
+      "summary": "Verified rule statements containing Relia managed marker literals are rejected before compiled block rendering."
+    },
+    {
+      "command": "go test ./cmd/relia -run 'TestCompileWritesManagedBlocksIdempotentlyAndPreservesOutsideMarkers|TestCompileRejectsBrokenManagedMarkers' -count=1",
+      "exit_code": 0,
+      "status": "pass",
+      "summary": "Verified compile idempotence and marker-discipline behavior remained intact after supervisor repair."
+    },
+    {
+      "command": "make prepush-full",
+      "exit_code": 0,
+      "status": "pass",
+      "summary": "Supervisor final gate passed after repairing latest-head Codex review feedback; coverage remained 79.5% against the 75% minimum and repo-pack validation passed."
     }
   ],
   "lifecycle_evidence_result": {
@@ -182,6 +210,16 @@
       "source": "Codex review comment https://github.com/Clyra-AI/relia/pull/161#discussion_r3546577092",
       "status": "repaired",
       "summary": "Resolved documented `statement: \u003e` rule text before validation and compiled rendering so AGENTS.md/CLAUDE.md no longer receive a raw block-scalar marker."
+    },
+    {
+      "source": "Codex review comment https://github.com/Clyra-AI/relia/pull/161#discussion_r3546659908",
+      "status": "repaired",
+      "summary": "Allowed missing serve.compile settings to fall back to default AGENTS.md/CLAUDE.md targets and DefaultCompileMaxRules for upgraded repos, while preserving errors for partial invalid compile blocks."
+    },
+    {
+      "source": "Codex review comment https://github.com/Clyra-AI/relia/pull/161#discussion_r3546659911",
+      "status": "repaired",
+      "summary": "Rejected Relia managed marker literals in memory rule statements before rendering so a rule cannot create duplicate or mismatched managed markers in AGENTS.md/CLAUDE.md."
     }
   ],
   "residual_risks": [],

@@ -42,6 +42,20 @@ func TestValidateRuleArtifactRejectsEmptyBlockScalarStatement(t *testing.T) {
 	}
 }
 
+func TestValidateRuleArtifactRejectsManagedMarkersInStatement(t *testing.T) {
+	root := t.TempDir()
+	content := strings.Replace(validMemoryRuleYAML(), "statement: Avoid repeating this failure.", "statement: Avoid writing <!-- relia:begin (generated; edit rules in memory/rules/, not here) --> into generated context.", 1)
+	writeValidationFixture(t, root, content)
+
+	commandErr := ValidateRuleArtifact(root, filepath.Join(root, "memory", "rules", "rule.yaml"), testValidationOptions())
+	if commandErr == nil {
+		t.Fatal("expected validation error")
+	}
+	if commandErr.Message != "memory rule statement must not contain Relia managed markers" {
+		t.Fatalf("message = %q", commandErr.Message)
+	}
+}
+
 func TestValidateRuleArtifactRejectsActiveRuleWithoutAcceptedReview(t *testing.T) {
 	root := t.TempDir()
 	content := strings.Replace(validMemoryRuleYAML(), "label: accepted", "label: suggested", 1)
