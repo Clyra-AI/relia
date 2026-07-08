@@ -41,7 +41,8 @@
     "initial_head": "721af306cf309cd547e7f86976791ab43005d733",
     "daemon_repair_head": "ee65ff9925eb373f3cd71bd66ba23ef156a60b4b",
     "ci_status_before_supervisor_repair": "passed",
-    "review_status_before_supervisor_repair": "latest_head_actionable_p2_comments"
+    "review_status_before_supervisor_repair": "latest_head_actionable_p2_comments",
+    "followup_review_status": "latest_head_actionable_p2_comment_repaired"
   },
   "decisions": [
     {
@@ -75,6 +76,17 @@
         "internal/memory/validation.go",
         "internal/memory/validation_test.go"
       ]
+    },
+    {
+      "decision_type": "review_disposition",
+      "actor": "supervisor",
+      "action_taken": "accepted_and_fixed",
+      "reason": "Quoted YAML list scalars are valid hand-edited compile target config and should normalize before target allow-list enforcement.",
+      "evidence_refs": [
+        "internal/config/config.go",
+        "internal/config/config_test.go",
+        "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546740455"
+      ]
     }
   ],
   "validation": {
@@ -82,6 +94,10 @@
     "commands": [
       {
         "command": "go test ./internal/config -run 'TestCompileSettingsFromConfigDefaultsMissingCompileBlock|TestCompileSettingsFromConfigRejectsPartialCompileBlock' -count=1",
+        "exit_code": 0
+      },
+      {
+        "command": "go test ./internal/config -run 'TestCompileSettingsFromConfigDefaultsMissingCompileBlock|TestCompileSettingsFromConfigRejectsPartialCompileBlock|TestCompileSettingsFromConfigAcceptsQuotedTargets' -count=1",
         "exit_code": 0
       },
       {
@@ -111,6 +127,7 @@
     ".factory/artifacts/task-runs/T13/proof-of-behavior-scorecard.json",
     "https://github.com/Clyra-AI/relia/pull/161",
     "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546659908",
-    "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546659911"
+    "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546659911",
+    "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546740455"
   ]
 }

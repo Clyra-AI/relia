@@ -105,6 +105,7 @@
     "go test ./internal/config -run 'TestCompileSettingsFromConfigDefaultsMissingCompileBlock|TestCompileSettingsFromConfigRejectsPartialCompileBlock' -count=1",
     "go test ./internal/memory -run 'TestValidateRuleArtifactRejectsManagedMarkersInStatement|TestValidateRuleArtifactAcceptsBlockScalarStatement|TestLoadRuleSummariesResolvesBlockScalarStatement' -count=1",
     "go test ./cmd/relia -run 'TestCompileWritesManagedBlocksIdempotentlyAndPreservesOutsideMarkers|TestCompileRejectsBrokenManagedMarkers' -count=1",
+    "go test ./internal/config -run 'TestCompileSettingsFromConfigDefaultsMissingCompileBlock|TestCompileSettingsFromConfigRejectsPartialCompileBlock|TestCompileSettingsFromConfigAcceptsQuotedTargets' -count=1",
     "make prepush-full"
   ],
   "docs_sync_result": {
@@ -172,6 +173,12 @@
       "summary": "Verified compile idempotence and marker-discipline behavior remained intact after supervisor repair."
     },
     {
+      "command": "go test ./internal/config -run 'TestCompileSettingsFromConfigDefaultsMissingCompileBlock|TestCompileSettingsFromConfigRejectsPartialCompileBlock|TestCompileSettingsFromConfigAcceptsQuotedTargets' -count=1",
+      "exit_code": 0,
+      "status": "pass",
+      "summary": "Verified quoted serve.compile target scalars normalize to AGENTS.md and CLAUDE.md before allowed-target validation."
+    },
+    {
       "command": "make prepush-full",
       "exit_code": 0,
       "status": "pass",
@@ -220,6 +227,11 @@
       "source": "Codex review comment https://github.com/Clyra-AI/relia/pull/161#discussion_r3546659911",
       "status": "repaired",
       "summary": "Rejected Relia managed marker literals in memory rule statements before rendering so a rule cannot create duplicate or mismatched managed markers in AGENTS.md/CLAUDE.md."
+    },
+    {
+      "source": "Codex review comment https://github.com/Clyra-AI/relia/pull/161#discussion_r3546740455",
+      "status": "repaired",
+      "summary": "Normalized quoted serve.compile target scalars before validation so hand-edited YAML using standard quoted list items is accepted."
     }
   ],
   "residual_risks": [],
