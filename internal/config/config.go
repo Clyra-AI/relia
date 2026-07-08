@@ -634,7 +634,7 @@ func CompileSettingsFromConfig(document yamlmini.Document) (CompileSettings, *Er
 		Targets:  DefaultCompileTargets(),
 		MaxRules: DefaultCompileMaxRules,
 	}
-	targets := normalizedCompileTargets(yamlmini.ListValues(document, "serve.compile.targets"))
+	targets := compileTargetValues(document)
 	maxRulesScalar, maxRulesConfigured := document.Scalars["serve.compile.max_rules"]
 	if len(targets) == 0 && !maxRulesConfigured {
 		return settings, nil
@@ -669,6 +669,36 @@ func CompileSettingsFromConfig(document yamlmini.Document) (CompileSettings, *Er
 	settings.Targets = append([]string(nil), targets...)
 	settings.MaxRules = maxRules
 	return settings, nil
+}
+
+func compileTargetValues(document yamlmini.Document) []string {
+	if targets := yamlmini.ListValues(document, "serve.compile.targets"); len(targets) > 0 {
+		return normalizedCompileTargets(targets)
+	}
+	scalar, ok := document.Scalars["serve.compile.targets"]
+	if !ok {
+		return nil
+	}
+	return normalizedCompileTargets(parseInlineYAMLList(scalar.Value))
+}
+
+func parseInlineYAMLList(value string) []string {
+	value = strings.TrimSpace(value)
+	if len(value) < 2 || value[0] != '[' || value[len(value)-1] != ']' {
+		return nil
+	}
+	inner := strings.TrimSpace(value[1 : len(value)-1])
+	if inner == "" {
+		return nil
+	}
+	parts := strings.Split(inner, ",")
+	values := make([]string, 0, len(parts))
+	for _, part := range parts {
+		if trimmed := strings.TrimSpace(part); trimmed != "" {
+			values = append(values, trimmed)
+		}
+	}
+	return values
 }
 
 func normalizedCompileTargets(targets []string) []string {

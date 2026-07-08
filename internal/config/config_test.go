@@ -110,6 +110,26 @@ func TestCompileSettingsFromConfigAcceptsQuotedTargets(t *testing.T) {
 	}
 }
 
+func TestCompileSettingsFromConfigAcceptsInlineTargets(t *testing.T) {
+	document, err := yamlmini.ParseDocument(`serve:
+  compile:
+    targets: [AGENTS.md, "CLAUDE.md"]
+    max_rules: 25
+`)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	settings, configErr := CompileSettingsFromConfig(document)
+
+	if configErr != nil {
+		t.Fatal(configErr)
+	}
+	if got := strings.Join(settings.Targets, ","); got != "AGENTS.md,CLAUDE.md" {
+		t.Fatalf("targets = %q", got)
+	}
+}
+
 func TestArtifactSkeletonPathsReturnsCopy(t *testing.T) {
 	paths := ArtifactSkeletonPaths()
 	if len(paths) == 0 {

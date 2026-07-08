@@ -74,6 +74,16 @@
       "observed_result": "`- \"AGENTS.md\"` and `- 'CLAUDE.md'` normalize before allowed-target enforcement."
     },
     {
+      "behavior": "Inline serve.compile target lists are accepted as the same AGENTS.md and CLAUDE.md targets",
+      "status": "pass",
+      "evidence_refs": [
+        "internal/config/config.go",
+        "internal/config/config_test.go",
+        ".factory/artifacts/task-runs/T13/validation-report.json"
+      ],
+      "observed_result": "`targets: [AGENTS.md, \"CLAUDE.md\"]` normalizes before allowed-target enforcement."
+    },
+    {
       "behavior": "Memory rules cannot inject Relia managed marker literals into generated AGENTS.md or CLAUDE.md blocks",
       "status": "pass",
       "evidence_refs": [

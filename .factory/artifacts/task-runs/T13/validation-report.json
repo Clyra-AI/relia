@@ -106,6 +106,7 @@
     "go test ./internal/memory -run 'TestValidateRuleArtifactRejectsManagedMarkersInStatement|TestValidateRuleArtifactAcceptsBlockScalarStatement|TestLoadRuleSummariesResolvesBlockScalarStatement' -count=1",
     "go test ./cmd/relia -run 'TestCompileWritesManagedBlocksIdempotentlyAndPreservesOutsideMarkers|TestCompileRejectsBrokenManagedMarkers' -count=1",
     "go test ./internal/config -run 'TestCompileSettingsFromConfigDefaultsMissingCompileBlock|TestCompileSettingsFromConfigRejectsPartialCompileBlock|TestCompileSettingsFromConfigAcceptsQuotedTargets' -count=1",
+    "go test ./internal/config -run 'TestCompileSettingsFromConfigDefaultsMissingCompileBlock|TestCompileSettingsFromConfigRejectsPartialCompileBlock|TestCompileSettingsFromConfigAcceptsQuotedTargets|TestCompileSettingsFromConfigAcceptsInlineTargets' -count=1",
     "make prepush-full"
   ],
   "docs_sync_result": {
@@ -179,6 +180,12 @@
       "summary": "Verified quoted serve.compile target scalars normalize to AGENTS.md and CLAUDE.md before allowed-target validation."
     },
     {
+      "command": "go test ./internal/config -run 'TestCompileSettingsFromConfigDefaultsMissingCompileBlock|TestCompileSettingsFromConfigRejectsPartialCompileBlock|TestCompileSettingsFromConfigAcceptsQuotedTargets|TestCompileSettingsFromConfigAcceptsInlineTargets' -count=1",
+      "exit_code": 0,
+      "status": "pass",
+      "summary": "Verified inline serve.compile target lists normalize to AGENTS.md and CLAUDE.md before allowed-target validation."
+    },
+    {
       "command": "make prepush-full",
       "exit_code": 0,
       "status": "pass",
@@ -232,6 +239,11 @@
       "source": "Codex review comment https://github.com/Clyra-AI/relia/pull/161#discussion_r3546740455",
       "status": "repaired",
       "summary": "Normalized quoted serve.compile target scalars before validation so hand-edited YAML using standard quoted list items is accepted."
+    },
+    {
+      "source": "Codex review comment https://github.com/Clyra-AI/relia/pull/161#discussion_r3546792660",
+      "status": "repaired",
+      "summary": "Parsed inline serve.compile target lists before validation so hand-edited YAML using standard inline list syntax is accepted."
     }
   ],
   "residual_risks": [],
