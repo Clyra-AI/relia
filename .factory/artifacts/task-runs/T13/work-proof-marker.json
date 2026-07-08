@@ -19,6 +19,7 @@
     "internal/config/config.go",
     "internal/config/config_test.go",
     "internal/memory/compile.go",
+    "internal/memory/compile_test.go",
     "internal/memory/statement.go",
     "internal/memory/summary.go",
     "internal/memory/summary_test.go",
@@ -53,6 +54,7 @@
     "Supervisor repair after latest-head Codex review filters workflow discovery to job-level check names instead of step names.",
     "Supervisor repair after latest-head Codex review uses resolved block-scalar rule statements when serving assess/advise/serve rule data.",
     "Supervisor repair after latest-head Codex review discovers required GitHub checks from job-level names or job IDs instead of workflow names.",
-    "Supervisor repair after latest-head Codex review rejects explicitly empty or malformed serve.compile.targets instead of applying upgrade defaults."
+    "Supervisor repair after latest-head Codex review rejects explicitly empty or malformed serve.compile.targets instead of applying upgrade defaults.",
+    "Supervisor repair after latest-head Codex review compiles only active accepted rules with explicit human_review/approved fields."
   ]
 }

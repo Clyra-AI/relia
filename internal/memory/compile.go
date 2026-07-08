@@ -43,6 +43,9 @@ func SelectCompiledRules(rules []RuleSummary, maxRules int) []RuleSummary {
 		if rule.Status != "active" {
 			continue
 		}
+		if rule.ReviewLabel != "accepted" || rule.ReviewGate != "human_review" || rule.ReviewDecision != "approved" {
+			continue
+		}
 		active = append(active, rule)
 	}
 	sort.Slice(active, func(i, j int) bool {

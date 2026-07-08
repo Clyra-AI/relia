@@ -22,6 +22,8 @@ type RuleSummary struct {
 	EvidenceCount   string
 	Contradictions  string
 	ReviewLabel     string
+	ReviewGate      string
+	ReviewDecision  string
 	StatementOrigin string
 	LifecycleReason string
 	Path            string
@@ -88,6 +90,8 @@ func LoadRuleSummaries(root string, options ValidationOptions) ([]RuleSummary, *
 			EvidenceCount:   document.Scalars["evidence.count"].Value,
 			Contradictions:  document.Scalars["evidence.contradictions"].Value,
 			ReviewLabel:     document.Scalars["review.label"].Value,
+			ReviewGate:      document.Scalars["review.gate"].Value,
+			ReviewDecision:  document.Scalars["review.decision"].Value,
 			StatementOrigin: document.Scalars["review.statement_origin"].Value,
 			LifecycleReason: document.Scalars["metadata.lifecycle_reason"].Value,
 			Path:            rel,

@@ -37,8 +37,20 @@
       "evidence_refs": [
         "memory/compiled/agents-block.md",
         "internal/memory/compile.go",
+        "internal/memory/compile_test.go",
         "memory/rules/demo-assessment-active-rule.yaml"
       ]
+    },
+    {
+      "behavior": "Compiled blocks emit only rules with explicit human review approval evidence",
+      "status": "pass",
+      "evidence_refs": [
+        "internal/memory/compile.go",
+        "internal/memory/compile_test.go",
+        "internal/memory/summary.go",
+        ".factory/artifacts/task-runs/T13/validation-report.json"
+      ],
+      "observed_result": "Active accepted rules missing review.gate=human_review or review.decision=approved are excluded from compiled AGENTS.md/CLAUDE.md context."
     },
     {
       "behavior": "Compiled blocks render documented block-scalar rule statements as rule guidance instead of raw YAML markers",
