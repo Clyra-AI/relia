@@ -78,6 +78,20 @@ func TestParseDocumentHandlesCommentsQuotesAndBlockScalars(t *testing.T) {
 	}
 }
 
+func TestParseDocumentUnquotesListScalars(t *testing.T) {
+	document, err := ParseDocument(`checks:
+  - "test #1"
+  - 'build: linux'
+`)
+	if err != nil {
+		t.Fatalf("ParseDocument returned error: %v", err)
+	}
+
+	if got := ListValues(document, "checks"); !reflect.DeepEqual(got, []string{"test #1", "build: linux"}) {
+		t.Fatalf("checks = %#v", got)
+	}
+}
+
 func TestListValuesWithMapFieldsReturnsUniqueValues(t *testing.T) {
 	document, err := ParseDocument(`attribution:
   agent_authors:

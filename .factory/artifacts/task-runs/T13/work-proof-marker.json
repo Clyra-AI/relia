@@ -25,6 +25,8 @@
     "internal/memory/summary_test.go",
     "internal/memory/validation.go",
     "internal/memory/validation_test.go",
+    "internal/yamlmini/yamlmini.go",
+    "internal/yamlmini/yamlmini_test.go",
     "memory/compiled/agents-block.md",
     "relia.yaml"
   ],
@@ -55,6 +57,7 @@
     "Supervisor repair after latest-head Codex review uses resolved block-scalar rule statements when serving assess/advise/serve rule data.",
     "Supervisor repair after latest-head Codex review discovers required GitHub checks from job-level names or job IDs instead of workflow names.",
     "Supervisor repair after latest-head Codex review rejects explicitly empty or malformed serve.compile.targets instead of applying upgrade defaults.",
-    "Supervisor repair after latest-head Codex review compiles only active accepted rules with explicit human_review/approved fields."
+    "Supervisor repair after latest-head Codex review compiles only active accepted rules with explicit human_review/approved fields.",
+    "Supervisor repair after latest-head Codex review quotes YAML-sensitive discovered required-check names and unquotes list scalars on readback."
   ]
 }

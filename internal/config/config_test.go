@@ -48,6 +48,20 @@ func TestDefaultYAMLWithChecksRendersDiscoveredChecks(t *testing.T) {
 	}
 }
 
+func TestDefaultYAMLWithChecksQuotesYAMLSensitiveCheckNames(t *testing.T) {
+	content := DefaultYAMLWithChecks("1.0", "0.0.0-dev", []string{"test #1", "build: linux"})
+	if !strings.Contains(content, `- "test #1"`) || !strings.Contains(content, `- "build: linux"`) {
+		t.Fatalf("content did not quote sensitive check names:\n%s", content)
+	}
+	document, err := yamlmini.ParseDocument(content)
+	if err != nil {
+		t.Fatalf("DefaultYAMLWithChecks did not parse: %v", err)
+	}
+	if got := strings.Join(yamlmini.ListValues(document, "outcomes.checks.required"), ","); got != "test #1,build: linux" {
+		t.Fatalf("required checks = %q", got)
+	}
+}
+
 func TestCompileSettingsFromConfigDefaultsMissingCompileBlock(t *testing.T) {
 	document, err := yamlmini.ParseDocument(`serve:
   advisory_only: true

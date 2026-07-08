@@ -84,6 +84,8 @@
     "internal/memory/summary_test.go",
     "internal/memory/validation.go",
     "internal/memory/validation_test.go",
+    "internal/yamlmini/yamlmini.go",
+    "internal/yamlmini/yamlmini_test.go",
     "memory/compiled/agents-block.md",
     "relia.yaml"
   ],
@@ -116,6 +118,8 @@
     "go test ./internal/config -run 'TestCompileSettingsFromConfigDefaultsMissingCompileBlock|TestCompileSettingsFromConfigRejectsPartialCompileBlock|TestCompileSettingsFromConfigRejectsExplicitEmptyTargets|TestCompileSettingsFromConfigAcceptsQuotedTargets|TestCompileSettingsFromConfigAcceptsInlineTargets' -count=1",
     "go test ./internal/memory -run 'TestSelectCompiledRulesRequiresExplicitApprovalFields|TestLoadRuleSummariesSortsAndLoadsValidatedRules|TestLoadRuleSummariesResolvesBlockScalarStatement' -count=1",
     "go test ./cmd/relia -run 'TestCompile' -count=1",
+    "go test ./internal/yamlmini -run 'TestParseDocumentHandlesCommentsQuotesAndBlockScalars|TestParseDocumentUnquotesListScalars|TestListValuesWithMapFieldsReturnsUniqueValues' -count=1",
+    "go test ./internal/config -run 'TestDefaultYAMLWithChecksRendersDiscoveredChecks|TestDefaultYAMLWithChecksQuotesYAMLSensitiveCheckNames|TestCompileSettingsFromConfigAcceptsQuotedTargets|TestCompileSettingsFromConfigAcceptsInlineTargets' -count=1",
     "make prepush-full"
   ],
   "docs_sync_result": {
@@ -231,6 +235,18 @@
       "summary": "Verified compile command behavior remains green after requiring explicit approval fields for selected compiled rules."
     },
     {
+      "command": "go test ./internal/yamlmini -run 'TestParseDocumentHandlesCommentsQuotesAndBlockScalars|TestParseDocumentUnquotesListScalars|TestListValuesWithMapFieldsReturnsUniqueValues' -count=1",
+      "exit_code": 0,
+      "status": "pass",
+      "summary": "Verified quoted list scalars containing YAML comment or mapping syntax read back as their original check names."
+    },
+    {
+      "command": "go test ./internal/config -run 'TestDefaultYAMLWithChecksRendersDiscoveredChecks|TestDefaultYAMLWithChecksQuotesYAMLSensitiveCheckNames|TestCompileSettingsFromConfigAcceptsQuotedTargets|TestCompileSettingsFromConfigAcceptsInlineTargets' -count=1",
+      "exit_code": 0,
+      "status": "pass",
+      "summary": "Verified generated relia.yaml quotes YAML-sensitive discovered required-check names while preserving normal discovered check names and compile target parsing."
+    },
+    {
       "command": "make prepush-full",
       "exit_code": 0,
       "status": "pass",
@@ -314,6 +330,11 @@
       "source": "Codex review comment https://github.com/Clyra-AI/relia/pull/161#discussion_r3547072540",
       "status": "repaired",
       "summary": "Changed compiled-context selection so only active accepted rules with explicit review.gate=human_review and review.decision=approved are emitted into AGENTS.md/CLAUDE.md context."
+    },
+    {
+      "source": "Codex review comment https://github.com/Clyra-AI/relia/pull/161#discussion_r3547132744",
+      "status": "repaired",
+      "summary": "Quoted generated required-check names containing YAML-sensitive syntax and made yamlmini unquote scalar list values on readback."
     }
   ],
   "residual_risks": [],

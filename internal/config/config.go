@@ -204,7 +204,18 @@ func renderYAMLStringList(values []string, indent int) string {
 }
 
 func safeYAMLListScalar(value string) string {
-	return strings.NewReplacer("\n", " ", "\r", " ").Replace(value)
+	value = strings.NewReplacer("\n", " ", "\r", " ").Replace(value)
+	if !needsQuotedYAMLListScalar(value) {
+		return value
+	}
+	return `"` + strings.NewReplacer(`\`, `\\`, `"`, `\"`).Replace(value) + `"`
+}
+
+func needsQuotedYAMLListScalar(value string) bool {
+	if value == "" || strings.TrimSpace(value) != value {
+		return true
+	}
+	return strings.ContainsAny(value, "#:")
 }
 
 func discoverRequiredCheckManifest(root string) []string {
