@@ -7,8 +7,8 @@
   "work_item_id": "relia-mvp-t12",
   "source_kind": "prd",
   "supervisor_skill": "autoship-supervisor",
-  "factoryd_config_ref": ".factory/factoryd.autoship.example.json",
-  "factoryd_command": "FACTORY_REPO=<factory-repo> factoryd run --config .factory/factoryd.autoship.example.json --repo relia --task T12 --loop --max-tasks 1 --json",
+  "factoryd_config_ref": ".factory/factoryd.autoship.example.json plus .factory/artifacts/supervisor-runs/T12/merge-authority-grant.json; local runtime config .factory/factoryd.json was gitignored",
+  "factoryd_command": "redacted_template_command_not_directly_replayable: FACTORY_REPO=<factory-repo> factoryd run --config .factory/factoryd.json --repo relia --task T12 --loop --max-tasks 1 --json; task-scoped merge_authority evidence is recorded in .factory/artifacts/supervisor-runs/T12/merge-authority-grant.json",
   "task_scope": {
     "delivery_slice_refs": [
       "mcp-serving-and-recall"
@@ -93,6 +93,7 @@
       "action_taken": "stopped",
       "reason": "T12 later reached merged and post-merge monitored state through PR #156 and closure-sync PR #159, but the committed closure-sync report remains partial because factoryd_run_once_report evidence was superseded by recovery evidence rather than materialized.",
       "evidence_refs": [
+        ".factory/artifacts/supervisor-runs/T12/merge-authority-grant.json",
         ".factory/artifacts/task-runs/T12/validation-report.json",
         ".factory/artifacts/task-runs/T12/scope-closure-report.json",
         ".factory/artifacts/task-runs/T12/scope-closure-map.json",
@@ -111,6 +112,7 @@
   },
   "evidence_refs": [
     ".factory/artifacts/supervisor-runs/T12/20260707T185417Z.json",
+    ".factory/artifacts/supervisor-runs/T12/merge-authority-grant.json",
     ".factory/artifacts/task-runs/T12/validation-report.json",
     ".factory/artifacts/task-runs/T12/proof-of-behavior-scorecard.json",
     ".factory/artifacts/task-runs/T12/work-proof-marker.json",
