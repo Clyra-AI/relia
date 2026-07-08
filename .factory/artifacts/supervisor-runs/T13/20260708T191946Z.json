@@ -132,6 +132,17 @@
         "internal/config/config_test.go",
         "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546926670"
       ]
+    },
+    {
+      "decision_type": "review_disposition",
+      "actor": "supervisor",
+      "action_taken": "accepted_and_fixed",
+      "reason": "Upgrade defaults should apply only when serve.compile is absent; explicit empty or malformed target config must fail closed.",
+      "evidence_refs": [
+        "internal/config/config.go",
+        "internal/config/config_test.go",
+        "https://github.com/Clyra-AI/relia/pull/161#discussion_r3547016206"
+      ]
     }
   ],
   "validation": {
@@ -159,6 +170,10 @@
       },
       {
         "command": "go test ./internal/config -run 'TestDiscoverRequiredChecksUsesManifest|TestDiscoverRequiredChecksIgnoresStepNames' -count=1",
+        "exit_code": 0
+      },
+      {
+        "command": "go test ./internal/config -run 'TestCompileSettingsFromConfigDefaultsMissingCompileBlock|TestCompileSettingsFromConfigRejectsPartialCompileBlock|TestCompileSettingsFromConfigRejectsExplicitEmptyTargets|TestCompileSettingsFromConfigAcceptsQuotedTargets|TestCompileSettingsFromConfigAcceptsInlineTargets' -count=1",
         "exit_code": 0
       },
       {
@@ -193,6 +208,7 @@
     "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546792660",
     "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546860530",
     "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546926665",
-    "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546926670"
+    "https://github.com/Clyra-AI/relia/pull/161#discussion_r3546926670",
+    "https://github.com/Clyra-AI/relia/pull/161#discussion_r3547016206"
   ]
 }

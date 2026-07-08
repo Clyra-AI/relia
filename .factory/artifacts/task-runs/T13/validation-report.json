@@ -112,6 +112,7 @@
     "go test ./internal/config -run 'TestDiscoverRequiredChecksUsesManifest|TestDiscoverRequiredChecksIgnoresStepNames|TestCompileSettingsFromConfigDefaultsMissingCompileBlock|TestCompileSettingsFromConfigRejectsPartialCompileBlock|TestCompileSettingsFromConfigAcceptsQuotedTargets|TestCompileSettingsFromConfigAcceptsInlineTargets' -count=1",
     "go test ./internal/assess -run 'TestLoadRulesResolvesBlockScalarStatement|TestLoadRulesReturnsOnlyActiveAcceptedRules' -count=1",
     "go test ./internal/config -run 'TestDiscoverRequiredChecksUsesManifest|TestDiscoverRequiredChecksIgnoresStepNames' -count=1",
+    "go test ./internal/config -run 'TestCompileSettingsFromConfigDefaultsMissingCompileBlock|TestCompileSettingsFromConfigRejectsPartialCompileBlock|TestCompileSettingsFromConfigRejectsExplicitEmptyTargets|TestCompileSettingsFromConfigAcceptsQuotedTargets|TestCompileSettingsFromConfigAcceptsInlineTargets' -count=1",
     "make prepush-full"
   ],
   "docs_sync_result": {
@@ -209,6 +210,12 @@
       "summary": "Verified workflow fallback discovery records job-level check names or job IDs and does not record workflow display names or step names."
     },
     {
+      "command": "go test ./internal/config -run 'TestCompileSettingsFromConfigDefaultsMissingCompileBlock|TestCompileSettingsFromConfigRejectsPartialCompileBlock|TestCompileSettingsFromConfigRejectsExplicitEmptyTargets|TestCompileSettingsFromConfigAcceptsQuotedTargets|TestCompileSettingsFromConfigAcceptsInlineTargets' -count=1",
+      "exit_code": 0,
+      "status": "pass",
+      "summary": "Verified missing serve.compile still defaults for upgraded repos while explicit empty or malformed serve.compile.targets fails validation."
+    },
+    {
       "command": "make prepush-full",
       "exit_code": 0,
       "status": "pass",
@@ -282,6 +289,11 @@
       "source": "Codex review comment https://github.com/Clyra-AI/relia/pull/161#discussion_r3546926670",
       "status": "repaired",
       "summary": "Changed workflow fallback discovery to emit job-level check names when configured and job IDs when unnamed, without emitting the top-level workflow display name."
+    },
+    {
+      "source": "Codex review comment https://github.com/Clyra-AI/relia/pull/161#discussion_r3547016206",
+      "status": "repaired",
+      "summary": "Limited compile-setting upgrade defaults to absent serve.compile config and made explicitly empty or malformed serve.compile.targets fail validation."
     }
   ],
   "residual_risks": [],

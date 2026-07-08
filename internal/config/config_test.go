@@ -88,6 +88,36 @@ func TestCompileSettingsFromConfigRejectsPartialCompileBlock(t *testing.T) {
 	}
 }
 
+func TestCompileSettingsFromConfigRejectsExplicitEmptyTargets(t *testing.T) {
+	cases := map[string]string{
+		"empty_inline_list": `serve:
+  compile:
+    targets: []
+`,
+		"non_list_scalar": `serve:
+  compile:
+    targets: AGENTS.md
+`,
+	}
+	for name, content := range cases {
+		t.Run(name, func(t *testing.T) {
+			document, err := yamlmini.ParseDocument(content)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			_, configErr := CompileSettingsFromConfig(document)
+
+			if configErr == nil {
+				t.Fatal("expected config error")
+			}
+			if !strings.Contains(configErr.Message, "serve.compile.targets") {
+				t.Fatalf("message = %q", configErr.Message)
+			}
+		})
+	}
+}
+
 func TestCompileSettingsFromConfigAcceptsQuotedTargets(t *testing.T) {
 	document, err := yamlmini.ParseDocument(`serve:
   compile:

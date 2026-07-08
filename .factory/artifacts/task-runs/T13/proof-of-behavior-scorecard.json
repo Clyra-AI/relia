@@ -95,6 +95,16 @@
       "observed_result": "`targets: [AGENTS.md, \"CLAUDE.md\"]` normalizes before allowed-target enforcement."
     },
     {
+      "behavior": "Explicitly empty or malformed serve.compile target config fails instead of silently compiling default targets",
+      "status": "pass",
+      "evidence_refs": [
+        "internal/config/config.go",
+        "internal/config/config_test.go",
+        ".factory/artifacts/task-runs/T13/validation-report.json"
+      ],
+      "observed_result": "`targets: []` and `targets: AGENTS.md` fail validation while an absent serve.compile block still uses upgrade defaults."
+    },
+    {
       "behavior": "Memory rules cannot inject Relia managed marker literals into generated AGENTS.md or CLAUDE.md blocks",
       "status": "pass",
       "evidence_refs": [
