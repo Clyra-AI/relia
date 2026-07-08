@@ -1,0 +1,164 @@
+{
+  "acceptance_results": [
+    {
+      "acceptance_item_id": "FR17-COMPILED-CONTEXT-BLOCK-001",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T13/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T13/proof-of-behavior-scorecard.json",
+        "AGENTS.md",
+        "CLAUDE.md",
+        "memory/compiled/agents-block.md"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-017",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T13/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T13/proof-of-behavior-scorecard.json",
+        "relia.yaml"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "INGEST-ATTRIBUTE-BACKTEST-ACCEPTANCE-TESTS-001",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T13/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T13/proof-of-behavior-scorecard.json",
+        "cmd/relia/compile_command_test.go"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-003",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T13/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T13/proof-of-behavior-scorecard.json",
+        "internal/memory/compile.go",
+        "cmd/relia/compile_command.go"
+      ],
+      "status": "implemented"
+    }
+  ],
+  "artifact_type": "validation_report",
+  "baseline_evidence": [
+    {
+      "command": "make lint-fast",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "make test-fast",
+      "exit_code": 0,
+      "status": "pass"
+    }
+  ],
+  "changed_paths": [
+    ".factory/artifacts/task-runs/T13/proof-of-behavior-scorecard.json",
+    ".factory/artifacts/task-runs/T13/validation-report.json",
+    ".factory/artifacts/task-runs/T13/work-proof-marker.json",
+    "AGENTS.md",
+    "CLAUDE.md",
+    "README.md",
+    "cmd/relia/compile_command.go",
+    "cmd/relia/compile_command_test.go",
+    "cmd/relia/config_helpers.go",
+    "cmd/relia/main.go",
+    "cmd/relia/main_test.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/dev/dev_guides.md",
+    "internal/config/config.go",
+    "internal/config/config_test.go",
+    "internal/memory/compile.go",
+    "memory/compiled/agents-block.md",
+    "relia.yaml"
+  ],
+  "changelog_result": {
+    "status": "pass",
+    "summary": "No standalone changelog file exists; user-facing behavior was documented in README.md and repo guides per docs_sync_refs."
+  },
+  "commands_run": [
+    "make lint-fast",
+    "make test-fast",
+    "go test ./cmd/relia -run 'TestInitDiscoversRequiredChecksAndCompileTargets|TestCompileWritesManagedBlocksIdempotentlyAndPreservesOutsideMarkers|TestCompileRejectsBrokenManagedMarkers' -count=1",
+    "GOCACHE=\"${TMPDIR:-/tmp}/relia-go-build\" go test ./cmd/relia -run 'TestInitDiscoversRequiredChecksAndCompileTargets|TestCompileWritesManagedBlocksIdempotentlyAndPreservesOutsideMarkers|TestCompileRejectsBrokenManagedMarkers' -count=1",
+    "GOCACHE=\"${TMPDIR:-/tmp}/relia-go-build\" go test ./internal/config ./cmd/relia -run 'TestDefaultYAML|TestDiscoverRequiredChecksUsesManifest|TestValidateDefaultYAMLPasses|TestInitDiscoversRequiredChecksAndCompileTargets|TestCompileWritesManagedBlocksIdempotentlyAndPreservesOutsideMarkers|TestCompileRejectsBrokenManagedMarkers' -count=1",
+    "GOCACHE=\"${TMPDIR:-/tmp}/relia-go-build\" go run ./cmd/relia --json compile",
+    "GOCACHE=\"${TMPDIR:-/tmp}/relia-go-build\" go run ./cmd/relia --json compile",
+    "make prepush-full",
+    "GOCACHE=\"${TMPDIR:-/tmp}/relia-go-build\" go test ./internal/config ./cmd/relia -run 'TestDefaultYAML|TestDiscoverRequiredChecksUsesManifest|TestValidateDefaultYAMLPasses|TestInitDiscoversRequiredChecksAndCompileTargets|TestCompileWritesManagedBlocksIdempotentlyAndPreservesOutsideMarkers|TestCompileRejectsBrokenManagedMarkers|TestReservedCommandsReturnTypedNotImplemented' -count=1",
+    "make prepush-full"
+  ],
+  "docs_sync_result": {
+    "status": "pass",
+    "updated_paths": [
+      "README.md",
+      "docs/dev/dev_guides.md",
+      "docs/architecture/architecture_guides.md"
+    ]
+  },
+  "final_validation_evidence": [
+    {
+      "command": "make prepush-full",
+      "exit_code": 0,
+      "status": "pass",
+      "summary": "Passed lint-fast, go test ./..., cmd coverage at 79.5% against 75% minimum, repo-pack validation, and TestDemo contracts."
+    }
+  ],
+  "green_evidence": [
+    {
+      "command": "GOCACHE=\"${TMPDIR:-/tmp}/relia-go-build\" go test ./internal/config ./cmd/relia -run 'TestDefaultYAML|TestDiscoverRequiredChecksUsesManifest|TestValidateDefaultYAMLPasses|TestInitDiscoversRequiredChecksAndCompileTargets|TestCompileWritesManagedBlocksIdempotentlyAndPreservesOutsideMarkers|TestCompileRejectsBrokenManagedMarkers|TestReservedCommandsReturnTypedNotImplemented' -count=1",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "GOCACHE=\"${TMPDIR:-/tmp}/relia-go-build\" go run ./cmd/relia --json compile",
+      "exit_code": 0,
+      "status": "pass",
+      "summary": "First workspace compile wrote AGENTS.md, CLAUDE.md, and memory/compiled/agents-block.md."
+    },
+    {
+      "command": "GOCACHE=\"${TMPDIR:-/tmp}/relia-go-build\" go run ./cmd/relia --json compile",
+      "exit_code": 0,
+      "status": "pass",
+      "summary": "Second workspace compile reported changed_targets: 0."
+    }
+  ],
+  "lifecycle_evidence_result": {
+    "status": "not_worker_owned",
+    "summary": "scope_closure_report, pr_lifecycle_report, and factoryd_run_once_report were not authored by the task-executor worker."
+  },
+  "path_policy_result": {
+    "changed_paths_checked": true,
+    "forbidden_paths_changed": [],
+    "status": "pass"
+  },
+  "plan_drift_result": {
+    "status": "pass",
+    "summary": "Implemented the bounded T13 compile/init/non-MCP access scope only."
+  },
+  "red_evidence": [
+    {
+      "command": "go test ./cmd/relia -run 'TestInitDiscoversRequiredChecksAndCompileTargets|TestCompileWritesManagedBlocksIdempotentlyAndPreservesOutsideMarkers|TestCompileRejectsBrokenManagedMarkers' -count=1",
+      "exit_code": 1,
+      "status": "fail_expected",
+      "summary": "Red-first tests failed because init did not discover required checks and compile still returned not_implemented."
+    }
+  ],
+  "repair_evidence": [
+    {
+      "command": "make prepush-full",
+      "exit_code": 2,
+      "status": "fail_repaired",
+      "summary": "Initial full gate failed because architecture-debt exception line counts no longer matched cmd/relia/main.go and cmd/relia/main_test.go after decomposition; line counts were restored to recorded ceilings without editing forbidden exception artifacts."
+    }
+  ],
+  "residual_risks": [],
+  "schema_version": "1.0",
+  "status": "pass",
+  "task_id": "T13",
+  "versioning_result": {
+    "status": "pass",
+    "summary": "Pre-1.0 additive CLI/config behavior; no migration artifact required for this task."
+  }
+}

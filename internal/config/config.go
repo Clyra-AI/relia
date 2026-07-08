@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -16,6 +17,10 @@ import (
 )
 
 const DefaultFile = "relia.yaml"
+
+const DefaultCompileMaxRules = 25
+
+var defaultCompileTargets = []string{"AGENTS.md", "CLAUDE.md"}
 
 type Finding struct {
 	Type    string `json:"type"`
@@ -75,6 +80,11 @@ type AdviseSettings struct {
 	MinConfidence           float64
 }
 
+type CompileSettings struct {
+	Targets  []string
+	MaxRules int
+}
+
 type LocalModelManifest struct {
 	ModelID        string `json:"model_id"`
 	Version        string `json:"version"`
@@ -88,6 +98,10 @@ type LocalModelManifest struct {
 }
 
 func DefaultYAML(schemaVersion string, reliaVersion string) string {
+	return DefaultYAMLWithChecks(schemaVersion, reliaVersion, nil)
+}
+
+func DefaultYAMLWithChecks(schemaVersion string, reliaVersion string, checks []string) string {
 	return fmt.Sprintf(`version: 1
 
 artifacts:
@@ -112,7 +126,7 @@ attribution:
 
 outcomes:
   checks:
-    required: []
+    required:%s
 
 privacy:
   local_only: true
@@ -144,6 +158,11 @@ models:
 
 serve:
   advisory_only: true
+  compile:
+    targets:
+      - AGENTS.md
+      - CLAUDE.md
+    max_rules: %d
 
 advise:
   enabled: true
@@ -154,7 +173,105 @@ advise:
 
 gate:
   enabled: false
-`, schemaVersion, reliaVersion, schemaVersion)
+`, schemaVersion, reliaVersion, renderYAMLStringList(checks, 6), schemaVersion, DefaultCompileMaxRules)
+}
+
+func DefaultCompileTargets() []string {
+	return append([]string(nil), defaultCompileTargets...)
+}
+
+func DiscoverRequiredChecks(root string) []string {
+	if checks := discoverRequiredCheckManifest(root); len(checks) > 0 {
+		return checks
+	}
+	return discoverWorkflowChecks(root)
+}
+
+func renderYAMLStringList(values []string, indent int) string {
+	values = uniqueNonEmptyStrings(values)
+	if len(values) == 0 {
+		return " []"
+	}
+	prefix := strings.Repeat(" ", indent)
+	var builder strings.Builder
+	for _, value := range values {
+		builder.WriteString("\n")
+		builder.WriteString(prefix)
+		builder.WriteString("- ")
+		builder.WriteString(safeYAMLListScalar(value))
+	}
+	return builder.String()
+}
+
+func safeYAMLListScalar(value string) string {
+	return strings.NewReplacer("\n", " ", "\r", " ").Replace(value)
+}
+
+func discoverRequiredCheckManifest(root string) []string {
+	content, err := os.ReadFile(filepath.Join(root, ".github", "required-checks.json"))
+	if err != nil {
+		return nil
+	}
+	var manifest struct {
+		RequiredChecks []string `json:"required_checks"`
+	}
+	if err := json.Unmarshal(content, &manifest); err != nil {
+		return nil
+	}
+	return uniqueNonEmptyStrings(manifest.RequiredChecks)
+}
+
+func discoverWorkflowChecks(root string) []string {
+	patterns := []string{
+		filepath.Join(root, ".github", "workflows", "*.yml"),
+		filepath.Join(root, ".github", "workflows", "*.yaml"),
+	}
+	var paths []string
+	for _, pattern := range patterns {
+		matches, err := filepath.Glob(pattern)
+		if err != nil {
+			continue
+		}
+		paths = append(paths, matches...)
+	}
+	sort.Strings(paths)
+	var checks []string
+	for _, path := range paths {
+		content, err := os.ReadFile(path)
+		if err != nil {
+			continue
+		}
+		document, err := yamlmini.ParseDocument(string(content))
+		if err != nil {
+			continue
+		}
+		if scalar, ok := document.Scalars["name"]; ok {
+			checks = append(checks, scalar.Value)
+		}
+		var jobNames []string
+		for key, scalar := range document.Scalars {
+			if strings.HasPrefix(key, "jobs.") && strings.HasSuffix(key, ".name") {
+				jobNames = append(jobNames, scalar.Value)
+			}
+		}
+		sort.Strings(jobNames)
+		checks = append(checks, jobNames...)
+	}
+	return uniqueNonEmptyStrings(checks)
+}
+
+func uniqueNonEmptyStrings(values []string) []string {
+	seen := map[string]bool{}
+	out := make([]string, 0, len(values))
+	for _, value := range values {
+		trimmed := strings.TrimSpace(value)
+		if trimmed == "" || seen[trimmed] {
+			continue
+		}
+		seen[trimmed] = true
+		out = append(out, trimmed)
+	}
+	return out
 }
 
 func Ref(defaultPath string, scalar yamlmini.Scalar) string {
@@ -357,6 +474,9 @@ func ValidateDocument(root string, document yamlmini.Document, options Validatio
 		len(yamlmini.ListValues(document, "attribution.pr_labels")) == 0 {
 		return nil, artifactContractError("attribution config has zero agent matchers; configure at least one agent_authors login, coauthor_trailer, or pr_label", PathRef(DefaultFile, document, "attribution"))
 	}
+	if _, configErr := CompileSettingsFromConfig(document); configErr != nil {
+		return nil, configErr
+	}
 	if _, configErr := AdviseSettingsFromConfig(document); configErr != nil {
 		return nil, configErr
 	}
@@ -506,6 +626,45 @@ func AdviseSettingsFromConfig(document yamlmini.Document) (AdviseSettings, *Erro
 		}
 		settings.MinConfidence = parsed
 	}
+	return settings, nil
+}
+
+func CompileSettingsFromConfig(document yamlmini.Document) (CompileSettings, *Error) {
+	settings := CompileSettings{
+		Targets:  DefaultCompileTargets(),
+		MaxRules: DefaultCompileMaxRules,
+	}
+	targets := yamlmini.ListValues(document, "serve.compile.targets")
+	if len(targets) == 0 {
+		return settings, configErrorAt("serve.compile.targets must include AGENTS.md and CLAUDE.md", PathRef(DefaultFile, document, "serve.compile.targets"))
+	}
+	seen := map[string]bool{}
+	for _, target := range targets {
+		switch target {
+		case "AGENTS.md", "CLAUDE.md":
+		default:
+			return settings, configErrorAt("serve.compile.targets may only contain AGENTS.md and CLAUDE.md", PathRef(DefaultFile, document, "serve.compile.targets"))
+		}
+		if seen[target] {
+			return settings, configErrorAt("serve.compile.targets must not contain duplicate targets", PathRef(DefaultFile, document, "serve.compile.targets"))
+		}
+		seen[target] = true
+	}
+	for _, required := range defaultCompileTargets {
+		if !seen[required] {
+			return settings, configErrorAt("serve.compile.targets must include "+required, PathRef(DefaultFile, document, "serve.compile.targets"))
+		}
+	}
+	maxRulesScalar, ok := document.Scalars["serve.compile.max_rules"]
+	if !ok {
+		return settings, configErrorAt("serve.compile.max_rules is required", PathRef(DefaultFile, document, "serve.compile"))
+	}
+	maxRules, err := strconv.Atoi(maxRulesScalar.Value)
+	if err != nil || maxRules < 1 || maxRules > 200 {
+		return settings, configErrorAt("serve.compile.max_rules must be an integer between 1 and 200", Ref(DefaultFile, maxRulesScalar))
+	}
+	settings.Targets = append([]string(nil), targets...)
+	settings.MaxRules = maxRules
 	return settings, nil
 }
 

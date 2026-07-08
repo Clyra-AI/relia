@@ -1,0 +1,66 @@
+{
+  "artifact_type": "proof-of-behavior-scorecard",
+  "schema_version": "1.0",
+  "task_id": "T13",
+  "status": "pass",
+  "proof_level": "user_visible_behavior",
+  "scorecard": [
+    {
+      "behavior": "relia compile maintains managed marker-delimited blocks in AGENTS.md and CLAUDE.md",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/compile_command_test.go",
+        "AGENTS.md",
+        "CLAUDE.md"
+      ]
+    },
+    {
+      "behavior": "relia compile is idempotent for unchanged active rules",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/compile_command_test.go",
+        ".factory/artifacts/task-runs/T13/validation-report.json"
+      ],
+      "observed_result": "Second workspace compile reported changed_targets: 0."
+    },
+    {
+      "behavior": "relia compile preserves content outside the managed markers and fails closed on broken marker discipline",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/compile_command_test.go",
+        "internal/memory/compile.go"
+      ]
+    },
+    {
+      "behavior": "Compiled blocks expose active accepted rules only with PR citations for non-MCP agents",
+      "status": "pass",
+      "evidence_refs": [
+        "memory/compiled/agents-block.md",
+        "internal/memory/compile.go",
+        "memory/rules/demo-assessment-active-rule.yaml"
+      ]
+    },
+    {
+      "behavior": "relia init writes valid config with discovered checks and candidate attribution markers",
+      "status": "pass",
+      "evidence_refs": [
+        "cmd/relia/compile_command_test.go",
+        "internal/config/config_test.go",
+        "relia.yaml"
+      ]
+    },
+    {
+      "behavior": "Agent-facing command output remains machine-readable and evidence-bearing",
+      "status": "pass",
+      "evidence_refs": [
+        "schemas/command-result.schema.json",
+        ".factory/artifacts/task-runs/T13/validation-report.json"
+      ]
+    }
+  ],
+  "final_validation_ref": ".factory/artifacts/task-runs/T13/validation-report.json",
+  "redaction_posture": {
+    "classification": "internal",
+    "customer_safe": false
+  }
+}

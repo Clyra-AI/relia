@@ -22,7 +22,9 @@ attribution:
 
 outcomes:
   checks:
-    required: []
+    required:
+      - validate
+      - CodeQL analyze
 
 privacy:
   local_only: true
@@ -54,6 +56,11 @@ models:
 
 serve:
   advisory_only: true
+  compile:
+    targets:
+      - AGENTS.md
+      - CLAUDE.md
+    max_rules: 25
 
 advise:
   enabled: true
