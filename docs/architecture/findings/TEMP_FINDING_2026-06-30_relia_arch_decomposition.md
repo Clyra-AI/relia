@@ -336,6 +336,6 @@ Current progress:
 
 - Source kind: review finding / architecture finding.
 - Candidate mission: `systemic-architecture-budget`.
-- Required command before implementation: `factoryd ingest --kind review` or
-  the equivalent governed Factory planning path.
+- Required command before implementation: Factory `task-supervisor` or
+  `factoryd ingest --kind review` with a structured `finding-list` source.
 - Required validation after materialization: `make prepush-full`.

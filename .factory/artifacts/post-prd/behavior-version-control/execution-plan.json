@@ -126,6 +126,21 @@
     "worker_type": "codex_cli",
     "workspace_root": "../.factoryd/workspaces"
   },
+  "task_supervision_policy": {
+    "skill_ref": "factory://skills/task-supervisor",
+    "scope_rule": "Bind intake supervision to exactly one post-PRD mission slug before implementation starts.",
+    "daemon_authority": "factoryd ingest remains the source-to-mission materializer; factoryd run and autoship-supervisor own implementation and shipping after a task is selected.",
+    "allowed_interventions": [
+      "run or reuse app-audit, repo-audit, or code-review",
+      "write or validate a structured finding-list source",
+      "run factoryd ingest, doctor, and dry-run",
+      "classify alignment blockers before daemon dispatch",
+      "recommend one next task for explicit autoship-supervisor handoff"
+    ],
+    "evidence_artifact_type": "task_supervisor_report",
+    "evidence_path": ".factory/artifacts/task-supervisor-runs/<mission>/<timestamp>.json",
+    "task_packet_policy": "Task-supervisor stops at generated mission readiness unless the operator explicitly asks to start one selected task through autoship-supervisor."
+  },
   "feedback_plan": "Use repo-configured validation commands, validation reports, PR lifecycle reports, and scope closure.",
   "generated_at": "2026-07-08T04:22:46Z",
   "level_gates": [

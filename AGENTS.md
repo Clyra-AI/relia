@@ -84,10 +84,14 @@ recorded with compensating validation evidence.
 
 ## 7. Post-PRD Finding Intake
 
-Material `app-audit` or `code-review` findings must be saved as repo-local
-markdown before implementation. Use `factoryd ingest --kind audit` for audit
-findings and `factoryd ingest --kind review` for review findings so generated
-task packets preserve the originating Factory skill refs.
+Material `app-audit`, `repo-audit`, or `code-review` findings should be saved
+as repo-local structured `finding-list` JSON before implementation. Use
+`factoryd ingest --kind audit` for audit findings and
+`factoryd ingest --kind review` for review findings so generated task packets
+preserve the originating Factory skill refs, severity, evidence, affected
+paths, minimum fix direction, and scope exclusions. Use Factory
+`task-supervisor` when a human wants guided source-to-mission intake before
+selecting an autoship task.
 
 The MVP has one public release boundary: the final release/demo/product-signals
 delivery slice. Do not clear that boundary when splitting release work into

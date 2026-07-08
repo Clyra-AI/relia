@@ -222,12 +222,15 @@ marker in place with a cleared advisory instead of leaving stale warning text.
 
 ## Post-PRD audit or review findings
 
-Save material findings from `app-audit` or `code-review` as repo-local markdown
-under `product/audits/` or `product/reviews/`, then ingest them:
+Save material findings from `app-audit`, `repo-audit`, or `code-review` as a
+structured `finding-list` JSON artifact under `product/audits/` or
+`product/reviews/`, then ingest them. Use Factory `task-supervisor` when you
+want the guided path that writes `task_supervisor_report` evidence, runs
+`doctor` and dry-run, and recommends one next task:
 
 ~~~sh
-FACTORY_REPO=/path/to/factory factoryd ingest --config .factory/factoryd.example.json --repo relia --kind audit --input product/audits/<mission>.md --mission <mission> --json
-FACTORY_REPO=/path/to/factory factoryd ingest --config .factory/factoryd.example.json --repo relia --kind review --input product/reviews/<mission>.md --mission <mission> --json
+FACTORY_REPO=/path/to/factory factoryd ingest --config .factory/factoryd.example.json --repo relia --kind audit --input product/audits/<mission>.finding-list.json --mission <mission> --json
+FACTORY_REPO=/path/to/factory factoryd ingest --config .factory/factoryd.example.json --repo relia --kind review --input product/reviews/<mission>.finding-list.json --mission <mission> --json
 ~~~
 
 ## Customer-derived failures
