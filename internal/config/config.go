@@ -634,7 +634,7 @@ func CompileSettingsFromConfig(document yamlmini.Document) (CompileSettings, *Er
 		Targets:  DefaultCompileTargets(),
 		MaxRules: DefaultCompileMaxRules,
 	}
-	targets := yamlmini.ListValues(document, "serve.compile.targets")
+	targets := normalizedCompileTargets(yamlmini.ListValues(document, "serve.compile.targets"))
 	maxRulesScalar, maxRulesConfigured := document.Scalars["serve.compile.max_rules"]
 	if len(targets) == 0 && !maxRulesConfigured {
 		return settings, nil
@@ -669,6 +669,25 @@ func CompileSettingsFromConfig(document yamlmini.Document) (CompileSettings, *Er
 	settings.Targets = append([]string(nil), targets...)
 	settings.MaxRules = maxRules
 	return settings, nil
+}
+
+func normalizedCompileTargets(targets []string) []string {
+	normalized := make([]string, 0, len(targets))
+	for _, target := range targets {
+		normalized = append(normalized, unquoteSimpleYAMLScalar(target))
+	}
+	return normalized
+}
+
+func unquoteSimpleYAMLScalar(value string) string {
+	value = strings.TrimSpace(value)
+	if len(value) < 2 {
+		return value
+	}
+	if (value[0] == '"' && value[len(value)-1] == '"') || (value[0] == '\'' && value[len(value)-1] == '\'') {
+		return strings.TrimSpace(value[1 : len(value)-1])
+	}
+	return value
 }
 
 func ValidateLocalModelManifest(root string, manifestScalar yamlmini.Scalar) *Error {
