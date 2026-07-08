@@ -29,6 +29,68 @@
   "blast_radius": "Post-PRD mission-scoped implementation paths.",
   "collaboration_rationale": "Generated post-PRD decomposition runs serially until boundaries, validation, and merge policy are reviewed.",
   "collaboration_strategy": "serial",
+  "delivery_slices": [
+    {
+      "acceptance_group_refs": [
+        "behavior-change-provenance-inventory"
+      ],
+      "acceptance_item_ids": [
+        "BEHAVIOR-CHANGE-PROVENANCE-INVENTORY-001",
+        "BEHAVIOR-CHANGE-PROVENANCE-INVENTORY-002",
+        "BEHAVIOR-CHANGE-PROVENANCE-INVENTORY-003",
+        "BEHAVIOR-CHANGE-PROVENANCE-INVENTORY-004"
+      ],
+      "generated_from_group_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#behavior-change-provenance-inventory",
+      "name": "Behavior change provenance inventory",
+      "public_release_boundary": false,
+      "required_for_completion": true,
+      "slice_id": "behavior-change-provenance-inventory",
+      "source_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#behavior-change-provenance-inventory",
+      "task_refs": [
+        "behavior-version-control-t1"
+      ]
+    },
+    {
+      "acceptance_group_refs": [
+        "err-regression-attribution"
+      ],
+      "acceptance_item_ids": [
+        "ERR-REGRESSION-ATTRIBUTION-001",
+        "ERR-REGRESSION-ATTRIBUTION-002",
+        "ERR-REGRESSION-ATTRIBUTION-003",
+        "ERR-REGRESSION-ATTRIBUTION-004"
+      ],
+      "generated_from_group_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#err-regression-attribution",
+      "name": "ERR regression attribution",
+      "public_release_boundary": false,
+      "required_for_completion": true,
+      "slice_id": "err-regression-attribution",
+      "source_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#err-regression-attribution",
+      "task_refs": [
+        "behavior-version-control-t2"
+      ]
+    },
+    {
+      "acceptance_group_refs": [
+        "rollback-recommendation-report"
+      ],
+      "acceptance_item_ids": [
+        "ROLLBACK-RECOMMENDATION-REPORT-001",
+        "ROLLBACK-RECOMMENDATION-REPORT-002",
+        "ROLLBACK-RECOMMENDATION-REPORT-003",
+        "ROLLBACK-RECOMMENDATION-REPORT-004"
+      ],
+      "generated_from_group_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#rollback-recommendation-report",
+      "name": "Rollback recommendation report",
+      "public_release_boundary": false,
+      "required_for_completion": true,
+      "slice_id": "rollback-recommendation-report",
+      "source_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#rollback-recommendation-report",
+      "task_refs": [
+        "behavior-version-control-t3"
+      ]
+    }
+  ],
   "dependencies": [
     {
       "blocked_by": "behavior-version-control-t1",
@@ -65,7 +127,7 @@
     "workspace_root": "../.factoryd/workspaces"
   },
   "feedback_plan": "Use repo-configured validation commands, validation reports, PR lifecycle reports, and scope closure.",
-  "generated_at": "2026-07-08T02:33:00Z",
+  "generated_at": "2026-07-08T03:49:58Z",
   "level_gates": [
     "Plan approval before implementation",
     "Human approval before live credentials or network"
@@ -127,8 +189,62 @@
     "behavior-version-control-t2",
     "behavior-version-control-t3"
   ],
+  "validation_contract": {
+    "acceptance_criteria": [
+      "Deliver: Record versioned changes to memory rules, compiled context, AGENTS/CLAUDE blocks, and Relia-owned instruction artifacts as local behavior-change candidates with commit refs, diff refs, owner/reviewer metadata when available, source rule IDs, lifecycle status, and affected path/signal scope.",
+      "Implement by: Build a deterministic offline inventory from local git history, committed rule files, Relia lifecycle metadata, and existing report artifacts. The inventory must not mutate rules, compile targets, or reviewed memory by itself.",
+      "Touch or validate paths: schemas/, examples/, docs/product/, docs/dev/, docs/architecture/, cmd/relia/, internal/memory/, internal/backtest/, internal/assess/",
+      "Respect dependency: Run after T18 because lesson grain, owner, evidence, applicability, and expiry rules must exist before behavior-change attribution can be trusted.",
+      "Deliver: Compare repeat-failure and ERR deltas before and after behavior-change candidates, then report candidate links with confidence, supporting receipts, diff refs, comparison windows, sample sizes, and excluded confounders.",
+      "Implement by: Reuse existing recurrence signatures, baselines, flake discounts, attribution confidence, contradiction handling, and stale-rule logic. When evidence is thin, classify the result as attribution_uncertain instead of blaming a behavior change.",
+      "Touch or validate paths: schemas/, examples/, docs/product/, docs/dev/, docs/architecture/, cmd/relia/, internal/backtest/, internal/memory/, internal/assess/",
+      "Respect dependency: Run after behavior change provenance inventory.",
+      "Deliver: Surface a product-safe advisory such as \"repeat-failure rate rose after rule X v3 was approved; here is the rule/instruction diff, confidence, evidence, and recommended rollback path.\" The recommendation is advisory only and never auto-applies a rollback.",
+      "Implement by: Add structured CLI/report fields and fixtures that show the diff ref, candidate rollback action, expected effect, confidence, and required human review. Tests must prove redaction is preserved and no rule, memory page, compiled block, or instruction file changes unless a later explicit task makes that mutation.",
+      "Touch or validate paths: schemas/, examples/, docs/product/, docs/dev/, docs/architecture/, cmd/relia/, internal/backtest/, internal/memory/, internal/assess/, internal/advise/",
+      "Respect dependency: Run after ERR regression attribution."
+    ],
+    "acceptance_item_count": 12,
+    "acceptance_ledger_ref": ".factory/artifacts/post-prd/behavior-version-control/acceptance-ledger.json",
+    "contract_id": "behavior-version-control-post-prd-validation-contract",
+    "evidence_required": [
+      "work_proof_marker",
+      "validation_report",
+      "scope_closure_report",
+      "pr_lifecycle_report",
+      "factoryd_run_once_report"
+    ],
+    "lifecycle_evidence_required": [
+      "scope_closure_report",
+      "pr_lifecycle_report",
+      "factoryd_run_once_report"
+    ],
+    "promotion_decisions": [
+      "ready_for_pr",
+      "needs_repair",
+      "blocked"
+    ],
+    "required_checks": [
+      "python3 scripts/validate_repo_pack.py --factoryd-config .factory/factoryd.behavior-version-control.json"
+    ],
+    "required_review": {
+      "required": false,
+      "review_type": "code",
+      "reviewer_class": "peer_agent"
+    },
+    "stop_conditions": [
+      "changed path outside allowed_paths",
+      "required validation command failed",
+      "scope closure did not advance",
+      "alignment drift detected"
+    ],
+    "worker_evidence_required": [
+      "work_proof_marker",
+      "validation_report"
+    ]
+  },
   "validation_requirements": [
-    "python3 scripts/validate_repo_pack.py"
+    "python3 scripts/validate_repo_pack.py --factoryd-config .factory/factoryd.behavior-version-control.json"
   ],
   "work_item_id": "behavior-version-control-post-prd",
   "work_signal_kind": "ideas"

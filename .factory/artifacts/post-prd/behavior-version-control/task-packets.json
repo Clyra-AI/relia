@@ -2,7 +2,69 @@
   "acceptance_ledger_ref": ".factory/artifacts/post-prd/behavior-version-control/acceptance-ledger.json",
   "acceptance_mapping_ref": ".factory/artifacts/post-prd/behavior-version-control/acceptance-mapping.json",
   "artifact_type": "task_packets",
-  "generated_at": "2026-07-08T02:33:00Z",
+  "delivery_slices": [
+    {
+      "acceptance_group_refs": [
+        "behavior-change-provenance-inventory"
+      ],
+      "acceptance_item_ids": [
+        "BEHAVIOR-CHANGE-PROVENANCE-INVENTORY-001",
+        "BEHAVIOR-CHANGE-PROVENANCE-INVENTORY-002",
+        "BEHAVIOR-CHANGE-PROVENANCE-INVENTORY-003",
+        "BEHAVIOR-CHANGE-PROVENANCE-INVENTORY-004"
+      ],
+      "generated_from_group_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#behavior-change-provenance-inventory",
+      "name": "Behavior change provenance inventory",
+      "public_release_boundary": false,
+      "required_for_completion": true,
+      "slice_id": "behavior-change-provenance-inventory",
+      "source_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#behavior-change-provenance-inventory",
+      "task_refs": [
+        "behavior-version-control-t1"
+      ]
+    },
+    {
+      "acceptance_group_refs": [
+        "err-regression-attribution"
+      ],
+      "acceptance_item_ids": [
+        "ERR-REGRESSION-ATTRIBUTION-001",
+        "ERR-REGRESSION-ATTRIBUTION-002",
+        "ERR-REGRESSION-ATTRIBUTION-003",
+        "ERR-REGRESSION-ATTRIBUTION-004"
+      ],
+      "generated_from_group_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#err-regression-attribution",
+      "name": "ERR regression attribution",
+      "public_release_boundary": false,
+      "required_for_completion": true,
+      "slice_id": "err-regression-attribution",
+      "source_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#err-regression-attribution",
+      "task_refs": [
+        "behavior-version-control-t2"
+      ]
+    },
+    {
+      "acceptance_group_refs": [
+        "rollback-recommendation-report"
+      ],
+      "acceptance_item_ids": [
+        "ROLLBACK-RECOMMENDATION-REPORT-001",
+        "ROLLBACK-RECOMMENDATION-REPORT-002",
+        "ROLLBACK-RECOMMENDATION-REPORT-003",
+        "ROLLBACK-RECOMMENDATION-REPORT-004"
+      ],
+      "generated_from_group_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#rollback-recommendation-report",
+      "name": "Rollback recommendation report",
+      "public_release_boundary": false,
+      "required_for_completion": true,
+      "slice_id": "rollback-recommendation-report",
+      "source_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#rollback-recommendation-report",
+      "task_refs": [
+        "behavior-version-control-t3"
+      ]
+    }
+  ],
+  "generated_at": "2026-07-08T03:49:58Z",
   "schema_version": "0.1",
   "source_post_prd_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md",
   "tasks": [
@@ -36,15 +98,17 @@
           "closure_evidence": "validation_ref",
           "evidence_mode": "automated",
           "evidence_required": [
+            "work_proof_marker",
             "validation_report",
-            "work_proof_marker"
+            "proof-of-behavior-scorecard"
           ],
           "lifecycle_evidence_required": [
             "scope_closure_report"
           ],
           "worker_evidence_required": [
+            "work_proof_marker",
             "validation_report",
-            "work_proof_marker"
+            "proof-of-behavior-scorecard"
           ]
         },
         {
@@ -59,15 +123,17 @@
           "closure_evidence": "validation_ref",
           "evidence_mode": "automated",
           "evidence_required": [
+            "work_proof_marker",
             "validation_report",
-            "work_proof_marker"
+            "proof-of-behavior-scorecard"
           ],
           "lifecycle_evidence_required": [
             "scope_closure_report"
           ],
           "worker_evidence_required": [
+            "work_proof_marker",
             "validation_report",
-            "work_proof_marker"
+            "proof-of-behavior-scorecard"
           ]
         },
         {
@@ -82,15 +148,17 @@
           "closure_evidence": "validation_ref",
           "evidence_mode": "automated",
           "evidence_required": [
+            "work_proof_marker",
             "validation_report",
-            "work_proof_marker"
+            "proof-of-behavior-scorecard"
           ],
           "lifecycle_evidence_required": [
             "scope_closure_report"
           ],
           "worker_evidence_required": [
+            "work_proof_marker",
             "validation_report",
-            "work_proof_marker"
+            "proof-of-behavior-scorecard"
           ]
         },
         {
@@ -105,15 +173,17 @@
           "closure_evidence": "validation_ref",
           "evidence_mode": "automated",
           "evidence_required": [
+            "work_proof_marker",
             "validation_report",
-            "work_proof_marker"
+            "proof-of-behavior-scorecard"
           ],
           "lifecycle_evidence_required": [
             "scope_closure_report"
           ],
           "worker_evidence_required": [
+            "work_proof_marker",
             "validation_report",
-            "work_proof_marker"
+            "proof-of-behavior-scorecard"
           ]
         }
       ],
@@ -141,8 +211,7 @@
         "docs/dev/",
         "docs/architecture/",
         "cmd/relia/",
-        "internal/backtest/",
-        ".factory/artifacts/pr-lifecycle/behavior-version-control-t1/"
+        "internal/backtest/"
       ],
       "architecture_guidance_refs": [
         {
@@ -235,7 +304,7 @@
         }
       ],
       "commands": [
-        "python3 scripts/validate_repo_pack.py"
+        "python3 scripts/validate_repo_pack.py --factoryd-config .factory/factoryd.behavior-version-control.json"
       ],
       "coverage_policy_refs": {
         "command_refs": [
@@ -255,6 +324,9 @@
         "required": true,
         "source_ref": "docs/dev/dev_guides.md#coverage-gates"
       },
+      "delivery_slice_refs": [
+        "behavior-change-provenance-inventory"
+      ],
       "docs_sync_refs": [
         {
           "path": "README.md",
@@ -359,7 +431,11 @@
         ".factory/artifacts/post-prd/behavior-version-control/task-packets.json",
         ".factory/artifacts/post-prd/behavior-version-control/validation-contract.json",
         ".factory/artifacts/post-prd/behavior-version-control/acceptance-mapping.json",
-        ".factory/artifacts/post-prd/behavior-version-control/scope-closure-map.json"
+        ".factory/artifacts/post-prd/behavior-version-control/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/behavior-version-control-t1/",
+        ".factory/artifacts/task-runs/behavior-version-control-t1/scope-closure-report.json",
+        ".factory/artifacts/task-runs/behavior-version-control-t1/scope-closure-map.json",
+        ".factory/artifacts/task-runs/behavior-version-control-t1/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         ".factory/artifacts/post-prd/behavior-version-control/source.md",
@@ -484,7 +560,7 @@
       ],
       "upstream_debt_refs": [],
       "validation_commands": [
-        "python3 scripts/validate_repo_pack.py"
+        "python3 scripts/validate_repo_pack.py --factoryd-config .factory/factoryd.behavior-version-control.json"
       ],
       "validation_contract_inheritance": {
         "acceptance_criteria": [
@@ -511,7 +587,7 @@
           "factoryd_run_once_report"
         ],
         "required_checks": [
-          "python3 scripts/validate_repo_pack.py"
+          "python3 scripts/validate_repo_pack.py --factoryd-config .factory/factoryd.behavior-version-control.json"
         ],
         "required_review": {
           "required": false,
@@ -572,15 +648,17 @@
           "closure_evidence": "validation_ref",
           "evidence_mode": "automated",
           "evidence_required": [
+            "work_proof_marker",
             "validation_report",
-            "work_proof_marker"
+            "proof-of-behavior-scorecard"
           ],
           "lifecycle_evidence_required": [
             "scope_closure_report"
           ],
           "worker_evidence_required": [
+            "work_proof_marker",
             "validation_report",
-            "work_proof_marker"
+            "proof-of-behavior-scorecard"
           ]
         },
         {
@@ -595,15 +673,17 @@
           "closure_evidence": "validation_ref",
           "evidence_mode": "automated",
           "evidence_required": [
+            "work_proof_marker",
             "validation_report",
-            "work_proof_marker"
+            "proof-of-behavior-scorecard"
           ],
           "lifecycle_evidence_required": [
             "scope_closure_report"
           ],
           "worker_evidence_required": [
+            "work_proof_marker",
             "validation_report",
-            "work_proof_marker"
+            "proof-of-behavior-scorecard"
           ]
         },
         {
@@ -618,15 +698,17 @@
           "closure_evidence": "validation_ref",
           "evidence_mode": "automated",
           "evidence_required": [
+            "work_proof_marker",
             "validation_report",
-            "work_proof_marker"
+            "proof-of-behavior-scorecard"
           ],
           "lifecycle_evidence_required": [
             "scope_closure_report"
           ],
           "worker_evidence_required": [
+            "work_proof_marker",
             "validation_report",
-            "work_proof_marker"
+            "proof-of-behavior-scorecard"
           ]
         },
         {
@@ -641,15 +723,17 @@
           "closure_evidence": "validation_ref",
           "evidence_mode": "automated",
           "evidence_required": [
+            "work_proof_marker",
             "validation_report",
-            "work_proof_marker"
+            "proof-of-behavior-scorecard"
           ],
           "lifecycle_evidence_required": [
             "scope_closure_report"
           ],
           "worker_evidence_required": [
+            "work_proof_marker",
             "validation_report",
-            "work_proof_marker"
+            "proof-of-behavior-scorecard"
           ]
         }
       ],
@@ -676,8 +760,7 @@
         "docs/architecture/",
         "cmd/relia/",
         "internal/backtest/",
-        "internal/memory/",
-        ".factory/artifacts/pr-lifecycle/behavior-version-control-t2/"
+        "internal/memory/"
       ],
       "architecture_guidance_refs": [
         {
@@ -771,7 +854,7 @@
         }
       ],
       "commands": [
-        "python3 scripts/validate_repo_pack.py"
+        "python3 scripts/validate_repo_pack.py --factoryd-config .factory/factoryd.behavior-version-control.json"
       ],
       "coverage_policy_refs": {
         "command_refs": [
@@ -791,6 +874,9 @@
         "required": true,
         "source_ref": "docs/dev/dev_guides.md#coverage-gates"
       },
+      "delivery_slice_refs": [
+        "err-regression-attribution"
+      ],
       "docs_sync_refs": [
         {
           "path": "README.md",
@@ -885,7 +971,11 @@
         ".factory/artifacts/post-prd/behavior-version-control/task-packets.json",
         ".factory/artifacts/post-prd/behavior-version-control/validation-contract.json",
         ".factory/artifacts/post-prd/behavior-version-control/acceptance-mapping.json",
-        ".factory/artifacts/post-prd/behavior-version-control/scope-closure-map.json"
+        ".factory/artifacts/post-prd/behavior-version-control/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/behavior-version-control-t2/",
+        ".factory/artifacts/task-runs/behavior-version-control-t2/scope-closure-report.json",
+        ".factory/artifacts/task-runs/behavior-version-control-t2/scope-closure-map.json",
+        ".factory/artifacts/task-runs/behavior-version-control-t2/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         ".factory/artifacts/post-prd/behavior-version-control/source.md",
@@ -1008,7 +1098,7 @@
       ],
       "upstream_debt_refs": [],
       "validation_commands": [
-        "python3 scripts/validate_repo_pack.py"
+        "python3 scripts/validate_repo_pack.py --factoryd-config .factory/factoryd.behavior-version-control.json"
       ],
       "validation_contract_inheritance": {
         "acceptance_criteria": [
@@ -1035,7 +1125,7 @@
           "factoryd_run_once_report"
         ],
         "required_checks": [
-          "python3 scripts/validate_repo_pack.py"
+          "python3 scripts/validate_repo_pack.py --factoryd-config .factory/factoryd.behavior-version-control.json"
         ],
         "required_review": {
           "required": false,
@@ -1095,15 +1185,17 @@
           "closure_evidence": "validation_ref",
           "evidence_mode": "automated",
           "evidence_required": [
+            "work_proof_marker",
             "validation_report",
-            "work_proof_marker"
+            "proof-of-behavior-scorecard"
           ],
           "lifecycle_evidence_required": [
             "scope_closure_report"
           ],
           "worker_evidence_required": [
+            "work_proof_marker",
             "validation_report",
-            "work_proof_marker"
+            "proof-of-behavior-scorecard"
           ]
         },
         {
@@ -1118,15 +1210,17 @@
           "closure_evidence": "acceptance_evidence_record",
           "evidence_mode": "manual_review",
           "evidence_required": [
+            "work_proof_marker",
             "validation_report",
-            "work_proof_marker"
+            "proof-of-behavior-scorecard"
           ],
           "lifecycle_evidence_required": [
             "scope_closure_report"
           ],
           "worker_evidence_required": [
+            "work_proof_marker",
             "validation_report",
-            "work_proof_marker"
+            "proof-of-behavior-scorecard"
           ]
         },
         {
@@ -1141,15 +1235,17 @@
           "closure_evidence": "validation_ref",
           "evidence_mode": "automated",
           "evidence_required": [
+            "work_proof_marker",
             "validation_report",
-            "work_proof_marker"
+            "proof-of-behavior-scorecard"
           ],
           "lifecycle_evidence_required": [
             "scope_closure_report"
           ],
           "worker_evidence_required": [
+            "work_proof_marker",
             "validation_report",
-            "work_proof_marker"
+            "proof-of-behavior-scorecard"
           ]
         },
         {
@@ -1164,15 +1260,17 @@
           "closure_evidence": "validation_ref",
           "evidence_mode": "automated",
           "evidence_required": [
+            "work_proof_marker",
             "validation_report",
-            "work_proof_marker"
+            "proof-of-behavior-scorecard"
           ],
           "lifecycle_evidence_required": [
             "scope_closure_report"
           ],
           "worker_evidence_required": [
+            "work_proof_marker",
             "validation_report",
-            "work_proof_marker"
+            "proof-of-behavior-scorecard"
           ]
         }
       ],
@@ -1198,8 +1296,7 @@
         "docs/dev/",
         "docs/architecture/",
         "cmd/relia/",
-        "internal/memory/",
-        ".factory/artifacts/pr-lifecycle/behavior-version-control-t3/"
+        "internal/memory/"
       ],
       "architecture_guidance_refs": [
         {
@@ -1292,7 +1389,7 @@
         }
       ],
       "commands": [
-        "python3 scripts/validate_repo_pack.py"
+        "python3 scripts/validate_repo_pack.py --factoryd-config .factory/factoryd.behavior-version-control.json"
       ],
       "coverage_policy_refs": {
         "command_refs": [
@@ -1312,6 +1409,9 @@
         "required": true,
         "source_ref": "docs/dev/dev_guides.md#coverage-gates"
       },
+      "delivery_slice_refs": [
+        "rollback-recommendation-report"
+      ],
       "docs_sync_refs": [
         {
           "path": "README.md",
@@ -1406,7 +1506,11 @@
         ".factory/artifacts/post-prd/behavior-version-control/task-packets.json",
         ".factory/artifacts/post-prd/behavior-version-control/validation-contract.json",
         ".factory/artifacts/post-prd/behavior-version-control/acceptance-mapping.json",
-        ".factory/artifacts/post-prd/behavior-version-control/scope-closure-map.json"
+        ".factory/artifacts/post-prd/behavior-version-control/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/behavior-version-control-t3/",
+        ".factory/artifacts/task-runs/behavior-version-control-t3/scope-closure-report.json",
+        ".factory/artifacts/task-runs/behavior-version-control-t3/scope-closure-map.json",
+        ".factory/artifacts/task-runs/behavior-version-control-t3/factoryd-run-once-report.json"
       ],
       "input_artifacts": [
         ".factory/artifacts/post-prd/behavior-version-control/source.md",
@@ -1529,7 +1633,7 @@
       ],
       "upstream_debt_refs": [],
       "validation_commands": [
-        "python3 scripts/validate_repo_pack.py"
+        "python3 scripts/validate_repo_pack.py --factoryd-config .factory/factoryd.behavior-version-control.json"
       ],
       "validation_contract_inheritance": {
         "acceptance_criteria": [
@@ -1556,7 +1660,7 @@
           "factoryd_run_once_report"
         ],
         "required_checks": [
-          "python3 scripts/validate_repo_pack.py"
+          "python3 scripts/validate_repo_pack.py --factoryd-config .factory/factoryd.behavior-version-control.json"
         ],
         "required_review": {
           "required": false,

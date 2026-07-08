@@ -6,7 +6,7 @@
     "enumerated_items_required": true,
     "group_only_refs_allowed": false
   },
-  "generated_at": "2026-07-08T02:33:00Z",
+  "generated_at": "2026-07-08T03:49:58Z",
   "generated_by": "factoryd",
   "items": [
     {
@@ -14,7 +14,9 @@
       "closure_required_for": [
         "implementation"
       ],
-      "delivery_slice_refs": null,
+      "delivery_slice_refs": [
+        "behavior-change-provenance-inventory"
+      ],
       "evidence_mode": "automated",
       "group_id": "behavior-change-provenance-inventory",
       "kind": "acceptance_test",
@@ -35,7 +37,9 @@
       "closure_required_for": [
         "implementation"
       ],
-      "delivery_slice_refs": null,
+      "delivery_slice_refs": [
+        "behavior-change-provenance-inventory"
+      ],
       "evidence_mode": "automated",
       "group_id": "behavior-change-provenance-inventory",
       "kind": "acceptance_test",
@@ -56,7 +60,9 @@
       "closure_required_for": [
         "implementation"
       ],
-      "delivery_slice_refs": null,
+      "delivery_slice_refs": [
+        "behavior-change-provenance-inventory"
+      ],
       "evidence_mode": "automated",
       "group_id": "behavior-change-provenance-inventory",
       "kind": "acceptance_test",
@@ -77,7 +83,9 @@
       "closure_required_for": [
         "implementation"
       ],
-      "delivery_slice_refs": null,
+      "delivery_slice_refs": [
+        "behavior-change-provenance-inventory"
+      ],
       "evidence_mode": "automated",
       "group_id": "behavior-change-provenance-inventory",
       "kind": "acceptance_test",
@@ -98,7 +106,9 @@
       "closure_required_for": [
         "implementation"
       ],
-      "delivery_slice_refs": null,
+      "delivery_slice_refs": [
+        "err-regression-attribution"
+      ],
       "evidence_mode": "automated",
       "group_id": "err-regression-attribution",
       "kind": "acceptance_test",
@@ -119,7 +129,9 @@
       "closure_required_for": [
         "implementation"
       ],
-      "delivery_slice_refs": null,
+      "delivery_slice_refs": [
+        "err-regression-attribution"
+      ],
       "evidence_mode": "automated",
       "group_id": "err-regression-attribution",
       "kind": "acceptance_test",
@@ -140,7 +152,9 @@
       "closure_required_for": [
         "implementation"
       ],
-      "delivery_slice_refs": null,
+      "delivery_slice_refs": [
+        "err-regression-attribution"
+      ],
       "evidence_mode": "automated",
       "group_id": "err-regression-attribution",
       "kind": "acceptance_test",
@@ -161,7 +175,9 @@
       "closure_required_for": [
         "implementation"
       ],
-      "delivery_slice_refs": null,
+      "delivery_slice_refs": [
+        "err-regression-attribution"
+      ],
       "evidence_mode": "automated",
       "group_id": "err-regression-attribution",
       "kind": "acceptance_test",
@@ -182,7 +198,9 @@
       "closure_required_for": [
         "implementation"
       ],
-      "delivery_slice_refs": null,
+      "delivery_slice_refs": [
+        "rollback-recommendation-report"
+      ],
       "evidence_mode": "automated",
       "group_id": "rollback-recommendation-report",
       "kind": "acceptance_test",
@@ -203,7 +221,9 @@
       "closure_required_for": [
         "implementation"
       ],
-      "delivery_slice_refs": null,
+      "delivery_slice_refs": [
+        "rollback-recommendation-report"
+      ],
       "evidence_mode": "manual_review",
       "group_id": "rollback-recommendation-report",
       "kind": "acceptance_test",
@@ -226,7 +246,9 @@
       "closure_required_for": [
         "implementation"
       ],
-      "delivery_slice_refs": null,
+      "delivery_slice_refs": [
+        "rollback-recommendation-report"
+      ],
       "evidence_mode": "automated",
       "group_id": "rollback-recommendation-report",
       "kind": "acceptance_test",
@@ -247,7 +269,9 @@
       "closure_required_for": [
         "implementation"
       ],
-      "delivery_slice_refs": null,
+      "delivery_slice_refs": [
+        "rollback-recommendation-report"
+      ],
       "evidence_mode": "automated",
       "group_id": "rollback-recommendation-report",
       "kind": "acceptance_test",

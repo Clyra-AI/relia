@@ -107,6 +107,38 @@ def load_json_file(path):
         fail(f"{path.relative_to(ROOT)} must contain a JSON object")
     return payload
 
+def repo_local_path(value, flag):
+    path = Path(value)
+    if not path.is_absolute():
+        path = ROOT / path
+    try:
+        path.relative_to(ROOT)
+    except ValueError:
+        fail(f"{flag} must point at a repo-local path")
+    return path
+
+def parse_args(argv):
+    options = {
+        "self_test": False,
+        "factoryd_config": FACTORYD_CONFIG,
+    }
+    index = 0
+    while index < len(argv):
+        arg = argv[index]
+        if arg == "--self-test":
+            options["self_test"] = True
+            index += 1
+            continue
+        if arg == "--factoryd-config":
+            index += 1
+            if index >= len(argv) or not str(argv[index]).strip():
+                fail("--factoryd-config requires a repo-local path")
+            options["factoryd_config"] = repo_local_path(argv[index], "--factoryd-config")
+            index += 1
+            continue
+        fail(f"unknown argument: {arg}")
+    return options
+
 def factoryd_config_capability_grants():
     grants = []
     if not FACTORYD_ACTIVE_CONFIG.exists():
@@ -929,7 +961,8 @@ def validate_runner_ready_task_fields(task, task_id):
 
 
 def main():
-    if "--self-test" in sys.argv[1:]:
+    args = parse_args(sys.argv[1:])
+    if args["self_test"]:
         from repo_pack_self_test import self_test
 
         self_test()
@@ -938,7 +971,7 @@ def main():
     for rel in REQUIRED:
         if not (root / rel).exists():
             fail(f"missing required repo-pack file: {rel}")
-    cfg = json.loads((root / ".factory/factoryd.example.json").read_text())
+    cfg = load_json_file(args["factoryd_config"])
     autoship_cfg = json.loads((root / ".factory/factoryd.autoship.example.json").read_text())
     repos = cfg.get("repos") or {}
     if len(repos) != 1:
