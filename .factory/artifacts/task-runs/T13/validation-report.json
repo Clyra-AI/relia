@@ -87,7 +87,8 @@
     "internal/yamlmini/yamlmini.go",
     "internal/yamlmini/yamlmini_test.go",
     "memory/compiled/agents-block.md",
-    "relia.yaml"
+    "relia.yaml",
+    "schemas/memory-rule.schema.json"
   ],
   "changelog_result": {
     "status": "pass",
@@ -120,6 +121,7 @@
     "go test ./cmd/relia -run 'TestCompile' -count=1",
     "go test ./internal/yamlmini -run 'TestParseDocumentHandlesCommentsQuotesAndBlockScalars|TestParseDocumentUnquotesListScalars|TestListValuesWithMapFieldsReturnsUniqueValues' -count=1",
     "go test ./internal/config -run 'TestDefaultYAMLWithChecksRendersDiscoveredChecks|TestDefaultYAMLWithChecksQuotesYAMLSensitiveCheckNames|TestCompileSettingsFromConfigAcceptsQuotedTargets|TestCompileSettingsFromConfigAcceptsInlineTargets' -count=1",
+    "go test ./internal/memory -run 'TestValidateRuleArtifactRejectsManagedMarkersInID|TestValidateRuleArtifactRejectsManagedMarkersInStatement|TestSelectCompiledRulesRequiresExplicitApprovalFields'",
     "make prepush-full"
   ],
   "docs_sync_result": {
@@ -251,6 +253,18 @@
       "exit_code": 0,
       "status": "pass",
       "summary": "Supervisor final gate passed after repairing latest-head Codex review feedback; coverage remained 79.5% against the 75% minimum and repo-pack validation passed."
+    },
+    {
+      "command": "go test ./internal/memory -run 'TestValidateRuleArtifactRejectsManagedMarkersInID|TestValidateRuleArtifactRejectsManagedMarkersInStatement|TestSelectCompiledRulesRequiresExplicitApprovalFields'",
+      "exit_code": 0,
+      "status": "pass",
+      "summary": "Verified memory rule IDs and statements containing Relia managed marker literals are rejected before compiled block rendering."
+    },
+    {
+      "command": "make prepush-full",
+      "exit_code": 0,
+      "status": "pass",
+      "summary": "Supervisor final gate passed after repairing latest-head rule-ID marker feedback; coverage remained 79.5% against the 75% minimum and repo-pack validation passed."
     }
   ],
   "lifecycle_evidence_result": {
@@ -335,6 +349,11 @@
       "source": "Codex review comment https://github.com/Clyra-AI/relia/pull/161#discussion_r3547132744",
       "status": "repaired",
       "summary": "Quoted generated required-check names containing YAML-sensitive syntax and made yamlmini unquote scalar list values on readback."
+    },
+    {
+      "source": "Codex review comment https://github.com/Clyra-AI/relia/pull/161#discussion_r3547182597",
+      "status": "repaired",
+      "summary": "Rejected Relia managed marker literals in memory rule IDs and reflected the constraint in schemas/memory-rule.schema.json so rule IDs cannot inject generated block markers."
     }
   ],
   "residual_risks": [],

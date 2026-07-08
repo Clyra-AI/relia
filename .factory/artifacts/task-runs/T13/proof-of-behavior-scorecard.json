@@ -122,9 +122,10 @@
       "evidence_refs": [
         "internal/memory/validation.go",
         "internal/memory/validation_test.go",
-        "cmd/relia/compile_command_test.go"
+        "cmd/relia/compile_command_test.go",
+        "schemas/memory-rule.schema.json"
       ],
-      "observed_result": "Rule statements containing Relia managed marker text fail memory-rule validation before compile renders managed context."
+      "observed_result": "Rule IDs and statements containing Relia managed marker text fail memory-rule validation before compile renders managed context."
     },
     {
       "behavior": "relia init writes valid config with discovered checks and candidate attribution markers",

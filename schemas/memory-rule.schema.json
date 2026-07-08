@@ -28,7 +28,17 @@
     },
     "id": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "not": {
+        "anyOf": [
+          {
+            "pattern": "<!-- relia:begin \\(generated; edit rules in memory/rules/, not here\\) -->"
+          },
+          {
+            "pattern": "<!-- relia:end -->"
+          }
+        ]
+      }
     },
     "kind": {
       "enum": ["avoid", "playbook"]

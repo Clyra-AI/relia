@@ -66,6 +66,10 @@ func ValidateRuleArtifact(root string, path string, options ValidationOptions) *
 	if document.Scalars["schema_version"].Value != options.SchemaVersion {
 		return artifactContractError(options, "memory rule schema_version must be "+options.SchemaVersion, rel)
 	}
+	ruleID := document.Scalars["id"].Value
+	if strings.Contains(ruleID, ManagedBeginMarker) || strings.Contains(ruleID, ManagedEndMarker) {
+		return artifactContractError(options, "memory rule id must not contain Relia managed markers", configdoc.RefWithPath(rel, document.Scalars["id"]))
+	}
 	statement, ok := resolvedRuleStatement(document, string(content))
 	if !ok || strings.TrimSpace(statement) == "" {
 		return artifactContractError(options, "memory rule statement is required", rel)
