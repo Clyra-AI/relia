@@ -19,9 +19,7 @@
       "risk_class": "low",
       "source_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#behavior-change-provenance-inventory",
       "task_refs": [
-        "T4",
-        "T5",
-        "T6"
+        "behavior-version-control-t1"
       ],
       "title": "Behavior change provenance inventory"
     },
@@ -30,9 +28,7 @@
       "risk_class": "low",
       "source_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#err-regression-attribution",
       "task_refs": [
-        "T2",
-        "T3",
-        "T6"
+        "behavior-version-control-t2"
       ],
       "title": "ERR regression attribution"
     },
@@ -41,9 +37,7 @@
       "risk_class": "low",
       "source_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#rollback-recommendation-report",
       "task_refs": [
-        "T1",
-        "T2",
-        "T6"
+        "behavior-version-control-t3"
       ],
       "title": "Rollback recommendation report"
     }
@@ -90,7 +84,7 @@
       "workspace_root": "../.factoryd/workspaces"
     }
   },
-  "generated_at": "2026-07-07T21:48:18Z",
+  "generated_at": "2026-07-08T02:33:00Z",
   "required_checks": [
     "python3 scripts/validate_repo_pack.py"
   ],

@@ -50,15 +50,15 @@
         "Generated from post-PRD intake; update status only with validation evidence."
       ],
       "remaining_task_refs": [
-        "T1"
+        "behavior-version-control-t1"
       ],
-      "requires_human_approval": false,
+      "requires_human_approval": true,
       "scope_item": "Behavior change provenance inventory",
       "scope_item_id": "behavior-change-provenance-inventory",
       "source_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#behavior-change-provenance-inventory",
       "status": "partial",
       "task_refs": [
-        "T1"
+        "behavior-version-control-t1"
       ]
     },
     {
@@ -106,7 +106,7 @@
         "Generated from post-PRD intake; update status only with validation evidence."
       ],
       "remaining_task_refs": [
-        "T2"
+        "behavior-version-control-t2"
       ],
       "requires_human_approval": false,
       "scope_item": "ERR regression attribution",
@@ -114,7 +114,7 @@
       "source_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#err-regression-attribution",
       "status": "partial",
       "task_refs": [
-        "T2"
+        "behavior-version-control-t2"
       ]
     },
     {
@@ -162,7 +162,7 @@
         "Generated from post-PRD intake; update status only with validation evidence."
       ],
       "remaining_task_refs": [
-        "T3"
+        "behavior-version-control-t3"
       ],
       "requires_human_approval": false,
       "scope_item": "Rollback recommendation report",
@@ -170,11 +170,11 @@
       "source_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#rollback-recommendation-report",
       "status": "partial",
       "task_refs": [
-        "T3"
+        "behavior-version-control-t3"
       ]
     }
   ],
-  "last_updated_at": "2026-07-07T21:48:18Z",
+  "last_updated_at": "2026-07-08T02:33:00Z",
   "schema_version": "0.1",
   "source_post_prd_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md",
   "work_signal_kind": "ideas"
