@@ -66,8 +66,8 @@
   "observations": {
     "task_binding_status": "verified",
     "factoryd_dispatch_status": "started",
-    "selected_task_assertion_ref": ".factoryd/events/20260707T181233.593209000Z-dry_run_task_selected-relia-T12.json",
-    "factoryd_run_report_ref": ".factoryd/runs/20260707T181313.827303000Z-relia-T12/lifecycle/pr-lifecycle-report.json",
+    "selected_task_assertion_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
+    "factoryd_run_report_ref": ".factory/artifacts/task-runs/T12/validation-report.json",
     "factoryd_status": "blocked_review_repair_worker_stalled",
     "pr_number": 156,
     "pr_url": "https://github.com/Clyra-AI/relia/pull/156",
@@ -93,8 +93,8 @@
       "action_taken": "none",
       "reason": "Factoryd selected T12, completed worker implementation, pushed PR #156, and reached green CI without manual product-code edits.",
       "evidence_refs": [
-        ".factoryd/events/20260707T181233.593209000Z-dry_run_task_selected-relia-T12.json",
-        ".factoryd/runs/20260707T181313.827303000Z-relia-T12/worker-attempts/20260707T181313.827303000Z/worker-output.log",
+        ".factory/artifacts/task-runs/T12/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T12/validation-report.json",
         "https://github.com/Clyra-AI/relia/pull/156"
       ]
     },
@@ -105,8 +105,8 @@
       "reason": "Codex produced one legitimate latest-head P2 review finding: serve tool requests should not fail because an unrelated active rule has malformed citations. Factoryd classified the finding as codex_review_actionable and started review repair.",
       "evidence_refs": [
         "https://github.com/Clyra-AI/relia/pull/156#discussion_r3538788812",
-        ".factoryd/runs/20260707T181313.827303000Z-relia-T12/20260707T181313.827303000Z-relia-T12-repair-checker-failure-envelope.json",
-        ".factoryd/runs/20260707T181313.827303000Z-relia-T12/review-repair-batch-20260707T181313.827303000Z-relia-T12-repair.json"
+        ".factory/artifacts/task-runs/T12/proof-of-behavior-scorecard.json",
+        ".factory/artifacts/task-runs/T12/validation-report.json"
       ]
     },
     {
@@ -115,9 +115,9 @@
       "action_taken": "stopped",
       "reason": "The factoryd review-repair worker produced a narrow local fix and evidence refresh, then remained alive for more than 20 minutes with no validation subprocess, no new run artifact, no push, and no handoff back to factoryd. The supervisor stopped the orphaned worker after interrupting factoryd.",
       "evidence_refs": [
-        ".factoryd/workspaces/relia-T12-20260707T181313.827303000Z",
-        ".factoryd/runs/20260707T181313.827303000Z-relia-T12/codex-review-repair-1-prompt.md",
-        ".factoryd/runs/20260707T181313.827303000Z-relia-T12/codex-review-repair-1-task-packet.json"
+        ".factory/artifacts/supervisor-runs/T12/20260708T152206Z.json",
+        "https://github.com/Clyra-AI/relia/pull/156",
+        "https://github.com/Clyra-AI/relia/pull/159"
       ]
     }
   ],
@@ -129,9 +129,13 @@
     "repo_clean": false
   },
   "evidence_refs": [
-    ".factoryd/runs/20260707T181313.827303000Z-relia-T12/lifecycle/pr-lifecycle-report.json",
-    ".factoryd/runs/20260707T181313.827303000Z-relia-T12/lifecycle/scope-closure-report.json",
-    ".factoryd/runs/20260707T181313.827303000Z-relia-T12/codex_review-output.log",
+    ".factory/artifacts/task-runs/T12/validation-report.json",
+    ".factory/artifacts/task-runs/T12/proof-of-behavior-scorecard.json",
+    ".factory/artifacts/task-runs/T12/work-proof-marker.json",
+    ".factory/artifacts/task-runs/T12/scope-closure-report.json",
+    ".factory/artifacts/task-runs/T12/scope-closure-map.json",
+    ".factory/artifacts/task-runs/T12/closure-sync-report.json",
+    ".factory/artifacts/pr-lifecycle/relia-mvp-t12/post-merge-report.json",
     "https://github.com/Clyra-AI/relia/pull/156"
   ],
   "follow_up_refs": [
