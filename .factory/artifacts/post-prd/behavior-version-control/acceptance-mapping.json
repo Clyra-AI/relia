@@ -2,7 +2,7 @@
   "acceptance_ledger_ref": ".factory/artifacts/post-prd/behavior-version-control/acceptance-ledger.json",
   "artifact_type": "acceptance_mapping",
   "decomposition_mode": "post_prd_recommendation_items",
-  "generated_at": "2026-07-07T21:48:18Z",
+  "generated_at": "2026-07-08T02:33:00Z",
   "groups": [
     {
       "acceptance_item_ids": [
@@ -29,7 +29,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T1"
+        "behavior-version-control-t1"
       ],
       "title": "Behavior change provenance inventory"
     },
@@ -58,7 +58,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T2"
+        "behavior-version-control-t2"
       ],
       "title": "ERR regression attribution"
     },
@@ -87,7 +87,7 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T3"
+        "behavior-version-control-t3"
       ],
       "title": "Rollback recommendation report"
     }

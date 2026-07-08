@@ -2,7 +2,7 @@
   "acceptance_ledger_ref": ".factory/artifacts/post-prd/behavior-version-control/acceptance-ledger.json",
   "acceptance_mapping_ref": ".factory/artifacts/post-prd/behavior-version-control/acceptance-mapping.json",
   "artifact_type": "task_packets",
-  "generated_at": "2026-07-07T21:48:18Z",
+  "generated_at": "2026-07-08T02:33:00Z",
   "schema_version": "0.1",
   "source_post_prd_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md",
   "tasks": [
@@ -11,7 +11,8 @@
         "Deliver: Record versioned changes to memory rules, compiled context, AGENTS/CLAUDE blocks, and Relia-owned instruction artifacts as local behavior-change candidates with commit refs, diff refs, owner/reviewer metadata when available, source rule IDs, lifecycle status, and affected path/signal scope.",
         "Implement by: Build a deterministic offline inventory from local git history, committed rule files, Relia lifecycle metadata, and existing report artifacts. The inventory must not mutate rules, compile targets, or reviewed memory by itself.",
         "Touch or validate paths: schemas/, examples/, docs/product/, docs/dev/, docs/architecture/, cmd/relia/, internal/memory/, internal/backtest/, internal/assess/",
-        "Respect dependency: Run after T18 because lesson grain, owner, evidence, applicability, and expiry rules must exist before behavior-change attribution can be trusted."
+        "Respect dependency: Run after T18 because lesson grain, owner, evidence, applicability, and expiry rules must exist before behavior-change attribution can be trusted.",
+        "External prerequisite completion or approved deferral evidence exists for: T18"
       ],
       "acceptance_group_id": "behavior-change-provenance-inventory",
       "acceptance_group_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md#behavior-change-provenance-inventory",
@@ -127,7 +128,7 @@
         "cassettes/",
         "baselines/",
         "runs/",
-        ".factory/artifacts/task-runs/T1/",
+        ".factory/artifacts/task-runs/behavior-version-control-t1/",
         "internal/context/",
         "internal/config/",
         "internal/assess/",
@@ -141,7 +142,6 @@
         "docs/architecture/",
         "cmd/relia/",
         "internal/backtest/",
-        ".factory/artifacts/pr-lifecycle/T1/",
         ".factory/artifacts/pr-lifecycle/behavior-version-control-t1/"
       ],
       "architecture_guidance_refs": [
@@ -311,6 +311,16 @@
         "validation_report",
         "proof-of-behavior-scorecard"
       ],
+      "external_prerequisites": [
+        {
+          "closure_map_ref": ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+          "evidence_refs": [],
+          "evidence_required": "record completion or approved deferral before dispatch",
+          "scope": "outside_post_prd_mission",
+          "status": "pending",
+          "task_ref": "T18"
+        }
+      ],
       "factory_compatibility": {
         "execution_compiler_ref": "factory://skills/execution-compiler",
         "factory_contract_version": "1.0",
@@ -400,7 +410,7 @@
         "post-merge-monitor"
       ],
       "requires_credentials": false,
-      "requires_human_approval": false,
+      "requires_human_approval": true,
       "requires_network": false,
       "risk_class": "low",
       "runtime_pins": {
@@ -415,7 +425,8 @@
       },
       "scope_exclusions": [
         "Do not mutate docs/product/prd.md unless this recommendation explicitly changes product requirements.",
-        "No completion claim without acceptance evidence."
+        "No completion claim without acceptance evidence.",
+        "Do not start implementation until external prerequisite completion or approved deferral evidence is recorded for: T18"
       ],
       "security_scanner_gates": {
         "exception_policy": "approved_exception_required_when_required_or_surface_touched",
@@ -444,9 +455,10 @@
         "forbidden path changed",
         "required validation command failed",
         "plan drift detected",
-        "scope closure did not advance"
+        "scope closure did not advance",
+        "external prerequisite completion evidence missing"
       ],
-      "task_id": "T1",
+      "task_id": "behavior-version-control-t1",
       "test_matrix_refs": [
         {
           "command_refs": [
@@ -513,7 +525,8 @@
           "forbidden path changed",
           "required validation command failed",
           "plan drift detected",
-          "scope closure did not advance"
+          "scope closure did not advance",
+          "external prerequisite completion evidence missing"
         ],
         "worker_evidence_required": [
           "work_proof_marker",
@@ -651,7 +664,7 @@
         "cassettes/",
         "baselines/",
         "runs/",
-        ".factory/artifacts/task-runs/T2/",
+        ".factory/artifacts/task-runs/behavior-version-control-t2/",
         "internal/distill/",
         "internal/assess/",
         "internal/advise/",
@@ -664,7 +677,6 @@
         "cmd/relia/",
         "internal/backtest/",
         "internal/memory/",
-        ".factory/artifacts/pr-lifecycle/T2/",
         ".factory/artifacts/pr-lifecycle/behavior-version-control-t2/"
       ],
       "architecture_guidance_refs": [
@@ -709,7 +721,7 @@
         "make test-fast"
       ],
       "blocked_by": [
-        "T1"
+        "behavior-version-control-t1"
       ],
       "changelog_intent": {
         "draft_entry": "Implement post-PRD recommendation: ERR regression attribution.",
@@ -970,7 +982,7 @@
         "plan drift detected",
         "scope closure did not advance"
       ],
-      "task_id": "T2",
+      "task_id": "behavior-version-control-t2",
       "test_matrix_refs": [
         {
           "command_refs": [
@@ -1175,7 +1187,7 @@
         "cassettes/",
         "baselines/",
         "runs/",
-        ".factory/artifacts/task-runs/T3/",
+        ".factory/artifacts/task-runs/behavior-version-control-t3/",
         "internal/assess/",
         "internal/advise/",
         "internal/diffparse/",
@@ -1187,7 +1199,6 @@
         "docs/architecture/",
         "cmd/relia/",
         "internal/memory/",
-        ".factory/artifacts/pr-lifecycle/T3/",
         ".factory/artifacts/pr-lifecycle/behavior-version-control-t3/"
       ],
       "architecture_guidance_refs": [
@@ -1231,7 +1242,7 @@
         "make test-fast"
       ],
       "blocked_by": [
-        "T2"
+        "behavior-version-control-t2"
       ],
       "changelog_intent": {
         "draft_entry": "Implement post-PRD recommendation: Rollback recommendation report.",
@@ -1492,7 +1503,7 @@
         "plan drift detected",
         "scope closure did not advance"
       ],
-      "task_id": "T3",
+      "task_id": "behavior-version-control-t3",
       "test_matrix_refs": [
         {
           "command_refs": [

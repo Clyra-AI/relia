@@ -1,12 +1,14 @@
 {
   "alignment_decisions": {
     "artifact_namespace": ".factory/artifacts/post-prd/behavior-version-control",
-    "implementation_may_start": true,
+    "implementation_may_start": false,
     "scope_rule": "Post-PRD work closes against this mission scope unless a human promotes it into docs/product/prd.md.",
     "source_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md",
-    "status": "resolved"
+    "status": "needs_decision"
   },
-  "alignment_questions": null,
+  "alignment_questions": [
+    "Post-PRD recommendation \"Behavior change provenance inventory\" references external task prerequisite(s) T18; record completion or approved deferral evidence before dispatch"
+  ],
   "assumptions": [
     "Generated post-PRD work runs serially until a planner marks tasks parallel-safe."
   ],
@@ -23,7 +25,7 @@
       "Factory daemon contracts"
     ]
   },
-  "generated_at": "2026-07-07T21:48:18Z",
+  "generated_at": "2026-07-08T02:33:00Z",
   "open_questions": [],
   "proven_findings": [
     "Post-PRD intake generated a governed artifact set from the supplied work signal.",
@@ -44,9 +46,12 @@
     ".factory/profile.yaml"
   ],
   "risk_flags": [
-    "Generated post-PRD plan must be reviewed before autonomous implementation."
+    "Generated post-PRD plan must be reviewed before autonomous implementation.",
+    "Recommendation \"Behavior change provenance inventory\" depends on external task prerequisite(s) T18; generated task must stay approval-gated until evidence exists."
   ],
-  "scope_risks": [],
+  "scope_risks": [
+    "Recommendation \"Behavior change provenance inventory\" depends on external task prerequisite(s) T18; generated task must stay approval-gated until evidence exists."
+  ],
   "shared_constraints_ref": "AGENTS.md",
   "source_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md",
   "system_model_summary": "State lives in repo-local files and Factory artifacts; feedback lives in validation commands, PR lifecycle reports, and scope closure.",

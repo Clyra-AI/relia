@@ -18,10 +18,12 @@
   "acceptance_mapping_ref": ".factory/artifacts/post-prd/behavior-version-control/acceptance-mapping.json",
   "active_loop_id": "implementation_task_to_validated_pr",
   "alignment_gate": {
-    "blocking_questions": null,
+    "blocking_questions": [
+      "Post-PRD recommendation \"Behavior change provenance inventory\" references external task prerequisite(s) T18; record completion or approved deferral evidence before dispatch"
+    ],
     "context_brief_ref": "context-brief.json",
-    "implementation_may_start": true,
-    "status": "resolved"
+    "implementation_may_start": false,
+    "status": "needs_decision"
   },
   "artifact_type": "execution_plan",
   "blast_radius": "Post-PRD mission-scoped implementation paths.",
@@ -29,12 +31,12 @@
   "collaboration_strategy": "serial",
   "dependencies": [
     {
-      "blocked_by": "T1",
-      "task_id": "T2"
+      "blocked_by": "behavior-version-control-t1",
+      "task_id": "behavior-version-control-t2"
     },
     {
-      "blocked_by": "T2",
-      "task_id": "T3"
+      "blocked_by": "behavior-version-control-t2",
+      "task_id": "behavior-version-control-t3"
     }
   ],
   "factory_compatibility": {
@@ -63,7 +65,7 @@
     "workspace_root": "../.factoryd/workspaces"
   },
   "feedback_plan": "Use repo-configured validation commands, validation reports, PR lifecycle reports, and scope closure.",
-  "generated_at": "2026-07-07T21:48:18Z",
+  "generated_at": "2026-07-08T02:33:00Z",
   "level_gates": [
     "Plan approval before implementation",
     "Human approval before live credentials or network"
@@ -121,9 +123,9 @@
   ],
   "system_model_summary": "State is repo-local; feedback is command and artifact based.",
   "tasks": [
-    "T1",
-    "T2",
-    "T3"
+    "behavior-version-control-t1",
+    "behavior-version-control-t2",
+    "behavior-version-control-t3"
   ],
   "validation_requirements": [
     "python3 scripts/validate_repo_pack.py"
