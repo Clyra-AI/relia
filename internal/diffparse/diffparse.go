@@ -120,6 +120,9 @@ func recordPlanPath(touched map[string]bool, field string) {
 	if field == "" || strings.Contains(field, "://") {
 		return
 	}
+	if githubShorthandRef(field) {
+		return
+	}
 	if index := strings.Index(field, "#"); index >= 0 {
 		field = field[:index]
 	}
@@ -127,6 +130,7 @@ func recordPlanPath(touched map[string]bool, field string) {
 	if field == "" {
 		return
 	}
+	field = stripLineSuffix(field)
 	if !planPathCandidate(field) {
 		return
 	}
@@ -144,6 +148,53 @@ func planPathToken(field string) string {
 		return ""
 	}
 	return value
+}
+
+func stripLineSuffix(value string) string {
+	for {
+		index := strings.LastIndex(value, ":")
+		if index < 0 {
+			return value
+		}
+		if !asciiDigitsOnly(value[index+1:]) {
+			return value
+		}
+		value = value[:index]
+	}
+}
+
+func githubShorthandRef(value string) bool {
+	index := strings.LastIndex(value, "#")
+	if index < 0 || index == len(value)-1 || !asciiDigitsOnly(value[index+1:]) {
+		return false
+	}
+	parts := strings.Split(value[:index], "/")
+	return len(parts) == 2 && githubShorthandPart(parts[0]) && githubShorthandPart(parts[1])
+}
+
+func githubShorthandPart(value string) bool {
+	if value == "" || strings.Contains(value, ".") {
+		return false
+	}
+	for _, char := range value {
+		if isASCIIAlpha(char) || (char >= '0' && char <= '9') || char == '-' || char == '_' {
+			continue
+		}
+		return false
+	}
+	return true
+}
+
+func asciiDigitsOnly(value string) bool {
+	if value == "" {
+		return false
+	}
+	for _, char := range value {
+		if char < '0' || char > '9' {
+			return false
+		}
+	}
+	return true
 }
 
 func planPathCandidate(field string) bool {

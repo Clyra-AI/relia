@@ -219,6 +219,50 @@ func TestTouchedPathsOrPlanSplitsQuotedCommandSpans(t *testing.T) {
 	}
 }
 
+func TestTouchedPathsOrPlanStripsQuotedLineSuffixes(t *testing.T) {
+	paths, inputKind, err := TouchedPathsOrPlan([]byte(`Implementation plan:
+
+- Update ` + "`README.md:42`" + ` for the quick-start note.
+- Inspect "internal/diffparse/diffparse.go:164:8" before changing parser behavior.
+`))
+	if err != nil {
+		t.Fatalf("TouchedPathsOrPlan error: %v", err)
+	}
+	if inputKind != "plan" {
+		t.Fatalf("input kind = %q, want plan", inputKind)
+	}
+	want := []string{"README.md", "internal/diffparse/diffparse.go"}
+	if fmt.Sprint(paths) != fmt.Sprint(want) {
+		t.Fatalf("paths = %#v, want %#v", paths, want)
+	}
+}
+
+func TestTouchedPathsOrPlanRejectsGitHubShorthandRefs(t *testing.T) {
+	paths, inputKind, err := TouchedPathsOrPlan([]byte(`Implementation plan:
+
+- Compare against Clyra-AI/relia#142 before changing behavior.
+- Update packages/billing/invoice.py with the covered implementation.
+`))
+	if err != nil {
+		t.Fatalf("TouchedPathsOrPlan error: %v", err)
+	}
+	if inputKind != "plan" {
+		t.Fatalf("input kind = %q, want plan", inputKind)
+	}
+	want := []string{"packages/billing/invoice.py"}
+	if fmt.Sprint(paths) != fmt.Sprint(want) {
+		t.Fatalf("paths = %#v, want %#v", paths, want)
+	}
+
+	paths, _, err = TouchedPathsOrPlan([]byte("Compare Clyra-AI/relia#142 and docs/architecture.md#42."))
+	if err != nil {
+		t.Fatalf("fragment path should remain valid: %v", err)
+	}
+	if fmt.Sprint(paths) != fmt.Sprint([]string{"docs/architecture.md"}) {
+		t.Fatalf("fragment paths = %#v", paths)
+	}
+}
+
 func TestTouchedPathsOrPlanRejectsSlashDelimitedProse(t *testing.T) {
 	paths, inputKind, err := TouchedPathsOrPlan([]byte(`Implementation plan:
 
