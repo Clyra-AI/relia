@@ -468,7 +468,8 @@
       "slice_id": "assessment-and-pr-advisory",
       "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T14",
       "task_refs": [
-        "T14"
+        "T14",
+        "T14.1"
       ]
     },
     {
@@ -671,7 +672,7 @@
       "task_id": "T14"
     },
     {
-      "blocked_by": "T14",
+      "blocked_by": "T14.1",
       "task_id": "T15"
     },
     {
@@ -689,6 +690,10 @@
     {
       "blocked_by": "T15",
       "task_id": "T15.1"
+    },
+    {
+      "blocked_by": "T14",
+      "task_id": "T14.1"
     }
   ],
   "engineering_policy_refs": [
@@ -859,7 +864,8 @@
     "T15.1",
     "T16",
     "T17",
-    "T18"
+    "T18",
+    "T14.1"
   ],
   "validation_contract": {
     "acceptance_criteria": [
@@ -1880,7 +1886,8 @@
         "slice_id": "assessment-and-pr-advisory",
         "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T14",
         "task_refs": [
-          "T14"
+          "T14",
+          "T14.1"
         ]
       },
       {
