@@ -116,7 +116,7 @@ func TestTouchedPathsOrPlanSkipsNonTouchedTaskPacketPaths(t *testing.T) {
   "commands": ["make prepush-full"],
   "validation_commands": ["go test ./internal/secret"],
   "evidence_refs": [".factory/artifacts/task-runs/T14/validation-report.json"],
-  "implementation_plan": ["Update internal/advise/advise.go for advisory output."]
+  "implementation_plan": ["Update internal/advise/advise.go for advisory output.", "Update README.md and go.mod."]
 }`))
 	if err != nil {
 		t.Fatalf("TouchedPathsOrPlan error: %v", err)
@@ -124,7 +124,7 @@ func TestTouchedPathsOrPlanSkipsNonTouchedTaskPacketPaths(t *testing.T) {
 	if inputKind != "plan" {
 		t.Fatalf("input kind = %q, want plan", inputKind)
 	}
-	want := []string{"internal/advise/advise.go", "internal/assess/assess.go"}
+	want := []string{"README.md", "go.mod", "internal/advise/advise.go", "internal/assess/assess.go"}
 	if fmt.Sprint(paths) != fmt.Sprint(want) {
 		t.Fatalf("paths = %#v, want %#v", paths, want)
 	}
