@@ -759,11 +759,11 @@
     ]
   },
   "final_state": {
-    "status": "repair_ready_for_shipping",
-    "reason": "Supervisor repair for latest-head Codex review comment discussion_r3552963066 passed local validation and is ready to push to PR #164 for CI and Codex review.",
-    "merged": false,
-    "post_merge_monitored": false,
-    "repo_clean": false
+    "status": "merged_post_merge_monitored",
+    "reason": "Supervisor repair for latest-head Codex review comment discussion_r3552963066 passed local validation, PR #164 merged, post-merge main CI passed, and T14 closure recovery evidence was materialized.",
+    "merged": true,
+    "post_merge_monitored": true,
+    "repo_clean": true
   },
   "evidence_refs": [
     ".factory/artifacts/task-runs/T14/work-proof-marker.json",
