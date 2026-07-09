@@ -88,9 +88,11 @@ func structuredPlanPaths(content []byte) ([]string, bool) {
 }
 
 func recordStructuredPlanPaths(touched map[string]bool, value any, key string) {
-	if structuredPlanIgnoreKey(key) {
+	normalizedKey := strings.ToLower(key)
+	if structuredPlanIgnoreKey(normalizedKey) {
 		return
 	}
+	collect := structuredPlanCollectKey(normalizedKey)
 	switch typed := value.(type) {
 	case map[string]any:
 		for childKey, childValue := range typed {
@@ -98,16 +100,30 @@ func recordStructuredPlanPaths(touched map[string]bool, value any, key string) {
 		}
 	case []any:
 		for _, childValue := range typed {
-			recordStructuredPlanPaths(touched, childValue, key)
+			recordStructuredPlanPaths(touched, childValue, normalizedKey)
 		}
 	case string:
-		recordQuotedPlanPath(touched, typed)
+		if collect {
+			recordQuotedPlanPath(touched, typed)
+		}
 	}
 }
 
 func structuredPlanIgnoreKey(key string) bool {
-	switch strings.ToLower(key) {
-	case "command_refs", "evidence_refs", "excluded_paths", "forbidden_path_patterns", "forbidden_paths", "scope_exclusions", "validation_commands":
+	if strings.HasSuffix(key, "_ref") || strings.HasSuffix(key, "_refs") {
+		return true
+	}
+	switch key {
+	case "acceptance_checks", "agent_native_cli_checks", "baseline_commands", "commands", "evidence_required", "excluded_paths", "final_validation_commands", "forbidden_path_patterns", "forbidden_paths", "input_artifacts", "lifecycle_evidence_required", "red_first_commands", "scope_exclusions", "source", "source_ref", "source_refs", "validation_commands", "worker_evidence_required":
+		return true
+	default:
+		return false
+	}
+}
+
+func structuredPlanCollectKey(key string) bool {
+	switch key {
+	case "affected_paths", "allowed_paths", "architecture_target_paths", "changed_paths", "change_summary", "changes", "description", "file_paths", "implementation_paths", "implementation_plan", "minimum_fix", "modified_paths", "objective", "path", "paths", "plan", "planned_paths", "summary", "target_paths", "touched_paths":
 		return true
 	default:
 		return false
