@@ -375,6 +375,7 @@ func TestTouchedPathsOrPlanRejectsSlashDelimitedProse(t *testing.T) {
 
 - Keep CI/CD and read/write guidance aligned.
 - Choose this and/or that while updating packages/billing/invoice.py.
+- Mark validation N/A and baseline n/a when not applicable.
 - Mention 2026/07/09 and 7/9 as schedule dates, not paths.
 - Mention T1/T2/T3 and FR16/FR19 as task chains, not paths.
 - Preserve internal/assess package handling for directory-scoped rules.
@@ -391,7 +392,7 @@ func TestTouchedPathsOrPlanRejectsSlashDelimitedProse(t *testing.T) {
 		t.Fatalf("paths = %#v, want %#v", paths, want)
 	}
 
-	_, _, err = TouchedPathsOrPlan([]byte("Improve CI/CD, read/write, 2026/07/09, 7/9, T1/T2/T3, FR16/FR19, and and/or prose only."))
+	_, _, err = TouchedPathsOrPlan([]byte("Improve CI/CD, read/write, 2026/07/09, 7/9, T1/T2/T3, FR16/FR19, N/A, n/a, and and/or prose only."))
 	if !errors.Is(err, ErrNoRepoRelativePaths) {
 		t.Fatalf("error = %v, want ErrNoRepoRelativePaths", err)
 	}
