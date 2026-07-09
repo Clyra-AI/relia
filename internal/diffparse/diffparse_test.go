@@ -111,6 +111,9 @@ func TestTouchedPathsOrPlanSkipsNonTouchedTaskPacketPaths(t *testing.T) {
   "task_id": "T14",
   "allowed_paths": ["internal/assess/assess.go"],
   "forbidden_paths": ["internal/secret/secret.go"],
+  "input_artifacts": ["docs/product/prd.md"],
+  "source_ref": {"path": "docs/source.md"},
+  "commands": ["make prepush-full"],
   "validation_commands": ["go test ./internal/secret"],
   "evidence_refs": [".factory/artifacts/task-runs/T14/validation-report.json"],
   "implementation_plan": ["Update internal/advise/advise.go for advisory output."]
@@ -126,7 +129,7 @@ func TestTouchedPathsOrPlanSkipsNonTouchedTaskPacketPaths(t *testing.T) {
 		t.Fatalf("paths = %#v, want %#v", paths, want)
 	}
 
-	_, _, err = TouchedPathsOrPlan([]byte(`{"forbidden_paths":["internal/secret/secret.go"],"validation_commands":["go test ./internal/secret"]}`))
+	_, _, err = TouchedPathsOrPlan([]byte(`{"forbidden_paths":["internal/secret/secret.go"],"source_ref":{"path":"docs/source.md"},"validation_commands":["go test ./internal/secret"]}`))
 	if !errors.Is(err, ErrNoRepoRelativePaths) {
 		t.Fatalf("error = %v, want ErrNoRepoRelativePaths", err)
 	}
