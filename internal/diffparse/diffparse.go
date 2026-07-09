@@ -180,7 +180,7 @@ func knownCommandToken(value string) bool {
 
 func interpreterCommandToken(value string) bool {
 	switch value {
-	case "node", "python", "python3":
+	case "bash", "node", "python", "python3", "sh", "zsh":
 		return true
 	default:
 		return false

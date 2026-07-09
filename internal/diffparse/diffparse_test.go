@@ -294,6 +294,7 @@ func TestTouchedPathsOrPlanSkipsUnquotedCommandHelpers(t *testing.T) {
 - Run ./scripts/check.py packages/billing/invoice.py before advice.
 - Run: ./scripts/check.py packages/billing/colon.py before advice.
 - Run python3 scripts/check.py packages/billing/receipt.py through the helper.
+- Run bash scripts/check.sh packages/billing/shell.py through the shell helper.
 - Update scripts/check.py and packages/billing/config.py in the same patch.
 `))
 	if err != nil {
@@ -302,7 +303,7 @@ func TestTouchedPathsOrPlanSkipsUnquotedCommandHelpers(t *testing.T) {
 	if inputKind != "plan" {
 		t.Fatalf("input kind = %q, want plan", inputKind)
 	}
-	want := []string{"packages/billing/colon.py", "packages/billing/config.py", "packages/billing/invoice.py", "packages/billing/receipt.py", "scripts/check.py"}
+	want := []string{"packages/billing/colon.py", "packages/billing/config.py", "packages/billing/invoice.py", "packages/billing/receipt.py", "packages/billing/shell.py", "scripts/check.py"}
 	if fmt.Sprint(paths) != fmt.Sprint(want) {
 		t.Fatalf("paths = %#v, want %#v", paths, want)
 	}
