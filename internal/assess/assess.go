@@ -47,15 +47,17 @@ type RiskAssessmentMatch struct {
 }
 
 type Rule struct {
-	ID             string
-	Kind           string
-	Path           string
-	Statement      string
-	Confidence     float64
-	ScopePaths     []string
-	Citations      []RuleCitation
-	ReviewGate     string
-	ReviewDecision string
+	ID                  string
+	Kind                string
+	Path                string
+	Statement           string
+	Confidence          float64
+	ScopePaths          []string
+	Citations           []RuleCitation
+	EvidenceCount       int
+	EvidenceExperiences []string
+	ReviewGate          string
+	ReviewDecision      string
 }
 
 type RuleCitation struct {
@@ -116,20 +118,28 @@ func ReadRule(root string, rulePath string, options Options) (Rule, bool, *resul
 	if err != nil {
 		return Rule{}, false, artifactError(options, "memory rule confidence must be numeric", rel)
 	}
+	evidenceCount := len(yamlmini.ListValues(document, "evidence.experiences"))
+	if evidenceCountScalar, ok := document.Scalars["evidence.count"]; ok {
+		if parsed, err := strconv.Atoi(evidenceCountScalar.Value); err == nil && parsed > 0 {
+			evidenceCount = parsed
+		}
+	}
 	statement, ok := memorydoc.ResolvedRuleStatement(document, string(content))
 	if !ok || strings.TrimSpace(statement) == "" {
 		return Rule{}, false, artifactError(options, "memory rule statement is required", rel)
 	}
 	return Rule{
-		ID:             document.Scalars["id"].Value,
-		Kind:           document.Scalars["kind"].Value,
-		Path:           rel,
-		Statement:      statement,
-		Confidence:     confidence,
-		ScopePaths:     yamlmini.ListValues(document, "scope.paths"),
-		Citations:      RuleCitations(document),
-		ReviewGate:     activeRuleReviewGate(document),
-		ReviewDecision: activeRuleReviewDecision(document),
+		ID:                  document.Scalars["id"].Value,
+		Kind:                document.Scalars["kind"].Value,
+		Path:                rel,
+		Statement:           statement,
+		Confidence:          confidence,
+		ScopePaths:          yamlmini.ListValues(document, "scope.paths"),
+		Citations:           RuleCitations(document),
+		EvidenceCount:       evidenceCount,
+		EvidenceExperiences: yamlmini.ListValues(document, "evidence.experiences"),
+		ReviewGate:          activeRuleReviewGate(document),
+		ReviewDecision:      activeRuleReviewDecision(document),
 	}, true, nil
 }
 
@@ -272,6 +282,9 @@ func ServedRuleData(rules []Rule, options Options) ([]map[string]any, *resultdoc
 			"confidence":       rule.Confidence,
 			"scope_paths":      append([]string(nil), rule.ScopePaths...),
 			"citations":        servedCitations,
+			"evidence_count":   RuleEvidenceCount(rule),
+			"experience_ids":   append([]string(nil), rule.EvidenceExperiences...),
+			"memory_source":    "active_rules_from_canonical_experience_records",
 			"path":             rule.Path,
 			"review_gate":      rule.ReviewGate,
 			"review_decision":  rule.ReviewDecision,
@@ -280,11 +293,15 @@ func ServedRuleData(rules []Rule, options Options) ([]map[string]any, *resultdoc
 	return data, nil
 }
 
-func BuildRiskAssessment(root string, inputRef string, content []byte, touchedPaths []string, rules []Rule, options Options) (RiskAssessment, *resultdoc.CommandError) {
+func BuildRiskAssessment(root string, inputRef string, content []byte, touchedPaths []string, rules []Rule, options Options, inputKinds ...string) (RiskAssessment, *resultdoc.CommandError) {
+	inputKind := "diff"
+	if len(inputKinds) > 0 && strings.TrimSpace(inputKinds[0]) != "" {
+		inputKind = strings.TrimSpace(inputKinds[0])
+	}
 	matches := []RiskAssessmentMatch{}
 	citations := []string{}
+	matchedRules := []Rule{}
 	highestAvoidConfidence := -1.0
-	hasPlaybookCoverage := false
 	for _, rule := range rules {
 		if !RuleMatchesTouchedPath(root, rule, touchedPaths) {
 			continue
@@ -307,10 +324,9 @@ func BuildRiskAssessment(root string, inputRef string, content []byte, touchedPa
 			RuleID:     rule.ID,
 			Confidence: rule.Confidence,
 		})
+		matchedRules = append(matchedRules, rule)
 		citations = append(citations, servedCitations...)
-		if rule.Kind == "playbook" {
-			hasPlaybookCoverage = true
-		} else if rule.Confidence > highestAvoidConfidence {
+		if rule.Kind != "playbook" && rule.Confidence > highestAvoidConfidence {
 			highestAvoidConfidence = rule.Confidence
 		}
 	}
@@ -324,20 +340,28 @@ func BuildRiskAssessment(root string, inputRef string, content []byte, touchedPa
 	if citations == nil {
 		citations = []string{}
 	}
+	pathCoverage, coverageStats := CoverageForPaths(root, touchedPaths, matchedRules)
 	riskLevel := "no_coverage"
 	if highestAvoidConfidence >= 0.75 {
 		riskLevel = "match_high"
 	} else if highestAvoidConfidence >= 0 {
 		riskLevel = "match_medium"
-	} else if hasPlaybookCoverage {
+	} else if coverageStats["coverage"] == "covered_clean" {
 		riskLevel = "covered_clean"
 	}
 	metadata := map[string]any{
-		"input_path":               inputRef,
-		"diff_fingerprint":         sha256String(string(content)),
-		"touched_paths":            touchedPaths,
-		"repo_relative_paths_only": true,
-		"redaction_status":         "customer_safe",
+		"input_path":                inputRef,
+		"input_kind":                inputKind,
+		"diff_fingerprint":          sha256String(string(content)),
+		"touched_paths":             touchedPaths,
+		"coverage":                  coverageStats["coverage"],
+		"coverage_stats":            coverageStats,
+		"path_coverage":             pathCoverage,
+		"experience_ids":            coverageStats["experience_ids"],
+		"canonical_experience_refs": coverageStats["experience_ids"],
+		"memory_source":             "active_rules_from_canonical_experience_records",
+		"repo_relative_paths_only":  true,
+		"redaction_status":          "customer_safe",
 	}
 	if highestAvoidConfidence >= 0 {
 		metadata["max_avoid_confidence"] = highestAvoidConfidence
@@ -351,6 +375,145 @@ func BuildRiskAssessment(root string, inputRef string, content []byte, touchedPa
 		Citations:     citations,
 		Metadata:      metadata,
 	}, nil
+}
+
+func CoverageForPaths(root string, touchedPaths []string, rules []Rule) ([]map[string]any, map[string]any) {
+	normalizedPaths := uniqueStrings(touchedPaths)
+	entries := make([]map[string]any, 0, len(normalizedPaths))
+	summary := map[string]any{
+		"coverage":                   "no_coverage",
+		"touched_path_count":         len(normalizedPaths),
+		"covered_path_count":         0,
+		"covered_clean_count":        0,
+		"covered_risky_count":        0,
+		"no_coverage_path_count":     0,
+		"no_coverage_count":          0,
+		"matched_rule_count":         len(rules),
+		"evidence_count":             EvidenceCountForRules(rules),
+		"experience_ids":             ExperienceIDsForRules(rules),
+		"experience_density":         0.0,
+		"experience_density_source":  "active_memory_rule_evidence",
+		"coverage_source":            "active_memory_rules",
+		"canonical_record_source":    "memory_rule_evidence.experiences",
+		"repo_relative_paths_only":   true,
+		"out_of_distribution_signal": false,
+	}
+	if len(normalizedPaths) > 0 {
+		summary["experience_density"] = float64(EvidenceCountForRules(rules)) / float64(len(normalizedPaths))
+	}
+	for _, touchedPath := range normalizedPaths {
+		matched := RulesForTouchedPath(root, touchedPath, rules)
+		coverage := CoverageLevelForRules(matched)
+		evidenceCount := EvidenceCountForRules(matched)
+		experienceIDs := ExperienceIDsForRules(matched)
+		entry := map[string]any{
+			"path":                touchedPath,
+			"coverage":            coverage,
+			"out_of_distribution": coverage == "no_coverage",
+			"active_rule_count":   len(matched),
+			"matched_rule_count":  len(matched),
+			"matched_rule_ids":    RuleIDs(matched),
+			"citations":           uniqueStrings(citationsFromRules(matched)),
+			"evidence_count":      evidenceCount,
+			"experience_ids":      experienceIDs,
+			"experience_density":  float64(evidenceCount),
+		}
+		entries = append(entries, entry)
+		switch coverage {
+		case "covered_risky":
+			summary["covered_path_count"] = summary["covered_path_count"].(int) + 1
+			summary["covered_risky_count"] = summary["covered_risky_count"].(int) + 1
+		case "covered_clean":
+			summary["covered_path_count"] = summary["covered_path_count"].(int) + 1
+			summary["covered_clean_count"] = summary["covered_clean_count"].(int) + 1
+		default:
+			summary["no_coverage_path_count"] = summary["no_coverage_path_count"].(int) + 1
+			summary["no_coverage_count"] = summary["no_coverage_count"].(int) + 1
+		}
+	}
+	summary["coverage"] = aggregateCoverage(summary)
+	summary["out_of_distribution_signal"] = summary["coverage"] == "no_coverage"
+	return entries, summary
+}
+
+func RulesForTouchedPath(root string, touchedPath string, rules []Rule) []Rule {
+	var matched []Rule
+	for _, rule := range rules {
+		if RuleMatchesTouchedPath(root, rule, []string{touchedPath}) {
+			matched = append(matched, rule)
+		}
+	}
+	sort.Slice(matched, func(i, j int) bool {
+		if matched[i].Confidence == matched[j].Confidence {
+			return matched[i].ID < matched[j].ID
+		}
+		return matched[i].Confidence > matched[j].Confidence
+	})
+	return matched
+}
+
+func CoverageLevelForRules(rules []Rule) string {
+	if len(rules) == 0 {
+		return "no_coverage"
+	}
+	for _, rule := range rules {
+		if rule.Kind == "avoid" {
+			return "covered_risky"
+		}
+	}
+	return "covered_clean"
+}
+
+func EvidenceCountForRules(rules []Rule) int {
+	count := 0
+	for _, rule := range rules {
+		count += RuleEvidenceCount(rule)
+	}
+	return count
+}
+
+func RuleEvidenceCount(rule Rule) int {
+	if rule.EvidenceCount > 0 {
+		return rule.EvidenceCount
+	}
+	return len(rule.EvidenceExperiences)
+}
+
+func ExperienceIDsForRules(rules []Rule) []string {
+	var ids []string
+	for _, rule := range rules {
+		ids = append(ids, rule.EvidenceExperiences...)
+	}
+	return uniqueStrings(ids)
+}
+
+func RuleIDs(rules []Rule) []string {
+	var ids []string
+	for _, rule := range rules {
+		ids = append(ids, rule.ID)
+	}
+	return uniqueStrings(ids)
+}
+
+func citationsFromRules(rules []Rule) []string {
+	var citations []string
+	for _, rule := range rules {
+		citations = append(citations, ServedRuleCitationURLs(rule)...)
+	}
+	return citations
+}
+
+func aggregateCoverage(summary map[string]any) string {
+	if summary["covered_risky_count"].(int) > 0 {
+		return "covered_risky"
+	}
+	if summary["no_coverage_path_count"].(int) > 0 {
+		return "no_coverage"
+	}
+	if summary["covered_clean_count"].(int) > 0 {
+		return "covered_clean"
+	}
+	return "no_coverage"
 }
 
 func HasPositivePlaybookEvidence(document yamlmini.Document) bool {
@@ -542,6 +705,9 @@ func uniqueStrings(values []string) []string {
 		}
 		seen[value] = true
 		unique = append(unique, value)
+	}
+	if unique == nil {
+		return []string{}
 	}
 	return unique
 }

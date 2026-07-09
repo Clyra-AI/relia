@@ -50,7 +50,7 @@ func adviseResult(args []string, start time.Time) CommandResult {
 		}
 		return withFormat(errorResult("advise", "advise", internalError("could not read advise input", err), start))
 	}
-	touchedPaths, commandErr := parseUnifiedDiffTouchedPaths(inputContent, displayPath(root, inputPath))
+	touchedPaths, inputKind, commandErr := parseAssessmentInputPaths(inputContent, displayPath(root, inputPath))
 	if commandErr != nil {
 		return withFormat(errorResult("advise", "advise", commandErr, start))
 	}
@@ -58,7 +58,7 @@ func adviseResult(args []string, start time.Time) CommandResult {
 	if commandErr != nil {
 		return withFormat(errorResult("advise", "advise", commandErr, start))
 	}
-	assessment, commandErr := assessdoc.BuildRiskAssessment(root, displayPath(root, inputPath), inputContent, touchedPaths, rules, assessmentBuildOptions())
+	assessment, commandErr := assessdoc.BuildRiskAssessment(root, displayPath(root, inputPath), inputContent, touchedPaths, rules, assessmentBuildOptions(), inputKind)
 	if commandErr != nil {
 		return withFormat(errorResult("advise", "advise", commandErr, start))
 	}
@@ -68,6 +68,11 @@ func adviseResult(args []string, start time.Time) CommandResult {
 		return withFormat(errorResult("advise", "advise", commandErrorFromAdviseState(stateErr), start))
 	}
 	shouldComment, skipReason := advisedoc.CommentDecision(settings, assessment, diffFingerprint, previousState, start)
+	forwardBaseline, stateErr := advisedoc.LoadForwardBaseline(root, options.BaselinePath)
+	if stateErr != nil {
+		return withFormat(errorResult("advise", "advise", commandErrorFromAdviseState(stateErr), start))
+	}
+	forwardSignal := advisedoc.BuildForwardSignal(commandSchemaVersion, displayPath(root, inputPath), assessment, settings, diffFingerprint, forwardBaseline, shouldComment, skipReason, start)
 	body := ""
 	if shouldComment {
 		body = advisedoc.RenderComment(assessment, touchedPaths, diffFingerprint, start, skipReason)
@@ -85,6 +90,7 @@ func adviseResult(args []string, start time.Time) CommandResult {
 		shouldComment,
 		skipReason,
 		start,
+		forwardSignal,
 	)
 	encodedState, err := json.MarshalIndent(state, "", "  ")
 	if err != nil {
@@ -95,6 +101,7 @@ func adviseResult(args []string, start time.Time) CommandResult {
 	}
 	result := passResult("advise", "advise", "planned advisory PR comment from local assessment", start, map[string]any{
 		"input_path":         displayPath(root, inputPath),
+		"input_kind":         inputKind,
 		"format":             options.Format,
 		"touched_paths":      touchedPaths,
 		"active_rule_count":  len(rules),
@@ -105,6 +112,8 @@ func adviseResult(args []string, start time.Time) CommandResult {
 		"skip_reason":        skipReason,
 		"comment_path":       options.CommentPath,
 		"state_path":         options.StatePath,
+		"baseline_path":      options.BaselinePath,
+		"forward_signal":     forwardSignal,
 		"comment_strategy":   advisedoc.CommentStrategy(settings),
 	})
 	result.Warnings = append(result.Warnings, warnings...)
@@ -112,6 +121,7 @@ func adviseResult(args []string, start time.Time) CommandResult {
 		"schemas/risk-assessment.schema.json",
 		displayPath(root, inputPath),
 		options.StatePath,
+		options.BaselinePath,
 	)
 	result.Artifacts = append(result.Artifacts,
 		ArtifactRef{Kind: "input_diff", Path: displayPath(root, inputPath)},

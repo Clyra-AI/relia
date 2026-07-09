@@ -260,6 +260,25 @@ credential path is added. Rollback is removal of the T13 compile command,
 config additions, and regenerated managed blocks; reviewed rule YAML and MCP
 serving remain the authoritative memory surfaces.
 
+T14 completes the assessment and forward-advisory signal boundary. The state
+owner is `internal/assess` for active-rule evidence projection, risk-level
+selection, per-path coverage, and experience-density metadata;
+`internal/diffparse` owns unified diff and plan path extraction;
+`internal/serve` owns MCP coverage response shaping; `internal/advise` owns
+one-comment advisory decisions, debounce/unchanged-fingerprint state, saved ERR
+baseline lookup, and `relia.forward_signal` state construction; `cmd/relia`
+owns command-result wiring and local artifact writes. The source of truth
+remains reviewed active `memory/rules/*.yaml` backed by canonical experience
+IDs plus `.relia/baselines/error-recurrence-baseline.json` when an operator has
+saved a reviewed baseline. Feedback sources are diff parser tests,
+assess/serve/advise package tests, command-boundary tests, `make prepush-full`,
+and task-run evidence. The blast radius is limited to local `relia assess`,
+`relia serve --tool assess`, `relia serve --tool coverage`, `relia advise`
+JSON output, advisory state/comment artifacts, schemas, and docs; no network,
+provider, credential, or merge-gate behavior is added. Rollback is removal of
+the T14 parser fallback, density metadata, forward-signal state fields, docs,
+and tests; active rule serving and prior diff-only assessment remain usable.
+
 ## Systems Thinking Map
 
 - State lives in repo-local config, generated artifacts, source files, and Factory evidence.

@@ -42,7 +42,7 @@ func ParseArgs(args []string) (CLIOptions, *ParseError) {
 		}
 	}
 	if strings.TrimSpace(options.InputPath) == "" {
-		return options, &ParseError{Message: "assess requires --input <diff> in offline mode"}
+		return options, &ParseError{Message: "assess requires --input <diff-or-plan> in offline mode"}
 	}
 	if options.Format != "json" {
 		return options, &ParseError{Message: "assess only supports --format json in this task slice"}

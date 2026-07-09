@@ -17,7 +17,7 @@ FACTORY_REPO=/path/to/factory factoryd run --config .factory/factoryd.autoship.e
 
 ## CLI Baseline
 
-The T1/T2/T3/T4.3/T5/T6/T7/T8/T9/T11/T11.1/T12/T13 command surface establishes the lifecycle
+The T1/T2/T3/T4.3/T5/T6/T7/T8/T9/T11/T11.1/T12/T13/T14 command surface establishes the lifecycle
 skeleton, configuration contract, assessment fixture slice, recurrence
 backtest, deterministic distillation, reporting evidence, provider/advisory
 approval boundaries, and agent-native output contract:
@@ -112,10 +112,12 @@ approval boundaries, and agent-native output contract:
   network transports fail closed unless explicitly approved. Deterministic
   local tool calls are available through `relia serve --tool recall --context
   <task>`, `relia serve --tool coverage --paths <repo-paths>`, and
-  `relia serve --tool assess --input <diff>`. Recall returns active rules with
+  `relia serve --tool assess --input <diff-or-plan>`. Recall returns active rules with
   statements, lifecycle status, confidence, and resolved PR citations. Coverage
   labels covered paths as `covered_risky` or `covered_clean` and uncovered
-  paths as `no_coverage`/out-of-distribution.
+  paths as `no_coverage`/out-of-distribution, with evidence counts,
+  experience IDs, and per-path experience density derived from active rule
+  evidence.
 - `relia compile` writes a Relia-managed, marker-delimited block into
   `AGENTS.md` and `CLAUDE.md` for non-MCP agents and refreshes the source block
   at `memory/compiled/agents-block.md`. The command serves only active accepted
@@ -123,14 +125,21 @@ approval boundaries, and agent-native output contract:
   `<!-- relia:begin (generated; edit rules in memory/rules/, not here) -->`
   and `<!-- relia:end -->`, and reports zero changed targets on an idempotent
   rerun.
-- `relia assess --input <diff>` reads a local unified diff, compares touched
-  paths with active local `memory/rules/*.yaml` rules, and emits a
-  `relia.risk_assessment` payload with `match_high`, `match_medium`, or
-  `no_coverage`.
+- `relia assess --input <diff-or-plan>` reads a local unified diff or plan
+  file, compares touched paths with active local `memory/rules/*.yaml` rules,
+  and emits a `relia.risk_assessment` payload with `match_high`,
+  `match_medium`, `no_coverage`, or `covered_clean`. Assessment metadata
+  includes `input_kind`, per-path coverage, aggregate coverage stats, evidence
+  counts, experience IDs, and density. Mixed playbook/no-memory plans remain
+  conservative: uncovered touched paths keep the aggregate coverage
+  `no_coverage` rather than implying safety.
 - `relia advise --input <diff>` runs the same assessment engine and writes one
   advisory comment plan under `.relia/reports/`, including a stable hidden
   marker and diff fingerprint so the GitHub Action can edit one living comment
-  or skip unchanged pushes.
+  or skip unchanged pushes. Advisory state and JSON output include a
+  `relia.forward_signal` object tied to
+  `.relia/baselines/error-recurrence-baseline.json` when present; a missing
+  baseline is non-blocking and records that forward ERR comparison is pending.
 - `--json` always emits the stable command result envelope.
 - piped or non-interactive stdout defaults to JSON.
 - interactive `relia backtest` output prints the operator summary, top repeated
@@ -228,6 +237,10 @@ when the local planner skips comments for new `covered_clean`, low-confidence,
 unchanged-diff, disabled-advise, or `max_comments_per_pr: 0` cases; when an
 existing marker is present and a later diff is `covered_clean`, it updates that
 marker in place with a cleared advisory instead of leaving stale warning text.
+The local planner records a forward signal with the assessment risk level,
+coverage label, comment action, debounce or skip reason, and saved ERR baseline
+reference so later outcome ingestion can compare forward results against the
+reviewed baseline.
 
 ## Post-PRD audit or review findings
 

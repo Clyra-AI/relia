@@ -8,10 +8,11 @@ import (
 )
 
 type Options struct {
-	InputPath   string
-	Format      string
-	StatePath   string
-	CommentPath string
+	InputPath    string
+	Format       string
+	StatePath    string
+	CommentPath  string
+	BaselinePath string
 }
 
 type ParseError struct {
@@ -24,9 +25,10 @@ func (e ParseError) Error() string {
 
 func ParseArgs(args []string) (Options, *ParseError) {
 	options := Options{
-		Format:      "json",
-		StatePath:   ".relia/reports/advisory-state.json",
-		CommentPath: ".relia/reports/advisory-comment.md",
+		Format:       "json",
+		StatePath:    ".relia/reports/advisory-state.json",
+		CommentPath:  ".relia/reports/advisory-comment.md",
+		BaselinePath: ".relia/baselines/error-recurrence-baseline.json",
 	}
 	for index := 0; index < len(args); index++ {
 		arg := args[index]
@@ -55,6 +57,12 @@ func ParseArgs(args []string) (Options, *ParseError) {
 			}
 			options.CommentPath = args[index+1]
 			index++
+		case "--baseline":
+			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
+				return options, &ParseError{Message: "advise requires a repo-relative path after --baseline"}
+			}
+			options.BaselinePath = args[index+1]
+			index++
 		default:
 			return options, &ParseError{Message: fmt.Sprintf("unknown advise argument %q", arg)}
 		}
@@ -71,6 +79,7 @@ func ParseArgs(args []string) (Options, *ParseError) {
 	}{
 		{"advise --state", options.StatePath},
 		{"advise --comment", options.CommentPath},
+		{"advise --baseline", options.BaselinePath},
 	} {
 		if _, ok := configdoc.CleanRepoPath(item.path); !ok {
 			return options, &ParseError{Message: item.label + " must be repo-relative"}

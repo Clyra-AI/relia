@@ -41,6 +41,31 @@
           },
           "coverage": {
             "enum": ["covered_clean", "covered_risky", "no_coverage"]
+          },
+          "out_of_distribution": {
+            "type": "boolean"
+          },
+          "experience_density": {
+            "type": "number",
+            "minimum": 0
+          },
+          "evidence_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "experience_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "matched_rule_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
           }
         }
       }

@@ -125,11 +125,11 @@ func serveAssessToolResult(root string, options servedoc.Options, rules []assess
 		}
 		return nil, internalError("could not read serve assess input", err)
 	}
-	touchedPaths, commandErr := parseUnifiedDiffTouchedPaths(inputContent, displayPath(root, inputPath))
+	touchedPaths, inputKind, commandErr := parseAssessmentInputPaths(inputContent, displayPath(root, inputPath))
 	if commandErr != nil {
 		return nil, commandErr
 	}
-	assessment, commandErr := assessdoc.BuildRiskAssessment(root, displayPath(root, inputPath), inputContent, touchedPaths, rules, assessmentBuildOptions())
+	assessment, commandErr := assessdoc.BuildRiskAssessment(root, displayPath(root, inputPath), inputContent, touchedPaths, rules, assessmentBuildOptions(), inputKind)
 	if commandErr != nil {
 		return nil, commandErr
 	}
@@ -137,6 +137,7 @@ func serveAssessToolResult(root string, options servedoc.Options, rules []assess
 		"object_type":           "relia.mcp_assess_response",
 		"schema_version":        commandSchemaVersion,
 		"input_path":            displayPath(root, inputPath),
+		"input_kind":            inputKind,
 		"touched_paths":         touchedPaths,
 		"assessment":            assessment,
 		"matched_rule_count":    len(assessment.Matches),
