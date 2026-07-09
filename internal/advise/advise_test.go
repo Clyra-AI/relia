@@ -35,6 +35,33 @@ func TestCommentDecisionClearsPriorBelowMinimumAdvisory(t *testing.T) {
 	}
 }
 
+func TestCommentDecisionDoesNotSuppressUncoveredPathBelowMinConfidence(t *testing.T) {
+	settings := configdoc.AdviseSettings{
+		Enabled:          true,
+		MaxCommentsPerPR: 1,
+		MinConfidence:    0.7,
+	}
+	assessment := assessdoc.RiskAssessment{
+		RiskLevel: "match_medium",
+		Matches: []assessdoc.RiskAssessmentMatch{
+			{RuleID: "billing-low-confidence", Confidence: 0.55},
+		},
+		Metadata: map[string]any{
+			"max_avoid_confidence": 0.55,
+			"coverage":             "no_coverage",
+			"coverage_stats": map[string]any{
+				"no_coverage_path_count": 1,
+			},
+		},
+	}
+
+	shouldComment, skipReason := CommentDecision(settings, assessment, "sha256:current", PriorState{}, time.Now().UTC())
+
+	if !shouldComment || skipReason != "" {
+		t.Fatalf("CommentDecision = (%v, %q), want advisory for uncovered path", shouldComment, skipReason)
+	}
+}
+
 func TestRenderCommentEscapesTouchedPathCodeSpans(t *testing.T) {
 	assessment := assessdoc.RiskAssessment{
 		RiskLevel: "no_coverage",

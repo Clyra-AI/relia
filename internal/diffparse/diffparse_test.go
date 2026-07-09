@@ -206,6 +206,7 @@ func TestTouchedPathsOrPlanSplitsQuotedCommandSpans(t *testing.T) {
 
 - Run ` + "`relia assess --input packages/billing/invoice.py`" + ` before advisory output.
 - Also run "relia assess --input=src/components/button.tsx" for UI coverage.
+- Then run "./scripts/check packages/search/query.py" for the repo-local helper.
 `))
 	if err != nil {
 		t.Fatalf("TouchedPathsOrPlan error: %v", err)
@@ -213,7 +214,7 @@ func TestTouchedPathsOrPlanSplitsQuotedCommandSpans(t *testing.T) {
 	if inputKind != "plan" {
 		t.Fatalf("input kind = %q, want plan", inputKind)
 	}
-	want := []string{"packages/billing/invoice.py", "src/components/button.tsx"}
+	want := []string{"packages/billing/invoice.py", "packages/search/query.py", "src/components/button.tsx"}
 	if fmt.Sprint(paths) != fmt.Sprint(want) {
 		t.Fatalf("paths = %#v, want %#v", paths, want)
 	}
