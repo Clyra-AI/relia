@@ -385,7 +385,8 @@
       "slice_id": "assessment-and-pr-advisory",
       "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T14",
       "task_refs": [
-        "T14"
+        "T14",
+        "T14.1"
       ]
     },
     {
@@ -1045,7 +1046,8 @@
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T14"
+            "T14",
+            "T14.1"
           ]
         }
       ],
@@ -1057,7 +1059,8 @@
         "make prepush-full"
       ],
       "task_refs": [
-        "T14"
+        "T14",
+        "T14.1"
       ],
       "title": "FR16: MCP Serving"
     },
@@ -2075,7 +2078,8 @@
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T14"
+            "T14",
+            "T14.1"
           ]
         },
         {
@@ -2178,6 +2182,7 @@
         "T11",
         "T13",
         "T14",
+        "T14.1",
         "T15",
         "T15.1"
       ],
@@ -2605,7 +2610,8 @@
           ],
           "evidence_mode": "automated",
           "task_refs": [
-            "T14"
+            "T14",
+            "T14.1"
           ]
         },
         {
@@ -2712,6 +2718,7 @@
         "T12",
         "T13",
         "T14",
+        "T14.1",
         "T15"
       ],
       "title": "Serve And Advise Acceptance Tests"
