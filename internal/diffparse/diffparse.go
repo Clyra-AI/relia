@@ -84,7 +84,7 @@ func planPathCandidate(field string) bool {
 		return false
 	}
 	if strings.Contains(field, "/") {
-		return true
+		return !remotePathLikeToken(field)
 	}
 	switch field {
 	case "Makefile", "Dockerfile", "LICENSE", "NOTICE", "README", "CHANGELOG":
@@ -95,6 +95,14 @@ func planPathCandidate(field string) bool {
 	}
 	extension := filepath.Ext(field)
 	return extension != "" && hasASCIIAlpha(extension)
+}
+
+func remotePathLikeToken(value string) bool {
+	first, _, found := strings.Cut(value, "/")
+	if !found || strings.HasPrefix(first, ".") {
+		return false
+	}
+	return strings.Contains(first, ".")
 }
 
 func abbreviationLikeToken(value string) bool {
