@@ -1,0 +1,136 @@
+{
+  "acceptance_results": [
+    {
+      "acceptance_item_id": "FR16-MCP-SERVING-001",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T14/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json",
+        ".factory/artifacts/task-runs/T14/validation-report.json",
+        ".factory/artifacts/task-runs/T14/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T14/scope-closure-report.json",
+        "https://github.com/Clyra-AI/relia/pull/164",
+        "refs/remotes/origin/main@1cceab856a7b8349a91111412e04741047331732"
+      ],
+      "status": "implemented",
+      "summary": ""
+    },
+    {
+      "acceptance_item_id": "FR19-COVERAGE-OOD-SIGNAL-001",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T14/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json",
+        ".factory/artifacts/task-runs/T14/validation-report.json",
+        ".factory/artifacts/task-runs/T14/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T14/scope-closure-report.json",
+        "https://github.com/Clyra-AI/relia/pull/164",
+        "refs/remotes/origin/main@1cceab856a7b8349a91111412e04741047331732"
+      ],
+      "status": "implemented",
+      "summary": ""
+    },
+    {
+      "acceptance_item_id": "FR5-CANONICAL-EXPERIENCE-SCHEMA-001",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T14/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json",
+        ".factory/artifacts/task-runs/T14/validation-report.json",
+        ".factory/artifacts/task-runs/T14/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T14/scope-closure-report.json",
+        "https://github.com/Clyra-AI/relia/pull/164",
+        "refs/remotes/origin/main@1cceab856a7b8349a91111412e04741047331732"
+      ],
+      "status": "implemented",
+      "summary": ""
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-016",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T14/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json",
+        ".factory/artifacts/task-runs/T14/validation-report.json",
+        ".factory/artifacts/task-runs/T14/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T14/scope-closure-report.json",
+        "https://github.com/Clyra-AI/relia/pull/164",
+        "refs/remotes/origin/main@1cceab856a7b8349a91111412e04741047331732"
+      ],
+      "status": "implemented",
+      "summary": ""
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-018",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T14/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json",
+        ".factory/artifacts/task-runs/T14/validation-report.json",
+        ".factory/artifacts/task-runs/T14/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T14/scope-closure-report.json",
+        "https://github.com/Clyra-AI/relia/pull/164",
+        "refs/remotes/origin/main@1cceab856a7b8349a91111412e04741047331732"
+      ],
+      "status": "implemented",
+      "summary": ""
+    },
+    {
+      "acceptance_item_id": "NFR14-ADVISORY-RESTRAINT-001",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T14/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json",
+        ".factory/artifacts/task-runs/T14/validation-report.json",
+        ".factory/artifacts/task-runs/T14/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T14/scope-closure-report.json",
+        "https://github.com/Clyra-AI/relia/pull/164",
+        "refs/remotes/origin/main@1cceab856a7b8349a91111412e04741047331732"
+      ],
+      "status": "implemented",
+      "summary": ""
+    },
+    {
+      "acceptance_item_id": "NFR15-NO-DASHBOARD-DEPENDENCY-001",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T14/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json",
+        ".factory/artifacts/task-runs/T14/validation-report.json",
+        ".factory/artifacts/task-runs/T14/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T14/scope-closure-report.json",
+        "https://github.com/Clyra-AI/relia/pull/164",
+        "refs/remotes/origin/main@1cceab856a7b8349a91111412e04741047331732"
+      ],
+      "status": "implemented",
+      "summary": ""
+    },
+    {
+      "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-001",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T14/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json",
+        ".factory/artifacts/task-runs/T14/validation-report.json",
+        ".factory/artifacts/task-runs/T14/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T14/scope-closure-report.json",
+        "https://github.com/Clyra-AI/relia/pull/164",
+        "refs/remotes/origin/main@1cceab856a7b8349a91111412e04741047331732"
+      ],
+      "status": "implemented",
+      "summary": ""
+    },
+    {
+      "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-006",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T14/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json",
+        ".factory/artifacts/task-runs/T14/validation-report.json",
+        ".factory/artifacts/task-runs/T14/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T14/scope-closure-report.json",
+        "https://github.com/Clyra-AI/relia/pull/164",
+        "refs/remotes/origin/main@1cceab856a7b8349a91111412e04741047331732"
+      ],
+      "status": "implemented",
+      "summary": ""
+    }
+  ],
+  "artifact_type": "task_scope_closure_map",
+  "canonical_scope_closure_map_modified": true,
+  "canonical_scope_closure_map_ref": ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+  "schema_version": "1.0",
+  "task_id": "T14",
+  "work_item_id": "relia-mvp-t14"
+}

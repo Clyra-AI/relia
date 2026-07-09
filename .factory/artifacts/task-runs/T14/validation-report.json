@@ -89,6 +89,16 @@
     }
   ],
   "blockers": [],
+  "checks": [
+    {
+      "name": "go test ./internal/diffparse ./internal/advise",
+      "status": "pass"
+    },
+    {
+      "name": "make prepush-full",
+      "status": "pass"
+    }
+  ],
   "changed_paths": [
     ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json",
     ".factory/artifacts/task-runs/T14/validation-report.json",
@@ -156,6 +166,48 @@
       "summary": "lint-fast, go test ./..., test-coverage at 79.4% against 75% minimum, repo-pack validation, and TestDemo contract lane passed."
     }
   ],
+  "independent_validation": {
+    "risk_class": "low",
+    "required_level": "validation_gate",
+    "provided_levels": [
+      "validation_gate"
+    ],
+    "status": "satisfied",
+    "evidence_refs": [
+      ".factory/artifacts/task-runs/T14/work-proof-marker.json",
+      ".factory/artifacts/task-runs/T14/validation-report.json"
+    ],
+    "notes": "Supervisor repair validation reran focused parser and advisory tests plus the full prepush gate."
+  },
+  "integrated_validation": {
+    "status": "whole_repo_ready",
+    "scope_summary": "Full repo validation completed for the supervised T14 repair before PR merge.",
+    "integrated_checks": [
+      {
+        "name": "make prepush-full",
+        "status": "pass",
+        "work_proof_marker_ref": ".factory/artifacts/task-runs/T14/work-proof-marker.json"
+      }
+    ],
+    "fresh_checkout": {
+      "required": false,
+      "status": "not_required",
+      "work_proof_marker_refs": []
+    },
+    "docs_schema_parity": {
+      "status": "not_applicable",
+      "evidence_refs": []
+    },
+    "release_readiness": {
+      "claimed": true,
+      "status": "pass",
+      "work_proof_marker_refs": [
+        ".factory/artifacts/task-runs/T14/work-proof-marker.json"
+      ],
+      "notes": "PR #164 merged after CI and latest-head Codex review gates cleared."
+    }
+  },
+  "introduced_failures": [],
   "path_policy_result": {
     "changed_paths_checked": [
       ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json",
@@ -185,9 +237,41 @@
   "residual_risks": [
     "Lifecycle evidence remains factoryd-owned and was not authored by this worker."
   ],
+  "result": "pass",
   "schema_version": "1.0",
   "status": "pass",
+  "test_scope": [
+    ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json",
+    ".factory/artifacts/task-runs/T14/validation-report.json",
+    ".factory/artifacts/task-runs/T14/work-proof-marker.json",
+    "README.md",
+    "cmd/relia/advise_command.go",
+    "cmd/relia/advise_test.go",
+    "cmd/relia/assess_command.go",
+    "cmd/relia/assess_command_test.go",
+    "cmd/relia/repo_helpers.go",
+    "cmd/relia/serve_command.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/dev/dev_guides.md",
+    "internal/advise/advise.go",
+    "internal/advise/advise_test.go",
+    "internal/advise/args.go",
+    "internal/advise/state.go",
+    "internal/advise/state_test.go",
+    "internal/assess/args.go",
+    "internal/assess/args_test.go",
+    "internal/assess/assess.go",
+    "internal/assess/assess_test.go",
+    "internal/diffparse/diffparse.go",
+    "internal/diffparse/diffparse_test.go",
+    "internal/serve/args.go",
+    "internal/serve/tools.go",
+    "internal/serve/tools_test.go",
+    "schemas/coverage-map.schema.json"
+  ],
   "task_id": "T14",
+  "work_item_id": "T14",
+  "promotion_decision": "ready_for_pr",
   "versioning_result": {
     "notes": "No runtime pin, dependency, schema version, migration, or distribution target changed.",
     "status": "pass"

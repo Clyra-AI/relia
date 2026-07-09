@@ -1,0 +1,64 @@
+{
+  "artifact_type": "factoryd_task_closure_sync_report",
+  "schema_version": "0.1",
+  "generated_at": "2026-07-09T16:17:55Z",
+  "repo": "relia",
+  "task_id": "T14",
+  "ok": true,
+  "evidence_dir_ref": ".factory/artifacts/task-runs/T14",
+  "work_proof_marker_ref": ".factory/artifacts/task-runs/T14/work-proof-marker.json",
+  "validation_report_ref": ".factory/artifacts/task-runs/T14/validation-report.json",
+  "task_scope_closure_map_ref": ".factory/artifacts/task-runs/T14/scope-closure-map.json",
+  "lifecycle_evidence_refs": [
+    ".factory/artifacts/task-runs/T14/work-proof-marker.json",
+    ".factory/artifacts/task-runs/T14/validation-report.json",
+    ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json",
+    ".factory/artifacts/task-runs/T14/scope-closure-report.json"
+  ],
+  "recovery_mode": "merged_pr_post_merge",
+  "recovery_evidence_refs": [
+    ".factory/artifacts/pr-lifecycle/relia-mvp-t14/post-merge-report.json",
+    ".factory/artifacts/supervisor-runs/T14/20260709T105253Z.json"
+  ],
+  "recovery_notes": [
+    "pr_lifecycle_report strict evidence .factory/artifacts/pr-lifecycle/relia-mvp-t14/pr-lifecycle-report.json was superseded by terminal merged-PR recovery evidence",
+    "factoryd_run_once_report strict evidence .factory/artifacts/task-runs/T14/factoryd-run-once-report.json was superseded by terminal merged-PR recovery evidence",
+    "supervisor report .factory/artifacts/supervisor-runs/T14/20260709T105253Z.json supplied 10 exact reviewed repair path refs for closure recovery"
+  ],
+  "supervisor_report_ref": ".factory/artifacts/supervisor-runs/T14/20260709T105253Z.json",
+  "supervised_path_refs": [
+    "internal/diffparse/diffparse.go",
+    "internal/diffparse/diffparse_test.go",
+    "internal/advise/state.go",
+    "internal/advise/state_test.go",
+    "internal/assess/assess.go",
+    "internal/assess/assess_test.go",
+    "internal/advise/advise.go",
+    "internal/advise/advise_test.go",
+    "cmd/relia/advise_test.go",
+    "docs/dev/dev_guides.md"
+  ],
+  "materialized_evidence_refs": [
+    ".factory/artifacts/task-runs/T14/scope-closure-map.json",
+    ".factory/artifacts/task-runs/T14/scope-closure-report.json",
+    ".factory/artifacts/pr-lifecycle/relia-mvp-t14/post-merge-report.json"
+  ],
+  "canonical_scope_closure_map_ref": ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+  "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+  "report_ref": ".factory/artifacts/task-runs/T14/closure-sync-report.json",
+  "updated_task_refs": [
+    "T14"
+  ],
+  "updated_acceptance_item_ids": [
+    "FR16-MCP-SERVING-001",
+    "FR19-COVERAGE-OOD-SIGNAL-001",
+    "FR5-CANONICAL-EXPERIENCE-SCHEMA-001",
+    "MVP-IN-SCOPE-016",
+    "MVP-IN-SCOPE-018",
+    "NFR14-ADVISORY-RESTRAINT-001",
+    "NFR15-NO-DASHBOARD-DEPENDENCY-001",
+    "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-001",
+    "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-006"
+  ],
+  "closure_status": "partial"
+}
