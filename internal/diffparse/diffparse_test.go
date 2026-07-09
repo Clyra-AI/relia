@@ -270,6 +270,8 @@ func TestTouchedPathsOrPlanSplitsQuotedCommandSpans(t *testing.T) {
 - Also run "relia assess --input=src/components/button.tsx" for UI coverage.
 - Then run "./scripts/check packages/search/query.py" for the repo-local helper.
 - Run "python3 scripts/check.py packages/billing/receipt.py" through the interpreter helper.
+- Run "./scripts/check.py packages/billing/credit.py" as a script helper with an extension.
+- Run "scripts/check.sh packages/billing/debit.py" as a repo-local shell helper.
 - Finally run "relia serve --tool coverage --paths=internal/assess/assess.go,internal/advise/advise.go".
 `))
 	if err != nil {
@@ -278,7 +280,7 @@ func TestTouchedPathsOrPlanSplitsQuotedCommandSpans(t *testing.T) {
 	if inputKind != "plan" {
 		t.Fatalf("input kind = %q, want plan", inputKind)
 	}
-	want := []string{"internal/advise/advise.go", "internal/assess/assess.go", "packages/billing/invoice.py", "packages/billing/receipt.py", "packages/search/query.py", "src/components/button.tsx"}
+	want := []string{"internal/advise/advise.go", "internal/assess/assess.go", "packages/billing/credit.py", "packages/billing/debit.py", "packages/billing/invoice.py", "packages/billing/receipt.py", "packages/search/query.py", "src/components/button.tsx"}
 	if fmt.Sprint(paths) != fmt.Sprint(want) {
 		t.Fatalf("paths = %#v, want %#v", paths, want)
 	}
