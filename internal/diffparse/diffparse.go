@@ -156,6 +156,16 @@ func recordPlanPath(touched map[string]bool, field string) {
 	if field == "" {
 		return
 	}
+	for _, part := range strings.Split(field, ",") {
+		recordPlanPathValue(touched, part)
+	}
+}
+
+func recordPlanPathValue(touched map[string]bool, field string) {
+	field = strings.TrimSpace(field)
+	if field == "" {
+		return
+	}
 	field = stripLineSuffix(field)
 	if !planPathCandidate(field) {
 		return
@@ -248,8 +258,24 @@ func slashPathCandidate(value string) bool {
 	if slashProseToken(value) {
 		return false
 	}
+	if slashNumericToken(value) {
+		return false
+	}
 	parts := strings.Split(value, "/")
 	return len(parts) >= 2 && parts[0] != ""
+}
+
+func slashNumericToken(value string) bool {
+	parts := strings.Split(value, "/")
+	if len(parts) < 2 {
+		return false
+	}
+	for _, part := range parts {
+		if !asciiDigitsOnly(part) {
+			return false
+		}
+	}
+	return true
 }
 
 func slashProseToken(value string) bool {

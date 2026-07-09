@@ -207,6 +207,7 @@ func TestTouchedPathsOrPlanSplitsQuotedCommandSpans(t *testing.T) {
 - Run ` + "`relia assess --input packages/billing/invoice.py`" + ` before advisory output.
 - Also run "relia assess --input=src/components/button.tsx" for UI coverage.
 - Then run "./scripts/check packages/search/query.py" for the repo-local helper.
+- Finally run "relia serve --tool coverage --paths=internal/assess/assess.go,internal/advise/advise.go".
 `))
 	if err != nil {
 		t.Fatalf("TouchedPathsOrPlan error: %v", err)
@@ -214,7 +215,7 @@ func TestTouchedPathsOrPlanSplitsQuotedCommandSpans(t *testing.T) {
 	if inputKind != "plan" {
 		t.Fatalf("input kind = %q, want plan", inputKind)
 	}
-	want := []string{"packages/billing/invoice.py", "packages/search/query.py", "src/components/button.tsx"}
+	want := []string{"internal/advise/advise.go", "internal/assess/assess.go", "packages/billing/invoice.py", "packages/search/query.py", "src/components/button.tsx"}
 	if fmt.Sprint(paths) != fmt.Sprint(want) {
 		t.Fatalf("paths = %#v, want %#v", paths, want)
 	}
@@ -269,6 +270,7 @@ func TestTouchedPathsOrPlanRejectsSlashDelimitedProse(t *testing.T) {
 
 - Keep CI/CD and read/write guidance aligned.
 - Choose this and/or that while updating packages/billing/invoice.py.
+- Mention 2026/07/09 and 7/9 as schedule dates, not paths.
 - Preserve internal/assess package handling for directory-scoped rules.
 - Preserve pkg/billing and src/components as generic directory-scoped paths.
 `))
@@ -283,7 +285,7 @@ func TestTouchedPathsOrPlanRejectsSlashDelimitedProse(t *testing.T) {
 		t.Fatalf("paths = %#v, want %#v", paths, want)
 	}
 
-	_, _, err = TouchedPathsOrPlan([]byte("Improve CI/CD, read/write, and and/or prose only."))
+	_, _, err = TouchedPathsOrPlan([]byte("Improve CI/CD, read/write, 2026/07/09, 7/9, and and/or prose only."))
 	if !errors.Is(err, ErrNoRepoRelativePaths) {
 		t.Fatalf("error = %v, want ErrNoRepoRelativePaths", err)
 	}
