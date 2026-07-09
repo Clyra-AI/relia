@@ -182,6 +182,25 @@ func TestTouchedPathsOrPlanStripsOptionPathPrefixes(t *testing.T) {
 	}
 }
 
+func TestTouchedPathsOrPlanPreservesQuotedPathsWithSpaces(t *testing.T) {
+	paths, inputKind, err := TouchedPathsOrPlan([]byte(`Implementation plan:
+
+- Update ` + "`docs/api guide.md`" + ` with the operator-facing contract.
+- Run relia assess --input="docs/release notes.md" before advisory output.
+- Do not record split fragments from quoted paths.
+`))
+	if err != nil {
+		t.Fatalf("TouchedPathsOrPlan error: %v", err)
+	}
+	if inputKind != "plan" {
+		t.Fatalf("input kind = %q, want plan", inputKind)
+	}
+	want := []string{"docs/api guide.md", "docs/release notes.md"}
+	if fmt.Sprint(paths) != fmt.Sprint(want) {
+		t.Fatalf("paths = %#v, want %#v", paths, want)
+	}
+}
+
 func TestTouchedPathsOrPlanKeepsUnifiedDiffKind(t *testing.T) {
 	paths, inputKind, err := TouchedPathsOrPlan([]byte(`diff --git a/packages/search/query.py b/packages/search/query.py
 --- a/packages/search/query.py
