@@ -248,6 +248,7 @@ func TestTouchedPathsOrPlanPreservesQuotedPathsWithSpaces(t *testing.T) {
 - Update ` + "`docs/api guide.md`" + ` with the operator-facing contract.
 - Run relia assess --input="docs/release notes.md" before advisory output.
 - Keep 'docs/single quote guide.md' in the same path extraction path.
+- Keep "docs/api guide/v1.md" as a quoted nested path with spaces.
 - Keep "release notes.md" as a quoted root-level path with spaces.
 - Do not record split fragments from quoted paths.
 `))
@@ -257,7 +258,7 @@ func TestTouchedPathsOrPlanPreservesQuotedPathsWithSpaces(t *testing.T) {
 	if inputKind != "plan" {
 		t.Fatalf("input kind = %q, want plan", inputKind)
 	}
-	want := []string{"docs/api guide.md", "docs/release notes.md", "docs/single quote guide.md", "release notes.md"}
+	want := []string{"docs/api guide.md", "docs/api guide/v1.md", "docs/release notes.md", "docs/single quote guide.md", "release notes.md"}
 	if fmt.Sprint(paths) != fmt.Sprint(want) {
 		t.Fatalf("paths = %#v, want %#v", paths, want)
 	}
@@ -291,6 +292,7 @@ func TestTouchedPathsOrPlanSkipsUnquotedCommandHelpers(t *testing.T) {
 	paths, inputKind, err := TouchedPathsOrPlan([]byte(`Implementation plan:
 
 - Run ./scripts/check.py packages/billing/invoice.py before advice.
+- Run: ./scripts/check.py packages/billing/colon.py before advice.
 - Run python3 scripts/check.py packages/billing/receipt.py through the helper.
 - Update scripts/check.py and packages/billing/config.py in the same patch.
 `))
@@ -300,7 +302,7 @@ func TestTouchedPathsOrPlanSkipsUnquotedCommandHelpers(t *testing.T) {
 	if inputKind != "plan" {
 		t.Fatalf("input kind = %q, want plan", inputKind)
 	}
-	want := []string{"packages/billing/config.py", "packages/billing/invoice.py", "packages/billing/receipt.py", "scripts/check.py"}
+	want := []string{"packages/billing/colon.py", "packages/billing/config.py", "packages/billing/invoice.py", "packages/billing/receipt.py", "scripts/check.py"}
 	if fmt.Sprint(paths) != fmt.Sprint(want) {
 		t.Fatalf("paths = %#v, want %#v", paths, want)
 	}
