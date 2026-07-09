@@ -257,6 +257,32 @@ func TestStateDocumentBuildsAdvisoryState(t *testing.T) {
 	}
 }
 
+func TestBuildForwardSignalPreservesAssessmentRiskWhenBelowConfidence(t *testing.T) {
+	generatedAt := time.Date(2026, 7, 2, 8, 0, 0, 0, time.UTC)
+	assessment := assessdoc.RiskAssessment{
+		ObjectType:    "relia.risk_assessment",
+		SchemaVersion: "1.0",
+		RiskLevel:     "match_medium",
+		Metadata:      map[string]any{},
+	}
+	settings := configdoc.AdviseSettings{
+		Enabled:                 true,
+		MaxCommentsPerPR:        1,
+		UpdateInPlace:           true,
+		ReassessDebounceMinutes: 15,
+		MinConfidence:           0.7,
+	}
+
+	forwardSignal := BuildForwardSignal("1.0", "changes.diff", assessment, settings, "sha256:current", ForwardBaseline{}, false, "below_min_confidence", generatedAt)
+
+	if forwardSignal["risk_level"] != "match_medium" {
+		t.Fatalf("risk_level = %#v, want assessment risk", forwardSignal["risk_level"])
+	}
+	if forwardSignal["skip_reason"] != "below_min_confidence" || forwardSignal["comment_action"] != "skip" {
+		t.Fatalf("forward_signal = %#v", forwardSignal)
+	}
+}
+
 func TestStateDocumentPreservesPriorFingerprintDuringDebounce(t *testing.T) {
 	generatedAt := time.Date(2026, 7, 2, 8, 30, 0, 0, time.UTC)
 	previousAt := time.Date(2026, 7, 2, 8, 0, 0, 0, time.UTC)
