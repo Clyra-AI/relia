@@ -78,9 +78,20 @@ func recordQuotedPlanPath(touched map[string]bool, field string) {
 }
 
 func recordQuotedCommandSpan(touched map[string]bool, parts []string) {
+	skipInterpreterScriptOperand := false
 	for index, part := range parts {
+		if index == 0 && knownCommandToken(part) {
+			skipInterpreterScriptOperand = interpreterCommandToken(part)
+			continue
+		}
 		if index == 0 && quotedCommandExecutable(part) {
 			continue
+		}
+		if skipInterpreterScriptOperand && !strings.HasPrefix(part, "-") {
+			skipInterpreterScriptOperand = false
+			if commandScriptOperand(part) {
+				continue
+			}
 		}
 		recordPlanPath(touched, part)
 	}
@@ -111,9 +122,23 @@ func knownCommandToken(value string) bool {
 	}
 }
 
+func interpreterCommandToken(value string) bool {
+	switch value {
+	case "node", "python", "python3":
+		return true
+	default:
+		return false
+	}
+}
+
 func quotedCommandExecutable(part string) bool {
 	trimmed := strings.TrimPrefix(part, "./")
 	return strings.Contains(trimmed, "/") && filepath.Ext(filepath.Base(trimmed)) == ""
+}
+
+func commandScriptOperand(part string) bool {
+	trimmed := strings.TrimPrefix(part, "./")
+	return strings.Contains(trimmed, "/")
 }
 
 func quotedPlanFields(raw string) ([]string, string) {
@@ -295,6 +320,9 @@ func slashPathCandidate(value string) bool {
 	if slashNumericToken(value) {
 		return false
 	}
+	if slashTaskIDChainToken(value) {
+		return false
+	}
 	parts := strings.Split(value, "/")
 	return len(parts) >= 2 && parts[0] != ""
 }
@@ -310,6 +338,39 @@ func slashNumericToken(value string) bool {
 		}
 	}
 	return true
+}
+
+func slashTaskIDChainToken(value string) bool {
+	parts := strings.Split(value, "/")
+	if len(parts) < 2 {
+		return false
+	}
+	for _, part := range parts {
+		if !taskIDLikeSegment(part) {
+			return false
+		}
+	}
+	return true
+}
+
+func taskIDLikeSegment(value string) bool {
+	if value == "" {
+		return false
+	}
+	hasUpper := false
+	hasDigit := false
+	for _, char := range value {
+		switch {
+		case char >= 'A' && char <= 'Z':
+			hasUpper = true
+		case char >= '0' && char <= '9':
+			hasDigit = true
+		case char == '-' || char == '_' || char == '.':
+		default:
+			return false
+		}
+	}
+	return hasUpper && hasDigit
 }
 
 func slashProseToken(value string) bool {
