@@ -672,6 +672,10 @@
       "task_id": "T14"
     },
     {
+      "blocked_by": "T14",
+      "task_id": "T14.1"
+    },
+    {
       "blocked_by": "T14.1",
       "task_id": "T15"
     },
@@ -690,10 +694,6 @@
     {
       "blocked_by": "T15",
       "task_id": "T15.1"
-    },
-    {
-      "blocked_by": "T14",
-      "task_id": "T14.1"
     }
   ],
   "engineering_policy_refs": [
@@ -860,12 +860,12 @@
     "T12",
     "T13",
     "T14",
+    "T14.1",
     "T15",
     "T15.1",
     "T16",
     "T17",
-    "T18",
-    "T14.1"
+    "T18"
   ],
   "validation_contract": {
     "acceptance_criteria": [
