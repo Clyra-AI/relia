@@ -1231,7 +1231,8 @@
         "risk_class": "low",
         "source_ref": "docs/product/prd.md#nfr2-fast-first-memory",
         "task_refs": [
-          "T6"
+          "T6",
+          "T15.1"
         ],
         "title": "NFR2: Fast First Memory"
       },
@@ -1368,7 +1369,8 @@
           "T13",
           "T9",
           "T4.1",
-          "T15"
+          "T15",
+          "T15.1"
         ],
         "title": "MVP In Scope"
       },
@@ -1629,7 +1631,6 @@
           "fr13-human-review-gate",
           "fr14-bidirectional-memory",
           "fr15-memory-page-with-receipts",
-          "nfr2-fast-first-memory",
           "nfr4-calibration-honesty",
           "nfr6-local-privacy",
           "nfr8-structured-data-first",
@@ -1647,14 +1648,11 @@
           "FR13-HUMAN-REVIEW-GATE-001",
           "FR14-BIDIRECTIONAL-MEMORY-001",
           "FR15-MEMORY-PAGE-WITH-RECEIPTS-001",
-          "NFR2-FAST-FIRST-MEMORY-001",
           "NFR4-CALIBRATION-HONESTY-001",
           "NFR6-LOCAL-PRIVACY-001",
           "NFR8-STRUCTURED-DATA-FIRST-001",
           "NFR11-STOCHASTIC-HONESTY-001",
-          "NFR13-INFERENCE-HUMILITY-001",
-          "MVP-IN-SCOPE-003",
-          "MVP-IN-SCOPE-006"
+          "NFR13-INFERENCE-HUMILITY-001"
         ],
         "name": "Distillation, Calibration, And Confidence Part 1",
         "public_release_boundary": false,
@@ -1743,6 +1741,7 @@
           "FR20-ADVISORY-ONLY-DEFAULT-001",
           "FR23-PROVIDER-ADAPTERS-AND-NO-LLM-MODE-001",
           "MVP-IN-SCOPE-010",
+          "MVP-IN-SCOPE-011",
           "FR24-COST-VISIBILITY-001",
           "FR25-PORTABLE-ARTIFACTS-001",
           "NFR10-COST-VISIBILITY-001",
@@ -1923,6 +1922,25 @@
       },
       {
         "acceptance_group_refs": [
+          "nfr2-fast-first-memory",
+          "mvp-in-scope"
+        ],
+        "acceptance_item_ids": [
+          "NFR2-FAST-FIRST-MEMORY-001",
+          "MVP-IN-SCOPE-003",
+          "MVP-IN-SCOPE-006"
+        ],
+        "name": "T6 Carried Release Demo Product Signal Proof",
+        "public_release_boundary": false,
+        "required_for_completion": true,
+        "slice_id": "t6-carried-release-demo-product-signal-proof",
+        "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T15.1",
+        "task_refs": [
+          "T15.1"
+        ]
+      },
+      {
+        "acceptance_group_refs": [
           "fr6-capture-time-redaction",
           "fr18-advisory-assessment",
           "nfr1-fast-first-value",
@@ -2005,6 +2023,7 @@
     "factoryd_runtime_requirements": {
       "runner_ready_fields": [
         "allowed_paths",
+        "semantic_invariants",
         "forbidden_paths",
         "worker_type",
         "factoryd_runtime",
@@ -2062,6 +2081,19 @@
       "required": false,
       "review_type": "code",
       "reviewer_class": "peer_agent"
+    },
+    "supervised_autoship_policy": {
+      "skill_ref": "factory://skills/autoship-supervisor",
+      "required_when": "A human supervisor explicitly oversees one factoryd autoship task from the Relia repo root.",
+      "evidence_artifact_type": "autoship_supervisor_report",
+      "evidence_path": ".factory/artifacts/supervisor-runs/<task_id>/<timestamp>.json",
+      "validation_rule": "Supervisor evidence supplements, but never replaces, validation_report, work_proof_marker, worker_evidence_required, lifecycle_evidence_required, scope closure, CI, and latest-head Codex review evidence.",
+      "blocked_if": [
+        "supervisor is used without a single task_id",
+        "manual intervention bypasses factoryd lifecycle evidence",
+        "manual acceptance lacks explicit gate evidence",
+        "non-convergent repair is applied without recording blocker classification"
+      ]
     },
     "schema_version": "0.1",
     "source_prd_ref": "docs/product/prd.md",

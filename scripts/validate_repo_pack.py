@@ -481,6 +481,21 @@ def validate_validation_contract_evidence_split(contract, label):
     lifecycle_defaults = lifecycle_evidence_items(evidence_required)
     require_lifecycle_evidence_mirror(f"{label}.lifecycle_evidence_required", lifecycle_defaults, lifecycle_evidence)
 
+def validate_runner_ready_field_sync(execution_plan, validation_contract):
+    embedded = (
+        (execution_plan.get("validation_contract") or {})
+        .get("factoryd_runtime_requirements") or {}
+    ).get("runner_ready_fields")
+    standalone = (
+        (validation_contract.get("factoryd_runtime_requirements") or {})
+        .get("runner_ready_fields")
+    )
+    if embedded != standalone:
+        fail(
+            "execution-plan.validation_contract.factoryd_runtime_requirements.runner_ready_fields "
+            "must match validation-contract.factoryd_runtime_requirements.runner_ready_fields"
+        )
+
 def missing_grant_value(value):
     if value is None or value == []:
         return True
@@ -1074,6 +1089,7 @@ def main():
         fail("execution-plan task_supervision_policy.evidence_path must point at task-supervisor-runs")
     validate_validation_contract_evidence_split(validation_contract, "validation-contract")
     validate_validation_contract_evidence_split(execution_plan.get("validation_contract"), "execution-plan.validation_contract")
+    validate_runner_ready_field_sync(execution_plan, validation_contract)
     ledger = json.loads((root / repo["acceptance_ledger"]).read_text())
     if ledger.get("artifact_type") != "acceptance_ledger":
         fail("acceptance ledger must use artifact_type acceptance_ledger")

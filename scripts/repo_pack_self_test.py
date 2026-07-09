@@ -29,6 +29,7 @@ validate_architecture_target_paths = validator.validate_architecture_target_path
 validate_lifecycle_path_ownership = validator.validate_lifecycle_path_ownership
 validate_model_provider_gate = validator.validate_model_provider_gate
 validate_runner_ready_task_fields = validator.validate_runner_ready_task_fields
+validate_runner_ready_field_sync = validator.validate_runner_ready_field_sync
 validate_validation_contract_evidence_split = validator.validate_validation_contract_evidence_split
 
 def self_test_public_release_boundary():
@@ -713,6 +714,27 @@ def self_test():
                 raise
         else:
             fail("validation contract unknown evidence key fixture did not fail closed")
+
+        try:
+            validate_runner_ready_field_sync(
+                {
+                    "validation_contract": {
+                        "factoryd_runtime_requirements": {
+                            "runner_ready_fields": ["allowed_paths"]
+                        }
+                    }
+                },
+                {
+                    "factoryd_runtime_requirements": {
+                        "runner_ready_fields": ["allowed_paths", "semantic_invariants"]
+                    }
+                },
+            )
+        except AssertionError as exc:
+            if "runner_ready_fields must match" not in str(exc):
+                raise
+        else:
+            fail("runner-ready field sync fixture did not fail closed")
 
         active_config_grant = {
             "task_id": "T9",
