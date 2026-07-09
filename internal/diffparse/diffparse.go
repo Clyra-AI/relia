@@ -132,7 +132,13 @@ func interpreterCommandToken(value string) bool {
 
 func quotedCommandExecutable(part string) bool {
 	trimmed := strings.TrimPrefix(part, "./")
-	return strings.Contains(trimmed, "/") && filepath.Ext(filepath.Base(trimmed)) == ""
+	if !strings.Contains(trimmed, "/") {
+		return false
+	}
+	if strings.HasPrefix(part, "./") || strings.HasPrefix(trimmed, "scripts/") {
+		return true
+	}
+	return filepath.Ext(filepath.Base(trimmed)) == ""
 }
 
 func commandScriptOperand(part string) bool {
