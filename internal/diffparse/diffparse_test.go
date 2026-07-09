@@ -188,6 +188,7 @@ func TestTouchedPathsOrPlanPreservesQuotedPathsWithSpaces(t *testing.T) {
 - Update ` + "`docs/api guide.md`" + ` with the operator-facing contract.
 - Run relia assess --input="docs/release notes.md" before advisory output.
 - Keep 'docs/single quote guide.md' in the same path extraction path.
+- Keep "release notes.md" as a quoted root-level path with spaces.
 - Do not record split fragments from quoted paths.
 `))
 	if err != nil {
@@ -196,7 +197,7 @@ func TestTouchedPathsOrPlanPreservesQuotedPathsWithSpaces(t *testing.T) {
 	if inputKind != "plan" {
 		t.Fatalf("input kind = %q, want plan", inputKind)
 	}
-	want := []string{"docs/api guide.md", "docs/release notes.md", "docs/single quote guide.md"}
+	want := []string{"docs/api guide.md", "docs/release notes.md", "docs/single quote guide.md", "release notes.md"}
 	if fmt.Sprint(paths) != fmt.Sprint(want) {
 		t.Fatalf("paths = %#v, want %#v", paths, want)
 	}

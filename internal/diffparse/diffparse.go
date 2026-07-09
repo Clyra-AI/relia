@@ -74,13 +74,7 @@ func recordQuotedPlanPath(touched map[string]bool, field string) {
 		recordQuotedCommandSpan(touched, parts)
 		return
 	}
-	if len(parts) <= 1 || quotedFieldLooksLikeSinglePath(parts[0]) {
-		recordPlanPath(touched, field)
-		return
-	}
-	for _, part := range parts {
-		recordPlanPath(touched, part)
-	}
+	recordPlanPath(touched, field)
 }
 
 func recordQuotedCommandSpan(touched map[string]bool, parts []string) {
@@ -97,16 +91,29 @@ func quotedFieldLooksLikeCommandSpan(parts []string) bool {
 		return false
 	}
 	first := parts[0]
-	return !strings.Contains(first, "/") || strings.HasPrefix(first, "./") || strings.HasPrefix(first, "scripts/")
+	if knownCommandToken(first) || strings.HasPrefix(first, "./") || strings.HasPrefix(first, "scripts/") {
+		return true
+	}
+	for _, part := range parts[1:] {
+		if strings.HasPrefix(part, "-") || strings.Contains(part, "/") {
+			return true
+		}
+	}
+	return false
+}
+
+func knownCommandToken(value string) bool {
+	switch value {
+	case "go", "make", "node", "npm", "pnpm", "python", "python3", "relia", "yarn":
+		return true
+	default:
+		return false
+	}
 }
 
 func quotedCommandExecutable(part string) bool {
 	trimmed := strings.TrimPrefix(part, "./")
 	return strings.Contains(trimmed, "/") && filepath.Ext(filepath.Base(trimmed)) == ""
-}
-
-func quotedFieldLooksLikeSinglePath(firstField string) bool {
-	return strings.Contains(firstField, "/") || strings.HasPrefix(firstField, ".")
 }
 
 func quotedPlanFields(raw string) ([]string, string) {
