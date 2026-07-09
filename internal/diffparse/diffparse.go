@@ -483,7 +483,7 @@ func slashProseToken(value string) bool {
 		"inputs/outputs", "outputs/inputs", "on/off", "yes/no", "before/after",
 		"after/before", "client/server", "server/client", "frontend/backend",
 		"backend/frontend", "producer/consumer", "consumer/producer", "request/response",
-		"response/request":
+		"response/request", "n/a":
 		return true
 	default:
 		return false
