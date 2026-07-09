@@ -49,7 +49,6 @@ func PlanPaths(content []byte) ([]string, error) {
 		">", " ",
 		",", " ",
 		";", " ",
-		":", " ",
 		"\n", " ",
 		"\r", " ",
 		"\t", " ",
