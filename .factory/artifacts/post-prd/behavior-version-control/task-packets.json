@@ -465,6 +465,11 @@
       "migration_impact": "None expected unless this task changes public output, schemas, artifacts, or install/distribution behavior.",
       "mission_contract_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md",
       "objective": "Implement post-PRD recommendation: Behavior change provenance inventory.",
+      "semantic_invariants": [
+        "Behavior-change provenance inventory ties every agent behavior change to a versioned rule, memory, skill, or instruction diff with stable evidence refs.",
+        "Inventory output must distinguish approved, pending, reverted, and superseded behavior sources without rewriting source truth.",
+        "Provenance evidence remains repo-relative, redacted, and usable by later ERR attribution and rollback recommendation tasks."
+      ],
       "path_planning_method": "architecture_target_paths_v1",
       "plan_drift_policy_ref": ".factory/artifacts/post-prd/behavior-version-control/execution-plan.json#/plan_drift_policy",
       "proof_scorecard_artifact": "proof-of-behavior-scorecard",
@@ -1005,6 +1010,11 @@
       "migration_impact": "None expected unless this task changes public output, schemas, artifacts, or install/distribution behavior.",
       "mission_contract_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md",
       "objective": "Implement post-PRD recommendation: ERR regression attribution.",
+      "semantic_invariants": [
+        "ERR regression attribution compares repeat-failure movement before and after behavior-source changes without claiming causality beyond available evidence.",
+        "Attribution output must name candidate rule, memory, skill, or instruction changes with diffs and confidence, including unknown or insufficient-evidence states.",
+        "Regression analysis preserves deterministic replay and does not require live provider or GitHub network access unless explicitly granted by a later task."
+      ],
       "path_planning_method": "architecture_target_paths_v1",
       "plan_drift_policy_ref": ".factory/artifacts/post-prd/behavior-version-control/execution-plan.json#/plan_drift_policy",
       "proof_scorecard_artifact": "proof-of-behavior-scorecard",
@@ -1540,6 +1550,11 @@
       "migration_impact": "None expected unless this task changes public output, schemas, artifacts, or install/distribution behavior.",
       "mission_contract_ref": ".factory/artifacts/post-prd/behavior-version-control/source.md",
       "objective": "Implement post-PRD recommendation: Rollback recommendation report.",
+      "semantic_invariants": [
+        "Rollback recommendation reports identify the exact behavior-source version to revert, the expected impact, and the validation needed after rollback.",
+        "Recommendations remain advisory until accepted by a human or governed task; the task must not silently mutate active rules, memory, or skills.",
+        "Rollback evidence preserves receipts, diffs, and ERR attribution links so agents can audit why a behavior change should be reverted."
+      ],
       "path_planning_method": "architecture_target_paths_v1",
       "plan_drift_policy_ref": ".factory/artifacts/post-prd/behavior-version-control/execution-plan.json#/plan_drift_policy",
       "proof_scorecard_artifact": "proof-of-behavior-scorecard",

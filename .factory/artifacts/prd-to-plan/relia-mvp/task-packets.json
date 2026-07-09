@@ -859,6 +859,11 @@
       "migration_impact": "None expected unless this task changes public output, schemas, artifacts, or install/distribution behavior.",
       "mission_contract_ref": "docs/product/prd.md",
       "objective": "Establish repo lifecycle, CLI skeleton, command result envelope, exit-code behavior, CI, validation, and local operating-pack baseline.",
+      "semantic_invariants": [
+        "CLI commands keep the stable Relia result envelope and documented exit-code behavior.",
+        "Repo lifecycle, CI, and operating-pack files remain deterministic and runnable without credentials or network.",
+        "The command entrypoint stays thin and delegates implementation behavior into cmd/ or bounded internal packages."
+      ],
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
       "proof_scorecard_artifact": "proof-of-behavior-scorecard",
       "proof_scorecard_required": true,
@@ -1380,6 +1385,11 @@
       "migration_impact": "None expected unless this task changes public output, schemas, artifacts, or install/distribution behavior.",
       "mission_contract_ref": "docs/product/prd.md",
       "objective": "Implement PRD-defined configuration, schemas, artifact contracts, privacy defaults, validation, and structured output guarantees.",
+      "semantic_invariants": [
+        "Configuration defaults preserve local-first privacy and do not enable live network, credentials, or provider calls by default.",
+        "Schemas and artifact contracts remain backward-compatible for existing repo-local Relia artifacts unless an explicit migration is documented.",
+        "Structured CLI output stays stable and machine-readable across validation, config, and artifact-checking paths."
+      ],
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
       "proof_scorecard_artifact": "proof-of-behavior-scorecard",
       "proof_scorecard_required": false,
@@ -1913,6 +1923,11 @@
       "migration_impact": "None expected unless this task changes public output, schemas, artifacts, or install/distribution behavior.",
       "mission_contract_ref": "docs/product/prd.md",
       "objective": "Implement PRD-defined input ingestion, attribution, normalization, redaction, persistence, and provenance capture.",
+      "semantic_invariants": [
+        "Every ingested outcome remains attributable to redacted source evidence and never requires committing raw customer data.",
+        "Normalization preserves enough provenance to reproduce which input produced each stored experience record.",
+        "Persistence and redaction behavior fail closed when required provenance, privacy, or path metadata is missing."
+      ],
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
       "proof_scorecard_artifact": "proof-of-behavior-scorecard",
       "proof_scorecard_required": true,
@@ -2496,6 +2511,11 @@
       "migration_impact": "None expected unless this task changes public output, schemas, artifacts, or install/distribution behavior.",
       "mission_contract_ref": "docs/product/prd.md",
       "objective": "Build the seeded outcome fixture corpus, flake-discount fixtures, redaction fixtures, attribution precision sample, and reproducible demo-number/citation baselines.",
+      "semantic_invariants": [
+        "Fixture corpus data remains synthetic or redacted and must not introduce raw customer repositories, logs, tickets, endpoints, or credentials.",
+        "Demo numbers, attribution samples, and citation baselines stay reproducible from committed fixtures and validation commands.",
+        "Fixture additions stay scoped to seeded outcomes, flake-discount, redaction, attribution, and backtest baselines for this slice."
+      ],
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
       "proof_scorecard_artifact": "proof-of-behavior-scorecard",
       "proof_scorecard_required": true,
@@ -3009,6 +3029,11 @@
       "migration_impact": "None expected unless this task changes public output, schemas, artifacts, or install/distribution behavior.",
       "mission_contract_ref": "docs/product/prd.md",
       "objective": "Build distill/review lifecycle fixture cases for planted recurrence, contradiction, and stale-path outcomes with correct citations.",
+      "semantic_invariants": [
+        "Distill and review fixtures preserve planted recurrence, contradiction, stale-path, and citation outcomes exactly.",
+        "Lifecycle fixture cases remain deterministic and do not depend on live providers, network, or mutable clocks.",
+        "Fixture evidence continues to prove review-memory page behavior without expanding into unrelated assessment corpus work."
+      ],
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
       "proof_scorecard_artifact": "proof-of-behavior-scorecard",
       "proof_scorecard_required": true,
@@ -3468,6 +3493,11 @@
       "migration_impact": "None expected unless this task changes public output, schemas, artifacts, or install/distribution behavior.",
       "mission_contract_ref": "docs/product/prd.md",
       "objective": "Build assessment fixture coverage for planted-pattern and unknown-path diffs without bundling unrelated corpus work.",
+      "semantic_invariants": [
+        "Assessment fixtures distinguish planted-pattern matches from unknown-path diffs without broadening unrelated corpus scope.",
+        "Unknown-path cases remain conservative and must not produce confident memory matches without supporting evidence.",
+        "Fixture expectations stay reproducible from committed examples and assessment validation commands."
+      ],
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
       "proof_scorecard_artifact": "proof-of-behavior-scorecard",
       "proof_scorecard_required": true,
@@ -4228,6 +4258,11 @@
       "migration_impact": "None expected unless this task changes public output, schemas, artifacts, or install/distribution behavior.",
       "mission_contract_ref": "docs/product/prd.md",
       "objective": "Implement PRD-defined signature extraction, recurrence pairing, backtest computation, flake handling, and conservative outcome classification.",
+      "semantic_invariants": [
+        "Recurrence pairing remains conservative and never treats weak or single-signal similarity as proven repeat failure.",
+        "Backtest computation stays deterministic, citation-backed, and reproducible from repo-local outcome fixtures.",
+        "Flake handling discounts noisy evidence without hiding forward ERR regressions or corrupting outcome classification."
+      ],
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
       "proof_scorecard_artifact": "proof-of-behavior-scorecard",
       "proof_scorecard_required": true,
@@ -4998,6 +5033,11 @@
       "migration_impact": "None expected unless this task changes public output, schemas, artifacts, or install/distribution behavior.",
       "mission_contract_ref": "docs/product/prd.md",
       "objective": "Implement PRD-defined clustering, rule drafting, confidence scoring, decay, contradiction handling, and deterministic fallback behavior. Part 1 of 2; scope is split to keep the runner-ready packet bounded.",
+      "semantic_invariants": [
+        "Rule clustering, confidence, decay, contradiction, and review-gate behavior remain explainable from stored outcome receipts.",
+        "Human-review states gate promoted memory; draft rules do not become active advice without explicit approval evidence.",
+        "Deterministic fallback behavior remains available when provider-backed drafting is unavailable or unapproved."
+      ],
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
       "proof_scorecard_artifact": "proof-of-behavior-scorecard",
       "proof_scorecard_required": true,
@@ -5809,6 +5849,11 @@
       "migration_impact": "None expected unless this task changes public output, schemas, artifacts, or install/distribution behavior.",
       "mission_contract_ref": "docs/product/prd.md",
       "objective": "Implement PRD-defined clustering, rule drafting, confidence scoring, decay, contradiction handling, and deterministic fallback behavior. Part 2 of 2; scope is split to keep the runner-ready packet bounded.",
+      "semantic_invariants": [
+        "Provider-backed drafting and embeddings remain behind explicit model-route, credential, network, and endpoint grants.",
+        "Memory pages preserve receipts, contradiction state, stale-path state, and confidence humility across lifecycle transitions.",
+        "No-LLM and deterministic fallback paths continue to satisfy review and memory behavior when live providers are disabled."
+      ],
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
       "proof_scorecard_artifact": "proof-of-behavior-scorecard",
       "proof_scorecard_required": true,
@@ -6317,6 +6362,11 @@
       "mission_contract_ref": "docs/product/prd.md",
       "model_provider_requirements": null,
       "objective": "Close command-level relia distill avoid-rule acceptance for the planted recurrence cluster after T7 implements rule drafting.",
+      "semantic_invariants": [
+        "The command-level distill path produces the planted avoid-rule outcome with stable citations and confidence evidence.",
+        "The task must close only the targeted distill acceptance and must not widen clustering, provider, or memory lifecycle scope.",
+        "Regression proof must exercise the user-visible command behavior, not only helper-level fixtures."
+      ],
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
       "proof_scorecard_artifact": "proof-of-behavior-scorecard",
       "proof_scorecard_required": true,
@@ -6787,6 +6837,11 @@
       "migration_impact": "None expected unless this task changes public output, schemas, artifacts, or install/distribution behavior.",
       "mission_contract_ref": "docs/product/prd.md",
       "objective": "Implement PRD-defined report generation, evidence records, diagnostics, metrics, summaries, badges, and operator-visible feedback.",
+      "semantic_invariants": [
+        "Reports and diagnostics derive only from stored outcomes, validation records, and evidence receipts.",
+        "Metrics, badges, summaries, and operator feedback remain reproducible and traceable to specific artifact references.",
+        "Report generation must not fabricate lifecycle, PR, or scope-closure evidence owned by factoryd."
+      ],
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
       "proof_scorecard_artifact": "proof-of-behavior-scorecard",
       "proof_scorecard_required": true,
@@ -7542,6 +7597,11 @@
         "selected_route_alias": "org-model/coding-agent"
       },
       "objective": "Implement PRD-defined provider, network, API, webhook, and hosted-service integrations behind explicit deterministic and approval boundaries.",
+      "semantic_invariants": [
+        "Provider, API, webhook, and hosted-service integrations remain opt-in behind explicit grants and documented network allowlists.",
+        "Offline, local-first, and advisory-only defaults continue to work without live credentials or model-provider calls.",
+        "Cost visibility, redaction posture, provider identity, endpoint, and portable artifact evidence stay attached to every approved live path."
+      ],
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
       "proof_scorecard_artifact": "proof-of-behavior-scorecard",
       "proof_scorecard_required": true,
@@ -8127,6 +8187,11 @@
       "migration_impact": "None expected unless this task changes public output, schemas, artifacts, or install/distribution behavior.",
       "mission_contract_ref": "docs/product/prd.md",
       "objective": "Implement PRD-defined review states, approval gates, policy lifecycle, governance evidence, and human-decision workflows.",
+      "semantic_invariants": [
+        "Review-state transitions and human-decision workflows remain auditable from structured evidence and approval records.",
+        "Backtest-before-behavior-change remains mandatory before rules or memory behavior can be promoted.",
+        "GitHub outcome intake for this task stays offline and structured; live GitHub API/network intake remains gated to T11.1."
+      ],
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
       "proof_scorecard_artifact": "proof-of-behavior-scorecard",
       "proof_scorecard_required": true,
@@ -8593,6 +8658,11 @@
       "migration_impact": "None expected unless this task changes public output, schemas, artifacts, or install/distribution behavior.",
       "mission_contract_ref": "docs/product/prd.md",
       "objective": "Implement PRD-defined durable memory artifacts, lifecycle rendering, provenance display, stale/contradicted handling, and managed memory-page output.",
+      "semantic_invariants": [
+        "Durable memory artifacts preserve receipts, provenance display, stale state, and contradicted state across rendering cycles.",
+        "Managed memory-page output stays deterministic and does not drop review lifecycle evidence.",
+        "Memory rendering keeps source artifacts as product truth and avoids embedding ambient credentials, customer raw data, or machine-local paths."
+      ],
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
       "proof_scorecard_artifact": "proof-of-behavior-scorecard",
       "proof_scorecard_required": true,
@@ -9069,6 +9139,11 @@
       "migration_impact": "None expected unless this task changes public output, schemas, artifacts, or install/distribution behavior.",
       "mission_contract_ref": "docs/product/prd.md",
       "objective": "Implement a read-only live GitHub API outcome intake adapter after T11, preserving offline replay, redaction, provenance, rate-limit/error handling, and explicit network/credential approval gates.",
+      "semantic_invariants": [
+        "Live GitHub intake remains read-only and requires explicit task-scoped network and credential approval evidence.",
+        "Offline replay, redaction, provenance, pagination, rate-limit, and error-handling behavior remain testable without live GitHub access.",
+        "Fetched GitHub data must be reduced to structured, customer-safe outcome records before entering memory workflows."
+      ],
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
       "proof_scorecard_artifact": "proof-of-behavior-scorecard",
       "proof_scorecard_required": true,
@@ -9587,6 +9662,11 @@
       "migration_impact": "None expected unless this task changes public output, schemas, artifacts, or install/distribution behavior.",
       "mission_contract_ref": "docs/product/prd.md",
       "objective": "Implement PRD-defined MCP tools, recall behavior, coverage/OOD responses, active-memory serving rules, and agent-facing access boundaries.",
+      "semantic_invariants": [
+        "MCP and recall tools serve only reviewed active memory and clearly report coverage or out-of-distribution gaps.",
+        "Agent-facing responses remain advisory, citation-backed, and bounded by local access controls.",
+        "Serving behavior must not bypass review state, stale/contradicted markers, or memory lifecycle policy."
+      ],
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
       "proof_scorecard_artifact": "proof-of-behavior-scorecard",
       "proof_scorecard_required": true,
@@ -10122,6 +10202,11 @@
       "migration_impact": "None expected unless this task changes public output, schemas, artifacts, or install/distribution behavior.",
       "mission_contract_ref": "docs/product/prd.md",
       "objective": "Implement PRD-defined managed context blocks, AGENTS/CLAUDE marker discipline, idempotent compile behavior, and non-MCP agent access.",
+      "semantic_invariants": [
+        "AGENTS and CLAUDE managed blocks remain marker-safe, idempotent, and reproducible from reviewed memory rules.",
+        "Every supported rule YAML shape must round-trip through compile without corrupting active memory or receipts.",
+        "Non-MCP context output preserves rule provenance while excluding raw customer data, credentials, and machine-local paths."
+      ],
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
       "proof_scorecard_artifact": "proof-of-behavior-scorecard",
       "proof_scorecard_required": true,
@@ -10790,6 +10875,11 @@
       "migration_impact": "None expected unless this task changes public output, schemas, artifacts, or install/distribution behavior.",
       "mission_contract_ref": "docs/product/prd.md",
       "objective": "Implement PRD-defined diff/plan assessment, risk match levels, advisory comment behavior, debounce rules, and forward signal tracking.",
+      "semantic_invariants": [
+        "Diff and plan assessment stays advisory and conservative, with explicit unknown or low-confidence outcomes when memory coverage is weak.",
+        "Risk-match levels, debounce behavior, and forward signal tracking remain deterministic from the diff, plan, and memory inputs.",
+        "Advisory comments must avoid overclaiming and must cite the memory or outcome evidence that produced each recommendation."
+      ],
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
       "proof_scorecard_artifact": "proof-of-behavior-scorecard",
       "proof_scorecard_required": true,
@@ -11631,6 +11721,11 @@
       "migration_impact": "None expected unless this task changes public output, schemas, artifacts, or install/distribution behavior.",
       "mission_contract_ref": "docs/product/prd.md",
       "objective": "Implement PRD-defined demo flows, distribution readiness, release gates, product-pull signals, and full-scope closure checks. Part 1 of 2; scope is split to keep the runner-ready packet bounded.",
+      "semantic_invariants": [
+        "Demo and release-readiness flows preserve fast first value, redaction, advisory assessment, and product-pull signal evidence.",
+        "Public release boundary closure remains item-level and must not be replaced by broad MVP, phase, or release labels.",
+        "Part 1 release/demo work must not mark full-scope closure complete without the remaining Part 2 acceptance evidence."
+      ],
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
       "proof_scorecard_artifact": "proof-of-behavior-scorecard",
       "proof_scorecard_required": true,
@@ -12437,6 +12532,11 @@
       "migration_impact": "None expected unless this task changes public output, schemas, artifacts, or install/distribution behavior.",
       "mission_contract_ref": "docs/product/prd.md",
       "objective": "Implement PRD-defined demo flows, distribution readiness, release gates, product-pull signals, and full-scope closure checks. Part 2 of 2; scope is split to keep the runner-ready packet bounded.",
+      "semantic_invariants": [
+        "Release/demo Part 2 preserves the remaining success metrics, demo acceptances, and public release boundary evidence.",
+        "Full-scope closure requires map-wide acceptance evidence and green release-readiness validation, not only local demo success.",
+        "Distribution artifacts and demo outputs must remain reproducible, redacted, and portable from committed repo-local assets."
+      ],
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
       "proof_scorecard_artifact": "proof-of-behavior-scorecard",
       "proof_scorecard_required": true,
@@ -12977,6 +13077,11 @@
       "migration_impact": "None expected unless this task changes public output, schemas, artifacts, or install/distribution behavior.",
       "mission_contract_ref": "docs/product/prd.md",
       "objective": "Add a bounded customer-failure intake and fixture-promotion loop with redaction, owner approval, and no committed customer data.",
+      "semantic_invariants": [
+        "Customer-failure intake requires redaction, owner approval, and synthetic fixture promotion before any lesson becomes reusable.",
+        "No raw customer code, logs, tickets, owner handles, endpoints, credentials, screenshots, or machine-local paths may be committed.",
+        "Failure-derived evidence must preserve provenance enough to audit why it became a Relia outcome or fixture."
+      ],
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
       "proof_scorecard_artifact": "proof-of-behavior-scorecard",
       "proof_scorecard_required": true,
@@ -13514,6 +13619,11 @@
       "migration_impact": "None expected unless this task changes public output, schemas, artifacts, or install/distribution behavior.",
       "mission_contract_ref": "docs/product/prd.md",
       "objective": "Define Relia lesson/memory grain so failure-derived lessons include applicability, expiry, source evidence, owner, and promotion review before reuse.",
+      "semantic_invariants": [
+        "Lesson and memory grain records include applicability, expiry, source evidence, owner, confidence, and promotion review before reuse.",
+        "Decay, contradiction, and bidirectional memory behavior remain explicit so stale or superseded lessons do not keep advising agents.",
+        "Reusable memory must stay tied to receipts and must not generalize beyond the evidence that supports it."
+      ],
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
       "proof_scorecard_artifact": "proof-of-behavior-scorecard",
       "proof_scorecard_required": true,
@@ -14032,6 +14142,11 @@
       "migration_impact": "None expected unless this task changes public output, schemas, artifacts, or install/distribution behavior.",
       "mission_contract_ref": "docs/product/prd.md",
       "objective": "Close T6-carried timed first-memory, MVP attribution, and deterministic signature acceptance with release/demo/product-signal proof after release-demo part 1.",
+      "semantic_invariants": [
+        "Timed first-memory, MVP attribution, and deterministic signature acceptance close only with release/demo/product-signal proof.",
+        "Attribution and signature behavior remain deterministic across repeated fixture and demo runs.",
+        "This closure task must preserve the T6-carried acceptance mapping rather than hiding it behind broad release completion."
+      ],
       "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
       "proof_scorecard_artifact": "proof-of-behavior-scorecard",
       "proof_scorecard_required": true,

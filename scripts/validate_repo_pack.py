@@ -19,6 +19,7 @@ PROVIDER_ACCEPTANCE_IDS = {
 RUNNER_READY_TASK_FIELDS = [
     "task_id",
     "objective",
+    "semantic_invariants",
     "allowed_paths",
     "forbidden_paths",
     "validation_commands",
@@ -480,6 +481,21 @@ def validate_validation_contract_evidence_split(contract, label):
     lifecycle_defaults = lifecycle_evidence_items(evidence_required)
     require_lifecycle_evidence_mirror(f"{label}.lifecycle_evidence_required", lifecycle_defaults, lifecycle_evidence)
 
+def validate_runner_ready_field_sync(execution_plan, validation_contract):
+    embedded = (
+        (execution_plan.get("validation_contract") or {})
+        .get("factoryd_runtime_requirements") or {}
+    ).get("runner_ready_fields")
+    standalone = (
+        (validation_contract.get("factoryd_runtime_requirements") or {})
+        .get("runner_ready_fields")
+    )
+    if embedded != standalone:
+        fail(
+            "execution-plan.validation_contract.factoryd_runtime_requirements.runner_ready_fields "
+            "must match validation-contract.factoryd_runtime_requirements.runner_ready_fields"
+        )
+
 def missing_grant_value(value):
     if value is None or value == []:
         return True
@@ -725,8 +741,19 @@ def model_provider_gate_task(task_id="T9", grant_task_id="*"):
 
 def validate_runner_ready_task_fields(task, task_id):
     for key in RUNNER_READY_TASK_FIELDS:
-        if key not in task or task[key] in (None, "", []):
+        missing_values = (None, "") if key == "semantic_invariants" else (None, "", [])
+        if key not in task or task[key] in missing_values:
             fail(f"{task_id} missing runner-ready field: {key}")
+    semantic_invariants = task.get("semantic_invariants")
+    if not isinstance(semantic_invariants, list) or not any(str(item).strip() for item in semantic_invariants):
+        fail(f"{task_id}.semantic_invariants must be a non-empty list")
+    normalized_semantic_invariants = []
+    for index, invariant in enumerate(semantic_invariants):
+        if not isinstance(invariant, str) or not invariant.strip():
+            fail(f"{task_id}.semantic_invariants[{index}] must be a non-empty string")
+        normalized_semantic_invariants.append(invariant.strip())
+    if len(set(normalized_semantic_invariants)) != len(normalized_semantic_invariants):
+        fail(f"{task_id}.semantic_invariants must not contain duplicate entries")
     worker_evidence = task.get("worker_evidence_required")
     if not isinstance(worker_evidence, list) or not any(str(item).strip() for item in worker_evidence):
         fail(f"{task_id}.worker_evidence_required must be a non-empty list")
@@ -1062,6 +1089,7 @@ def main():
         fail("execution-plan task_supervision_policy.evidence_path must point at task-supervisor-runs")
     validate_validation_contract_evidence_split(validation_contract, "validation-contract")
     validate_validation_contract_evidence_split(execution_plan.get("validation_contract"), "execution-plan.validation_contract")
+    validate_runner_ready_field_sync(execution_plan, validation_contract)
     ledger = json.loads((root / repo["acceptance_ledger"]).read_text())
     if ledger.get("artifact_type") != "acceptance_ledger":
         fail("acceptance ledger must use artifact_type acceptance_ledger")

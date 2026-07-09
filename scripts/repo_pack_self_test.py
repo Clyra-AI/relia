@@ -29,6 +29,7 @@ validate_architecture_target_paths = validator.validate_architecture_target_path
 validate_lifecycle_path_ownership = validator.validate_lifecycle_path_ownership
 validate_model_provider_gate = validator.validate_model_provider_gate
 validate_runner_ready_task_fields = validator.validate_runner_ready_task_fields
+validate_runner_ready_field_sync = validator.validate_runner_ready_field_sync
 validate_validation_contract_evidence_split = validator.validate_validation_contract_evidence_split
 
 def self_test_public_release_boundary():
@@ -174,6 +175,7 @@ def self_test():
     sample_task = {key: "value" for key in RUNNER_READY_TASK_FIELDS}
     for key in [
         "allowed_paths",
+        "semantic_invariants",
         "forbidden_paths",
         "validation_commands",
         "baseline_commands",
@@ -400,6 +402,36 @@ def self_test():
                 raise
         else:
             fail("non-list evidence_required fixture did not fail closed")
+
+        empty_semantic_invariants = dict(sample_task)
+        empty_semantic_invariants["semantic_invariants"] = []
+        try:
+            validate_runner_ready_task_fields(empty_semantic_invariants, "self-test")
+        except AssertionError as exc:
+            if ".semantic_invariants must be a non-empty list" not in str(exc):
+                raise
+        else:
+            fail("empty semantic_invariants fixture did not fail closed")
+
+        blank_semantic_invariant = dict(sample_task)
+        blank_semantic_invariant["semantic_invariants"] = ["preserve behavior", ""]
+        try:
+            validate_runner_ready_task_fields(blank_semantic_invariant, "self-test")
+        except AssertionError as exc:
+            if ".semantic_invariants[1] must be a non-empty string" not in str(exc):
+                raise
+        else:
+            fail("blank semantic_invariant fixture did not fail closed")
+
+        duplicate_semantic_invariant = dict(sample_task)
+        duplicate_semantic_invariant["semantic_invariants"] = ["preserve behavior", "preserve behavior"]
+        try:
+            validate_runner_ready_task_fields(duplicate_semantic_invariant, "self-test")
+        except AssertionError as exc:
+            if ".semantic_invariants must not contain duplicate entries" not in str(exc):
+                raise
+        else:
+            fail("duplicate semantic_invariants fixture did not fail closed")
 
         non_list_inherited_evidence = json.loads(json.dumps(sample_task))
         non_list_inherited_evidence["validation_contract_inheritance"] = {
@@ -682,6 +714,27 @@ def self_test():
                 raise
         else:
             fail("validation contract unknown evidence key fixture did not fail closed")
+
+        try:
+            validate_runner_ready_field_sync(
+                {
+                    "validation_contract": {
+                        "factoryd_runtime_requirements": {
+                            "runner_ready_fields": ["allowed_paths"]
+                        }
+                    }
+                },
+                {
+                    "factoryd_runtime_requirements": {
+                        "runner_ready_fields": ["allowed_paths", "semantic_invariants"]
+                    }
+                },
+            )
+        except AssertionError as exc:
+            if "runner_ready_fields must match" not in str(exc):
+                raise
+        else:
+            fail("runner-ready field sync fixture did not fail closed")
 
         active_config_grant = {
             "task_id": "T9",
