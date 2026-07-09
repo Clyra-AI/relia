@@ -310,7 +310,7 @@ func TestCheckFailsOutsideRepo(t *testing.T) {
 func TestCheckReportsMissingOperatingPackFiles(t *testing.T) {
 	tempDir := t.TempDir()
 	t.Chdir(tempDir)
-	if err := os.WriteFile("go.mod", []byte("module github.com/Clyra-AI/relia\n\ngo 1.26.4\n"), 0o644); err != nil {
+	if err := os.WriteFile("go.mod", []byte("module github.com/Clyra-AI/relia\n\ngo 1.26.5\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.WriteFile("relia.yaml", []byte("version: 1\n"), 0o644); err != nil {
@@ -911,8 +911,8 @@ func setupContractRepo(t *testing.T) string {
 		"WORKFLOW.md":            "workflow contract\n",
 		"README.md":              "readme\n",
 		"Makefile":               "prepush-full:\n",
-		".tool-versions":         "golang 1.26.4\n",
-		"go.mod":                 "module github.com/Clyra-AI/relia\n\ngo 1.26.4\n",
+		".tool-versions":         "golang 1.26.5\n",
+		"go.mod":                 "module github.com/Clyra-AI/relia\n\ngo 1.26.5\n",
 		"relia.yaml":             defaultConfigYAML(),
 		"docs/product/prd.md":    "prd\n",
 		"docs/dev/dev_guides.md": "dev guides\n",

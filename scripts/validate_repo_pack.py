@@ -990,6 +990,20 @@ def validate_runner_ready_task_fields(task, task_id):
         fail(f"{task_id}.redaction_posture.customer_safe must be boolean")
 
 
+def validate_task_required_review(task, task_id, required):
+    review = task.get("required_review")
+    if not required and review is None:
+        return
+    if not isinstance(review, dict):
+        fail(f"{task_id}.required_review must be an object")
+    if review.get("required") is not True:
+        fail(f"{task_id}.required_review.required must be true for remaining implementation work")
+    if review.get("review_type") not in {"code", "architecture", "security"}:
+        fail(f"{task_id}.required_review.review_type must be code, architecture, or security")
+    if review.get("reviewer_class") != "peer_agent":
+        fail(f"{task_id}.required_review.reviewer_class must be peer_agent")
+
+
 def main():
     args = parse_args(sys.argv[1:])
     if args["self_test"]:
@@ -1198,9 +1212,15 @@ def main():
         ("acceptance-mapping", mapping),
         ("scope-closure-map", closure),
     ])
+    remaining_task_ids = {
+        task_id
+        for item in closure_items
+        for task_id in item.get("remaining_task_refs") or []
+    }
     for index, task in enumerate(tasks):
         task_id = task.get("task_id") or f"task[{index}]"
         validate_runner_ready_task_fields(task, task_id)
+        validate_task_required_review(task, task_id, task_id in remaining_task_ids)
         lifecycle = task.get("lifecycle_gates") or {}
         if "ship_pr_required" in lifecycle:
             fail(f"{task_id}.lifecycle_gates uses deprecated ship_pr_required")

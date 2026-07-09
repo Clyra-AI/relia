@@ -234,7 +234,7 @@ func TestFindRepoRootFindsReliaModuleFromNestedDirectory(t *testing.T) {
 	if err := os.MkdirAll(nested, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(root, "go.mod"), []byte("module github.com/Clyra-AI/relia\n\ngo 1.26.4\n"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(root, "go.mod"), []byte("module github.com/Clyra-AI/relia\n\ngo 1.26.5\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 
