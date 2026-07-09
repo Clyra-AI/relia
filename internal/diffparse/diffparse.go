@@ -106,7 +106,7 @@ func commandLeadInToken(value string) bool {
 
 func unquotedHelperExecutable(value string) bool {
 	trimmed := strings.TrimPrefix(strings.TrimSpace(value), "./")
-	return strings.HasPrefix(trimmed, "scripts/") && filepath.Ext(filepath.Base(trimmed)) != ""
+	return strings.HasPrefix(trimmed, "scripts/")
 }
 
 func recordQuotedPlanPath(touched map[string]bool, field string) {
