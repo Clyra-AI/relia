@@ -131,6 +131,7 @@ func TestBuildRiskAssessmentReportsNoCoverageDensityDistinctFromCoveredClean(t *
 	if coverageStats["coverage"] != "no_coverage" ||
 		coverageStats["covered_path_count"] != 1 ||
 		coverageStats["no_coverage_path_count"] != 1 ||
+		coverageStats["out_of_distribution_signal"] != true ||
 		coverageStats["evidence_count"] != 2 ||
 		coverageStats["experience_density"] != float64(1) {
 		t.Fatalf("coverage_stats = %#v", coverageStats)

@@ -1,0 +1,177 @@
+{
+  "artifact_type": "autoship_supervisor_report",
+  "schema_version": "0.1",
+  "generated_at": "2026-07-09T10:52:53Z",
+  "repo": "relia",
+  "task_id": "T14",
+  "work_item_id": "relia-mvp-t14",
+  "source_kind": "prd",
+  "supervisor_skill": "autoship-supervisor",
+  "factoryd_config_ref": ".factory/factoryd.json",
+  "factoryd_command": "redacted_template_command_not_directly_replayable: FACTORY_REPO=<factory-repo> factoryd run --config .factory/factoryd.json --repo relia --task T14 --loop --max-tasks 1 --json",
+  "task_scope": {
+    "delivery_slice_refs": [
+      "assessment-and-pr-advisory"
+    ],
+    "acceptance_item_ids": [
+      "FR5-CANONICAL-EXPERIENCE-SCHEMA-001",
+      "FR16-MCP-SERVING-001",
+      "FR19-COVERAGE-OOD-SIGNAL-001",
+      "NFR14-ADVISORY-RESTRAINT-001",
+      "NFR15-NO-DASHBOARD-DEPENDENCY-001",
+      "MVP-IN-SCOPE-016",
+      "MVP-IN-SCOPE-018",
+      "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-001",
+      "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-006"
+    ],
+    "allowed_paths": [
+      "AGENTS.md",
+      "WORKFLOW.md",
+      "README.md",
+      "Makefile",
+      ".tool-versions",
+      "go.mod",
+      "go.sum",
+      "relia.yaml",
+      "CLAUDE.md",
+      "tests/",
+      "schemas/",
+      "docs/",
+      "examples/",
+      "memory/",
+      ".github/",
+      ".factory/artifacts/task-runs/T14/",
+      "cmd/relia/",
+      "internal/assess/",
+      "internal/advise/",
+      "internal/diffparse/",
+      "internal/serve/",
+      "internal/ingest/",
+      "internal/backtest/",
+      "internal/distill/"
+    ],
+    "forbidden_paths": [
+      ".git/",
+      ".factory/tmp/",
+      ".factoryd/",
+      ".factory/artifacts/prd-to-plan/relia-mvp/",
+      ".factory/artifacts/pr-lifecycle/relia-mvp-t14/",
+      ".factory/artifacts/task-runs/T14/scope-closure-report.json",
+      ".factory/artifacts/task-runs/T14/scope-closure-map.json",
+      ".factory/artifacts/task-runs/T14/factoryd-run-once-report.json"
+    ],
+    "validation_commands": [
+      "make prepush-full"
+    ],
+    "explicit_gates": [
+      "ci_status",
+      "codex_review",
+      "quality_bot_review",
+      "scope_closure",
+      "architecture_budget"
+    ]
+  },
+  "observations": {
+    "task_binding_status": "verified",
+    "factoryd_dispatch_status": "started",
+    "selected_task_assertion_ref": ".factoryd/events/20260709T101156.893999000Z-dry_run_task_selected-relia-T14.json",
+    "factoryd_run_report_ref": ".factoryd/runs/20260709T101204.015746000Z-relia-T14/task-run-report.json",
+    "factoryd_run_id": "20260709T101204.015746000Z-relia-T14",
+    "factoryd_status": "blocked_non_convergent_after_review_repair",
+    "factoryd_stop_reason": "codex_review_non_convergent",
+    "pr_number": 164,
+    "pr_url": "https://github.com/Clyra-AI/relia/pull/164",
+    "initial_head": "38d38813579ab5f98ca924a2a00849e57e7b8de2",
+    "daemon_repair_head": "a28cf0c5dce793bea30332687053d98a305792e6",
+    "ci_status_before_supervisor_repair": "passed",
+    "review_status_before_supervisor_repair": "latest_head_actionable_p2_comments",
+    "manual_repair_validation_status": "passed"
+  },
+  "decisions": [
+    {
+      "decision_type": "daemon_continue",
+      "actor": "supervisor",
+      "action_taken": "recorded_merge_authority_grant",
+      "reason": "Relia autoship runs use restricted autonomy; T14 required an explicit task-scoped merge_authority grant before daemon dispatch.",
+      "evidence_refs": [
+        "operator_request:2026-07-09T10:12Z:work-on-relia-t14-using-autoship-supervisor"
+      ]
+    },
+    {
+      "decision_type": "daemon_repair",
+      "actor": "supervisor",
+      "action_taken": "monitored",
+      "reason": "The first Codex review produced two latest-head P2 comments and factoryd performed a bounded daemon repair.",
+      "evidence_refs": [
+        ".factoryd/runs/20260709T101204.015746000Z-relia-T14/review-repair-batch-20260709T101204.015746000Z-relia-T14-repair.json",
+        ".factoryd/runs/20260709T101204.015746000Z-relia-T14/codex-review-repair-1-output.log",
+        "https://github.com/Clyra-AI/relia/pull/164#discussion_r3550895536",
+        "https://github.com/Clyra-AI/relia/pull/164#discussion_r3550895540"
+      ]
+    },
+    {
+      "decision_type": "manual_patch",
+      "actor": "supervisor",
+      "action_taken": "repaired",
+      "reason": "factoryd reached codex_review_non_convergent after the daemon repair. The remaining latest-head P2 comments were concrete T14 defects in plan-path parsing and mixed coverage/OOD semantics, so a narrow supervisor patch was within scope.",
+      "evidence_refs": [
+        ".factoryd/runs/20260709T101204.015746000Z-relia-T14/review-loop-metrics.json",
+        ".factoryd/runs/20260709T101204.015746000Z-relia-T14/20260709T101204.015746000Z-relia-T14-repair-2-checker-failure-envelope.json",
+        "https://github.com/Clyra-AI/relia/pull/164#discussion_r3550974043",
+        "https://github.com/Clyra-AI/relia/pull/164#discussion_r3550974047"
+      ]
+    },
+    {
+      "decision_type": "review_disposition",
+      "actor": "supervisor",
+      "action_taken": "accepted_and_fixed",
+      "reason": "Plan parsing must reject glob-like and ellipsis validation-command tokens before normalizing plan paths.",
+      "evidence_refs": [
+        "internal/diffparse/diffparse.go",
+        "internal/diffparse/diffparse_test.go"
+      ]
+    },
+    {
+      "decision_type": "review_disposition",
+      "actor": "supervisor",
+      "action_taken": "accepted_and_fixed",
+      "reason": "Mixed coverage must mark the aggregate OOD signal true whenever any touched path has no coverage.",
+      "evidence_refs": [
+        "internal/assess/assess.go",
+        "internal/assess/assess_test.go"
+      ]
+    }
+  ],
+  "validation": {
+    "status": "pass",
+    "commands": [
+      {
+        "command": "go test ./internal/diffparse ./internal/assess -count=1",
+        "exit_code": 0
+      },
+      {
+        "command": "make prepush-full",
+        "exit_code": 0
+      }
+    ]
+  },
+  "final_state": {
+    "status": "repair_ready_for_shipping",
+    "reason": "Supervisor repair is validated locally and ready to push to PR #164 for CI and Codex review.",
+    "merged": false,
+    "post_merge_monitored": false,
+    "repo_clean": false
+  },
+  "evidence_refs": [
+    ".factory/artifacts/task-runs/T14/work-proof-marker.json",
+    ".factory/artifacts/task-runs/T14/validation-report.json",
+    ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json",
+    ".factoryd/runs/20260709T101204.015746000Z-relia-T14/task-run-report.json",
+    ".factoryd/runs/20260709T101204.015746000Z-relia-T14/review-loop-metrics.json",
+    "https://github.com/Clyra-AI/relia/pull/164",
+    "https://github.com/Clyra-AI/relia/pull/164#discussion_r3550895536",
+    "https://github.com/Clyra-AI/relia/pull/164#discussion_r3550895540",
+    "https://github.com/Clyra-AI/relia/pull/164#discussion_r3550974043",
+    "https://github.com/Clyra-AI/relia/pull/164#discussion_r3550974047"
+  ]
+}

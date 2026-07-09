@@ -432,7 +432,7 @@ func CoverageForPaths(root string, touchedPaths []string, rules []Rule) ([]map[s
 		}
 	}
 	summary["coverage"] = aggregateCoverage(summary)
-	summary["out_of_distribution_signal"] = summary["coverage"] == "no_coverage"
+	summary["out_of_distribution_signal"] = summary["no_coverage_path_count"].(int) > 0
 	return entries, summary
 }
 
