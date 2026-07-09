@@ -235,6 +235,9 @@ func recordPlanPathValue(touched map[string]bool, field string) {
 }
 
 func planPathToken(field string) string {
+	if envAssignmentToken(field) {
+		return ""
+	}
 	if !strings.HasPrefix(field, "-") {
 		return field
 	}
@@ -243,6 +246,24 @@ func planPathToken(field string) string {
 		return ""
 	}
 	return value
+}
+
+func envAssignmentToken(field string) bool {
+	key, value, found := strings.Cut(field, "=")
+	if !found || key == "" || value == "" || strings.HasPrefix(key, "-") {
+		return false
+	}
+	for index, char := range key {
+		switch {
+		case char == '_':
+		case char >= 'A' && char <= 'Z':
+		case char >= 'a' && char <= 'z':
+		case index > 0 && char >= '0' && char <= '9':
+		default:
+			return false
+		}
+	}
+	return true
 }
 
 func stripLineSuffix(value string) string {
@@ -304,6 +325,9 @@ func planPathCandidate(field string) bool {
 		return true
 	}
 	if abbreviationLikeToken(field) {
+		return false
+	}
+	if bareDomainLikeToken(field) {
 		return false
 	}
 	extension := filepath.Ext(field)
@@ -371,6 +395,23 @@ func taskIDLikeSegment(value string) bool {
 		}
 	}
 	return hasUpper && hasDigit
+}
+
+func bareDomainLikeToken(value string) bool {
+	if strings.ContainsAny(value, "/:") {
+		return false
+	}
+	trimmed := strings.TrimSuffix(strings.ToLower(value), ".")
+	base := strings.TrimSuffix(trimmed, filepath.Ext(trimmed))
+	if base == "" || strings.ContainsAny(base, " _") {
+		return false
+	}
+	switch filepath.Ext(trimmed) {
+	case ".ai", ".app", ".biz", ".co", ".com", ".dev", ".io", ".net", ".org":
+		return true
+	default:
+		return false
+	}
 }
 
 func slashProseToken(value string) bool {
