@@ -287,6 +287,25 @@ func TestTouchedPathsOrPlanSplitsQuotedCommandSpans(t *testing.T) {
 	}
 }
 
+func TestTouchedPathsOrPlanSkipsUnquotedCommandHelpers(t *testing.T) {
+	paths, inputKind, err := TouchedPathsOrPlan([]byte(`Implementation plan:
+
+- Run ./scripts/check.py packages/billing/invoice.py before advice.
+- Run python3 scripts/check.py packages/billing/receipt.py through the helper.
+- Update scripts/check.py and packages/billing/config.py in the same patch.
+`))
+	if err != nil {
+		t.Fatalf("TouchedPathsOrPlan error: %v", err)
+	}
+	if inputKind != "plan" {
+		t.Fatalf("input kind = %q, want plan", inputKind)
+	}
+	want := []string{"packages/billing/config.py", "packages/billing/invoice.py", "packages/billing/receipt.py", "scripts/check.py"}
+	if fmt.Sprint(paths) != fmt.Sprint(want) {
+		t.Fatalf("paths = %#v, want %#v", paths, want)
+	}
+}
+
 func TestTouchedPathsOrPlanStripsQuotedLineSuffixes(t *testing.T) {
 	paths, inputKind, err := TouchedPathsOrPlan([]byte(`Implementation plan:
 

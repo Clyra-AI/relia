@@ -53,9 +53,7 @@ func PlanPaths(content []byte) ([]string, error) {
 		"\r", " ",
 		"\t", " ",
 	)
-	for _, field := range strings.Fields(replacer.Replace(planText)) {
-		recordPlanPath(touched, field)
-	}
+	recordUnquotedPlanFields(touched, strings.Fields(replacer.Replace(planText)))
 	paths := make([]string, 0, len(touched))
 	for touchedPath := range touched {
 		paths = append(paths, touchedPath)
@@ -65,6 +63,50 @@ func PlanPaths(content []byte) ([]string, error) {
 		return nil, ErrNoRepoRelativePaths
 	}
 	return paths, nil
+}
+
+func recordUnquotedPlanFields(touched map[string]bool, fields []string) {
+	skipInterpreterScriptOperand := false
+	previousMeaningful := ""
+	for _, field := range fields {
+		normalized := commandContextToken(field)
+		if skipInterpreterScriptOperand && !strings.HasPrefix(field, "-") {
+			skipInterpreterScriptOperand = false
+			if commandScriptOperand(field) {
+				previousMeaningful = normalized
+				continue
+			}
+		}
+		if unquotedHelperExecutable(field) && commandLeadInToken(previousMeaningful) {
+			previousMeaningful = normalized
+			continue
+		}
+		recordPlanPath(touched, field)
+		if interpreterCommandToken(normalized) {
+			skipInterpreterScriptOperand = true
+		}
+		if normalized != "" {
+			previousMeaningful = normalized
+		}
+	}
+}
+
+func commandContextToken(value string) string {
+	return strings.ToLower(strings.Trim(strings.TrimSpace(value), "-"))
+}
+
+func commandLeadInToken(value string) bool {
+	switch value {
+	case "run", "execute", "executed", "invoke", "invoked", "call", "called", "test", "validate":
+		return true
+	default:
+		return false
+	}
+}
+
+func unquotedHelperExecutable(value string) bool {
+	trimmed := strings.TrimPrefix(strings.TrimSpace(value), "./")
+	return strings.HasPrefix(trimmed, "scripts/") && filepath.Ext(filepath.Base(trimmed)) != ""
 }
 
 func recordQuotedPlanPath(touched map[string]bool, field string) {
