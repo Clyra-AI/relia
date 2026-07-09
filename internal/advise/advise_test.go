@@ -107,3 +107,40 @@ func TestRenderCommentNoCoverageNamesOnlyUncoveredPaths(t *testing.T) {
 		t.Fatalf("comment falsely listed covered path as uncovered:\n%s", comment)
 	}
 }
+
+func TestRenderCommentMixedCoverageNamesUncoveredPath(t *testing.T) {
+	assessment := assessdoc.RiskAssessment{
+		RiskLevel: "match_medium",
+		Matches: []assessdoc.RiskAssessmentMatch{
+			{RuleID: "billing-low-confidence", Confidence: 0.55},
+		},
+		Metadata: map[string]any{
+			"max_avoid_confidence": 0.55,
+			"coverage_stats": map[string]any{
+				"no_coverage_path_count": 1,
+			},
+			"path_coverage": []map[string]any{
+				{"path": "packages/billing/invoice.py", "coverage": "covered_risky"},
+				{"path": "packages/search/query.py", "coverage": "no_coverage"},
+			},
+		},
+	}
+
+	comment := RenderComment(
+		assessment,
+		[]string{"packages/billing/invoice.py", "packages/search/query.py"},
+		"sha256:abc",
+		time.Unix(0, 0).UTC(),
+		"",
+	)
+
+	if !strings.Contains(comment, "no prior active memory covers `packages/search/query.py`") {
+		t.Fatalf("comment missing uncovered path:\n%s", comment)
+	}
+	if !strings.Contains(comment, "change also matches `billing-low-confidence`") {
+		t.Fatalf("comment missing matched rule context:\n%s", comment)
+	}
+	if strings.Contains(comment, "`packages/billing/invoice.py`") {
+		t.Fatalf("comment falsely listed covered path as uncovered:\n%s", comment)
+	}
+}
