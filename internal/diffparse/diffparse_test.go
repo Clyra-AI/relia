@@ -86,6 +86,26 @@ func TestTouchedPathsOrPlanFallsBackToPlanPaths(t *testing.T) {
 	}
 }
 
+func TestTouchedPathsOrPlanPreservesRootLevelPlanPaths(t *testing.T) {
+	paths, inputKind, err := TouchedPathsOrPlan([]byte(`Implementation plan:
+
+- Update README.md with the local assessment command.
+- Keep go.mod pinned to the current module path.
+- Touch internal/assess/assess.go for the shared assessment behavior.
+- Ignore https://github.com/acme/relia/pull/164 review links.
+`))
+	if err != nil {
+		t.Fatalf("TouchedPathsOrPlan error: %v", err)
+	}
+	if inputKind != "plan" {
+		t.Fatalf("input kind = %q, want plan", inputKind)
+	}
+	want := []string{"README.md", "go.mod", "internal/assess/assess.go"}
+	if fmt.Sprint(paths) != fmt.Sprint(want) {
+		t.Fatalf("paths = %#v, want %#v", paths, want)
+	}
+}
+
 func TestTouchedPathsOrPlanKeepsUnifiedDiffKind(t *testing.T) {
 	paths, inputKind, err := TouchedPathsOrPlan([]byte(`diff --git a/packages/search/query.py b/packages/search/query.py
 --- a/packages/search/query.py

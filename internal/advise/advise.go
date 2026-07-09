@@ -116,7 +116,7 @@ func RenderComment(assessment assessdoc.RiskAssessment, touchedPaths []string, d
 	switch assessment.RiskLevel {
 	case "no_coverage":
 		builder.WriteString("Relia advisory - no prior active memory covers ")
-		builder.WriteString(markdownInlineList(touchedPaths, 3))
+		builder.WriteString(markdownInlineList(noCoveragePaths(assessment, touchedPaths), 3))
 		builder.WriteString(". Suggest closer review.\n")
 	case "covered_clean":
 		builder.WriteString("Relia advisory - current diff is covered by active memory. Prior advisory cleared.")
@@ -133,6 +133,57 @@ func RenderComment(assessment assessdoc.RiskAssessment, touchedPaths []string, d
 		builder.WriteString(".\n")
 	}
 	return builder.String()
+}
+
+func noCoveragePaths(assessment assessdoc.RiskAssessment, fallback []string) []string {
+	if assessment.Metadata == nil {
+		return fallback
+	}
+	rawEntries, ok := assessment.Metadata["path_coverage"]
+	if !ok {
+		return fallback
+	}
+	paths := uncoveredPathsFromPathCoverage(rawEntries)
+	if len(paths) == 0 {
+		return fallback
+	}
+	return paths
+}
+
+func uncoveredPathsFromPathCoverage(rawEntries any) []string {
+	var paths []string
+	switch entries := rawEntries.(type) {
+	case []map[string]any:
+		for _, entry := range entries {
+			if path, ok := uncoveredPathFromCoverageEntry(entry); ok {
+				paths = append(paths, path)
+			}
+		}
+	case []any:
+		for _, rawEntry := range entries {
+			entry, ok := rawEntry.(map[string]any)
+			if !ok {
+				continue
+			}
+			if path, ok := uncoveredPathFromCoverageEntry(entry); ok {
+				paths = append(paths, path)
+			}
+		}
+	}
+	return paths
+}
+
+func uncoveredPathFromCoverageEntry(entry map[string]any) (string, bool) {
+	coverage, _ := entry["coverage"].(string)
+	if coverage != "no_coverage" {
+		return "", false
+	}
+	path, _ := entry["path"].(string)
+	path = strings.TrimSpace(path)
+	if path == "" {
+		return "", false
+	}
+	return path, true
 }
 
 func writeMatches(builder *strings.Builder, matches []assessdoc.RiskAssessmentMatch) {

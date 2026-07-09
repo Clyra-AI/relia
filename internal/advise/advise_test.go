@@ -53,3 +53,30 @@ func TestRenderCommentEscapesTouchedPathCodeSpans(t *testing.T) {
 		t.Fatalf("comment missing risk level marker:\n%s", comment)
 	}
 }
+
+func TestRenderCommentNoCoverageNamesOnlyUncoveredPaths(t *testing.T) {
+	assessment := assessdoc.RiskAssessment{
+		RiskLevel: "no_coverage",
+		Metadata: map[string]any{
+			"path_coverage": []map[string]any{
+				{"path": "packages/billing/invoice.py", "coverage": "covered_clean"},
+				{"path": "packages/search/query.py", "coverage": "no_coverage"},
+			},
+		},
+	}
+
+	comment := RenderComment(
+		assessment,
+		[]string{"packages/billing/invoice.py", "packages/search/query.py"},
+		"sha256:abc",
+		time.Unix(0, 0).UTC(),
+		"",
+	)
+
+	if !strings.Contains(comment, "`packages/search/query.py`") {
+		t.Fatalf("comment missing uncovered path:\n%s", comment)
+	}
+	if strings.Contains(comment, "`packages/billing/invoice.py`") {
+		t.Fatalf("comment falsely listed covered path as uncovered:\n%s", comment)
+	}
+}
