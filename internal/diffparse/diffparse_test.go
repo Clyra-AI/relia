@@ -163,6 +163,25 @@ func TestTouchedPathsOrPlanRejectsRemoteModulePathTokens(t *testing.T) {
 	}
 }
 
+func TestTouchedPathsOrPlanStripsOptionPathPrefixes(t *testing.T) {
+	paths, inputKind, err := TouchedPathsOrPlan([]byte(`Implementation plan:
+
+- Run relia assess --input=packages/billing/invoice.py before advice.
+- Run relia assess --config=relia.yaml for root configuration coverage.
+- Ignore --verbose because it is not a path-valued option.
+`))
+	if err != nil {
+		t.Fatalf("TouchedPathsOrPlan error: %v", err)
+	}
+	if inputKind != "plan" {
+		t.Fatalf("input kind = %q, want plan", inputKind)
+	}
+	want := []string{"packages/billing/invoice.py", "relia.yaml"}
+	if fmt.Sprint(paths) != fmt.Sprint(want) {
+		t.Fatalf("paths = %#v, want %#v", paths, want)
+	}
+}
+
 func TestTouchedPathsOrPlanKeepsUnifiedDiffKind(t *testing.T) {
 	paths, inputKind, err := TouchedPathsOrPlan([]byte(`diff --git a/packages/search/query.py b/packages/search/query.py
 --- a/packages/search/query.py

@@ -61,6 +61,10 @@ func PlanPaths(content []byte) ([]string, error) {
 		if index := strings.Index(field, "#"); index >= 0 {
 			field = field[:index]
 		}
+		field = planPathToken(field)
+		if field == "" {
+			continue
+		}
 		if !planPathCandidate(field) {
 			continue
 		}
@@ -77,6 +81,17 @@ func PlanPaths(content []byte) ([]string, error) {
 		return nil, ErrNoRepoRelativePaths
 	}
 	return paths, nil
+}
+
+func planPathToken(field string) string {
+	if !strings.HasPrefix(field, "-") {
+		return field
+	}
+	_, value, found := strings.Cut(field, "=")
+	if !found {
+		return ""
+	}
+	return value
 }
 
 func planPathCandidate(field string) bool {
