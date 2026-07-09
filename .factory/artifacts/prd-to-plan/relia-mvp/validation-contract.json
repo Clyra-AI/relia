@@ -1160,6 +1160,7 @@
   "factoryd_runtime_requirements": {
     "runner_ready_fields": [
       "allowed_paths",
+      "semantic_invariants",
       "forbidden_paths",
       "worker_type",
       "factoryd_runtime",

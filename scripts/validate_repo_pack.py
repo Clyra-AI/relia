@@ -19,6 +19,7 @@ PROVIDER_ACCEPTANCE_IDS = {
 RUNNER_READY_TASK_FIELDS = [
     "task_id",
     "objective",
+    "semantic_invariants",
     "allowed_paths",
     "forbidden_paths",
     "validation_commands",
@@ -725,8 +726,19 @@ def model_provider_gate_task(task_id="T9", grant_task_id="*"):
 
 def validate_runner_ready_task_fields(task, task_id):
     for key in RUNNER_READY_TASK_FIELDS:
-        if key not in task or task[key] in (None, "", []):
+        missing_values = (None, "") if key == "semantic_invariants" else (None, "", [])
+        if key not in task or task[key] in missing_values:
             fail(f"{task_id} missing runner-ready field: {key}")
+    semantic_invariants = task.get("semantic_invariants")
+    if not isinstance(semantic_invariants, list) or not any(str(item).strip() for item in semantic_invariants):
+        fail(f"{task_id}.semantic_invariants must be a non-empty list")
+    normalized_semantic_invariants = []
+    for index, invariant in enumerate(semantic_invariants):
+        if not isinstance(invariant, str) or not invariant.strip():
+            fail(f"{task_id}.semantic_invariants[{index}] must be a non-empty string")
+        normalized_semantic_invariants.append(invariant.strip())
+    if len(set(normalized_semantic_invariants)) != len(normalized_semantic_invariants):
+        fail(f"{task_id}.semantic_invariants must not contain duplicate entries")
     worker_evidence = task.get("worker_evidence_required")
     if not isinstance(worker_evidence, list) or not any(str(item).strip() for item in worker_evidence):
         fail(f"{task_id}.worker_evidence_required must be a non-empty list")

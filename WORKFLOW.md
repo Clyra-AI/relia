@@ -35,6 +35,10 @@ item-level scope closure. Any intervention must be recorded as an
 `autoship_supervisor_report` under
 `.factory/artifacts/supervisor-runs/<task_id>/`.
 
+Before supervised dispatch, confirm the selected task packet has non-empty
+`semantic_invariants`; these are the behavior promises the supervisor should
+use to generalize narrow review comments into the full hazard family.
+
 Do not use supervised autoship to widen task scope, bypass lifecycle gates,
 edit PRD-derived control artifacts directly, or close acceptance with broad
 labels instead of item-level evidence.
@@ -63,8 +67,11 @@ FACTORY_REPO=/path/to/factory factoryd ingest --config .factory/factoryd.example
 ```
 
 The generated `.factory/artifacts/post-prd/<mission>/` artifacts are the
-governed source for execution. Do not edit `docs/product/prd.md` unless a human
-explicitly promotes the work into PRD scope.
+governed source for execution. Runner-ready post-PRD tasks must carry
+`semantic_invariants` in addition to allowed paths, validation commands,
+evidence requirements, lifecycle gates, and acceptance item mappings. Do not
+edit `docs/product/prd.md` unless a human explicitly promotes the work into PRD
+scope.
 
 ## Post-MVP Learning Intake
 

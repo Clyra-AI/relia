@@ -174,6 +174,7 @@ def self_test():
     sample_task = {key: "value" for key in RUNNER_READY_TASK_FIELDS}
     for key in [
         "allowed_paths",
+        "semantic_invariants",
         "forbidden_paths",
         "validation_commands",
         "baseline_commands",
@@ -400,6 +401,36 @@ def self_test():
                 raise
         else:
             fail("non-list evidence_required fixture did not fail closed")
+
+        empty_semantic_invariants = dict(sample_task)
+        empty_semantic_invariants["semantic_invariants"] = []
+        try:
+            validate_runner_ready_task_fields(empty_semantic_invariants, "self-test")
+        except AssertionError as exc:
+            if ".semantic_invariants must be a non-empty list" not in str(exc):
+                raise
+        else:
+            fail("empty semantic_invariants fixture did not fail closed")
+
+        blank_semantic_invariant = dict(sample_task)
+        blank_semantic_invariant["semantic_invariants"] = ["preserve behavior", ""]
+        try:
+            validate_runner_ready_task_fields(blank_semantic_invariant, "self-test")
+        except AssertionError as exc:
+            if ".semantic_invariants[1] must be a non-empty string" not in str(exc):
+                raise
+        else:
+            fail("blank semantic_invariant fixture did not fail closed")
+
+        duplicate_semantic_invariant = dict(sample_task)
+        duplicate_semantic_invariant["semantic_invariants"] = ["preserve behavior", "preserve behavior"]
+        try:
+            validate_runner_ready_task_fields(duplicate_semantic_invariant, "self-test")
+        except AssertionError as exc:
+            if ".semantic_invariants must not contain duplicate entries" not in str(exc):
+                raise
+        else:
+            fail("duplicate semantic_invariants fixture did not fail closed")
 
         non_list_inherited_evidence = json.loads(json.dumps(sample_task))
         non_list_inherited_evidence["validation_contract_inheritance"] = {

@@ -58,16 +58,20 @@ Before PR or merge, run:
 
 ## 5. Runner Readiness
 
-Task packets must declare allowed_paths, forbidden_paths, validation_commands,
-baseline_commands, red_first_commands, final_validation_commands,
-acceptance_result_requirements, worker_type, factoryd_runtime,
-evidence_required, worker_evidence_required, lifecycle_evidence_required,
-lifecycle_gates, and stop_conditions before daemon dispatch.
+Task packets must declare allowed_paths, forbidden_paths, semantic_invariants,
+validation_commands, baseline_commands, red_first_commands,
+final_validation_commands, acceptance_result_requirements, worker_type,
+factoryd_runtime, evidence_required, worker_evidence_required,
+lifecycle_evidence_required, lifecycle_gates, and stop_conditions before
+daemon dispatch.
 `evidence_required` and `worker_evidence_required` are worker-owned evidence
 that must exist before commit or PR shipping. `lifecycle_evidence_required` is
 factoryd-owned evidence such as scope closure, PR lifecycle, and run-once
 reports; workers must not fabricate those files or mark worker validation
 blocked only because lifecycle artifacts do not exist before shipping.
+`semantic_invariants` are task-owned behavior promises: implementation and
+review must preserve them even when a Codex comment or repair request names
+only one line-level symptom.
 
 When a task is run through Factory `autoship-supervisor`, bind supervision to
 one task ID and keep the supervisor as the judgment layer only. It may classify

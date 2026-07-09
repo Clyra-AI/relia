@@ -242,6 +242,10 @@ FACTORY_REPO=/path/to/factory factoryd ingest --config .factory/factoryd.example
 FACTORY_REPO=/path/to/factory factoryd ingest --config .factory/factoryd.example.json --repo relia --kind review --input product/reviews/<mission>.finding-list.json --mission <mission> --json
 ~~~
 
+Runner-ready PRD and post-PRD task packets must include
+`semantic_invariants`: behavior-level promises that workers, supervisors, and
+review repairs must preserve even when the immediate finding is line-specific.
+
 ## Customer-derived failures
 
 Customer-derived failures are not committed directly. Use

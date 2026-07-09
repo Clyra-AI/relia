@@ -266,6 +266,9 @@ serving remain the authoritative memory surfaces.
 - Source of truth for product scope is docs/product/prd.md.
 - Source of truth for governed delivery state is .factory/artifacts/prd-to-plan/relia-mvp/.
 - Feedback lives in command output, tests, coverage gates, CodeQL status, validation reports, PR lifecycle reports, and scope closure.
+- Runner-ready task packets carry `semantic_invariants`; treat them as
+  architecture-level behavior boundaries during decomposition, review repair,
+  and supervised autoship recovery.
 - Deleting Factory artifacts breaks governed closure; deleting dev/architecture guides breaks task propagation.
 - Deleting required-check metadata, CODEOWNERS, action-ref exceptions, or CI workflows breaks public-repo delivery controls.
 
