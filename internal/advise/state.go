@@ -182,7 +182,7 @@ func BuildForwardSignal(
 		"input_path":       inputPath,
 		"diff_fingerprint": diffFingerprint,
 		"assessment_id":    assessment.AssessmentID,
-		"risk_level":       PublishedRiskLevel(assessment, skipReason),
+		"risk_level":       assessment.RiskLevel,
 		"coverage":         coverage,
 		"comment_action":   commentAction,
 		"skip_reason":      skipReason,

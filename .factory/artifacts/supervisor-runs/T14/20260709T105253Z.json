@@ -1,7 +1,7 @@
 {
   "artifact_type": "autoship_supervisor_report",
   "schema_version": "0.1",
-  "generated_at": "2026-07-09T15:39:34Z",
+  "generated_at": "2026-07-09T15:50:39Z",
   "repo": "relia",
   "task_id": "T14",
   "work_item_id": "relia-mvp-t14",
@@ -111,6 +111,7 @@
     "twenty_sixth_supervisor_repair_base_head": "cbe69f45dad7d0bf53c12781a1d723753a5a31be",
     "twenty_seventh_supervisor_repair_base_head": "ff607a6b1627680901c0d7c174d79ff46750879f",
     "twenty_eighth_supervisor_repair_base_head": "b957b872603dbc8a82b3785f712db8e36fb72215",
+    "twenty_ninth_supervisor_repair_base_head": "7a9d4df229b41248c9174ed2959bef2c112d8393",
     "ci_status_before_supervisor_repair": "passed",
     "review_status_before_supervisor_repair": "latest_head_actionable_p2_comments",
     "review_status_after_first_supervisor_repair": "latest_head_actionable_p2_comment",
@@ -141,6 +142,7 @@
     "review_status_after_twenty_sixth_supervisor_repair": "local_supervisor_repair_validated_pending_push",
     "review_status_after_twenty_seventh_supervisor_repair": "local_supervisor_repair_validated_pending_push",
     "review_status_after_twenty_eighth_supervisor_repair": "local_supervisor_repair_validated_pending_push",
+    "review_status_after_twenty_ninth_supervisor_repair": "local_supervisor_repair_validated_pending_push",
     "manual_repair_validation_status": "passed"
   },
   "decisions": [
@@ -606,6 +608,17 @@
         "internal/diffparse/diffparse.go",
         "internal/diffparse/diffparse_test.go"
       ]
+    },
+    {
+      "decision_type": "review_disposition",
+      "actor": "supervisor",
+      "action_taken": "accepted_and_fixed",
+      "reason": "Forward ERR signals must preserve the underlying assessment risk level and use skip_reason only for advisory suppression state.",
+      "evidence_refs": [
+        "https://github.com/Clyra-AI/relia/pull/164#discussion_r3552963066",
+        "internal/advise/state.go",
+        "internal/advise/state_test.go"
+      ]
     }
   ],
   "validation": {
@@ -714,12 +727,20 @@
       {
         "command": "make prepush-full",
         "exit_code": 0
+      },
+      {
+        "command": "go test ./internal/advise -count=1",
+        "exit_code": 0
+      },
+      {
+        "command": "make prepush-full",
+        "exit_code": 0
       }
     ]
   },
   "final_state": {
     "status": "repair_ready_for_shipping",
-    "reason": "Supervisor repair for latest-head Codex review comment discussion_r3552882186 passed local validation and is ready to push to PR #164 for CI and Codex review.",
+    "reason": "Supervisor repair for latest-head Codex review comment discussion_r3552963066 passed local validation and is ready to push to PR #164 for CI and Codex review.",
     "merged": false,
     "post_merge_monitored": false,
     "repo_clean": false
@@ -771,6 +792,7 @@
     "https://github.com/Clyra-AI/relia/pull/164#discussion_r3552613808",
     "https://github.com/Clyra-AI/relia/pull/164#discussion_r3552728135",
     "https://github.com/Clyra-AI/relia/pull/164#discussion_r3552806172",
-    "https://github.com/Clyra-AI/relia/pull/164#discussion_r3552882186"
+    "https://github.com/Clyra-AI/relia/pull/164#discussion_r3552882186",
+    "https://github.com/Clyra-AI/relia/pull/164#discussion_r3552963066"
   ]
 }
