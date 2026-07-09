@@ -83,7 +83,7 @@ metadata: {}
 		t.Fatalf("forward_signal = %#v", forwardSignal)
 	}
 	baseline := forwardSignal["baseline"].(map[string]any)
-	if baseline["status"] != "current" ||
+	if baseline["status"] != "stale" ||
 		baseline["path"] != ".relia/baselines/error-recurrence-baseline.json" ||
 		baseline["headline_err"] != 0.2143 {
 		t.Fatalf("forward signal baseline = %#v", baseline)

@@ -113,7 +113,7 @@ func TestLoadPriorStateRejectsInvalidJSON(t *testing.T) {
 	}
 }
 
-func TestLoadForwardBaselineReadsSavedERRBaseline(t *testing.T) {
+func TestLoadForwardBaselineLabelsSavedERRBaselineStaleUntilVerified(t *testing.T) {
 	root := t.TempDir()
 	writePriorState(t, root, ".relia/baselines/error-recurrence-baseline.json", `{
   "object_type": "relia.err_baseline",
@@ -134,8 +134,11 @@ func TestLoadForwardBaselineReadsSavedERRBaseline(t *testing.T) {
 	if stateErr != nil {
 		t.Fatalf("LoadForwardBaseline returned error: %v", stateErr)
 	}
-	if got.Status != "current" || got.Path != ".relia/baselines/error-recurrence-baseline.json" || !got.HasHeadlineERR || got.HeadlineERR != 0.2143 {
-		t.Fatalf("baseline = %#v", got)
+	if got.Status != "stale" || got.Path != ".relia/baselines/error-recurrence-baseline.json" || !got.HasHeadlineERR || got.HeadlineERR != 0.2143 {
+		t.Fatalf("baseline = %#v, want stale with retained headline ERR", got)
+	}
+	if !strings.Contains(got.Reason, "cannot be verified") {
+		t.Fatalf("Reason = %q, want unverifiable baseline explanation", got.Reason)
 	}
 }
 

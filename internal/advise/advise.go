@@ -155,6 +155,17 @@ func RenderComment(assessment assessdoc.RiskAssessment, touchedPaths []string, d
 		writeCitations(&builder, assessment.Citations)
 		builder.WriteString(".\n")
 	default:
+		if HasUncoveredPath(assessment) {
+			builder.WriteString("Relia advisory - no prior active memory covers ")
+			builder.WriteString(markdownInlineList(noCoveragePaths(assessment, touchedPaths), 3))
+			if len(assessment.Matches) > 0 {
+				builder.WriteString("; change also matches ")
+				writeMatches(&builder, assessment.Matches)
+				writeCitations(&builder, assessment.Citations)
+			}
+			builder.WriteString(".\n")
+			return builder.String()
+		}
 		builder.WriteString("Relia advisory - this change matches ")
 		writeMatches(&builder, assessment.Matches)
 		writeCitations(&builder, assessment.Citations)

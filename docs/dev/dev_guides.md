@@ -426,7 +426,9 @@ T14 completes the local assessment/advisory behavior slice:
   advisory state. The signal includes assessment risk, aggregate coverage,
   comment action, skip or debounce reason, advisory restraint settings, and the
   saved ERR baseline path/status. Missing baselines are non-blocking; malformed
-  baselines fail closed as artifact-contract errors.
+  baselines fail closed as artifact-contract errors. `relia advise` carries the
+  baseline ERR value forward when available, but labels saved baselines `stale`
+  unless a backtest comparison has verified freshness against current inputs.
 - Advisory comment decisions still default to one update-in-place comment,
   skip unchanged diff fingerprints before debounce checks, debounce changed
   fingerprints by `advise.reassess_debounce_minutes`, and stay silent for new
