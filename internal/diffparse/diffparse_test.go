@@ -201,12 +201,11 @@ func TestTouchedPathsOrPlanPreservesQuotedPathsWithSpaces(t *testing.T) {
 	}
 }
 
-func TestTouchedPathsOrPlanRejectsSlashDelimitedProse(t *testing.T) {
+func TestTouchedPathsOrPlanSplitsQuotedCommandSpans(t *testing.T) {
 	paths, inputKind, err := TouchedPathsOrPlan([]byte(`Implementation plan:
 
-- Keep CI/CD and read/write guidance aligned.
-- Choose this and/or that while updating packages/billing/invoice.py.
-- Preserve internal/assess package handling for directory-scoped rules.
+- Run ` + "`relia assess --input packages/billing/invoice.py`" + ` before advisory output.
+- Also run "relia assess --input=src/components/button.tsx" for UI coverage.
 `))
 	if err != nil {
 		t.Fatalf("TouchedPathsOrPlan error: %v", err)
@@ -214,7 +213,27 @@ func TestTouchedPathsOrPlanRejectsSlashDelimitedProse(t *testing.T) {
 	if inputKind != "plan" {
 		t.Fatalf("input kind = %q, want plan", inputKind)
 	}
-	want := []string{"internal/assess", "packages/billing/invoice.py"}
+	want := []string{"packages/billing/invoice.py", "src/components/button.tsx"}
+	if fmt.Sprint(paths) != fmt.Sprint(want) {
+		t.Fatalf("paths = %#v, want %#v", paths, want)
+	}
+}
+
+func TestTouchedPathsOrPlanRejectsSlashDelimitedProse(t *testing.T) {
+	paths, inputKind, err := TouchedPathsOrPlan([]byte(`Implementation plan:
+
+- Keep CI/CD and read/write guidance aligned.
+- Choose this and/or that while updating packages/billing/invoice.py.
+- Preserve internal/assess package handling for directory-scoped rules.
+- Preserve pkg/billing and src/components as generic directory-scoped paths.
+`))
+	if err != nil {
+		t.Fatalf("TouchedPathsOrPlan error: %v", err)
+	}
+	if inputKind != "plan" {
+		t.Fatalf("input kind = %q, want plan", inputKind)
+	}
+	want := []string{"internal/assess", "packages/billing/invoice.py", "pkg/billing", "src/components"}
 	if fmt.Sprint(paths) != fmt.Sprint(want) {
 		t.Fatalf("paths = %#v, want %#v", paths, want)
 	}

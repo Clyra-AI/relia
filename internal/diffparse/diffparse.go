@@ -33,7 +33,7 @@ func PlanPaths(content []byte) ([]string, error) {
 	touched := map[string]bool{}
 	quotedFields, planText := quotedPlanFields(string(content))
 	for _, field := range quotedFields {
-		recordPlanPath(touched, field)
+		recordQuotedPlanPath(touched, field)
 	}
 	replacer := strings.NewReplacer(
 		"`", " ",
@@ -66,6 +66,21 @@ func PlanPaths(content []byte) ([]string, error) {
 		return nil, ErrNoRepoRelativePaths
 	}
 	return paths, nil
+}
+
+func recordQuotedPlanPath(touched map[string]bool, field string) {
+	parts := strings.Fields(field)
+	if len(parts) <= 1 || quotedFieldLooksLikeSinglePath(parts[0]) {
+		recordPlanPath(touched, field)
+		return
+	}
+	for _, part := range parts {
+		recordPlanPath(touched, part)
+	}
+}
+
+func quotedFieldLooksLikeSinglePath(firstField string) bool {
+	return strings.Contains(firstField, "/") || strings.HasPrefix(firstField, ".")
 }
 
 func quotedPlanFields(raw string) ([]string, string) {
@@ -153,25 +168,20 @@ func slashPathCandidate(value string) bool {
 	if remotePathLikeToken(value) {
 		return false
 	}
-	parts := strings.Split(value, "/")
-	if len(parts) < 2 || parts[0] == "" {
+	if slashProseToken(value) {
 		return false
 	}
-	if strings.HasPrefix(parts[0], ".") || knownRepoPathRoot(parts[0]) {
-		return true
-	}
-	for _, part := range parts[1:] {
-		extension := filepath.Ext(part)
-		if extension != "" && hasASCIIAlpha(extension) {
-			return true
-		}
-	}
-	return false
+	parts := strings.Split(value, "/")
+	return len(parts) >= 2 && parts[0] != ""
 }
 
-func knownRepoPathRoot(value string) bool {
-	switch value {
-	case "cmd", "docs", "examples", "internal", "memory", "packages", "schemas", "scripts", "tests":
+func slashProseToken(value string) bool {
+	switch strings.ToLower(value) {
+	case "and/or", "ci/cd", "read/write", "write/read", "input/output", "output/input",
+		"inputs/outputs", "outputs/inputs", "on/off", "yes/no", "before/after",
+		"after/before", "client/server", "server/client", "frontend/backend",
+		"backend/frontend", "producer/consumer", "consumer/producer", "request/response",
+		"response/request":
 		return true
 	default:
 		return false
