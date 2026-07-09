@@ -456,7 +456,7 @@
   "generated_at": "2026-07-09T16:17:55Z",
   "intent_source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T14",
   "mission_contract_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T14",
-  "overall_status": "closed",
+  "overall_status": "partial",
   "recovery_evidence_refs": [
     "https://github.com/Clyra-AI/relia/pull/164",
     "refs/remotes/origin/main@1cceab856a7b8349a91111412e04741047331732"
