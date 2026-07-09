@@ -11062,6 +11062,525 @@
     },
     {
       "acceptance_checks": [
+        "relia serve handles MCP JSON-RPC initialize, tools/list, and tools/call over stdio without network or hosted service requirements.",
+        "MCP tools recall, assess, and coverage reuse the existing one-shot tool builders and serve only active accepted rules with citations.",
+        "Invalid JSON-RPC requests fail closed with typed errors while preserving the command-result and MCP response contracts."
+      ],
+      "acceptance_group_id": "fr16-mcp-serving",
+      "acceptance_group_ids": [
+        "fr16-mcp-serving",
+        "mvp-in-scope",
+        "serve-and-advise-acceptance-tests"
+      ],
+      "acceptance_group_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json#/groups",
+      "acceptance_item_ids": [
+        "FR16-MCP-SERVING-001",
+        "MVP-IN-SCOPE-016",
+        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-001"
+      ],
+      "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+      "acceptance_result_requirements": [
+        {
+          "acceptance_item_id": "FR16-MCP-SERVING-001",
+          "allowed_statuses": [
+            "implemented",
+            "partial",
+            "missing",
+            "blocked",
+            "deferred_with_approval"
+          ],
+          "evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
+            "scope_closure_report"
+          ]
+        },
+        {
+          "acceptance_item_id": "MVP-IN-SCOPE-016",
+          "allowed_statuses": [
+            "implemented",
+            "partial",
+            "missing",
+            "blocked",
+            "deferred_with_approval"
+          ],
+          "evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
+            "scope_closure_report"
+          ]
+        },
+        {
+          "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-001",
+          "allowed_statuses": [
+            "implemented",
+            "partial",
+            "missing",
+            "blocked",
+            "deferred_with_approval"
+          ],
+          "evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "worker_evidence_required": [
+            "validation_report",
+            "work_proof_marker",
+            "proof-of-behavior-scorecard"
+          ],
+          "lifecycle_evidence_required": [
+            "scope_closure_report"
+          ]
+        }
+      ],
+      "agent_native_cli_checks": [
+        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
+        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
+        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
+      ],
+      "alignment_gate_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions",
+      "allowed_paths": [
+        "AGENTS.md",
+        "WORKFLOW.md",
+        "README.md",
+        "Makefile",
+        ".tool-versions",
+        "go.mod",
+        "go.sum",
+        "relia.yaml",
+        "CLAUDE.md",
+        "tests/",
+        "schemas/",
+        "docs/",
+        "examples/",
+        "memory/",
+        ".github/",
+        ".factory/artifacts/task-runs/T14.1/",
+        "cmd/relia/",
+        "internal/serve/",
+        "internal/assess/",
+        "internal/result/"
+      ],
+      "architecture_guidance_refs": [
+        {
+          "rule": "Record state owner, feedback source, blast radius, source-of-truth impact, and rollback/deletion checks for material changes.",
+          "source_ref": "docs/architecture/architecture_guides.md#systems-thinking-map"
+        },
+        {
+          "rule": "Use test-first evidence or a structured skipped reason.",
+          "source_ref": "docs/architecture/architecture_guides.md#tdd-and-red-first-expectations"
+        },
+        {
+          "rule": "Boundary, public contract, credential/network, or major reliability/perf changes require a decision note.",
+          "source_ref": "docs/architecture/architecture_guides.md#adr-and-decision-triggers"
+        },
+        {
+          "rule": "Deterministic bootstrap has no network/secrets; live work requires approval and evidence.",
+          "source_ref": "docs/architecture/architecture_guides.md#trust-mode-posture"
+        }
+      ],
+      "artifact_budget_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "baseline_commands": [
+        "make lint-fast",
+        "make test-fast"
+      ],
+      "blocked_by": [
+        "T14"
+      ],
+      "changelog_intent": {
+        "draft_entry": "Implement live MCP JSON-RPC stdio protocol handling for relia serve.",
+        "impact": "required",
+        "section": "Unreleased",
+        "semver_marker": "pre_1_0_minor_candidate"
+      },
+      "ci_control_refs": {
+        "action_ref_exceptions_ref": ".github/action-ref-exceptions.yaml",
+        "controls": [
+          "least_privilege_permissions",
+          "concurrency",
+          "timeouts",
+          "toolchain_pin_from_go_mod"
+        ],
+        "owner_review_ref": ".github/CODEOWNERS",
+        "required": true,
+        "required_checks_ref": ".github/required-checks.json",
+        "workflow_refs": [
+          ".github/workflows/validate.yml",
+          ".github/workflows/codeql.yml"
+        ]
+      },
+      "ci_lane_refs": [
+        {
+          "command_refs": [
+            "make lint-fast",
+            "make test-fast"
+          ],
+          "lane": "fast",
+          "source_ref": "docs/dev/dev_guides.md#validation-matrix"
+        },
+        {
+          "command_refs": [
+            "make test-contracts",
+            "make prepush-full"
+          ],
+          "lane": "core",
+          "source_ref": "docs/dev/dev_guides.md#validation-matrix"
+        },
+        {
+          "lane": "risk",
+          "source_ref": "docs/dev/dev_guides.md#ci-and-pr-lifecycle",
+          "status_check_refs": [
+            "CodeQL analyze"
+          ]
+        }
+      ],
+      "commands": [
+        "make prepush-full"
+      ],
+      "coverage_policy_refs": {
+        "command_refs": [
+          "make test-coverage",
+          "make prepush-full"
+        ],
+        "exception_policy": "coverage misses block promotion unless the task records an approved scoped exception with owner, reason, expiry or follow-up task, and compensating validation evidence",
+        "minimums": [
+          {
+            "command_refs": [
+              "make test-coverage"
+            ],
+            "scope": "go_first_party_packages_overall",
+            "threshold": 75
+          }
+        ],
+        "required": true,
+        "source_ref": "docs/dev/dev_guides.md#coverage-gates"
+      },
+      "delivery_slice_refs": [
+        "assessment-and-pr-advisory"
+      ],
+      "docs_sync_refs": [
+        {
+          "path": "README.md",
+          "reason": "Document live MCP stdio serving behavior and client usage."
+        },
+        {
+          "path": "docs/dev/dev_guides.md",
+          "reason": "Keep validation and serve workflow guidance aligned."
+        },
+        {
+          "path": "docs/product/prd.md",
+          "reason": "Keep MCP serve acceptance evidence aligned with implementation status."
+        }
+      ],
+      "engineering_policy_refs": [
+        {
+          "policy": "docs_parity",
+          "rule": "Behavior, flags, outputs, install paths, and workflow semantics update docs and Factory planning artifacts together.",
+          "source_ref": "docs/dev/dev_guides.md"
+        },
+        {
+          "policy": "output_contracts",
+          "rule": "CLI output, exit codes, schemas, and artifacts are executable contracts.",
+          "source_ref": "docs/dev/dev_guides.md"
+        },
+        {
+          "policy": "provenance_evidence",
+          "rule": "Validation, work-proof, PR lifecycle, scanner, and scope-closure evidence use repo-relative refs.",
+          "source_ref": "docs/dev/dev_guides.md"
+        },
+        {
+          "policy": "structured_parser_policy",
+          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+        },
+        {
+          "policy": "agent_native_cli",
+          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use.",
+          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy"
+        },
+        {
+          "policy": "artifact_budget_and_refs",
+          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+        },
+        {
+          "policy": "customer_safe_redaction",
+          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data.",
+          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+        }
+      ],
+      "evidence_required": [
+        "work_proof_marker",
+        "validation_report",
+        "proof-of-behavior-scorecard"
+      ],
+      "factory_compatibility": {
+        "factory_contract_version": "1.0",
+        "generated_by": "repo-bootstrap-from-prd",
+        "profile_ref": ".factory/profile.yaml",
+        "skill_inventory_ref": "Factory skills/README.md"
+      },
+      "factoryd_runtime": {
+        "approval_posture": "human approval required for high risk, live credentials, and merge",
+        "branch_prefix": "codex",
+        "capability_grants": [],
+        "credential_posture": "no ambient secrets",
+        "network_posture": "offline by default",
+        "runtime_control": {
+          "autonomy_level": "restricted",
+          "conflict_behavior": "fail_closed",
+          "launch_request": {
+            "expected_decision": "allow",
+            "reason_code": "within_runtime_control_limits",
+            "requested_action": "continue_mission",
+            "requested_adapter": "codex_cli"
+          },
+          "owner": "factoryd-operator",
+          "release_freeze": {
+            "enabled": false
+          }
+        },
+        "state_dir": ".factoryd/",
+        "worker_command": "",
+        "worker_type": "codex_cli",
+        "workspace_root": ".factoryd/workspaces/"
+      },
+      "final_validation_commands": [
+        "make prepush-full"
+      ],
+      "forbidden_paths": [
+        ".git/",
+        ".factory/tmp/",
+        ".factoryd/",
+        ".factory/artifacts/prd-to-plan/relia-mvp/",
+        ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
+        ".factory/artifacts/pr-lifecycle/relia-mvp-t14-1/",
+        ".factory/artifacts/task-runs/T14.1/scope-closure-report.json",
+        ".factory/artifacts/task-runs/T14.1/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T14.1/factoryd-run-once-report.json"
+      ],
+      "input_artifacts": [
+        "docs/product/prd.md",
+        "AGENTS.md",
+        "WORKFLOW.md",
+        "docs/dev/dev_guides.md",
+        "docs/architecture/architecture_guides.md",
+        ".factory/profile.yaml",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json"
+      ],
+      "lifecycle_gates": {
+        "ci_required": true,
+        "codex_review_required": true,
+        "commit_push_required": true,
+        "local_validation_required": true,
+        "post_merge_monitor_required": true,
+        "pr_lifecycle_report_required": true,
+        "skip_policy": "approved_exception_required"
+      },
+      "max_iterations": 2,
+      "migration_impact": "Pre-1.0 MVP work; MCP stdio protocol handling changes public serve behavior and must preserve one-shot tool compatibility.",
+      "mission_contract_ref": "docs/product/prd.md",
+      "objective": "Implement live MCP JSON-RPC stdio protocol handling for relia serve so Claude/Cursor-style MCP clients can initialize, list tools, and call recall, assess, and coverage over active rules.",
+      "semantic_invariants": [
+        "Live MCP stdio serving reuses the existing recall, assess, and coverage tool builders instead of creating parallel behavior.",
+        "Only active accepted rules with resolvable citations are served through MCP.",
+        "MCP protocol handling remains local-first and requires no network, credentials, hosted service, dashboard, or provider call."
+      ],
+      "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
+      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
+      "proof_scorecard_required": true,
+      "red_first_commands": [
+        "make test-fast"
+      ],
+      "redaction_posture": {
+        "classification": "internal",
+        "customer_safe": false,
+        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing",
+        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported."
+      },
+      "required_proof_level": "workflow_behavior",
+      "required_worker_chain": [
+        "task-executor",
+        "validation-gate",
+        "commit-push",
+        "post-merge-monitor"
+      ],
+      "requires_credentials": false,
+      "requires_human_approval": false,
+      "requires_network": false,
+      "risk_class": "medium",
+      "runtime_pins": {
+        "artifact_namespace": ".factory/artifacts/",
+        "dependency_policy": "standard library first; pin and justify dependencies",
+        "distribution_target": "standalone_binary",
+        "language": "go",
+        "live_work_policy": "no ambient secrets or live network by default",
+        "module_or_package_path": "github.com/Clyra-AI/relia",
+        "provider_policy": "none by default",
+        "toolchain_version": "1.26.4"
+      },
+      "scope_exclusions": [
+        "No hosted MCP transport, network listener, credentials, or provider calls.",
+        "No dashboard or remote service dependency.",
+        "No broad rewrite of assessment, advisory, or memory-rule semantics beyond MCP protocol wiring."
+      ],
+      "security_scanner_gates": {
+        "exception_policy": "approved_exception_required_when_required_or_surface_touched",
+        "required": true,
+        "required_for_surfaces": [
+          "dependency additions",
+          "generated-code intake",
+          "CI or workflow changes",
+          "external calls",
+          "security-sensitive code",
+          "release-sensitive changes"
+        ],
+        "scanner": "CodeQL",
+        "status_check": "CodeQL analyze",
+        "workflow_ref": ".github/workflows/codeql.yml"
+      },
+      "shared_constraints_ref": "AGENTS.md",
+      "slice_rationale": {
+        "rationale": "Task advances a product-shaped capability slice while preserving acceptance-item closure refs.",
+        "slice_type": "vertical"
+      },
+      "slice_type": "vertical",
+      "stop_conditions": [
+        "MCP serving attempts network, credentials, or hosted transport without approval",
+        "changed path outside allowed_paths",
+        "forbidden path changed",
+        "live MCP protocol handling lacks initialize/tools/list/tools/call tests",
+        "missing runner-ready task contract",
+        "plan drift detected",
+        "required validation command failed",
+        "scope closure did not advance"
+      ],
+      "structured_parser_policy_refs": [
+        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
+      ],
+      "task_id": "T14.1",
+      "test_matrix_refs": [
+        {
+          "command_refs": [
+            "make test-fast"
+          ],
+          "source_ref": "docs/dev/dev_guides.md#12-level-test-matrix",
+          "tier": "Tier 1 Unit"
+        },
+        {
+          "command_refs": [
+            "scope closure map"
+          ],
+          "source_ref": "docs/dev/dev_guides.md#12-level-test-matrix",
+          "tier": "Tier 4 Acceptance"
+        },
+        {
+          "command_refs": [
+            "make test-contracts"
+          ],
+          "source_ref": "docs/dev/dev_guides.md#12-level-test-matrix",
+          "tier": "Tier 9 Contract"
+        }
+      ],
+      "upstream_debt_refs": [],
+      "validation_commands": [
+        "make prepush-full"
+      ],
+      "validation_contract_inheritance": {
+        "acceptance_criteria": [
+          "relia serve handles MCP JSON-RPC initialize, tools/list, and tools/call over stdio.",
+          "MCP recall, assess, and coverage serve only active accepted rules with citations.",
+          "One-shot serve --tool behavior remains compatible."
+        ],
+        "acceptance_item_ids": [
+          "FR16-MCP-SERVING-001",
+          "MVP-IN-SCOPE-016",
+          "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-001"
+        ],
+        "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
+        "evidence_required": [
+          "work_proof_marker",
+          "validation_report",
+          "proof-of-behavior-scorecard"
+        ],
+        "required_checks": [
+          "make prepush-full"
+        ],
+        "required_review": {
+          "required": false,
+          "review_type": "code",
+          "reviewer_class": "peer_agent"
+        },
+        "source_validation_contract_ref": ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
+        "stop_conditions": [
+          "missing runner-ready task contract",
+          "changed path outside allowed_paths",
+          "forbidden path changed",
+          "required validation command failed",
+          "plan drift detected",
+          "scope closure did not advance"
+        ],
+        "worker_evidence_required": [
+          "work_proof_marker",
+          "validation_report",
+          "proof-of-behavior-scorecard"
+        ],
+        "lifecycle_evidence_required": [
+          "scope_closure_report",
+          "pr_lifecycle_report",
+          "factoryd_run_once_report"
+        ]
+      },
+      "versioning_impact": "Pre-1.0 MVP work; live MCP stdio protocol behavior must preserve one-shot serve compatibility before release.",
+      "work_item_id": "relia-mvp-t14-1",
+      "worker_type": "codex_cli",
+      "worker_evidence_required": [
+        "work_proof_marker",
+        "validation_report",
+        "proof-of-behavior-scorecard"
+      ],
+      "lifecycle_evidence_required": [
+        "scope_closure_report",
+        "pr_lifecycle_report",
+        "factoryd_run_once_report"
+      ],
+      "architecture_target_paths": [
+        "cmd/relia/",
+        "internal/serve/",
+        "internal/assess/",
+        "internal/result/",
+        "schemas/",
+        "docs/"
+      ],
+      "path_planning_method": "relia_decomposition_targets_2026_07_03"
+    },
+    {
+      "acceptance_checks": [
         "Secrets must be redacted before experience records, reports, memory pages, compiled blocks, or shares are persisted.",
         "relia assess`, the MCP `assess` tool, and the PR comment must share one engine and one `RiskAssessment` schema.",
         "A technical user should run `relia demo` and open the bundled backtest report in under 5 minutes, and run a real `backtest` in under 10 minutes from install.",
@@ -14325,525 +14844,6 @@
         "internal/distill/",
         "internal/review/",
         "examples/",
-        "docs/"
-      ],
-      "path_planning_method": "relia_decomposition_targets_2026_07_03"
-    },
-    {
-      "acceptance_checks": [
-        "relia serve handles MCP JSON-RPC initialize, tools/list, and tools/call over stdio without network or hosted service requirements.",
-        "MCP tools recall, assess, and coverage reuse the existing one-shot tool builders and serve only active accepted rules with citations.",
-        "Invalid JSON-RPC requests fail closed with typed errors while preserving the command-result and MCP response contracts."
-      ],
-      "acceptance_group_id": "fr16-mcp-serving",
-      "acceptance_group_ids": [
-        "fr16-mcp-serving",
-        "mvp-in-scope",
-        "serve-and-advise-acceptance-tests"
-      ],
-      "acceptance_group_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json#/groups",
-      "acceptance_item_ids": [
-        "FR16-MCP-SERVING-001",
-        "MVP-IN-SCOPE-016",
-        "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-001"
-      ],
-      "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
-      "acceptance_result_requirements": [
-        {
-          "acceptance_item_id": "FR16-MCP-SERVING-001",
-          "allowed_statuses": [
-            "implemented",
-            "partial",
-            "missing",
-            "blocked",
-            "deferred_with_approval"
-          ],
-          "evidence_required": [
-            "validation_report",
-            "work_proof_marker",
-            "proof-of-behavior-scorecard"
-          ],
-          "worker_evidence_required": [
-            "validation_report",
-            "work_proof_marker",
-            "proof-of-behavior-scorecard"
-          ],
-          "lifecycle_evidence_required": [
-            "scope_closure_report"
-          ]
-        },
-        {
-          "acceptance_item_id": "MVP-IN-SCOPE-016",
-          "allowed_statuses": [
-            "implemented",
-            "partial",
-            "missing",
-            "blocked",
-            "deferred_with_approval"
-          ],
-          "evidence_required": [
-            "validation_report",
-            "work_proof_marker",
-            "proof-of-behavior-scorecard"
-          ],
-          "worker_evidence_required": [
-            "validation_report",
-            "work_proof_marker",
-            "proof-of-behavior-scorecard"
-          ],
-          "lifecycle_evidence_required": [
-            "scope_closure_report"
-          ]
-        },
-        {
-          "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-001",
-          "allowed_statuses": [
-            "implemented",
-            "partial",
-            "missing",
-            "blocked",
-            "deferred_with_approval"
-          ],
-          "evidence_required": [
-            "validation_report",
-            "work_proof_marker",
-            "proof-of-behavior-scorecard"
-          ],
-          "worker_evidence_required": [
-            "validation_report",
-            "work_proof_marker",
-            "proof-of-behavior-scorecard"
-          ],
-          "lifecycle_evidence_required": [
-            "scope_closure_report"
-          ]
-        }
-      ],
-      "agent_native_cli_checks": [
-        "Agent-facing CLI output supports stable JSON mode or records an approved deferral.",
-        "Non-interactive or piped output is machine-readable unless the command is explicitly human-only.",
-        "Quiet and compact modes preserve status, evidence refs, typed exits, and machine-readable errors."
-      ],
-      "alignment_gate_ref": ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json#/alignment_decisions",
-      "allowed_paths": [
-        "AGENTS.md",
-        "WORKFLOW.md",
-        "README.md",
-        "Makefile",
-        ".tool-versions",
-        "go.mod",
-        "go.sum",
-        "relia.yaml",
-        "CLAUDE.md",
-        "tests/",
-        "schemas/",
-        "docs/",
-        "examples/",
-        "memory/",
-        ".github/",
-        ".factory/artifacts/task-runs/T14.1/",
-        "cmd/relia/",
-        "internal/serve/",
-        "internal/assess/",
-        "internal/result/"
-      ],
-      "architecture_guidance_refs": [
-        {
-          "rule": "Record state owner, feedback source, blast radius, source-of-truth impact, and rollback/deletion checks for material changes.",
-          "source_ref": "docs/architecture/architecture_guides.md#systems-thinking-map"
-        },
-        {
-          "rule": "Use test-first evidence or a structured skipped reason.",
-          "source_ref": "docs/architecture/architecture_guides.md#tdd-and-red-first-expectations"
-        },
-        {
-          "rule": "Boundary, public contract, credential/network, or major reliability/perf changes require a decision note.",
-          "source_ref": "docs/architecture/architecture_guides.md#adr-and-decision-triggers"
-        },
-        {
-          "rule": "Deterministic bootstrap has no network/secrets; live work requires approval and evidence.",
-          "source_ref": "docs/architecture/architecture_guides.md#trust-mode-posture"
-        }
-      ],
-      "artifact_budget_refs": [
-        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
-      ],
-      "baseline_commands": [
-        "make lint-fast",
-        "make test-fast"
-      ],
-      "blocked_by": [
-        "T14"
-      ],
-      "changelog_intent": {
-        "draft_entry": "Implement live MCP JSON-RPC stdio protocol handling for relia serve.",
-        "impact": "required",
-        "section": "Unreleased",
-        "semver_marker": "pre_1_0_minor_candidate"
-      },
-      "ci_control_refs": {
-        "action_ref_exceptions_ref": ".github/action-ref-exceptions.yaml",
-        "controls": [
-          "least_privilege_permissions",
-          "concurrency",
-          "timeouts",
-          "toolchain_pin_from_go_mod"
-        ],
-        "owner_review_ref": ".github/CODEOWNERS",
-        "required": true,
-        "required_checks_ref": ".github/required-checks.json",
-        "workflow_refs": [
-          ".github/workflows/validate.yml",
-          ".github/workflows/codeql.yml"
-        ]
-      },
-      "ci_lane_refs": [
-        {
-          "command_refs": [
-            "make lint-fast",
-            "make test-fast"
-          ],
-          "lane": "fast",
-          "source_ref": "docs/dev/dev_guides.md#validation-matrix"
-        },
-        {
-          "command_refs": [
-            "make test-contracts",
-            "make prepush-full"
-          ],
-          "lane": "core",
-          "source_ref": "docs/dev/dev_guides.md#validation-matrix"
-        },
-        {
-          "lane": "risk",
-          "source_ref": "docs/dev/dev_guides.md#ci-and-pr-lifecycle",
-          "status_check_refs": [
-            "CodeQL analyze"
-          ]
-        }
-      ],
-      "commands": [
-        "make prepush-full"
-      ],
-      "coverage_policy_refs": {
-        "command_refs": [
-          "make test-coverage",
-          "make prepush-full"
-        ],
-        "exception_policy": "coverage misses block promotion unless the task records an approved scoped exception with owner, reason, expiry or follow-up task, and compensating validation evidence",
-        "minimums": [
-          {
-            "command_refs": [
-              "make test-coverage"
-            ],
-            "scope": "go_first_party_packages_overall",
-            "threshold": 75
-          }
-        ],
-        "required": true,
-        "source_ref": "docs/dev/dev_guides.md#coverage-gates"
-      },
-      "delivery_slice_refs": [
-        "assessment-and-pr-advisory"
-      ],
-      "docs_sync_refs": [
-        {
-          "path": "README.md",
-          "reason": "Document live MCP stdio serving behavior and client usage."
-        },
-        {
-          "path": "docs/dev/dev_guides.md",
-          "reason": "Keep validation and serve workflow guidance aligned."
-        },
-        {
-          "path": "docs/product/prd.md",
-          "reason": "Keep MCP serve acceptance evidence aligned with implementation status."
-        }
-      ],
-      "engineering_policy_refs": [
-        {
-          "policy": "docs_parity",
-          "rule": "Behavior, flags, outputs, install paths, and workflow semantics update docs and Factory planning artifacts together.",
-          "source_ref": "docs/dev/dev_guides.md"
-        },
-        {
-          "policy": "output_contracts",
-          "rule": "CLI output, exit codes, schemas, and artifacts are executable contracts.",
-          "source_ref": "docs/dev/dev_guides.md"
-        },
-        {
-          "policy": "provenance_evidence",
-          "rule": "Validation, work-proof, PR lifecycle, scanner, and scope-closure evidence use repo-relative refs.",
-          "source_ref": "docs/dev/dev_guides.md"
-        },
-        {
-          "policy": "structured_parser_policy",
-          "rule": "Structured data is read through parsers, schemas, stable APIs, or approved exceptions.",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
-        },
-        {
-          "policy": "agent_native_cli",
-          "rule": "CLI tasks define JSON, non-interactive, quiet, compact, typed-exit, and machine-readable error behavior before agent-facing use.",
-          "source_ref": "docs/dev/dev_guides.md#agent-native-cli-policy"
-        },
-        {
-          "policy": "artifact_budget_and_refs",
-          "rule": "Large output is cited by artifact ref with full-output hash and truncation metadata.",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
-        },
-        {
-          "policy": "customer_safe_redaction",
-          "rule": "Shareable artifacts must declare redaction posture and recursively redact sensitive data.",
-          "source_ref": "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
-        }
-      ],
-      "evidence_required": [
-        "work_proof_marker",
-        "validation_report",
-        "proof-of-behavior-scorecard"
-      ],
-      "factory_compatibility": {
-        "factory_contract_version": "1.0",
-        "generated_by": "repo-bootstrap-from-prd",
-        "profile_ref": ".factory/profile.yaml",
-        "skill_inventory_ref": "Factory skills/README.md"
-      },
-      "factoryd_runtime": {
-        "approval_posture": "human approval required for high risk, live credentials, and merge",
-        "branch_prefix": "codex",
-        "capability_grants": [],
-        "credential_posture": "no ambient secrets",
-        "network_posture": "offline by default",
-        "runtime_control": {
-          "autonomy_level": "restricted",
-          "conflict_behavior": "fail_closed",
-          "launch_request": {
-            "expected_decision": "allow",
-            "reason_code": "within_runtime_control_limits",
-            "requested_action": "continue_mission",
-            "requested_adapter": "codex_cli"
-          },
-          "owner": "factoryd-operator",
-          "release_freeze": {
-            "enabled": false
-          }
-        },
-        "state_dir": ".factoryd/",
-        "worker_command": "",
-        "worker_type": "codex_cli",
-        "workspace_root": ".factoryd/workspaces/"
-      },
-      "final_validation_commands": [
-        "make prepush-full"
-      ],
-      "forbidden_paths": [
-        ".git/",
-        ".factory/tmp/",
-        ".factoryd/",
-        ".factory/artifacts/prd-to-plan/relia-mvp/",
-        ".factory/artifacts/prd-to-plan/relia-mvp/context-brief.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/scope-closure-map.json",
-        ".factory/artifacts/pr-lifecycle/relia-mvp-t14-1/",
-        ".factory/artifacts/task-runs/T14.1/scope-closure-report.json",
-        ".factory/artifacts/task-runs/T14.1/scope-closure-map.json",
-        ".factory/artifacts/task-runs/T14.1/factoryd-run-once-report.json"
-      ],
-      "input_artifacts": [
-        "docs/product/prd.md",
-        "AGENTS.md",
-        "WORKFLOW.md",
-        "docs/dev/dev_guides.md",
-        "docs/architecture/architecture_guides.md",
-        ".factory/profile.yaml",
-        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
-        ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-mapping.json"
-      ],
-      "lifecycle_gates": {
-        "ci_required": true,
-        "codex_review_required": true,
-        "commit_push_required": true,
-        "local_validation_required": true,
-        "post_merge_monitor_required": true,
-        "pr_lifecycle_report_required": true,
-        "skip_policy": "approved_exception_required"
-      },
-      "max_iterations": 2,
-      "migration_impact": "Pre-1.0 MVP work; MCP stdio protocol handling changes public serve behavior and must preserve one-shot tool compatibility.",
-      "mission_contract_ref": "docs/product/prd.md",
-      "objective": "Implement live MCP JSON-RPC stdio protocol handling for relia serve so Claude/Cursor-style MCP clients can initialize, list tools, and call recall, assess, and coverage over active rules.",
-      "semantic_invariants": [
-        "Live MCP stdio serving reuses the existing recall, assess, and coverage tool builders instead of creating parallel behavior.",
-        "Only active accepted rules with resolvable citations are served through MCP.",
-        "MCP protocol handling remains local-first and requires no network, credentials, hosted service, dashboard, or provider call."
-      ],
-      "plan_drift_policy_ref": ".factory/artifacts/prd-to-plan/relia-mvp/execution-plan.json#/plan_drift_policy",
-      "proof_scorecard_artifact": "proof-of-behavior-scorecard",
-      "proof_scorecard_required": true,
-      "red_first_commands": [
-        "make test-fast"
-      ],
-      "redaction_posture": {
-        "classification": "internal",
-        "customer_safe": false,
-        "recursive_policy": "nested owner, credential, secret, endpoint, and machine-local path fields must be redacted before sharing",
-        "redaction_notes": "Recursive redaction is required before customer-safe/public sharing; task-run evidence remains internal unless explicitly exported."
-      },
-      "required_proof_level": "workflow_behavior",
-      "required_worker_chain": [
-        "task-executor",
-        "validation-gate",
-        "commit-push",
-        "post-merge-monitor"
-      ],
-      "requires_credentials": false,
-      "requires_human_approval": false,
-      "requires_network": false,
-      "risk_class": "medium",
-      "runtime_pins": {
-        "artifact_namespace": ".factory/artifacts/",
-        "dependency_policy": "standard library first; pin and justify dependencies",
-        "distribution_target": "standalone_binary",
-        "language": "go",
-        "live_work_policy": "no ambient secrets or live network by default",
-        "module_or_package_path": "github.com/Clyra-AI/relia",
-        "provider_policy": "none by default",
-        "toolchain_version": "1.26.4"
-      },
-      "scope_exclusions": [
-        "No hosted MCP transport, network listener, credentials, or provider calls.",
-        "No dashboard or remote service dependency.",
-        "No broad rewrite of assessment, advisory, or memory-rule semantics beyond MCP protocol wiring."
-      ],
-      "security_scanner_gates": {
-        "exception_policy": "approved_exception_required_when_required_or_surface_touched",
-        "required": true,
-        "required_for_surfaces": [
-          "dependency additions",
-          "generated-code intake",
-          "CI or workflow changes",
-          "external calls",
-          "security-sensitive code",
-          "release-sensitive changes"
-        ],
-        "scanner": "CodeQL",
-        "status_check": "CodeQL analyze",
-        "workflow_ref": ".github/workflows/codeql.yml"
-      },
-      "shared_constraints_ref": "AGENTS.md",
-      "slice_rationale": {
-        "rationale": "Task advances a product-shaped capability slice while preserving acceptance-item closure refs.",
-        "slice_type": "vertical"
-      },
-      "slice_type": "vertical",
-      "stop_conditions": [
-        "MCP serving attempts network, credentials, or hosted transport without approval",
-        "changed path outside allowed_paths",
-        "forbidden path changed",
-        "live MCP protocol handling lacks initialize/tools/list/tools/call tests",
-        "missing runner-ready task contract",
-        "plan drift detected",
-        "required validation command failed",
-        "scope closure did not advance"
-      ],
-      "structured_parser_policy_refs": [
-        "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
-      ],
-      "task_id": "T14.1",
-      "test_matrix_refs": [
-        {
-          "command_refs": [
-            "make test-fast"
-          ],
-          "source_ref": "docs/dev/dev_guides.md#12-level-test-matrix",
-          "tier": "Tier 1 Unit"
-        },
-        {
-          "command_refs": [
-            "scope closure map"
-          ],
-          "source_ref": "docs/dev/dev_guides.md#12-level-test-matrix",
-          "tier": "Tier 4 Acceptance"
-        },
-        {
-          "command_refs": [
-            "make test-contracts"
-          ],
-          "source_ref": "docs/dev/dev_guides.md#12-level-test-matrix",
-          "tier": "Tier 9 Contract"
-        }
-      ],
-      "upstream_debt_refs": [],
-      "validation_commands": [
-        "make prepush-full"
-      ],
-      "validation_contract_inheritance": {
-        "acceptance_criteria": [
-          "relia serve handles MCP JSON-RPC initialize, tools/list, and tools/call over stdio.",
-          "MCP recall, assess, and coverage serve only active accepted rules with citations.",
-          "One-shot serve --tool behavior remains compatible."
-        ],
-        "acceptance_item_ids": [
-          "FR16-MCP-SERVING-001",
-          "MVP-IN-SCOPE-016",
-          "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-001"
-        ],
-        "acceptance_ledger_ref": ".factory/artifacts/prd-to-plan/relia-mvp/acceptance-ledger.json",
-        "evidence_required": [
-          "work_proof_marker",
-          "validation_report",
-          "proof-of-behavior-scorecard"
-        ],
-        "required_checks": [
-          "make prepush-full"
-        ],
-        "required_review": {
-          "required": false,
-          "review_type": "code",
-          "reviewer_class": "peer_agent"
-        },
-        "source_validation_contract_ref": ".factory/artifacts/prd-to-plan/relia-mvp/validation-contract.json",
-        "stop_conditions": [
-          "missing runner-ready task contract",
-          "changed path outside allowed_paths",
-          "forbidden path changed",
-          "required validation command failed",
-          "plan drift detected",
-          "scope closure did not advance"
-        ],
-        "worker_evidence_required": [
-          "work_proof_marker",
-          "validation_report",
-          "proof-of-behavior-scorecard"
-        ],
-        "lifecycle_evidence_required": [
-          "scope_closure_report",
-          "pr_lifecycle_report",
-          "factoryd_run_once_report"
-        ]
-      },
-      "versioning_impact": "Pre-1.0 MVP work; live MCP stdio protocol behavior must preserve one-shot serve compatibility before release.",
-      "work_item_id": "relia-mvp-t14-1",
-      "worker_type": "codex_cli",
-      "worker_evidence_required": [
-        "work_proof_marker",
-        "validation_report",
-        "proof-of-behavior-scorecard"
-      ],
-      "lifecycle_evidence_required": [
-        "scope_closure_report",
-        "pr_lifecycle_report",
-        "factoryd_run_once_report"
-      ],
-      "architecture_target_paths": [
-        "cmd/relia/",
-        "internal/serve/",
-        "internal/assess/",
-        "internal/result/",
-        "schemas/",
         "docs/"
       ],
       "path_planning_method": "relia_decomposition_targets_2026_07_03"
