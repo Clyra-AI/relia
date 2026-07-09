@@ -163,6 +163,27 @@ func TestTouchedPathsOrPlanRejectsRemoteModulePathTokens(t *testing.T) {
 	}
 }
 
+func TestTouchedPathsOrPlanRejectsBareDomains(t *testing.T) {
+	paths, inputKind, err := TouchedPathsOrPlan([]byte(`Implementation plan:
+
+- Compare github.com and example.org before editing README.md.
+`))
+	if err != nil {
+		t.Fatalf("TouchedPathsOrPlan error: %v", err)
+	}
+	if inputKind != "plan" {
+		t.Fatalf("input kind = %q, want plan", inputKind)
+	}
+	if fmt.Sprint(paths) != fmt.Sprint([]string{"README.md"}) {
+		t.Fatalf("paths = %#v", paths)
+	}
+
+	_, _, err = TouchedPathsOrPlan([]byte("Compare github.com and example.org only."))
+	if !errors.Is(err, ErrNoRepoRelativePaths) {
+		t.Fatalf("error = %v, want ErrNoRepoRelativePaths", err)
+	}
+}
+
 func TestTouchedPathsOrPlanStripsOptionPathPrefixes(t *testing.T) {
 	paths, inputKind, err := TouchedPathsOrPlan([]byte(`Implementation plan:
 
@@ -177,6 +198,24 @@ func TestTouchedPathsOrPlanStripsOptionPathPrefixes(t *testing.T) {
 		t.Fatalf("input kind = %q, want plan", inputKind)
 	}
 	want := []string{"packages/billing/invoice.py", "relia.yaml"}
+	if fmt.Sprint(paths) != fmt.Sprint(want) {
+		t.Fatalf("paths = %#v, want %#v", paths, want)
+	}
+}
+
+func TestTouchedPathsOrPlanRejectsEnvAssignmentPaths(t *testing.T) {
+	paths, inputKind, err := TouchedPathsOrPlan([]byte(`Implementation plan:
+
+- Run CONFIG=relia.yaml go test ./internal/assess.
+- Run GOCACHE=/tmp/relia go test ./internal/advise.
+`))
+	if err != nil {
+		t.Fatalf("TouchedPathsOrPlan error: %v", err)
+	}
+	if inputKind != "plan" {
+		t.Fatalf("input kind = %q, want plan", inputKind)
+	}
+	want := []string{"internal/advise", "internal/assess"}
 	if fmt.Sprint(paths) != fmt.Sprint(want) {
 		t.Fatalf("paths = %#v, want %#v", paths, want)
 	}
