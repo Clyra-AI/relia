@@ -53,8 +53,13 @@ metadata: {}
   "baseline_id": "baseline_demo",
   "report_id": "backtest_demo",
   "headline_err": 0.2143,
+  "window": {
+    "start": "2026-01-01T00:00:00Z",
+    "end": "2026-06-30T00:00:00Z"
+  },
   "metadata": {
-    "created_by": "relia backtest --save-baseline"
+    "created_by": "relia backtest --save-baseline",
+    "source_artifact_digest": "sha256:source"
   }
 }
 `)
