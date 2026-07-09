@@ -54,7 +54,7 @@
       ]
     },
     {
-      "behavior": "MCP serve exposes recall, assess, and coverage over active accepted rules only, with served rule projections carrying citations and evidence IDs.",
+      "behavior": "Serve one-shot tool responses expose recall, assess, and coverage over active accepted rules only, with served rule projections carrying citations and evidence IDs; live MCP JSON-RPC protocol handling remains open.",
       "status": "pass",
       "evidence_refs": [
         "internal/assess/assess.go",
@@ -63,6 +63,9 @@
       ],
       "validation_refs": [
         "make prepush-full"
+      ],
+      "notes": [
+        "T14 implemented local one-shot recall/assess/coverage tool responses and active-rule filtering, but live MCP JSON-RPC stdio protocol handling remains open before this item can close."
       ]
     },
     {

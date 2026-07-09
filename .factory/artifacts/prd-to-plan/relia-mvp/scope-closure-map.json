@@ -1416,7 +1416,7 @@
             "refs/remotes/origin/main@1cceab856a7b8349a91111412e04741047331732"
           ],
           "repair_task_refs": [],
-          "status": "implemented"
+          "status": "partial"
         }
       ],
       "delivery_slice_refs": [
@@ -1432,14 +1432,15 @@
         "T14"
       ],
       "notes": [
-        "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
+        "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence.",
+        "T14 implemented local one-shot recall/assess/coverage tool responses and active-rule filtering, but live MCP JSON-RPC stdio protocol handling remains open before this item can close."
       ],
       "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "relia serve` must expose `recall`, `assess`, and `coverage` over MCP, serving only `active` rules.",
       "scope_item_id": "FR16-MCP-SERVING-001",
       "source_ref": "docs/product/prd.md#fr16-mcp-serving",
-      "status": "implemented",
+      "status": "partial",
       "task_refs": [
         "T14"
       ]
@@ -3559,7 +3560,7 @@
             "refs/remotes/origin/main@1cceab856a7b8349a91111412e04741047331732"
           ],
           "repair_task_refs": [],
-          "status": "implemented"
+          "status": "partial"
         }
       ],
       "delivery_slice_refs": [
@@ -3575,14 +3576,15 @@
         "T14"
       ],
       "notes": [
-        "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
+        "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence.",
+        "T14 implemented local one-shot recall/assess/coverage tool responses and active-rule filtering, but live MCP JSON-RPC stdio protocol handling remains open before this item can close."
       ],
       "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "MCP server (`recall`, `assess`, `coverage`)",
       "scope_item_id": "MVP-IN-SCOPE-016",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
-      "status": "implemented",
+      "status": "partial",
       "task_refs": [
         "T14"
       ]
@@ -5265,7 +5267,7 @@
             "refs/remotes/origin/main@1cceab856a7b8349a91111412e04741047331732"
           ],
           "repair_task_refs": [],
-          "status": "implemented"
+          "status": "partial"
         }
       ],
       "delivery_slice_refs": [
@@ -5281,14 +5283,15 @@
         "T14"
       ],
       "notes": [
-        "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence."
+        "Generated from PRD bootstrap at acceptance-item granularity; update status only with validation evidence.",
+        "T14 implemented local one-shot recall/assess/coverage tool responses and active-rule filtering, but live MCP JSON-RPC stdio protocol handling remains open before this item can close."
       ],
       "remaining_task_refs": [],
       "requires_human_approval": false,
       "scope_item": "relia serve` exposes `recall`, `assess`, and `coverage` over MCP and serves only `active` rules.",
       "scope_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-001",
       "source_ref": "docs/product/prd.md#serve-and-advise-acceptance-tests",
-      "status": "implemented",
+      "status": "partial",
       "task_refs": [
         "T14"
       ]

@@ -530,11 +530,13 @@
       "evidence_mode": "automated",
       "group_id": "fr16-mcp-serving",
       "kind": "acceptance_test",
-      "notes": [],
+      "notes": [
+        "T14 implemented local one-shot recall/assess/coverage tool responses and active-rule filtering, but live MCP JSON-RPC stdio protocol handling remains open before this item can close."
+      ],
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#fr16-mcp-serving",
       "source_text": "relia serve` must expose `recall`, `assess`, and `coverage` over MCP, serving only `active` rules.",
-      "status": "implemented",
+      "status": "partial",
       "task_refs": [
         "T14"
       ],
@@ -1823,11 +1825,13 @@
       "evidence_mode": "automated",
       "group_id": "mvp-in-scope",
       "kind": "acceptance_test",
-      "notes": [],
+      "notes": [
+        "T14 implemented local one-shot recall/assess/coverage tool responses and active-rule filtering, but live MCP JSON-RPC stdio protocol handling remains open before this item can close."
+      ],
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
       "source_text": "MCP server (`recall`, `assess`, `coverage`)",
-      "status": "implemented",
+      "status": "partial",
       "task_refs": [
         "T14"
       ],
@@ -2740,11 +2744,13 @@
       "evidence_mode": "automated",
       "group_id": "serve-and-advise-acceptance-tests",
       "kind": "acceptance_test",
-      "notes": [],
+      "notes": [
+        "T14 implemented local one-shot recall/assess/coverage tool responses and active-rule filtering, but live MCP JSON-RPC stdio protocol handling remains open before this item can close."
+      ],
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#serve-and-advise-acceptance-tests",
       "source_text": "relia serve` exposes `recall`, `assess`, and `coverage` over MCP and serves only `active` rules.",
-      "status": "implemented",
+      "status": "partial",
       "task_refs": [
         "T14"
       ],
