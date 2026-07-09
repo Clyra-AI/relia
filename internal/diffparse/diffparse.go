@@ -70,6 +70,10 @@ func PlanPaths(content []byte) ([]string, error) {
 
 func recordQuotedPlanPath(touched map[string]bool, field string) {
 	parts := strings.Fields(field)
+	if quotedFieldLooksLikeCommandSpan(parts) {
+		recordQuotedCommandSpan(touched, parts)
+		return
+	}
 	if len(parts) <= 1 || quotedFieldLooksLikeSinglePath(parts[0]) {
 		recordPlanPath(touched, field)
 		return
@@ -77,6 +81,28 @@ func recordQuotedPlanPath(touched map[string]bool, field string) {
 	for _, part := range parts {
 		recordPlanPath(touched, part)
 	}
+}
+
+func recordQuotedCommandSpan(touched map[string]bool, parts []string) {
+	for index, part := range parts {
+		if index == 0 && quotedCommandExecutable(part) {
+			continue
+		}
+		recordPlanPath(touched, part)
+	}
+}
+
+func quotedFieldLooksLikeCommandSpan(parts []string) bool {
+	if len(parts) < 2 {
+		return false
+	}
+	first := parts[0]
+	return !strings.Contains(first, "/") || strings.HasPrefix(first, "./") || strings.HasPrefix(first, "scripts/")
+}
+
+func quotedCommandExecutable(part string) bool {
+	trimmed := strings.TrimPrefix(part, "./")
+	return strings.Contains(trimmed, "/") && filepath.Ext(filepath.Base(trimmed)) == ""
 }
 
 func quotedFieldLooksLikeSinglePath(firstField string) bool {

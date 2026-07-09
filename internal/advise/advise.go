@@ -63,7 +63,35 @@ func CommentDecision(settings configdoc.AdviseSettings, assessment assessdoc.Ris
 func BelowMinConfidence(settings configdoc.AdviseSettings, assessment assessdoc.RiskAssessment) bool {
 	return assessment.RiskLevel != "no_coverage" &&
 		assessment.RiskLevel != "covered_clean" &&
+		!HasUncoveredPath(assessment) &&
 		RiskConfidence(assessment) < settings.MinConfidence
+}
+
+func HasUncoveredPath(assessment assessdoc.RiskAssessment) bool {
+	if assessment.Metadata == nil {
+		return false
+	}
+	if coverage, _ := assessment.Metadata["coverage"].(string); coverage == "no_coverage" {
+		return true
+	}
+	rawStats, ok := assessment.Metadata["coverage_stats"].(map[string]any)
+	if !ok {
+		return false
+	}
+	return positiveCount(rawStats["no_coverage_path_count"])
+}
+
+func positiveCount(value any) bool {
+	switch count := value.(type) {
+	case int:
+		return count > 0
+	case int64:
+		return count > 0
+	case float64:
+		return count > 0
+	default:
+		return false
+	}
 }
 
 func RiskConfidence(assessment assessdoc.RiskAssessment) float64 {
