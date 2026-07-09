@@ -110,11 +110,12 @@ metadata: {}
 		t.Fatalf("input_kind = %#v", result.Data["input_kind"])
 	}
 	metadata := assessment.Metadata
-	if metadata["input_kind"] != "plan" || metadata["coverage"] != "covered_risky" {
+	if metadata["input_kind"] != "plan" || metadata["coverage"] != "no_coverage" {
 		t.Fatalf("metadata = %#v", metadata)
 	}
 	stats := metadata["coverage_stats"].(map[string]any)
-	if int(stats["touched_path_count"].(float64)) != 2 ||
+	if stats["coverage"] != "no_coverage" ||
+		int(stats["touched_path_count"].(float64)) != 2 ||
 		int(stats["covered_path_count"].(float64)) != 1 ||
 		int(stats["no_coverage_path_count"].(float64)) != 1 ||
 		stats["experience_density"] != float64(1.5) {

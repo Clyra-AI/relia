@@ -31,6 +31,10 @@ func TouchedPathsOrPlan(content []byte) ([]string, string, error) {
 
 func PlanPaths(content []byte) ([]string, error) {
 	touched := map[string]bool{}
+	quotedFields, planText := quotedPlanFields(string(content))
+	for _, field := range quotedFields {
+		recordPlanPath(touched, field)
+	}
 	replacer := strings.NewReplacer(
 		"`", " ",
 		"\"", " ",
@@ -50,27 +54,8 @@ func PlanPaths(content []byte) ([]string, error) {
 		"\r", " ",
 		"\t", " ",
 	)
-	for _, field := range strings.Fields(replacer.Replace(string(content))) {
-		field = strings.TrimRight(field, "!?")
-		if !strings.HasSuffix(field, "...") {
-			field = strings.TrimRight(field, ".")
-		}
-		if field == "" || strings.Contains(field, "://") {
-			continue
-		}
-		if index := strings.Index(field, "#"); index >= 0 {
-			field = field[:index]
-		}
-		field = planPathToken(field)
-		if field == "" {
-			continue
-		}
-		if !planPathCandidate(field) {
-			continue
-		}
-		if cleanPath, ok := normalizedDiffPath(field, false); ok {
-			touched[cleanPath] = true
-		}
+	for _, field := range strings.Fields(replacer.Replace(planText)) {
+		recordPlanPath(touched, field)
 	}
 	paths := make([]string, 0, len(touched))
 	for touchedPath := range touched {
@@ -81,6 +66,58 @@ func PlanPaths(content []byte) ([]string, error) {
 		return nil, ErrNoRepoRelativePaths
 	}
 	return paths, nil
+}
+
+func quotedPlanFields(raw string) ([]string, string) {
+	var fields []string
+	var remaining strings.Builder
+	for index := 0; index < len(raw); {
+		quote := raw[index]
+		if quote == '`' && index+2 < len(raw) && raw[index+1] == '`' && raw[index+2] == '`' {
+			remaining.WriteString("   ")
+			index += 3
+			continue
+		}
+		if quote != '"' && quote != '`' {
+			remaining.WriteByte(raw[index])
+			index++
+			continue
+		}
+		endOffset := strings.IndexByte(raw[index+1:], quote)
+		if endOffset < 0 {
+			remaining.WriteByte(raw[index])
+			index++
+			continue
+		}
+		fields = append(fields, raw[index+1:index+1+endOffset])
+		remaining.WriteByte(' ')
+		index += endOffset + 2
+	}
+	return fields, remaining.String()
+}
+
+func recordPlanPath(touched map[string]bool, field string) {
+	field = strings.TrimSpace(field)
+	field = strings.TrimRight(field, "!?")
+	if !strings.HasSuffix(field, "...") {
+		field = strings.TrimRight(field, ".")
+	}
+	if field == "" || strings.Contains(field, "://") {
+		return
+	}
+	if index := strings.Index(field, "#"); index >= 0 {
+		field = field[:index]
+	}
+	field = planPathToken(field)
+	if field == "" {
+		return
+	}
+	if !planPathCandidate(field) {
+		return
+	}
+	if cleanPath, ok := normalizedDiffPath(field, false); ok {
+		touched[cleanPath] = true
+	}
 }
 
 func planPathToken(field string) string {

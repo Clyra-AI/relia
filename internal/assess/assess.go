@@ -504,11 +504,11 @@ func citationsFromRules(rules []Rule) []string {
 }
 
 func aggregateCoverage(summary map[string]any) string {
-	if summary["covered_risky_count"].(int) > 0 {
-		return "covered_risky"
-	}
 	if summary["no_coverage_path_count"].(int) > 0 {
 		return "no_coverage"
+	}
+	if summary["covered_risky_count"].(int) > 0 {
+		return "covered_risky"
 	}
 	if summary["covered_clean_count"].(int) > 0 {
 		return "covered_clean"
