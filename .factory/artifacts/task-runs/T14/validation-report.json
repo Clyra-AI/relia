@@ -78,11 +78,13 @@
     {
       "command": "make lint-fast",
       "exit_code": 0,
+      "source": "prior T14 worker evidence",
       "status": "pass"
     },
     {
       "command": "make test-fast",
       "exit_code": 0,
+      "source": "prior T14 worker evidence",
       "status": "pass"
     }
   ],
@@ -100,6 +102,8 @@
     "cmd/relia/serve_command.go",
     "docs/architecture/architecture_guides.md",
     "docs/dev/dev_guides.md",
+    "internal/advise/advise.go",
+    "internal/advise/advise_test.go",
     "internal/advise/args.go",
     "internal/advise/state.go",
     "internal/advise/state_test.go",
@@ -115,27 +119,18 @@
     "schemas/coverage-map.schema.json"
   ],
   "changelog_result": {
-    "notes": "Task packet carried changelog intent but no changelog file exists in the allowed path set; README/dev/architecture docs were updated instead.",
+    "notes": "Repair did not introduce a new public changelog surface beyond the existing T14 behavior.",
     "status": "not_applicable"
   },
   "commands_run": [
-    "make lint-fast",
-    "make test-fast",
-    "go test ./internal/diffparse ./internal/assess ./internal/serve ./internal/advise ./cmd/relia -run 'TestTouchedPathsOrPlan|TestBuildRiskAssessment|TestBuildCoverageResultReportsExperienceDensity|TestLoadForwardBaseline|TestStateDocumentBuildsAdvisoryState|TestCommentDecisionSkipsUnchangedFingerprintBeforeDebounce|TestAssessAcceptsPlanInput|TestAdviseWritesOneAdvisoryCommentPlanAndSkipsUnchangedDiff' -count=1",
-    "GOCACHE=${TMPDIR:-/tmp}/relia-go-cache go test ./internal/serve -run TestBuildCoverageResultReportsExperienceDensity -count=1",
-    "make test-contracts",
+    "go test ./internal/diffparse ./internal/advise",
     "make prepush-full",
     "python3 -m json.tool .factory/artifacts/task-runs/T14/work-proof-marker.json",
     "python3 -m json.tool .factory/artifacts/task-runs/T14/validation-report.json",
     "python3 -m json.tool .factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json"
   ],
   "docs_sync_result": {
-    "evidence_refs": [
-      "README.md",
-      "docs/dev/dev_guides.md",
-      "docs/architecture/architecture_guides.md",
-      "schemas/coverage-map.schema.json"
-    ],
+    "notes": "No docs changes were required for the repair; existing T14 docs already describe root-level plan extraction and mixed coverage semantics.",
     "status": "pass"
   },
   "final_validation_evidence": [
@@ -146,59 +141,55 @@
       "summary": "lint-fast, go test ./..., test-coverage at 79.4% against 75% minimum, repo-pack validation, and TestDemo contract lane passed."
     }
   ],
-  "generated_at": "2026-07-09T10:28:53Z",
+  "generated_at": "2026-07-09T10:41:06Z",
   "green_evidence": [
     {
-      "command": "go test ./internal/diffparse ./internal/assess ./internal/serve ./internal/advise ./cmd/relia -run 'TestTouchedPathsOrPlan|TestBuildRiskAssessment|TestBuildCoverageResultReportsExperienceDensity|TestLoadForwardBaseline|TestStateDocumentBuildsAdvisoryState|TestCommentDecisionSkipsUnchangedFingerprintBeforeDebounce|TestAssessAcceptsPlanInput|TestAdviseWritesOneAdvisoryCommentPlanAndSkipsUnchangedDiff' -count=1",
+      "command": "go test ./internal/diffparse ./internal/advise",
       "exit_code": 0,
-      "status": "pass"
+      "status": "pass",
+      "summary": "Focused parser and advisory repair tests passed."
     },
     {
-      "command": "make test-fast",
+      "command": "make prepush-full",
       "exit_code": 0,
-      "status": "pass"
-    },
-    {
-      "command": "make lint-fast",
-      "exit_code": 0,
-      "status": "pass"
-    },
-    {
-      "command": "make test-contracts",
-      "exit_code": 0,
-      "status": "pass"
-    },
-    {
-      "command": "python3 -m json.tool .factory/artifacts/task-runs/T14/work-proof-marker.json \u0026\u0026 python3 -m json.tool .factory/artifacts/task-runs/T14/validation-report.json \u0026\u0026 python3 -m json.tool .factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json",
-      "exit_code": 0,
-      "status": "pass"
+      "status": "pass",
+      "summary": "lint-fast, go test ./..., test-coverage at 79.4% against 75% minimum, repo-pack validation, and TestDemo contract lane passed."
     }
   ],
   "path_policy_result": {
+    "changed_paths_checked": [
+      ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json",
+      ".factory/artifacts/task-runs/T14/validation-report.json",
+      ".factory/artifacts/task-runs/T14/work-proof-marker.json",
+      "internal/advise/advise.go",
+      "internal/advise/advise_test.go",
+      "internal/diffparse/diffparse.go",
+      "internal/diffparse/diffparse_test.go"
+    ],
     "forbidden_paths_changed": [],
-    "notes": "Worker-owned evidence was written only under .factory/artifacts/task-runs/T14/. Factory lifecycle evidence paths were not authored.",
+    "notes": "Repair changes stayed within declared allowed paths. Factory lifecycle evidence paths were not authored.",
     "status": "pass"
   },
   "plan_drift_result": {
-    "notes": "Implementation stayed within the T14 diff/plan assessment, coverage/OOD, MCP, advisory restraint, debounce, forward-signal, docs, schema, and evidence scope.",
+    "notes": "Repair stayed within the T14 assessment/advisory contract and addressed only actionable Codex review findings.",
     "status": "pass"
   },
   "red_evidence": [
     {
-      "command": "go test ./internal/diffparse ./internal/assess ./internal/serve ./internal/advise ./cmd/relia -run 'TestTouchedPathsOrPlan|TestBuildRiskAssessment|TestBuildCoverageResultReportsExperienceDensity|TestLoadForwardBaseline|TestStateDocumentBuildsAdvisoryState|TestCommentDecisionSkipsUnchangedFingerprintBeforeDebounce|TestAssessAcceptsPlanInput|TestAdviseWritesOneAdvisoryCommentPlanAndSkipsUnchangedDiff' -count=1",
+      "command": "go test ./internal/diffparse ./internal/advise",
       "exit_code": 1,
-      "status": "expected_fail_before_implementation",
-      "summary": "Failed on missing TouchedPathsOrPlan, evidence fields, forward baseline/signal helpers, and forward_signal command output before implementation."
+      "status": "expected_fail_before_repair",
+      "summary": "Focused tests failed because root-level plan paths were omitted and no_coverage advisory text included a covered path in mixed coverage."
     }
   ],
   "residual_risks": [
-    "Lifecycle evidence is intentionally left for factoryd-owned validation-gate, commit-push, and post-merge-monitor workers."
+    "Lifecycle evidence remains factoryd-owned and was not authored by this worker."
   ],
   "schema_version": "1.0",
   "status": "pass",
   "task_id": "T14",
   "versioning_result": {
-    "notes": "Pre-1.0 additive JSON metadata and optional schema fields; no runtime pin, dependency, migration, or distribution target changed.",
+    "notes": "No runtime pin, dependency, schema version, migration, or distribution target changed.",
     "status": "pass"
   }
 }

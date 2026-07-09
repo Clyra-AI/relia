@@ -3,17 +3,29 @@
   "schema_version": "1.0",
   "task_id": "T14",
   "status": "pass",
-  "generated_at": "2026-07-09T10:28:53Z",
+  "generated_at": "2026-07-09T10:41:06Z",
   "proof_level": "user_visible_behavior",
   "scorecard": [
     {
-      "behavior": "CLI assess accepts unified diffs and plan files through one engine.",
+      "behavior": "CLI assess accepts unified diffs and plan files through one shared engine.",
       "status": "pass",
       "evidence_refs": [
         "internal/diffparse/diffparse_test.go",
         "cmd/relia/assess_command_test.go"
       ],
       "validation_refs": [
+        "make prepush-full"
+      ]
+    },
+    {
+      "behavior": "Plan extraction preserves root-level repo paths such as README.md and go.mod while still ignoring external review URLs.",
+      "status": "pass",
+      "evidence_refs": [
+        "internal/diffparse/diffparse.go",
+        "internal/diffparse/diffparse_test.go"
+      ],
+      "validation_refs": [
+        "go test ./internal/diffparse ./internal/advise",
         "make prepush-full"
       ]
     },
@@ -63,6 +75,18 @@
         "cmd/relia/advise_test.go"
       ],
       "validation_refs": [
+        "make prepush-full"
+      ]
+    },
+    {
+      "behavior": "No-coverage advisory text for mixed coverage names only the uncovered subset and does not claim covered paths lack memory.",
+      "status": "pass",
+      "evidence_refs": [
+        "internal/advise/advise.go",
+        "internal/advise/advise_test.go"
+      ],
+      "validation_refs": [
+        "go test ./internal/diffparse ./internal/advise",
         "make prepush-full"
       ]
     },

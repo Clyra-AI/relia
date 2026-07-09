@@ -51,12 +51,15 @@ func PlanPaths(content []byte) ([]string, error) {
 		"\t", " ",
 	)
 	for _, field := range strings.Fields(replacer.Replace(string(content))) {
-		field = strings.Trim(field, ".!?")
-		if field == "" || strings.Contains(field, "://") || !strings.Contains(field, "/") {
+		field = strings.TrimRight(field, ".!?")
+		if field == "" || strings.Contains(field, "://") {
 			continue
 		}
 		if index := strings.Index(field, "#"); index >= 0 {
 			field = field[:index]
+		}
+		if !planPathCandidate(field) {
+			continue
 		}
 		if cleanPath, ok := normalizedDiffPath(field, false); ok {
 			touched[cleanPath] = true
@@ -71,6 +74,30 @@ func PlanPaths(content []byte) ([]string, error) {
 		return nil, ErrNoRepoRelativePaths
 	}
 	return paths, nil
+}
+
+func planPathCandidate(field string) bool {
+	if strings.Contains(field, "/") {
+		return true
+	}
+	if strings.ContainsAny(field, `\*?`) {
+		return false
+	}
+	switch field {
+	case "Makefile", "Dockerfile", "LICENSE", "NOTICE", "README", "CHANGELOG":
+		return true
+	}
+	extension := filepath.Ext(field)
+	return extension != "" && hasASCIIAlpha(extension)
+}
+
+func hasASCIIAlpha(value string) bool {
+	for _, char := range value {
+		if (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z') {
+			return true
+		}
+	}
+	return false
 }
 
 func TouchedPaths(content []byte) ([]string, error) {

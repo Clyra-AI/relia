@@ -13,6 +13,8 @@
     "cmd/relia/serve_command.go",
     "docs/architecture/architecture_guides.md",
     "docs/dev/dev_guides.md",
+    "internal/advise/advise.go",
+    "internal/advise/advise_test.go",
     "internal/advise/args.go",
     "internal/advise/state.go",
     "internal/advise/state_test.go",
@@ -31,14 +33,13 @@
     ".factory/artifacts/task-runs/T14/validation-report.json",
     ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json"
   ],
-  "generated_at": "2026-07-09T10:28:53Z",
+  "generated_at": "2026-07-09T10:41:06Z",
   "implementation_performed": true,
   "implementation_summary": [
-    "Added plan-aware assessment path extraction while preserving unified diff parsing.",
-    "Added risk assessment coverage metadata with per-path coverage, evidence counts, canonical experience IDs, and experience density.",
-    "Extended MCP coverage and assess responses to use the shared assessment engine and density semantics.",
-    "Added advisory forward-signal tracking tied to the saved ERR baseline, with missing baselines treated as non-blocking and malformed baselines failing closed.",
-    "Kept advisory restraint behavior deterministic: unchanged diff fingerprints skip before debounce, changed fingerprints debounce, and new covered_clean or below-min-confidence assessments stay silent."
+    "Implemented the T14 local diff/plan assessment, coverage/OOD, MCP serve, advisory restraint, debounce, and forward-signal behavior.",
+    "Repaired plan extraction so root-level repo paths such as README.md and go.mod are preserved alongside nested paths.",
+    "Repaired no_coverage advisory rendering so mixed covered/uncovered assessments name only the uncovered paths.",
+    "Updated focused tests for the Codex review findings and reran the required full validation gate."
   ],
   "schema_version": "1.0",
   "status": "implemented",
