@@ -66,3 +66,41 @@ func TestTouchedPathsReturnsSentinelForNoRepoPaths(t *testing.T) {
 		t.Fatalf("error = %v, want ErrNoRepoRelativePaths", err)
 	}
 }
+
+func TestTouchedPathsOrPlanFallsBackToPlanPaths(t *testing.T) {
+	paths, inputKind, err := TouchedPathsOrPlan([]byte(`Implementation plan:
+
+- Update packages/billing/invoice.py to use the billing clock fixture.
+- Adjust docs/product/prd.md#serve-compile-assess-advise for the CLI contract.
+- Ignore https://github.com/acme/billing-service/pull/142 citations.
+`))
+	if err != nil {
+		t.Fatalf("TouchedPathsOrPlan error: %v", err)
+	}
+	if inputKind != "plan" {
+		t.Fatalf("input kind = %q, want plan", inputKind)
+	}
+	want := []string{"docs/product/prd.md", "packages/billing/invoice.py"}
+	if fmt.Sprint(paths) != fmt.Sprint(want) {
+		t.Fatalf("paths = %#v, want %#v", paths, want)
+	}
+}
+
+func TestTouchedPathsOrPlanKeepsUnifiedDiffKind(t *testing.T) {
+	paths, inputKind, err := TouchedPathsOrPlan([]byte(`diff --git a/packages/search/query.py b/packages/search/query.py
+--- a/packages/search/query.py
++++ b/packages/search/query.py
+@@ -1 +1 @@
+-old
++new
+`))
+	if err != nil {
+		t.Fatalf("TouchedPathsOrPlan error: %v", err)
+	}
+	if inputKind != "diff" {
+		t.Fatalf("input kind = %q, want diff", inputKind)
+	}
+	if fmt.Sprint(paths) != fmt.Sprint([]string{"packages/search/query.py"}) {
+		t.Fatalf("paths = %#v", paths)
+	}
+}

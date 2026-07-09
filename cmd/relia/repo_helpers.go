@@ -2,12 +2,14 @@ package main
 
 import (
 	"crypto/sha256"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 
 	configdoc "github.com/Clyra-AI/relia/internal/config"
+	"github.com/Clyra-AI/relia/internal/diffparse"
 	ingestdoc "github.com/Clyra-AI/relia/internal/ingest"
 	memorydoc "github.com/Clyra-AI/relia/internal/memory"
 	"github.com/Clyra-AI/relia/internal/yamlmini"
@@ -92,6 +94,17 @@ func writeMemoryPage(root string, outputPath string, rules []memorydoc.RuleSumma
 func parseIngestEvents(content []byte, ref string) ([]map[string]any, *CommandError) {
 	events, ingestErr := ingestdoc.ParseEvents(content, ref)
 	return events, commandErrorFromIngest(ingestErr)
+}
+
+func parseAssessmentInputPaths(content []byte, ref string) ([]string, string, *CommandError) {
+	paths, inputKind, err := diffparse.TouchedPathsOrPlan(content)
+	if err == nil {
+		return paths, inputKind, nil
+	}
+	if errors.Is(err, diffparse.ErrNoRepoRelativePaths) {
+		return nil, "", artifactContractError("assess input contains no repo-relative diff or plan paths", ref)
+	}
+	return nil, "", internalError("could not parse assess input", err)
 }
 
 func parseIngestEventsForOptions(content []byte, ref string, options ingestOptions) ([]map[string]any, *CommandError) {

@@ -97,7 +97,7 @@ func ParseArgs(args []string) (Options, *ParseError) {
 		return options, usageError("serve coverage requires --paths")
 	}
 	if options.Tool == "assess" && strings.TrimSpace(options.InputPath) == "" {
-		return options, usageError("serve assess requires --input <diff>")
+		return options, usageError("serve assess requires --input <diff-or-plan>")
 	}
 	if options.Tool == "" && (strings.TrimSpace(options.Context) != "" || len(options.Paths) > 0 || strings.TrimSpace(options.InputPath) != "") {
 		return options, usageError("serve tool arguments require --tool recall, assess, or coverage")

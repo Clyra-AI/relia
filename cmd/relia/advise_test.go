@@ -47,6 +47,17 @@ metadata: {}
 -    return "2026-01-01"
 +    return datetime.utcnow().strftime("%Y-%m-%d")
 `)
+	writeFileForTest(t, filepath.Join(tempDir, ".relia", "baselines", "error-recurrence-baseline.json"), `{
+  "object_type": "relia.err_baseline",
+  "schema_version": "1.0",
+  "baseline_id": "baseline_demo",
+  "report_id": "backtest_demo",
+  "headline_err": 0.2143,
+  "metadata": {
+    "created_by": "relia backtest --save-baseline"
+  }
+}
+`)
 
 	stdout, stderr, code := runForTest(t, []string{"--json", "advise", "--input", "change.diff", "--format", "json"}, false)
 
@@ -60,6 +71,18 @@ metadata: {}
 	if result.Data["comment_strategy"].(map[string]any)["max_comments_per_pr"].(float64) != 1 {
 		t.Fatalf("comment_strategy = %#v", result.Data["comment_strategy"])
 	}
+	forwardSignal := result.Data["forward_signal"].(map[string]any)
+	if forwardSignal["object_type"] != "relia.forward_signal" ||
+		forwardSignal["risk_level"] != "match_high" ||
+		forwardSignal["comment_action"] != "publish" {
+		t.Fatalf("forward_signal = %#v", forwardSignal)
+	}
+	baseline := forwardSignal["baseline"].(map[string]any)
+	if baseline["status"] != "current" ||
+		baseline["path"] != ".relia/baselines/error-recurrence-baseline.json" ||
+		baseline["headline_err"] != 0.2143 {
+		t.Fatalf("forward signal baseline = %#v", baseline)
+	}
 	commentPath := filepath.Join(tempDir, ".relia", "reports", "advisory-comment.md")
 	comment, err := os.ReadFile(commentPath)
 	if err != nil {
@@ -72,6 +95,17 @@ metadata: {}
 		if !strings.Contains(string(comment), want) {
 			t.Fatalf("comment missing %q:\n%s", want, comment)
 		}
+	}
+	stateContent, err := os.ReadFile(filepath.Join(tempDir, ".relia", "reports", "advisory-state.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var state map[string]any
+	if err := json.Unmarshal(stateContent, &state); err != nil {
+		t.Fatalf("decode advisory state: %v\n%s", err, stateContent)
+	}
+	if stateForwardSignal := state["forward_signal"].(map[string]any); stateForwardSignal["risk_level"] != "match_high" {
+		t.Fatalf("state forward_signal = %#v", stateForwardSignal)
 	}
 
 	stdout, stderr, code = runForTest(t, []string{"--json", "advise", "--input", "change.diff", "--format", "json"}, false)

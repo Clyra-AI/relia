@@ -7,7 +7,7 @@ func TestParseArgsRequiresInput(t *testing.T) {
 	if parseErr == nil {
 		t.Fatal("expected missing input error")
 	}
-	if parseErr.Message != "assess requires --input <diff> in offline mode" {
+	if parseErr.Message != "assess requires --input <diff-or-plan> in offline mode" {
 		t.Fatalf("Message = %q", parseErr.Message)
 	}
 }

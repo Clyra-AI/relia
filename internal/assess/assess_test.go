@@ -25,20 +25,24 @@ func TestBuildRiskAssessmentSortsMatchesAndReportsHighRisk(t *testing.T) {
 		[]string{"packages/billing/invoice.py"},
 		[]Rule{
 			{
-				ID:         "billing-medium",
-				Kind:       "avoid",
-				Confidence: 0.61,
-				ScopePaths: []string{"packages/billing/"},
-				Citations:  []RuleCitation{{URL: "https://github.com/acme/billing-service/pull/61", PR: 61, Outcome: "ci_failure"}},
-				Path:       "memory/rules/billing-medium.yaml",
+				ID:                  "billing-medium",
+				Kind:                "avoid",
+				Confidence:          0.61,
+				ScopePaths:          []string{"packages/billing/"},
+				EvidenceCount:       2,
+				EvidenceExperiences: []string{"exp_0060", "exp_0061"},
+				Citations:           []RuleCitation{{URL: "https://github.com/acme/billing-service/pull/61", PR: 61, Outcome: "ci_failure"}},
+				Path:                "memory/rules/billing-medium.yaml",
 			},
 			{
-				ID:         "billing-high",
-				Kind:       "avoid",
-				Confidence: 0.86,
-				ScopePaths: []string{"packages/billing/"},
-				Citations:  []RuleCitation{{URL: "https://github.com/acme/billing-service/pull/86", PR: 86, Outcome: "review_correction"}},
-				Path:       "memory/rules/billing-high.yaml",
+				ID:                  "billing-high",
+				Kind:                "avoid",
+				Confidence:          0.86,
+				ScopePaths:          []string{"packages/billing/"},
+				EvidenceCount:       3,
+				EvidenceExperiences: []string{"exp_0084", "exp_0085", "exp_0086"},
+				Citations:           []RuleCitation{{URL: "https://github.com/acme/billing-service/pull/86", PR: 86, Outcome: "review_correction"}},
+				Path:                "memory/rules/billing-high.yaml",
 			},
 		},
 		testOptions(),
@@ -64,6 +68,81 @@ func TestBuildRiskAssessmentSortsMatchesAndReportsHighRisk(t *testing.T) {
 	}
 	if !strings.HasPrefix(assessment.AssessmentID, "assess_") || len(assessment.AssessmentID) != len("assess_")+12 {
 		t.Fatalf("assessment_id = %q", assessment.AssessmentID)
+	}
+	coverageStats := assessment.Metadata["coverage_stats"].(map[string]any)
+	if coverageStats["coverage"] != "covered_risky" ||
+		coverageStats["touched_path_count"] != 1 ||
+		coverageStats["covered_path_count"] != 1 ||
+		coverageStats["no_coverage_path_count"] != 0 ||
+		coverageStats["matched_rule_count"] != 2 ||
+		coverageStats["evidence_count"] != 5 ||
+		coverageStats["experience_density"] != float64(5) {
+		t.Fatalf("coverage_stats = %#v", coverageStats)
+	}
+	pathCoverage := assessment.Metadata["path_coverage"].([]map[string]any)
+	if len(pathCoverage) != 1 ||
+		pathCoverage[0]["path"] != "packages/billing/invoice.py" ||
+		pathCoverage[0]["coverage"] != "covered_risky" ||
+		pathCoverage[0]["evidence_count"] != 5 ||
+		pathCoverage[0]["experience_density"] != float64(5) {
+		t.Fatalf("path_coverage = %#v", pathCoverage)
+	}
+	if got := assessment.Metadata["memory_source"]; got != "active_rules_from_canonical_experience_records" {
+		t.Fatalf("memory_source = %#v", got)
+	}
+}
+
+func TestBuildRiskAssessmentReportsNoCoverageDensityDistinctFromCoveredClean(t *testing.T) {
+	root := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(root, "packages", "billing"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "packages", "billing", "invoice.py"), []byte("def rollover_day(): pass\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	assessment, commandErr := BuildRiskAssessment(
+		root,
+		"plan.md",
+		[]byte("Update packages/search/query.py and packages/billing/invoice.py"),
+		[]string{"packages/billing/invoice.py", "packages/search/query.py"},
+		[]Rule{
+			{
+				ID:                  "billing-playbook",
+				Kind:                "playbook",
+				Confidence:          0.91,
+				ScopePaths:          []string{"packages/billing/"},
+				EvidenceCount:       2,
+				EvidenceExperiences: []string{"exp_0141", "exp_0142"},
+				Citations:           []RuleCitation{{URL: "https://github.com/acme/billing-service/pull/142", PR: 142, Outcome: "merged_clean"}},
+				Path:                "memory/rules/billing-playbook.yaml",
+			},
+		},
+		testOptions(),
+	)
+
+	if commandErr != nil {
+		t.Fatal(commandErr)
+	}
+	if assessment.RiskLevel != "no_coverage" {
+		t.Fatalf("risk level = %q, want no_coverage", assessment.RiskLevel)
+	}
+	coverageStats := assessment.Metadata["coverage_stats"].(map[string]any)
+	if coverageStats["coverage"] != "no_coverage" ||
+		coverageStats["covered_path_count"] != 1 ||
+		coverageStats["no_coverage_path_count"] != 1 ||
+		coverageStats["evidence_count"] != 2 ||
+		coverageStats["experience_density"] != float64(1) {
+		t.Fatalf("coverage_stats = %#v", coverageStats)
+	}
+	pathCoverage := assessment.Metadata["path_coverage"].([]map[string]any)
+	coverageByPath := map[string]string{}
+	for _, entry := range pathCoverage {
+		coverageByPath[entry["path"].(string)] = entry["coverage"].(string)
+	}
+	if coverageByPath["packages/billing/invoice.py"] != "covered_clean" ||
+		coverageByPath["packages/search/query.py"] != "no_coverage" {
+		t.Fatalf("path coverage = %#v", pathCoverage)
 	}
 }
 

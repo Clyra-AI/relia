@@ -1,0 +1,204 @@
+{
+  "acceptance_results": [
+    {
+      "acceptance_item_id": "FR5-CANONICAL-EXPERIENCE-SCHEMA-001",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T14/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "FR16-MCP-SERVING-001",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T14/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "FR19-COVERAGE-OOD-SIGNAL-001",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T14/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "NFR14-ADVISORY-RESTRAINT-001",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T14/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "NFR15-NO-DASHBOARD-DEPENDENCY-001",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T14/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-016",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T14/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "MVP-IN-SCOPE-018",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T14/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-001",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T14/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    },
+    {
+      "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-006",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T14/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json"
+      ],
+      "status": "implemented"
+    }
+  ],
+  "artifact_type": "validation_report",
+  "baseline_evidence": [
+    {
+      "command": "make lint-fast",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "make test-fast",
+      "exit_code": 0,
+      "status": "pass"
+    }
+  ],
+  "blockers": [],
+  "changed_paths": [
+    ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json",
+    ".factory/artifacts/task-runs/T14/validation-report.json",
+    ".factory/artifacts/task-runs/T14/work-proof-marker.json",
+    "README.md",
+    "cmd/relia/advise_command.go",
+    "cmd/relia/advise_test.go",
+    "cmd/relia/assess_command.go",
+    "cmd/relia/assess_command_test.go",
+    "cmd/relia/repo_helpers.go",
+    "cmd/relia/serve_command.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/dev/dev_guides.md",
+    "internal/advise/args.go",
+    "internal/advise/state.go",
+    "internal/advise/state_test.go",
+    "internal/assess/args.go",
+    "internal/assess/args_test.go",
+    "internal/assess/assess.go",
+    "internal/assess/assess_test.go",
+    "internal/diffparse/diffparse.go",
+    "internal/diffparse/diffparse_test.go",
+    "internal/serve/args.go",
+    "internal/serve/tools.go",
+    "internal/serve/tools_test.go",
+    "schemas/coverage-map.schema.json"
+  ],
+  "changelog_result": {
+    "notes": "Task packet carried changelog intent but no changelog file exists in the allowed path set; README/dev/architecture docs were updated instead.",
+    "status": "not_applicable"
+  },
+  "commands_run": [
+    "make lint-fast",
+    "make test-fast",
+    "go test ./internal/diffparse ./internal/assess ./internal/serve ./internal/advise ./cmd/relia -run 'TestTouchedPathsOrPlan|TestBuildRiskAssessment|TestBuildCoverageResultReportsExperienceDensity|TestLoadForwardBaseline|TestStateDocumentBuildsAdvisoryState|TestCommentDecisionSkipsUnchangedFingerprintBeforeDebounce|TestAssessAcceptsPlanInput|TestAdviseWritesOneAdvisoryCommentPlanAndSkipsUnchangedDiff' -count=1",
+    "GOCACHE=${TMPDIR:-/tmp}/relia-go-cache go test ./internal/serve -run TestBuildCoverageResultReportsExperienceDensity -count=1",
+    "make test-contracts",
+    "make prepush-full",
+    "python3 -m json.tool .factory/artifacts/task-runs/T14/work-proof-marker.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T14/validation-report.json",
+    "python3 -m json.tool .factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json"
+  ],
+  "docs_sync_result": {
+    "evidence_refs": [
+      "README.md",
+      "docs/dev/dev_guides.md",
+      "docs/architecture/architecture_guides.md",
+      "schemas/coverage-map.schema.json"
+    ],
+    "status": "pass"
+  },
+  "final_validation_evidence": [
+    {
+      "command": "make prepush-full",
+      "exit_code": 0,
+      "status": "pass",
+      "summary": "lint-fast, go test ./..., test-coverage at 79.4% against 75% minimum, repo-pack validation, and TestDemo contract lane passed."
+    }
+  ],
+  "generated_at": "2026-07-09T10:28:53Z",
+  "green_evidence": [
+    {
+      "command": "go test ./internal/diffparse ./internal/assess ./internal/serve ./internal/advise ./cmd/relia -run 'TestTouchedPathsOrPlan|TestBuildRiskAssessment|TestBuildCoverageResultReportsExperienceDensity|TestLoadForwardBaseline|TestStateDocumentBuildsAdvisoryState|TestCommentDecisionSkipsUnchangedFingerprintBeforeDebounce|TestAssessAcceptsPlanInput|TestAdviseWritesOneAdvisoryCommentPlanAndSkipsUnchangedDiff' -count=1",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "make test-fast",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "make lint-fast",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "make test-contracts",
+      "exit_code": 0,
+      "status": "pass"
+    },
+    {
+      "command": "python3 -m json.tool .factory/artifacts/task-runs/T14/work-proof-marker.json \u0026\u0026 python3 -m json.tool .factory/artifacts/task-runs/T14/validation-report.json \u0026\u0026 python3 -m json.tool .factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json",
+      "exit_code": 0,
+      "status": "pass"
+    }
+  ],
+  "path_policy_result": {
+    "forbidden_paths_changed": [],
+    "notes": "Worker-owned evidence was written only under .factory/artifacts/task-runs/T14/. Factory lifecycle evidence paths were not authored.",
+    "status": "pass"
+  },
+  "plan_drift_result": {
+    "notes": "Implementation stayed within the T14 diff/plan assessment, coverage/OOD, MCP, advisory restraint, debounce, forward-signal, docs, schema, and evidence scope.",
+    "status": "pass"
+  },
+  "red_evidence": [
+    {
+      "command": "go test ./internal/diffparse ./internal/assess ./internal/serve ./internal/advise ./cmd/relia -run 'TestTouchedPathsOrPlan|TestBuildRiskAssessment|TestBuildCoverageResultReportsExperienceDensity|TestLoadForwardBaseline|TestStateDocumentBuildsAdvisoryState|TestCommentDecisionSkipsUnchangedFingerprintBeforeDebounce|TestAssessAcceptsPlanInput|TestAdviseWritesOneAdvisoryCommentPlanAndSkipsUnchangedDiff' -count=1",
+      "exit_code": 1,
+      "status": "expected_fail_before_implementation",
+      "summary": "Failed on missing TouchedPathsOrPlan, evidence fields, forward baseline/signal helpers, and forward_signal command output before implementation."
+    }
+  ],
+  "residual_risks": [
+    "Lifecycle evidence is intentionally left for factoryd-owned validation-gate, commit-push, and post-merge-monitor workers."
+  ],
+  "schema_version": "1.0",
+  "status": "pass",
+  "task_id": "T14",
+  "versioning_result": {
+    "notes": "Pre-1.0 additive JSON metadata and optional schema fields; no runtime pin, dependency, migration, or distribution target changed.",
+    "status": "pass"
+  }
+}

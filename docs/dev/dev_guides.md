@@ -407,6 +407,31 @@ T13 adds non-MCP compiled context access:
 - Compiled blocks expose only active accepted rules with resolved PR citations,
   schema/version metadata, and an explicit non-MCP agent-access boundary.
 
+T14 completes the local assessment/advisory behavior slice:
+
+- `relia assess --input <diff-or-plan> --format json` and
+  `relia serve --tool assess --input <diff-or-plan> --format json` share the
+  plan-aware assessment parser. Unified diffs are parsed from file headers;
+  non-diff plan files fall back to conservative repo-relative path extraction.
+- Risk assessment metadata reports `input_kind`, per-path coverage,
+  `coverage_stats`, evidence counts, experience IDs, and experience density.
+  Mixed coverage is conservative: an avoid match returns `match_high` or
+  `match_medium`, an all-playbook covered change returns `covered_clean`, and
+  any otherwise-uncovered touched path keeps the aggregate coverage
+  `no_coverage`.
+- `relia serve --tool coverage --paths <repo-paths> --format json` reports the
+  same density source for MCP callers, using active reviewed memory-rule
+  evidence derived from canonical experience record IDs.
+- `relia advise` records a `relia.forward_signal` in command JSON and
+  advisory state. The signal includes assessment risk, aggregate coverage,
+  comment action, skip or debounce reason, advisory restraint settings, and the
+  saved ERR baseline path/status. Missing baselines are non-blocking; malformed
+  baselines fail closed as artifact-contract errors.
+- Advisory comment decisions still default to one update-in-place comment,
+  skip unchanged diff fingerprints before debounce checks, debounce changed
+  fingerprints by `advise.reassess_debounce_minutes`, and stay silent for new
+  below-`min_confidence` and `covered_clean` assessments.
+
 ## Structured Data, Proof, Budgets, And Redaction
 
 - PR, check-run, experience, memory, MCP, assessment, report, and config data

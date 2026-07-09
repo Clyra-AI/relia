@@ -75,28 +75,24 @@ func BuildRecallResult(root string, options Options, rules []assessdoc.Rule, ass
 }
 
 func BuildCoverageResult(root string, paths []string, rules []assessdoc.Rule, assessOptions assessdoc.Options) (map[string]any, *resultdoc.CommandError) {
-	entries := make([]map[string]any, 0, len(paths))
-	summary := map[string]int{
-		"covered_clean_count": 0,
-		"covered_risky_count": 0,
-		"no_coverage_count":   0,
-	}
-	for _, queryPath := range NormalizeQueryPaths(paths) {
+	queryPaths := NormalizeQueryPaths(paths)
+	var matchedForQuery []assessdoc.Rule
+	seenMatched := map[string]bool{}
+	for _, queryPath := range queryPaths {
 		matched := MatchRules(root, rules, []string{queryPath}, "")
 		if _, commandErr := assessdoc.ServedRuleData(matched, assessOptions); commandErr != nil {
 			return nil, commandErr
 		}
-		coverage := CoverageForRules(matched)
-		summary[coverage+"_count"]++
-		entries = append(entries, map[string]any{
-			"path":                queryPath,
-			"coverage":            coverage,
-			"out_of_distribution": coverage == "no_coverage",
-			"active_rule_count":   len(matched),
-			"matched_rule_ids":    ruleIDs(matched),
-			"citations":           uniqueStrings(citationsFromRules(matched)),
-		})
+		for _, rule := range matched {
+			key := rule.Path + "\x00" + rule.ID
+			if seenMatched[key] {
+				continue
+			}
+			seenMatched[key] = true
+			matchedForQuery = append(matchedForQuery, rule)
+		}
 	}
+	entries, summary := assessdoc.CoverageForPaths(root, queryPaths, matchedForQuery)
 	return map[string]any{
 		"object_type":           CoverageObjectType,
 		"schema_version":        "1.0",

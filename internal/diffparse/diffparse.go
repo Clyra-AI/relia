@@ -14,6 +14,65 @@ var (
 	unifiedHunkHeaderRegexp = regexp.MustCompile(`^@@ -\d+(?:,(\d+))? \+\d+(?:,(\d+))? @@`)
 )
 
+func TouchedPathsOrPlan(content []byte) ([]string, string, error) {
+	paths, err := TouchedPaths(content)
+	if err == nil {
+		return paths, "diff", nil
+	}
+	if !errors.Is(err, ErrNoRepoRelativePaths) {
+		return nil, "", err
+	}
+	paths, planErr := PlanPaths(content)
+	if planErr != nil {
+		return nil, "", err
+	}
+	return paths, "plan", nil
+}
+
+func PlanPaths(content []byte) ([]string, error) {
+	touched := map[string]bool{}
+	replacer := strings.NewReplacer(
+		"`", " ",
+		"\"", " ",
+		"'", " ",
+		"(", " ",
+		")", " ",
+		"[", " ",
+		"]", " ",
+		"{", " ",
+		"}", " ",
+		"<", " ",
+		">", " ",
+		",", " ",
+		";", " ",
+		":", " ",
+		"\n", " ",
+		"\r", " ",
+		"\t", " ",
+	)
+	for _, field := range strings.Fields(replacer.Replace(string(content))) {
+		field = strings.Trim(field, ".!?")
+		if field == "" || strings.Contains(field, "://") || !strings.Contains(field, "/") {
+			continue
+		}
+		if index := strings.Index(field, "#"); index >= 0 {
+			field = field[:index]
+		}
+		if cleanPath, ok := normalizedDiffPath(field, false); ok {
+			touched[cleanPath] = true
+		}
+	}
+	paths := make([]string, 0, len(touched))
+	for touchedPath := range touched {
+		paths = append(paths, touchedPath)
+	}
+	sort.Strings(paths)
+	if len(paths) == 0 {
+		return nil, ErrNoRepoRelativePaths
+	}
+	return paths, nil
+}
+
 func TouchedPaths(content []byte) ([]string, error) {
 	touched := map[string]bool{}
 	inFileHeader := false

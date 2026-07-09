@@ -61,6 +61,67 @@ metadata: {}
 	}
 }
 
+func TestAssessAcceptsPlanInputAndReportsCoverageStats(t *testing.T) {
+	tempDir := setupContractRepo(t)
+	t.Chdir(tempDir)
+	writeFileForTest(t, filepath.Join(tempDir, "memory", "rules", "billing-time.yaml"), `object_type: relia.memory_rule
+schema_version: "1.0"
+id: billing-time-fixture
+kind: avoid
+status: active
+statement: Use the billing clock fixture instead of direct UTC calls.
+scope:
+  paths:
+    - packages/billing/
+confidence: 0.86
+evidence:
+  count: 3
+  contradictions: 0
+  experiences:
+    - exp_0142
+    - exp_0187
+    - exp_0203
+provenance:
+  - pr: 142
+    outcome: ci_failure
+    url: https://github.com/acme/billing-service/pull/142
+review:
+  label: accepted
+  statement_origin: human_authored
+metadata: {}
+`)
+	writeFileForTest(t, filepath.Join(tempDir, "change.plan.md"), `# Plan
+
+- Refactor packages/billing/invoice.py so rollover uses the billing clock.
+- Leave packages/search/query.py unchanged until the follow-up.
+`)
+
+	stdout, stderr, code := runForTest(t, []string{"--json", "assess", "--input", "change.plan.md"}, false)
+
+	if code != ExitSuccess {
+		t.Fatalf("exit code = %d, stderr = %q, stdout = %q", code, stderr, stdout)
+	}
+	result := decodeResult(t, stdout)
+	assessment := decodeAssessmentFromResult(t, result)
+	if assessment.RiskLevel != "match_high" {
+		t.Fatalf("risk_level = %q, want match_high", assessment.RiskLevel)
+	}
+	if result.Data["input_kind"] != "plan" {
+		t.Fatalf("input_kind = %#v", result.Data["input_kind"])
+	}
+	metadata := assessment.Metadata
+	if metadata["input_kind"] != "plan" || metadata["coverage"] != "covered_risky" {
+		t.Fatalf("metadata = %#v", metadata)
+	}
+	stats := metadata["coverage_stats"].(map[string]any)
+	if int(stats["touched_path_count"].(float64)) != 2 ||
+		int(stats["covered_path_count"].(float64)) != 1 ||
+		int(stats["no_coverage_path_count"].(float64)) != 1 ||
+		stats["experience_density"] != float64(1.5) {
+		t.Fatalf("coverage_stats = %#v", stats)
+	}
+}
+
 func TestServeExposesLocalMCPCapabilityManifestForActiveRules(t *testing.T) {
 	tempDir := setupContractRepo(t)
 	t.Chdir(tempDir)

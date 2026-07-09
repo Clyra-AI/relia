@@ -1,0 +1,46 @@
+{
+  "artifact_type": "work_proof_marker",
+  "changed_paths": [
+    ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json",
+    ".factory/artifacts/task-runs/T14/validation-report.json",
+    ".factory/artifacts/task-runs/T14/work-proof-marker.json",
+    "README.md",
+    "cmd/relia/advise_command.go",
+    "cmd/relia/advise_test.go",
+    "cmd/relia/assess_command.go",
+    "cmd/relia/assess_command_test.go",
+    "cmd/relia/repo_helpers.go",
+    "cmd/relia/serve_command.go",
+    "docs/architecture/architecture_guides.md",
+    "docs/dev/dev_guides.md",
+    "internal/advise/args.go",
+    "internal/advise/state.go",
+    "internal/advise/state_test.go",
+    "internal/assess/args.go",
+    "internal/assess/args_test.go",
+    "internal/assess/assess.go",
+    "internal/assess/assess_test.go",
+    "internal/diffparse/diffparse.go",
+    "internal/diffparse/diffparse_test.go",
+    "internal/serve/args.go",
+    "internal/serve/tools.go",
+    "internal/serve/tools_test.go",
+    "schemas/coverage-map.schema.json"
+  ],
+  "evidence_refs": [
+    ".factory/artifacts/task-runs/T14/validation-report.json",
+    ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json"
+  ],
+  "generated_at": "2026-07-09T10:28:53Z",
+  "implementation_performed": true,
+  "implementation_summary": [
+    "Added plan-aware assessment path extraction while preserving unified diff parsing.",
+    "Added risk assessment coverage metadata with per-path coverage, evidence counts, canonical experience IDs, and experience density.",
+    "Extended MCP coverage and assess responses to use the shared assessment engine and density semantics.",
+    "Added advisory forward-signal tracking tied to the saved ERR baseline, with missing baselines treated as non-blocking and malformed baselines failing closed.",
+    "Kept advisory restraint behavior deterministic: unchanged diff fingerprints skip before debounce, changed fingerprints debounce, and new covered_clean or below-min-confidence assessments stay silent."
+  ],
+  "schema_version": "1.0",
+  "status": "implemented",
+  "task_id": "T14"
+}

@@ -41,7 +41,7 @@ func assessResult(args []string, start time.Time) CommandResult {
 		}
 		return withFormat(errorResult("assess", "assess", internalError("could not read assess input", err), start))
 	}
-	touchedPaths, commandErr := parseUnifiedDiffTouchedPaths(inputContent, displayPath(root, inputPath))
+	touchedPaths, inputKind, commandErr := parseAssessmentInputPaths(inputContent, displayPath(root, inputPath))
 	if commandErr != nil {
 		return withFormat(errorResult("assess", "assess", commandErr, start))
 	}
@@ -49,13 +49,14 @@ func assessResult(args []string, start time.Time) CommandResult {
 	if commandErr != nil {
 		return withFormat(errorResult("assess", "assess", commandErr, start))
 	}
-	assessment, commandErr := assessdoc.BuildRiskAssessment(root, displayPath(root, inputPath), inputContent, touchedPaths, rules, assessmentBuildOptions())
+	assessment, commandErr := assessdoc.BuildRiskAssessment(root, displayPath(root, inputPath), inputContent, touchedPaths, rules, assessmentBuildOptions(), inputKind)
 	if commandErr != nil {
 		return withFormat(errorResult("assess", "assess", commandErr, start))
 	}
 
-	result := passResult("assess", "assess", "assessed local diff against active memory rules", start, map[string]any{
+	result := passResult("assess", "assess", "assessed local diff or plan against active memory rules", start, map[string]any{
 		"input_path":         displayPath(root, inputPath),
+		"input_kind":         inputKind,
 		"format":             options.Format,
 		"touched_paths":      touchedPaths,
 		"active_rule_count":  len(rules),
