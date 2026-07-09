@@ -171,7 +171,7 @@ func quotedFieldLooksLikeCommandSpan(parts []string) bool {
 
 func knownCommandToken(value string) bool {
 	switch value {
-	case "go", "make", "node", "npm", "pnpm", "python", "python3", "relia", "yarn":
+	case "bash", "go", "make", "node", "npm", "pnpm", "python", "python3", "relia", "sh", "yarn", "zsh":
 		return true
 	default:
 		return false
