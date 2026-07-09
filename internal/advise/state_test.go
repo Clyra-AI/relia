@@ -3,6 +3,7 @@ package advise
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -118,7 +119,14 @@ func TestLoadForwardBaselineReadsSavedERRBaseline(t *testing.T) {
   "object_type": "relia.err_baseline",
   "schema_version": "1.0",
   "headline_err": 0.2143,
-  "report_id": "backtest_demo"
+  "report_id": "backtest_demo",
+  "window": {
+    "start": "2026-01-01",
+    "end": "2026-06-30"
+  },
+  "metadata": {
+    "source_artifact_digest": "sha256:source"
+  }
 }`)
 
 	got, stateErr := LoadForwardBaseline(root, ".relia/baselines/error-recurrence-baseline.json")
@@ -128,6 +136,53 @@ func TestLoadForwardBaselineReadsSavedERRBaseline(t *testing.T) {
 	}
 	if got.Status != "current" || got.Path != ".relia/baselines/error-recurrence-baseline.json" || !got.HasHeadlineERR || got.HeadlineERR != 0.2143 {
 		t.Fatalf("baseline = %#v", got)
+	}
+}
+
+func TestLoadForwardBaselineLabelsMetadataFreeSavedERRBaselineStale(t *testing.T) {
+	root := t.TempDir()
+	writePriorState(t, root, ".relia/baselines/error-recurrence-baseline.json", `{
+  "object_type": "relia.err_baseline",
+  "schema_version": "1.0",
+  "headline_err": 0.2143,
+  "report_id": "backtest_demo"
+}`)
+
+	got, stateErr := LoadForwardBaseline(root, ".relia/baselines/error-recurrence-baseline.json")
+
+	if stateErr != nil {
+		t.Fatalf("LoadForwardBaseline returned error: %v", stateErr)
+	}
+	if got.Status != "stale" || got.Path != ".relia/baselines/error-recurrence-baseline.json" || !got.HasHeadlineERR || got.HeadlineERR != 0.2143 {
+		t.Fatalf("baseline = %#v, want stale with retained headline ERR", got)
+	}
+	if !strings.Contains(got.Reason, "source artifact digest") {
+		t.Fatalf("Reason = %q, want missing digest explanation", got.Reason)
+	}
+}
+
+func TestLoadForwardBaselineLabelsWindowFreeSavedERRBaselineStale(t *testing.T) {
+	root := t.TempDir()
+	writePriorState(t, root, ".relia/baselines/error-recurrence-baseline.json", `{
+  "object_type": "relia.err_baseline",
+  "schema_version": "1.0",
+  "headline_err": 0.2143,
+  "report_id": "backtest_demo",
+  "metadata": {
+    "source_artifact_digest": "sha256:source"
+  }
+}`)
+
+	got, stateErr := LoadForwardBaseline(root, ".relia/baselines/error-recurrence-baseline.json")
+
+	if stateErr != nil {
+		t.Fatalf("LoadForwardBaseline returned error: %v", stateErr)
+	}
+	if got.Status != "stale" || got.Path != ".relia/baselines/error-recurrence-baseline.json" || !got.HasHeadlineERR || got.HeadlineERR != 0.2143 {
+		t.Fatalf("baseline = %#v, want stale with retained headline ERR", got)
+	}
+	if !strings.Contains(got.Reason, "window metadata") {
+		t.Fatalf("Reason = %q, want missing window explanation", got.Reason)
 	}
 }
 

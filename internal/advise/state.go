@@ -116,13 +116,30 @@ func LoadForwardBaseline(root string, baselinePath string) (ForwardBaseline, *St
 	if !ok || headlineERR < 0 || headlineERR > 1 {
 		return ForwardBaseline{}, &StateError{Kind: StateErrorArtifactContract, Message: "forward ERR baseline must include headline_err between 0 and 1", Ref: ref}
 	}
+	status, reason := forwardBaselineFreshness(payload)
 	return ForwardBaseline{
-		Status:         "current",
+		Status:         status,
 		Path:           ref,
 		HeadlineERR:    headlineERR,
 		HasHeadlineERR: true,
-		Reason:         "Loaded saved ERR baseline for forward advisory signal tracking.",
+		Reason:         reason,
 	}, nil
+}
+
+func forwardBaselineFreshness(payload map[string]any) (string, string) {
+	if metadata, ok := payload["metadata"].(map[string]any); ok {
+		if digest, _ := metadata["source_artifact_digest"].(string); strings.TrimSpace(digest) != "" {
+			if window, windowOK := payload["window"].(map[string]any); windowOK {
+				start, _ := window["start"].(string)
+				end, _ := window["end"].(string)
+				if strings.TrimSpace(start) != "" && strings.TrimSpace(end) != "" {
+					return "current", "Loaded saved ERR baseline for forward advisory signal tracking."
+				}
+			}
+			return "stale", "Saved ERR baseline is missing baseline window metadata; regenerate with relia backtest --save-baseline before comparing forward advisory signals."
+		}
+	}
+	return "stale", "Saved ERR baseline is missing source artifact digest metadata; regenerate with relia backtest --save-baseline before comparing forward advisory signals."
 }
 
 func BuildForwardSignal(
