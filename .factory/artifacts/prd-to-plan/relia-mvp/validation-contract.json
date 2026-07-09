@@ -269,7 +269,8 @@
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#fr16-mcp-serving",
       "task_refs": [
-        "T14"
+        "T14",
+        "T14.1"
       ],
       "title": "FR16: MCP Serving"
     },
@@ -503,6 +504,7 @@
         "T7",
         "T11",
         "T14",
+        "T14.1",
         "T13",
         "T9",
         "T4.1",
@@ -552,6 +554,7 @@
       "source_ref": "docs/product/prd.md#serve-and-advise-acceptance-tests",
       "task_refs": [
         "T14",
+        "T14.1",
         "T12",
         "T13",
         "T4.3",
@@ -1017,7 +1020,8 @@
       "slice_id": "assessment-and-pr-advisory",
       "source_ref": ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/T14",
       "task_refs": [
-        "T14"
+        "T14",
+        "T14.1"
       ]
     },
     {
