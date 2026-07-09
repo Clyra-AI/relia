@@ -304,6 +304,24 @@ func TestTouchedPathsOrPlanStripsQuotedLineSuffixes(t *testing.T) {
 	}
 }
 
+func TestTouchedPathsOrPlanStripsTrailingPlanLabelColon(t *testing.T) {
+	paths, inputKind, err := TouchedPathsOrPlan([]byte(`Implementation plan:
+
+- packages/billing/invoice.py: use the billing clock fixture.
+- internal/advise/advise.go: keep advisory output stable.
+`))
+	if err != nil {
+		t.Fatalf("TouchedPathsOrPlan error: %v", err)
+	}
+	if inputKind != "plan" {
+		t.Fatalf("input kind = %q, want plan", inputKind)
+	}
+	want := []string{"internal/advise/advise.go", "packages/billing/invoice.py"}
+	if fmt.Sprint(paths) != fmt.Sprint(want) {
+		t.Fatalf("paths = %#v, want %#v", paths, want)
+	}
+}
+
 func TestTouchedPathsOrPlanRejectsGitHubShorthandRefs(t *testing.T) {
 	paths, inputKind, err := TouchedPathsOrPlan([]byte(`Implementation plan:
 
