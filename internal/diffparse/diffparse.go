@@ -1,6 +1,7 @@
 package diffparse
 
 import (
+	"encoding/json"
 	"errors"
 	"path/filepath"
 	"regexp"
@@ -30,6 +31,12 @@ func TouchedPathsOrPlan(content []byte) ([]string, string, error) {
 }
 
 func PlanPaths(content []byte) ([]string, error) {
+	if paths, ok := structuredPlanPaths(content); ok {
+		if len(paths) == 0 {
+			return nil, ErrNoRepoRelativePaths
+		}
+		return paths, nil
+	}
 	touched := map[string]bool{}
 	quotedFields, planText := quotedPlanFields(string(content))
 	for _, field := range quotedFields {
@@ -63,6 +70,48 @@ func PlanPaths(content []byte) ([]string, error) {
 		return nil, ErrNoRepoRelativePaths
 	}
 	return paths, nil
+}
+
+func structuredPlanPaths(content []byte) ([]string, bool) {
+	var payload any
+	if err := json.Unmarshal(content, &payload); err != nil {
+		return nil, false
+	}
+	touched := map[string]bool{}
+	recordStructuredPlanPaths(touched, payload, "")
+	paths := make([]string, 0, len(touched))
+	for touchedPath := range touched {
+		paths = append(paths, touchedPath)
+	}
+	sort.Strings(paths)
+	return paths, true
+}
+
+func recordStructuredPlanPaths(touched map[string]bool, value any, key string) {
+	if structuredPlanIgnoreKey(key) {
+		return
+	}
+	switch typed := value.(type) {
+	case map[string]any:
+		for childKey, childValue := range typed {
+			recordStructuredPlanPaths(touched, childValue, childKey)
+		}
+	case []any:
+		for _, childValue := range typed {
+			recordStructuredPlanPaths(touched, childValue, key)
+		}
+	case string:
+		recordQuotedPlanPath(touched, typed)
+	}
+}
+
+func structuredPlanIgnoreKey(key string) bool {
+	switch strings.ToLower(key) {
+	case "command_refs", "evidence_refs", "excluded_paths", "forbidden_path_patterns", "forbidden_paths", "scope_exclusions", "validation_commands":
+		return true
+	default:
+		return false
+	}
 }
 
 func recordUnquotedPlanFields(touched map[string]bool, fields []string) {

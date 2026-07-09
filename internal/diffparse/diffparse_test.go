@@ -106,6 +106,32 @@ func TestTouchedPathsOrPlanPreservesRootLevelPlanPaths(t *testing.T) {
 	}
 }
 
+func TestTouchedPathsOrPlanSkipsNonTouchedTaskPacketPaths(t *testing.T) {
+	paths, inputKind, err := TouchedPathsOrPlan([]byte(`{
+  "task_id": "T14",
+  "allowed_paths": ["internal/assess/assess.go"],
+  "forbidden_paths": ["internal/secret/secret.go"],
+  "validation_commands": ["go test ./internal/secret"],
+  "evidence_refs": [".factory/artifacts/task-runs/T14/validation-report.json"],
+  "implementation_plan": ["Update internal/advise/advise.go for advisory output."]
+}`))
+	if err != nil {
+		t.Fatalf("TouchedPathsOrPlan error: %v", err)
+	}
+	if inputKind != "plan" {
+		t.Fatalf("input kind = %q, want plan", inputKind)
+	}
+	want := []string{"internal/advise/advise.go", "internal/assess/assess.go"}
+	if fmt.Sprint(paths) != fmt.Sprint(want) {
+		t.Fatalf("paths = %#v, want %#v", paths, want)
+	}
+
+	_, _, err = TouchedPathsOrPlan([]byte(`{"forbidden_paths":["internal/secret/secret.go"],"validation_commands":["go test ./internal/secret"]}`))
+	if !errors.Is(err, ErrNoRepoRelativePaths) {
+		t.Fatalf("error = %v, want ErrNoRepoRelativePaths", err)
+	}
+}
+
 func TestTouchedPathsOrPlanRejectsGlobLikePlanTokens(t *testing.T) {
 	paths, inputKind, err := TouchedPathsOrPlan([]byte(`Implementation plan:
 
