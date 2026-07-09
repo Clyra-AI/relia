@@ -270,7 +270,7 @@
     "schemas/coverage-map.schema.json"
   ],
   "task_id": "T14",
-  "work_item_id": "T14",
+  "work_item_id": "relia-mvp-t14",
   "promotion_decision": "ready_for_pr",
   "versioning_result": {
     "notes": "No runtime pin, dependency, schema version, migration, or distribution target changed.",
