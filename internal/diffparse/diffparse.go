@@ -113,28 +113,55 @@ func quotedPlanFields(raw string) ([]string, string) {
 	var fields []string
 	var remaining strings.Builder
 	for index := 0; index < len(raw); {
-		quote := raw[index]
+		quote, quoted := planQuoteAt(raw, index)
 		if quote == '`' && index+2 < len(raw) && raw[index+1] == '`' && raw[index+2] == '`' {
 			remaining.WriteString("   ")
 			index += 3
 			continue
 		}
-		if quote != '"' && quote != '`' {
+		if !quoted {
 			remaining.WriteByte(raw[index])
 			index++
 			continue
 		}
-		endOffset := strings.IndexByte(raw[index+1:], quote)
-		if endOffset < 0 {
+		endIndex := closingPlanQuoteIndex(raw, index+1, quote)
+		if endIndex < 0 {
 			remaining.WriteByte(raw[index])
 			index++
 			continue
 		}
-		fields = append(fields, raw[index+1:index+1+endOffset])
+		fields = append(fields, raw[index+1:endIndex])
 		remaining.WriteByte(' ')
-		index += endOffset + 2
+		index = endIndex + 1
 	}
 	return fields, remaining.String()
+}
+
+func planQuoteAt(raw string, index int) (byte, bool) {
+	switch raw[index] {
+	case '"', '`':
+		return raw[index], true
+	case '\'':
+		if index > 0 && isASCIIAlpha(rune(raw[index-1])) {
+			return 0, false
+		}
+		return raw[index], true
+	default:
+		return 0, false
+	}
+}
+
+func closingPlanQuoteIndex(raw string, start int, quote byte) int {
+	for index := start; index < len(raw); index++ {
+		if raw[index] != quote {
+			continue
+		}
+		if quote == '\'' && index+1 < len(raw) && isASCIIAlpha(rune(raw[index+1])) {
+			continue
+		}
+		return index
+	}
+	return -1
 }
 
 func recordPlanPath(touched map[string]bool, field string) {

@@ -1,7 +1,7 @@
 {
   "artifact_type": "autoship_supervisor_report",
   "schema_version": "0.1",
-  "generated_at": "2026-07-09T12:08:10Z",
+  "generated_at": "2026-07-09T12:18:34Z",
   "repo": "relia",
   "task_id": "T14",
   "work_item_id": "relia-mvp-t14",
@@ -92,6 +92,7 @@
     "seventh_supervisor_repair_head": "4f959121f8b94afc6f129043c37fc4afc8868ded",
     "eighth_supervisor_repair_head": "0ead3402c3c4c346d66673604f89fb3fc6725e5e",
     "ninth_supervisor_repair_head": "5c8e06b6438d9215231c9bde3477dda4d6ee5d7f",
+    "tenth_supervisor_repair_head": "6131dd7d3e0649abc0bf1e0c21b5e36193c576ef",
     "ci_status_before_supervisor_repair": "passed",
     "review_status_before_supervisor_repair": "latest_head_actionable_p2_comments",
     "review_status_after_first_supervisor_repair": "latest_head_actionable_p2_comment",
@@ -103,6 +104,7 @@
     "review_status_after_seventh_supervisor_repair": "latest_head_actionable_p2_comments",
     "review_status_after_eighth_supervisor_repair": "latest_head_actionable_p2_comments",
     "review_status_after_ninth_supervisor_repair": "latest_head_actionable_p2_comments",
+    "review_status_after_tenth_supervisor_repair": "latest_head_actionable_p2_comment",
     "manual_repair_validation_status": "passed"
   },
   "decisions": [
@@ -312,6 +314,17 @@
         "internal/diffparse/diffparse.go",
         "internal/diffparse/diffparse_test.go"
       ]
+    },
+    {
+      "decision_type": "review_disposition",
+      "actor": "supervisor",
+      "action_taken": "accepted_and_fixed",
+      "reason": "Single-quoted plan paths with spaces must be preserved as quoted path spans while ordinary apostrophes remain prose.",
+      "evidence_refs": [
+        "https://github.com/Clyra-AI/relia/pull/164#discussion_r3551498792",
+        "internal/diffparse/diffparse.go",
+        "internal/diffparse/diffparse_test.go"
+      ]
     }
   ],
   "validation": {
@@ -366,6 +379,7 @@
     "https://github.com/Clyra-AI/relia/pull/164#discussion_r3551383556",
     "https://github.com/Clyra-AI/relia/pull/164#discussion_r3551383559",
     "https://github.com/Clyra-AI/relia/pull/164#discussion_r3551438359",
-    "https://github.com/Clyra-AI/relia/pull/164#discussion_r3551438362"
+    "https://github.com/Clyra-AI/relia/pull/164#discussion_r3551438362",
+    "https://github.com/Clyra-AI/relia/pull/164#discussion_r3551498792"
   ]
 }
