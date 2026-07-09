@@ -143,7 +143,7 @@ func quotedCommandExecutable(part string) bool {
 
 func commandScriptOperand(part string) bool {
 	trimmed := strings.TrimPrefix(part, "./")
-	return strings.Contains(trimmed, "/")
+	return strings.HasPrefix(trimmed, "scripts/")
 }
 
 func quotedPlanFields(raw string) ([]string, string) {
