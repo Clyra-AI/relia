@@ -51,7 +51,10 @@ func PlanPaths(content []byte) ([]string, error) {
 		"\t", " ",
 	)
 	for _, field := range strings.Fields(replacer.Replace(string(content))) {
-		field = strings.TrimRight(field, ".!?")
+		field = strings.TrimRight(field, "!?")
+		if !strings.HasSuffix(field, "...") {
+			field = strings.TrimRight(field, ".")
+		}
 		if field == "" || strings.Contains(field, "://") {
 			continue
 		}
@@ -77,11 +80,11 @@ func PlanPaths(content []byte) ([]string, error) {
 }
 
 func planPathCandidate(field string) bool {
+	if strings.ContainsAny(field, `\*?`) || strings.Contains(field, "...") {
+		return false
+	}
 	if strings.Contains(field, "/") {
 		return true
-	}
-	if strings.ContainsAny(field, `\*?`) {
-		return false
 	}
 	switch field {
 	case "Makefile", "Dockerfile", "LICENSE", "NOTICE", "README", "CHANGELOG":

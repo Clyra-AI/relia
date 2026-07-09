@@ -106,6 +106,25 @@ func TestTouchedPathsOrPlanPreservesRootLevelPlanPaths(t *testing.T) {
 	}
 }
 
+func TestTouchedPathsOrPlanRejectsGlobLikePlanTokens(t *testing.T) {
+	paths, inputKind, err := TouchedPathsOrPlan([]byte(`Implementation plan:
+
+- Run go test ./internal/... before shipping.
+- Review cmd/relia/*.go for command wiring.
+- Change internal/assess/assess.go for coverage semantics.
+`))
+	if err != nil {
+		t.Fatalf("TouchedPathsOrPlan error: %v", err)
+	}
+	if inputKind != "plan" {
+		t.Fatalf("input kind = %q, want plan", inputKind)
+	}
+	want := []string{"internal/assess/assess.go"}
+	if fmt.Sprint(paths) != fmt.Sprint(want) {
+		t.Fatalf("paths = %#v, want %#v", paths, want)
+	}
+}
+
 func TestTouchedPathsOrPlanKeepsUnifiedDiffKind(t *testing.T) {
 	paths, inputKind, err := TouchedPathsOrPlan([]byte(`diff --git a/packages/search/query.py b/packages/search/query.py
 --- a/packages/search/query.py
