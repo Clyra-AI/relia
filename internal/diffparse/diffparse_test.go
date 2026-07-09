@@ -144,6 +144,25 @@ func TestTouchedPathsOrPlanRejectsProseAbbreviations(t *testing.T) {
 	}
 }
 
+func TestTouchedPathsOrPlanRejectsRemoteModulePathTokens(t *testing.T) {
+	paths, inputKind, err := TouchedPathsOrPlan([]byte(`Implementation plan:
+
+- Import github.com/Clyra-AI/relia/internal/assess in examples.
+- Keep .github/workflows/validate.yml wired to the validator.
+- Update docs/v1.0/assessment.md with plan guidance.
+`))
+	if err != nil {
+		t.Fatalf("TouchedPathsOrPlan error: %v", err)
+	}
+	if inputKind != "plan" {
+		t.Fatalf("input kind = %q, want plan", inputKind)
+	}
+	want := []string{".github/workflows/validate.yml", "docs/v1.0/assessment.md"}
+	if fmt.Sprint(paths) != fmt.Sprint(want) {
+		t.Fatalf("paths = %#v, want %#v", paths, want)
+	}
+}
+
 func TestTouchedPathsOrPlanKeepsUnifiedDiffKind(t *testing.T) {
 	paths, inputKind, err := TouchedPathsOrPlan([]byte(`diff --git a/packages/search/query.py b/packages/search/query.py
 --- a/packages/search/query.py
