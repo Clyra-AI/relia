@@ -13,6 +13,7 @@ import (
 var (
 	ErrNoRepoRelativePaths  = errors.New("diff contains no repo-relative paths")
 	unifiedHunkHeaderRegexp = regexp.MustCompile(`^@@ -\d+(?:,(\d+))? \+\d+(?:,(\d+))? @@`)
+	planTextReplacer        = strings.NewReplacer("`", " ", "\"", " ", "'", " ", "(", " ", ")", " ", "[", " ", "]", " ", "{", " ", "}", " ", "<", " ", ">", " ", ",", " ", ";", " ", "\n", " ", "\r", " ", "\t", " ")
 )
 
 func TouchedPathsOrPlan(content []byte) ([]string, string, error) {
@@ -38,29 +39,7 @@ func PlanPaths(content []byte) ([]string, error) {
 		return paths, nil
 	}
 	touched := map[string]bool{}
-	quotedFields, planText := quotedPlanFields(string(content))
-	for _, field := range quotedFields {
-		recordQuotedPlanPath(touched, field)
-	}
-	replacer := strings.NewReplacer(
-		"`", " ",
-		"\"", " ",
-		"'", " ",
-		"(", " ",
-		")", " ",
-		"[", " ",
-		"]", " ",
-		"{", " ",
-		"}", " ",
-		"<", " ",
-		">", " ",
-		",", " ",
-		";", " ",
-		"\n", " ",
-		"\r", " ",
-		"\t", " ",
-	)
-	recordUnquotedPlanFields(touched, strings.Fields(replacer.Replace(planText)))
+	recordPlanText(touched, string(content))
 	paths := make([]string, 0, len(touched))
 	for touchedPath := range touched {
 		paths = append(paths, touchedPath)
@@ -70,6 +49,14 @@ func PlanPaths(content []byte) ([]string, error) {
 		return nil, ErrNoRepoRelativePaths
 	}
 	return paths, nil
+}
+
+func recordPlanText(touched map[string]bool, text string) {
+	quotedFields, planText := quotedPlanFields(text)
+	for _, field := range quotedFields {
+		recordQuotedPlanPath(touched, field)
+	}
+	recordUnquotedPlanFields(touched, strings.Fields(planTextReplacer.Replace(planText)))
 }
 
 func structuredPlanPaths(content []byte) ([]string, bool) {
@@ -92,7 +79,8 @@ func recordStructuredPlanPaths(touched map[string]bool, value any, key string) {
 	if structuredPlanIgnoreKey(normalizedKey) {
 		return
 	}
-	collect := structuredPlanCollectKey(normalizedKey)
+	pathKey := structuredPlanPathKey(normalizedKey)
+	proseKey := structuredPlanProseKey(normalizedKey)
 	switch typed := value.(type) {
 	case map[string]any:
 		for childKey, childValue := range typed {
@@ -103,7 +91,9 @@ func recordStructuredPlanPaths(touched map[string]bool, value any, key string) {
 			recordStructuredPlanPaths(touched, childValue, normalizedKey)
 		}
 	case string:
-		if collect {
+		if proseKey {
+			recordPlanText(touched, typed)
+		} else if pathKey {
 			recordQuotedPlanPath(touched, typed)
 		}
 	}
@@ -121,9 +111,18 @@ func structuredPlanIgnoreKey(key string) bool {
 	}
 }
 
-func structuredPlanCollectKey(key string) bool {
+func structuredPlanPathKey(key string) bool {
 	switch key {
-	case "affected_paths", "allowed_paths", "architecture_target_paths", "changed_paths", "change_summary", "changes", "description", "file_paths", "implementation_paths", "implementation_plan", "minimum_fix", "modified_paths", "objective", "path", "paths", "plan", "planned_paths", "summary", "target_paths", "touched_paths":
+	case "affected_paths", "allowed_paths", "architecture_target_paths", "changed_paths", "file_paths", "implementation_paths", "modified_paths", "path", "paths", "planned_paths", "target_paths", "touched_paths":
+		return true
+	default:
+		return false
+	}
+}
+
+func structuredPlanProseKey(key string) bool {
+	switch key {
+	case "change_summary", "changes", "description", "implementation_plan", "minimum_fix", "objective", "plan", "summary":
 		return true
 	default:
 		return false
