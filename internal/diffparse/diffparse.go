@@ -207,6 +207,7 @@ func recordPlanPath(touched map[string]bool, field string) {
 	if !strings.HasSuffix(field, "...") {
 		field = strings.TrimRight(field, ".")
 	}
+	field = strings.TrimRight(field, ":")
 	if field == "" || strings.Contains(field, "://") {
 		return
 	}
