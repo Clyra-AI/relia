@@ -4,6 +4,7 @@
   "exception_id": "ARCH-DEBT-2026-07-01-relia-main",
   "repo": "relia",
   "scope": {
+    "budget_type": "source_file_lines",
     "paths": [
       "cmd/relia/main.go",
       "cmd/relia/main_test.go"

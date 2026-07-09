@@ -9,6 +9,7 @@ from tempfile import TemporaryDirectory
 import validate_repo_pack as validator
 from repo_pack_architecture import (
     architecture_budget_unexcepted_failures,
+    architecture_debt_exception_budget_type_error,
     architecture_debt_exception_expiry_error,
     validate_architecture_debt_exception_expiry,
 )
@@ -29,6 +30,7 @@ validate_architecture_target_paths = validator.validate_architecture_target_path
 validate_lifecycle_path_ownership = validator.validate_lifecycle_path_ownership
 validate_model_provider_gate = validator.validate_model_provider_gate
 validate_runner_ready_task_fields = validator.validate_runner_ready_task_fields
+validate_task_required_review = validator.validate_task_required_review
 validate_runner_ready_field_sync = validator.validate_runner_ready_field_sync
 validate_validation_contract_evidence_split = validator.validate_validation_contract_evidence_split
 
@@ -164,6 +166,10 @@ def self_test():
         datetime(2026, 7, 1, tzinfo=timezone.utc),
     ):
         fail("architecture debt exception self-test expected expired evidence to fail")
+    if not architecture_debt_exception_budget_type_error("self-test", {}):
+        fail("architecture debt exception self-test expected missing budget_type to fail")
+    if architecture_debt_exception_budget_type_error("self-test", {"budget_type": "source_file_lines"}):
+        fail("architecture debt exception self-test expected source_file_lines budget_type to pass")
     if duplicate_values(["T1", "T2", "T1", "T2", "T3"]) != ["T1", "T2"]:
         fail("duplicate_values must preserve duplicate ids in first duplicate order")
     if "FR23-PROVIDER-ADAPTERS-AND-NO-LLM-MODE-001" not in PROVIDER_ACCEPTANCE_IDS:
@@ -217,6 +223,13 @@ def self_test():
     sample_task["required_proof_level"] = "workflow_behavior"
     sample_task["redaction_posture"] = {"classification": "internal", "customer_safe": False}
     validate_runner_ready_task_fields(sample_task, "self-test")
+    review_task = dict(sample_task)
+    review_task["required_review"] = {
+        "required": True,
+        "review_type": "architecture",
+        "reviewer_class": "peer_agent",
+    }
+    validate_task_required_review(review_task, "self-test", True)
     validate_architecture_target_paths(
         {
             "architecture_target_paths": ["internal/review/"],
@@ -261,6 +274,14 @@ def self_test():
                 raise
         else:
             fail("missing runner-ready proof field fixture did not fail closed")
+
+        try:
+            validate_task_required_review(sample_task, "self-test", True)
+        except AssertionError as exc:
+            if "required_review" not in str(exc):
+                raise
+        else:
+            fail("missing required review fixture did not fail closed")
 
         lifecycle_allowed_path = {
             "work_item_id": "relia-mvp-t1",

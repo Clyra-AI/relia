@@ -13,7 +13,7 @@ import (
 func TestInitDiscoversRequiredChecksAndCompileTargets(t *testing.T) {
 	tempDir := t.TempDir()
 	t.Chdir(tempDir)
-	writeFileForTest(t, filepath.Join(tempDir, "go.mod"), "module github.com/Clyra-AI/relia\n\ngo 1.26.4\n")
+	writeFileForTest(t, filepath.Join(tempDir, "go.mod"), "module github.com/Clyra-AI/relia\n\ngo 1.26.5\n")
 	writeFileForTest(t, filepath.Join(tempDir, ".github", "required-checks.json"), `{"required_checks":["validate","CodeQL analyze"]}`+"\n")
 
 	stdout, stderr, code := runForTest(t, []string{"--json", "init"}, false)

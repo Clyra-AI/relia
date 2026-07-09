@@ -24,7 +24,7 @@ Before PR or merge, run:
 
 ## 3. Alignment Pins
 
-- Runtime: Go 1.26.4.
+- Runtime: Go 1.26.5.
 - Module path: github.com/Clyra-AI/relia.
 - Distribution target: standalone_binary.
 - Repository visibility: public.

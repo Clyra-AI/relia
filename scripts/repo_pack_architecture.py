@@ -152,6 +152,9 @@ def validate_architecture_debt_exception(ref):
     scope = exception.get("scope")
     if not isinstance(scope, dict):
         fail(f"{ref}.scope must be an object")
+    budget_type_error = architecture_debt_exception_budget_type_error(ref, scope)
+    if budget_type_error:
+        fail(budget_type_error)
     paths = scope.get("paths")
     if sorted(paths or []) != sorted(ARCHITECTURE_BUDGET_EXCEPTION_PATHS):
         fail(f"{ref}.scope.paths must be {ARCHITECTURE_BUDGET_EXCEPTION_PATHS!r}")
@@ -165,6 +168,11 @@ def validate_architecture_debt_exception(ref):
         ref_error = architecture_debt_exception_repo_ref_error(ROOT, ref, key, exception.get(key))
         if ref_error:
             fail(ref_error)
+
+def architecture_debt_exception_budget_type_error(ref, scope):
+    if not isinstance(scope, dict) or scope.get("budget_type") != "source_file_lines":
+        return f"{ref}.scope.budget_type must be source_file_lines"
+    return None
 
 def normalize_architecture_budget_path(value):
     path = str(value).strip().replace("\\", "/")
@@ -293,4 +301,3 @@ def validate_architecture_budget_policy(repo, label):
     for ref in ARCHITECTURE_BUDGET_EXCEPTION_REFS:
         validate_architecture_debt_exception(ref)
     validate_architecture_budget_inventory(budget, label)
-

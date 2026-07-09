@@ -16,7 +16,7 @@ lint-fast:
 	test -f .factory/factoryd.autoship.example.json
 	test -f scripts/check_go_coverage.py
 	test -f .tool-versions
-	grep -q '^golang 1.26.4$$' .tool-versions
+	grep -q '^golang 1.26.5$$' .tool-versions
 	grep -q 'make test-coverage' docs/dev/dev_guides.md
 
 test-fast:

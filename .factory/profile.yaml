@@ -8,7 +8,7 @@ source_prd: docs/product/prd.md
 repo_visibility: public
 runtime_pins:
   language: go
-  toolchain_version: 1.26.4
+  toolchain_version: 1.26.5
   module_or_package_path: github.com/Clyra-AI/relia
   dependency_policy: standard_library_first; pin and justify additions
   distribution_target: standalone_binary

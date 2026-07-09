@@ -32,7 +32,7 @@
       },
       {
         "decision": "toolchain_version",
-        "value": "1.26.4"
+        "value": "1.26.5"
       },
       {
         "decision": "module_path",
@@ -76,7 +76,7 @@
   },
   "alignment_findings": {
     "facts": [
-      "Runtime is Go 1.26.4.",
+      "Runtime is Go 1.26.5.",
       "Module path is github.com/Clyra-AI/relia.",
       "Distribution target is standalone_binary."
     ],

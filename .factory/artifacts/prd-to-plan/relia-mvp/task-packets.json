@@ -896,7 +896,7 @@
         "live_work_policy": "no ambient secrets or live network by default",
         "module_or_package_path": "github.com/Clyra-AI/relia",
         "provider_policy": "none by default",
-        "toolchain_version": "1.26.4"
+        "toolchain_version": "1.26.5"
       },
       "scope_exclusions": [
         "No scope outside docs/product/prd.md.",
@@ -1422,7 +1422,7 @@
         "live_work_policy": "no ambient secrets or live network by default",
         "module_or_package_path": "github.com/Clyra-AI/relia",
         "provider_policy": "none by default",
-        "toolchain_version": "1.26.4"
+        "toolchain_version": "1.26.5"
       },
       "scope_exclusions": [
         "No scope outside docs/product/prd.md.",
@@ -1960,7 +1960,7 @@
         "live_work_policy": "no ambient secrets or live network by default",
         "module_or_package_path": "github.com/Clyra-AI/relia",
         "provider_policy": "none by default",
-        "toolchain_version": "1.26.4"
+        "toolchain_version": "1.26.5"
       },
       "scope_exclusions": [
         "No scope outside docs/product/prd.md.",
@@ -2548,7 +2548,7 @@
         "live_work_policy": "no ambient secrets or live network by default",
         "module_or_package_path": "github.com/Clyra-AI/relia",
         "provider_policy": "none by default",
-        "toolchain_version": "1.26.4"
+        "toolchain_version": "1.26.5"
       },
       "scope_exclusions": [
         "Do not broaden this task outside its listed acceptance item IDs.",
@@ -3066,7 +3066,7 @@
         "live_work_policy": "no ambient secrets or live network by default",
         "module_or_package_path": "github.com/Clyra-AI/relia",
         "provider_policy": "none by default",
-        "toolchain_version": "1.26.4"
+        "toolchain_version": "1.26.5"
       },
       "scope_exclusions": [
         "Do not broaden this task outside its listed acceptance item IDs.",
@@ -3530,7 +3530,7 @@
         "live_work_policy": "no ambient secrets or live network by default",
         "module_or_package_path": "github.com/Clyra-AI/relia",
         "provider_policy": "none by default",
-        "toolchain_version": "1.26.4"
+        "toolchain_version": "1.26.5"
       },
       "scope_exclusions": [
         "Do not broaden this task outside its listed acceptance item IDs.",
@@ -4295,7 +4295,7 @@
         "live_work_policy": "no ambient secrets or live network by default",
         "module_or_package_path": "github.com/Clyra-AI/relia",
         "provider_policy": "none by default",
-        "toolchain_version": "1.26.4"
+        "toolchain_version": "1.26.5"
       },
       "scope_exclusions": [
         "No scope outside docs/product/prd.md.",
@@ -5070,7 +5070,7 @@
         "live_work_policy": "no ambient secrets or live network by default",
         "module_or_package_path": "github.com/Clyra-AI/relia",
         "provider_policy": "none by default",
-        "toolchain_version": "1.26.4"
+        "toolchain_version": "1.26.5"
       },
       "scope_exclusions": [
         "No scope outside docs/product/prd.md.",
@@ -5886,7 +5886,7 @@
         "live_work_policy": "no ambient secrets or live network by default",
         "module_or_package_path": "github.com/Clyra-AI/relia",
         "provider_policy": "none by default; T7 uses deterministic signature/no-LLM paths and implements fail-closed local embedding behavior without downloading model artifacts during task execution",
-        "toolchain_version": "1.26.4"
+        "toolchain_version": "1.26.5"
       },
       "scope_exclusions": [
         "No scope outside docs/product/prd.md.",
@@ -6400,7 +6400,7 @@
         "live_work_policy": "no ambient secrets or live network by default",
         "module_or_package_path": "github.com/Clyra-AI/relia",
         "provider_policy": "none by default; T7 uses deterministic signature/no-LLM paths and implements fail-closed local embedding behavior without downloading model artifacts during task execution",
-        "toolchain_version": "1.26.4"
+        "toolchain_version": "1.26.5"
       },
       "scope_exclusions": [
         "No scope outside docs/product/prd.md.",
@@ -6874,7 +6874,7 @@
         "live_work_policy": "no ambient secrets or live network by default",
         "module_or_package_path": "github.com/Clyra-AI/relia",
         "provider_policy": "none by default",
-        "toolchain_version": "1.26.4"
+        "toolchain_version": "1.26.5"
       },
       "scope_exclusions": [
         "No scope outside docs/product/prd.md.",
@@ -7635,7 +7635,7 @@
         "live_work_policy": "no ambient secrets or live network by default; GitHub/webhook/hosted-service work needs generic credential/network approval, and provider-backed distill needs model_provider_endpoint approval",
         "module_or_package_path": "github.com/Clyra-AI/relia",
         "provider_policy": "deterministic no-LLM by default; provider embeddings and OpenAI-compatible or Anthropic LLM rule-drafting adapters require a complete model_provider_endpoint grant with provider identity, provider model, endpoint or base_url, credential environment, budget posture, redaction posture, and allowlist",
-        "toolchain_version": "1.26.4"
+        "toolchain_version": "1.26.5"
       },
       "scope_exclusions": [
         "No scope outside docs/product/prd.md.",
@@ -8224,7 +8224,7 @@
         "live_work_policy": "no ambient secrets or live network by default",
         "module_or_package_path": "github.com/Clyra-AI/relia",
         "provider_policy": "none by default",
-        "toolchain_version": "1.26.4"
+        "toolchain_version": "1.26.5"
       },
       "scope_exclusions": [
         "No scope outside docs/product/prd.md.",
@@ -8695,7 +8695,7 @@
         "live_work_policy": "no ambient secrets or live network by default",
         "module_or_package_path": "github.com/Clyra-AI/relia",
         "provider_policy": "none by default",
-        "toolchain_version": "1.26.4"
+        "toolchain_version": "1.26.5"
       },
       "scope_exclusions": [
         "No scope outside docs/product/prd.md.",
@@ -9176,7 +9176,7 @@
         "live_work_policy": "no ambient secrets or live network by default",
         "module_or_package_path": "github.com/Clyra-AI/relia",
         "provider_policy": "none by default",
-        "toolchain_version": "1.26.4"
+        "toolchain_version": "1.26.5"
       },
       "scope_exclusions": [
         "No scope outside docs/product/prd.md.",
@@ -9699,7 +9699,7 @@
         "live_work_policy": "no ambient secrets or live network by default",
         "module_or_package_path": "github.com/Clyra-AI/relia",
         "provider_policy": "none by default",
-        "toolchain_version": "1.26.4"
+        "toolchain_version": "1.26.5"
       },
       "scope_exclusions": [
         "No scope outside docs/product/prd.md.",
@@ -10239,7 +10239,7 @@
         "live_work_policy": "no ambient secrets or live network by default",
         "module_or_package_path": "github.com/Clyra-AI/relia",
         "provider_policy": "none by default",
-        "toolchain_version": "1.26.4"
+        "toolchain_version": "1.26.5"
       },
       "scope_exclusions": [
         "No scope outside docs/product/prd.md.",
@@ -10912,7 +10912,7 @@
         "live_work_policy": "no ambient secrets or live network by default",
         "module_or_package_path": "github.com/Clyra-AI/relia",
         "provider_policy": "none by default",
-        "toolchain_version": "1.26.4"
+        "toolchain_version": "1.26.5"
       },
       "scope_exclusions": [
         "No scope outside docs/product/prd.md.",
@@ -11442,7 +11442,7 @@
         "live_work_policy": "no ambient secrets or live network by default",
         "module_or_package_path": "github.com/Clyra-AI/relia",
         "provider_policy": "none by default",
-        "toolchain_version": "1.26.4"
+        "toolchain_version": "1.26.5"
       },
       "scope_exclusions": [
         "No hosted MCP transport, network listener, credentials, or provider calls.",
@@ -11484,6 +11484,11 @@
         "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
       ],
       "task_id": "T14.1",
+      "required_review": {
+        "required": true,
+        "review_type": "architecture",
+        "reviewer_class": "peer_agent"
+      },
       "test_matrix_refs": [
         {
           "command_refs": [
@@ -12277,7 +12282,7 @@
         "live_work_policy": "no ambient secrets or live network by default",
         "module_or_package_path": "github.com/Clyra-AI/relia",
         "provider_policy": "none by default",
-        "toolchain_version": "1.26.4"
+        "toolchain_version": "1.26.5"
       },
       "scope_exclusions": [
         "No scope outside docs/product/prd.md.",
@@ -12321,6 +12326,11 @@
         "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
       ],
       "task_id": "T15",
+      "required_review": {
+        "required": true,
+        "review_type": "code",
+        "reviewer_class": "peer_agent"
+      },
       "test_matrix_refs": [
         {
           "command_refs": [
@@ -13088,7 +13098,7 @@
         "live_work_policy": "no ambient secrets or live network by default",
         "module_or_package_path": "github.com/Clyra-AI/relia",
         "provider_policy": "none by default",
-        "toolchain_version": "1.26.4"
+        "toolchain_version": "1.26.5"
       },
       "scope_exclusions": [
         "No scope outside docs/product/prd.md.",
@@ -13131,6 +13141,11 @@
         "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
       ],
       "task_id": "T16",
+      "required_review": {
+        "required": true,
+        "review_type": "code",
+        "reviewer_class": "peer_agent"
+      },
       "test_matrix_refs": [
         {
           "command_refs": [
@@ -13633,7 +13648,7 @@
         "live_work_policy": "no ambient secrets or live network by default",
         "module_or_package_path": "github.com/Clyra-AI/relia",
         "provider_policy": "none by default",
-        "toolchain_version": "1.26.4"
+        "toolchain_version": "1.26.5"
       },
       "scope_exclusions": [
         "Do not build hosted analytics, broad support-ticket ingestion, or a customer failure database in MVP.",
@@ -14175,7 +14190,7 @@
         "live_work_policy": "no ambient secrets or live network by default",
         "module_or_package_path": "github.com/Clyra-AI/relia",
         "provider_policy": "none by default",
-        "toolchain_version": "1.26.4"
+        "toolchain_version": "1.26.5"
       },
       "scope_exclusions": [
         "Do not build retrieval infrastructure or global memory promotion automation in this task.",
@@ -14698,7 +14713,7 @@
         "live_work_policy": "no ambient secrets or live network by default",
         "module_or_package_path": "github.com/Clyra-AI/relia",
         "provider_policy": "none by default",
-        "toolchain_version": "1.26.4"
+        "toolchain_version": "1.26.5"
       },
       "scope_exclusions": [
         "No scope outside docs/product/prd.md.",
@@ -14745,6 +14760,11 @@
         "docs/dev/dev_guides.md#structured-data-proof-budgets-and-redaction"
       ],
       "task_id": "T15.1",
+      "required_review": {
+        "required": true,
+        "review_type": "code",
+        "reviewer_class": "peer_agent"
+      },
       "test_matrix_refs": [
         {
           "command_refs": [

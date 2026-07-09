@@ -4,7 +4,7 @@
 
 | Tool | Version |
 |---|---:|
-| Go | 1.26.4 |
+| Go | 1.26.5 |
 
 The Makefile sets `GOCACHE` under `TMPDIR` by default so sandboxed validation
 does not depend on a writable user-level Go build cache.
