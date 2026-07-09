@@ -207,13 +207,24 @@
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#fr5-canonical-experience-schema",
       "source_text": "Backtest, distill, serve, assess, and reports must consume canonical experience records.",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T14"
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/17/validation_commands"
-      ]
+      ],
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T14/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json",
+        ".factory/artifacts/task-runs/T14/validation-report.json",
+        ".factory/artifacts/task-runs/T14/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T14/scope-closure-report.json",
+        "https://github.com/Clyra-AI/relia/pull/164",
+        "refs/remotes/origin/main@1cceab856a7b8349a91111412e04741047331732"
+      ],
+      "recorded_by": "factoryd sync-task-closure",
+      "recorded_at": "2026-07-09T16:17:55Z"
     },
     {
       "acceptance_item_id": "FR6-CAPTURE-TIME-REDACTION-001",
@@ -523,13 +534,24 @@
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#fr16-mcp-serving",
       "source_text": "relia serve` must expose `recall`, `assess`, and `coverage` over MCP, serving only `active` rules.",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T14"
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/17/validation_commands"
-      ]
+      ],
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T14/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json",
+        ".factory/artifacts/task-runs/T14/validation-report.json",
+        ".factory/artifacts/task-runs/T14/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T14/scope-closure-report.json",
+        "https://github.com/Clyra-AI/relia/pull/164",
+        "refs/remotes/origin/main@1cceab856a7b8349a91111412e04741047331732"
+      ],
+      "recorded_by": "factoryd sync-task-closure",
+      "recorded_at": "2026-07-09T16:17:55Z"
     },
     {
       "acceptance_item_id": "FR17-COMPILED-CONTEXT-BLOCK-001",
@@ -615,13 +637,24 @@
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#fr19-coverage-ood-signal",
       "source_text": "Relia must report experience density for touched paths and label `no_coverage` distinctly from `covered_clean`.",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T14"
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/17/validation_commands"
-      ]
+      ],
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T14/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json",
+        ".factory/artifacts/task-runs/T14/validation-report.json",
+        ".factory/artifacts/task-runs/T14/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T14/scope-closure-report.json",
+        "https://github.com/Clyra-AI/relia/pull/164",
+        "refs/remotes/origin/main@1cceab856a7b8349a91111412e04741047331732"
+      ],
+      "recorded_by": "factoryd sync-task-closure",
+      "recorded_at": "2026-07-09T16:17:55Z"
     },
     {
       "acceptance_item_id": "FR20-ADVISORY-ONLY-DEFAULT-001",
@@ -1257,13 +1290,24 @@
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#nfr14-advisory-restraint",
       "source_text": "The PR advisor must default to at most one comment per PR and edit that comment in place on subsequent pushes rather than posting new ones. Reassessment is debounced (default 10 minutes) and skipped entirely when the diff fingerprint is unchanged, so force-push storms produce one living comment, not a thread. The advisor stays silent below `min_confidence` and on `covered_clean`.",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T14"
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/17/validation_commands"
-      ]
+      ],
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T14/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json",
+        ".factory/artifacts/task-runs/T14/validation-report.json",
+        ".factory/artifacts/task-runs/T14/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T14/scope-closure-report.json",
+        "https://github.com/Clyra-AI/relia/pull/164",
+        "refs/remotes/origin/main@1cceab856a7b8349a91111412e04741047331732"
+      ],
+      "recorded_by": "factoryd sync-task-closure",
+      "recorded_at": "2026-07-09T16:17:55Z"
     },
     {
       "acceptance_item_id": "NFR15-NO-DASHBOARD-DEPENDENCY-001",
@@ -1280,13 +1324,24 @@
       "risk_class": "low",
       "source_ref": "docs/product/prd.md#nfr15-no-dashboard-dependency",
       "source_text": "The MVP must explain value through local CLI output, local reports, MEMORY.md, and the PR comment.",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T14"
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/17/validation_commands"
-      ]
+      ],
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T14/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json",
+        ".factory/artifacts/task-runs/T14/validation-report.json",
+        ".factory/artifacts/task-runs/T14/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T14/scope-closure-report.json",
+        "https://github.com/Clyra-AI/relia/pull/164",
+        "refs/remotes/origin/main@1cceab856a7b8349a91111412e04741047331732"
+      ],
+      "recorded_by": "factoryd sync-task-closure",
+      "recorded_at": "2026-07-09T16:17:55Z"
     },
     {
       "acceptance_item_id": "MVP-IN-SCOPE-001",
@@ -1772,13 +1827,24 @@
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
       "source_text": "MCP server (`recall`, `assess`, `coverage`)",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T14"
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/17/validation_commands"
-      ]
+      ],
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T14/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json",
+        ".factory/artifacts/task-runs/T14/validation-report.json",
+        ".factory/artifacts/task-runs/T14/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T14/scope-closure-report.json",
+        "https://github.com/Clyra-AI/relia/pull/164",
+        "refs/remotes/origin/main@1cceab856a7b8349a91111412e04741047331732"
+      ],
+      "recorded_by": "factoryd sync-task-closure",
+      "recorded_at": "2026-07-09T16:17:55Z"
     },
     {
       "acceptance_item_id": "MVP-IN-SCOPE-017",
@@ -1841,13 +1907,24 @@
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#mvp-in-scope",
       "source_text": "CLI `assess` on diff or plan",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T14"
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/17/validation_commands"
-      ]
+      ],
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T14/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json",
+        ".factory/artifacts/task-runs/T14/validation-report.json",
+        ".factory/artifacts/task-runs/T14/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T14/scope-closure-report.json",
+        "https://github.com/Clyra-AI/relia/pull/164",
+        "refs/remotes/origin/main@1cceab856a7b8349a91111412e04741047331732"
+      ],
+      "recorded_by": "factoryd sync-task-closure",
+      "recorded_at": "2026-07-09T16:17:55Z"
     },
     {
       "acceptance_item_id": "MVP-IN-SCOPE-019",
@@ -2667,13 +2744,24 @@
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#serve-and-advise-acceptance-tests",
       "source_text": "relia serve` exposes `recall`, `assess`, and `coverage` over MCP and serves only `active` rules.",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T14"
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/17/validation_commands"
-      ]
+      ],
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T14/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json",
+        ".factory/artifacts/task-runs/T14/validation-report.json",
+        ".factory/artifacts/task-runs/T14/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T14/scope-closure-report.json",
+        "https://github.com/Clyra-AI/relia/pull/164",
+        "refs/remotes/origin/main@1cceab856a7b8349a91111412e04741047331732"
+      ],
+      "recorded_by": "factoryd sync-task-closure",
+      "recorded_at": "2026-07-09T16:17:55Z"
     },
     {
       "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-002",
@@ -2842,13 +2930,24 @@
       "risk_class": "medium",
       "source_ref": "docs/product/prd.md#serve-and-advise-acceptance-tests",
       "source_text": "The Action stays silent below `min_confidence` and on `covered_clean`.",
-      "status": "planned",
+      "status": "implemented",
       "task_refs": [
         "T14"
       ],
       "validation_refs": [
         ".factory/artifacts/prd-to-plan/relia-mvp/task-packets.json#/tasks/17/validation_commands"
-      ]
+      ],
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T14/work-proof-marker.json",
+        ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json",
+        ".factory/artifacts/task-runs/T14/validation-report.json",
+        ".factory/artifacts/task-runs/T14/scope-closure-map.json",
+        ".factory/artifacts/task-runs/T14/scope-closure-report.json",
+        "https://github.com/Clyra-AI/relia/pull/164",
+        "refs/remotes/origin/main@1cceab856a7b8349a91111412e04741047331732"
+      ],
+      "recorded_by": "factoryd sync-task-closure",
+      "recorded_at": "2026-07-09T16:17:55Z"
     },
     {
       "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-007",
@@ -3514,7 +3613,7 @@
       ]
     }
   ],
-  "last_updated_at": "2026-07-08T21:58:59Z",
+  "last_updated_at": "2026-07-09T16:17:55Z",
   "schema_version": "1.0",
   "source_prd_ref": "docs/product/prd.md",
   "source_ref": "docs/product/prd.md"

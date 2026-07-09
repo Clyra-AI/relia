@@ -619,6 +619,26 @@
         "internal/advise/state.go",
         "internal/advise/state_test.go"
       ]
+    },
+    {
+      "decision_type": "manual_patch",
+      "actor": "supervisor",
+      "action_taken": "patched_code",
+      "reason": "factoryd stopped with codex_review_non_convergent; supervisor applied bounded T14 repairs for parser and advisory semantics, validated the supervised paths locally, and merged PR #164 after CI and Codex review cleared.",
+      "evidence_refs": [
+        ".factory/artifacts/task-runs/T14/validation-report.json",
+        "internal/diffparse/diffparse.go",
+        "internal/diffparse/diffparse_test.go",
+        "internal/advise/state.go",
+        "internal/advise/state_test.go",
+        "internal/assess/assess.go",
+        "internal/assess/assess_test.go",
+        "internal/advise/advise.go",
+        "internal/advise/advise_test.go",
+        "cmd/relia/advise_test.go",
+        "docs/dev/dev_guides.md",
+        "https://github.com/Clyra-AI/relia/pull/164"
+      ]
     }
   ],
   "validation": {
