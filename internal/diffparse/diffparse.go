@@ -90,17 +90,37 @@ func planPathCandidate(field string) bool {
 	case "Makefile", "Dockerfile", "LICENSE", "NOTICE", "README", "CHANGELOG":
 		return true
 	}
+	if abbreviationLikeToken(field) {
+		return false
+	}
 	extension := filepath.Ext(field)
 	return extension != "" && hasASCIIAlpha(extension)
 }
 
+func abbreviationLikeToken(value string) bool {
+	parts := strings.Split(value, ".")
+	if len(parts) < 2 {
+		return false
+	}
+	for _, part := range parts {
+		if len(part) != 1 || !isASCIIAlpha(rune(part[0])) {
+			return false
+		}
+	}
+	return true
+}
+
 func hasASCIIAlpha(value string) bool {
 	for _, char := range value {
-		if (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z') {
+		if isASCIIAlpha(char) {
 			return true
 		}
 	}
 	return false
+}
+
+func isASCIIAlpha(char rune) bool {
+	return (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z')
 }
 
 func TouchedPaths(content []byte) ([]string, error) {

@@ -1,7 +1,7 @@
 {
   "artifact_type": "autoship_supervisor_report",
   "schema_version": "0.1",
-  "generated_at": "2026-07-09T10:52:53Z",
+  "generated_at": "2026-07-09T11:03:38Z",
   "repo": "relia",
   "task_id": "T14",
   "work_item_id": "relia-mvp-t14",
@@ -83,8 +83,10 @@
     "pr_url": "https://github.com/Clyra-AI/relia/pull/164",
     "initial_head": "38d38813579ab5f98ca924a2a00849e57e7b8de2",
     "daemon_repair_head": "a28cf0c5dce793bea30332687053d98a305792e6",
+    "first_supervisor_repair_head": "af7f1ba1cdeb71693e9ba8be7aeb5b6b05cdb17c",
     "ci_status_before_supervisor_repair": "passed",
     "review_status_before_supervisor_repair": "latest_head_actionable_p2_comments",
+    "review_status_after_first_supervisor_repair": "latest_head_actionable_p2_comment",
     "manual_repair_validation_status": "passed"
   },
   "decisions": [
@@ -140,11 +142,26 @@
         "internal/assess/assess.go",
         "internal/assess/assess_test.go"
       ]
+    },
+    {
+      "decision_type": "review_disposition",
+      "actor": "supervisor",
+      "action_taken": "accepted_and_fixed",
+      "reason": "Plan parsing must reject prose abbreviations such as e.g. and i.e. while preserving concrete root-level plan paths.",
+      "evidence_refs": [
+        "https://github.com/Clyra-AI/relia/pull/164#discussion_r3551061293",
+        "internal/diffparse/diffparse.go",
+        "internal/diffparse/diffparse_test.go"
+      ]
     }
   ],
   "validation": {
     "status": "pass",
     "commands": [
+      {
+        "command": "go test ./internal/diffparse -count=1",
+        "exit_code": 0
+      },
       {
         "command": "go test ./internal/diffparse ./internal/assess -count=1",
         "exit_code": 0
@@ -172,6 +189,7 @@
     "https://github.com/Clyra-AI/relia/pull/164#discussion_r3550895536",
     "https://github.com/Clyra-AI/relia/pull/164#discussion_r3550895540",
     "https://github.com/Clyra-AI/relia/pull/164#discussion_r3550974043",
-    "https://github.com/Clyra-AI/relia/pull/164#discussion_r3550974047"
+    "https://github.com/Clyra-AI/relia/pull/164#discussion_r3550974047",
+    "https://github.com/Clyra-AI/relia/pull/164#discussion_r3551061293"
   ]
 }

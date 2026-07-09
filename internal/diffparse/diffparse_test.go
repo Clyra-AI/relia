@@ -125,6 +125,25 @@ func TestTouchedPathsOrPlanRejectsGlobLikePlanTokens(t *testing.T) {
 	}
 }
 
+func TestTouchedPathsOrPlanRejectsProseAbbreviations(t *testing.T) {
+	paths, inputKind, err := TouchedPathsOrPlan([]byte(`Implementation plan:
+
+- For example, e.g. no concrete repo file is named here.
+- In other words, i.e. this prose should not look like a path.
+- Keep README.md and package.json as concrete root-level paths.
+`))
+	if err != nil {
+		t.Fatalf("TouchedPathsOrPlan error: %v", err)
+	}
+	if inputKind != "plan" {
+		t.Fatalf("input kind = %q, want plan", inputKind)
+	}
+	want := []string{"README.md", "package.json"}
+	if fmt.Sprint(paths) != fmt.Sprint(want) {
+		t.Fatalf("paths = %#v, want %#v", paths, want)
+	}
+}
+
 func TestTouchedPathsOrPlanKeepsUnifiedDiffKind(t *testing.T) {
 	paths, inputKind, err := TouchedPathsOrPlan([]byte(`diff --git a/packages/search/query.py b/packages/search/query.py
 --- a/packages/search/query.py
