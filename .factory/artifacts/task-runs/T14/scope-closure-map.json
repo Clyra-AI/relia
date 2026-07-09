@@ -11,8 +11,8 @@
         "https://github.com/Clyra-AI/relia/pull/164",
         "refs/remotes/origin/main@1cceab856a7b8349a91111412e04741047331732"
       ],
-      "status": "implemented",
-      "summary": ""
+      "status": "partial",
+      "summary": "T14 implemented local one-shot recall/assess/coverage tool responses and active-rule filtering, but live MCP JSON-RPC stdio protocol handling remains open before this item can close."
     },
     {
       "acceptance_item_id": "FR19-COVERAGE-OOD-SIGNAL-001",
@@ -53,8 +53,8 @@
         "https://github.com/Clyra-AI/relia/pull/164",
         "refs/remotes/origin/main@1cceab856a7b8349a91111412e04741047331732"
       ],
-      "status": "implemented",
-      "summary": ""
+      "status": "partial",
+      "summary": "T14 implemented local one-shot recall/assess/coverage tool responses and active-rule filtering, but live MCP JSON-RPC stdio protocol handling remains open before this item can close."
     },
     {
       "acceptance_item_id": "MVP-IN-SCOPE-018",
@@ -109,8 +109,8 @@
         "https://github.com/Clyra-AI/relia/pull/164",
         "refs/remotes/origin/main@1cceab856a7b8349a91111412e04741047331732"
       ],
-      "status": "implemented",
-      "summary": ""
+      "status": "partial",
+      "summary": "T14 implemented local one-shot recall/assess/coverage tool responses and active-rule filtering, but live MCP JSON-RPC stdio protocol handling remains open before this item can close."
     },
     {
       "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-006",

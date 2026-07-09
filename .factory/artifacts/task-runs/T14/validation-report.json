@@ -14,7 +14,8 @@
         ".factory/artifacts/task-runs/T14/work-proof-marker.json",
         ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json"
       ],
-      "status": "implemented"
+      "status": "partial",
+      "summary": "T14 implemented local one-shot recall/assess/coverage tool responses and active-rule filtering, but live MCP JSON-RPC stdio protocol handling remains open before this item can close."
     },
     {
       "acceptance_item_id": "FR19-COVERAGE-OOD-SIGNAL-001",
@@ -46,7 +47,8 @@
         ".factory/artifacts/task-runs/T14/work-proof-marker.json",
         ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json"
       ],
-      "status": "implemented"
+      "status": "partial",
+      "summary": "T14 implemented local one-shot recall/assess/coverage tool responses and active-rule filtering, but live MCP JSON-RPC stdio protocol handling remains open before this item can close."
     },
     {
       "acceptance_item_id": "MVP-IN-SCOPE-018",
@@ -62,7 +64,8 @@
         ".factory/artifacts/task-runs/T14/work-proof-marker.json",
         ".factory/artifacts/task-runs/T14/proof-of-behavior-scorecard.json"
       ],
-      "status": "implemented"
+      "status": "partial",
+      "summary": "T14 implemented local one-shot recall/assess/coverage tool responses and active-rule filtering, but live MCP JSON-RPC stdio protocol handling remains open before this item can close."
     },
     {
       "acceptance_item_id": "SERVE-AND-ADVISE-ACCEPTANCE-TESTS-006",

@@ -67,10 +67,10 @@
             "refs/remotes/origin/main@1cceab856a7b8349a91111412e04741047331732"
           ],
           "repair_task_refs": [],
-          "status": "implemented"
+          "status": "partial"
         }
       ],
-      "classification": "implemented",
+      "classification": "partial",
       "evidence_refs": [
         ".factory/artifacts/task-runs/T14/work-proof-marker.json",
         ".factory/artifacts/task-runs/T14/validation-report.json",
@@ -95,6 +95,9 @@
       ],
       "work_proof_marker_refs": [
         ".factory/artifacts/task-runs/T14/work-proof-marker.json"
+      ],
+      "notes": [
+        "T14 implemented local one-shot recall/assess/coverage tool responses and active-rule filtering, but live MCP JSON-RPC stdio protocol handling remains open before this item can close."
       ]
     },
     {
@@ -255,10 +258,10 @@
             "refs/remotes/origin/main@1cceab856a7b8349a91111412e04741047331732"
           ],
           "repair_task_refs": [],
-          "status": "implemented"
+          "status": "partial"
         }
       ],
-      "classification": "implemented",
+      "classification": "partial",
       "evidence_refs": [
         ".factory/artifacts/task-runs/T14/work-proof-marker.json",
         ".factory/artifacts/task-runs/T14/validation-report.json",
@@ -283,6 +286,9 @@
       ],
       "work_proof_marker_refs": [
         ".factory/artifacts/task-runs/T14/work-proof-marker.json"
+      ],
+      "notes": [
+        "T14 implemented local one-shot recall/assess/coverage tool responses and active-rule filtering, but live MCP JSON-RPC stdio protocol handling remains open before this item can close."
       ]
     },
     {
@@ -349,10 +355,10 @@
             "refs/remotes/origin/main@1cceab856a7b8349a91111412e04741047331732"
           ],
           "repair_task_refs": [],
-          "status": "implemented"
+          "status": "partial"
         }
       ],
-      "classification": "implemented",
+      "classification": "partial",
       "evidence_refs": [
         ".factory/artifacts/task-runs/T14/work-proof-marker.json",
         ".factory/artifacts/task-runs/T14/validation-report.json",
@@ -377,6 +383,9 @@
       ],
       "work_proof_marker_refs": [
         ".factory/artifacts/task-runs/T14/work-proof-marker.json"
+      ],
+      "notes": [
+        "T14 implemented local one-shot recall/assess/coverage tool responses and active-rule filtering, but live MCP JSON-RPC stdio protocol handling remains open before this item can close."
       ]
     },
     {
