@@ -163,6 +163,27 @@ func TestTouchedPathsOrPlanRejectsRemoteModulePathTokens(t *testing.T) {
 	}
 }
 
+func TestTouchedPathsOrPlanRejectsSSHRemoteFragments(t *testing.T) {
+	paths, inputKind, err := TouchedPathsOrPlan([]byte(`Implementation plan:
+
+- Compare git@github.com:Clyra-AI/relia before editing README.md.
+`))
+	if err != nil {
+		t.Fatalf("TouchedPathsOrPlan error: %v", err)
+	}
+	if inputKind != "plan" {
+		t.Fatalf("input kind = %q, want plan", inputKind)
+	}
+	if fmt.Sprint(paths) != fmt.Sprint([]string{"README.md"}) {
+		t.Fatalf("paths = %#v", paths)
+	}
+
+	_, _, err = TouchedPathsOrPlan([]byte("Compare git@github.com:Clyra-AI/relia only."))
+	if !errors.Is(err, ErrNoRepoRelativePaths) {
+		t.Fatalf("error = %v, want ErrNoRepoRelativePaths", err)
+	}
+}
+
 func TestTouchedPathsOrPlanRejectsBareDomains(t *testing.T) {
 	paths, inputKind, err := TouchedPathsOrPlan([]byte(`Implementation plan:
 
