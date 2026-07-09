@@ -120,6 +120,7 @@
     "runner_ready_fields": [
       "allowed_paths",
       "forbidden_paths",
+      "semantic_invariants",
       "worker_type",
       "factoryd_runtime",
       "validation_commands",
