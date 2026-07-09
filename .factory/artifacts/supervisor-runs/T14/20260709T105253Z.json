@@ -1,7 +1,7 @@
 {
   "artifact_type": "autoship_supervisor_report",
   "schema_version": "0.1",
-  "generated_at": "2026-07-09T11:27:27Z",
+  "generated_at": "2026-07-09T11:33:54Z",
   "repo": "relia",
   "task_id": "T14",
   "work_item_id": "relia-mvp-t14",
@@ -87,12 +87,14 @@
     "second_supervisor_repair_head": "06d6b2e7b7c30d4c62179d8adaf07a87c17ed7d2",
     "third_supervisor_repair_head": "17b7bd4b4426f3e287234558bad02558a2bc2f6a",
     "fourth_supervisor_repair_head": "5c8c4b4b06c7ed0525f875a16707a384d6325cea",
+    "fifth_supervisor_repair_head": "ecd750ff455d8f0b8cc3555994cdd83104703549",
     "ci_status_before_supervisor_repair": "passed",
     "review_status_before_supervisor_repair": "latest_head_actionable_p2_comments",
     "review_status_after_first_supervisor_repair": "latest_head_actionable_p2_comment",
     "review_status_after_second_supervisor_repair": "latest_head_actionable_p2_comment",
     "review_status_after_third_supervisor_repair": "latest_head_actionable_p2_comment",
     "review_status_after_fourth_supervisor_repair": "latest_head_actionable_p2_comments",
+    "review_status_after_fifth_supervisor_repair": "latest_head_actionable_p2_comment",
     "manual_repair_validation_status": "passed"
   },
   "decisions": [
@@ -203,6 +205,17 @@
         "internal/assess/assess.go",
         "cmd/relia/assess_command_test.go"
       ]
+    },
+    {
+      "decision_type": "review_disposition",
+      "actor": "supervisor",
+      "action_taken": "accepted_and_fixed",
+      "reason": "Plan parsing must reject common slash-delimited prose tokens such as CI/CD, read/write, and and/or before recording repo paths.",
+      "evidence_refs": [
+        "https://github.com/Clyra-AI/relia/pull/164#discussion_r3551246798",
+        "internal/diffparse/diffparse.go",
+        "internal/diffparse/diffparse_test.go"
+      ]
     }
   ],
   "validation": {
@@ -248,6 +261,7 @@
     "https://github.com/Clyra-AI/relia/pull/164#discussion_r3551119434",
     "https://github.com/Clyra-AI/relia/pull/164#discussion_r3551160624",
     "https://github.com/Clyra-AI/relia/pull/164#discussion_r3551202246",
-    "https://github.com/Clyra-AI/relia/pull/164#discussion_r3551202248"
+    "https://github.com/Clyra-AI/relia/pull/164#discussion_r3551202248",
+    "https://github.com/Clyra-AI/relia/pull/164#discussion_r3551246798"
   ]
 }

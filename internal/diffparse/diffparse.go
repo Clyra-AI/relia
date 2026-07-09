@@ -136,7 +136,7 @@ func planPathCandidate(field string) bool {
 		return false
 	}
 	if strings.Contains(field, "/") {
-		return !remotePathLikeToken(field)
+		return slashPathCandidate(field)
 	}
 	switch field {
 	case "Makefile", "Dockerfile", "LICENSE", "NOTICE", "README", "CHANGELOG":
@@ -147,6 +147,35 @@ func planPathCandidate(field string) bool {
 	}
 	extension := filepath.Ext(field)
 	return extension != "" && hasASCIIAlpha(extension)
+}
+
+func slashPathCandidate(value string) bool {
+	if remotePathLikeToken(value) {
+		return false
+	}
+	parts := strings.Split(value, "/")
+	if len(parts) < 2 || parts[0] == "" {
+		return false
+	}
+	if strings.HasPrefix(parts[0], ".") || knownRepoPathRoot(parts[0]) {
+		return true
+	}
+	for _, part := range parts[1:] {
+		extension := filepath.Ext(part)
+		if extension != "" && hasASCIIAlpha(extension) {
+			return true
+		}
+	}
+	return false
+}
+
+func knownRepoPathRoot(value string) bool {
+	switch value {
+	case "cmd", "docs", "examples", "internal", "memory", "packages", "schemas", "scripts", "tests":
+		return true
+	default:
+		return false
+	}
 }
 
 func remotePathLikeToken(value string) bool {
