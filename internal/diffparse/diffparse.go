@@ -92,7 +92,7 @@ func recordUnquotedPlanFields(touched map[string]bool, fields []string) {
 }
 
 func commandContextToken(value string) string {
-	return strings.ToLower(strings.Trim(strings.TrimSpace(value), "-"))
+	return strings.ToLower(strings.Trim(strings.TrimSpace(value), "-:"))
 }
 
 func commandLeadInToken(value string) bool {
@@ -111,11 +111,26 @@ func unquotedHelperExecutable(value string) bool {
 
 func recordQuotedPlanPath(touched map[string]bool, field string) {
 	parts := strings.Fields(field)
+	if quotedFieldLooksLikePathWithSpaces(parts) {
+		recordPlanPath(touched, field)
+		return
+	}
 	if quotedFieldLooksLikeCommandSpan(parts) {
 		recordQuotedCommandSpan(touched, parts)
 		return
 	}
 	recordPlanPath(touched, field)
+}
+
+func quotedFieldLooksLikePathWithSpaces(parts []string) bool {
+	if len(parts) < 2 {
+		return false
+	}
+	first := parts[0]
+	return strings.Contains(first, "/") &&
+		!knownCommandToken(first) &&
+		!strings.HasPrefix(first, "./") &&
+		!strings.HasPrefix(first, "scripts/")
 }
 
 func recordQuotedCommandSpan(touched map[string]bool, parts []string) {
