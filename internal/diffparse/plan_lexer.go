@@ -261,9 +261,20 @@ func recordStructuredPlanPaths(touched map[string]bool, value any, key string) {
 			token := PlanToken{Text: typed, Class: PlanTokenStructuredProse, Children: LexPlanText(typed)}
 			recordPlanToken(touched, token)
 		} else if pathKey {
-			recordPlanToken(touched, PlanToken{Text: typed, Class: PlanTokenStructuredPath})
+			recordStructuredPathValue(touched, typed)
 		}
 	}
+}
+
+func recordStructuredPathValue(touched map[string]bool, value string) {
+	fields := scanPlanFields(value)
+	if len(fields) > 1 {
+		for _, token := range classifyUnquotedPlanFields(fields, 0) {
+			recordPlanToken(touched, token)
+		}
+		return
+	}
+	recordPlanToken(touched, PlanToken{Text: value, Class: PlanTokenStructuredPath})
 }
 
 func structuredPlanIgnoreKey(key string) bool {

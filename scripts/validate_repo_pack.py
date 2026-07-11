@@ -566,6 +566,20 @@ def validate_context_brief(context, provider_task_ids):
         fail("context-brief.json.alignment_decisions.model_provider_endpoint.required_before_dispatch missing provider-gated tasks: " + ", ".join(missing))
 
 
+def validated_remaining_task_refs(item, task_ids, item_id):
+    refs = item.get("remaining_task_refs") or []
+    if not isinstance(refs, list):
+        fail(f"scope closure item {item_id} remaining_task_refs must be a list")
+    normalized = set()
+    for ref in refs:
+        if not isinstance(ref, str) or ref.strip() != ref or not ref:
+            fail(f"scope closure item {item_id} remaining_task_refs must contain canonical task ids")
+        normalized.add(ref)
+    if not normalized.issubset(task_ids):
+        fail(f"scope closure item {item_id} remaining_task_refs references missing task")
+    return normalized
+
+
 def validate_model_provider_gate(task):
     task_id = task.get("task_id") or "T9"
     if task.get("requires_model_provider_endpoint") is not True:
@@ -1215,7 +1229,7 @@ def main():
     remaining_task_ids = {
         task_id
         for item in closure_items
-        for task_id in item.get("remaining_task_refs") or []
+        for task_id in validated_remaining_task_refs(item, task_ids, item.get("scope_item_id"))
     }
     for index, task in enumerate(tasks):
         task_id = task.get("task_id") or f"task[{index}]"
