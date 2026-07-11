@@ -567,7 +567,7 @@ def validate_context_brief(context, provider_task_ids):
 
 
 def validated_remaining_task_refs(item, task_ids, item_id):
-    refs = item.get("remaining_task_refs") or []
+    refs = item["remaining_task_refs"] if "remaining_task_refs" in item else []
     if not isinstance(refs, list):
         fail(f"scope closure item {item_id} remaining_task_refs must be a list")
     normalized = set()

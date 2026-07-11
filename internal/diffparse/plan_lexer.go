@@ -81,7 +81,7 @@ func classifyQuotedPlanField(field planField) PlanToken {
 		children := classifyUnquotedPlanFields(parts, field.start)
 		if len(children) > 0 {
 			first := commandContextToken(children[0].Text)
-			if knownCommandToken(first) || unquotedHelperExecutable(children[0].Text) || strings.HasPrefix(strings.TrimSpace(children[0].Text), "./") {
+			if knownCommandToken(first) || quotedCommandExecutable(children[0].Text) {
 				children[0].Class = PlanTokenCommandHelper
 			}
 			if interpreterCommandToken(first) {
@@ -269,12 +269,31 @@ func recordStructuredPlanPaths(touched map[string]bool, value any, key string) {
 func recordStructuredPathValue(touched map[string]bool, value string) {
 	fields := scanPlanFields(value)
 	if len(fields) > 1 {
+		if structuredPathValueLooksLikeSinglePathWithSpaces(value, fields) {
+			recordPlanToken(touched, PlanToken{Text: value, Class: PlanTokenStructuredPath})
+			return
+		}
 		for _, token := range classifyUnquotedPlanFields(fields, 0) {
 			recordPlanToken(touched, token)
 		}
 		return
 	}
 	recordPlanToken(touched, PlanToken{Text: value, Class: PlanTokenStructuredPath})
+}
+
+func structuredPathValueLooksLikeSinglePathWithSpaces(value string, fields []planField) bool {
+	if len(fields) < 2 || !planPathCandidate(stripLineSuffix(strings.TrimRight(strings.TrimSpace(value), ".:!?"))) {
+		return false
+	}
+	if !strings.Contains(fields[0].text, "/") {
+		return false
+	}
+	for _, field := range fields[1:] {
+		if strings.Contains(field.text, "/") {
+			return false
+		}
+	}
+	return true
 }
 
 func structuredPlanIgnoreKey(key string) bool {
@@ -312,6 +331,9 @@ func quotedFieldLooksLikePathWithSpaces(parts []planField) bool {
 		return false
 	}
 	first := parts[0].text
+	if extensionlessRepoExecutable(first) && laterQuotedPartContainsSlashPath(parts[1:]) {
+		return false
+	}
 	return strings.Contains(first, "/") && !knownCommandToken(first) && !strings.HasPrefix(first, "./") && !strings.HasPrefix(first, "scripts/")
 }
 
@@ -320,7 +342,7 @@ func quotedFieldLooksLikeCommandSpan(parts []planField) bool {
 		return false
 	}
 	first := parts[0].text
-	if knownCommandToken(first) || strings.HasPrefix(first, "./") || strings.HasPrefix(first, "scripts/") {
+	if knownCommandToken(first) || quotedCommandExecutable(first) {
 		return true
 	}
 	for _, part := range parts[1:] {
@@ -347,6 +369,39 @@ func commandLeadInToken(value string) bool {
 func unquotedHelperExecutable(value string) bool {
 	trimmed := strings.TrimPrefix(strings.TrimSpace(value), "./")
 	return strings.HasPrefix(trimmed, "scripts/")
+}
+
+func quotedCommandExecutable(value string) bool {
+	trimmed := strings.TrimSpace(value)
+	if strings.HasPrefix(trimmed, "./") {
+		return true
+	}
+	withoutDotSlash := strings.TrimPrefix(trimmed, "./")
+	return strings.HasPrefix(withoutDotSlash, "scripts/") || extensionlessRepoExecutable(withoutDotSlash)
+}
+
+func extensionlessRepoExecutable(value string) bool {
+	trimmed := strings.TrimPrefix(strings.TrimSpace(value), "./")
+	if !strings.Contains(trimmed, "/") || strings.ContainsAny(trimmed, `\*?`) || strings.Contains(trimmed, "...") {
+		return false
+	}
+	if !strings.HasPrefix(trimmed, "bin/") && !strings.HasPrefix(trimmed, "scripts/") && !strings.HasPrefix(trimmed, "tools/") {
+		return false
+	}
+	if remotePathLikeToken(trimmed) || slashProseToken(trimmed) || slashNumericToken(trimmed) || slashTaskIDChainToken(trimmed) {
+		return false
+	}
+	base := filepath.Base(trimmed)
+	return base != "." && base != "" && filepath.Ext(base) == "" && !strings.ContainsAny(base, " \t")
+}
+
+func laterQuotedPartContainsSlashPath(parts []planField) bool {
+	for _, part := range parts {
+		if strings.Contains(part.text, "/") && planPathCandidate(stripLineSuffix(strings.TrimRight(strings.TrimSpace(part.text), ".:!?"))) {
+			return true
+		}
+	}
+	return false
 }
 
 func knownCommandToken(value string) bool {
