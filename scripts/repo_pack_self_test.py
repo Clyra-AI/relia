@@ -33,6 +33,7 @@ validate_runner_ready_task_fields = validator.validate_runner_ready_task_fields
 validate_task_required_review = validator.validate_task_required_review
 validate_runner_ready_field_sync = validator.validate_runner_ready_field_sync
 validate_validation_contract_evidence_split = validator.validate_validation_contract_evidence_split
+validated_remaining_task_refs = validator.validated_remaining_task_refs
 
 def self_test_public_release_boundary():
     valid = {
@@ -756,6 +757,30 @@ def self_test():
                 raise
         else:
             fail("runner-ready field sync fixture did not fail closed")
+
+        if validated_remaining_task_refs({"remaining_task_refs": ["T1"]}, {"T1"}, "self-test") != {"T1"}:
+            fail("remaining_task_refs valid fixture did not return canonical task refs")
+        try:
+            validated_remaining_task_refs({"remaining_task_refs": "T1"}, {"T1"}, "self-test")
+        except AssertionError as exc:
+            if "remaining_task_refs must be a list" not in str(exc):
+                raise
+        else:
+            fail("remaining_task_refs scalar fixture did not fail closed")
+        try:
+            validated_remaining_task_refs({"remaining_task_refs": ["T1 "]}, {"T1"}, "self-test")
+        except AssertionError as exc:
+            if "canonical task ids" not in str(exc):
+                raise
+        else:
+            fail("remaining_task_refs whitespace fixture did not fail closed")
+        try:
+            validated_remaining_task_refs({"remaining_task_refs": ["T2"]}, {"T1"}, "self-test")
+        except AssertionError as exc:
+            if "references missing task" not in str(exc):
+                raise
+        else:
+            fail("remaining_task_refs unknown task fixture did not fail closed")
 
         active_config_grant = {
             "task_id": "T9",
