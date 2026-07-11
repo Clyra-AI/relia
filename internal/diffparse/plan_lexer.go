@@ -308,12 +308,38 @@ func structuredPathValueLooksLikeSinglePathWithSpaces(value string, fields []pla
 	if len(fields) < 2 || !planPathCandidate(stripLineSuffix(strings.TrimRight(strings.TrimSpace(value), ".:!?"))) {
 		return false
 	}
+	if structuredPathFieldsLookLikePathList(fields) {
+		return false
+	}
 	for _, field := range fields[1:] {
 		if strings.Contains(field.text, "/") {
 			return false
 		}
 	}
 	return true
+}
+
+func structuredPathFieldsLookLikePathList(fields []planField) bool {
+	if len(fields) < 2 || !structuredPathFieldLooksCompletePath(fields[0].text) {
+		return false
+	}
+	for _, field := range fields[1:] {
+		if structuredPathFieldLooksCompletePath(field.text) {
+			return true
+		}
+	}
+	return false
+}
+
+func structuredPathFieldLooksCompletePath(field string) bool {
+	cleaned := stripLineSuffix(strings.TrimRight(strings.TrimSpace(field), ".:!?"))
+	if !planPathCandidate(cleaned) {
+		return false
+	}
+	if strings.Contains(cleaned, "/") {
+		return filepath.Ext(filepath.Base(cleaned)) != ""
+	}
+	return filepath.Ext(cleaned) != ""
 }
 
 func structuredPlanIgnoreKey(key string) bool {
