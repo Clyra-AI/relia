@@ -55,6 +55,7 @@ func TestPlanPathsCorpus(t *testing.T) {
 		{name: "remote and domain", input: "Compare https://example.com/a/b, github.com/acme/repo, and example.org."},
 		{name: "task IDs and dates", input: "T14/T14.1 and FR3/FR4 are reviewed on 2026/07/09."},
 		{name: "command targets", input: "Run python3 scripts/check.py internal/assess/assess.go and update README.md.", want: []string{"README.md", "internal/assess/assess.go"}},
+		{name: "quoted local helper command target", input: "Run `./tools/check packages/foo.go`.", want: []string{"packages/foo.go"}},
 		{name: "quoted path", input: "Update `docs/release notes.md:42`.", want: []string{"docs/release notes.md"}},
 		{name: "quoted path list preserves first path", input: `Update "README.md docs/product/prd.md".`, want: []string{"README.md", "docs/product/prd.md"}},
 		{name: "planned new path", input: "Create internal/attribution/new_rule.go and docs/product/rollback.md.", want: []string{"docs/product/rollback.md", "internal/attribution/new_rule.go"}},

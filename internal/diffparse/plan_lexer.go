@@ -81,7 +81,7 @@ func classifyQuotedPlanField(field planField) PlanToken {
 		children := classifyUnquotedPlanFields(parts, field.start)
 		if len(children) > 0 {
 			first := commandContextToken(children[0].Text)
-			if knownCommandToken(first) || unquotedHelperExecutable(children[0].Text) {
+			if knownCommandToken(first) || unquotedHelperExecutable(children[0].Text) || strings.HasPrefix(strings.TrimSpace(children[0].Text), "./") {
 				children[0].Class = PlanTokenCommandHelper
 			}
 			if interpreterCommandToken(first) {
