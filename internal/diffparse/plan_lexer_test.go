@@ -55,6 +55,8 @@ func TestPlanPathsCorpus(t *testing.T) {
 		{name: "remote and domain", input: "Compare https://example.com/a/b, github.com/acme/repo, and example.org."},
 		{name: "task IDs and dates", input: "T14/T14.1 and FR3/FR4 are reviewed on 2026/07/09."},
 		{name: "command targets", input: "Run python3 scripts/check.py internal/assess/assess.go and update README.md.", want: []string{"README.md", "internal/assess/assess.go"}},
+		{name: "command path option before interpreter helper", input: "Run python3 --config=relia.yaml scripts/check.py packages/foo.py.", want: []string{"packages/foo.py"}},
+		{name: "quoted command path option before interpreter helper", input: "Run `python3 --config=relia.yaml scripts/check.py packages/foo.py`.", want: []string{"packages/foo.py"}},
 		{name: "quoted local helper command target", input: "Run `./tools/check packages/foo.go`.", want: []string{"packages/foo.go"}},
 		{name: "quoted extensionless local helper command target", input: "Run `tools/check packages/foo.go`.", want: []string{"packages/foo.go"}},
 		{name: "quoted path", input: "Update `docs/release notes.md:42`.", want: []string{"docs/release notes.md"}},
