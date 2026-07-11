@@ -86,7 +86,8 @@ func classifyQuotedPlanField(field planField) PlanToken {
 			}
 			if interpreterCommandToken(first) {
 				for index := 1; index < len(children); index++ {
-					if children[index].Class == PlanTokenOption {
+					if planTokenOptionLike(children[index]) {
+						children[index].Class = PlanTokenOption
 						continue
 					}
 					if commandScriptOperand(children[index].Text) {
@@ -112,10 +113,14 @@ func classifyUnquotedPlanFields(fields []planField, base int) []PlanToken {
 	for _, field := range fields {
 		token := classifyPlanAtom(field.text, base+field.start, base+field.end)
 		normalized := commandContextToken(field.text)
-		if skipInterpreterScriptOperand && token.Class != PlanTokenOption {
-			skipInterpreterScriptOperand = false
-			if commandScriptOperand(field.text) {
-				token.Class = PlanTokenCommandHelper
+		if skipInterpreterScriptOperand {
+			if planTokenOptionLike(token) {
+				token.Class = PlanTokenOption
+			} else {
+				skipInterpreterScriptOperand = false
+				if commandScriptOperand(field.text) {
+					token.Class = PlanTokenCommandHelper
+				}
 			}
 		}
 		if unquotedHelperExecutable(field.text) && commandLeadInToken(previousMeaningful) {
@@ -134,6 +139,10 @@ func classifyUnquotedPlanFields(fields []planField, base int) []PlanToken {
 		}
 	}
 	return tokens
+}
+
+func planTokenOptionLike(token PlanToken) bool {
+	return token.Class == PlanTokenOption || token.Class == PlanTokenOptionValue
 }
 
 func classifyPlanAtom(raw string, start int, end int) PlanToken {
