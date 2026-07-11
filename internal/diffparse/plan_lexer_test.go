@@ -66,6 +66,7 @@ func TestPlanPathsCorpus(t *testing.T) {
 		{name: "structured root path string with spaces", input: `{"allowed_paths":"release notes.md"}`, want: []string{"release notes.md"}},
 		{name: "structured root path string with path-like first word", input: `{"allowed_paths":"README draft.md"}`, want: []string{"README draft.md"}},
 		{name: "structured comma path string with spaces", input: `{"allowed_paths":"docs/release notes.md,docs/api guide.md"}`, want: []string{"docs/api guide.md", "docs/release notes.md"}},
+		{name: "structured whitespace path list starts with nested path", input: `{"allowed_paths":"docs/product/prd.md README.md"}`, want: []string{"README.md", "docs/product/prd.md"}},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
