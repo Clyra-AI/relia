@@ -267,6 +267,29 @@ func recordStructuredPlanPaths(touched map[string]bool, value any, key string) {
 }
 
 func recordStructuredPathValue(touched map[string]bool, value string) {
+	segments := structuredPathListSegments(value)
+	if len(segments) > 1 {
+		for _, segment := range segments {
+			recordStructuredPathSegment(touched, segment)
+		}
+		return
+	}
+	recordStructuredPathSegment(touched, value)
+}
+
+func structuredPathListSegments(value string) []string {
+	parts := strings.Split(value, ",")
+	segments := make([]string, 0, len(parts))
+	for _, part := range parts {
+		trimmed := strings.TrimSpace(part)
+		if trimmed != "" {
+			segments = append(segments, trimmed)
+		}
+	}
+	return segments
+}
+
+func recordStructuredPathSegment(touched map[string]bool, value string) {
 	fields := scanPlanFields(value)
 	if len(fields) > 1 {
 		if structuredPathValueLooksLikeSinglePathWithSpaces(value, fields) {
