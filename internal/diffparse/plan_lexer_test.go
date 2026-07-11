@@ -63,6 +63,7 @@ func TestPlanPathsCorpus(t *testing.T) {
 		{name: "structured field policy", input: `{"allowed_paths":["internal/assess/new.go"],"forbidden_paths":["secrets/key.txt"],"validation_commands":["go test ./internal/assess"],"summary":"Update README.md"}`, want: []string{"README.md", "internal/assess/new.go"}},
 		{name: "structured path string list", input: `{"allowed_paths":"README.md docs/product/prd.md"}`, want: []string{"README.md", "docs/product/prd.md"}},
 		{name: "structured path string with spaces", input: `{"allowed_paths":"docs/release notes.md"}`, want: []string{"docs/release notes.md"}},
+		{name: "structured root path string with spaces", input: `{"allowed_paths":"release notes.md"}`, want: []string{"release notes.md"}},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
