@@ -80,8 +80,11 @@ func classifyQuotedPlanField(field planField) PlanToken {
 	if quotedFieldLooksLikeCommandSpan(parts) {
 		children := classifyUnquotedPlanFields(parts, field.start)
 		if len(children) > 0 {
-			children[0].Class = PlanTokenCommandHelper
-			if interpreterCommandToken(commandContextToken(children[0].Text)) {
+			first := commandContextToken(children[0].Text)
+			if knownCommandToken(first) || unquotedHelperExecutable(children[0].Text) {
+				children[0].Class = PlanTokenCommandHelper
+			}
+			if interpreterCommandToken(first) {
 				for index := 1; index < len(children); index++ {
 					if children[index].Class == PlanTokenOption {
 						continue
