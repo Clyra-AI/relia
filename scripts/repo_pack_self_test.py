@@ -767,6 +767,14 @@ def self_test():
                 raise
         else:
             fail("remaining_task_refs scalar fixture did not fail closed")
+        for malformed in ["", False, {}, None]:
+            try:
+                validated_remaining_task_refs({"remaining_task_refs": malformed}, {"T1"}, "self-test")
+            except AssertionError as exc:
+                if "remaining_task_refs must be a list" not in str(exc):
+                    raise
+            else:
+                fail("remaining_task_refs falsey malformed fixture did not fail closed")
         try:
             validated_remaining_task_refs({"remaining_task_refs": ["T1 "]}, {"T1"}, "self-test")
         except AssertionError as exc:
