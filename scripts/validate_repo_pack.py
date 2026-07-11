@@ -567,9 +567,13 @@ def validate_context_brief(context, provider_task_ids):
 
 
 def validated_remaining_task_refs(item, task_ids, item_id):
+    item_refs = item.get("task_refs") or []
     refs = item["remaining_task_refs"] if "remaining_task_refs" in item else []
     if not isinstance(refs, list):
         fail(f"scope closure item {item_id} remaining_task_refs must be a list")
+    if not isinstance(item_refs, list):
+        fail(f"scope closure item {item_id} task_refs must be a list")
+    item_ref_ids = set(item_refs)
     normalized = set()
     for ref in refs:
         if not isinstance(ref, str) or ref.strip() != ref or not ref:
@@ -577,6 +581,8 @@ def validated_remaining_task_refs(item, task_ids, item_id):
         normalized.add(ref)
     if not normalized.issubset(task_ids):
         fail(f"scope closure item {item_id} remaining_task_refs references missing task")
+    if not normalized.issubset(item_ref_ids):
+        fail(f"scope closure item {item_id} remaining_task_refs must be a subset of task_refs")
     return normalized
 
 

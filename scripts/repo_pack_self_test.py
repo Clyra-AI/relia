@@ -758,10 +758,10 @@ def self_test():
         else:
             fail("runner-ready field sync fixture did not fail closed")
 
-        if validated_remaining_task_refs({"remaining_task_refs": ["T1"]}, {"T1"}, "self-test") != {"T1"}:
+        if validated_remaining_task_refs({"task_refs": ["T1"], "remaining_task_refs": ["T1"]}, {"T1"}, "self-test") != {"T1"}:
             fail("remaining_task_refs valid fixture did not return canonical task refs")
         try:
-            validated_remaining_task_refs({"remaining_task_refs": "T1"}, {"T1"}, "self-test")
+            validated_remaining_task_refs({"task_refs": ["T1"], "remaining_task_refs": "T1"}, {"T1"}, "self-test")
         except AssertionError as exc:
             if "remaining_task_refs must be a list" not in str(exc):
                 raise
@@ -769,26 +769,33 @@ def self_test():
             fail("remaining_task_refs scalar fixture did not fail closed")
         for malformed in ["", False, {}, None]:
             try:
-                validated_remaining_task_refs({"remaining_task_refs": malformed}, {"T1"}, "self-test")
+                validated_remaining_task_refs({"task_refs": ["T1"], "remaining_task_refs": malformed}, {"T1"}, "self-test")
             except AssertionError as exc:
                 if "remaining_task_refs must be a list" not in str(exc):
                     raise
             else:
                 fail("remaining_task_refs falsey malformed fixture did not fail closed")
         try:
-            validated_remaining_task_refs({"remaining_task_refs": ["T1 "]}, {"T1"}, "self-test")
+            validated_remaining_task_refs({"task_refs": ["T1"], "remaining_task_refs": ["T1 "]}, {"T1"}, "self-test")
         except AssertionError as exc:
             if "canonical task ids" not in str(exc):
                 raise
         else:
             fail("remaining_task_refs whitespace fixture did not fail closed")
         try:
-            validated_remaining_task_refs({"remaining_task_refs": ["T2"]}, {"T1"}, "self-test")
+            validated_remaining_task_refs({"task_refs": ["T2"], "remaining_task_refs": ["T2"]}, {"T1"}, "self-test")
         except AssertionError as exc:
             if "references missing task" not in str(exc):
                 raise
         else:
             fail("remaining_task_refs unknown task fixture did not fail closed")
+        try:
+            validated_remaining_task_refs({"task_refs": ["T1"], "remaining_task_refs": ["T2"]}, {"T1", "T2"}, "self-test")
+        except AssertionError as exc:
+            if "remaining_task_refs must be a subset of task_refs" not in str(exc):
+                raise
+        else:
+            fail("remaining_task_refs cross-item fixture did not fail closed")
 
         active_config_grant = {
             "task_id": "T9",

@@ -285,10 +285,6 @@ func structuredPathValueLooksLikeSinglePathWithSpaces(value string, fields []pla
 	if len(fields) < 2 || !planPathCandidate(stripLineSuffix(strings.TrimRight(strings.TrimSpace(value), ".:!?"))) {
 		return false
 	}
-	firstField := stripLineSuffix(strings.TrimRight(strings.TrimSpace(fields[0].text), ".:!?"))
-	if !strings.Contains(firstField, "/") && planPathCandidate(firstField) {
-		return false
-	}
 	for _, field := range fields[1:] {
 		if strings.Contains(field.text, "/") {
 			return false
