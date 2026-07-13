@@ -866,6 +866,16 @@ def self_test():
                     fail("top-level active factoryd.json grants should remain visible")
                 if active_factoryd_repo_config(FACTORYD_REPO_KEY) is not None:
                     fail("top-level-only active factoryd.json config should skip repo architecture parity")
+                validate_active_capability_grants(active_factoryd_repo_config(FACTORYD_REPO_KEY))
+                invalid_top_level_payload = {"capability_grants": [invalid_credentials_grant]}
+                active_config.write_text(json.dumps(invalid_top_level_payload), encoding="utf-8")
+                try:
+                    validate_active_capability_grants(active_factoryd_repo_config(FACTORYD_REPO_KEY))
+                except AssertionError as exc:
+                    if "credential_environment" not in str(exc):
+                        raise
+                else:
+                    fail("top-level active credentials grant without credential_environment did not fail closed")
                 full_active_missing_budget_payload = {
                     "repos": {
                         FACTORYD_REPO_KEY: {
