@@ -61,6 +61,11 @@ monoliths are temporary debt covered by
 `.factory/artifacts/exceptions/architecture-debt-relia-main.json`; work that
 touches them must avoid net growth unless it is shrink-only decomposition.
 
+The repo-pack contract gate also validates any local active
+`.factory/factoryd.json` capability grants before daemon execution. Approved
+privileged grants must remain task-scoped and must carry their capability's
+required expiry, evidence, credential, and network metadata.
+
 ## CI And PR Lifecycle
 
 - GitHub Actions workflow: .github/workflows/validate.yml.
