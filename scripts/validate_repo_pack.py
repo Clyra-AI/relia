@@ -215,6 +215,8 @@ def validate_active_capability_grants(active_repo):
         capability = capability_value.strip().lower() if isinstance(capability_value, str) else ""
         if capability not in SUPPORTED_CAPABILITY_GRANTS:
             fail(f"{label}.capability is unsupported")
+        if capability_value != capability:
+            fail(f"{label}.capability must use its canonical lowercase value")
         if grant.get("approved") not in (True, False):
             fail(f"{label}.approved must be true or false")
         if grant.get("approved") is not True:
