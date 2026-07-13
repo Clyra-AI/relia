@@ -280,6 +280,21 @@ def validate_active_capability_grants(active_repo):
             allowlist = grant.get("network_allowlist")
             if not isinstance(allowlist, list) or not allowlist or not all(isinstance(item, str) and item.strip() for item in allowlist):
                 fail(f"{label} approved model_provider_endpoint grant requires a concrete network_allowlist")
+            checked_provider_values = [
+                grant.get("provider_identity"),
+                grant.get("provider_model"),
+                provider_endpoint_value,
+                base_url_value,
+                grant.get("credential_environment"),
+                grant.get("budget_posture"),
+                grant.get("redaction_posture"),
+                *allowlist,
+            ]
+            if any(
+                "pending-approved" in str(value).lower() or str(value).lower().startswith("pending-")
+                for value in checked_provider_values
+            ):
+                fail(f"{label} approved model_provider_endpoint grant must not use pending placeholders")
         if capability == "model_artifact_pull":
             required_artifact_fields = [
                 "pull_command",

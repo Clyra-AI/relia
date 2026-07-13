@@ -860,6 +860,15 @@ def self_test():
                 raise
         else:
             fail("active provider grant with malformed provider_endpoint did not fail closed")
+        pending_provider_grant = dict(active_config_grant)
+        pending_provider_grant["provider_identity"] = "pending-approved-provider"
+        try:
+            validate_active_capability_grants({"capability_grants": [pending_provider_grant]})
+        except AssertionError as exc:
+            if "must not use pending placeholders" not in str(exc):
+                raise
+        else:
+            fail("active provider grant with pending placeholders did not fail closed")
         expired_grant = {
             "task_id": "T9",
             "capability": "approval",
