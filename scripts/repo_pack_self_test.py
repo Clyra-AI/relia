@@ -896,6 +896,43 @@ def self_test():
                 raise
         else:
             fail("incomplete active model_artifact_pull grant did not fail closed")
+        active_artifact_grant = {
+            "task_id": "T9",
+            "capability": "model_artifact_pull",
+            "approved": True,
+            "evidence_ref": ".factory/artifacts/approvals/model_artifact_pull.md",
+            "expires_at": "2099-12-31T23:59:59Z",
+            "network_allowlist": ["models.example.com"],
+            "pull_command": "approved-model-fetch",
+            "model_source_url": "https://models.example.com/model.bin",
+            "model_id": "example-model",
+            "model_version": "1",
+            "model_license": "example-license",
+            "content_digest": "sha256:" + ("a" * 64),
+            "cache_path": ".relia/models/example/model.bin",
+            "update_policy": "manual",
+            "rollback_policy": "restore prior digest",
+            "absence_behavior": "fail closed",
+        }
+        validate_active_capability_grants({"capability_grants": [active_artifact_grant]})
+        insecure_artifact_grant = dict(active_artifact_grant)
+        insecure_artifact_grant["model_source_url"] = "http://models.example.com/model.bin"
+        try:
+            validate_active_capability_grants({"capability_grants": [insecure_artifact_grant]})
+        except AssertionError as exc:
+            if "model_source_url must be https" not in str(exc):
+                raise
+        else:
+            fail("active model artifact grant with insecure source URL did not fail closed")
+        escaped_artifact_grant = dict(active_artifact_grant)
+        escaped_artifact_grant["cache_path"] = ".relia/models/../../outside.bin"
+        try:
+            validate_active_capability_grants({"capability_grants": [escaped_artifact_grant]})
+        except AssertionError as exc:
+            if "cache_path must stay under .relia/models" not in str(exc):
+                raise
+        else:
+            fail("active model artifact grant with escaped cache path did not fail closed")
         nonexpiring_credentials_grant = {
             "task_id": "T9",
             "capability": "credentials",

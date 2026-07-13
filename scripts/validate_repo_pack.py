@@ -314,6 +314,11 @@ def validate_active_capability_grants(active_repo):
             ]
             if missing_artifact_fields:
                 fail(f"{label} approved model_artifact_pull grant missing fields: {missing_artifact_fields}")
+            if not grant["model_source_url"].startswith("https://"):
+                fail(f"{label} approved model_artifact_pull grant model_source_url must be https")
+            cache_path = Path(grant["cache_path"])
+            if cache_path.is_absolute() or len(cache_path.parts) < 3 or cache_path.parts[:2] != (".relia", "models") or ".." in cache_path.parts:
+                fail(f"{label} approved model_artifact_pull grant cache_path must stay under .relia/models")
             digest = grant.get("content_digest")
             if not isinstance(digest, str) or re.fullmatch(r"sha256:[0-9a-fA-F]{64}", digest.strip()) is None:
                 fail(f"{label} approved model_artifact_pull grant requires a sha256 content_digest")
