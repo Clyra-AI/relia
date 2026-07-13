@@ -195,7 +195,10 @@ def validate_active_architecture_budget_policy(active_repo):
 
 def validate_active_capability_grants(active_repo):
     if active_repo is None:
-        return
+        active_grants = factoryd_config_capability_grants()
+        if not active_grants:
+            return
+        active_repo = {"capability_grants": active_grants}
     grants = active_repo.get("capability_grants")
     if not isinstance(grants, list):
         fail("active factoryd config capability_grants must be a list")
