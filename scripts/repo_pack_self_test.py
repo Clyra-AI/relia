@@ -826,6 +826,20 @@ def self_test():
                 raise
         else:
             fail("active credentials grant without credential_environment did not fail closed")
+        invalid_provider_grant = {
+            "task_id": "T9",
+            "capability": "model_provider_endpoint",
+            "approved": True,
+            "evidence_ref": ".factory/artifacts/approvals/model_provider_endpoint.md",
+            "credential_environment": "RELIA_PROVIDER_API_KEY",
+        }
+        try:
+            validate_active_capability_grants({"capability_grants": [invalid_provider_grant]})
+        except AssertionError as exc:
+            if "model_provider_endpoint grant missing fields" not in str(exc):
+                raise
+        else:
+            fail("incomplete active model_provider_endpoint grant did not fail closed")
         with TemporaryDirectory() as temp_dir:
             temp_root = Path(temp_dir)
             example_config = temp_root / "factoryd.example.json"
