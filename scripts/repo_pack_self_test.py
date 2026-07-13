@@ -895,6 +895,18 @@ def self_test():
                 raise
         else:
             fail("noncanonical active capability value did not fail closed")
+        numeric_approval_grant = {
+            "task_id": "T9",
+            "capability": "approval",
+            "approved": 1,
+        }
+        try:
+            validate_active_capability_grants({"capability_grants": [numeric_approval_grant]})
+        except AssertionError as exc:
+            if "approved must be true or false" not in str(exc):
+                raise
+        else:
+            fail("numeric active capability approval did not fail closed")
         with TemporaryDirectory() as temp_dir:
             temp_root = Path(temp_dir)
             example_config = temp_root / "factoryd.example.json"
