@@ -854,6 +854,19 @@ def self_test():
                 raise
         else:
             fail("expired active capability grant did not fail closed")
+        invalid_artifact_grant = {
+            "task_id": "T9",
+            "capability": "model_artifact_pull",
+            "approved": True,
+            "evidence_ref": ".factory/artifacts/approvals/model_artifact_pull.md",
+        }
+        try:
+            validate_active_capability_grants({"capability_grants": [invalid_artifact_grant]})
+        except AssertionError as exc:
+            if "model_artifact_pull grant missing fields" not in str(exc):
+                raise
+        else:
+            fail("incomplete active model_artifact_pull grant did not fail closed")
         with TemporaryDirectory() as temp_dir:
             temp_root = Path(temp_dir)
             example_config = temp_root / "factoryd.example.json"
