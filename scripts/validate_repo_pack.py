@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from pathlib import Path
+from datetime import datetime
 import json
 import re
 import sys
@@ -10,6 +11,17 @@ FACTORYD_CONFIG = ROOT / ".factory" / "factoryd.example.json"
 FACTORYD_ACTIVE_CONFIG = ROOT / ".factory" / "factoryd.json"
 FACTORYD_AUTOSHIP_CONFIG = ROOT / ".factory" / "factoryd.autoship.example.json"
 FACTORYD_REPO_KEY = "relia"
+SUPPORTED_CAPABILITY_GRANTS = {
+    "approval",
+    "merge_authority",
+    "network",
+    "credentials",
+    "model_provider_endpoint",
+    "model_artifact_pull",
+    "model_route_override",
+    "codex_review_carry_forward",
+}
+PRIVILEGED_CAPABILITY_GRANTS = SUPPORTED_CAPABILITY_GRANTS - {"approval"}
 PROVIDER_ACCEPTANCE_IDS = {
     "FR23-PROVIDER-ADAPTERS-AND-NO-LLM-MODE-001",
     "MVP-IN-SCOPE-010",
@@ -180,6 +192,57 @@ def validate_active_architecture_budget_policy(active_repo):
     if active_repo_is_grant_overlay(active_repo):
         return
     fail("active factoryd config.architecture_budget must be an object for full active configs")
+
+def validate_active_capability_grants(active_repo):
+    if active_repo is None:
+        return
+    grants = active_repo.get("capability_grants")
+    if not isinstance(grants, list):
+        fail("active factoryd config capability_grants must be a list")
+    for index, grant in enumerate(grants):
+        label = f"active factoryd config capability_grants[{index}]"
+        if not isinstance(grant, dict):
+            fail(f"{label} must be an object")
+        task_id = grant.get("task_id")
+        if not isinstance(task_id, str) or not task_id.strip() or task_id != task_id.strip() or "\n" in task_id or "\r" in task_id:
+            fail(f"{label}.task_id must be a canonical non-blank string")
+        capability_value = grant.get("capability")
+        capability = capability_value.strip().lower() if isinstance(capability_value, str) else ""
+        if capability not in SUPPORTED_CAPABILITY_GRANTS:
+            fail(f"{label}.capability is unsupported")
+        if grant.get("approved") not in (True, False):
+            fail(f"{label}.approved must be true or false")
+        if grant.get("approved") is not True:
+            continue
+        if capability in PRIVILEGED_CAPABILITY_GRANTS and task_id == "*":
+            fail(f"{label} approved {capability} grant requires a concrete task_id")
+        evidence_ref = grant.get("evidence_ref")
+        if not isinstance(evidence_ref, str) or not evidence_ref.strip():
+            fail(f"{label} approved {capability} grant requires evidence_ref")
+        expires_at = grant.get("expires_at")
+        if expires_at not in (None, ""):
+            if not isinstance(expires_at, str) or expires_at != expires_at.strip():
+                fail(f"{label}.expires_at must be RFC3339")
+            try:
+                parsed_expiry = datetime.fromisoformat(expires_at.replace("Z", "+00:00"))
+            except ValueError:
+                fail(f"{label}.expires_at must be RFC3339")
+            if parsed_expiry.tzinfo is None:
+                fail(f"{label}.expires_at must be RFC3339")
+        if capability == "merge_authority" and not expires_at:
+            fail(f"{label} approved merge_authority grant requires expires_at")
+        if capability == "network":
+            allowlist = grant.get("network_allowlist")
+            if not isinstance(allowlist, list) or not allowlist or not all(isinstance(item, str) and item.strip() for item in allowlist):
+                fail(f"{label} approved network grant requires a concrete network_allowlist")
+        if capability in {"credentials", "model_provider_endpoint"}:
+            credential_environment = grant.get("credential_environment")
+            if not isinstance(credential_environment, str) or not credential_environment.strip():
+                fail(f"{label} approved {capability} grant requires credential_environment")
+        if capability == "credentials":
+            scopes = grant.get("credential_scopes")
+            if not isinstance(scopes, list) or not scopes or not all(isinstance(item, str) and item.strip() for item in scopes):
+                fail(f"{label} approved credentials grant requires credential_scopes")
 
 def active_repo_is_grant_overlay(active_repo):
     overlay_keys = {
@@ -1097,6 +1160,7 @@ def main():
     validate_architecture_budget_policy(autoship_repo, "autoship config")
     active_repo = active_factoryd_repo_config(repo_key)
     validate_active_architecture_budget_policy(active_repo)
+    validate_active_capability_grants(active_repo)
     for rel in [repo["acceptance_ledger"], repo["task_packets"], repo["scope_closure_map"], repo["validation_contract"]]:
         if not (root / rel).exists():
             fail(f"factoryd config references missing file: {rel}")

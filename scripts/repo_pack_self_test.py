@@ -25,6 +25,7 @@ fail = validator.fail
 model_provider_gate_task = validator.model_provider_gate_task
 public_release_boundary_error = validator.public_release_boundary_error
 validate_active_architecture_budget_policy = validator.validate_active_architecture_budget_policy
+validate_active_capability_grants = validator.validate_active_capability_grants
 validate_context_brief = validator.validate_context_brief
 validate_architecture_target_paths = validator.validate_architecture_target_paths
 validate_lifecycle_path_ownership = validator.validate_lifecycle_path_ownership
@@ -810,6 +811,21 @@ def self_test():
             "budget_posture": "capped",
             "redaction_posture": "redacted",
         }
+        validate_active_capability_grants({"capability_grants": [active_config_grant]})
+        invalid_credentials_grant = {
+            "task_id": "T9",
+            "capability": "credentials",
+            "approved": True,
+            "evidence_ref": ".factory/artifacts/approvals/credentials.md",
+            "credential_scopes": ["env:RELIA_PROVIDER_API_KEY"],
+        }
+        try:
+            validate_active_capability_grants({"capability_grants": [invalid_credentials_grant]})
+        except AssertionError as exc:
+            if "credential_environment" not in str(exc):
+                raise
+        else:
+            fail("active credentials grant without credential_environment did not fail closed")
         with TemporaryDirectory() as temp_dir:
             temp_root = Path(temp_dir)
             example_config = temp_root / "factoryd.example.json"
