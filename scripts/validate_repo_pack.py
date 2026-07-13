@@ -266,7 +266,15 @@ def validate_active_capability_grants(active_repo):
             ]
             if missing_provider_fields:
                 fail(f"{label} approved model_provider_endpoint grant missing fields: {missing_provider_fields}")
-            endpoint = grant.get("provider_endpoint") or grant.get("base_url")
+            provider_endpoint_value = grant.get("provider_endpoint", "")
+            base_url_value = grant.get("base_url", "")
+            if provider_endpoint_value not in (None, "") and not isinstance(provider_endpoint_value, str):
+                fail(f"{label}.provider_endpoint must be a string")
+            if base_url_value not in (None, "") and not isinstance(base_url_value, str):
+                fail(f"{label}.base_url must be a string")
+            provider_endpoint = provider_endpoint_value.strip() if isinstance(provider_endpoint_value, str) else ""
+            base_url = base_url_value.strip() if isinstance(base_url_value, str) else ""
+            endpoint = provider_endpoint or base_url
             if not isinstance(endpoint, str) or not endpoint.strip():
                 fail(f"{label} approved model_provider_endpoint grant requires provider_endpoint or base_url")
             allowlist = grant.get("network_allowlist")

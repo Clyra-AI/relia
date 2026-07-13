@@ -841,6 +841,25 @@ def self_test():
                 raise
         else:
             fail("incomplete active model_provider_endpoint grant did not fail closed")
+        malformed_alternate_endpoint_grant = dict(active_config_grant)
+        malformed_alternate_endpoint_grant["base_url"] = 7
+        try:
+            validate_active_capability_grants({"capability_grants": [malformed_alternate_endpoint_grant]})
+        except AssertionError as exc:
+            if "base_url must be a string" not in str(exc):
+                raise
+        else:
+            fail("active provider grant with malformed alternate base_url did not fail closed")
+        malformed_primary_endpoint_grant = dict(active_config_grant)
+        malformed_primary_endpoint_grant["provider_endpoint"] = 7
+        malformed_primary_endpoint_grant["base_url"] = "https://api.example.com/v1"
+        try:
+            validate_active_capability_grants({"capability_grants": [malformed_primary_endpoint_grant]})
+        except AssertionError as exc:
+            if "provider_endpoint must be a string" not in str(exc):
+                raise
+        else:
+            fail("active provider grant with malformed provider_endpoint did not fail closed")
         expired_grant = {
             "task_id": "T9",
             "capability": "approval",
