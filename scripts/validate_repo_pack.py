@@ -246,6 +246,26 @@ def validate_active_capability_grants(active_repo):
             scopes = grant.get("credential_scopes")
             if not isinstance(scopes, list) or not scopes or not all(isinstance(item, str) and item.strip() for item in scopes):
                 fail(f"{label} approved credentials grant requires credential_scopes")
+        if capability == "model_provider_endpoint":
+            required_provider_fields = [
+                "provider_identity",
+                "provider_model",
+                "budget_posture",
+                "redaction_posture",
+            ]
+            missing_provider_fields = [
+                field
+                for field in required_provider_fields
+                if not isinstance(grant.get(field), str) or not grant[field].strip()
+            ]
+            if missing_provider_fields:
+                fail(f"{label} approved model_provider_endpoint grant missing fields: {missing_provider_fields}")
+            endpoint = grant.get("provider_endpoint") or grant.get("base_url")
+            if not isinstance(endpoint, str) or not endpoint.strip():
+                fail(f"{label} approved model_provider_endpoint grant requires provider_endpoint or base_url")
+            allowlist = grant.get("network_allowlist")
+            if not isinstance(allowlist, list) or not allowlist or not all(isinstance(item, str) and item.strip() for item in allowlist):
+                fail(f"{label} approved model_provider_endpoint grant requires a concrete network_allowlist")
 
 def active_repo_is_grant_overlay(active_repo):
     overlay_keys = {
