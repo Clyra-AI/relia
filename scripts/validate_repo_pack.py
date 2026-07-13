@@ -295,6 +295,8 @@ def validate_active_capability_grants(active_repo):
             allowlist = grant.get("network_allowlist")
             if not isinstance(allowlist, list) or not allowlist or not all(isinstance(item, str) and item.strip() for item in allowlist):
                 fail(f"{label} approved model_artifact_pull grant requires a concrete network_allowlist")
+        if capability in PRIVILEGED_CAPABILITY_GRANTS and not expires_at:
+            fail(f"{label} approved {capability} grant requires expires_at")
 
 def active_repo_is_grant_overlay(active_repo):
     overlay_keys = {
