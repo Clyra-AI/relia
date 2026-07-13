@@ -883,6 +883,18 @@ def self_test():
                 raise
         else:
             fail("nonexpiring active credentials grant did not fail closed")
+        noncanonical_capability_grant = {
+            "task_id": "T9",
+            "capability": " Credentials ",
+            "approved": False,
+        }
+        try:
+            validate_active_capability_grants({"capability_grants": [noncanonical_capability_grant]})
+        except AssertionError as exc:
+            if "canonical lowercase value" not in str(exc):
+                raise
+        else:
+            fail("noncanonical active capability value did not fail closed")
         with TemporaryDirectory() as temp_dir:
             temp_root = Path(temp_dir)
             example_config = temp_root / "factoryd.example.json"
