@@ -810,6 +810,7 @@ def self_test():
             "credential_environment": "RELIA_PROVIDER_API_KEY",
             "budget_posture": "capped",
             "redaction_posture": "redacted",
+            "expires_at": "2099-12-31T23:59:59Z",
         }
         validate_active_capability_grants({"capability_grants": [active_config_grant]})
         invalid_credentials_grant = {
@@ -867,6 +868,21 @@ def self_test():
                 raise
         else:
             fail("incomplete active model_artifact_pull grant did not fail closed")
+        nonexpiring_credentials_grant = {
+            "task_id": "T9",
+            "capability": "credentials",
+            "approved": True,
+            "evidence_ref": ".factory/artifacts/approvals/credentials.md",
+            "credential_environment": "RELIA_PROVIDER_API_KEY",
+            "credential_scopes": ["env:RELIA_PROVIDER_API_KEY"],
+        }
+        try:
+            validate_active_capability_grants({"capability_grants": [nonexpiring_credentials_grant]})
+        except AssertionError as exc:
+            if "requires expires_at" not in str(exc):
+                raise
+        else:
+            fail("nonexpiring active credentials grant did not fail closed")
         with TemporaryDirectory() as temp_dir:
             temp_root = Path(temp_dir)
             example_config = temp_root / "factoryd.example.json"
