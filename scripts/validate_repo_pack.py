@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 import re
 import sys
@@ -195,10 +195,12 @@ def validate_active_architecture_budget_policy(active_repo):
 
 def validate_active_capability_grants(active_repo):
     if active_repo is None:
-        active_grants = factoryd_config_capability_grants()
-        if not active_grants:
+        if not FACTORYD_ACTIVE_CONFIG.exists():
             return
-        active_repo = {"capability_grants": active_grants}
+        active_config = load_json_file(FACTORYD_ACTIVE_CONFIG)
+        if "capability_grants" not in active_config:
+            return
+        active_repo = {"capability_grants": active_config.get("capability_grants")}
     grants = active_repo.get("capability_grants")
     if not isinstance(grants, list):
         fail("active factoryd config capability_grants must be a list")
@@ -232,6 +234,8 @@ def validate_active_capability_grants(active_repo):
                 fail(f"{label}.expires_at must be RFC3339")
             if parsed_expiry.tzinfo is None:
                 fail(f"{label}.expires_at must be RFC3339")
+            if parsed_expiry <= datetime.now(timezone.utc):
+                fail(f"{label}.expires_at must be in the future")
         if capability == "merge_authority" and not expires_at:
             fail(f"{label} approved merge_authority grant requires expires_at")
         if capability == "network":

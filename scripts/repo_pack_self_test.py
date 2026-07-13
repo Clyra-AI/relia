@@ -840,6 +840,20 @@ def self_test():
                 raise
         else:
             fail("incomplete active model_provider_endpoint grant did not fail closed")
+        expired_grant = {
+            "task_id": "T9",
+            "capability": "approval",
+            "approved": True,
+            "evidence_ref": ".factory/artifacts/approvals/T9.md",
+            "expires_at": "2026-01-01T00:00:00Z",
+        }
+        try:
+            validate_active_capability_grants({"capability_grants": [expired_grant]})
+        except AssertionError as exc:
+            if "must be in the future" not in str(exc):
+                raise
+        else:
+            fail("expired active capability grant did not fail closed")
         with TemporaryDirectory() as temp_dir:
             temp_root = Path(temp_dir)
             example_config = temp_root / "factoryd.example.json"
@@ -890,6 +904,15 @@ def self_test():
                         raise
                 else:
                     fail("top-level active credentials grant without credential_environment did not fail closed")
+                malformed_top_level_payload = {"capability_grants": ["bad"]}
+                active_config.write_text(json.dumps(malformed_top_level_payload), encoding="utf-8")
+                try:
+                    validate_active_capability_grants(active_factoryd_repo_config(FACTORYD_REPO_KEY))
+                except AssertionError as exc:
+                    if "must be an object" not in str(exc):
+                        raise
+                else:
+                    fail("malformed top-level active capability grant did not fail closed")
                 full_active_missing_budget_payload = {
                     "repos": {
                         FACTORYD_REPO_KEY: {
