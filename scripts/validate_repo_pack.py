@@ -270,6 +270,31 @@ def validate_active_capability_grants(active_repo):
             allowlist = grant.get("network_allowlist")
             if not isinstance(allowlist, list) or not allowlist or not all(isinstance(item, str) and item.strip() for item in allowlist):
                 fail(f"{label} approved model_provider_endpoint grant requires a concrete network_allowlist")
+        if capability == "model_artifact_pull":
+            required_artifact_fields = [
+                "pull_command",
+                "model_source_url",
+                "model_id",
+                "model_version",
+                "model_license",
+                "cache_path",
+                "update_policy",
+                "rollback_policy",
+                "absence_behavior",
+            ]
+            missing_artifact_fields = [
+                field
+                for field in required_artifact_fields
+                if not isinstance(grant.get(field), str) or not grant[field].strip()
+            ]
+            if missing_artifact_fields:
+                fail(f"{label} approved model_artifact_pull grant missing fields: {missing_artifact_fields}")
+            digest = grant.get("content_digest")
+            if not isinstance(digest, str) or re.fullmatch(r"sha256:[0-9a-fA-F]{64}", digest.strip()) is None:
+                fail(f"{label} approved model_artifact_pull grant requires a sha256 content_digest")
+            allowlist = grant.get("network_allowlist")
+            if not isinstance(allowlist, list) or not allowlist or not all(isinstance(item, str) and item.strip() for item in allowlist):
+                fail(f"{label} approved model_artifact_pull grant requires a concrete network_allowlist")
 
 def active_repo_is_grant_overlay(active_repo):
     overlay_keys = {
